@@ -89,7 +89,7 @@ svg{display:block}
 .hudstars{display:flex;gap:2px}
 .hudstars svg{width:22px;height:22px;fill:#ffffff30;transition:fill .25s,transform .25s}
 .hudstars svg.on{fill:var(--acc);transform:scale(1.08)}
-.instr{color:var(--dim);font-size:13.5px;text-align:center;margin:2px 10px 8px;min-height:36px;max-width:420px}
+.instr{color:var(--dim);font-size:13.5px;text-align:center;margin:2px 10px 6px;min-height:36px;max-width:440px;line-height:1.35}
 #board{flex:1;display:flex;align-items:center;justify-content:center;width:100%;position:relative;min-height:0}
 .toolbar{display:flex;gap:10px;justify-content:center;padding-top:8px}
 .tool{position:relative;min-width:72px;padding:9px 6px 7px;border-radius:16px;background:var(--panel);font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 0 #0004;transition:transform .1s}
@@ -97,7 +97,7 @@ svg{display:block}
 .tool span{font-size:20px;line-height:1}
 .tool .badge{position:absolute;top:-6px;right:-4px;background:var(--acc2);color:#fff;border-radius:99px;font-size:11px;padding:2px 6px;display:flex;gap:3px;align-items:center}
 .tool:disabled{opacity:.35;pointer-events:none}
-:root{--bs:min(92vw,calc(100dvh - 330px),480px)}
+:root{--bs:min(92vw,calc(100dvh - 365px),480px)}
 .shake{animation:shake .35s}
 @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(4px)}}
 
@@ -123,7 +123,7 @@ svg{display:block}
 .tile.ok>div{box-shadow:inset 0 -5px 0 #0003,inset 0 3px 0 #fff3,0 0 0 2px #fff8}
 /* flood */
 .floodwrap{display:flex;flex-direction:column;align-items:center;gap:16px}
-.floodgrid{display:grid;width:var(--bs);gap:2px;border-radius:12px;overflow:hidden;background:#0005;padding:2px;--bs:min(92vw,calc(100dvh - 400px),460px)}
+.floodgrid{display:grid;width:var(--bs);gap:2px;border-radius:12px;overflow:hidden;background:#0005;padding:2px;--bs:min(92vw,calc(100dvh - 435px),460px)}
 .floodgrid i{aspect-ratio:1;transition:background .25s;border-radius:18%}
 .cbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .cbtn{width:46px;height:46px;border-radius:50%;box-shadow:inset 0 -4px 0 #0004,0 4px 0 #0004;transition:transform .1s}
@@ -147,6 +147,25 @@ svg{display:block}
 .pad.wrong{animation:shake .35s;background:#555 !important}
 .memnote{position:absolute;top:0;width:100%;text-align:center;font-weight:800;letter-spacing:2px;color:var(--acc);text-transform:uppercase;font-size:14px}
 
+.coach{color:var(--acc);font-weight:800;font-size:15px;min-height:22px;text-align:center;margin:0 10px 6px;max-width:440px}
+.pat{display:inline-block;vertical-align:middle;margin:0 2px}
+.mini{display:grid;gap:3px}.mini.sm{display:inline-grid;gap:2px}
+.mini i{width:22px;height:22px;border-radius:6px;background:var(--cell2);display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:800}
+.mini.sm i{width:10px;height:10px;border-radius:3px}
+.mini i.on{background:var(--acc)}.mini i.ok{background:#6be58555;color:var(--good)}
+.mini i.tap,.mt.tap{outline:2px solid var(--acc);outline-offset:1px}.mini i.own{box-shadow:inset 0 0 0 2px #fff}
+.demo{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 8px}
+.demo .arr{font-size:24px;color:var(--dim)}
+.dm{display:flex;flex-direction:column;align-items:center;gap:6px;max-width:140px}
+.dm small{font-size:11.5px;color:var(--dim);line-height:1.2}
+.mt{width:22px;height:74px;border:2px solid #fff6;border-radius:5px 5px 11px 11px;display:flex;flex-direction:column-reverse;padding:2px;gap:2px}
+.mt b{height:15px;border-radius:4px;display:block}
+.mt.tap{border-color:var(--acc)}
+.goal{color:var(--text) !important;font-size:17px}
+.steps{text-align:left;padding-left:24px;margin:8px 0 0;font-size:15px;line-height:1.35}.steps li{margin:7px 0}
+.card{max-height:92dvh;overflow-y:auto}
+.tube.ok{border-color:#fff;box-shadow:0 0 14px #fff6}.tube.no{opacity:.4}
+.tile.mv>div{filter:brightness(1.15)}
 /* modal */
 #modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
 #modal.on{display:flex;animation:fadein .2s}
@@ -211,9 +230,11 @@ svg{display:block}
     <button class="iconbtn" id="backBtn">←</button>
     <div class="ptitle"><b id="ptitle">Level 1</b><small id="psub"></small></div>
     <div class="chip"><i class="coin"></i><b class="coinval">0</b></div>
+    <button class="iconbtn" id="helpBtn" aria-label="How to play">?</button>
   </div>
   <div class="hud"><div class="hudstars" id="hudStars"></div><div id="hudInfo"></div></div>
   <div class="instr" id="instr"></div>
+  <div class="coach" id="coach"></div>
   <div id="board"></div>
   <div class="toolbar">
     <button class="tool" id="undoBtn"><span>↩️</span>Undo</button>
@@ -243,7 +264,7 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 
 /* ====================== save data ====================== */
 const KEY='endless-puzzle-pop-v1';
-const DEFAULTS={unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0};
+const DEFAULTS={unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{}};
 let S=load();
 function load(){try{return Object.assign(JSON.parse(JSON.stringify(DEFAULTS)),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return JSON.parse(JSON.stringify(DEFAULTS))}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -327,12 +348,12 @@ function applyTheme(){const t=THEMES[S.theme]||THEMES.midnight;for(const k in t.
 /* ====================== level generation ====================== */
 const TYPES=['lights','tubes','rotate','slide','flood','memory'];
 const INFO={
-  lights:{name:'Lights Out',icon:'💡',tip:'Tap a light to flip it and its neighbours. Switch every light off!'},
-  tubes:{name:'Sort Tubes',icon:'🧪',tip:'Tap a tube, then another, to pour matching colours. Fill each tube with one colour.'},
-  rotate:{name:'Spin Lock',icon:'🧭',tip:'Tapping spins that arrow and the ones touching it. Point every arrow up!'},
-  slide:{name:'Slide Tiles',icon:'🔢',tip:'Slide tiles into the gap to put the numbers in order. You can drag a whole row at once.'},
-  flood:{name:'Colour Flood',icon:'🎨',tip:'Flood from the top-left corner. Fill the whole board before you run out of moves!'},
-  memory:{name:'Echo Pads',icon:'🎵',tip:'Watch the pads light up, then repeat the pattern. Three mistakes and it\'s over.'}
+  lights:{name:'Lights Out',icon:'💡',tip:'Tap a square to flip it and its neighbours. Turn every light off.'},
+  tubes:{name:'Sort Tubes',icon:'🧪',tip:'Tap a tube to pick up its top colour, then tap another tube to pour. Make every tube one colour.'},
+  rotate:{name:'Spin Lock',icon:'🧭',tip:'Tap an arrow to turn it and its neighbours. Make every arrow point up.'},
+  slide:{name:'Slide Tiles',icon:'🔢',tip:'Tap a tile beside the gap to slide it. Put the numbers in order, gap in the bottom-right.'},
+  flood:{name:'Colour Flood',icon:'🎨',tip:'Tap a colour to flood from the top-left corner. Cover the whole board before moves run out.'},
+  memory:{name:'Echo Pads',icon:'🎵',tip:'Watch the pads light up, then tap them in the same order. Three mistakes ends the level.'}
 };
 function bagOrder(b){
   if(b===0)return TYPES.slice();
@@ -355,6 +376,8 @@ const api={
   fail(t,m){onFail(t,m)},
   over:()=>!cur||cur.over,
   shake(){board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake')},
+  coach(t){$('#coach').innerHTML=t},
+  setTip(h){$('#instr').innerHTML=h},
   flash(e,ms=2400){e.classList.add('hint');setTimeout(()=>e.classList.remove('hint'),ms)}
 };
 function startLevel(n){
@@ -364,15 +387,56 @@ function startLevel(n){
   $('#hudStars').innerHTML=STAR+STAR+STAR;
   $('#ptitle').textContent='Level '+n;
   $('#psub').textContent=INFO[type].icon+' '+INFO[type].name;
-  $('#instr').textContent=INFO[type].tip;
+  $('#instr').textContent=INFO[type].tip;$('#coach').textContent='';
   cur={level:n,type,over:false,history:[],puz:null};
   const R=rngOf(hashSeed(n,TYPES.indexOf(type)+1));
   cur.puz=MAKERS[type]({R,tier:tierFor(n),level:n,board,api});
   cur.history=[cur.puz.snap()];
   $('#undoBtn').disabled=!!cur.puz.noUndo;
   refreshHUD();show('play');
+  const go=()=>{if(cur&&cur.type===type&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
+  if(!S.seen[type])showHowTo(type,go);else go();
 }
-function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null}
+let nudgeT=0,nudges=0;
+function resetNudge(full){
+  clearTimeout(nudgeT);if(full)nudges=0;
+  if(!cur||cur.over||cur.puz.noNudge)return;
+  nudgeT=setTimeout(()=>{
+    if(!cur||cur.over||nudges>=3)return;
+    if($('#modal').classList.contains('on')){resetNudge();return}
+    nudges++;toast('Stuck? Here\'s a free hint 💡');sfx.good();cur.puz.hint();resetNudge();
+  },16000);
+}
+$('#play').addEventListener('pointerdown',()=>resetNudge());
+function showHowTo(type,done){
+  const h=HOWTO[type],i=INFO[type];
+  openModal(`<h2>${i.icon} ${i.name}</h2><p class="goal"><b>Goal:</b> ${h.goal}</p><div class="demo">${h.demo()}</div><ol class="steps">${h.steps.map(t=>`<li>${t}</li>`).join('')}</ol>`,
+    [{label:'Got it!',fn:()=>{S.seen[type]=true;save();closeModal();if(done)done()}}]);
+}
+const dm=(inner,cap)=>`<div class="dm">${inner}<small>${cap}</small></div>`;
+const ARR='<span class="arr">→</span>';
+const mini=(n,cells,f)=>`<div class="mini" style="grid-template-columns:repeat(${n},22px)">${cells.map(f).join('')}</div>`;
+const idx=n=>[...Array(n).keys()];
+const tube=(segs,cls='')=>`<div class="mt ${cls}">${segs.map(c=>`<b style="background:${COLORS[c]}"></b>`).join('')}</div>`;
+const patIcon=o=>`<span class="mini sm pat" style="grid-template-columns:repeat(3,10px)">${idx(9).map(i=>`<i class="${o.some(([dx,dy])=>dx===i%3-1&&dy===((i/3)|0)-1)?'on':''}"></i>`).join('')}</span>`;
+const FL={r:COLORS[0],b:COLORS[6],y:COLORS[2],g:COLORS[3]};
+const floodDemo=(cells,own)=>mini(4,idx(16),i=>`<i class="${own.includes(i)?'own':''}" style="background:${FL[cells[i]]}"></i>`);
+const slideDemo=(nums,tap)=>mini(3,idx(9),i=>`<i class="${i===tap?'tap':''}" style="${nums[i]===''?'visibility:hidden':''}">${nums[i]}</i>`);
+const HOWTO={
+  lights:{goal:'Turn every light off.',steps:['Tap any square.','It flips itself and the squares touching it. Lit squares go dark and dark squares light up.','Keep going until the whole board is dark. Fewer taps earn more stars.'],
+    demo:()=>dm(mini(3,idx(9),i=>`<i class="${i===4?'tap':''}"></i>`),'Tap the middle square')+ARR+dm(mini(3,idx(9),i=>`<i class="${[1,3,4,5,7].includes(i)?'on':''}"></i>`),'It and its 4 neighbours flip')},
+  tubes:{goal:'Make every tube hold a single colour.',steps:['Tap a tube to pick up its top colour.','Tap another tube to pour. It must be empty, or already have the same colour on top.','Fill each tube with 4 of one colour. The empty tubes are spare space.'],
+    demo:()=>dm(tube([0,6],'tap')+tube([6])+tube([]),'Tap the tube with blue on top, then the tube with blue')+ARR+dm(tube([0])+tube([6,6])+tube([]),'The blue pours across')},
+  rotate:{goal:'Point every arrow up.',steps:['Tap an arrow.','It and the arrows touching it turn a quarter turn clockwise.','An arrow turns green when it points up. Make them all green.'],
+    demo:()=>dm(mini(3,idx(9),i=>`<i class="${i===4?'tap':''}">${[1,3,4,5,7].includes(i)?'←':'↑'}</i>`),'Tap the middle arrow')+ARR+dm(mini(3,idx(9),()=>'<i class="ok">↑</i>'),'Five arrows turn once')},
+  slide:{goal:'Put the numbers in order, with the gap in the bottom-right corner.',steps:['Tap a tile next to the gap to slide it in.','Tap a tile further along the same row or column to slide several at once.','Tiles with a white outline are already in the right place.'],
+    demo:()=>dm(slideDemo([1,2,3,4,5,6,'',8,7],7),'Tap the 8, next to the gap')+ARR+dm(slideDemo([1,2,3,4,5,6,7,8,''],-1),'It slides in. Numbers in order!')},
+  flood:{goal:'Turn the whole board one colour before you run out of moves.',steps:['You own the white-outlined area in the top-left corner.','Tap a colour button to turn your area that colour.','Your area swallows every touching square of that colour. Grow it until it covers the board.'],
+    demo:()=>dm(floodDemo(['r','r','b','y','r','b','b','y','g','g','b','y','g','y','y','y'],[0,1,4]),'Your area is red')+ARR+dm(floodDemo(['b','b','b','y','b','b','b','y','g','g','b','y','g','y','y','y'],[0,1,2,4,5,6,10]),'Tap blue: it grows')},
+  memory:{goal:'Copy the pattern the pads play.',steps:['Watch the pads light up and play notes.','When it says Your turn, tap the same pads in the same order.','Every round adds one more pad. Three mistakes ends the level.'],
+    demo:()=>dm(mini(2,idx(4),i=>`<i style="background:${COLORS[i]};width:34px;height:34px;font-size:16px">${['1','','2','3'][i]}</i>`),'Watch: pad 1, 2, 3')+ARR+dm(mini(2,idx(4),i=>`<i class="${[0,2,3].includes(i)?'tap':''}" style="background:${COLORS[i]};width:34px;height:34px;font-size:16px">${['1','','2','3'][i]}</i>`),'Tap them in the same order')}
+};
+function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null;clearTimeout(nudgeT)}
 function undo(){
   if(!cur||cur.over||cur.puz.noUndo)return;
   if(cur.history.length<2){sfx.bad();return}
@@ -398,7 +462,7 @@ function skipLevel(){
     }}]);
 }
 function onWin(stars){
-  if(cur.over)return;cur.over=true;
+  if(cur.over)return;cur.over=true;clearTimeout(nudgeT);
   const me=cur;
   const n=cur.level,prev=S.stars[n]||0;
   let coins=prev?3:10;if(stars>prev)coins+=(stars-prev)*10;
@@ -527,7 +591,7 @@ MAKERS.lights=function({R,tier,board,api}){
   const avail=['plus'];if(tier>=2)avail.push('x');if(tier>=4)avail.push('box');
   const pat=tier<2?'plus':R.pick(avail),offs=pats[pat];
   const apply=(g,i)=>{const x=i%n,y=(i/n)|0;for(const[dx,dy]of offs){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<n&&Y<n)g[Y*n+X]^=1}};
-  const k=Math.min(Math.ceil(n*n*.45),3+Math.floor(tier*.7));
+  const k=Math.min(Math.ceil(n*n*.45),2+Math.floor(tier*.7));
   let sol,grid;
   do{
     const idx=shuffle([...Array(n*n).keys()],R).slice(0,k);
@@ -540,7 +604,10 @@ MAKERS.lights=function({R,tier,board,api}){
   const cells=grid.map((_,i)=>{const c=el('button','cell');c.onclick=()=>press(i);wrap.appendChild(c);return c});
   board.appendChild(wrap);
   function render(){cells.forEach((c,i)=>c.classList.toggle('on',!!grid[i]));
+    const lit=grid.filter(v=>v).length;
+    api.coach(lit?`${lit} light${lit>1?'s':''} still on`:'All dark!');
     api.setInfo(`Moves <b>${moves}</b> · Par ${par}`);api.setStars(starsFor(moves,par,s2))}
+  api.setTip(`Tap a square to flip it and ${patIcon(offs)} the squares shown. Turn every light off.`);
   function press(i){
     if(api.over())return;
     const before=grid.slice();apply(grid,i);U[i]^=1;moves++;
@@ -562,7 +629,7 @@ MAKERS.lights=function({R,tier,board,api}){
 MAKERS.rotate=function({R,tier,board,api}){
   const n=Math.min(6,3+Math.floor(tier/3));
   const offs=[[0,0],[1,0],[-1,0],[0,1],[0,-1]];
-  const k=Math.min(n*n-1,3+Math.floor(tier*.8));
+  const k=Math.min(n*n-1,2+Math.floor(tier*.8));
   let sol,ang;
   do{
     sol=Array(n*n).fill(0);ang=Array(n*n).fill(0);
@@ -579,7 +646,10 @@ MAKERS.rotate=function({R,tier,board,api}){
   const cells=ang.map((_,i)=>{const c=el('button','cell rot',arrow);c.onclick=()=>tap(i);wrap.appendChild(c);return c});
   board.appendChild(wrap);
   function render(){cells.forEach((c,i)=>{c.firstChild.style.transform=`rotate(${ang[i]*90}deg)`;c.classList.toggle('ok',ang[i]%4===0)});
+    const bad=ang.filter(a=>a%4).length;
+    api.coach(bad?`${bad} arrow${bad>1?'s':''} still not pointing up`:'All pointing up!');
     api.setInfo(`Moves <b>${moves}</b> · Par ${par}`);api.setStars(starsFor(moves,par,s2))}
+  api.setTip(`Tap an arrow: it and ${patIcon(offs)} the arrows shown turn a quarter turn clockwise. Make every arrow point up.`);
   function tap(i){
     if(api.over())return;
     const x=i%n,y=(i/n)|0;
@@ -616,7 +686,7 @@ MAKERS.slide=function({R,tier,board,api}){
   }while(tiles.every((t,i)=>t===(i+1)%(w*h)));
   const par=stack.length,s3=par+2,s2=Math.ceil(par*1.8)+6;
   const box=el('div','slidebox');box.style.aspectRatio=`${w}/${h}`;
-  box.style.setProperty('--bs',`min(92vw,calc(100dvh - 330px),480px,calc((100dvh - 330px) * ${w/h}))`);
+  box.style.setProperty('--bs',`min(92vw,calc(100dvh - 365px),480px,calc((100dvh - 365px) * ${w/h}))`);
   const els={};
   for(let id=1;id<w*h;id++){
     const t=el('div','tile');t.style.width=100/w+'%';t.style.height=100/h+'%';
@@ -628,6 +698,10 @@ MAKERS.slide=function({R,tier,board,api}){
   board.appendChild(box);
   function render(){
     tiles.forEach((id,p)=>{if(!id)return;const t=els[id];t.style.left=(p%w)*100/w+'%';t.style.top=((p/w)|0)*100/h+'%';t.classList.toggle('ok',id===p+1)});
+    const bx=blank%w,by=(blank/w)|0;
+    tiles.forEach((id,p)=>{if(id)els[id].classList.toggle('mv',p%w===bx||((p/w)|0)===by)});
+    const placed=tiles.filter((id,p)=>id&&id===p+1).length;
+    api.coach(`${placed} of ${w*h-1} tiles in place`);
     api.setInfo(`Moves <b>${moves}</b> · Par ${par}`);api.setStars(starsFor(moves,s3,s2));
   }
   function tryMove(p){
@@ -687,6 +761,9 @@ MAKERS.flood=function({R,tier,board,api}){
       c.style.background=COLORS[grid[i]];
     });
     bEls.forEach((b,c)=>{b.classList.toggle('cur',c===grid[0]);b.classList.remove('hint')});
+    const rg=new Set(region(grid));
+    cellEls.forEach((c,i)=>{c.style.boxShadow=rg.has(i)?'inset 0 0 0 2px #fffd':'none'});
+    api.coach(`${rg.size} of ${n*n} squares flooded · ${limit-moves} move${limit-moves===1?'':'s'} left`);
     api.setInfo(`Moves <b>${moves}</b> / ${limit}`);api.setStars(moves<=s3?3:moves<=s2?2:1);
   }
   function pick(c){
@@ -763,7 +840,10 @@ MAKERS.tubes=function({R,tier,board,api}){
       e.classList.toggle('done',t.length===cap&&uniform(t));
       e.classList.toggle('tilt',i===lastFrom);
       e.classList.remove('hint');e.removeAttribute('data-h');
+      const can=sel>=0&&i!==sel&&canPour(tubes,sel,i)>0;
+      e.classList.toggle('ok',can);e.classList.toggle('no',sel>=0&&i!==sel&&!can);
     });
+    api.coach(hintPair?'💡 Tap the first glowing tube, then the second':sel<0?'Tap a tube to pick up its top colour':tubes.some((_,i)=>i!==sel&&canPour(tubes,sel,i)>0)?'Now tap a bright tube to pour into':'Nowhere to pour that colour. Tap it again to put it down');
     if(hintPair){hintPair.forEach((i,k)=>{tEls[i].classList.add('hint');tEls[i].dataset.h=k+1})}
     api.setInfo(`Moves <b>${moves}</b> · Par ${par}`);api.setStars(starsFor(moves,par,s2));
   }
@@ -810,9 +890,11 @@ MAKERS.memory=function({R,tier,board,api}){
   const wrap=el('div');wrap.style.cssText='width:100%;display:flex;flex-direction:column;align-items:center;gap:16px';
   const note=el('div','memnote');note.style.position='static';
   const grid=el('div','pads');grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
-  if(pads===9)grid.style.setProperty('--bs','min(86vw,calc(100dvh - 400px),420px)');
+  if(pads===9)grid.style.setProperty('--bs','min(86vw,calc(100dvh - 435px),420px)');
   const pEls=[...Array(pads).keys()].map(i=>{const p=el('button','pad');p.style.background=COLORS[i];p.style.color=COLORS[i];p.onclick=()=>tapPad(i);grid.appendChild(p);return p});
   wrap.append(note,grid);board.appendChild(wrap);
+  const yourTurn=()=>reverse?`Your turn, BACKWARDS: ${pos+1} of ${round}`:`Your turn: ${pos+1} of ${round}`;
+  if(reverse)api.setTip('<b>Backwards rounds:</b> watch the pattern, then tap it in reverse. Start with the last pad that lit up.');
   const expected=()=>reverse?seq.slice(0,round).reverse():seq.slice(0,round);
   function info(){api.setInfo(`Round <b>${round}</b>/${L} · ${'❤️'.repeat(3-mistakes)}${'🖤'.repeat(mistakes)}`);api.setStars(mistakes===0?3:mistakes===1?2:1)}
   function lit(i,ms){const p=pEls[i];p.classList.add('lit');sfx.pad(i);after(()=>p.classList.remove('lit'),ms)}
@@ -820,13 +902,14 @@ MAKERS.memory=function({R,tier,board,api}){
     phase='show';pos=0;info();note.textContent=reverse?'Watch… then repeat in REVERSE':'Watch…';
     const s=seq.slice(0,round);
     s.forEach((p,k)=>{after(()=>lit(p,speed*.7),700+k*speed)});
-    after(()=>{phase='input';note.textContent=reverse?'Your turn — REVERSE order!':'Your turn!'},700+s.length*speed);
+    after(()=>{phase='input';note.textContent=yourTurn()},700+s.length*speed);
   }
   function tapPad(i){
     if(api.over()||phase!=='input'){if(phase==='show')sfx.tick(.7);return}
     const want=expected()[pos];
     if(i===want){
       lit(i,200);buzz(8);const[x,y]=centerOf(pEls[i]);burst(x,y,COLORS[i],8,.7);pos++;
+      if(pos<round)note.textContent=yourTurn();
       if(pos===round){
         phase='idle';sfx.good();
         if(round===L){after(()=>api.win(mistakes===0?3:mistakes===1?2:1),500);return}
@@ -839,16 +922,16 @@ MAKERS.memory=function({R,tier,board,api}){
       note.textContent='Oops! Watch again…';after(showRound,1100);
     }
   }
-  info();after(showRound,500);
+  info();
   return{
-    noUndo:true,_seq:seq,_expected:expected,_phase:()=>phase,_pos:()=>pos,
+    noUndo:true,noNudge:true,begin(){after(showRound,500)},_seq:seq,_expected:expected,_phase:()=>phase,_pos:()=>pos,
     snap:()=>'',restore(){},
     destroy(){dead=true;timers.forEach(clearTimeout)},
     hint(){
       if(phase!=='input')return;phase='show';note.textContent='Watch again…';
       expected().slice(0,round).forEach(()=>{});
       seq.slice(0,round).forEach((p,k)=>after(()=>lit(p,speed*.7),500+k*speed));
-      pos=0;after(()=>{phase='input';note.textContent=reverse?'Your turn — REVERSE order!':'Your turn!'},500+round*speed);
+      pos=0;after(()=>{phase='input';note.textContent=yourTurn()},500+round*speed);
     }
   };
 };
@@ -862,6 +945,7 @@ $$('[data-go]').forEach(b=>b.onclick=()=>{sfx.tick();show(b.dataset.go)});
 $('#backBtn').onclick=()=>{sfx.tick();exitLevel();show('map')};
 $('#undoBtn').onclick=undo;
 $('#hintBtn').onclick=useHint;
+$('#helpBtn').onclick=()=>{if(cur){sfx.tick();showHowTo(cur.type)}};
 $('#restartBtn').onclick=()=>{if(cur){sfx.tick();startLevel(cur.level)}};
 $('#skipBtn').onclick=skipLevel;
 addEventListener('pointerdown',()=>audio(),{once:true});
