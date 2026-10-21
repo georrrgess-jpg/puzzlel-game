@@ -1,0 +1,6 @@
+favorite leading     n=336 shape 2.82 | hold 2.79 | composed 2.78 | focus 2.78 | rally 2.77 | none 2.75 | youngsters 2.75 | push 2.73 | underdog 2.70
+favorite level       n=178 push 2.35 | shape 2.18 | rally 2.11 | composed 2.04 | none 2.03 | youngsters 2.03 | hold 1.95 | focus 1.94 | underdog 1.80
+favorite trailing    n=86 push 1.64 | rally 1.37 | composed 1.13 | none 1.03 | focus 1.03 | youngsters 1.03 | shape 0.84 | underdog 0.74 | hold 0.67
+underdog leading     n=102 hold 2.23 | underdog 2.20 | shape 2.16 | rally 2.12 | composed 2.11 | none 2.07 | youngsters 2.07 | focus 2.02 | push 1.32
+underdog level       n=182 underdog 1.23 | shape 1.18 | rally 1.13 | focus 0.99 | composed 0.99 | none 0.91 | hold 0.91 | youngsters 0.91 | push 0.60
+underdog trailing    n=316 underdog 0.21 | focus 0.16 | push 0.16 | shape 0.15 | rally 0.13 | composed 0.13 | none 0.12 | youngsters 0.12 | hold 0.09

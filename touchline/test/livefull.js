@@ -1,0 +1,25 @@
+const { chromium } = require('./_pw');
+const W=+(process.argv[2]||1440), H=+(process.argv[3]||900), tag=process.argv[4]||'d';
+(async()=>{
+  const browser = await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
+  const page = await browser.newPage({viewport:{width:W,height:H}});
+  const errs=[]; page.on('pageerror',e=>errs.push('pageerror: '+e.message+'\n'+(e.stack||'').split('\n').slice(0,3).join('\n')));
+  await page.goto(require('./_pw').DIST); await page.waitForTimeout(500);
+  await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Full Coach'); await page.fill('#nc-seed','fullrun');
+  await page.click('[data-a="ncNext"]'); await page.waitForTimeout(200); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(800);
+  await page.click('.cta [data-a="playNext"]'); await page.waitForTimeout(400); await page.screenshot({path:`test/shots/lf-${tag}-preview.png`});
+  await page.click('[data-a="pvSpeed"][data-v="4"]').catch(()=>{}); await page.click('[data-a="kickoff"]');
+  await page.waitForTimeout(900); await page.screenshot({path:`test/shots/lf-${tag}-intro.png`});
+  await page.waitForTimeout(4000); await page.screenshot({path:`test/shots/lf-${tag}-live.png`});
+  await page.click('[data-a="liveTab"][data-v="lu"]'); await page.waitForTimeout(300); await page.screenshot({path:`test/shots/lf-${tag}-lineups.png`});
+  await page.click('[data-a="liveTab"][data-v="feed"]');
+  await page.click('[data-a="liveSkip"][data-to="ht"]'); await page.waitForSelector('#lv-ht .htbox',{timeout:30000}); await page.screenshot({path:`test/shots/lf-${tag}-ht.png`});
+  await page.click('#ht-go'); await page.waitForTimeout(3000);
+  await page.click('#lv-ctrl [data-a="livePause"]'); await page.waitForTimeout(1500); await page.click('#lv-ctrl [data-a="livePause"]'); await page.waitForTimeout(2500);
+  const min1=await page.evaluate(()=>App.live.view.min); await page.waitForTimeout(2500); const min2=await page.evaluate(()=>App.live.view.min);
+  console.log('resume advancing', min1, '->', min2);
+  await page.click('[data-a="liveSkip"][data-to="ft"]'); await page.waitForSelector('#lv-cont',{timeout:30000}); await page.waitForTimeout(2600); await page.screenshot({path:`test/shots/lf-${tag}-ft.png`});
+  const sc=await page.evaluate(()=>({view:App.live.view.sc, real:App.live.M.sc, feed:App.live.feed.length}));
+  console.log(JSON.stringify(sc));
+  await page.click('[data-a="liveContinue"]'); await page.waitForTimeout(800); await page.screenshot({path:`test/shots/lf-${tag}-results.png`});
+  console.log(errs.join('\n')||'no errors'); await browser.close(); })();
