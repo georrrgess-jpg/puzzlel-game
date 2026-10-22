@@ -821,7 +821,7 @@ class Stage {
       const wpt=this.detour(p); if(wpt){ p.tx=wpt.x; p.ty=wpt.y; } const dx=p.tx-p.x, dy=p.ty-p.y; const d=Math.hypot(dx,dy);
       const urgent=!!(p.chase||p.ov||p.meet||p.trail||p===this.own||p===presser||p.ref);
       const v=vmax*(p.upT&&now-p.upT<this.D(650)?0.2:1)*(p.chase?1.4:1)*(p.slow?0.45:1)*(p.celeb?1.3:1)*(p.hurry?1.5:1)*(p===this.own&&!this.hands?0.88:1)*(p.ref&&!p.ar?0.85:1)*(p.plant?0.22:1)*(urgent?1:0.62);
-      const want=Math.min(v, d*2.6*sp); const wx=d>0.01?dx/d*want:0, wy=d>0.01?dy/d*want:0;
+      const want=this.v17want?this.v17want(p,v,d,sp,urgent):Math.min(v, d*2.6*sp); const wx=d>0.01?dx/d*want:0, wy=d>0.01?dy/d*want:0;
       p.vx=pvx; p.vy=pvy; const acc=v*(p.chase?5:3.6)*dt; let ax=wx-p.vx, ay=wy-p.vy; const al=Math.hypot(ax,ay); if(al>acc){ ax*=acc/al; ay*=acc/al; }
       p.vx+=ax; p.vy+=ay; let mx=p.vx*dt, my=p.vy*dt; const ml=Math.hypot(mx,my); if(ml>d&&!p.chase){ mx=dx; my=dy; p.vx*=0.5; p.vy*=0.5; }
       if(this.netBlock(p.x,p.y,p.x+mx,p.y+my)){ mx=0; my=0; p.vx=0; p.vy=0; }
