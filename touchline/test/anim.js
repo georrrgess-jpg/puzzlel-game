@@ -40,6 +40,16 @@ const { chromium } = require('./_pw');
   // 6. turning never flips a player 180° in one step, and nobody is ever drawn twice with the ball
   const flips=await page.evaluate(async()=>{ const st=App.labSt; const last=new Map(); let fl=0; for(let i=0;i<240;i++){ await new Promise(r=>requestAnimationFrame(r)); for(const p of st.players.values()){ const y=last.get(p); if(y!=null&&Math.abs(Math.atan2(Math.sin(p.yaw-y),Math.cos(p.yaw-y)))>2.4) fl++; last.set(p,p.yaw); } } return fl; });
   ok(flips===0, 'no instant 180° facing flips ('+flips+')');
+  // 7. (v17) drawing between simulation steps: driven at 50 fps (2.4 steps a frame), the drawn clock advances exactly one
+  //    frame per draw, and a running player's drawn facing never jumps more than 0.3 rad between two drawn frames
+  const sm=await page.evaluate(async()=>{ const st=App.labSt; const D0=st.draw; const last=new Map(); let mx=0,n=0,jit=0,nd=0,pn=null;
+    st.draw=function(){ const sp=this.spdMul||1; if(pn!=null){ jit=Math.max(jit,Math.abs(this.now-pn-20)); nd++; } pn=this.now;
+      for(const p of this.players.values()){ if(p.off) continue; const y=last.get(p); if(y!=null&&(p.spd||0)/sp>3){ mx=Math.max(mx,Math.abs(Math.atan2(Math.sin(p.yaw-y),Math.cos(p.yaw-y)))); n++; } last.set(p,p.yaw); } return D0.apply(this,arguments); };
+    const R0=window.requestAnimationFrame; window.requestAnimationFrame=cb=>cb===st.loop?0:R0(cb); cancelAnimationFrame(st.raf);
+    try{ let ts=st.t0+st.lastReal+1; for(let i=0;i<200;i++){ ts+=20; st.loop(ts); await new Promise(r=>setTimeout(r,0)); } }
+    finally{ window.requestAnimationFrame=R0; delete st.draw; st.raf=R0(st.loop); } return {mx,n,jit,nd}; });
+  ok(sm.nd>150&&sm.jit<0.01, 'the drawn clock moves evenly between simulation steps (max deviation '+sm.jit.toFixed(3)+' ms over '+sm.nd+' frames)');
+  ok(sm.n>100&&sm.mx<=0.3, 'drawn facing of running players never jumps more than 0.3 rad a frame ('+sm.mx.toFixed(3)+' rad, '+sm.n+' samples)');
   await page.evaluate(()=>A.labClose()); ok(!(await page.$('#anim-lab'))&&await page.evaluate(()=>!App.labSt), 'closing the lab destroys its stage');
   console.log(errs.length?'ERRORS\n'+errs.join('\n'):'ERRORS none'); console.log(fails?fails+' FAILED':'ALL PASS');
   await browser.close(); process.exit(fails||errs.length?1:0);
