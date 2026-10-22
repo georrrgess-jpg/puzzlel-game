@@ -114,12 +114,14 @@ async function renderStart(){
     el.innerHTML=`<div class="start-bg" aria-hidden="true"><canvas id="start-cv"></canvas><div class="start-shade"></div><div class="beam b1"></div><div class="beam b2"></div><div class="start-grain"></div></div><div class="start-live" aria-hidden="true"><i></i>LIVE · Showcase match</div><div class="start-snd">${typeof soundBtn==='function'?soundBtn(true):''}</div><div class="start-bug" id="start-bug" aria-hidden="true"></div><div class="start-ui"></div>`;
     if(!reducedMotion()) requestAnimationFrame(()=>{ try{ App.menuShow=startMenuShow($('#start-cv')); }catch(e){ console.warn(e); } }); }
   const metas=await DB.getMeta(); const by={}; for(const m of metas) by[m.slot]=m;
-  const parade=[...MASCOT_LIST,...MASCOT_LIST].map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length]; return `<span>${mascotSVG(k,cp[0],cp[1],58)}</span>`; }).join('');
+  /* v17: the parade is one cached canvas strip (src/v17/10_start.js); the inline-SVG version is only the fallback */
+  const parade=typeof v17ParadeHTML==='function'?v17ParadeHTML():`<div class="parade" aria-hidden="true"><div class="parade-in">${[...MASCOT_LIST,...MASCOT_LIST].map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length]; return `<span>${mascotSVG(k,cp[0],cp[1],58)}</span>`; }).join('')}</div></div>`;
   const word='TOUCHLINE'.split('').map((c,i)=>`<span style="--i:${i}">${c}</span>`).join('');
+  const logoWord=typeof v17LogoWord==='function'?v17LogoWord(word):`<span class="logo-word" aria-label="Touchline">${word}</span>`;
   const phaseName=ph=>({preseason:'Preseason',regular:'League play',sectionals:'Sectionals',regional:'Regional',states:'State tourney',awards:'Awards',offseason:'Offseason'}[ph]||ph);
   const ui=el.querySelector('.start-ui');
   ui.innerHTML=`
-   <div class="logo ${fresh?'intro':''} ${metas.length?'compact':''}"><span class="logo-kicker"><i></i>Friday Night Varsity<i></i></span><span class="logo-word" aria-label="Touchline">${word}</span><small>High School Soccer Manager</small></div>
+   <div class="logo ${fresh?'intro':''} ${metas.length?'compact':''}"><span class="logo-kicker"><i></i>Friday Night Varsity<i></i></span>${logoWord}<small>High School Soccer Manager</small></div>
    <p class="start-pitch">Take over a program. Develop raw freshmen into Varsity stars. Chase the sectional plaque, the regional cup and the state crown, one season at a time.</p>
    ${continueHero(metas)}
    <div class="slots">${[1,2,3].map(n=>{ const m=by[n]; return m?`<div class="slot filled" style="--c1:${m.c1};--c2:${m.c2};--d:${n}">
@@ -134,7 +136,7 @@ async function renderStart(){
    <div class="start-feats">${[`${MASCOT_LIST.length} original mascots`,'Live broadcast matches','Modified → JV → Varsity','Road to State'].map(t=>`<span>${t}</span>`).join('<i></i>')}</div>
    <div class="row start-links"><button class="btn ghost sm" data-a="howTo">How to play</button><button class="btn ghost sm whatsnew" data-a="whatsNew"><i></i>What's new</button><button class="btn ghost sm" data-a="importOpen">Import a backup</button><button class="btn ghost sm" data-a="openTheme">Appearance</button></div>
    <div class="start-ticker" aria-hidden="true"><div class="st-in">${startTicker()}</div></div>
-   <div class="parade" aria-hidden="true"><div class="parade-in">${parade}</div></div>`;
+   ${parade}`;
 }
 MODALS.newCareer = m => {
   if(m.step!==2) return modalShell('<h2>New career · 1 of 2</h2>', `
