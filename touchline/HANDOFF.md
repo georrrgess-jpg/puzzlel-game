@@ -104,6 +104,10 @@ node test/<name>.js              # one suite
 
 ## 6. State of play and open threads
 
+Next up: the animation overhaul in `ANIMATION_PLAN.md` (UI fluidity mini-update, motion quality in the shared
+simulation, then a WebGL broadcast renderer with the 2-D painter kept as the fallback). Baseline measurement and capture
+scripts live in `test/plan/`; their output goes to `test/shots/plan/` (not committed).
+
 Done through v16: menu overhaul (v14), top-nav dashboard + performance (v15), 16 new mascots and a much wider school-name
 generator (v16). All suites pass as of the v16 build.
 

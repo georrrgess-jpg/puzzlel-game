@@ -1,0 +1,12 @@
+const { chromium, DIST } = require('../_pw');
+(async()=>{ const browser=await chromium.launch(); const page=await browser.newPage({viewport:{width:1440,height:900}});
+  await page.goto(DIST); await page.waitForTimeout(1500);
+  const fps=()=>page.evaluate(()=>new Promise(r=>{ let n=0; const t0=performance.now(); const f=()=>{ n++; if(performance.now()-t0<2500) requestAnimationFrame(f); else r(+(n/2.5).toFixed(1)); }; requestAnimationFrame(f); }));
+  console.log('baseline', await fps());
+  await page.evaluate(()=>{ document.querySelectorAll('.beam').forEach(e=>e.style.display='none'); }); console.log('no beams', await fps());
+  await page.evaluate(()=>{ document.querySelectorAll('.parade-in,.parade,[class*=parade]').forEach(e=>e.style.display='none'); }); console.log('no beams, no parade', await fps());
+  await page.evaluate(()=>{ document.querySelectorAll('.start-bg canvas').forEach(e=>e.style.display='none'); }); console.log('no beams, parade, canvas(hidden but still drawing)', await fps());
+  await page.evaluate(()=>{ document.querySelectorAll('[style*=animation],*').forEach(e=>{}); document.querySelectorAll('.logo-word span').forEach(e=>e.style.animation='none'); }); console.log('also no logo shine', await fps());
+  const counts=await page.evaluate(()=>({svg:document.querySelectorAll('svg').length, filters:document.querySelectorAll('filter').length, animated:[...document.querySelectorAll('*')].filter(e=>{ const a=getComputedStyle(e).animationName; return a&&a!=='none'; }).length, blur:[...document.querySelectorAll('*')].filter(e=>{ const f=getComputedStyle(e).filter+getComputedStyle(e).backdropFilter; return /blur/.test(f); }).length}));
+  console.log('start screen', JSON.stringify(counts));
+  await browser.close(); })();

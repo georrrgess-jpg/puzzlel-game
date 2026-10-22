@@ -1,6 +1,7 @@
 # Touchline (single-file HTML soccer manager)
 
 Read `HANDOFF.md` first (build/test/wiring/conventions), then the top sections of `DEVELOPER_NOTES.md`.
+For the animation overhaul (versions 17–18) follow `ANIMATION_PLAN.md`: it is the step-by-step plan, with the measured baseline, the phase gates and the order of work.
 
 Essentials:
 - Build: `python3 build.py` → `dist/touchline.html` and `dist/touchline-standalone.html`. Source in `src/`, concatenated in the order listed in `build.py`; later files override earlier ones. One global scope: extend by wrapping globals in a new file appended to the build, not by rewriting old modules.
