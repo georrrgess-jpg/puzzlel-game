@@ -64,9 +64,10 @@ portraitSVG=function(p,size=96,kit){
     t=v17Put(v17Cache.port,k,m?out.split(m[1]).join(V17_ID):out); }
   return t.indexOf(V17_ID)<0?t:t.split(V17_ID).join('pv'+(++v17PtN).toString(36)); };
 
-/* mascot pickers are a grid of choices, not a list: keep the outline/gloss on their 52 px tiles */
+/* mascot pickers are a grid of choices: keep the outline/gloss on their 52 px tiles (the new-career form, modals), except inside the
+   list views (School), where 36 filtered tiles were the page's main raster cost */
 const _v17Picker=mascotPicker;
-mascotPicker=function(){ v17Gloss++; try{ return _v17Picker.apply(this,arguments); } finally{ v17Gloss--; } };
+mascotPicker=function(){ const keep=!(App.C&&V17_LITE_VIEWS.has(App.route)); if(keep) v17Gloss++; try{ return _v17Picker.apply(this,arguments); } finally{ if(keep) v17Gloss--; } };
 /* the share-card renderer draws mascot markup into an <img>: give it self-contained filters */
 if(typeof svgImg==='function'){ const _v17SvgImg=svgImg; svgImg=function(svg,size){ return _v17SvgImg(v17Standalone(svg),size); }; }
 
@@ -94,13 +95,15 @@ function v17Swap(app,side,top,view){
   const live=!!(c&&c.isConnected&&c.parentNode&&c.parentNode.parentNode===app&&c.parentNode.firstElementChild&&c.parentNode.firstElementChild.tagName==='HEADER');
   /* a full render used to drop focus from the shell, which is what closes an open top-bar drop-down */
   const unfocus=()=>{ const a=document.activeElement; if(a&&a!==document.body&&app.contains(a)&&!c.contains(a)&&!a.matches('input,select,textarea')) a.blur(); };
-  if(live&&key===v17Shell.key){ unfocus(); c.className='content view-'+App.route; c.innerHTML=view; v17Stat.fast++; return true; }
+  const clearSearch=()=>{ const sr=app.querySelector('#sres'); if(sr&&sr.firstChild) sr.innerHTML=''; };
+  if(live&&key===v17Shell.key){ unfocus(); clearSearch(); c.className='content view-'+App.route; c.innerHTML=view; v17Stat.fast++; return true; }
   const hi=top.lastIndexOf('</header>'); const hdr=hi<0?null:top.slice(0,hi+9), head=hi<0?'':top.slice(hi+9);
   const nkey=hdr==null?null:v17Norm(side)+'\u0002'+v17Norm(hdr);
-  if(live&&nkey!=null&&nkey===v17Shell.nkey&&v17Mark(app,c,side+hdr)){ unfocus();
+  if(live&&nkey!=null&&nkey===v17Shell.nkey&&v17Mark(app,c,side+hdr)){ unfocus(); clearSearch();
     const main=c.parentNode; let n=main.firstElementChild.nextSibling; while(n&&n!==c){ const nx=n.nextSibling; n.remove(); n=nx; }
     if(head) c.insertAdjacentHTML('beforebegin',head);
-    c.className='content view-'+App.route; c.innerHTML=view; v17Shell.key=key; v17Stat.route++; return true; }
+    /* a new #content element per route change, as the full render made: a leftover polishView timer from the previous page must only touch the detached old one */
+    const nc=document.createElement('main'); nc.id='content'; nc.className='content view-'+App.route; nc.innerHTML=view; c.replaceWith(nc); v17Shell.content=nc; v17Shell.key=key; v17Stat.route++; return true; }
   app.innerHTML=side+`<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
   v17Shell.key=key; v17Shell.nkey=nkey; v17Shell.content=app.querySelector('#content'); v17Stat.full++; return true; }
 const _v17Render=render;
@@ -126,7 +129,7 @@ function v17RoundCard(C,lvl,rd,games,focus){
   const tog=`data-a="v17Round" data-rd="${rd}" data-lvl="${lvl}" aria-expanded="${open}"`;
   if(open) return `<div class="card v17-rd" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><div class="hd"><h3>Matchday ${rd+1}</h3><span class="row v17-rdh">${cur?'<span class="chip acc">Next up</span>':''}<button class="v17-rdt" ${tog} aria-label="Collapse matchday ${rd+1}">${icon('caret',16)}</button></span></div><div class="list">${games.map(f=>v17GameRow(C,f)).join('')}</div></div>`;
   const s=v17RoundSummary(C,games);
-  return `<div class="card v17-rd v17-rdc" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><button class="v17-rdsum" ${tog} aria-label="Matchday ${rd+1}: show all ${games.length} games"><h3>Matchday ${rd+1}</h3><span class="v17-rdme">${s.me}</span><span class="v17-rdn tiny muted">${s.info}</span><span class="v17-rdt" aria-hidden="true">${icon('caret',16)}</span></button></div>`; }
+  return `<div class="card v17-rd v17-rdc" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><h3 class="v17-rdh3"><button class="v17-rdsum" ${tog} aria-label="Matchday ${rd+1}: show all ${games.length} games"><span class="v17-rdtitle">Matchday ${rd+1}</span><span class="v17-rdme">${s.me}</span><span class="v17-rdn tiny muted">${s.info}</span><span class="v17-rdt" aria-hidden="true">${icon('caret',16)}</span></button></h3></div>`; }
 function v17Focus(C){ return C.phase==='regular'?C.md:C.phase==='preseason'?0:-1; }
 function v17RegRounds(C,lvl){ const rounds={}; for(const f of Object.values(C.fixtures)) if(f.yr===C.year&&f.lvl===lvl&&f.comp==='reg') (rounds[f.rd]=rounds[f.rd]||[]).push(f); return rounds; }
 VIEWS.schedule = ()=>{
