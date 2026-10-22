@@ -13,6 +13,7 @@ let v17ParadeStrip={dpr:0, tiles:null, job:null};
 function v17ParadeDpr(){ return Math.min(3, Math.max(1, window.devicePixelRatio||1)); }
 /* markup for renderStart (ui_views.js): 2 x 36 empty cells; data-t is the tile, --c the column inside it */
 function v17ParadeHTML(){ const n=MASCOT_LIST.length, per=V17_PARADE.per; let cells='';
+  if(v17ParadeStrip.failed){ const items=[...MASCOT_LIST,...MASCOT_LIST].map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length]; return `<span>${mascotSVG(k,cp[0],cp[1],30).replace('width="30" height="30"','width="58" height="58"')}</span>`; }).join(''); return `<div class="parade" aria-hidden="true"><div class="parade-in">${items}</div></div>`; }
   for(let i=0;i<2*n;i++){ const k=i%n; cells+=`<i data-t="${Math.floor(k/per)}" style="--c:${k%per}"></i>`; }
   return `<div class="parade v17-parade${v17ParadeStrip.tiles?' v17-ready':''}" aria-hidden="true"><div class="parade-in">${cells}</div></div>`; }
 /* the wordmark plus an aria-hidden copy laid exactly over it that carries the periodic glint (opacity only, outside the
@@ -27,14 +28,15 @@ function v17ParadeApply(){ const T=v17ParadeStrip.tiles; if(!T) return; let st=d
 /* draws the strip, then encodes it tile by tile, in slices of <= ~6 ms per frame; abandons the job if the start screen
    goes away (it starts again on the next start-screen render) */
 function v17ParadeBuild(){ const dpr=v17ParadeDpr();
-  if(v17ParadeStrip.tiles&&v17ParadeStrip.dpr===dpr){ v17ParadeApply(); return Promise.resolve(true); }
+  if(v17ParadeStrip.failed) return Promise.resolve(false);
+  if(v17ParadeStrip.tiles&&v17ParadeStrip.dpr===dpr){ v17ParadeStrip.job=null; v17ParadeApply(); return Promise.resolve(true); }
   if(v17ParadeStrip.job&&v17ParadeStrip.job.dpr===dpr) return v17ParadeStrip.job.p;
   const job={dpr}; v17ParadeStrip.job=job;
   const live=()=>v17ParadeStrip.job===job&&!!document.getElementById('start');
   job.p=(async()=>{ try{
     const P=V17_PARADE, list=MASCOT_LIST, n=list.length, px=Math.round(P.size*dpr), ch=Math.round(P.h*dpr);
     const cv=document.createElement('canvas'); cv.width=Math.round(n*P.cell*dpr); cv.height=ch;
-    const g=cv.getContext('2d'); if(!g) return false;
+    const g=cv.getContext('2d'); if(!g){ v17ParadeStrip.failed=true; return false; }
     /* canvas shadowBlur B is a Gaussian of sigma B/2, the same as a CSS drop-shadow blur radius B; neither scales with the
        transform, so both are given in device pixels */
     g.shadowColor=P.shC; g.shadowOffsetX=0; g.shadowOffsetY=P.shY*dpr; g.shadowBlur=P.shBlur*dpr;
@@ -50,11 +52,11 @@ function v17ParadeBuild(){ const dpr=v17ParadeDpr();
     const tiles=[];
     for(let t=0;t*P.per<n;t++){ const cols=Math.min(P.per,n-t*P.per), sx=Math.round(t*P.per*P.cell*dpr), sw=Math.round((t*P.per+cols)*P.cell*dpr)-sx;
       const tc=document.createElement('canvas'); tc.width=sw; tc.height=ch; tc.getContext('2d').drawImage(cv,sx,0,sw,ch,0,0,sw,ch);
-      let url=''; try{ url=tc.toDataURL('image/png'); }catch(e){} if(!url||url.length<32) return false;
+      let url=''; try{ url=tc.toDataURL('image/png'); }catch(e){} if(!url||url.length<32){ v17ParadeStrip.failed=true; return false; }
       tiles.push({url,cols}); if(!await slice()) return false; }
     await Promise.all(tiles.map(t=>{ try{ const im=new Image(); im.src=t.url; return im.decode?im.decode().catch(()=>{}):null; }catch(e){ return null; } }));
     if(v17ParadeStrip.job!==job) return false;
-    v17ParadeStrip={dpr, tiles, job:null}; v17ParadeApply(); return true;
+    v17ParadeStrip={dpr, tiles, job:null, failed:false}; v17ParadeApply(); return true;
   }catch(e){ console.warn('v17 parade', e); return false; }
   finally{ if(v17ParadeStrip.job===job) v17ParadeStrip.job=null; } })();
   return job.p; }
@@ -63,13 +65,15 @@ function v17ParadeBuild(){ const dpr=v17ParadeDpr();
    all. They are still invisible at that point (the cards and the hero fade in after 1.1 s), so the async image load never shows. */
 function v17MascotsToImg(root){ if(!root||typeof XMLSerializer==='undefined') return; const xs=new XMLSerializer();
   root.querySelectorAll('.slot-wm>svg.mascot,.slot-logo>svg.mascot,.ch-logo>svg.mascot').forEach(svg=>{ try{
-    const im=document.createElement('img'); im.className='mascot v17-mimg'; im.alt=''; im.decoding='async';
+    const im=document.createElement('img'); im.className='mascot v17-mimg'; im.alt=svg.getAttribute('aria-label')||''; im.decoding='async';
     im.width=+svg.getAttribute('width')||64; im.height=+svg.getAttribute('height')||64;
     im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent((typeof v17Standalone==='function'?v17Standalone:String)(xs.serializeToString(svg))); svg.replaceWith(im); }catch(e){} }); }
 /* after every start-screen render: swap the card mascots, then make (or reuse) the parade strip */
 const _v17RenderStart=renderStart;
 renderStart=async function(){ const r=await _v17RenderStart.apply(this,arguments);
-  try{ const ui=document.querySelector('#start .start-ui'); v17MascotsToImg(ui); if(document.querySelector('.v17-parade')) v17ParadeBuild(); }catch(e){ console.warn(e); } return r; };
+  try{ const ui=document.querySelector('#start .start-ui'); v17MascotsToImg(ui); if(document.querySelector('.v17-parade')) v17ParadeBuild().then(ok=>{ if(!ok&&v17ParadeStrip.failed){ const old=document.querySelector('.v17-parade'); if(old) old.outerHTML=v17ParadeHTML(); } }); }catch(e){ console.warn(e); } return r; };
 /* devicePixelRatio changes (browser zoom, moving the window to another screen): rebuild while the old strip stays up */
 let v17ParadeRz=0;
 window.addEventListener('resize',()=>{ clearTimeout(v17ParadeRz); v17ParadeRz=setTimeout(()=>{ if(document.querySelector('.v17-parade')&&v17ParadeStrip.dpr!==v17ParadeDpr()) v17ParadeBuild(); },250); });
+function v17ParadeDprWatch(){ if(!window.matchMedia) return; const mq=matchMedia(`(resolution: ${window.devicePixelRatio||1}dppx)`); const on=()=>{ mq.removeEventListener?mq.removeEventListener('change',on):mq.removeListener(on); if(document.querySelector('.v17-parade')&&v17ParadeStrip.dpr!==v17ParadeDpr()) v17ParadeBuild(); v17ParadeDprWatch(); }; mq.addEventListener?mq.addEventListener('change',on):mq.addListener(on); }
+v17ParadeDprWatch();

@@ -39,11 +39,11 @@
 /* card and hero mascots are <img> copies of the SVG (10_start.js); same box as svg.mascot */
 .start img.v17-mimg{display:inline-block;flex:none;vertical-align:middle}
 @media (max-width:640px){ .ch-logo img.v17-mimg{width:60px;height:60px} }
-.cont-hero{transition:transform .25s}
+.cont-hero{transition:transform .25s,border-color .2s,box-shadow .25s}
 
 /* program cards: only the lift is transitioned; the hover border/shadow switch without a paint transition.
    The "+" disc's hover fill fades in on a pseudo-element (opacity) instead of a background transition. */
-.slot{transition:transform .25s cubic-bezier(.2,1.2,.4,1)}
+.slot{transition:transform .25s cubic-bezier(.2,1.2,.4,1),border-color .2s,box-shadow .25s}
 .slot-plus{isolation:isolate;transition:transform .3s}
 .slot-plus::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:50%;background:rgba(255,211,107,.13);opacity:0;transition:opacity .3s}
 .slot.empty:hover .slot-plus{background:rgba(255,211,107,.06)}
@@ -58,7 +58,7 @@
 @keyframes v17cvin{from{opacity:0;transform:scale(1.04)}}
 .start-grain{display:none}
 .start-shade{background:repeating-radial-gradient(circle at 17% 32%,rgba(255,255,255,.008) 0 .5px,transparent 1px 3px),radial-gradient(ellipse 70% 60% at 50% 42%,rgba(3,6,10,.55),rgba(3,6,10,.86) 75%),linear-gradient(180deg,rgba(3,6,10,.6),transparent 30%,transparent 62%,rgba(3,6,10,.95))}
-.slot{-webkit-backdrop-filter:none;backdrop-filter:none;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),rgba(8,12,18,.7)}
+.slot{-webkit-backdrop-filter:none;backdrop-filter:none;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),rgba(8,12,18,.9)}
 .start-live,.start-bug,.start-snd .sndbtn{-webkit-backdrop-filter:none;backdrop-filter:none}
 .start-live,.start-snd .sndbtn{background:rgba(0,0,0,.56)}
 .start-bug{background:rgba(0,0,0,.6)}
