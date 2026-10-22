@@ -76,18 +76,19 @@ Stage.prototype.loop=function(ts){ if(!this.alive) return; if(!this.cv.isConnect
   if(this.paused||hold){ this.acc=0; }
   else { this.acc=(this.acc||0)+step; let n=0; while(this.acc>=H&&n<8){ this.keepPrev(); this.now+=H; this.update(H/1000); this.acc-=H; n++; } if(n===8) this.acc=0; alpha=this.acc/H; }
   if(this.mode!==V.mode||this.paused!==V.paused){ V.mode=this.mode; V.paused=this.paused; V.dirty=true; }
+  if(this.paused||hold) V.fast=null; /* pause, hold or hidden time never counts toward a render-scale raise */
   if(hold&&V.drawn){ this._ld=0; V.parked=true; v17Park(V.wake||(V.wake=()=>v17StageWake(this))); return; } /* a held demo still paints its first frame */
   if(V.always||v17Vis.on(this.cv)){
     /* cadence: ~60 fps live, 30 fps for the demo, ~2 fps while paused; a dirty stage draws on this frame */
     const since=ts-(this._ld||0); const gap=this.paused?480:this.demo?31.5:15.5;
     if(V.dirty||since>=gap||since<0){ if(this._ld&&!V.dirty&&!this.paused) v17RenderScale(this,ts,Math.min(100,since)); V.dirty=false; this._ld=ts; V.drawn=true; this.drawLerp(alpha); }
-  } else this._ld=0;
+  } else { this._ld=0; V.fast=null; }
   this.raf=requestAnimationFrame(this.loop); };
 
 const v17_stageResize=Stage.prototype.resize;
 Stage.prototype.resize=function(){ const r=v17_stageResize.apply(this,arguments); const V=this._v17;
   if(V){ V.dirty=true; /* resizing clears the canvas: a paused stage repaints now instead of on its next 2 fps tick */
-    if(this.paused&&this.alive&&!V.parked&&(V.always||v17Vis.on(this.cv))){ V.dirty=false; this.drawLerp(1); } }
+    if((this.paused||(this.demo&&V.parked))&&this.alive&&(V.always||v17Vis.on(this.cv))){ V.dirty=false; this.drawLerp(1); } }
   return r; };
 const v17_stageDestroy=Stage.prototype.destroy;
 Stage.prototype.destroy=function(){ V17_STAGES.delete(this); const V=this._v17; if(V&&V.wake) v17Parked.delete(V.wake); if(this.cv) v17Vis.unwatch(this.cv); return v17_stageDestroy.apply(this,arguments); };
@@ -107,7 +108,7 @@ celebPreview=function(cv){ if(!cv||cv._run) return v17_celebPreview.apply(this,a
 /* kit lab: one loop draws every [data-klfig]/[data-klclash] canvas; it parks while none of them is visible */
 const v17_klFigLoop=klFigLoop; const v17KlCv=new Set();
 const v17KlSel='[data-klfig],[data-klclash]';
-const v17KlWake=()=>{ if(App._klRun||App.route!=='kits') return true; const cvs=[...document.querySelectorAll(v17KlSel)]; if(!cvs.length) return true;
+const v17KlWake=()=>{ if(App.route!=='kits'){ for(const cv of v17KlCv) v17Vis.unwatch(cv); v17KlCv.clear(); return true; } if(App._klRun) return true; const cvs=[...document.querySelectorAll(v17KlSel)]; if(!cvs.length) return true;
   if(!cvs.some(cv=>v17Vis.on(cv))) return false; App._klRun=true; v17RAF(klFigLoop); return true; };
 klFigLoop=function(){ if(App.route!=='kits'){ App._klRun=false; for(const cv of v17KlCv) v17Vis.unwatch(cv); v17KlCv.clear(); return; }
   for(const cv of v17KlCv) if(!cv.isConnected){ v17Vis.unwatch(cv); v17KlCv.delete(cv); }
@@ -116,11 +117,13 @@ klFigLoop=function(){ if(App.route!=='kits'){ App._klRun=false; for(const cv of 
   return v17_klFigLoop.apply(this,arguments); };
 
 /* trophy-ceremony fireworks: stop when the run is over (Celebrate again restarts it) or while the canvas is hidden */
+/* parked check for an idle fireworks canvas: stop() once it leaves the DOM; resume a hidden (not finished) run when visible */
+function v17FwWake(fw,V){ return ()=>{ if(!fw.alive||!fw.cv.isConnected){ fw.stop(); return true; } if(!V.idle) return true; if(V.done||!v17Vis.on(fw.cv)) return false; V.idle=false; fw.last=performance.now(); v17RAF(fw.loop); return true; }; }
 const v17_fwLoop=Fireworks.prototype.loop, v17_fwRestart=Fireworks.prototype.restart, v17_fwStop=Fireworks.prototype.stop;
 Fireworks.prototype.loop=function(now){ if(!this.alive||!this.cv.isConnected){ this.stop(); return; }
   const V=this._v17||(this._v17={idle:false,wake:null}); v17Vis.watch(this.cv);
-  if(this.t>this.dur+4&&!this.rk.length&&!this.p.length&&!this.conf.length){ this.g.clearRect(0,0,this.W,this.H); V.idle=true; return; }
-  if(!v17Vis.on(this.cv)){ V.idle=true; v17Park(V.wake||(V.wake=()=>{ if(!this.alive||!this.cv.isConnected){ this.stop(); return true; } if(!V.idle) return true; if(!v17Vis.on(this.cv)) return false; V.idle=false; this.last=performance.now(); v17RAF(this.loop); return true; })); return; }
+  if(this.t>this.dur+4&&!this.rk.length&&!this.p.length&&!this.conf.length){ this.g.clearRect(0,0,this.W,this.H); V.idle=true; V.done=true; v17Park(V.wake||(V.wake=v17FwWake(this,V))); return; }
+  if(!v17Vis.on(this.cv)){ V.idle=true; v17Park(V.wake||(V.wake=v17FwWake(this,V))); return; }
   return v17_fwLoop.call(this,now); };
-Fireworks.prototype.restart=function(){ v17_fwRestart.apply(this,arguments); const V=this._v17; if(V&&V.idle&&this.alive&&this.cv.isConnected){ V.idle=false; this.last=performance.now(); v17RAF(this.loop); } };
+Fireworks.prototype.restart=function(){ v17_fwRestart.apply(this,arguments); const V=this._v17; if(V&&V.idle&&this.alive&&this.cv.isConnected){ V.idle=false; V.done=false; this.last=performance.now(); v17RAF(this.loop); } };
 Fireworks.prototype.stop=function(){ v17_fwStop.apply(this,arguments); const V=this._v17; if(V&&V.wake) v17Parked.delete(V.wake); v17Vis.unwatch(this.cv); };

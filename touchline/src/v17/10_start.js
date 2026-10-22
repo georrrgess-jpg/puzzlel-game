@@ -65,7 +65,7 @@ function v17MascotsToImg(root){ if(!root||typeof XMLSerializer==='undefined') re
   root.querySelectorAll('.slot-wm>svg.mascot,.slot-logo>svg.mascot,.ch-logo>svg.mascot').forEach(svg=>{ try{
     const im=document.createElement('img'); im.className='mascot v17-mimg'; im.alt=''; im.decoding='async';
     im.width=+svg.getAttribute('width')||64; im.height=+svg.getAttribute('height')||64;
-    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xs.serializeToString(svg)); svg.replaceWith(im); }catch(e){} }); }
+    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent((typeof v17Standalone==='function'?v17Standalone:String)(xs.serializeToString(svg))); svg.replaceWith(im); }catch(e){} }); }
 /* after every start-screen render: swap the card mascots, then make (or reuse) the parade strip */
 const _v17RenderStart=renderStart;
 renderStart=async function(){ const r=await _v17RenderStart.apply(this,arguments);
