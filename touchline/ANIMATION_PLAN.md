@@ -228,12 +228,30 @@ drawing the HUD part when `p3d` is on. `Painter3D` reads only public simulation 
 target, hype, flash, shake, netD, wx, kits, looks) and never writes it.
 
 3.1 **Scaffold**
-   - `vendor/three.min.js` (esbuild-minified r186, MIT licence beside it) embedded by `build.py` before `data.js` as a
-     classic script; expose `window.THREE`. Build size check: ≤ 1.8 MB.
-   - `Painter3D(stage)`: renderer (`antialias:true`, `powerPreference:'high-performance'`, pixel ratio ≤ 1.5 × rs),
-     `PerspectiveCamera` (fov 32°, a broadcast position about 38 m back and 18 m up from the far touchline centre at
-     zoom 1, looking at the stage's `cam.x`), scene, `DirectionalLight` with a 2048 shadow map covering the pitch,
-     `HemisphereLight` fill, fog for the night mist. Context-lost handler falls back to 2-D in place.
+   - `vendor/three.min.js`: three r186 bundled by esbuild as a minified IIFE with `--global-name=THREE`, tree-shaken to
+     the classes the renderer imports (`vendor/three-entry.js` lists them; rebuild with
+     `npx esbuild@0.27.3 vendor/three-entry.js --bundle --minify --format=iife --global-name=THREE --legal-comments=none
+     --outfile=vendor/three.min.js`). Measured 2026-10-22: 602 KB minified / 152 KB gzip for a full renderer set (the
+     WebGL renderer pulls in nearly all shader chunks; the whole library is 743 KB). MIT licence in
+     `vendor/three-LICENSE`. `build.py` embeds it as its own `<script>` before the game script. Build size check:
+     ≤ 2.1 MB (was 1.35 MB).
+   - Headless findings (2026-10-22): WebGL2 works in the test Chromium via software rendering; a lit pitch with a 2048
+     shadow map, 22 capsule figures and 6,000 instanced fans renders correctly at ~3.8 fps (170 draw calls, 103k
+     triangles). So 3-D suites must force `PREFS.renderer='3d'` and a tier, and must not assert frame rates; the
+     probe in headless correctly falls back to 2-D. `PCFSoftShadowMap` is removed in r186 (use `PCFShadowMap` or
+     `VSMShadowMap`).
+   - Axes: stage metres map to three.js as `x = X` (0..105 along the pitch), `z = Y` (0 = far touchline with the main
+     stand, 68 = near touchline), `y = Z` (height). The broadcast camera sits behind and above the NEAR touchline
+     (z ≈ 68 + 40, y ≈ 20 at zoom 1), looking toward the far stand at the stage's `cam.x`, exactly like today's view
+     where the near touchline is the bottom of the screen.
+   - `Painter3D(stage)`: renderer (`antialias` per tier, `powerPreference:'high-performance'`, pixel ratio ≤ 1.5 × rs),
+     `PerspectiveCamera` (fov ~30°), scene, `DirectionalLight` with a shadow map covering the pitch, `HemisphereLight`
+     fill, fog for the night mist. Context-lost handler falls back to 2-D in place.
+   - Module contract (so pitch/stadium, figures, ball/effects, crowd and camera can be built in parallel files):
+     `P3D_MODULES.push({name, order, init(P), frame(P, st, alpha), resize(P), dispose(P)})`. `P` is the Painter3D
+     (`P.T` = THREE, `P.scene`, `P.camera`, `P.renderer`, `P.tier`, `P.st` = the Stage, `P.v3(X,Y,Z)` → `THREE.Vector3`,
+     `P.track(obj)` registers geometries/materials/textures for disposal, `P.night`, `P.wx`). Modules only read
+     simulation state. Each module lives in its own `src/v17/6x_p3d_*.js` file.
    - Camera mapping: `cam.w` (metres visible at the near touchline) → camera distance so `zoomTo` keeps working.
    - Gate: an empty lit pitch plane with markings renders at ≥ 55 fps on a laptop GPU; the live screen, TV, lab and
      Wrapped all still run on 2-D when `rendererFor()==='2d'`.
@@ -261,6 +279,23 @@ target, hype, flash, shake, netD, wx, kits, looks) and never writes it.
      (`BackSide`, scale 1.03, black). Kit: `paintKitPattern` rendered into a `CanvasTexture` per kit (cached per
      school), numbers on back and chest as part of that texture, collar and sleeve variants as texture regions.
    - Skin tones, builds (`lean/average/stocky` scale x/z), heights, from `looks.js` as now.
+   - Prototype result (2026-10-22, `test/plan/proto_fig3d/`): driving capsule-and-sphere toon figures from the existing
+     `poseOf`/`blendPose`/`ik3` output works. Running, a struck shot, a header jump, a keeper dive and a celebration all
+     read correctly with real cast shadows, and at broadcast distance they already read better than the 2-D vectors.
+     Up close they look like plain mannequins. What the module must add: shorts that stop mid-thigh with skin below,
+     short sleeves with skin forearms, capsules sized so joints do not bead, a face (eyes, brows, nose, mouth, ears), the
+     13 hair styles as meshes, boots with a sole and toe, shirt numbers, collar/trim, keeper gloves. Body units map to
+     metres at about 0.92 × height/70 (head top ≈ 1.9 m for a 70-inch player); the slight exaggeration keeps players
+     readable at broadcast distance.
+   - Draw calls: one mesh per body part per figure (×2 for outlines) is ~1,700 draw calls for 27 figures, too many for
+     weak GPUs. Render by PART instead: one `InstancedMesh` per part kind (thigh, shin, torso, head, hair style, boot …)
+     across all figures, with per-instance colour (`instanceColor`) and, for patterned shirts/shorts/socks, a per-instance
+     index into a small kit atlas (home, away, both keepers, officials) read in an `onBeforeCompile` patch; numbers as
+     instanced quads from a digit atlas. Outline = the same instanced geometry drawn with a back-face material whose
+     vertex shader pushes along the normal by a distance-scaled amount (constant screen thickness). That is ~40–60 draw
+     calls for every figure on the pitch, and per-frame work is setting ~900 instance matrices.
+   - Whole-body rotations: the 2-D painter rotates in the screen plane. In 3-D, `dive`, `airplane` and the run's
+     `turnLean` roll about the body's forward axis; `fall`, `trip`, `backflip` and `flag` pitch about the lateral axis.
    - Per-frame update: one `Object3D` hierarchy per figure, joint positions set from the solver, limb capsules oriented
      with `lookAt`, yaw/lean/rot applied on the root (dives and backflips use `P.rot` about `P.pivot` exactly as now).
    - Shadows: cast and receive on the pitch plane.
