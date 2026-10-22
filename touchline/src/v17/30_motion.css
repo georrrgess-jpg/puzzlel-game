@@ -1,0 +1,64 @@
+/* ===== v17 · 30_motion: layout-property transitions become compositor transforms, plus touch feel =====
+   Every rule here overrides an older rule that transitioned or animated width / height / all.
+   Bars driven by JS take a 0..1 fraction in --p on the fill element instead of a width.
+   Square-ended fills scale (transform-origin left); rounded fills translate inside a clipping track,
+   because scaleX would squash their rounded end cap. Both look identical to the old width at rest. */
+
+/* live possession bar (updateLive sets --p on #lv-ph). The away fill is the full-width base, the home fill
+   scales over it from the left, so the two never leave an anti-aliased seam. The home fill is opaque with a
+   15% #0b1015 veil, which is exactly what opacity .85 over the #0b1015 track used to produce. */
+.possbar i{position:absolute;top:0;left:0;width:100%;height:100%;transition:transform .8s ease}
+.possbar #lv-pa{opacity:.85}
+.possbar #lv-ph{z-index:1;opacity:1;transform-origin:0 50%;transform:scaleX(var(--p,0))}
+.possbar #lv-ph::after{content:"";position:absolute;inset:0;background:#0b1015;opacity:.15}
+.possbar span{z-index:2}
+
+/* sim-ahead overlay progress (A.simAhead sets --p once per animation frame) */
+.sv-bar i{width:100%;transform-origin:0 50%;transform:scaleX(var(--p,.04));transition:transform .15s}
+/* the single-round sim has no overlay; this invisible layer keeps taps out while it yields between fixtures */
+.v17-simshield{position:fixed;inset:0;z-index:120;cursor:progress;background:transparent}
+
+/* walkout progress (ui_announcer sets --p): rounded fill slides in from the left inside the rounded track */
+.walk-prog{overflow:hidden}
+.walk-prog i{width:100%;transform:translateX(calc((var(--p,0) - 1) * 100%));transition:transform .4s}
+
+/* PA microphone level bars: idle size unchanged (3x4 px pill); the live meter scales from the bottom
+   between the old 3 px and 14 px heights instead of animating height */
+.pa-mic i{transform-origin:50% 100%;transition:transform .15s}
+.pa-mic.live i{animation-name:v17-pabar}
+@keyframes v17-pabar{from{transform:scaleY(.75)}to{transform:scaleY(3.5)}}
+
+/* senior-night portrait dots: only opacity and the scale-up animate; the gold ring switches with the state */
+.sn-dot{transition:opacity .3s,transform .3s}
+
+/* static bars: their markup is built with a fixed inline width by innerHTML/outerHTML and never updated in
+   place (win bar, squad unit bars, scouting knowledge), so the old width transitions could never run */
+.wb-track i,.sq-unit .bar i,.pro-know i{transition:none}
+
+/* sliding tab indicator: a fixed 72 px bar moved with translateX and sized with scaleX (tabIndicators in
+   30_motion.js sets --ti-x and --ti-s); --ti-y only changes when the tab row wraps and is never animated */
+.tabs.tabs-ind::after{width:72px;transform-origin:0 0;transform:translateX(var(--ti-x,0px)) scaleX(var(--ti-s,0));transition:transform .32s cubic-bezier(.3,1.3,.5,1)}
+.tabs.ti-still::after{transition:none}
+body.rm .tabs.tabs-ind::after{transition:none}
+@media (prefers-reduced-motion:reduce){ .tabs.tabs-ind::after{transition:none} }
+
+/* awards night: .flip pointed at an undefined "flipin". Its only job is to carry the per-card delay that
+   .flip-in inherits (animation-delay:inherit) while the deck shows face down; the 300 ms first delay waits for
+   the modal to open with the backs visible. cvin is the existing to-only keyframes (opacity 1, scale 1) that
+   equals the card's resting state, so the reveal looks exactly as before and no name is undefined.
+   (fadein instead would hide each card until its turn, i.e. deal them in rather than turn a visible deck.) */
+.flip{animation-name:cvin}
+
+/* ---------- touch feel ---------- */
+/* no double-tap-zoom wait on anything tappable; zero specificity so drag surfaces keep touch-action:none */
+:where(button,[data-a],[role=button],[role=tab],a[href],summary,label){touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+/* press feedback lands in the first frame (release still eases back) */
+.btn:active{transition-duration:0s}
+#tabbar .tb:active{transition-duration:0s}
+/* every other tappable control dims while pressed (opacity only). Full-screen tap targets (modal scrim,
+   intro/walkout/senior-night overlays, full-time card, paused overlay) and drag surfaces are left alone,
+   since :active also matches every ancestor of the pressed element. Zero specificity: a control that sets its
+   own opacity keeps it */
+:where(button:not(:disabled),[role=button],[data-a]):where(:not(.btn,.scrim,.walk,.lvi,.snight,.ftc,.lv-paused,.bcard,.tok,.ceremony)):where(:active){opacity:.72}
+/* scrolling panels keep their overscroll to themselves (no scroll chaining / pull-to-refresh behind them) */
+.scrim,.modal,.mbody,.drawer,.drawer .mbody,.side,.tn-dd,.lv-panel,.lv-pbody,.htbox .mbody{overscroll-behavior:contain}

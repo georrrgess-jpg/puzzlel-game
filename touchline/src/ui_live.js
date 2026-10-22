@@ -112,17 +112,21 @@ function updateLive(scoreOnly){
   const sc=$('#lv-score'); if(sc){ const sp=sc.children; if(sp.length===3){ if(sp[0].textContent!=String(V.sc[0])) sp[0].textContent=V.sc[0]; if(sp[2].textContent!=String(V.sc[1])) sp[2].textContent=V.sc[1]; } }
   const cl=$('#lv-clock'); if(cl) cl.textContent = V.phase==='so'?`PENS ${(V.so||[0,0])[0]}–${(V.so||[0,0])[1]}`: V.phase==='ft'?'FULL TIME' : V.phase==='ht'?'HALF TIME' : V.min===0?'KICKOFF': (V.min>80?`ET ${V.min}'`:`${V.min}'`);
   if(scoreOnly) return;
-  const ph=(V.st[0].pos+2)/(V.st[0].pos+V.st[1].pos+4)*100; const a=$('#lv-ph'), b=$('#lv-pa'), t=$('#lv-pt'); if(a){ a.style.width=ph+'%'; b.style.width=(100-ph)+'%'; t.textContent=`${R(ph)}% possession ${R(100-ph)}%`; }
+  /* v17: the home fill scales over the away fill (transform, see 30_motion.css); nothing is rewritten when unchanged */
+  const ph=(V.st[0].pos+2)/(V.st[0].pos+V.st[1].pos+4)*100; const a=$('#lv-ph'), t=$('#lv-pt'); if(a){ const p=(ph/100).toFixed(4); if(a.style.getPropertyValue('--p')!==p) a.style.setProperty('--p',p); const tx=`${R(ph)}% possession ${R(100-ph)}%`; if(t&&t.textContent!==tx) t.textContent=tx; }
   const ctrl=$('#lv-ctrl'); if(!ctrl) return;
-  if(L.done){ ctrl.innerHTML=`<button class="btn" data-a="liveReport">Match report</button><button class="btn pri play" data-a="liveContinue" id="lv-cont">Continue</button>`; return; }
-  if(M.phase==='ht'){ ctrl.innerHTML='<span class="small muted">Half time: pick a talk, then proceed.</span>'; return; }
+  /* v17: the control bar is only rebuilt when its markup changes (it used to be rebuilt every minute, which
+     restyled the bar and dropped a tap that landed between pointerdown and click) */
+  const set=h=>{ if(ctrl.v17h===h&&ctrl.firstChild) return; ctrl.v17h=h; ctrl.innerHTML=h; };
+  if(L.done){ set(`<button class="btn" data-a="liveReport">Match report</button><button class="btn pri play" data-a="liveContinue" id="lv-cont">Continue</button>`); return; }
+  if(M.phase==='ht'){ set('<span class="small muted">Half time: pick a talk, then proceed.</span>'); return; }
   const view=PREFS.view||'broadcast';
-  ctrl.innerHTML=`<button class="btn ico" data-a="livePause" aria-label="${L.paused?'Resume':'Pause'}" title="${L.paused?'Resume':'Pause'} (Space)">${L.paused?'▶':'❚❚'}</button>
+  set(`<button class="btn ico" data-a="livePause" aria-label="${L.paused?'Resume':'Pause'}" title="${L.paused?'Resume':'Pause'} (Space)">${L.paused?'▶':'❚❚'}</button>
    <div class="seg" role="group" aria-label="Speed">${[1,2,4,8].map(s=>`<button class="${L.speed===s?'on':''}" data-a="liveSpeed" data-v="${s}" aria-pressed="${L.speed===s}">${s}×</button>`).join('')}</div>
    <div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['tactical','Tactical']].map(([k,l])=>`<button class="${view===k?'on':''}" data-a="liveView" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>
    <button class="btn sm" data-a="liveTactics">Tactics</button>${typeof soundBtn==='function'?soundBtn():''}
    ${!M.htDone&&M.htOn?'<button class="btn sm ghost" data-a="liveSkip" data-to="ht">Skip to half</button>':''}<button class="btn sm ghost" data-a="liveSkip" data-to="ft">Skip to end</button>
-   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · M sound</span>`;
+   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · M sound</span>`);
 }
 const waitMs=ms=>new Promise(r=>setTimeout(r,ms));
 /* animate one resolved minute; every visible event is announced by the stage itself */

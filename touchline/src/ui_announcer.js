@@ -72,7 +72,7 @@ liveWalkout=function(done){
     <div class="pa-call" id="pa-call" aria-live="polite"></div>
     ${T.xi.map(({s,p},i)=>`<div class="wk-tok" id="wk${i}" style="left:${X(s)}%;top:${Y(s)}%;--sc:${(0.8+(1-s.y/100)*0.35).toFixed(2)}"><span class="wk-face">${portraitSVG(p,64)}</span><b><i>${p.num}</i> ${esc(p.ln)}${p.id===T.cap?' <em>C</em>':''}</b><small>${s.role}</small></div>`).join('')}
     <small class="walk-skip">Tap to skip</small>`; };
-  const prog=(T,i)=>{ const pr=W.querySelector('#wk-prog'); if(pr) pr.style.width=((i+1)/T.xi.length*100)+'%'; const n=W.querySelector('#wk-n'); if(n) n.textContent=`${i+1} of ${T.xi.length} announced`; };
+  const prog=(T,i)=>{ const pr=W.querySelector('#wk-prog'); if(pr) pr.style.setProperty('--p',((i+1)/T.xi.length).toFixed(4)); const n=W.querySelector('#wk-n'); if(n) n.textContent=`${i+1} of ${T.xi.length} announced`; };
   const card=(T,i)=>{ const {s,p}=T.xi[i]; const now=W.querySelector('#wk-now'); if(now) now.innerHTML=`<div class="wk-card"><span class="wk-big">${portraitSVG(p,84)}</span><div><b>${esc(pname(p))}</b><small>#${p.num} · ${esc(gradeTag(p))} · ${s.role}${p.id===T.cap?' · Captain':''}</small></div></div>`; };
   const flash=()=>{ const fl=W.querySelector('.walk-flash'); if(fl){ fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go'); } };
   if(rm){ stageFor(mine,true); let i=0; const step=()=>{ if(!alive()) return; if(i<mine.xi.length){ W.querySelector('#wk'+i)?.classList.add('in'); i++; L.walkT=setTimeout(step,120); } else L.walkT=setTimeout(go,900); }; L.walkT=setTimeout(step,300); return; }

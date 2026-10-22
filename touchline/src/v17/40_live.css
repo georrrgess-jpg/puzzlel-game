@@ -1,0 +1,6 @@
+/* ===== v17 · 40_live: live screen side panel =====
+   The panel body is sized by its flex/grid parents (flex:1 in a fixed-width column on desktop, a 34% row on
+   phones) and already clips and scrolls, so strict containment changes nothing visible. It makes the body a
+   layout and paint boundary: a new commentary line or a tab switch restyles and lays out only the panel body,
+   never the stage next to it, so the broadcast canvas is not resized or repainted by panel changes. */
+.lv-pbody{contain:strict}
