@@ -1,0 +1,1 @@
+/* v17 file order: 00_ prefs/renderer switch, 05_ stage housekeeping, 10_ start screen, 20_ menu rendering, 30_ motion/transitions, 40_ live screen. One file per feature; wrap globals, do not edit older modules unless a wrapper cannot reach. */
