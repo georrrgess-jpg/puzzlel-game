@@ -1921,6 +1921,193 @@ table.ot tr.me td:first-child{box-shadow:inset 3px 0 0 var(--team2-hi)}
 
 /* v17 file order: 00_ prefs/renderer switch, 05_ stage housekeeping, 10_ start screen, 20_ menu rendering, 30_ motion/transitions, 40_ live screen. One file per feature; wrap globals, do not edit older modules unless a wrapper cannot reach. */
 
+/* ---------- v17 start screen: everything that moves is transform/opacity only; no live filter, blur or blend on a moving layer ---------- */
+
+/* parade: one cached canvas strip (10_start.js, encoded as 6 PNG tiles) painted as the background of 72 cells; the track moves by transform only.
+   Cell = 86px pitch (58px mascot at x 14 + the old 28px gap), 80px tall so the baked shadow below the mascot survives a hover lift;
+   the parade box stays 58px tall and clips like the old one did. */
+.v17-parade{height:58px;opacity:0;transition:opacity .6s ease}
+.v17-parade.v17-ready{opacity:1}
+.v17-parade .parade-in{display:flex;gap:0;width:max-content;margin-left:-14px;animation:v17parade 70s linear infinite;will-change:transform}
+.v17-parade .parade-in i{flex:none;display:block;width:86px;height:80px;opacity:.8;background-repeat:no-repeat;background-position:calc(var(--c)*-86px) 0;transition:transform .2s}
+.v17-parade .parade-in i:hover{transform:translateY(-6px) scale(1.12)}
+@keyframes v17parade{to{transform:translateX(-50%)}}
+
+/* floodlight beams: the 18px blur is replaced by a feathered mask on a static child (rasterised once into the beam's layer),
+   the screen blend by normal blending (identical for a faint warm-white beam), and the box ends where the gradient reaches 0
+   (70% of the old 130vh). The sway stays a transform animation. */
+.beam{filter:none;mix-blend-mode:normal;background:none;height:calc(91vh + 36px);will-change:transform}
+.beam::before{content:"";position:absolute;top:0;bottom:0;left:-54px;right:-54px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,240,200,.16),rgba(255,240,200,0) calc(100% - 36px));
+  -webkit-mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,.023) 18px,rgba(0,0,0,.067) 27px,rgba(0,0,0,.159) 36px,rgba(0,0,0,.309) 45px,rgba(0,0,0,.5) 54px,rgba(0,0,0,.691) 63px,rgba(0,0,0,.841) 72px,rgba(0,0,0,.933) 81px,rgba(0,0,0,.977) 90px,#000 108px,#000 calc(100% - 108px),rgba(0,0,0,.977) calc(100% - 90px),rgba(0,0,0,.933) calc(100% - 81px),rgba(0,0,0,.841) calc(100% - 72px),rgba(0,0,0,.691) calc(100% - 63px),rgba(0,0,0,.5) calc(100% - 54px),rgba(0,0,0,.309) calc(100% - 45px),rgba(0,0,0,.159) calc(100% - 36px),rgba(0,0,0,.067) calc(100% - 27px),rgba(0,0,0,.023) calc(100% - 18px),transparent);
+  mask-image:linear-gradient(90deg,transparent,rgba(0,0,0,.023) 18px,rgba(0,0,0,.067) 27px,rgba(0,0,0,.159) 36px,rgba(0,0,0,.309) 45px,rgba(0,0,0,.5) 54px,rgba(0,0,0,.691) 63px,rgba(0,0,0,.841) 72px,rgba(0,0,0,.933) 81px,rgba(0,0,0,.977) 90px,#000 108px,#000 calc(100% - 108px),rgba(0,0,0,.977) calc(100% - 90px),rgba(0,0,0,.933) calc(100% - 81px),rgba(0,0,0,.841) calc(100% - 72px),rgba(0,0,0,.691) calc(100% - 63px),rgba(0,0,0,.5) calc(100% - 54px),rgba(0,0,0,.309) calc(100% - 45px),rgba(0,0,0,.159) calc(100% - 36px),rgba(0,0,0,.067) calc(100% - 27px),rgba(0,0,0,.023) calc(100% - 18px),transparent)}
+
+/* logo: the entrance drops the blur (opacity + transform only). The old infinite background-position "shine" has been invisible
+   since v14 (the letters have background:none) but still repainted the outlined word and re-ran its drop-shadow every frame;
+   it is replaced by a glint on an aria-hidden copy of the word laid over it: each letter flashes once, left to right, every 7 s. */
+.logo-word span{animation:none}
+.logo.intro .logo-word span{animation:v17letterin .9s cubic-bezier(.2,1.25,.35,1) backwards;animation-delay:calc(.15s + var(--i)*.07s)}
+@keyframes v17letterin{0%{opacity:0;transform:translateY(-70px) scale(1.6)}60%{opacity:1}100%{transform:none}}
+.v17-lw{display:block;position:relative}
+/* .v17-lw is positioned (it anchors the glint), so the subtitle must be too, or the word's drop shadow would paint over it */
+.start .logo small{position:relative}
+.start .logo .logo-word.v17-glint{position:absolute;left:0;right:0;top:0;filter:none;pointer-events:none;user-select:none}
+.start .logo .logo-word.v17-glint span{color:transparent;text-shadow:none;background:linear-gradient(112deg,rgba(255,255,255,0) 28%,rgba(255,255,255,.95) 50%,rgba(255,255,255,0) 72%);-webkit-background-clip:text;background-clip:text;opacity:0;animation:v17glint 7s ease-in-out infinite;animation-delay:calc(3.2s + var(--i)*.08s)}
+@keyframes v17glint{0%,15%,100%{opacity:0}6%{opacity:.7}}
+
+/* continue hero: the bobbing logo's drop shadow moves to the (static) svg so it is rasterised with the layer instead of
+   being re-filtered every frame; hover lifts by transform and the shadow change is no longer transitioned */
+.ch-logo{filter:none}
+.ch-logo>.mascot{filter:drop-shadow(0 10px 18px rgba(0,0,0,.55))}
+/* card and hero mascots are <img> copies of the SVG (10_start.js); same box as svg.mascot */
+.start img.v17-mimg{display:inline-block;flex:none;vertical-align:middle}
+@media (max-width:640px){ .ch-logo img.v17-mimg{width:60px;height:60px} }
+.cont-hero{transition:transform .25s}
+
+/* program cards: only the lift is transitioned; the hover border/shadow switch without a paint transition.
+   The "+" disc's hover fill fades in on a pseudo-element (opacity) instead of a background transition. */
+.slot{transition:transform .25s cubic-bezier(.2,1.2,.4,1)}
+.slot-plus{isolation:isolate;transition:transform .3s}
+.slot-plus::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:50%;background:rgba(255,211,107,.13);opacity:0;transition:opacity .3s}
+.slot.empty:hover .slot-plus{background:rgba(255,211,107,.06)}
+.slot.empty:hover .slot-plus::before{opacity:1}
+
+/* things that sit over the moving demo canvas are re-composited every frame, so none of them may carry a filter, blend or
+   backdrop blur (headless software compositing: saturate on the canvas ~12 ms/frame, the overlay grain ~8, the glass blurs ~7-13):
+   - demo canvas: no saturate(1.1) (under the shade the difference is 1-2 levels); the fade-in keeps opacity + scale and ends on the base style
+   - grain: the overlay-blended layer becomes a faint normal-blend layer of the shade (one fewer full-screen layer, same texture)
+   - glass (cards, chips, ticker, score bug): backdrop blur replaced by a slightly denser tint */
+.start-bg canvas{opacity:1;transform:none;filter:none;animation:v17cvin 2.4s .3s ease backwards}
+@keyframes v17cvin{from{opacity:0;transform:scale(1.04)}}
+.start-grain{display:none}
+.start-shade{background:repeating-radial-gradient(circle at 17% 32%,rgba(255,255,255,.008) 0 .5px,transparent 1px 3px),radial-gradient(ellipse 70% 60% at 50% 42%,rgba(3,6,10,.55),rgba(3,6,10,.86) 75%),linear-gradient(180deg,rgba(3,6,10,.6),transparent 30%,transparent 62%,rgba(3,6,10,.95))}
+.slot{-webkit-backdrop-filter:none;backdrop-filter:none;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),rgba(8,12,18,.7)}
+.start-live,.start-bug,.start-snd .sndbtn{-webkit-backdrop-filter:none;backdrop-filter:none}
+.start-live,.start-snd .sndbtn{background:rgba(0,0,0,.56)}
+.start-bug{background:rgba(0,0,0,.6)}
+.start-ticker{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(4,7,12,.64)}
+
+/* one-shot entrances end on the element's own style, so they fill backwards only: once finished they stop counting as
+   running animations and their layers can merge again */
+.logo.intro .logo-kicker,.logo.intro small,.logo.intro ~ .start-pitch,.slot,.start-feats,.start-links,.cont-hero{animation-fill-mode:backwards}
+
+/* reduced motion: no parade scroll, no beam sway, no glint (the global rule in style.css already shortens everything else) */
+body.rm .v17-parade .parade-in,body.rm .beam,body.rm .st-in{animation:none}
+body.rm .v17-glint{display:none}
+body.rm .v17-parade{transition:none}
+body.rm .beam,body.rm .v17-parade .parade-in{will-change:auto}
+@media (prefers-reduced-motion:reduce){
+  .v17-parade .parade-in,.beam.b1,.beam.b2,.st-in{animation:none}
+  .v17-glint{display:none}
+  .v17-parade{transition:none}
+  .beam,.v17-parade .parade-in{will-change:auto}
+}
+
+/* ===================== v17 menu rendering: collapsed matchdays, content-visibility on long cards ===================== */
+/* off-screen cards skip style, layout and paint until they scroll near the viewport; "auto" remembers the real size */
+.v17-rd{content-visibility:auto;contain-intrinsic-size:auto 250px}
+.v17-rd.v17-rdc{contain-intrinsic-size:auto 62px;padding:0}
+.v17-cv{content-visibility:auto;contain-intrinsic-size:auto 640px}
+.view-school .grid.g2>.col>.card:not(.trophycase){content-visibility:auto;contain-intrinsic-size:auto 420px}
+.view-kits .kl-grid>.col>.card:not(:first-child){content-visibility:auto;contain-intrinsic-size:auto 360px}
+.view-squads .sq-side>.card:not(.sq-spot):not(.sq-tip){content-visibility:auto;contain-intrinsic-size:auto 400px}
+/* full-page screenshots never scroll, so skipped cards would come out blank: scripts add html.v17-nocv first */
+html.v17-nocv .v17-rd,html.v17-nocv .v17-cv,html.v17-nocv .view-school .card,html.v17-nocv .view-kits .card,html.v17-nocv .view-squads .card{content-visibility:visible!important}
+@media print{ .v17-rd,.v17-cv,.view-school .card,.view-kits .card,.view-squads .card{content-visibility:visible!important} }
+
+/* matchday cards: an expanded card keeps the v16 look; a collapsed one is a single summary row */
+.v17-rounds{align-items:start}
+.v17-now{grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr))}
+.v17-rdh{gap:8px;flex-wrap:nowrap}
+.v17-rdt{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer;flex:none;padding:0}
+.v17-rdt svg{transition:transform .18s ease}
+button.v17-rdt:hover,.v17-rdsum:hover .v17-rdt{color:var(--text);border-color:var(--line);background:var(--surface2)}
+.v17-rd:not(.v17-rdc) .v17-rdt svg{transform:rotate(180deg)}
+.v17-rdsum{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:12px 14px 12px 18px;border-radius:inherit;cursor:pointer;color:inherit}
+.v17-rdsum:hover{background:color-mix(in srgb,var(--surface2) 55%,transparent)}
+.v17-rdsum:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.v17-rdsum h3{margin:0;white-space:nowrap;flex:none}
+.v17-rdme{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto;font-size:.88rem}
+.v17-rdme .mono{flex:none}
+.v17-rdopp{display:inline-flex;align-items:center;gap:6px;min-width:0;color:var(--muted)}
+.v17-rdopp .trunc{color:var(--text);font-weight:600}
+.v17-rdn{flex:none;white-space:nowrap}
+@media (max-width:520px){ .v17-rdsum{gap:8px;padding:10px 10px 10px 14px} .v17-rdn{display:none} }
+body.rm .v17-rdt svg{transition:none}
+@media (prefers-reduced-motion:reduce){ .v17-rdt svg{transition:none} }
+
+/* ===== v17 · 30_motion: layout-property transitions become compositor transforms, plus touch feel =====
+   Every rule here overrides an older rule that transitioned or animated width / height / all.
+   Bars driven by JS take a 0..1 fraction in --p on the fill element instead of a width.
+   Square-ended fills scale (transform-origin left); rounded fills translate inside a clipping track,
+   because scaleX would squash their rounded end cap. Both look identical to the old width at rest. */
+
+/* live possession bar (updateLive sets --p on #lv-ph). The away fill is the full-width base, the home fill
+   scales over it from the left, so the two never leave an anti-aliased seam. The home fill is opaque with a
+   15% #0b1015 veil, which is exactly what opacity .85 over the #0b1015 track used to produce. */
+.possbar i{position:absolute;top:0;left:0;width:100%;height:100%;transition:transform .8s ease}
+.possbar #lv-pa{opacity:.85}
+.possbar #lv-ph{z-index:1;opacity:1;transform-origin:0 50%;transform:scaleX(var(--p,0))}
+.possbar #lv-ph::after{content:"";position:absolute;inset:0;background:#0b1015;opacity:.15}
+.possbar span{z-index:2}
+
+/* sim-ahead overlay progress (A.simAhead sets --p once per animation frame) */
+.sv-bar i{width:100%;transform-origin:0 50%;transform:scaleX(var(--p,.04));transition:transform .15s}
+/* the single-round sim has no overlay; this invisible layer keeps taps out while it yields between fixtures */
+.v17-simshield{position:fixed;inset:0;z-index:120;cursor:progress;background:transparent}
+
+/* walkout progress (ui_announcer sets --p): rounded fill slides in from the left inside the rounded track */
+.walk-prog{overflow:hidden}
+.walk-prog i{width:100%;transform:translateX(calc((var(--p,0) - 1) * 100%));transition:transform .4s}
+
+/* PA microphone level bars: idle size unchanged (3x4 px pill); the live meter scales from the bottom
+   between the old 3 px and 14 px heights instead of animating height */
+.pa-mic i{transform-origin:50% 100%;transition:transform .15s}
+.pa-mic.live i{animation-name:v17-pabar}
+@keyframes v17-pabar{from{transform:scaleY(.75)}to{transform:scaleY(3.5)}}
+
+/* senior-night portrait dots: only opacity and the scale-up animate; the gold ring switches with the state */
+.sn-dot{transition:opacity .3s,transform .3s}
+
+/* static bars: their markup is built with a fixed inline width by innerHTML/outerHTML and never updated in
+   place (win bar, squad unit bars, scouting knowledge), so the old width transitions could never run */
+.wb-track i,.sq-unit .bar i,.pro-know i{transition:none}
+
+/* sliding tab indicator: a fixed 72 px bar moved with translateX and sized with scaleX (tabIndicators in
+   30_motion.js sets --ti-x and --ti-s); --ti-y only changes when the tab row wraps and is never animated */
+.tabs.tabs-ind::after{width:72px;transform-origin:0 0;transform:translateX(var(--ti-x,0px)) scaleX(var(--ti-s,0));transition:transform .32s cubic-bezier(.3,1.3,.5,1)}
+.tabs.ti-still::after{transition:none}
+body.rm .tabs.tabs-ind::after{transition:none}
+@media (prefers-reduced-motion:reduce){ .tabs.tabs-ind::after{transition:none} }
+
+/* awards night: .flip pointed at an undefined "flipin". Its only job is to carry the per-card delay that
+   .flip-in inherits (animation-delay:inherit) while the deck shows face down; the 300 ms first delay waits for
+   the modal to open with the backs visible. cvin is the existing to-only keyframes (opacity 1, scale 1) that
+   equals the card's resting state, so the reveal looks exactly as before and no name is undefined.
+   (fadein instead would hide each card until its turn, i.e. deal them in rather than turn a visible deck.) */
+.flip{animation-name:cvin}
+
+/* ---------- touch feel ---------- */
+/* no double-tap-zoom wait on anything tappable; zero specificity so drag surfaces keep touch-action:none */
+:where(button,[data-a],[role=button],[role=tab],a[href],summary,label){touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+/* press feedback lands in the first frame (release still eases back) */
+.btn:active{transition-duration:0s}
+#tabbar .tb:active{transition-duration:0s}
+/* every other tappable control dims while pressed (opacity only). Full-screen tap targets (modal scrim,
+   intro/walkout/senior-night overlays, full-time card, paused overlay) and drag surfaces are left alone,
+   since :active also matches every ancestor of the pressed element. Zero specificity: a control that sets its
+   own opacity keeps it */
+:where(button:not(:disabled),[role=button],[data-a]):where(:not(.btn,.scrim,.walk,.lvi,.snight,.ftc,.lv-paused,.bcard,.tok,.ceremony)):where(:active){opacity:.72}
+/* scrolling panels keep their overscroll to themselves (no scroll chaining / pull-to-refresh behind them) */
+.scrim,.modal,.mbody,.drawer,.drawer .mbody,.side,.tn-dd,.lv-panel,.lv-pbody,.htbox .mbody{overscroll-behavior:contain}
+
+/* ===== v17 · 40_live: live screen side panel =====
+   The panel body is sized by its flex/grid parents (flex:1 in a fixed-width column on desktop, a 34% row on
+   phones) and already clips and scrolls, so strict containment changes nothing visible. It makes the body a
+   layout and paint boundary: a new commentary line or a tab switch restyles and lays out only the panel body,
+   never the stage next to it, so the broadcast canvas is not resized or repainted by panel changes. */
+.lv-pbody{contain:strict}
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -4168,7 +4355,7 @@ function render(){
   const C=App.C; const us=Sx(C.userSid); C.flags=C.flags||{};
   if(App.route==='news'&&C.news[0]) C.flags.newsSeen=Math.max(...C.news.map(n=>parseInt(n.id.slice(1),36)||0));
   if(App.route==='dev') C.flags.evalYear=C.year;
-  const view=(VIEWS[App.route]||VIEWS.office)();
+  const vf=VIEWS[App.route]||VIEWS.office; const view=typeof v17View==='function'?v17View(vf):vf();
   const badges=navBadges(C);
   const sideHtml=`<nav class="side" aria-label="Main">
     <div class="brand"><div class="brand-logo">${logo(us,48)}</div><div class="brand-t"><b>TOUCHLINE</b><small>${esc(us.town)} ${esc(us.mascot)}</small></div></div>
@@ -4184,7 +4371,7 @@ function render(){
     ${App.simMenu?`<div class="menu" role="menu"><button role="menuitem" data-a="simAhead" data-k="round">Quick sim this round<span>Plays your match without watching</span></button>${['preseason','regular'].includes(C.phase)?`<button role="menuitem" data-a="simAhead" data-k="regular">Sim to end of regular season<span>Stops before Sectionals</span></button>`:''}<button role="menuitem" data-a="simAhead" data-k="season">Sim to end of season<span>Through the State final and awards</span></button></div>`:''}</div>
   </header>${trackerHtml(C)}`;
   const y=window.scrollY;
-  app.innerHTML = sideHtml + `<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
+  if(!(typeof v17Swap==='function'&&v17Swap(app,sideHtml,top,view))) app.innerHTML = sideHtml + `<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
   if(App.keepScroll) window.scrollTo(0,y); App.keepScroll=false;
   paintSaveState(); renderModal();
 }
@@ -4208,12 +4395,14 @@ async function renderStart(){
     el.innerHTML=`<div class="start-bg" aria-hidden="true"><canvas id="start-cv"></canvas><div class="start-shade"></div><div class="beam b1"></div><div class="beam b2"></div><div class="start-grain"></div></div><div class="start-live" aria-hidden="true"><i></i>LIVE · Showcase match</div><div class="start-snd">${typeof soundBtn==='function'?soundBtn(true):''}</div><div class="start-bug" id="start-bug" aria-hidden="true"></div><div class="start-ui"></div>`;
     if(!reducedMotion()) requestAnimationFrame(()=>{ try{ App.menuShow=startMenuShow($('#start-cv')); }catch(e){ console.warn(e); } }); }
   const metas=await DB.getMeta(); const by={}; for(const m of metas) by[m.slot]=m;
-  const parade=[...MASCOT_LIST,...MASCOT_LIST].map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length]; return `<span>${mascotSVG(k,cp[0],cp[1],58)}</span>`; }).join('');
+  /* v17: the parade is one cached canvas strip (src/v17/10_start.js); the inline-SVG version is only the fallback */
+  const parade=typeof v17ParadeHTML==='function'?v17ParadeHTML():`<div class="parade" aria-hidden="true"><div class="parade-in">${[...MASCOT_LIST,...MASCOT_LIST].map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length]; return `<span>${mascotSVG(k,cp[0],cp[1],58)}</span>`; }).join('')}</div></div>`;
   const word='TOUCHLINE'.split('').map((c,i)=>`<span style="--i:${i}">${c}</span>`).join('');
+  const logoWord=typeof v17LogoWord==='function'?v17LogoWord(word):`<span class="logo-word" aria-label="Touchline">${word}</span>`;
   const phaseName=ph=>({preseason:'Preseason',regular:'League play',sectionals:'Sectionals',regional:'Regional',states:'State tourney',awards:'Awards',offseason:'Offseason'}[ph]||ph);
   const ui=el.querySelector('.start-ui');
   ui.innerHTML=`
-   <div class="logo ${fresh?'intro':''} ${metas.length?'compact':''}"><span class="logo-kicker"><i></i>Friday Night Varsity<i></i></span><span class="logo-word" aria-label="Touchline">${word}</span><small>High School Soccer Manager</small></div>
+   <div class="logo ${fresh?'intro':''} ${metas.length?'compact':''}"><span class="logo-kicker"><i></i>Friday Night Varsity<i></i></span>${logoWord}<small>High School Soccer Manager</small></div>
    <p class="start-pitch">Take over a program. Develop raw freshmen into Varsity stars. Chase the sectional plaque, the regional cup and the state crown, one season at a time.</p>
    ${continueHero(metas)}
    <div class="slots">${[1,2,3].map(n=>{ const m=by[n]; return m?`<div class="slot filled" style="--c1:${m.c1};--c2:${m.c2};--d:${n}">
@@ -4228,7 +4417,7 @@ async function renderStart(){
    <div class="start-feats">${[`${MASCOT_LIST.length} original mascots`,'Live broadcast matches','Modified → JV → Varsity','Road to State'].map(t=>`<span>${t}</span>`).join('<i></i>')}</div>
    <div class="row start-links"><button class="btn ghost sm" data-a="howTo">How to play</button><button class="btn ghost sm whatsnew" data-a="whatsNew"><i></i>What's new</button><button class="btn ghost sm" data-a="importOpen">Import a backup</button><button class="btn ghost sm" data-a="openTheme">Appearance</button></div>
    <div class="start-ticker" aria-hidden="true"><div class="st-in">${startTicker()}</div></div>
-   <div class="parade" aria-hidden="true"><div class="parade-in">${parade}</div></div>`;
+   ${parade}`;
 }
 MODALS.newCareer = m => {
   if(m.step!==2) return modalShell('<h2>New career · 1 of 2</h2>', `
@@ -6455,17 +6644,21 @@ function updateLive(scoreOnly){
   const sc=$('#lv-score'); if(sc){ const sp=sc.children; if(sp.length===3){ if(sp[0].textContent!=String(V.sc[0])) sp[0].textContent=V.sc[0]; if(sp[2].textContent!=String(V.sc[1])) sp[2].textContent=V.sc[1]; } }
   const cl=$('#lv-clock'); if(cl) cl.textContent = V.phase==='so'?`PENS ${(V.so||[0,0])[0]}–${(V.so||[0,0])[1]}`: V.phase==='ft'?'FULL TIME' : V.phase==='ht'?'HALF TIME' : V.min===0?'KICKOFF': (V.min>80?`ET ${V.min}'`:`${V.min}'`);
   if(scoreOnly) return;
-  const ph=(V.st[0].pos+2)/(V.st[0].pos+V.st[1].pos+4)*100; const a=$('#lv-ph'), b=$('#lv-pa'), t=$('#lv-pt'); if(a){ a.style.width=ph+'%'; b.style.width=(100-ph)+'%'; t.textContent=`${R(ph)}% possession ${R(100-ph)}%`; }
+  /* v17: the home fill scales over the away fill (transform, see 30_motion.css); nothing is rewritten when unchanged */
+  const ph=(V.st[0].pos+2)/(V.st[0].pos+V.st[1].pos+4)*100; const a=$('#lv-ph'), t=$('#lv-pt'); if(a){ const p=(ph/100).toFixed(4); if(a.style.getPropertyValue('--p')!==p) a.style.setProperty('--p',p); const tx=`${R(ph)}% possession ${R(100-ph)}%`; if(t&&t.textContent!==tx) t.textContent=tx; }
   const ctrl=$('#lv-ctrl'); if(!ctrl) return;
-  if(L.done){ ctrl.innerHTML=`<button class="btn" data-a="liveReport">Match report</button><button class="btn pri play" data-a="liveContinue" id="lv-cont">Continue</button>`; return; }
-  if(M.phase==='ht'){ ctrl.innerHTML='<span class="small muted">Half time: pick a talk, then proceed.</span>'; return; }
+  /* v17: the control bar is only rebuilt when its markup changes (it used to be rebuilt every minute, which
+     restyled the bar and dropped a tap that landed between pointerdown and click) */
+  const set=h=>{ if(ctrl.v17h===h&&ctrl.firstChild) return; ctrl.v17h=h; ctrl.innerHTML=h; };
+  if(L.done){ set(`<button class="btn" data-a="liveReport">Match report</button><button class="btn pri play" data-a="liveContinue" id="lv-cont">Continue</button>`); return; }
+  if(M.phase==='ht'){ set('<span class="small muted">Half time: pick a talk, then proceed.</span>'); return; }
   const view=PREFS.view||'broadcast';
-  ctrl.innerHTML=`<button class="btn ico" data-a="livePause" aria-label="${L.paused?'Resume':'Pause'}" title="${L.paused?'Resume':'Pause'} (Space)">${L.paused?'▶':'❚❚'}</button>
+  set(`<button class="btn ico" data-a="livePause" aria-label="${L.paused?'Resume':'Pause'}" title="${L.paused?'Resume':'Pause'} (Space)">${L.paused?'▶':'❚❚'}</button>
    <div class="seg" role="group" aria-label="Speed">${[1,2,4,8].map(s=>`<button class="${L.speed===s?'on':''}" data-a="liveSpeed" data-v="${s}" aria-pressed="${L.speed===s}">${s}×</button>`).join('')}</div>
    <div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['tactical','Tactical']].map(([k,l])=>`<button class="${view===k?'on':''}" data-a="liveView" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>
    <button class="btn sm" data-a="liveTactics">Tactics</button>${typeof soundBtn==='function'?soundBtn():''}
    ${!M.htDone&&M.htOn?'<button class="btn sm ghost" data-a="liveSkip" data-to="ht">Skip to half</button>':''}<button class="btn sm ghost" data-a="liveSkip" data-to="ft">Skip to end</button>
-   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · M sound</span>`;
+   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · M sound</span>`);
 }
 const waitMs=ms=>new Promise(r=>setTimeout(r,ms));
 /* animate one resolved minute; every visible event is announced by the stage itself */
@@ -7832,7 +8025,7 @@ liveWalkout=function(done){
     <div class="pa-call" id="pa-call" aria-live="polite"></div>
     ${T.xi.map(({s,p},i)=>`<div class="wk-tok" id="wk${i}" style="left:${X(s)}%;top:${Y(s)}%;--sc:${(0.8+(1-s.y/100)*0.35).toFixed(2)}"><span class="wk-face">${portraitSVG(p,64)}</span><b><i>${p.num}</i> ${esc(p.ln)}${p.id===T.cap?' <em>C</em>':''}</b><small>${s.role}</small></div>`).join('')}
     <small class="walk-skip">Tap to skip</small>`; };
-  const prog=(T,i)=>{ const pr=W.querySelector('#wk-prog'); if(pr) pr.style.width=((i+1)/T.xi.length*100)+'%'; const n=W.querySelector('#wk-n'); if(n) n.textContent=`${i+1} of ${T.xi.length} announced`; };
+  const prog=(T,i)=>{ const pr=W.querySelector('#wk-prog'); if(pr) pr.style.setProperty('--p',((i+1)/T.xi.length).toFixed(4)); const n=W.querySelector('#wk-n'); if(n) n.textContent=`${i+1} of ${T.xi.length} announced`; };
   const card=(T,i)=>{ const {s,p}=T.xi[i]; const now=W.querySelector('#wk-now'); if(now) now.innerHTML=`<div class="wk-card"><span class="wk-big">${portraitSVG(p,84)}</span><div><b>${esc(pname(p))}</b><small>#${p.num} · ${esc(gradeTag(p))} · ${s.role}${p.id===T.cap?' · Captain':''}</small></div></div>`; };
   const flash=()=>{ const fl=W.querySelector('.walk-flash'); if(fl){ fl.classList.remove('go'); void fl.offsetWidth; fl.classList.add('go'); } };
   if(rm){ stageFor(mine,true); let i=0; const step=()=>{ if(!alive()) return; if(i<mine.xi.length){ W.querySelector('#wk'+i)?.classList.add('in'); i++; L.walkT=setTimeout(step,120); } else L.walkT=setTimeout(go,900); }; L.walkT=setTimeout(step,300); return; }
@@ -8552,6 +8745,497 @@ A.simAhead=async el=>{ const kind=el.dataset.k; App.simMenu=false; const C=App.C
   App.odds.clear(); queueSave(); saveNow(); App.keepScroll=true;
   App.modal={type:'simSummary',n,w,d,l,from:t0,kind,titles:titles.map(t=>t[0])}; render();
   if(titles.length){ const [tt,fid,yr]=titles[titles.length-1]; showTrophy(tt,Sx(u),yr,{chips:titleChips(C,fid)}); } };
+
+/* ===================== v17 Phase 0: renderer preference ('auto' | '3d' | '2d') =====================
+   PREFS.renderer is the user's choice of match graphics. Nothing draws differently yet: every caller asks
+   rendererFor(kind) and gets '2d' until the 3-D renderer ships (ANIMATION_PLAN Phase 3), when 'auto' starts returning
+   '3d' for the kinds that support it on capable devices. kind is 'live' | 'lab' | 'tv' | 'photo' | 'menu' | 'preview'. */
+const V17_RENDERERS=['auto','3d','2d'];
+/* the choices shown in Settings > Appearance; Phase 3 adds ['3d','3D broadcast'] here when it ships */
+const V17_RENDERER_OPTIONS=[['auto','Auto (recommended)'],['2d','Classic 2D']];
+DEFAULT_PREFS.renderer='auto';
+if(!V17_RENDERERS.includes(PREFS.renderer)) PREFS.renderer='auto';
+function rendererFor(kind){ return '2d'; }
+
+/* Settings > Appearance: one select, wired through the input controller (data-c -> CH.renderer on change) */
+CH.renderer=el=>{ PREFS.renderer=V17_RENDERERS.includes(el.value)?el.value:'auto'; savePrefs(); };
+function v17RendererField(){ const cur=PREFS.renderer||'auto'; const list=V17_RENDERER_OPTIONS.some(o=>o[0]===cur)?V17_RENDERER_OPTIONS:[...V17_RENDERER_OPTIONS,[cur,cur==='3d'?'3D broadcast':cur]];
+  return `<div class="field v17-rend"><label class="lab" for="set-renderer">Match graphics</label><select id="set-renderer" data-c="renderer">${list.map(([v,l])=>`<option value="${v}" ${v===cur?'selected':''}>${esc(l)}</option>`).join('')}</select><span class="tiny muted">How live matches, highlights and previews are drawn. Auto picks the best renderer this device can run smoothly.</span></div>`; }
+const v17_settingsView=VIEWS.settings;
+VIEWS.settings=function(){ const h=v17_settingsView.apply(this,arguments); const k='data-k="rm"'; const i=h.indexOf(k); const j=i<0?-1:h.indexOf('</label>',i);
+  if(j>=0) return h.slice(0,j+8)+v17RendererField()+h.slice(j+8);
+  const c=h.indexOf('<div class="card"><h3>Sound</h3>'); return c>=0?h.slice(0,c)+`<div class="card"><h3>Match graphics</h3>${v17RendererField()}</div>`+h.slice(c):h; };
+
+/* ===================== v17 Phase 0: Stage housekeeping (both renderers need it) =====================
+   - render scale (Stage.rs) now recovers when frames are fast again, with hysteresis;
+   - a paused stage draws at most ~2 frames a second, but at once on resize, view-mode change, pause/resume and
+     stage.requestDraw();
+   - a stage stops drawing while its canvas is off-screen / display:none or the tab is hidden (it keeps stepping, so the
+     match flow never stalls) and draws again the moment it is visible;
+   - the start-screen demo (opts.demo) draws at most 30 fps and stops stepping and drawing while a modal, a drawer or
+     the new-career form covers it, or once the start screen is gone;
+   - the single-canvas preview loops (Fireworks, figurePreview, celebPreview, the kit lab's klFigLoop) stop their
+     requestAnimationFrame loops while their canvas is removed, hidden or off-screen, and Fireworks stops when its run
+     is over; each resumes when its canvas is visible again.
+   Simulation stepping is untouched: same fixed 120 Hz step, same sub-step cap, presentation only. */
+
+const v17RAF=window.requestAnimationFrame.bind(window);
+
+/* ---------- canvas visibility: one shared IntersectionObserver. A canvas counts as visible until the observer has
+   reported otherwise, so a new canvas always gets its first frame. ---------- */
+const v17Vis=(()=>{ const seen=new WeakMap(); let io=null;
+  const obs=()=>{ if(!io&&typeof IntersectionObserver!=='undefined') io=new IntersectionObserver(es=>{ let wake=false; for(const e of es){ if(!seen.has(e.target)) continue; const was=seen.get(e.target); seen.set(e.target,e.isIntersecting); if(e.isIntersecting&&was===false) wake=true; } if(wake) v17Sweep(); },{rootMargin:'64px'}); return io; };
+  return {
+    watch(el){ if(!el||seen.has(el)) return; seen.set(el,undefined); const o=obs(); if(o) o.observe(el); },
+    unwatch(el){ if(!el||!seen.has(el)) return; seen.delete(el); if(io) io.unobserve(el); },
+    on(el){ return !document.hidden&&!!el&&el.isConnected&&seen.get(el)!==false; } };
+})();
+
+/* ---------- parked loops: a loop with nothing to draw parks a check function here instead of spinning
+   requestAnimationFrame. Checks run on every wake-up event (canvas scrolled into view, tab shown, modal closed) and
+   on a slow 400 ms poll; a check returns false to stay parked, anything else removes it. ---------- */
+const v17Parked=new Set(); let v17ParkT=0;
+function v17Park(fn){ v17Parked.add(fn); if(!v17ParkT) v17ParkT=setTimeout(v17Sweep,400); }
+function v17Sweep(){ if(v17ParkT){ clearTimeout(v17ParkT); v17ParkT=0; }
+  for(const fn of [...v17Parked]){ let done=true; try{ done=fn()!==false; }catch(e){ console.warn(e); } if(done) v17Parked.delete(fn); }
+  if(v17Parked.size) v17ParkT=setTimeout(v17Sweep,400); }
+
+/* ---------- gated requestAnimationFrame for single-canvas loops whose frame callback is a private closure
+   (figurePreview, celebPreview): v17WithRaf(v17Gate(cv), fn) runs fn with requestAnimationFrame routed through the
+   gate, and so does every frame the loop schedules afterwards. While cv is hidden the next frame is parked; once cv
+   leaves the DOM the loop is dropped. ---------- */
+function v17WithRaf(req,fn,cv){ const prev=window.requestAnimationFrame; window.requestAnimationFrame=req;
+  try{ return fn(); } finally{ window.requestAnimationFrame=prev; if(cv&&!cv.isConnected) v17Vis.unwatch(cv); } }
+function v17Gate(cv){ v17Vis.watch(cv);
+  const frame=cb=>ts=>v17WithRaf(req,()=>cb(ts),cv);
+  const req=cb=>{ if(!cv.isConnected){ v17Vis.unwatch(cv); return 0; }
+    if(v17Vis.on(cv)) return v17RAF(frame(cb));
+    v17Park(()=>{ if(!cv.isConnected){ v17Vis.unwatch(cv); return true; } if(!v17Vis.on(cv)) return false; v17RAF(frame(cb)); return true; }); return 0; };
+  return req; }
+
+/* ===================== Stage ===================== */
+const V17_STAGES=new Set();
+function v17StageInit(st){
+  /* an invisible render target (the Courier photo stage lives in a visibility:hidden box at left:-3000px) always draws */
+  let target=false; try{ target=getComputedStyle(st.cv).visibility==='hidden'; }catch(e){}
+  const V=st._v17={dirty:true,mode:st.mode,paused:st.paused,always:target,parked:false,drawn:false,fast:null,up:-1e9,down:-1e9,noUp:false,wake:null};
+  if(!target) v17Vis.watch(st.cv); V17_STAGES.add(st); return V; }
+/* the start-screen demo pauses whenever anything covers the start screen or it is no longer the current screen */
+function v17DemoHeld(st){ if(App.C||App.modal||App.drawer) return true; const s=document.getElementById('start'); if(!s||!s.contains(st.cv)) return true;
+  const m=document.getElementById('modal-root'); return !!(m&&m.firstElementChild); }
+function v17StageWake(st){ if(!st.alive) return true; if(!st.cv.isConnected){ st.destroy(); return true; } if(st.demo&&v17DemoHeld(st)) return false;
+  const V=st._v17; V.parked=false; V.dirty=true; st._ld=0; st.lastReal=Math.max(st.lastReal,performance.now()-st.t0-1000/60); st.raf=requestAnimationFrame(st.loop); return true; }
+/* camera-preserving resize after a render-scale change (same as the v15 drop) */
+function v17Rescale(st){ st._fn=0; st._fe=null; const cw=st.cam.w, cx=st.cam.x, tw=st.cam.tw; st.resize(); st.cam.w=cw; st.cam.tw=tw; st.cam.x=cx; }
+/* adaptive render scale. fi = interval since the previous cadence draw (ms). Thresholds are relative to the nominal
+   interval (60 fps, or 30 fps for the demo): slower than nominal+13.3 ms over 90 draws drops rs by 0.12 (floor 0.7), as
+   in v15; faster than nominal+3.3 ms for 3 s raises it by 0.12 (cap 1). Never raise within 5 s of a drop; a drop within
+   10 s of a raise ends raising for the rest of this stage's life. */
+function v17RenderScale(st,ts,fi){ const V=st._v17; const nom=st.demo?1000/30:1000/60; const rs=st.rs||1;
+  st._fe=st._fe==null?fi:st._fe*0.94+fi*0.06; st._fn=(st._fn||0)+1;
+  if(st._fn>90&&st._fe>nom+13.3&&rs>0.72){ st.rs=Math.max(0.7,rs-0.12); if(ts-V.up<10000) V.noUp=true; V.down=ts; V.fast=null; v17Rescale(st); return; }
+  if(st._fe<nom+3.3){ if(V.fast==null) V.fast=ts; } else V.fast=null;
+  if(rs<1&&!V.noUp&&V.fast!=null&&st._fn>30&&ts-V.fast>=3000&&ts-V.down>=5000){ st.rs=Math.min(1,Math.round((rs+0.12)*100)/100); if(st.rs>0.97) st.rs=1; V.up=ts; V.fast=null; v17Rescale(st); } }
+
+Stage.prototype.loop=function(ts){ if(!this.alive) return; if(!this.cv.isConnected){ this.destroy(); return; }
+  const V=this._v17||v17StageInit(this);
+  const real=ts-this.t0; const step=Math.min(50,Math.max(0,real-this.lastReal)); this.lastReal=real;
+  const H=1000/120; let alpha=1; const hold=this.demo&&v17DemoHeld(this);
+  if(this.paused||hold){ this.acc=0; }
+  else { this.acc=(this.acc||0)+step; let n=0; while(this.acc>=H&&n<8){ this.keepPrev(); this.now+=H; this.update(H/1000); this.acc-=H; n++; } if(n===8) this.acc=0; alpha=this.acc/H; }
+  if(this.mode!==V.mode||this.paused!==V.paused){ V.mode=this.mode; V.paused=this.paused; V.dirty=true; }
+  if(this.paused||hold) V.fast=null; /* pause, hold or hidden time never counts toward a render-scale raise */
+  if(hold&&V.drawn){ this._ld=0; V.parked=true; v17Park(V.wake||(V.wake=()=>v17StageWake(this))); return; } /* a held demo still paints its first frame */
+  if(V.always||v17Vis.on(this.cv)){
+    /* cadence: ~60 fps live, 30 fps for the demo, ~2 fps while paused; a dirty stage draws on this frame */
+    const since=ts-(this._ld||0); const gap=this.paused?480:this.demo?31.5:15.5;
+    if(V.dirty||since>=gap||since<0){ if(this._ld&&!V.dirty&&!this.paused) v17RenderScale(this,ts,Math.min(100,since)); V.dirty=false; this._ld=ts; V.drawn=true; this.drawLerp(alpha); }
+  } else { this._ld=0; V.fast=null; }
+  this.raf=requestAnimationFrame(this.loop); };
+
+const v17_stageResize=Stage.prototype.resize;
+Stage.prototype.resize=function(){ const r=v17_stageResize.apply(this,arguments); const V=this._v17;
+  if(V){ V.dirty=true; /* resizing clears the canvas: a paused stage repaints now instead of on its next 2 fps tick */
+    if((this.paused||(this.demo&&V.parked))&&this.alive&&(V.always||v17Vis.on(this.cv))){ V.dirty=false; this.drawLerp(1); } }
+  return r; };
+const v17_stageDestroy=Stage.prototype.destroy;
+Stage.prototype.destroy=function(){ V17_STAGES.delete(this); const V=this._v17; if(V&&V.wake) v17Parked.delete(V.wake); if(this.cv) v17Vis.unwatch(this.cv); return v17_stageDestroy.apply(this,arguments); };
+/* ask for a frame now (for anything that changes what a paused or idle stage shows) */
+Stage.prototype.requestDraw=function(){ const V=this._v17; if(this.alive&&V) V.dirty=true; };
+
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; for(const st of V17_STAGES){ st._ld=0; if(st._v17) st._v17.dirty=true; } v17Sweep(); });
+/* modals and drawers open and close through renderModal: re-check the parked start-screen demo at once */
+const v17_renderModal=renderModal; renderModal=function(){ const r=v17_renderModal.apply(this,arguments); if(v17Parked.size) v17Sweep(); return r; };
+
+/* ===================== preview loops ===================== */
+const v17_figurePreview=figurePreview;
+figurePreview=function(cv){ if(!cv||cv._fp) return v17_figurePreview.apply(this,arguments); const a=arguments; return v17WithRaf(v17Gate(cv),()=>v17_figurePreview.apply(this,a),cv); };
+const v17_celebPreview=celebPreview;
+celebPreview=function(cv){ if(!cv||cv._run) return v17_celebPreview.apply(this,arguments); const a=arguments; return v17WithRaf(v17Gate(cv),()=>v17_celebPreview.apply(this,a),cv); };
+
+/* kit lab: one loop draws every [data-klfig]/[data-klclash] canvas; it parks while none of them is visible */
+const v17_klFigLoop=klFigLoop; const v17KlCv=new Set();
+const v17KlSel='[data-klfig],[data-klclash]';
+const v17KlWake=()=>{ if(App.route!=='kits'){ for(const cv of v17KlCv) v17Vis.unwatch(cv); v17KlCv.clear(); return true; } if(App._klRun) return true; const cvs=[...document.querySelectorAll(v17KlSel)]; if(!cvs.length) return true;
+  if(!cvs.some(cv=>v17Vis.on(cv))) return false; App._klRun=true; v17RAF(klFigLoop); return true; };
+klFigLoop=function(){ if(App.route!=='kits'){ App._klRun=false; for(const cv of v17KlCv) v17Vis.unwatch(cv); v17KlCv.clear(); return; }
+  for(const cv of v17KlCv) if(!cv.isConnected){ v17Vis.unwatch(cv); v17KlCv.delete(cv); }
+  const cvs=[...document.querySelectorAll(v17KlSel)]; for(const cv of cvs) if(!v17KlCv.has(cv)){ v17KlCv.add(cv); v17Vis.watch(cv); }
+  if(!cvs.some(cv=>v17Vis.on(cv))){ App._klRun=false; if(cvs.length) v17Park(v17KlWake); return; }
+  return v17_klFigLoop.apply(this,arguments); };
+
+/* trophy-ceremony fireworks: stop when the run is over (Celebrate again restarts it) or while the canvas is hidden */
+/* parked check for an idle fireworks canvas: stop() once it leaves the DOM; resume a hidden (not finished) run when visible */
+function v17FwWake(fw,V){ return ()=>{ if(!fw.alive||!fw.cv.isConnected){ fw.stop(); return true; } if(!V.idle) return true; if(V.done||!v17Vis.on(fw.cv)) return false; V.idle=false; fw.last=performance.now(); v17RAF(fw.loop); return true; }; }
+const v17_fwLoop=Fireworks.prototype.loop, v17_fwRestart=Fireworks.prototype.restart, v17_fwStop=Fireworks.prototype.stop;
+Fireworks.prototype.loop=function(now){ if(!this.alive||!this.cv.isConnected){ this.stop(); return; }
+  const V=this._v17||(this._v17={idle:false,wake:null}); v17Vis.watch(this.cv);
+  if(this.t>this.dur+4&&!this.rk.length&&!this.p.length&&!this.conf.length){ this.g.clearRect(0,0,this.W,this.H); V.idle=true; V.done=true; v17Park(V.wake||(V.wake=v17FwWake(this,V))); return; }
+  if(!v17Vis.on(this.cv)){ V.idle=true; v17Park(V.wake||(V.wake=v17FwWake(this,V))); return; }
+  return v17_fwLoop.call(this,now); };
+Fireworks.prototype.restart=function(){ v17_fwRestart.apply(this,arguments); const V=this._v17; if(V&&V.idle&&this.alive&&this.cv.isConnected){ V.idle=false; V.done=false; this.last=performance.now(); v17RAF(this.loop); } };
+Fireworks.prototype.stop=function(){ v17_fwStop.apply(this,arguments); const V=this._v17; if(V&&V.wake) v17Parked.delete(V.wake); v17Vis.unwatch(this.cv); };
+
+/* ===================== v17 START SCREEN: compositor-only menu backdrop (ANIMATION_PLAN Phase 1 step 1) =====================
+   The mascot parade used to be 72 inline SVGs (two copies of the 36 mascots), each with its own SVG filter plus a CSS
+   drop-shadow. It is now drawn ONCE per session into a single wide canvas strip (36 cells of 86 x 80 CSS px at the device
+   pixel ratio, the drop shadow baked in with canvas shadowBlur). The strip is cut into 6 tiles of 6 mascots, each encoded
+   to a PNG data URL (small synchronous encodes, one per frame slice: toBlob's idle-time PNG encoder took > 1 s next to the
+   demo match), and shown as the background of 72 plain cells inside .parade-in. The track moves by one transform animation
+   (translateX -50% = one strip, so the loop is seamless) and each cell keeps the old hover lift. Nothing is shown until the
+   strip is ready (the cells reserve their space, so there is no layout jump); it is remade only when devicePixelRatio
+   changes. The beams, logo and the rest of the start-screen motion are CSS only (10_start.css).
+   Do not touch Stage/startMenuShow here (the demo canvas belongs to the stage housekeeping work). */
+const V17_PARADE={cell:86, size:58, h:80, x0:14, per:6, shY:6, shBlur:10, shC:'rgba(0,0,0,.6)'};
+let v17ParadeStrip={dpr:0, tiles:null, job:null};
+function v17ParadeDpr(){ return Math.min(3, Math.max(1, window.devicePixelRatio||1)); }
+/* markup for renderStart (ui_views.js): 2 x 36 empty cells; data-t is the tile, --c the column inside it */
+function v17ParadeHTML(){ const n=MASCOT_LIST.length, per=V17_PARADE.per; let cells='';
+  for(let i=0;i<2*n;i++){ const k=i%n; cells+=`<i data-t="${Math.floor(k/per)}" style="--c:${k%per}"></i>`; }
+  return `<div class="parade v17-parade${v17ParadeStrip.tiles?' v17-ready':''}" aria-hidden="true"><div class="parade-in">${cells}</div></div>`; }
+/* the wordmark plus an aria-hidden copy laid exactly over it that carries the periodic glint (opacity only, outside the
+   word's drop-shadow filter, so the glint never makes the compositor re-filter the logo) */
+function v17LogoWord(word){ return `<span class="v17-lw"><span class="logo-word" aria-label="Touchline">${word}</span><span class="logo-word v17-glint" aria-hidden="true">${word}</span></span>`; }
+const v17Frame=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
+function v17SvgImage(svg){ return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }); }
+function v17ParadeApply(){ const T=v17ParadeStrip.tiles; if(!T) return; let st=document.getElementById('v17-pstrip');
+  if(!st){ st=document.createElement('style'); st.id='v17-pstrip'; (document.head||document.documentElement).appendChild(st); }
+  st.textContent=T.map((t,i)=>`.v17-parade .parade-in i[data-t="${i}"]{background-image:url("${t.url}");background-size:${t.cols*V17_PARADE.cell}px ${V17_PARADE.h}px}`).join('\n');
+  document.querySelectorAll('.v17-parade').forEach(p=>p.classList.add('v17-ready')); }
+/* draws the strip, then encodes it tile by tile, in slices of <= ~6 ms per frame; abandons the job if the start screen
+   goes away (it starts again on the next start-screen render) */
+function v17ParadeBuild(){ const dpr=v17ParadeDpr();
+  if(v17ParadeStrip.tiles&&v17ParadeStrip.dpr===dpr){ v17ParadeApply(); return Promise.resolve(true); }
+  if(v17ParadeStrip.job&&v17ParadeStrip.job.dpr===dpr) return v17ParadeStrip.job.p;
+  const job={dpr}; v17ParadeStrip.job=job;
+  const live=()=>v17ParadeStrip.job===job&&!!document.getElementById('start');
+  job.p=(async()=>{ try{
+    const P=V17_PARADE, list=MASCOT_LIST, n=list.length, px=Math.round(P.size*dpr), ch=Math.round(P.h*dpr);
+    const cv=document.createElement('canvas'); cv.width=Math.round(n*P.cell*dpr); cv.height=ch;
+    const g=cv.getContext('2d'); if(!g) return false;
+    /* canvas shadowBlur B is a Gaussian of sigma B/2, the same as a CSS drop-shadow blur radius B; neither scales with the
+       transform, so both are given in device pixels */
+    g.shadowColor=P.shC; g.shadowOffsetX=0; g.shadowOffsetY=P.shY*dpr; g.shadowBlur=P.shBlur*dpr;
+    const imgs=list.map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length];
+      const svg=mascotSVG(k,cp[0],cp[1],P.size).replace('<svg','<svg xmlns="http://www.w3.org/2000/svg"').replace(`width="${P.size}" height="${P.size}"`,`width="${px}" height="${px}"`);
+      return v17SvgImage(svg); });
+    await v17Frame(); let t0=performance.now();
+    const slice=async()=>{ if(performance.now()-t0>6){ await v17Frame(); t0=performance.now(); } return live(); };
+    for(let i=0;i<n;i++){ if(!live()) return false;
+      const im=await imgs[i]; if(!live()) return false;
+      if(im) g.drawImage(im, Math.round((i*P.cell+P.x0)*dpr), 0, px, px);
+      if(!await slice()) return false; }
+    const tiles=[];
+    for(let t=0;t*P.per<n;t++){ const cols=Math.min(P.per,n-t*P.per), sx=Math.round(t*P.per*P.cell*dpr), sw=Math.round((t*P.per+cols)*P.cell*dpr)-sx;
+      const tc=document.createElement('canvas'); tc.width=sw; tc.height=ch; tc.getContext('2d').drawImage(cv,sx,0,sw,ch,0,0,sw,ch);
+      let url=''; try{ url=tc.toDataURL('image/png'); }catch(e){} if(!url||url.length<32) return false;
+      tiles.push({url,cols}); if(!await slice()) return false; }
+    await Promise.all(tiles.map(t=>{ try{ const im=new Image(); im.src=t.url; return im.decode?im.decode().catch(()=>{}):null; }catch(e){ return null; } }));
+    if(v17ParadeStrip.job!==job) return false;
+    v17ParadeStrip={dpr, tiles, job:null}; v17ParadeApply(); return true;
+  }catch(e){ console.warn('v17 parade', e); return false; }
+  finally{ if(v17ParadeStrip.job===job) v17ParadeStrip.job=null; } })();
+  return job.p; }
+/* the career cards and the continue hero carry full-size mascots (each an inline SVG with its own filter). They are swapped
+   for <img> copies of the same SVG, rasterised once by the image decoder, so the start screen holds no live SVG filter at
+   all. They are still invisible at that point (the cards and the hero fade in after 1.1 s), so the async image load never shows. */
+function v17MascotsToImg(root){ if(!root||typeof XMLSerializer==='undefined') return; const xs=new XMLSerializer();
+  root.querySelectorAll('.slot-wm>svg.mascot,.slot-logo>svg.mascot,.ch-logo>svg.mascot').forEach(svg=>{ try{
+    const im=document.createElement('img'); im.className='mascot v17-mimg'; im.alt=''; im.decoding='async';
+    im.width=+svg.getAttribute('width')||64; im.height=+svg.getAttribute('height')||64;
+    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent((typeof v17Standalone==='function'?v17Standalone:String)(xs.serializeToString(svg))); svg.replaceWith(im); }catch(e){} }); }
+/* after every start-screen render: swap the card mascots, then make (or reuse) the parade strip */
+const _v17RenderStart=renderStart;
+renderStart=async function(){ const r=await _v17RenderStart.apply(this,arguments);
+  try{ const ui=document.querySelector('#start .start-ui'); v17MascotsToImg(ui); if(document.querySelector('.v17-parade')) v17ParadeBuild(); }catch(e){ console.warn(e); } return r; };
+/* devicePixelRatio changes (browser zoom, moving the window to another screen): rebuild while the old strip stays up */
+let v17ParadeRz=0;
+window.addEventListener('resize',()=>{ clearTimeout(v17ParadeRz); v17ParadeRz=setTimeout(()=>{ if(document.querySelector('.v17-parade')&&v17ParadeStrip.dpr!==v17ParadeDpr()) v17ParadeBuild(); },250); });
+
+/* ===================== v17 MENU RENDERING (ANIMATION_PLAN Phase 1, steps 2 and 3) =====================
+   The cost of render() is the browser parsing, styling and laying out the markup (measured with CDP: ParseHTML +
+   UpdateLayoutTree + Layout are ~85% of it; building the strings is 1-3 ms). So the work here is "less markup":
+   1. Mascot marks, crests and portraits are cached as strings. Per-instance SVG ids are re-minted on every call, so a
+      cached string never yields duplicate ids. Inside the career shell, full-size marks point at ONE shared
+      outline/gloss filter per palette kept in a hidden sprite (#v17-sprite) instead of carrying 22 filter nodes each,
+      and view content uses the lite mark (no filter) under 60 px; mascot pickers keep the gloss.
+      Outside render() (start screen, share images, test sheets) the markup is byte-identical to v16: self-contained.
+   2. render() fast path: when the route and the shell markup (side nav + top bar + page head) are unchanged, only the
+      #content element is replaced; the v14/v15 decorations on the shell stay as they are.
+   3. Schedule: the focus matchday and the next two are expanded; every other matchday is one summary row that expands
+      in place. Long cards (rounds, postseason, school history, kit lab gallery) use content-visibility:auto.
+   4. The kit lab memoises kitMatchup() while its view is being built (it was called ~47 times per render). */
+
+/* ---------- 1. mark, crest and portrait caches ---------- */
+let v17MarkCtx=0;   /* 0: standalone markup (v16 behaviour). 1: career shell, modals, views (sprite filters). 2: table/list views (sprite filters, lite under v17LiteMax px) */
+let v17Gloss=0;     /* >0 while a mascot picker is built: its 52 px tiles keep the outline and gloss */
+let v17LiteMax=60; /* in view content, marks below this size use the lite path */
+const V17_NS='http://www.w3.org/2000/svg', V17_ID='\u0001';
+const v17Cache={mark:new Map(),crest:new Map(),port:new Map()};
+const v17Stat={fast:0,route:0,full:0};
+let v17PtN=0;
+function v17Put(m,k,v){ if(m.size>4000) m.clear(); m.set(k,v); return v; }
+function v17Sprite(){ let el=v17Sprite.el;
+  if(!el){ el=v17Sprite.el=document.createElementNS(V17_NS,'svg'); el.setAttribute('id','v17-sprite'); el.setAttribute('aria-hidden','true'); el.setAttribute('focusable','false'); el.setAttribute('width','0'); el.setAttribute('height','0');
+    el.setAttribute('style','position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;pointer-events:none'); el.appendChild(document.createElementNS(V17_NS,'defs')); v17Sprite.ids=new Map(); }
+  if(!el.isConnected&&document.body) document.body.appendChild(el);
+  return el; }
+/* id of the shared outline/gloss filter for a palette (created once in the sprite) */
+function v17Filter(c1,c2){ const el=v17Sprite(); const k=c1+'|'+c2; let id=v17Sprite.ids.get(k); if(id) return id;
+  id='v17f'+(v17Sprite.ids.size+1); el.firstChild.insertAdjacentHTML('beforeend',mascotFilter(id,mascotPalette(c1,c2))); v17Sprite.ids.set(k,id); return id; }
+/* a cached template -> final markup: lite needs nothing, 'i' gets a fresh inline filter id, 's' points at the sprite */
+function v17Mint(t,mode,c1,c2){ if(mode==='l') return t; return t.split(V17_ID).join(mode==='s'?v17Filter(c1,c2):'mf'+(++_mUid)); }
+/* markup for a sprite-referencing string used outside the page (e.g. drawn into an Image): inline the filters it uses */
+function v17Standalone(svg){ svg=String(svg); if(svg.indexOf('url(#v17f')<0) return svg; const ids=[...new Set(svg.match(/v17f\d+/g)||[])];
+  const defs=ids.map(id=>{ const f=document.getElementById(id); return f?f.outerHTML:''; }).join(''); return svg.replace(/(<svg\b[^>]*>)/,'$1<defs>'+defs+'</defs>'); }
+
+const _v17Mascot=mascotSVG;
+mascotSVG=function(key,c1,c2,size=64,label){
+  const ctx=v17MarkCtx; const lite=size<(ctx===2&&!v17Gloss?v17LiteMax:34); const mode=lite?'l':ctx?'s':'i';
+  const k=key+'|'+c1+'|'+c2+'|'+size+'|'+mode+'|'+(label||'');
+  let t=v17Cache.mark.get(k);
+  if(t===undefined){ const art=mascotInner(key,c1,c2,true);
+    t=v17Put(v17Cache.mark,k,`<svg class="mascot${lite?' lite':''}" width="${size}" height="${size}" viewBox="${lite?'-2 -2 104 104':'-7 -7 114 116'}" role="img" aria-label="${label||((MASCOT_BY[key]||{}).n||'Mascot')} logo">${lite?art:`${mode==='i'?`<defs>${mascotFilter(V17_ID,mascotPalette(c1,c2))}</defs>`:''}<g filter="url(#${V17_ID})">${art}</g>`}</svg>`); }
+  return v17Mint(t,mode,c1,c2); };
+
+const _v17Crest=crest;
+crest=function(s,size=40){ if(!s) return _v17Crest(s,size);
+  const mk=s.mk||mascotKeyFor(s.mascot); const lite=size<60; const mode=lite?'l':v17MarkCtx?'s':'i';
+  const k=mk+'|'+s.c1+'|'+s.c2+'|'+size+'|'+mode+'|'+(s.town||s.name||'')+'|'+(s.mascot||'');
+  let t=v17Cache.crest.get(k);
+  if(t===undefined){ const P=mascotPalette(s.c1,s.c2); const bg=_mc(P.P,'#05070b',0.66); const art=mascotInner(mk,s.c1,s.c2,true);
+    const inner=lite?art:`${mode==='i'?`<defs>${mascotFilter(V17_ID,P)}</defs>`:''}<g filter="url(#${V17_ID})">${art}</g>`;
+    t=v17Put(v17Cache.crest,k,`<svg class="crest" width="${size}" height="${(size*1.15).toFixed(1)}" viewBox="0 0 100 115" role="img" aria-label="${esc(s.town||s.name||'')} ${esc(s.mascot||'')} crest"><path d="M50 3 93 14v41c0 30-20 47-43 57C27 102 7 85 7 55V14z" fill="${bg}" stroke="${P.S}" stroke-width="5" stroke-linejoin="round"/><path d="M50 11 85 20v35c0 25-16 39-35 48C31 94 15 80 15 55V20z" fill="none" stroke="${P.P}" stroke-opacity=".55" stroke-width="2"/><g transform="translate(13 15) scale(.74)">${inner}</g></svg>`); }
+  return v17Mint(t,mode,s.c1,s.c2); };
+
+/* portraits: cached per player id + look + kit colours + number + name + size; the pattern/gradient ids are re-minted */
+const _v17Portrait=portraitSVG;
+portraitSVG=function(p,size=96,kit){
+  const sch=p&&App.C?App.C.schools[p.sid]:null; const c1=(kit&&kit.c1)||(sch?sch.c1:'#1d4ed8'), c2=(kit&&kit.c2)||(sch?sch.c2:'#ffffff');
+  const k=(p?p.id+'|'+p.num+'|'+p.fn+'|'+p.ln+'|'+p.grade:'-')+'|'+size+'|'+c1+'|'+c2+'|'+JSON.stringify(lookOf(p));
+  let t=v17Cache.port.get(k);
+  if(t===undefined){ const out=_v17Portrait(p,size,kit); const m=out.match(/<pattern id="([^"]+)t"/);
+    t=v17Put(v17Cache.port,k,m?out.split(m[1]).join(V17_ID):out); }
+  return t.indexOf(V17_ID)<0?t:t.split(V17_ID).join('pv'+(++v17PtN).toString(36)); };
+
+/* mascot pickers are a grid of choices, not a list: keep the outline/gloss on their 52 px tiles */
+const _v17Picker=mascotPicker;
+mascotPicker=function(){ v17Gloss++; try{ return _v17Picker.apply(this,arguments); } finally{ v17Gloss--; } };
+/* the share-card renderer draws mascot markup into an <img>: give it self-contained filters */
+if(typeof svgImg==='function'){ const _v17SvgImg=svgImg; svgImg=function(svg,size){ return _v17SvgImg(v17Standalone(svg),size); }; }
+
+/* ---------- 2. render(): mark context + shell reuse ----------
+   v17Swap(app, sideHtml, topHtml, viewHtml) is called by render() in place of the whole-shell innerHTML:
+   - same route and identical shell markup: only #content is replaced;
+   - another route, and the shell markup differs only by the active-route markers (class "on", aria-current) and the
+     page head under the top bar: those markers are copied onto the live shell, the page head and #content replaced;
+   - anything else (badges, record, sound, sim menu, search text, theme...): the whole shell is rebuilt as before. */
+/* views whose small marks sit in tables and lists: marks under v17LiteMax px drop the filter there (in the others they
+   keep it, through the sprite). In these views today that changes only the 34 px standings badges in League. */
+const V17_LITE_VIEWS=new Set(['league','schedule','school','squads','kits']);
+function v17View(fn){ const prev=v17MarkCtx; v17MarkCtx=V17_LITE_VIEWS.has(App.route)?2:1; try{ return fn(); } finally{ v17MarkCtx=prev; } }
+const v17Shell={key:null,nkey:null,content:null};  /* last shell markup (exact and normalised) and the live #content element */
+const V17_ROUTE_EL='.nav[data-r],.tn-tab,.tn-btn,.tn-item';
+function v17Norm(h){ return h.replace(/aria-current="page"/g,'').replace(/ class="([^"]*)"/g,(m,c)=>' class="'+c.split(' ').filter(x=>x&&x!=='on').join(' ')+'"').replace(/\s+/g,' ').replace(/ >/g,'>'); }
+/* copy the active-route markers from freshly built shell markup onto the live shell; false if they do not line up */
+function v17Mark(app,c,markup){ const tpl=document.createElement('template'); tpl.innerHTML=markup;
+  const a=tpl.content.querySelectorAll(V17_ROUTE_EL), b=[...app.querySelectorAll(V17_ROUTE_EL)].filter(el=>!c.contains(el)); if(a.length!==b.length) return false;
+  for(let i=0;i<a.length;i++){ const x=a[i], y=b[i]; if(x.tagName!==y.tagName||x.getAttribute('data-r')!==y.getAttribute('data-r')) return false; }
+  for(let i=0;i<a.length;i++){ const x=a[i], y=b[i]; if(y.className!==x.className) y.className=x.className; const ac=x.getAttribute('aria-current'); if(ac==null) y.removeAttribute('aria-current'); else if(y.getAttribute('aria-current')!==ac) y.setAttribute('aria-current',ac); }
+  return true; }
+function v17Swap(app,side,top,view){
+  const key=App.route+'\u0002'+side+'\u0002'+top; const c=v17Shell.content;
+  const live=!!(c&&c.isConnected&&c.parentNode&&c.parentNode.parentNode===app&&c.parentNode.firstElementChild&&c.parentNode.firstElementChild.tagName==='HEADER');
+  /* a full render used to drop focus from the shell, which is what closes an open top-bar drop-down */
+  const unfocus=()=>{ const a=document.activeElement; if(a&&a!==document.body&&app.contains(a)&&!c.contains(a)&&!a.matches('input,select,textarea')) a.blur(); };
+  if(live&&key===v17Shell.key){ unfocus(); c.className='content view-'+App.route; c.innerHTML=view; v17Stat.fast++; return true; }
+  const hi=top.lastIndexOf('</header>'); const hdr=hi<0?null:top.slice(0,hi+9), head=hi<0?'':top.slice(hi+9);
+  const nkey=hdr==null?null:v17Norm(side)+'\u0002'+v17Norm(hdr);
+  if(live&&nkey!=null&&nkey===v17Shell.nkey&&v17Mark(app,c,side+hdr)){ unfocus();
+    const main=c.parentNode; let n=main.firstElementChild.nextSibling; while(n&&n!==c){ const nx=n.nextSibling; n.remove(); n=nx; }
+    if(head) c.insertAdjacentHTML('beforebegin',head);
+    c.className='content view-'+App.route; c.innerHTML=view; v17Shell.key=key; v17Stat.route++; return true; }
+  app.innerHTML=side+`<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
+  v17Shell.key=key; v17Shell.nkey=nkey; v17Shell.content=app.querySelector('#content'); v17Stat.full++; return true; }
+const _v17Render=render;
+render=function(){ const prev=v17MarkCtx; v17MarkCtx=App.C?1:0; if(!App.C) v17ShellDirty();
+  try{ return _v17Render.apply(this,arguments); } finally{ v17MarkCtx=prev; } };
+/* anything else that rewrites the shell must not be mistaken for an unchanged one */
+function v17ShellDirty(){ v17Shell.key=null; v17Shell.nkey=null; }
+
+/* ---------- 3. schedule: focus matchdays expanded, the rest one row each ---------- */
+const v17Rounds=new Map();  /* 'year|lvl|rd' -> true (open) / false (closed), set by the user */
+function v17RoundOpen(C,lvl,rd,focus){ const u=v17Rounds.get(C.year+'|'+lvl+'|'+rd); if(u!=null) return u; if(App.params.rall==='1') return true; return focus>=0&&rd>=focus&&rd<=focus+2; }
+function v17GameRow(C,f){ const mine=f.h===C.userSid||f.a===C.userSid;
+  return `<div class="li click" data-a="openFixture" data-id="${f.id}" ${mine?'style="background:color-mix(in srgb,var(--accent) 8%,transparent)"':''}>${crest(Sx(f.h),18)}<div class="grow trunc small">${esc(Sx(f.h).town)} <span class="muted">vs</span> ${esc(Sx(f.a).town)}${isRivalry(C,f.h,f.a)?' <span class="pill" style="border-color:var(--bad)">Rivalry</span>':''}</div><b class="mono">${f.st==='d'?`${f.hg}–${f.ag}`:'—'}</b>${crest(Sx(f.a),18)}</div>`; }
+function v17RoundSummary(C,games){ const u=C.userSid; const f=games.find(g=>g.h===u||g.a===u); const done=games.filter(g=>g.st==='d').length;
+  let me='';
+  if(f){ const home=f.h===u, opp=Sx(home?f.a:f.h);
+    if(f.st==='d'){ const w=f.w===u, l=f.w&&f.w!==u; const gf=home?f.hg:f.ag, ga=home?f.ag:f.hg;
+      me=`<span class="pill" style="background:${w?'var(--good)':l?'var(--bad)':'var(--surface2)'};color:${w||l?'#0b0b0b':'inherit'}">${w?'W':l?'L':'D'}</span><b class="mono">${gf}–${ga}</b>`; }
+    me+=`<span class="v17-rdopp">${home?'vs':'at'} ${crest(opp,18)}<span class="trunc">${esc(opp.town)}</span></span>`; }
+  return {me,info:`${games.length} games${done&&done<games.length?` · ${done} played`:''}`}; }
+function v17RoundCard(C,lvl,rd,games,focus){
+  const cur=C.phase==='regular'&&rd===C.md; const open=v17RoundOpen(C,lvl,rd,focus);
+  const tog=`data-a="v17Round" data-rd="${rd}" data-lvl="${lvl}" aria-expanded="${open}"`;
+  if(open) return `<div class="card v17-rd" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><div class="hd"><h3>Matchday ${rd+1}</h3><span class="row v17-rdh">${cur?'<span class="chip acc">Next up</span>':''}<button class="v17-rdt" ${tog} aria-label="Collapse matchday ${rd+1}">${icon('caret',16)}</button></span></div><div class="list">${games.map(f=>v17GameRow(C,f)).join('')}</div></div>`;
+  const s=v17RoundSummary(C,games);
+  return `<div class="card v17-rd v17-rdc" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><button class="v17-rdsum" ${tog} aria-label="Matchday ${rd+1}: show all ${games.length} games"><h3>Matchday ${rd+1}</h3><span class="v17-rdme">${s.me}</span><span class="v17-rdn tiny muted">${s.info}</span><span class="v17-rdt" aria-hidden="true">${icon('caret',16)}</span></button></div>`; }
+function v17Focus(C){ return C.phase==='regular'?C.md:C.phase==='preseason'?0:-1; }
+function v17RegRounds(C,lvl){ const rounds={}; for(const f of Object.values(C.fixtures)) if(f.yr===C.year&&f.lvl===lvl&&f.comp==='reg') (rounds[f.rd]=rounds[f.rd]||[]).push(f); return rounds; }
+VIEWS.schedule = ()=>{
+  const C=App.C; const lvl=App.params.lvl||'V'; const showPre = C.phase==='preseason' || (C.phase==='regular'&&C.md===0);
+  const fx=Object.values(C.fixtures).filter(f=>f.yr===C.year&&f.lvl===lvl);
+  const pre=fx.filter(f=>f.comp==='pre').sort((a,b)=>a.rd-b.rd);
+  const rounds={}; for(const f of fx.filter(f=>f.comp==='reg')) (rounds[f.rd]=rounds[f.rd]||[]).push(f);
+  const keys=Object.keys(rounds).map(Number).sort((a,b)=>a-b); const focus=v17Focus(C);
+  /* played rows, then the focus matchdays side by side, then upcoming rows; one plain grid when everything is open */
+  const groups=App.params.rall==='1'||focus<0?[['g2',keys]]:[['g2',keys.filter(rd=>rd<focus)],['v17-now',keys.filter(rd=>rd>=focus&&rd<=focus+2)],['g2',keys.filter(rd=>rd>focus+2)]];
+  const anyClosed=keys.some(rd=>!v17RoundOpen(C,lvl,rd,focus));
+  let html=`<div class="row" style="justify-content:space-between">${seg('lvl',LVLS.map(l=>[l,LVL_NAME[l]]),lvl)}<div class="row">${keys.length>3?`<button class="btn sm ghost" data-a="v17AllRounds" data-v="${anyClosed?'1':''}">${anyClosed?'Expand all matchdays':'Collapse matchdays'}</button>`:''}${C.phase==='preseason'?'<button class="btn" data-a="skipPre">Skip preseason</button>':''}</div></div>`;
+  if(showPre && lvl==='V') html+=`<div class="card"><h3>Preseason Cup</h3><p class="small muted" style="margin-top:0">Three friendlies to test lineups. They give small development boosts, count only in preseason stats, and never touch league standings or records.</p><div class="list">${pre.map(f=>resultRow(f)).join('')}</div></div>`;
+  html+=groups.filter(g=>g[1].length).map(([cls,ks])=>`<div class="grid ${cls} v17-rounds">${ks.map(rd=>v17RoundCard(C,lvl,rd,rounds[rd],focus)).join('')}</div>`).join('');
+  const post=fx.filter(f=>['sec','rgn','st'].includes(f.comp)).sort((a,b)=>fxOrder(a)-fxOrder(b));
+  if(post.length) html+=`<div class="card v17-cv v17-post"><h3>Postseason</h3><div class="list">${post.map(f=>resultRow(f,f.h===C.userSid||f.a===C.userSid?C.userSid:f.h)).join('')}</div></div>`;
+  return html;
+};
+/* expand / collapse one matchday in place: no full render, the page does not move */
+A.v17Round=el=>{ const C=App.C; const rd=+el.dataset.rd, lvl=el.dataset.lvl||'V'; const card=el.closest('.v17-rd'); const games=v17RegRounds(C,lvl)[rd]; if(!card||!games) return;
+  const focus=v17Focus(C); v17Rounds.set(C.year+'|'+lvl+'|'+rd,!v17RoundOpen(C,lvl,rd,focus));
+  card.outerHTML=v17View(()=>v17RoundCard(C,lvl,rd,games,focus));
+  const b=document.querySelector(`.v17-rd[data-rd="${rd}"] [data-a="v17Round"]`); if(b) b.focus({preventScroll:true}); };
+A.v17AllRounds=el=>{ const C=App.C; for(const k of [...v17Rounds.keys()]) if(k.startsWith(C.year+'|')) v17Rounds.delete(k); if(el.dataset.v) App.params.rall='1'; else delete App.params.rall; App.keepScroll=true; render(); };
+
+/* ---------- 4. kit lab: kitMatchup() is pure for one view build, so memoise it there ---------- */
+let v17KitMemo=null;
+const _v17KitMatchup=kitMatchup;
+kitMatchup=function(h,a){ if(!v17KitMemo||!h||!a||h.id==null||a.id==null) return _v17KitMatchup.apply(this,arguments); const k=h.id+'|'+a.id; let r=v17KitMemo.get(k); if(!r){ r=_v17KitMatchup.apply(this,arguments); v17KitMemo.set(k,r); } return r; };
+const _v17Kits=VIEWS.kits;
+VIEWS.kits=function(){ const outer=!v17KitMemo; if(outer) v17KitMemo=new Map(); try{ return _v17Kits.apply(this,arguments); } finally{ if(outer) v17KitMemo=null; } };
+
+/* ===== v17 · 30_motion: tab indicator without forced reflow, sim-ahead one fixture per task =====
+   Pairs with 30_motion.css. Globals are prefixed v17. */
+
+/* ---------- sliding tab indicator ----------
+   Replaces tabIndicators (ui_v8.js). The old version measured the active tab synchronously inside render()
+   (a forced layout), then forced a second style/layout with `void offsetWidth` to restart the transition, and
+   animated width. Now: render() only tags the bar and seeds its previous position; one requestAnimationFrame
+   per frame measures every queued bar (reads first, then writes, so at most one layout, the one the frame
+   needs anyway) and sets --ti-x / --ti-s. CSS moves a fixed-width bar with translateX + scaleX. */
+const V17_TI_BASE=72; /* must match the ::after width in 30_motion.css */
+const v17TabQ=new Set(); let v17TabRaf=0;
+function v17TabKey(tb){ return (tb.querySelector('.tab')||{}).dataset?.k||'t'; }
+function v17TabSet(tb,p){ tb.style.setProperty('--ti-x',p.x+'px'); tb.style.setProperty('--ti-s',(p.w/V17_TI_BASE).toFixed(4)); tb.style.setProperty('--ti-y',p.y+'px'); tb.v17ti=p; }
+tabIndicators=function(scope){
+  scope.querySelectorAll('.tabs').forEach(tb=>{ if(!tb.querySelector('.tab.on')) return; tb.classList.add('tabs-ind');
+    /* a freshly rendered bar starts where the previous one of the same group ended, so it can glide */
+    if(!tb.v17ti){ const prev=TABPOS[v17TabKey(tb)]; if(prev) v17TabSet(tb,prev); }
+    v17TabQ.add(tb); });
+  if(v17TabQ.size&&!v17TabRaf) v17TabRaf=requestAnimationFrame(v17TabFlush); };
+function v17TabFlush(){ v17TabRaf=0; const list=[...v17TabQ]; v17TabQ.clear(); const rm=reducedMotion();
+  const reads=list.map(tb=>{ const on=tb.isConnected&&tb.querySelector('.tab.on'); return on?{x:on.offsetLeft,w:on.offsetWidth,y:on.offsetTop+on.offsetHeight}:null; });
+  const still=[];
+  list.forEach((tb,i)=>{ const r=reads[i]; if(!r) return; const cur=tb.v17ti; TABPOS[v17TabKey(tb)]=r;
+    if(cur&&cur.x===r.x&&cur.w===r.w&&cur.y===r.y) return;
+    /* glide only along the same row; first paint, a wrapped row or reduced motion jump */
+    if(!(cur&&cur.y===r.y)||rm){ tb.classList.add('ti-still'); still.push(tb); }
+    v17TabSet(tb,r); });
+  /* the jump is committed by this frame's style pass; re-enable the transition on the next frame */
+  if(still.length) requestAnimationFrame(()=>still.forEach(tb=>tb.classList.remove('ti-still'))); }
+
+/* ---------- sim-ahead ----------
+   Replaces A.simAhead (ui_v15.js). Every fixture simulation (the user's match, then each other fixture of the
+   round in roundFixtures order, exactly what simRound does) is its own task, advance() runs in its own task,
+   and the loop yields between them with scheduler.yield() (MessageChannel macrotask where unsupported; not
+   setTimeout, which is clamped and throttled in background tabs). The engine calls, their order and their
+   arguments are unchanged, so results are identical. The #simov bar is written at most once per frame.
+   The closing render and the save run as separate tasks. A sim already running ignores further calls, and the
+   single-round sim (which never had an overlay) gets an invisible input shield while it yields. */
+const v17Yield=(()=>{ if(typeof scheduler!=='undefined'&&scheduler&&typeof scheduler.yield==='function') return ()=>scheduler.yield();
+  const ch=new MessageChannel(); const q=[]; ch.port1.onmessage=()=>{ const r=q.shift(); if(r) r(); };
+  return ()=>new Promise(r=>{ q.push(r); ch.port2.postMessage(0); }); })();
+/* scheduler.yield() continuations outrank rendering, so a loop of them alone starves frames (measured: 3 frames
+   in a 400 ms season sim). v17Pace() yields with scheduler.yield() while the current frame still has budget,
+   and once ~12 ms of work have run it waits for the next frame to be painted (rAF, then a message posted from
+   it runs after the paint). Hidden tabs never paint, so there it only yields; a 120 ms timer covers a tab that
+   hides while waiting. */
+const v17Post=(()=>{ const ch=new MessageChannel(); const q=[]; ch.port1.onmessage=()=>{ const f=q.shift(); if(f) f(); }; return f=>{ q.push(f); ch.port2.postMessage(0); }; })();
+const v17NextPaint=()=>document.visibilityState==='hidden'?v17Yield():new Promise(r=>{ let done=false; const go=()=>{ if(done) return; done=true; clearTimeout(to); r(); }; const to=setTimeout(go,120); requestAnimationFrame(()=>v17Post(go)); });
+const v17Pace=async()=>{ if(document.visibilityState==='hidden'||performance.now()-v17Pace.t<12){ await v17Yield(); return; }
+  await v17NextPaint(); v17Pace.t=performance.now(); };
+v17Pace.t=0;
+const v17Sim={busy:false};
+function v17SimPaint(S){ if(S.raf||!S.ov) return; S.raf=requestAnimationFrame(()=>{ S.raf=0; const ov=S.ov; if(!ov||!ov.isConnected) return;
+  const i=ov.querySelector('.sv-bar i'); const p=S.p.toFixed(3); if(i&&i.style.getPropertyValue('--p')!==p) i.style.setProperty('--p',p);
+  const l=ov.querySelector('.sv-l'); if(l&&l.textContent!==S.label) l.textContent=S.label; }); }
+A.simAhead=async el=>{ if(v17Sim.busy) return; v17Sim.busy=true; try{ return await v17SimAhead(el); } finally{ v17Sim.busy=false; } };
+async function v17SimAhead(el){
+  const kind=el.dataset.k; App.simMenu=false; const C=App.C; const u=C.userSid; let n=0,w=0,d=0,l=0; const titles=[]; const t0=C.phase;
+  let ov=document.getElementById('simov'); if(!ov&&kind!=='round'){ ov=document.createElement('div'); ov.id='simov'; ov.setAttribute('role','status'); ov.innerHTML='<div class="sv-box"><b>Simulating…</b><div class="sv-bar"><i></i></div><span class="sv-l"></span></div>'; document.body.appendChild(ov); }
+  let shield=null; if(!ov){ shield=document.createElement('div'); shield.className='v17-simshield'; shield.setAttribute('aria-hidden','true'); document.body.appendChild(shield); }
+  const total=kind==='regular'?16:kind==='season'?22:1; const S={ov,p:.04,label:'',raf:0}; v17Pace.t=performance.now();
+  const tick=frac=>{ if(!ov) return; S.p=Math.min(.96,Math.max(.04,frac/total)); S.label=`${w}-${d}-${l} · ${phaseLabel(C)}`; v17SimPaint(S); };
+  try{
+    while(n<80&&C.phase!=='offseason'){
+      if(kind==='regular'&&!['preseason','regular'].includes(C.phase)) break;
+      const uf=userFixture(C); if(uf){ const M=startMatch(C,uf.id,{}); runToEnd(C,M); finishMatch(C,M); if(uf.w===u) w++; else if(uf.w) l++; else d++; const tt=uf.w===u?(uf.comp==='sec'&&uf.rd===2?`Section ${C.section} Champions`:uf.comp==='rgn'?'Regional Champions':uf.comp==='st'&&uf.rd===2?'State Champions':null):null; if(tt) titles.push([tt,uf.id,C.year]);
+        tick(n+.1); await v17Pace(); }
+      /* simRound(C), one fixture per task */
+      const fx=roundFixtures(C); let k=0;
+      for(const f of fx){ k++; if(!f||f.st==='d') continue; const M=startMatch(C,f.id,{}); runToEnd(C,M); finishMatch(C,M); tick(n+.1+.85*k/fx.length); await v17Pace(); }
+      const ev=advance(C); n++; if(!ev) break; if(kind==='round') break;
+      tick(n); await v17Pace();
+    }
+  } catch(e){ if(ov) ov.remove(); if(shield) shield.remove(); throw e; }
+  finally { if(S.raf){ cancelAnimationFrame(S.raf); S.raf=0; } S.ov=null; }
+  App.odds.clear(); queueSave(); App.keepScroll=true;
+  await v17Yield();
+  if(ov) ov.remove(); if(shield) shield.remove();
+  App.modal={type:'simSummary',n,w,d,l,from:t0,kind,titles:titles.map(t=>t[0])}; render();
+  if(titles.length){ const [tt,fid,yr]=titles[titles.length-1]; showTrophy(tt,Sx(u),yr,{chips:titleChips(C,fid)}); }
+  /* the save (an IndexedDB structured clone of the whole career) runs in its own task once the summary has been
+     painted; queueSave above already scheduled it, saveNow runs it now and clears that timer */
+  await v17NextPaint(); saveNow(); }
+
+/* ===== v17 · 40_live: the live screen's commentary feed appends instead of rebuilding =====
+   renderFeed (ui_live.js) rebuilt the whole Commentary list on every minute and every event, so every line was
+   re-created and replayed its pop animation each time. The feed is newest-first (feedPush unshifts), so new
+   lines are inserted at the top and existing nodes are left alone. The full rebuild (the original renderFeed)
+   still runs when the panel shows another tab, when the tab changes, when the panel node is new, when the
+   feed array was replaced or shrank, or when anything else rewrote the panel. Other tabs are unchanged.
+   Also here: the live panel is a layout/paint containment boundary (40_live.css). */
+const v17RenderFeed0=renderFeed;
+function v17FeedItem(x,i){ return `<div class="fe ${x.cls} ${x.fresh&&i===0?'new':''}"><span class="m">${x.m}</span><span>${x.txt}</span></div>`; }
+renderFeed=function(){
+  const L=App.live; const body=$('#lv-pbody');
+  if(!L||!body||L.tab!=='feed'){ if(L) L.v17feed=null; return v17RenderFeed0.apply(this,arguments); }
+  const F=L.feed, st=L.v17feed, n=F.length;
+  /* what is on screen is exactly the list we rendered last time, and the feed only grew at the top */
+  const same=st&&st.body===body&&st.n>0&&n>=st.n&&F[n-st.n]===st.top&&body.firstElementChild===st.first&&body.childElementCount===st.count;
+  if(!same){ const r=v17RenderFeed0.apply(this,arguments); L.v17feed=n?{body,n,top:F[0],first:body.firstElementChild,count:body.childElementCount}:null; return r; }
+  const add=n-st.n; if(!add) return;
+  body.insertAdjacentHTML('afterbegin',F.slice(0,add).map(v17FeedItem).join('')); F[0].fresh=false;
+  L.v17feed={body,n,top:F[0],first:body.firstElementChild,count:body.childElementCount}; };
 
 </script>
 </body></html>
