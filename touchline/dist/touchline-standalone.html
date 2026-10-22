@@ -1962,11 +1962,11 @@ table.ot tr.me td:first-child{box-shadow:inset 3px 0 0 var(--team2-hi)}
 /* card and hero mascots are <img> copies of the SVG (10_start.js); same box as svg.mascot */
 .start img.v17-mimg{display:inline-block;flex:none;vertical-align:middle}
 @media (max-width:640px){ .ch-logo img.v17-mimg{width:60px;height:60px} }
-.cont-hero{transition:transform .25s}
+.cont-hero{transition:transform .25s,border-color .2s,box-shadow .25s}
 
 /* program cards: only the lift is transitioned; the hover border/shadow switch without a paint transition.
    The "+" disc's hover fill fades in on a pseudo-element (opacity) instead of a background transition. */
-.slot{transition:transform .25s cubic-bezier(.2,1.2,.4,1)}
+.slot{transition:transform .25s cubic-bezier(.2,1.2,.4,1),border-color .2s,box-shadow .25s}
 .slot-plus{isolation:isolate;transition:transform .3s}
 .slot-plus::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:50%;background:rgba(255,211,107,.13);opacity:0;transition:opacity .3s}
 .slot.empty:hover .slot-plus{background:rgba(255,211,107,.06)}
@@ -1981,7 +1981,7 @@ table.ot tr.me td:first-child{box-shadow:inset 3px 0 0 var(--team2-hi)}
 @keyframes v17cvin{from{opacity:0;transform:scale(1.04)}}
 .start-grain{display:none}
 .start-shade{background:repeating-radial-gradient(circle at 17% 32%,rgba(255,255,255,.008) 0 .5px,transparent 1px 3px),radial-gradient(ellipse 70% 60% at 50% 42%,rgba(3,6,10,.55),rgba(3,6,10,.86) 75%),linear-gradient(180deg,rgba(3,6,10,.6),transparent 30%,transparent 62%,rgba(3,6,10,.95))}
-.slot{-webkit-backdrop-filter:none;backdrop-filter:none;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),rgba(8,12,18,.7)}
+.slot{-webkit-backdrop-filter:none;backdrop-filter:none;background:linear-gradient(160deg,rgba(255,255,255,.09),rgba(255,255,255,.02)),rgba(8,12,18,.9)}
 .start-live,.start-bug,.start-snd .sndbtn{-webkit-backdrop-filter:none;backdrop-filter:none}
 .start-live,.start-snd .sndbtn{background:rgba(0,0,0,.56)}
 .start-bug{background:rgba(0,0,0,.6)}
@@ -2026,7 +2026,8 @@ button.v17-rdt:hover,.v17-rdsum:hover .v17-rdt{color:var(--text);border-color:va
 .v17-rdsum{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;min-width:0;padding:12px 14px 12px 18px;border-radius:inherit;cursor:pointer;color:inherit}
 .v17-rdsum:hover{background:color-mix(in srgb,var(--surface2) 55%,transparent)}
 .v17-rdsum:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.v17-rdsum h3{margin:0;white-space:nowrap;flex:none}
+.v17-rdh3{margin:0;padding:0;display:block}
+.v17-rdsum .v17-rdtitle{white-space:nowrap;flex:none}
 .v17-rdme{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto;font-size:.88rem}
 .v17-rdme .mono{flex:none}
 .v17-rdopp{display:inline-flex;align-items:center;gap:6px;min-width:0;color:var(--muted)}
@@ -7458,6 +7459,9 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['⚡','Menus that keep up','Pages open faster. The schedule shows this week and the next two matchdays, with earlier ones folded into one line each (tap one to open it, or Expand all). Crests are drawn once and reused, and moving between pages only redraws what changed. Tab underlines and progress bars glide instead of jumping.'],
+  ['🏟️','A lighter title screen','The mascot parade, floodlight beams and logo shine on the title screen now cost a fraction of what they did, so it runs about twice as smoothly. The match in the background pauses while a window or the career builder covers it.'],
+  ['📶','Fewer stalls','Simulating ahead no longer freezes the page between games, the live commentary adds new lines without rebuilding the whole list, and a paused or hidden match stops redrawing to save battery. Settings has a new Match graphics option.'],
   ['🐉','16 new mascots','Phoenix, Dragons, Gators, Scorpions, Owls, Cyclones, Bison, Cobras, Yetis, Krakens, Mammoths, Coyotes, Stingrays, Rhinos, Foxes and Huskies join the original 20, each drawn in the same style and recoloured for every school. New careers can pick any of the 36.'],
   ['🏫','Thousands more school names','Towns now come from a much bigger pool, and schools are named in more ways: Ravenwood Academy, Granite Falls North, Lincoln Memorial High, St. Ambrose Prep, Ironbridge Tech. Older saves keep their names.'],
   ['🧭','A new home screen','The sidebar is replaced by a top bar: Overview, Squad, Schedule, Competition, Club and More, each with a drop-down that says what every page is for. The Overview is now one dashboard: your team card and coach decisions, your starting XI on a pitch, a big Play button for the next match, youth watch, training focus and the section table, with everything else underneath.'],
@@ -8911,6 +8915,7 @@ let v17ParadeStrip={dpr:0, tiles:null, job:null};
 function v17ParadeDpr(){ return Math.min(3, Math.max(1, window.devicePixelRatio||1)); }
 /* markup for renderStart (ui_views.js): 2 x 36 empty cells; data-t is the tile, --c the column inside it */
 function v17ParadeHTML(){ const n=MASCOT_LIST.length, per=V17_PARADE.per; let cells='';
+  if(v17ParadeStrip.failed){ const items=[...MASCOT_LIST,...MASCOT_LIST].map(([k],i)=>{ const cp=COLOR_PAIRS[(i*7)%COLOR_PAIRS.length]; return `<span>${mascotSVG(k,cp[0],cp[1],30).replace('width="30" height="30"','width="58" height="58"')}</span>`; }).join(''); return `<div class="parade" aria-hidden="true"><div class="parade-in">${items}</div></div>`; }
   for(let i=0;i<2*n;i++){ const k=i%n; cells+=`<i data-t="${Math.floor(k/per)}" style="--c:${k%per}"></i>`; }
   return `<div class="parade v17-parade${v17ParadeStrip.tiles?' v17-ready':''}" aria-hidden="true"><div class="parade-in">${cells}</div></div>`; }
 /* the wordmark plus an aria-hidden copy laid exactly over it that carries the periodic glint (opacity only, outside the
@@ -8925,14 +8930,15 @@ function v17ParadeApply(){ const T=v17ParadeStrip.tiles; if(!T) return; let st=d
 /* draws the strip, then encodes it tile by tile, in slices of <= ~6 ms per frame; abandons the job if the start screen
    goes away (it starts again on the next start-screen render) */
 function v17ParadeBuild(){ const dpr=v17ParadeDpr();
-  if(v17ParadeStrip.tiles&&v17ParadeStrip.dpr===dpr){ v17ParadeApply(); return Promise.resolve(true); }
+  if(v17ParadeStrip.failed) return Promise.resolve(false);
+  if(v17ParadeStrip.tiles&&v17ParadeStrip.dpr===dpr){ v17ParadeStrip.job=null; v17ParadeApply(); return Promise.resolve(true); }
   if(v17ParadeStrip.job&&v17ParadeStrip.job.dpr===dpr) return v17ParadeStrip.job.p;
   const job={dpr}; v17ParadeStrip.job=job;
   const live=()=>v17ParadeStrip.job===job&&!!document.getElementById('start');
   job.p=(async()=>{ try{
     const P=V17_PARADE, list=MASCOT_LIST, n=list.length, px=Math.round(P.size*dpr), ch=Math.round(P.h*dpr);
     const cv=document.createElement('canvas'); cv.width=Math.round(n*P.cell*dpr); cv.height=ch;
-    const g=cv.getContext('2d'); if(!g) return false;
+    const g=cv.getContext('2d'); if(!g){ v17ParadeStrip.failed=true; return false; }
     /* canvas shadowBlur B is a Gaussian of sigma B/2, the same as a CSS drop-shadow blur radius B; neither scales with the
        transform, so both are given in device pixels */
     g.shadowColor=P.shC; g.shadowOffsetX=0; g.shadowOffsetY=P.shY*dpr; g.shadowBlur=P.shBlur*dpr;
@@ -8948,11 +8954,11 @@ function v17ParadeBuild(){ const dpr=v17ParadeDpr();
     const tiles=[];
     for(let t=0;t*P.per<n;t++){ const cols=Math.min(P.per,n-t*P.per), sx=Math.round(t*P.per*P.cell*dpr), sw=Math.round((t*P.per+cols)*P.cell*dpr)-sx;
       const tc=document.createElement('canvas'); tc.width=sw; tc.height=ch; tc.getContext('2d').drawImage(cv,sx,0,sw,ch,0,0,sw,ch);
-      let url=''; try{ url=tc.toDataURL('image/png'); }catch(e){} if(!url||url.length<32) return false;
+      let url=''; try{ url=tc.toDataURL('image/png'); }catch(e){} if(!url||url.length<32){ v17ParadeStrip.failed=true; return false; }
       tiles.push({url,cols}); if(!await slice()) return false; }
     await Promise.all(tiles.map(t=>{ try{ const im=new Image(); im.src=t.url; return im.decode?im.decode().catch(()=>{}):null; }catch(e){ return null; } }));
     if(v17ParadeStrip.job!==job) return false;
-    v17ParadeStrip={dpr, tiles, job:null}; v17ParadeApply(); return true;
+    v17ParadeStrip={dpr, tiles, job:null, failed:false}; v17ParadeApply(); return true;
   }catch(e){ console.warn('v17 parade', e); return false; }
   finally{ if(v17ParadeStrip.job===job) v17ParadeStrip.job=null; } })();
   return job.p; }
@@ -8961,16 +8967,18 @@ function v17ParadeBuild(){ const dpr=v17ParadeDpr();
    all. They are still invisible at that point (the cards and the hero fade in after 1.1 s), so the async image load never shows. */
 function v17MascotsToImg(root){ if(!root||typeof XMLSerializer==='undefined') return; const xs=new XMLSerializer();
   root.querySelectorAll('.slot-wm>svg.mascot,.slot-logo>svg.mascot,.ch-logo>svg.mascot').forEach(svg=>{ try{
-    const im=document.createElement('img'); im.className='mascot v17-mimg'; im.alt=''; im.decoding='async';
+    const im=document.createElement('img'); im.className='mascot v17-mimg'; im.alt=svg.getAttribute('aria-label')||''; im.decoding='async';
     im.width=+svg.getAttribute('width')||64; im.height=+svg.getAttribute('height')||64;
     im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent((typeof v17Standalone==='function'?v17Standalone:String)(xs.serializeToString(svg))); svg.replaceWith(im); }catch(e){} }); }
 /* after every start-screen render: swap the card mascots, then make (or reuse) the parade strip */
 const _v17RenderStart=renderStart;
 renderStart=async function(){ const r=await _v17RenderStart.apply(this,arguments);
-  try{ const ui=document.querySelector('#start .start-ui'); v17MascotsToImg(ui); if(document.querySelector('.v17-parade')) v17ParadeBuild(); }catch(e){ console.warn(e); } return r; };
+  try{ const ui=document.querySelector('#start .start-ui'); v17MascotsToImg(ui); if(document.querySelector('.v17-parade')) v17ParadeBuild().then(ok=>{ if(!ok&&v17ParadeStrip.failed){ const old=document.querySelector('.v17-parade'); if(old) old.outerHTML=v17ParadeHTML(); } }); }catch(e){ console.warn(e); } return r; };
 /* devicePixelRatio changes (browser zoom, moving the window to another screen): rebuild while the old strip stays up */
 let v17ParadeRz=0;
 window.addEventListener('resize',()=>{ clearTimeout(v17ParadeRz); v17ParadeRz=setTimeout(()=>{ if(document.querySelector('.v17-parade')&&v17ParadeStrip.dpr!==v17ParadeDpr()) v17ParadeBuild(); },250); });
+function v17ParadeDprWatch(){ if(!window.matchMedia) return; const mq=matchMedia(`(resolution: ${window.devicePixelRatio||1}dppx)`); const on=()=>{ mq.removeEventListener?mq.removeEventListener('change',on):mq.removeListener(on); if(document.querySelector('.v17-parade')&&v17ParadeStrip.dpr!==v17ParadeDpr()) v17ParadeBuild(); v17ParadeDprWatch(); }; mq.addEventListener?mq.addEventListener('change',on):mq.addListener(on); }
+v17ParadeDprWatch();
 
 /* ===================== v17 MENU RENDERING (ANIMATION_PLAN Phase 1, steps 2 and 3) =====================
    The cost of render() is the browser parsing, styling and laying out the markup (measured with CDP: ParseHTML +
@@ -9038,9 +9046,10 @@ portraitSVG=function(p,size=96,kit){
     t=v17Put(v17Cache.port,k,m?out.split(m[1]).join(V17_ID):out); }
   return t.indexOf(V17_ID)<0?t:t.split(V17_ID).join('pv'+(++v17PtN).toString(36)); };
 
-/* mascot pickers are a grid of choices, not a list: keep the outline/gloss on their 52 px tiles */
+/* mascot pickers are a grid of choices: keep the outline/gloss on their 52 px tiles (the new-career form, modals), except inside the
+   list views (School), where 36 filtered tiles were the page's main raster cost */
 const _v17Picker=mascotPicker;
-mascotPicker=function(){ v17Gloss++; try{ return _v17Picker.apply(this,arguments); } finally{ v17Gloss--; } };
+mascotPicker=function(){ const keep=!(App.C&&V17_LITE_VIEWS.has(App.route)); if(keep) v17Gloss++; try{ return _v17Picker.apply(this,arguments); } finally{ if(keep) v17Gloss--; } };
 /* the share-card renderer draws mascot markup into an <img>: give it self-contained filters */
 if(typeof svgImg==='function'){ const _v17SvgImg=svgImg; svgImg=function(svg,size){ return _v17SvgImg(v17Standalone(svg),size); }; }
 
@@ -9068,13 +9077,15 @@ function v17Swap(app,side,top,view){
   const live=!!(c&&c.isConnected&&c.parentNode&&c.parentNode.parentNode===app&&c.parentNode.firstElementChild&&c.parentNode.firstElementChild.tagName==='HEADER');
   /* a full render used to drop focus from the shell, which is what closes an open top-bar drop-down */
   const unfocus=()=>{ const a=document.activeElement; if(a&&a!==document.body&&app.contains(a)&&!c.contains(a)&&!a.matches('input,select,textarea')) a.blur(); };
-  if(live&&key===v17Shell.key){ unfocus(); c.className='content view-'+App.route; c.innerHTML=view; v17Stat.fast++; return true; }
+  const clearSearch=()=>{ const sr=app.querySelector('#sres'); if(sr&&sr.firstChild) sr.innerHTML=''; };
+  if(live&&key===v17Shell.key){ unfocus(); clearSearch(); c.className='content view-'+App.route; c.innerHTML=view; v17Stat.fast++; return true; }
   const hi=top.lastIndexOf('</header>'); const hdr=hi<0?null:top.slice(0,hi+9), head=hi<0?'':top.slice(hi+9);
   const nkey=hdr==null?null:v17Norm(side)+'\u0002'+v17Norm(hdr);
-  if(live&&nkey!=null&&nkey===v17Shell.nkey&&v17Mark(app,c,side+hdr)){ unfocus();
+  if(live&&nkey!=null&&nkey===v17Shell.nkey&&v17Mark(app,c,side+hdr)){ unfocus(); clearSearch();
     const main=c.parentNode; let n=main.firstElementChild.nextSibling; while(n&&n!==c){ const nx=n.nextSibling; n.remove(); n=nx; }
     if(head) c.insertAdjacentHTML('beforebegin',head);
-    c.className='content view-'+App.route; c.innerHTML=view; v17Shell.key=key; v17Stat.route++; return true; }
+    /* a new #content element per route change, as the full render made: a leftover polishView timer from the previous page must only touch the detached old one */
+    const nc=document.createElement('main'); nc.id='content'; nc.className='content view-'+App.route; nc.innerHTML=view; c.replaceWith(nc); v17Shell.content=nc; v17Shell.key=key; v17Stat.route++; return true; }
   app.innerHTML=side+`<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
   v17Shell.key=key; v17Shell.nkey=nkey; v17Shell.content=app.querySelector('#content'); v17Stat.full++; return true; }
 const _v17Render=render;
@@ -9100,7 +9111,7 @@ function v17RoundCard(C,lvl,rd,games,focus){
   const tog=`data-a="v17Round" data-rd="${rd}" data-lvl="${lvl}" aria-expanded="${open}"`;
   if(open) return `<div class="card v17-rd" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><div class="hd"><h3>Matchday ${rd+1}</h3><span class="row v17-rdh">${cur?'<span class="chip acc">Next up</span>':''}<button class="v17-rdt" ${tog} aria-label="Collapse matchday ${rd+1}">${icon('caret',16)}</button></span></div><div class="list">${games.map(f=>v17GameRow(C,f)).join('')}</div></div>`;
   const s=v17RoundSummary(C,games);
-  return `<div class="card v17-rd v17-rdc" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><button class="v17-rdsum" ${tog} aria-label="Matchday ${rd+1}: show all ${games.length} games"><h3>Matchday ${rd+1}</h3><span class="v17-rdme">${s.me}</span><span class="v17-rdn tiny muted">${s.info}</span><span class="v17-rdt" aria-hidden="true">${icon('caret',16)}</span></button></div>`; }
+  return `<div class="card v17-rd v17-rdc" data-rd="${rd}" ${cur?'style="border-color:var(--accent)"':''}><h3 class="v17-rdh3"><button class="v17-rdsum" ${tog} aria-label="Matchday ${rd+1}: show all ${games.length} games"><span class="v17-rdtitle">Matchday ${rd+1}</span><span class="v17-rdme">${s.me}</span><span class="v17-rdn tiny muted">${s.info}</span><span class="v17-rdt" aria-hidden="true">${icon('caret',16)}</span></button></h3></div>`; }
 function v17Focus(C){ return C.phase==='regular'?C.md:C.phase==='preseason'?0:-1; }
 function v17RegRounds(C,lvl){ const rounds={}; for(const f of Object.values(C.fixtures)) if(f.yr===C.year&&f.lvl===lvl&&f.comp==='reg') (rounds[f.rd]=rounds[f.rd]||[]).push(f); return rounds; }
 VIEWS.schedule = ()=>{
