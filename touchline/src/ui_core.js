@@ -37,9 +37,9 @@ function metaOf(C){ const s=C.schools[C.userSid]; return {slot:App.slot, school:
 function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,350); }
 async function saveNow(){
   const C=App.C; if(!C) return; clearTimeout(saveTimer);
-  const dirty=[...(C._dirty||[])].map(id=>C.logs[id]).filter(Boolean);
+  const ids=[...(C._dirty||[])]; const dirty=ids.map(id=>C.logs[id]).filter(Boolean);
   App.saveState='saving'; paintSaveState();
-  try{ await DB.put(App.slot, careerForSave(C), metaOf(C), dirty); C._dirty=new Set(); App.saveState='saved'; App.saveErr=null; }
+  try{ await DB.put(App.slot, careerForSave(C), metaOf(C), dirty); /* only what was written: logs finished during the await stay dirty for the next save */ if(C._dirty) for(const id of ids) C._dirty.delete(id); else C._dirty=new Set(); App.saveState='saved'; App.saveErr=null; }
   catch(e){ App.saveState='error'; App.saveErr=String(e&&e.message||e); }
   paintSaveState();
 }

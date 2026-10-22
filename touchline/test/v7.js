@@ -21,7 +21,7 @@ const S=n=>`test/shots/v7-${tag}-${n}.png`;
   for(let k=0;k<4;k++){ if(await page.$('#lv-cont')) break; if(await page.$('#lv-ht .htbox')){ await page.click('#ht-go'); await page.waitForTimeout(400); } await page.click('#lv-ctrl [data-a="liveSkip"][data-to="ft"]',{timeout:3000}).catch(()=>{}); await page.waitForTimeout(1200); } await page.waitForSelector('#lv-cont',{timeout:30000}); await page.waitForTimeout(500);
   await page.click('[data-a="liveContinue"]'); await page.waitForTimeout(1500); await page.screenshot({path:S('06-after')});
   console.log('rivalry', await page.evaluate(()=>JSON.stringify(rivalrySeries(App.C)).slice(0,200)));
-  await page.evaluate(()=>{ document.querySelectorAll('.ceremony').forEach(x=>x.remove()); App.modal=null; renderModal(); A.simAhead({dataset:{k:'season'}}); }); await page.waitForTimeout(800);
+  await page.evaluate(()=>{ document.querySelectorAll('.ceremony').forEach(x=>x.remove()); App.modal=null; renderModal(); return A.simAhead({dataset:{k:'season'}}); }); await page.waitForTimeout(300);
   await page.evaluate(()=>{ document.querySelectorAll('.ceremony').forEach(x=>x.remove()); App.modal=null; renderModal(); App.route='camp'; render(); }); await page.waitForTimeout(400);
   await page.click('[data-a="campScout"] >> nth=0'); await page.click('[data-a="campScout"] >> nth=1'); await page.click('[data-a="campInvite"] >> nth=0'); await page.click('[data-a="campInvite"] >> nth=2'); await page.waitForTimeout(300);
   await page.screenshot({path:S('07-camp'),fullPage:true});
