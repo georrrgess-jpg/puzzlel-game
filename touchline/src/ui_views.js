@@ -74,7 +74,7 @@ function render(){
   const C=App.C; const us=Sx(C.userSid); C.flags=C.flags||{};
   if(App.route==='news'&&C.news[0]) C.flags.newsSeen=Math.max(...C.news.map(n=>parseInt(n.id.slice(1),36)||0));
   if(App.route==='dev') C.flags.evalYear=C.year;
-  const view=(VIEWS[App.route]||VIEWS.office)();
+  const vf=VIEWS[App.route]||VIEWS.office; const view=typeof v17View==='function'?v17View(vf):vf();
   const badges=navBadges(C);
   const sideHtml=`<nav class="side" aria-label="Main">
     <div class="brand"><div class="brand-logo">${logo(us,48)}</div><div class="brand-t"><b>TOUCHLINE</b><small>${esc(us.town)} ${esc(us.mascot)}</small></div></div>
@@ -90,7 +90,7 @@ function render(){
     ${App.simMenu?`<div class="menu" role="menu"><button role="menuitem" data-a="simAhead" data-k="round">Quick sim this round<span>Plays your match without watching</span></button>${['preseason','regular'].includes(C.phase)?`<button role="menuitem" data-a="simAhead" data-k="regular">Sim to end of regular season<span>Stops before Sectionals</span></button>`:''}<button role="menuitem" data-a="simAhead" data-k="season">Sim to end of season<span>Through the State final and awards</span></button></div>`:''}</div>
   </header>${trackerHtml(C)}`;
   const y=window.scrollY;
-  app.innerHTML = sideHtml + `<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
+  if(!(typeof v17Swap==='function'&&v17Swap(app,sideHtml,top,view))) app.innerHTML = sideHtml + `<div class="main">${top}<main class="content view-${App.route}" id="content">${view}</main></div>`;
   if(App.keepScroll) window.scrollTo(0,y); App.keepScroll=false;
   paintSaveState(); renderModal();
 }
