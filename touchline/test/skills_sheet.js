@@ -10,7 +10,7 @@ const OUT=path.join(__dirname,'shots','v186','skills'); fs.mkdirSync(OUT,{recurs
   const page=await browser.newPage({viewport:{width:1100,height:640}});
   const errs=[]; page.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
   await page.goto(DIST+'#anim-lab'); await page.waitForTimeout(900);
-  await page.evaluate(([s,r,o])=>{ PREFS.renderer=r==='3d'?'3d':'2d'; if(o.length) window.__seq=o; labRun(s); },[scen,rend,only]);
+  await page.evaluate(([s,r,o])=>{ PREFS.renderer=r==='3d'?'3d':'2d'; if(o.length){ window.__seq=o; window.__v186seq=o; } labRun(s); },[scen,rend,only]);
   await page.waitForFunction(()=>App.labSt&&App.labSt._v186lab,null,{timeout:150000});
   await page.evaluate(v=>{ if(v){ PREFS.view=v; App.labSt.mode=v; } },process.env.V186VIEW||'');
   await page.evaluate(()=>{ const st=App.labSt; if(window.__seq) st._v186seq=window.__seq; const P=[...st.players.values()]; const fw=P.filter(p=>p.side===0)[9]; st.focus=fw; window.__fw=fw;

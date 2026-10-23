@@ -419,7 +419,7 @@ labRun=function(scen){ const r=_v186sLabRun.apply(this,arguments); if(scen!=='sk
     /* everyone else out of the way, holding shape */
     for(const q of P){ if(q!==fw&&q!==def&&!q.gk){ q.ov={x:q.side===0?20+q.y*0.2:85+q.y*0.1,y:q.y}; } }
     let n=0;
-    while(alive()){ const seq=st._v186seq||V186S_LABSEQ; const k=seq[n++%seq.length]; const known=v186sKnows(k,fw.v186lv,fw.v186fl); st._v186force=known?k:null; st._v186forceK=k; st.zoomTo(0.42); st.focus=null;
+    while(alive()){ const seq=st._v186seq||(typeof window!=="undefined"&&window.__v186seq)||V186S_LABSEQ; const k=seq[n++%seq.length]; const known=v186sKnows(k,fw.v186lv,fw.v186fl); st._v186force=known?k:null; st._v186forceK=k; st.zoomTo(0.42); st.focus=null;
       await st.gain(fw); if(!alive()) return; fw.x=46; fw.y=44; fw.vx=0; fw.vy=0; fw.ov={x:47,y:44}; def.x=V186S_MV[k].turn?57.5:60; def.y=44; def.ov=null; def.vx=0; def.vy=0; def.v186rT=null; st.cam.x=58;
       await st.wait(st.D(500)); if(!alive()) return;
       if(!V186S_MV[k].turn){ def.ov={x:59,y:44}; const g=st.dribble(fw,70,44.5,2400); await st.until(()=>Math.hypot(fw.x-def.x,fw.y-def.y)<4.2,3000); def.ov=null; await g; }
