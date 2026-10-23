@@ -20,7 +20,7 @@ const api={
   fail(t,m){onFail(t,m)},
   over:()=>!cur||cur.over,
   shake(){board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake')},
-  coach(t){$('#coach').innerHTML=t},
+  coach(t){const c=$('#coach');if(c._t===t)return;c._t=t;c.innerHTML=t;if(t){c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump')}},
   setTip(h){$('#instr').innerHTML=h},
   flash(e,ms=2600){e.classList.add('hint');clearTimeout(e._ht);e._ht=setTimeout(()=>e.classList.remove('hint'),ms)},
   good(e,o={}){
@@ -44,7 +44,7 @@ function startLevel(n,opts={}){
   $('#ptitle').textContent=daily?'📅 Daily Challenge':bonus?`👑 Level ${n}`:'Level '+n;
   $('.ptitle').classList.toggle('bonus',bonus||daily);
   $('#psub').textContent=INFO[type].icon+' '+INFO[type].name+(bonus?' · BONUS 2× coins':daily?' · big reward!':'');
-  $('#instr').textContent=INFO[type].tip;$('#coach').textContent='';
+  $('#instr').textContent=INFO[type].tip;api.coach('');
   cur={level:n,type,daily,bonus,over:false,history:[],puz:null,combo:0,hinted:false,last:null};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
@@ -66,8 +66,8 @@ function resetNudge(full){
 $('#play').addEventListener('pointerdown',()=>resetNudge());
 function showHowTo(type,done){
   const h=HOWTO[type],i=INFO[type];
-  openModal(`<h2>${i.icon} ${i.name}</h2><p class="goal"><b>Goal:</b> ${h.goal}</p><div class="demo">${h.demo()}</div><ol class="steps">${h.steps.map(t=>`<li>${t}</li>`).join('')}</ol>`,
-    [{label:'Got it! ▶',cls:'big',fn:()=>{S.seen[type]=true;save();closeModal();if(done)done()}}]);
+  openModal(`<div class="kicker">How to play</div><h2>${i.name}</h2><p class="goal"><b>Goal</b> ${h.goal}</p><div class="demo">${h.demo()}</div><ol class="steps">${h.steps.map(t=>`<li>${t}</li>`).join('')}</ol>`,
+    [{label:'Got it! ▶',cls:'big',fn:()=>{S.seen[type]=true;save();closeModal();if(done)done()}}],{icon:i.icon,cls:'howto'});
 }
 function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null;clearTimeout(nudgeT)}
 function undo(){
@@ -87,11 +87,11 @@ function skipLevel(){
   if(!cur||cur.over||cur.daily)return;
   const n=cur.level,hasToken=S.skips>0;
   openModal(`<h2>Skip level?</h2><p>Move on to the next level. This level stays unstarred so you can come back for stars later.</p>
-    <div class="reward">${hasToken?'⏭️ Use 1 skip token':`<i class="coin"></i>${SKIP_COST}`}</div>`,
+    <div class="reward cost">${hasToken?'<span>Use 1 skip token</span>':`<i class="coin"></i><b>${SKIP_COST}</b>`}</div>`,
     [{label:'Cancel',cls:'sec',fn:closeModal},{label:'Skip ⏭️',fn:()=>{
       if(hasToken)S.skips--;else if(S.coins>=SKIP_COST)S.coins-=SKIP_COST;else{closeModal();toast('Not enough coins');sfx.bad();return}
       if(S.unlocked<=n)S.unlocked=n+1;S.streak=0;save();refreshHUD();startLevel(n+1);
-    }}]);
+    }}],{icon:'⏭️'});
 }
 function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);
@@ -123,27 +123,29 @@ function onWin(stars){
   setTimeout(()=>{
     if(cur!==me)return;
     const lvFrom=xr.from,needFrom=xpNeed(lvFrom.lv);
-    openModal(`<div class="rays"></div>
-      <div class="ribbon ${daily||me.bonus?'gold':''}">${daily?'DAILY CLEAR!':me.bonus?'BONUS CLEAR!':`LEVEL ${n} CLEAR!`}</div>
-      <div class="bigstars">${[0,1,2].map(i=>STAR.replace('<svg','<svg style="animation-delay:'+(i*.38+.25)+'s" class="'+(i<stars?'on':'')+'"')).join('')}</div>
-      <div class="reward"><i class="coin"></i>+<span id="cntUp">0</span></div>
-      <div class="xpline"><span id="xpLv">Lv ${lvFrom.lv}</span><div class="bar"><div id="xpFill" style="width:${lvFrom.xp/needFrom*100}%"></div></div><span>+${xpGain} XP</span></div>
+    openModal(`<svg class="sdefs" width="0" height="0" aria-hidden="true"><defs><linearGradient id="hudSG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb,var(--acc) 30%,#fff)"/><stop offset=".5" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--acc) 65%,#e05a00)"/></linearGradient></defs></svg><div class="rays"></div><div class="rays r2"></div><div class="wglow"></div>
+      <div class="ribbon ${daily||me.bonus?'gold':''}"><span>${daily?'DAILY CLEAR!':me.bonus?'BONUS CLEAR!':`LEVEL ${n} CLEAR!`}</span></div>
+      <div class="bigstars">${[0,1,2].map(i=>`<div class="sock ${i<stars?'on':''}" style="--d:${i*.38+.25}s">${STAR}</div>`).join('')}</div>
+      <div class="verdict" style="--d:${stars*.38+.35}s">${stars===3?'PERFECT!':stars===2?'GREAT JOB!':'CLEARED!'}</div>
+      <div class="reward"><i class="coin"></i><b>+<span id="cntUp">0</span></b></div>
+      <div class="xpline"><span class="lvb" id="xpLv">Lv ${lvFrom.lv}</span><div class="bar"><div id="xpFill" style="width:${lvFrom.xp/needFrom*100}%"></div></div><span class="xpg">+${xpGain} XP</span></div>
       <div id="lvSlot"></div>
       ${me.bonus?'<div class="extra gold">👑 Bonus level: double coins!</div>':''}
       ${daily?`<div class="extra gold">📅 Daily streak: ${dstreak} day${dstreak>1?'s':''}! Come back tomorrow</div>`:''}
       ${streakBonus?`<div class="extra">🔥 3-star streak ×${S.streak}: +${streakBonus}</div>`:''}
       ${stars>prev&&prev>0?`<div class="extra">🏅 New best!</div>`:''}
       ${chest?`<div class="extra gold">🎁 Star chest opened: +${chest} coins!</div>`:''}
-      ${stars===3?'<p>Perfect! ✨</p>':near>0?`<p class="nearmiss">So close! Just ${near} move${near>1?'s':''} from ${stars===2?'★★★':'★★'}. Replay?</p>`:'<p>Replay to chase 3 stars!</p>'}`,
+      ${stars===3?'':near>0?`<p class="nearmiss">So close! Just ${near} move${near>1?'s':''} from ${stars===2?'★★★':'★★'}. Replay?</p>`:'<p>Replay to chase 3 stars!</p>'}`,
       daily?[{label:'Home',cls:'sec',fn:()=>{closeModal();exitLevel();show('home')}},{label:'Keep playing ▶',cls:'big',fn:()=>startLevel(S.unlocked)}]
       :[{label:'Levels',cls:'sec sm',fn:()=>{closeModal();exitLevel();show('map')}},
        {label:'Replay',cls:'sec sm',fn:()=>startLevel(n)},
-       {label:'Next ▶',cls:'big',fn:()=>startLevel(n+1)}]);
-    for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars svg')[i];if(s){const[x,y]=centerOf(s);burst(x,y,'#ffd166',22,1.1);ring(x,y,'#ffd166',140)}},(i*.38+.5)*1000);
+       {label:'Next ▶',cls:'big',fn:()=>startLevel(n+1)}],{cls:'win'});
+    for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',26+i*8,1.1+i*.15);ring(x,y,'#ffd166',150+i*30);ring(x,y,'#fff',90,420);
+      const c=$('#modal .card');if(c&&c.animate)c.animate([{transform:'none'},{transform:`translateY(${5+i*2}px) scale(.985)`},{transform:'none'}],{duration:220,easing:'ease-out'})}},(i*.38+.58)*1000);
     // coin count-up
     const total=coins,t0=performance.now()+300,dur=900;let lt=0;
     const countUp=t=>{const e=$('#cntUp');if(!e||cur!==me)return;const k=clamp((t-t0)/dur,0,1);e.textContent=Math.round(total*(1-Math.pow(1-k,3)));
-      if(k>0&&k<1&&t-lt>70){lt=t;sfx.tick(1.5+k)}if(k<1)requestAnimationFrame(countUp)};
+      if(k>0&&k<1&&t-lt>70){lt=t;sfx.tick(1.5+k)}if(k<1)requestAnimationFrame(countUp);else{const r=$('#modal .reward');if(r)r.classList.add('done')}};
     requestAnimationFrame(countUp);
     setTimeout(()=>{if(cur===me)flyCoins($('.reward .coin'),Math.min(12,4+total/4|0))},600+stars*380);
     // XP bar (with level-up flourish)
@@ -166,16 +168,17 @@ function onWin(stars){
 function onFail(title,msg){
   if(cur.over)return;cur.over=true;sfx.fail();buzz(200);api.meh();
   const me=cur;
-  setTimeout(()=>cur===me&&openModal(`<h2>${title}</h2><div style="font-size:64px;margin:6px 0">😵‍💫</div><p>${msg}</p>`,[
+  setTimeout(()=>cur===me&&openModal(`<div class="kicker">${me.daily?'Daily challenge':'Level '+me.level}</div><h2>${title}</h2><p>${msg}</p><div class="failtip">💡 Stuck? A hint shows the best next move</div>`,[
     me.daily?{label:'Home',cls:'sec sm',fn:()=>{closeModal();exitLevel();show('home')}}:{label:'Levels',cls:'sec sm',fn:()=>{closeModal();exitLevel();show('map')}},
-    {label:'Try again 🔄',cls:'big',fn:()=>startLevel(me.level,{daily:me.daily})}]),700);
+    {label:'Try again 🔄',cls:'big',fn:()=>startLevel(me.level,{daily:me.daily})}],{icon:'😵‍💫',cls:'fail'}),700);
 }
 
 /* ====================== modal / screens ====================== */
 function openModal(html,btns,o={}){
-  const m=$('#modal');m.innerHTML=`<div class="card ${o.wide?'wide':''}"${o.still?' style="animation:none"':''}>${html}<div class="mbtns"></div></div>`;
+  const m=$('#modal'),st=o.still?' style="animation:none"':'';
+  m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}"${st}>${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}<div class="mbtns"></div></div>`;
   const row=$('.mbtns',m);
-  btns.forEach(b=>{const x=el('button','btn '+(b.cls||''),b.label);x.onclick=()=>{sfx.click();b.fn(x)};row.appendChild(x)});
+  btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);x.onclick=()=>{sfx.click();b.fn(x)};row.appendChild(x)});
   m.classList.add('on');
 }
 function closeModal(){$('#modal').classList.remove('on')}

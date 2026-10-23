@@ -21,6 +21,15 @@ An endless puzzle game that runs in the browser. Just open `index.html`; there i
 - **Accessibility**: colour-blind symbols, reduced-motion support, and haptics and audio toggles.
 - Progress is saved in `localStorage`, and older saves are migrated automatically.
 
-Code layout: `css/style.css`, `js/core.js` (helpers, saves, themes, level generation), `js/audio.js`, `js/fx.js`,
-`js/meta.js` (XP, quests, trophies, daily, spin, settings), `js/puzzles.js`, `js/ui.js` (screens and game flow).
+Code layout:
+- `css/style.css` is the base. `css/menus.css`, `hud.css`, `games-grid.css` and `games-fluid.css` add per-area styling on top.
+- `js/core.js`: helpers, saves, themes, level generation.
+- `js/audio.js`, `js/fx.js`: sound and visual effects.
+- `js/meta.js`: XP, quests, trophies, daily, spin, settings.
+- `js/howto.js`: the how-to cards.
+- `js/puzzles-grid.js`: Lights Out, Spin Lock, Slide Tiles.
+- `js/puzzles-fluid.js`: Flood, Tubes, Echo Pads.
+- `js/screens.js`: home, map, shop.
+- `js/ui.js`: game flow, popups, HUD.
+
 See `PLAN.md` for the update plan.

@@ -50,10 +50,11 @@ const allQuestsClaimed=()=>S.quests.list.every(q=>q.claimed);
 function questsReady(){ensureQuests();return S.quests.list.filter(q=>q.v>=q.n&&!q.claimed).length+(allQuestsClaimed()&&!S.quests.bonus?1:0)}
 function showQuests(still){
   ensureQuests();const L=S.quests.list,allC=allQuestsClaimed();
-  openModal(`<h2>📜 Daily Quests</h2><p>Fresh quests in ${fmtTime(untilMidnight())}</p><div class="qlist">${L.map((q,i)=>{const T=QT[q.k],done=q.v>=q.n;
-    return`<div class="quest ${q.claimed?'claimed':done?'ready':''}"><div class="qi">${T.ic}</div><div class="qt"><b>${T.txt(q.n,q.p)}</b><div class="bar"><div style="width:${q.v/q.n*100}%"></div></div><small>${q.v} / ${q.n} · <i class="coin"></i> ${q.r} + 15 XP</small></div>${q.claimed?'✅':done?`<button class="btn sm" data-q="${i}">Claim</button>`:''}</div>`}).join('')}
-    <div class="quest ${allC?(S.quests.bonus?'claimed':'ready'):''}"><div class="qi">🎁</div><div class="qt"><b>Finish all 3 quests</b><small>Bonus chest · <i class="coin"></i> 100 + 💡 1</small></div>${allC&&!S.quests.bonus?'<button class="btn sm pink" data-q="bonus">Open!</button>':S.quests.bonus?'✅':'🔒'}</div></div>`,
-    [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,still});
+  const nDone=L.filter(q=>q.v>=q.n).length;
+  openModal(`<h2>Daily Quests</h2><p class="qtimer">⏱ Fresh quests in <b>${fmtTime(untilMidnight())}</b></p><div class="qlist">${L.map((q,i)=>{const T=QT[q.k],done=q.v>=q.n;
+    return`<div class="quest ${q.claimed?'claimed':done?'ready':''}" style="--i:${i}"><div class="qi">${T.ic}</div><div class="qt"><b>${T.txt(q.n,q.p)}</b><div class="qbar"><div class="bar"><div style="width:${q.v/q.n*100}%"></div></div><em>${q.v}/${q.n}</em></div><div class="rchips"><span class="rc"><i class="coin"></i>${q.r}</span><span class="rc xp">+15 XP</span></div></div>${q.claimed?'<div class="qdone">✓</div>':done?`<button class="btn sm" data-q="${i}">Claim</button>`:''}</div>`}).join('')}
+    <div class="quest bonusq ${allC?(S.quests.bonus?'claimed':'ready'):''}" style="--i:3"><div class="qi">🎁</div><div class="qt"><b>Finish all 3 quests</b><div class="qpips">${L.map((q,i)=>`<i class="${i<nDone?'on':''}"></i>`).join('')}</div><div class="rchips"><span class="rc"><i class="coin"></i>100</span><span class="rc">💡 1</span></div></div>${allC&&!S.quests.bonus?'<button class="btn sm pink" data-q="bonus">Open!</button>':S.quests.bonus?'<div class="qdone">✓</div>':'<div class="qlock">🔒</div>'}</div></div>`,
+    [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,still,icon:'📜',cls:'quests'});
   $$('#modal [data-q]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.q;let coins;
     if(k==='bonus'){S.quests.bonus=true;coins=100;S.hints++}
@@ -98,19 +99,20 @@ function checkAch(){
 }
 const achCount=()=>ACH.filter(a=>S.ach[a.id]).length;
 function showTrophies(){
-  openModal(`<h2>🏆 Trophies</h2><p>${achCount()} of ${ACH.length} unlocked</p><div class="achgrid">${ACH.map(a=>`<div class="ach ${S.ach[a.id]?'got':''}"><i>${a.ic}</i><div><b>${a.name}</b><small>${a.desc} · 🪙${a.r}</small></div></div>`).join('')}</div>`,
-    [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true});
+  const n=achCount();
+  openModal(`<h2>Trophies</h2><div class="achprog"><div class="bar"><div style="width:${n/ACH.length*100}%"></div></div><span><b>${n}</b> / ${ACH.length}</span></div><div class="achgrid">${ACH.map((a,i)=>{const got=S.ach[a.id],tier=a.r>=150?'gold':a.r>=60?'silver':'bronze';
+    return`<div class="ach ${got?'got':''} ${tier}" style="--i:${i}"><div class="am"><i>${a.ic}</i>${got?'':'<em>🔒</em>'}</div><b>${a.name}</b><small>${a.desc}</small><span class="rc"><i class="coin"></i>${a.r}</span></div>`}).join('')}</div>`,
+    [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,icon:'🏆',cls:'trophies'});
 }
 function showProfile(){
   const s=S.stats;
-  openModal(`<h2>${rankOf(S.plv)}</h2><p>Player level ${S.plv} · ${S.xp} / ${xpNeed(S.plv)} XP</p>
-    <div class="bar" style="margin:0 10px"><div style="width:${S.xp/xpNeed(S.plv)*100}%"></div></div>
-    <div class="stats"><div><b>${s.wins}</b><small>Levels cleared</small></div><div><b>${totalStars()}</b><small>Stars</small></div>
-    <div><b>${s.perfect}</b><small>Perfect clears</small></div><div><b>${s.bestStreak}</b><small>Best 3★ streak</small></div>
-    <div><b>×${s.maxCombo}</b><small>Best combo</small></div><div><b>${s.daily}</b><small>Daily challenges</small></div>
-    <div><b>${achCount()}/${ACH.length}</b><small>Trophies</small></div><div><b>${S.login.streak}</b><small>Login streak</small></div></div>
-    <p>Next rank: <b>${RANKS[Math.min(RANKS.length-1,Math.floor((S.plv-1)/3)+1)]}</b> at level ${(Math.floor((S.plv-1)/3)+1)*3+1}</p>`,
-    [{label:'Close',cls:'sec',fn:closeModal}]);
+  const sd=(ic,v,l)=>`<div><i>${ic}</i><b>${v}</b><small>${l}</small></div>`;
+  openModal(`<div class="kicker">Player level ${S.plv}</div><h2>${rankOf(S.plv)}</h2>
+    <div class="xpline prof"><div class="bar"><div style="width:${S.xp/xpNeed(S.plv)*100}%"></div></div><span class="xpg">${S.xp} / ${xpNeed(S.plv)} XP</span></div>
+    <div class="stats">${sd('🧩',s.wins,'Levels cleared')}${sd('⭐',totalStars(),'Stars')}${sd('✨',s.perfect,'Perfect clears')}${sd('🔥',s.bestStreak,'Best 3★ streak')}
+    ${sd('⚡','×'+s.maxCombo,'Best combo')}${sd('📅',s.daily,'Daily challenges')}${sd('🏆',achCount()+'/'+ACH.length,'Trophies')}${sd('🎁',S.login.streak,'Login streak')}</div>
+    <p class="nextrank">Next rank: <b>${RANKS[Math.min(RANKS.length-1,Math.floor((S.plv-1)/3)+1)]}</b> at level ${(Math.floor((S.plv-1)/3)+1)*3+1}</p>`,
+    [{label:'Close',cls:'sec',fn:closeModal}],{icon:`<b class="plv">${S.plv}</b>`,cls:'profcard'});
 }
 
 /* ---------- daily login calendar ---------- */
@@ -119,14 +121,14 @@ const loginDue=()=>S.login.last!==today();
 function showLogin(){
   const d=today(),streak=S.login.last===d-1?S.login.streak:0,idx=streak%7;
   const txt=r=>[r.c?`🪙${r.c}`:'',r.h?`💡${r.h}`:'',r.s?`⏭️${r.s}`:''].filter(Boolean).join(' ');
-  openModal(`<h2>🎁 Daily Reward</h2><p>${streak?`🔥 ${streak}-day streak! Come back tomorrow for more.`:'Log in every day for bigger rewards!'}</p>
-    <div class="days">${LOGIN.map((r,i)=>`<div class="day ${i<idx?'got':i===idx?'now':''} ${i===6?'big':''}"><small>Day ${i+1}</small><i>${r.ic}</i><b>${txt(r)}</b></div>`).join('')}</div>`,
+  openModal(`<h2>Daily Reward</h2><p>${streak?`🔥 <b>${streak}-day streak!</b> Come back tomorrow for more.`:'Log in every day for bigger rewards!'}</p>
+    <div class="days">${LOGIN.map((r,i)=>`<div class="day ${i<idx?'got':i===idx?'now':''} ${i===6?'big':''}" style="--i:${i}"><small>Day ${i+1}</small><i>${r.ic}</i><b>${txt(r)}</b></div>`).join('')}</div>`,
     [{label:'Claim!',cls:'big',fn:b=>{
       const r=LOGIN[idx];S.login={last:d,streak:streak+1};S.stats.bestLogin=Math.max(S.stats.bestLogin,streak+1);
       S.coins+=r.c||0;S.hints+=r.h||0;S.skips+=r.s||0;save();
       sfx.chest();const now_=$('.day.now');if(now_){const[x,y]=centerOf(now_);burst(x,y,'#ffd166',40,1.4)}flyCoins(now_,10);
-      setTimeout(()=>{closeModal();checkAch();renderHome()},700);
-    }}]);
+      now_&&now_.classList.add('dayclaim');setTimeout(()=>{closeModal();checkAch();renderHome()},700);
+    }}],{icon:'🎁',cls:'login'});
 }
 
 /* ---------- daily challenge ---------- */
@@ -149,18 +151,18 @@ function showSpin(){
   const grad=`radial-gradient(circle,transparent 58%,#00000030 59%,transparent 61%),conic-gradient(${WHEEL.map((w,i)=>`${w.col} ${i*seg}deg ${(i+1)*seg-.6}deg,#fff8 ${(i+1)*seg-.6}deg ${(i+1)*seg}deg`).join(',')})`;
   const free=spinReady();
   openModal(`<h2>🎡 Lucky Spin</h2><p id="spinTxt">${free?'Your free spin is ready!':`Next free spin in ${fmtTime(S.spinAt-Date.now())}`}</p>
-    <div class="wheelwrap"><div class="bulbs">${[...Array(16)].map((_,i)=>{const a=i/16*Math.PI*2;return`<i style="left:${50+50*Math.sin(a)}%;top:${50-50*Math.cos(a)}%;animation-delay:${(i%2)*.5}s"></i>`}).join('')}</div>
+    <div class="wheelwrap"><div class="rim"></div><div class="bulbs">${[...Array(20)].map((_,i)=>{const a=i/20*Math.PI*2;return`<i style="left:${50+50*Math.sin(a)}%;top:${50-50*Math.cos(a)}%;animation-delay:${(-i/20*1.2).toFixed(2)}s"></i>`}).join('')}</div>
     <div class="wheel" id="wheel" style="background:${grad};transform:rotate(${wheelAng}deg)">${WHEEL.map((w,i)=>`<div class="lb" style="transform:rotate(${(i+.5)*seg}deg)"><span>${w.c?'<i class="coin"></i>':''}${w.t}</span></div>`).join('')}</div>
-    <div class="hub">⭐</div><svg class="ptr" id="ptr" viewBox="0 0 32 40"><path d="M16 40L2 8a14 14 0 1 1 28 0z" fill="#fff"/><circle cx="16" cy="12" r="5" fill="var(--acc2)"/></svg></div>`,
+    <div class="gloss"></div><div class="hub"><span>⭐</span></div><svg class="ptr" id="ptr" viewBox="0 0 32 40"><defs><linearGradient id="ptrg" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#ffe9a8"/><stop offset="1" stop-color="#d9a400"/></linearGradient></defs><path d="M16 40L2 8a14 14 0 1 1 28 0z" fill="url(#ptrg)" stroke="#7a4b00" stroke-width="1.5"/><circle cx="16" cy="12" r="5" fill="var(--acc2)" stroke="#fff" stroke-width="1.5"/></svg></div>`,
     [{label:'Close',cls:'sec',fn:()=>{if(!spinning){closeModal();renderHome()}}},
-     {label:free?'SPIN! 🎡':`Spin · <i class="coin"></i> ${SPIN_COST}`,cls:free?'big':'',fn:()=>doSpin()}]);
+     {label:free?'SPIN! 🎡':`Spin · <i class="coin"></i> ${SPIN_COST}`,cls:free?'big':'',fn:()=>doSpin()}],{cls:'spin'});
 }
 function doSpin(){
   if(spinning)return;
   const free=spinReady();
   if(!free){if(S.coins<SPIN_COST){toast('Not enough coins');sfx.bad();return}S.coins-=SPIN_COST;refreshCoins()}
   else S.spinAt=Date.now()+SPIN_CD;
-  save();spinning=true;$$('#modal .mbtns .btn').forEach(b=>b.disabled=true);
+  save();spinning=true;$$('#modal .mbtns .btn').forEach(b=>b.disabled=true);const ww=$('.wheelwrap');if(ww)ww.classList.add('going');
   const tot=WHEEL.reduce((a,w)=>a+w.w,0);let r=Math.random()*tot,i=0;while(r>=WHEEL[i].w){r-=WHEEL[i].w;i++}
   const seg=360/WHEEL.length,start=wheelAng,base=((-(i+.5)*seg-start)%360+360)%360;
   const end=start+360*6+base+(Math.random()-.5)*seg*.6,T=4600,t0=performance.now(),wh=$('#wheel'),ptr=$('#ptr');
@@ -181,16 +183,16 @@ function doSpin(){
 
 /* ---------- settings ---------- */
 function showSettings(){
-  const sw=(k,label,sub)=>`<div class="set"><b>${label}${sub?`<small>${sub}</small>`:''}</b><button class="sw ${S[k]?'on':''}" data-k="${k}" aria-label="${label}"></button></div>`;
-  openModal(`<h2>⚙️ Settings</h2>
-    ${sw('music','🎵 Music','Relaxing generative soundtrack')}<div class="set"><b>Music volume</b><input type="range" min="0" max="1" step=".05" value="${S.musVol}" data-v="musVol"></div>
-    ${sw('sfx','🔊 Sound effects')}<div class="set"><b>Effects volume</b><input type="range" min="0" max="1" step=".05" value="${S.sfxVol}" data-v="sfxVol"></div>
-    ${sw('haptics','📳 Vibration')}${sw('symbols','🔣 Colour symbols','Shapes on colours, helps colour-blind players')}
-    <div class="set"><b>Reset progress<small>Erases all levels, coins and trophies</small></b><button class="btn sm sec" id="resetBtn">Reset</button></div>`,
-    [{label:'Done',fn:()=>{closeModal();refreshHUD()}}]);
+  const sw=(k,ic,label,sub)=>`<div class="set"><span class="si">${ic}</span><b>${label}${sub?`<small>${sub}</small>`:''}</b><button class="sw ${S[k]?'on':''}" data-k="${k}" aria-label="${label}"></button></div>`;
+  const rg=(k,label)=>`<div class="set rng"><span class="si"></span><b>${label}</b><input type="range" min="0" max="1" step=".05" value="${S[k]}" data-v="${k}" style="--p:${S[k]*100}%"></div>`;
+  openModal(`<h2>Settings</h2>
+    <div class="sgroup"><div class="sgh">Sound</div>${sw('music','🎵','Music','Relaxing generative soundtrack')}${rg('musVol','Volume')}${sw('sfx','🔊','Sound effects')}${rg('sfxVol','Volume')}</div>
+    <div class="sgroup"><div class="sgh">Gameplay</div>${sw('haptics','📳','Vibration')}${sw('symbols','🔣','Colour symbols','Shapes on colours, helps colour-blind players')}</div>
+    <div class="sgroup danger"><div class="sgh">Danger zone</div><div class="set"><span class="si">🗑️</span><b>Reset progress<small>Erases all levels, coins and trophies</small></b><button class="btn sm sec" id="resetBtn">Reset</button></div></div>`,
+    [{label:'Done',fn:()=>{closeModal();refreshHUD()}}],{icon:'⚙️',cls:'settings'});
   $$('#modal .sw').forEach(b=>b.onclick=()=>{const k=b.dataset.k;S[k]=!S[k];b.classList.toggle('on',S[k]);save();applyVolumes();audio();if(k==='music'&&S.music)Music.start();sfx.click();if(k==='haptics')buzz(30)});
-  $$('#modal input[type=range]').forEach(r=>r.oninput=()=>{S[r.dataset.v]=+r.value;applyVolumes();save()});
+  $$('#modal input[type=range]').forEach(r=>r.oninput=()=>{S[r.dataset.v]=+r.value;r.style.setProperty('--p',r.value*100+'%');applyVolumes();save()});
   $$('#modal input[type=range]').forEach(r=>r.onchange=()=>sfx.good());
   $('#resetBtn').onclick=()=>openModal('<h2>Erase everything?</h2><p>All levels, stars, coins, themes and trophies will be lost. This cannot be undone.</p>',
-    [{label:'Cancel',cls:'sec',fn:showSettings},{label:'Erase',cls:'pink',fn:()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}]);
+    [{label:'Cancel',cls:'sec',fn:showSettings},{label:'Erase',cls:'pink',fn:()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}],{icon:'⚠️',cls:'fail'});
 }

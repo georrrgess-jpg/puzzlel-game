@@ -1,6 +1,9 @@
 'use strict';
 /* ====================== FLUID PUZZLES: Colour Flood, Sort Tubes, Echo Pads ======================
    Same `api` contract as js/puzzles-grid.js. */
+const FL_RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const flRing=(...a)=>{if(typeof ring==='function')ring(...a)};
+const flBurst=(...a)=>{if(typeof burst==='function')burst(...a)};
 /* ---------- Colour Flood ---------- */
 MAKERS.flood=function({R,tier,board,api}){
   const n=Math.min(14,6+tier),nc=Math.min(6,4+Math.floor(tier/2));
@@ -11,6 +14,13 @@ MAKERS.flood=function({R,tier,board,api}){
     for(let h=0;h<q.length;h++){const p=q[h],x=p%n,y=(p/n)|0;
       for(const[dx,dy]of NB){const X=x+dx,Y=y+dy;if(X<0||Y<0||X>=n||Y>=n)continue;const m=Y*n+X;if(!seen[m]&&g[m]===col){seen[m]=1;q.push(m)}}}
     return q;
+  }
+  /* BFS distance from the corner through the owned region (-1 = not owned): drives the wavefront */
+  function regionDist(g){
+    const col=g[0],d=new Int16Array(n*n).fill(-1),q=[0];d[0]=0;
+    for(let h=0;h<q.length;h++){const p=q[h],x=p%n,y=(p/n)|0;
+      for(const[dx,dy]of NB){const X=x+dx,Y=y+dy;if(X<0||Y<0||X>=n||Y>=n)continue;const m=Y*n+X;if(d[m]<0&&g[m]===col){d[m]=d[p]+1;q.push(m)}}}
+    return d;
   }
   function fill(g,col){for(const p of region(g))g[p]=col}
   const gainOf=(g,c)=>{if(c===g[0])return 0;const t=g.slice();fill(t,c);return region(t).length-region(g).length};
@@ -23,18 +33,24 @@ MAKERS.flood=function({R,tier,board,api}){
   const wrap=el('div','floodwrap');
   const gridEl=el('div','floodgrid');gridEl.style.gridTemplateColumns=`repeat(${n},1fr)`;
   const cellEls=grid.map(()=>{const c=el('i');gridEl.appendChild(c);return c});
-  const prog=el('div','fprog','<div class="bar"><div></div></div>'),pbar=prog.querySelector('.bar>div');
+  const prog=el('div','fprog','<div class="bar"><div></div></div><b class="fpct">0%</b>'),pbar=prog.querySelector('.bar>div'),pct=prog.querySelector('.fpct');
   const btns=el('div','cbtns');
-  const bEls=[...Array(nc).keys()].map(c=>{const b=el('button','cbtn');b.style.background=COLORS[c];b.onclick=()=>pick(c);btns.appendChild(b);return b});
+  const bEls=[...Array(nc).keys()].map(c=>{const b=el('button','cbtn');b.style.setProperty('--c',COLORS[c]);b.onclick=()=>pick(c);btns.appendChild(b);return b});
   wrap.append(gridEl,prog,btns);board.appendChild(wrap);api.stagger(bEls,60);
   gridEl.classList.add('popin');
   function render(animate,fresh){
-    const reg=new Set(region(grid));
+    const reg=new Set(region(grid)),dist=regionDist(grid);
+    let maxd=1;for(const v of dist)if(v>maxd)maxd=v;
+    const step=Math.min(34,620/maxd),dl=i=>Math.round(dist[i]*step)+'ms';
     cellEls.forEach((c,i)=>{
-      c.style.transitionDelay=animate&&reg.has(i)?((i%n)+((i/n)|0))*16+'ms':'0ms';
+      c.style.transitionDelay=animate&&reg.has(i)?dl(i):'0ms';
       c.style.background=COLORS[grid[i]];c.classList.toggle('own',reg.has(i));c.textContent=S.symbols?SYMS[grid[i]]:'';
     });
-    if(fresh)fresh.forEach(i=>{const c=cellEls[i];c.style.animationDelay=((i%n)+((i/n)|0))*16+'ms';c.classList.remove('cap');void c.offsetWidth;c.classList.add('cap')});
+    if(fresh){fresh.forEach(i=>c0(i));void gridEl.offsetWidth;fresh.forEach(i=>{const c=cellEls[i];c.style.setProperty('--d',dl(i));c.style.animationDelay=dl(i);c.classList.add('cap')})}
+    function c0(i){cellEls[i].classList.remove('cap')}
+    const fr=reg.size/(n*n);
+    pbar.style.setProperty('--c',COLORS[grid[0]]);pct.textContent=Math.round(fr*100)+'%';
+    prog.classList.toggle('full',fr>=1);
     bEls.forEach((b,c)=>{b.classList.toggle('cur',c===grid[0]);b.classList.remove('hint');
       const g=training&&c!==grid[0]?gainOf(grid,c):0;b.innerHTML=(S.symbols?SYMS[c]:'')+(g?`<span class="gain">+${g}</span>`:'')});
     pbar.style.width=reg.size/(n*n)*100+'%';
@@ -47,7 +63,8 @@ MAKERS.flood=function({R,tier,board,api}){
     const old=new Set(region(grid));fill(grid,c);moves++;
     const now_=region(grid),fresh=now_.filter(i=>!old.has(i));
     sfx.pad(c+2);sfx.pour(1);buzz(10);
-    const[x,y]=centerOf(cellEls[0]);burst(x,y,COLORS[c],12,.9);
+    const[x,y]=centerOf(cellEls[0]);flBurst(x,y,COLORS[c],12,.9);if(!FL_RM)flRing(x,y,COLORS[c],gridEl.offsetWidth*.5,700);
+    if(!FL_RM)bEls[c].animate([{transform:'scale(.72) translateY(4px)'},{transform:'scale(1.14)',offset:.45},{transform:'scale(1)'}],{duration:420,easing:'cubic-bezier(.3,1.5,.5,1)'});
     render(true,fresh);api.commit();
     fresh.length>=Math.max(2,n/3)?api.good(bEls[c]):api.meh();
     if(now_.length===n*n)api.win(starsFor(moves,s3,s2));
@@ -107,17 +124,22 @@ MAKERS.tubes=function({R,tier,board,api}){
   const t0sol=solve(tubes);
   const par=t0sol?t0sol.length:nc*3;
   const s2=Math.ceil(par*1.4)+2;
-  let moves=0,sel=-1,hintPair=null,lastNew=null,lastFrom=-1;
+  let moves=0,sel=-1,hintPair=null,lastNew=null,lastFrom=-1,lastGhost=null;
   const wrap=el('div','tubes');if(tubes.length<=6)wrap.style.setProperty('--seg','clamp(30px,min(11vw,8dvh),48px)');board.appendChild(wrap);
   const tEls=tubes.map((_,i)=>{const t=el('div','tube');t.onclick=()=>tapTube(i);wrap.appendChild(t);return t});
   api.stagger(tEls,50);
   function render(){
     tubes.forEach((t,i)=>{
       const e=tEls[i];e.innerHTML='';
-      t.forEach((c,j)=>{const s=el('div','seg'+(lastNew&&lastNew.i===i&&j>=lastNew.from?' new':''),S.symbols?SYMS[c]:'');s.style.background=`linear-gradient(90deg,${COLORS[c]},color-mix(in srgb,${COLORS[c]} 78%,#000))`;if(lastNew&&lastNew.i===i)s.style.animationDelay=(j-lastNew.from)*60+'ms';e.appendChild(s)});
+      const isNew=j=>lastNew&&lastNew.i===i&&j>=lastNew.from,ghost=lastGhost&&lastGhost.i===i?lastGhost.segs:[];
+      t.forEach((c,j)=>{
+        const s=el('div','seg'+(isNew(j)?' new':'')+(j===t.length-1&&!ghost.length?' top':'')+(j&&t[j-1]===c?' same':''),S.symbols?SYMS[c]:'');
+        s.style.setProperty('--c',COLORS[c]);if(isNew(j))s.style.animationDelay=(FL_RM?0:230)+(j-lastNew.from)*90+'ms';e.appendChild(s)});
+      /* liquid that just left this tube drains away from the top */
+      ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',COLORS[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
+      if(t.length&&!FL_RM)for(let b=0;b<2;b++){const u=el('i','bub');u.style.setProperty('--n',t.length);u.style.left=(28+Math.random()*40)+'%';u.style.animationDelay=-(Math.random()*3+b*1.5).toFixed(2)+'s';e.appendChild(u)}
       e.classList.toggle('sel',i===sel);
       e.classList.toggle('done',t.length===cap&&uniform(t));
-      e.classList.toggle('tilt',i===lastFrom);
       e.classList.remove('hint');e.removeAttribute('data-h');
       const can=sel>=0&&i!==sel&&canPour(tubes,sel,i)>0;
       e.classList.toggle('ok',can);e.classList.toggle('no',sel>=0&&i!==sel&&!can);
@@ -139,16 +161,41 @@ MAKERS.tubes=function({R,tier,board,api}){
       render();return;
     }
     const from=sel,col=tubes[from][tubes[from].length-1],stacking=tubes[i].length>0;
-    flyDrops(tEls[from],tEls[i],COLORS[col],3+cnt*2);
-    const mv=tubes[from].splice(tubes[from].length-cnt,cnt);
-    lastNew={i,from:tubes[i].length};tubes[i].push(...mv);lastFrom=from;
+    const mv=tubes[from].splice(tubes[from].length-cnt,cnt),oldLen=tubes[i].length;
+    lastNew={i,from:oldLen};tubes[i].push(...mv);lastFrom=from;lastGhost={i:from,segs:mv};
     sel=-1;moves++;sfx.pour(cnt);buzz(10);
-    render();api.commit();lastFrom=-1;lastNew=null;
+    render();api.commit();lastFrom=-1;lastNew=null;lastGhost=null;
+    pourAnim(from,i,COLORS[col],cnt,oldLen);
     const finished=tubes[i].length===cap&&uniform(tubes[i]);
-    if(finished){setTimeout(sfx.done,250);const[x,y]=centerOf(tEls[i]);burst(x,y,COLORS[tubes[i][0]],24,1.1);ring(x,y,COLORS[tubes[i][0]],160)}
+    if(finished){const T=tEls[i],cc=COLORS[tubes[i][0]];setTimeout(()=>{sfx.done();if(!T.isConnected)return;const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
+      if(!FL_RM)T.animate([{filter:'brightness(1)'},{filter:'brightness(1.7)',offset:.25},{filter:'brightness(1)'}],{duration:700})},FL_RM?0:520)}
     if(stacking||finished)api.good(tEls[i],{silent:true});
     if(solved(tubes))api.win(starsFor(moves,par,s2));
     else if(!pourMoves(tubes).length){toast('No moves left — try Undo! ↩️');$('#undoBtn').classList.add('glow');setTimeout(()=>$('#undoBtn').classList.remove('glow'),3000)}
+  }
+  /* the source tube lifts, tilts over the target and pours a stream of liquid into it */
+  function pourAnim(from,to,color,cnt,oldLen){
+    const A=tEls[from],B=tEls[to];
+    if(FL_RM||!A.isConnected){return}
+    if(A._pa)A._pa.cancel();
+    const w=A.offsetWidth,h=A.offsetHeight,side=(B.offsetLeft+B.offsetWidth/2)>=(A.offsetLeft+w/2)?1:-1;
+    const dx=(B.offsetLeft+B.offsetWidth/2)-(A.offsetLeft+w/2),dy=(B.offsetTop+B.offsetHeight/2)-(A.offsetTop+h/2);
+    const th=side*74*Math.PI/180,lip=Math.max(18,h*.12);
+    const mx=-side*w*.18,my=-B.offsetHeight/2-lip;
+    const tx=dx+mx-Math.sin(th)*h/2,ty=dy+my+Math.cos(th)*h/2,deg=th*180/Math.PI;
+    A.style.zIndex=6;
+    const an=A.animate([
+      {transform:'translate(0,-22px) rotate(0deg)'},
+      {transform:`translate(${tx}px,${ty}px) rotate(${deg}deg)`,offset:.3,easing:'ease-in-out'},
+      {transform:`translate(${tx}px,${ty+3}px) rotate(${deg+side*8}deg)`,offset:.72,easing:'ease-in-out'},
+      {transform:'translate(0,0) rotate(0deg)'}],{duration:820,easing:'cubic-bezier(.4,0,.3,1)'});
+    A._pa=an;an.onfinish=an.oncancel=()=>{if(A._pa===an){A._pa=null;A.style.zIndex=''}};
+    /* stream from the lip down to where the new liquid lands */
+    const b=B.getBoundingClientRect(),land=B.querySelectorAll('.seg')[oldLen];
+    const sx=b.left+b.width/2+mx,sy=b.top-lip+4,ey=land?land.getBoundingClientRect().bottom:b.bottom-6;
+    const st=el('div','pourst');st.style.cssText=`left:${sx-(3+cnt)}px;top:${sy}px;width:${6+cnt*2}px;height:${Math.max(10,ey-sy)}px;--c:${color}`;document.body.appendChild(st);
+    st.animate([{transform:'translateY(0) scaleY(0)'},{transform:'translateY(0) scaleY(1)',offset:.3},{transform:'translateY(0) scaleY(1)',offset:.7},{transform:`translateY(${Math.max(10,ey-sy)}px) scaleY(0)`}],{duration:460,delay:230,easing:'ease-in-out',fill:'both'}).onfinish=()=>st.remove();
+    setTimeout(()=>{if(B.isConnected)flBurst(sx,Math.min(ey,b.bottom)-4,color,5,.35)},420);
   }
   render();
   return{
@@ -177,7 +224,7 @@ MAKERS.memory=function({R,tier,board,api}){
   const grid=el('div','pads glass');grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
   if(pads===9)grid.style.setProperty('--bs','min(86vw,calc(100dvh - 450px),420px)');
   else grid.style.setProperty('--bs','min(86vw,calc(100dvh - 430px),440px)');
-  const pEls=[...Array(pads).keys()].map(i=>{const p=el('button','pad',`<span>${SYMS[i]}</span>`);p.style.background=`radial-gradient(circle at 50% 120%,color-mix(in srgb,${COLORS[i]} 60%,#000),${COLORS[i]})`;p.style.setProperty('--pc',COLORS[i]);p.onclick=()=>tapPad(i);grid.appendChild(p);return p});
+  const pEls=[...Array(pads).keys()].map(i=>{const p=el('button','pad',`<b class="core"></b><span>${SYMS[i]}</span>`);p.style.setProperty('--pc',COLORS[i]);p.onclick=()=>tapPad(i);grid.appendChild(p);return p});
   wrap.append(note,grid,dots);board.appendChild(wrap);api.stagger(pEls,70);
   const yourTurn=()=>reverse?`Your turn · BACKWARDS · ${pos+1}/${round}`:`Your turn! · ${pos+1}/${round}`;
   if(reverse)api.setTip('<b>Backwards rounds:</b> watch the pattern, then tap it in reverse. Start with the last pad that lit up.');
@@ -187,8 +234,9 @@ MAKERS.memory=function({R,tier,board,api}){
     api.setStars(mistakes===0?3:mistakes===1?2:1);
     [...dots.children].forEach((d,i)=>{d.className=i<round-1?'d':i===round-1?'c':''});
   }
-  function lit(i,ms){const p=pEls[i];p.classList.add('lit');sfx.pad(i);const[x,y]=centerOf(p);ring(x,y,COLORS[i],p.offsetWidth*1.6,500);after(()=>p.classList.remove('lit'),ms)}
-  function setNote(t,go){note.textContent=t;note.classList.toggle('go',!!go)}
+  function lit(i,ms){const p=pEls[i];p.classList.remove('lit');void p.offsetWidth;p.classList.add('lit');sfx.pad(i);const[x,y]=centerOf(p);flRing(x,y,COLORS[i],p.offsetWidth*1.6,500);after(()=>p.classList.remove('lit'),ms)}
+  function setNote(t,go){note.textContent=t;note.classList.toggle('go',!!go);grid.classList.toggle('go',!!go);
+    if(!FL_RM)note.animate([{transform:'scale(.85)',opacity:.4},{transform:'scale(1)',opacity:1}],{duration:260,easing:'cubic-bezier(.3,1.6,.5,1)'})}
   function showRound(){
     phase='show';pos=0;info();setNote(reverse?'👀 Watch… then repeat in REVERSE':'👀 Watch closely…');
     api.coach(`🎵 Round ${round}: ${round} pad${round>1?'s':''} to remember`);
@@ -200,7 +248,7 @@ MAKERS.memory=function({R,tier,board,api}){
     if(api.over()||phase!=='input'){if(phase==='show')sfx.tick(.7);return}
     const want=expected()[pos];
     if(i===want){
-      lit(i,200);buzz(8);const[x,y]=centerOf(pEls[i]);burst(x,y,COLORS[i],10,.7);pos++;api.good(pEls[i],{silent:true});
+      lit(i,200);buzz(8);const[x,y]=centerOf(pEls[i]);flBurst(x,y,COLORS[i],10,.7);pos++;api.good(pEls[i],{silent:true});
       if(pos<round)setNote(yourTurn(),true);
       if(pos===round){
         phase='idle';sfx.good();
@@ -214,7 +262,7 @@ MAKERS.memory=function({R,tier,board,api}){
       setNote('Oops! Watch again…');after(showRound,1100);
     }
   }
-  info();
+  info();setNote('✨ Get ready…');
   return{
     noUndo:true,noNudge:true,begin(){after(showRound,600)},_seq:seq,_expected:expected,_phase:()=>phase,_pos:()=>pos,
     snap:()=>'',restore(){},
