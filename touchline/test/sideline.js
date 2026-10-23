@@ -25,7 +25,7 @@ const SAMPLER=()=>{ window.SLS=[]; if(window._slHooked) return; window._slHooked
   Painter3D.prototype.render=function(){ R.apply(this,arguments); try{ const P=this, st=P.st; if(P.kind!=='live'||!window.SLS) return; const c=P.camera, D=P.dir||{}, S=P._sl||{};
     c.updateMatrixWorld(); const V=new P.T.Vector3(st.ball.x,(st.ball.z||0)+0.11,st.ball.y).project(c); const f=new P.T.Vector3(); c.getWorldDirection(f);
     let near=99; for(const q of st.players.values()){ if(q.off) continue; near=Math.min(near,Math.hypot(c.position.x-q.x,c.position.z-q.y)); }
-    SLS.push({sl:!!P._slOn,dm:D.mode,w:D.w||0,rp:!!(st._rp&&st._rp.on),cut:!!S.snapNow,e:[c.position.x,c.position.y,c.position.z],f:[f.x,f.y,f.z],fov:c.fov,bx:V.x,by:V.y,bz:V.z,near,ball:[st.ball.x,st.ball.y,st.ball.z||0]}); }catch(e){} }; };
+    const shotCut=!!window.SLCUT; window.SLCUT=false; SLS.push({sl:!!P._slOn,dm:D.mode,w:D.w||0,rp:!!(st._rp&&st._rp.on),cut:!!S.snapNow||shotCut,e:[c.position.x,c.position.y,c.position.z],f:[f.x,f.y,f.z],fov:c.fov,bx:V.x,by:V.y,bz:V.z,near,ball:[st.ball.x,st.ball.y,st.ball.z||0]}); }catch(e){} }; };
 function judge(S){ const pure=s=>s.sl&&s.dm==='main'&&s.w<0.0005&&!s.rp; const P=S.filter(pure);
   const inF=P.filter(s=>Math.abs(s.bx)<=1&&Math.abs(s.by)<=1&&s.bz<1).length;
   let ej=0, aj=0, cuts=0; for(let i=1;i<S.length;i++){ const a=S[i-1], b=S[i]; if(!pure(a)||!pure(b)) continue; if(b.cut){ cuts++; continue; }
@@ -35,7 +35,7 @@ function judge(S){ const pure=s=>s.sl&&s.dm==='main'&&s.w<0.0005&&!s.rp; const P
 const f2=x=>+(+x).toFixed(2);
 /* screenshots only: headless software GL draws ~1 frame a second, far behind a real camera; before a picture the stage is
    paused and the camera springs are stepped in camera time only (no rendering, no simulation), then one frame is drawn */
-async function snap(p,file,stage){ await p.evaluate(async hl=>{ const st=hl?App.hl:App.live.stage; const P=st&&st._p3d; const was=st.paused; st.paused=true;
+async function snap(p,file,stage){ await p.evaluate(async hl=>{ window.SLCUT=true; const st=hl?App.hl:App.live.stage; const P=st&&st._p3d; const was=st.paused; st.paused=true;
     if(P&&!P.dead){ const D=P3D_MODULES.find(m=>m.name==='director'), Q=P3D_MODULES.find(m=>m.name==='polish'); for(let i=0;i<70;i++){ P.dt=0.05; P.camPose(st); if(D) D.frame(P,st); if(Q&&P._pol) Q.frame(P,st); } P._t=performance.now(); }
     st._v184was=was; if(st.requestDraw) st.requestDraw(); },!!stage); await p.waitForTimeout(1600); await p.screenshot({path:OUT+file});
   await p.evaluate(hl=>{ const st=hl?App.hl:App.live.stage; st.paused=!!st._v184was; },!!stage); }
@@ -83,7 +83,7 @@ async function snap(p,file,stage){ await p.evaluate(async hl=>{ const st=hl?App.
   ok(J.inFrame>=0.9,'throw-in and corner: the ball in frame ('+(J.inFrame*100).toFixed(1)+' %)');
   /* ---------- zoom: buttons ---------- */
   const lvl=()=>p.evaluate(()=>PREFS.zoom);
-  const fov=()=>p.evaluate(()=>App.live.stage._p3d.camera.fov);
+  const fov=()=>p.evaluate(()=>{ const P=App.live.stage._p3d; return P._sl&&P._sl.fovT!=null?P._sl.fovT:P.camera.fov; }); /* the lens the sideline camera is easing toward */
   const settle=()=>p.waitForTimeout(1300);
   const seen={btn:new Set(),key:new Set(),wheel:new Set()}; let dirOk=true, lvOk=true;
   const step=async(how,fn,want)=>{ const f0=await fov(); const l0=await lvl(); await fn(); const l1=await lvl(); seen[how].add(l1); await settle(); const f1=await fov();

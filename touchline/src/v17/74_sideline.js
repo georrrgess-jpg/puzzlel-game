@@ -21,7 +21,7 @@
 
 const V184_ZOOMS=[['wide','Wide',1.3,46],['normal','Normal',1,34],['close','Close',0.78,26],['tight','Tight',0.6,19]];
 const V184_SL2D=0.72;
-const V184_SL={z:70.7,zBack:71.32,h:2.0,x0:18,x1:87,omEye:0.8,omAvoid:3.4,omBall:3.2,omAim:2.6,omFov:3,rate:1.2,clear:3.1,limH:0.66,limV:0.6};
+const V184_SL={z:70.7,zBack:71.32,h:2.0,x0:18,x1:87,omEye:0.8,omAvoid:3.4,omBall:3.2,omAim:2.6,omFov:3,rate:1.2,clear:3.6,limH:0.66,limV:0.6};
 DEFAULT_PREFS.zoom='normal'; if(!V184_ZOOMS.some(z=>z[0]===PREFS.zoom)) PREFS.zoom='normal';
 
 function v184ZoomIdx(){ const i=V184_ZOOMS.findIndex(z=>z[0]===PREFS.zoom); return i<0?1:i; }
@@ -83,7 +83,8 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   else if(!frozen){ let r=v18Damp(S.b.x,S.b.vx,bx,C.omBall,dt); S.b.x=r[0]; S.b.vx=r[1]; r=v18Damp(S.b.z,S.b.vz,bz,C.omBall,dt); S.b.z=r[0]; S.b.vz=r[1]; }
   const o=st.own; const att=o&&!st.fl?(o.side===0?1:-1):0;
   const lead=Math.max(-6,Math.min(6,att*2.2+S.b.vx*0.3));
-  const ax=S.b.x+lead, az=S.b.z, ay=1.2+Math.min(4,bh)*0.5;
+  /* aim a little above the play, more so for far play, so the action sits just below the middle with the far stand above */
+  const ax=S.b.x+lead, az=S.b.z, ay=1.2+Math.min(40,Math.hypot(ax-S.e.p,az-C.z))*0.028+Math.min(4,bh)*0.5;
   /* 2. the eye: a heavy slide along the line after the play, never bobbing */
   const ex0=Math.max(C.x0,Math.min(C.x1,S.b.x+lead*0.6));
   if(snap){ S.e.p=ex0; S.e.v=0; } else if(!frozen){ const r=v18Damp(S.e.p,S.e.v,ex0,C.omEye,dt); S.e.p=r[0]; S.e.v=r[1]; }
@@ -108,7 +109,7 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   for(const p of st.players.values()){ if(p.off) continue; const d=Math.hypot(ex-p.x,ez-p.y); if(d<near) near=d; } S.near=near;
   /* 4. the lens: the zoom level's field of view (vertical), opened up on narrow frames so the width never gets too tight */
   const zl=V184_ZOOMS[v184ZoomIdx()][3]; const asp=Math.max(0.5,cam.aspect||1.6); const hMin=2*Math.atan(Math.tan(zl*Math.PI/360)*1.45);
-  let vf=zl*Math.PI/180; if(asp<1.45) vf=Math.min(70*Math.PI/180,2*Math.atan(Math.tan(hMin/2)/asp)); const fovT=vf*180/Math.PI;
+  let vf=zl*Math.PI/180; if(asp<1.45) vf=Math.min(70*Math.PI/180,2*Math.atan(Math.tan(hMin/2)/asp)); const fovT=vf*180/Math.PI; S.fovT=fovT;
   if(snap||st.rm){ S.fov=fovT; S.fv=0; } else { const r=v18Damp(S.fov,S.fv,fovT,C.omFov,dt); S.fov=r[0]; S.fv=r[1]; }
   if(Math.abs(cam.fov-S.fov)>1e-4){ cam.fov=S.fov; cam.updateProjectionMatrix(); }
   /* 5. the head: aim springs toward the ball point, then the ball is kept inside the frame and the turn rate is limited */
