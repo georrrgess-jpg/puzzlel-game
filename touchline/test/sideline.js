@@ -155,7 +155,9 @@ const f2=x=>+(+x).toFixed(2);
   await q.keyboard.press('v'); await q.waitForTimeout(1200); if(SHOTS) await q.screenshot({path:OUT+'d-2d-broadcast-close.png'});
   ok(await q.evaluate(()=>{ const s=App.live.stage; return s.mode==='broadcast'&&Math.abs(s.cam.tw/(s.bw*s.zoom)-0.78)<0.01; }),'2-D broadcast: the zoom factor applies');
   /* the goal-replay card in the match report: the same three views and the zoom control */
-  await q.click('[data-a="liveSkip"][data-to="ft"]'); await until(q,()=>!!document.querySelector('[data-a="liveReport"]'),60000);
+  await q.click('[data-a="liveSkip"][data-to="ft"]').catch(()=>{});
+  if(await until(q,()=>!!document.querySelector('#ht-go'),5000)){ await q.click('#ht-go'); await q.waitForTimeout(600); await q.click('[data-a="liveSkip"][data-to="ft"]').catch(()=>{}); }
+  await until(q,()=>!!document.querySelector('[data-a="liveReport"]'),60000);
   await q.click('[data-a="liveReport"]'); await q.waitForTimeout(700); await q.evaluate(()=>{ App.modal.tab='high'; renderModal(); }); await q.waitForTimeout(500);
   ok(await q.evaluate(()=>[...document.querySelectorAll('[data-a="hlView"]')].map(b=>b.textContent).join()==='Broadcast,Sideline,Tactical'&&!!document.querySelector('[data-a="hlZoom"]')),'replay card: Broadcast · Sideline · Tactical and a zoom control');
   await q.click('[data-a="hlView"][data-v="sideline"]'); const hz0=await q.evaluate(()=>PREFS.zoom); await q.click('[data-a="hlZoom"][data-v="1"]'); await q.waitForTimeout(300);
