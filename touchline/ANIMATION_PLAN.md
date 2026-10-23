@@ -23,6 +23,72 @@ comparison sheet this plan asks for.
 
 ---
 
+## v18.4 execution plan: sideline camera, zoom levels, figure polish, ball touches (3-hour budget, 13:12–16:12 UTC, 2026-10-23)
+
+Goal: a new **Sideline** camera that watches the match from the touchline at standing height, the way a player on
+the bench or a coach sees it; **zoom levels** for the match cameras; **smoother, more coherent player models**; and
+**more realistic touches on the ball**. Presentation only: no change to `engine.js`, and the suites `sync`,
+`goalcap`, `postcap` and `v13_audit` keep passing.
+
+### Design decisions
+1. **Where the sideline camera stands.** The stadium is built for the near-side gantry: the dugouts, far LED boards and
+   main stand sit behind the far touchline (stage y < 0), and the near side only has a rail. So the sideline eye
+   stands on the **near** touchline (stage y ≈ 68 + 2 to 3 m, inside the near rail), at **1.75–2.1 m** (a person
+   standing), looking across at the dugouts and the main stand. Nothing behind the camera is ever in frame.
+2. **How it moves.** Like a coach pacing the technical area or a substitute warming up: the eye slides along the line
+   after the play with a heavy, critically damped lag (`v18Damp`), clamped to roughly x 18–87, and never bobs. The head
+   turns and tilts to follow the ball through its own critically damped springs, with a small lead toward the attack,
+   so a long pass is a smooth pan, never a snap. When the ball or a player comes within a few metres of the eye (a
+   throw-in, a ball run out), the eye steps back or along the line; nobody walks through the lens.
+3. **Presets in sideline view.** Live play, kick-offs, corners, throw-ins and penalties stay on the sideline camera (the
+   director's kickoff, corner and penalty presets are broadcast framings). The goal replay (`68_replay.js`) and the
+   celebration close-up still play, since they are the broadcast's cutaways; cuts keep the 120 ms fade.
+4. **2-D.** `st.mode==='sideline'` already falls through to `drawBroadcast`. In 2-D the sideline view is the broadcast
+   drawing framed tighter on the ball (and lower, only if it is a contained change to `proj`); the 3-D renderer gives
+   the real touchline view. The camera control reads Broadcast · Sideline · Tactical everywhere.
+5. **Zoom levels.** Four levels, Wide · Normal · Close · Tight, stored in `PREFS.zoom` (default Normal). Broadcast: a
+   factor on the stage's camera width, applied where `zoomTo` and `resize` set it, so the existing penalty and
+   celebration framings keep their relative zoom and every change eases in. Sideline: the lens (field of view). Tactical
+   fits the whole pitch and ignores zoom (the control is disabled there). Controls: a − / + pair with the level name in
+   the live bar and the goal-replay card, the keys `+`/`=` and `-`, and the mouse wheel over the match canvas; the
+   keyboard hint and phone layout are updated.
+6. **Figures.** The sideline camera brings the players close, so the models must hold up at 3–10 m: no gaps or
+   creases at the shoulders, elbows, hips, knees, ankles and neck; smooth silhouettes (more segments at tier A, smooth
+   normals across parts); consistent toon shading between parts; outlines that stay a constant screen width instead of
+   thickening up close; believable proportions, hands and boots. Same instanced design and per-tier budgets.
+7. **Touches.** The dribble touch lands on a real foot at a real moment of the stride: the swinging foot meets the
+   ball, the ball rolls ahead and slows, and the player runs onto it; the touch foot alternates with the stride. A
+   received pass is met by the foot reaching for it and cushioned; strikes leave the foot at contact. The ball never
+   jumps, and it rolls about the axis of travel.
+
+### Units (worktrees, one file set each)
+| Unit | Owner | Files |
+| --- | --- | --- |
+| A. Sideline camera + zoom | workflow agent | new `src/v17/74_sideline.js` (+ `.css` if needed), `66_p3d_director.js` (preset gating), `60_p3d_core.js` (zoom in `camPose`), `ui_live.js`, `ui_main.js`, `ui_match.js`, `ui_stage.js` (zoom factor only), new `test/sideline.js` |
+| B. Figure polish | workflow agent | `63_p3d_figures.js`, `test/fig3d_sheet.js`, new `test/figures3d.js` if useful |
+| C. Ball touches | main session | new `src/v17/75_touches.js` (wraps the stage's ball and pose code), `test/touches.js` |
+
+Each unit is reviewed adversarially (correctness, determinism, performance, visuals from screenshots) and fixed before
+the merge.
+
+### Gates (all must hold to ship)
+- `sync`, `goalcap`, `postcap`, `v13_audit`, `anim`, `stage2`, `stage3d_smoke`, `stage3d`, `previews3d`, `walkout3d`,
+  `punt`, `polish`, `kickoff` and the new `sideline`/`touches` suites pass; no page errors.
+- Sideline: the ball stays in frame (≥ 95% of sampled frames in a live match at 1×), no camera jump > 0.6 m or > 8° in
+  one frame outside cuts, the eye never inside a player or past the near rail, every zoom level reachable by button, key
+  and wheel and saved across reloads.
+- Figures: a close-up sheet (3, 6, 12 m) and the wide shot show no joint gaps; frame time at tier A within 10% of v18.3.
+- Touches: the ball is within 0.35 m of a foot at every dribble touch, the touch foot alternates, and the ball never moves
+  more than its own speed allows in a step.
+- Screenshots inspected: desktop and phone, two themes, broadcast/sideline/tactical, all four zoom levels.
+
+### Timeline
+13:25 plan and workflow launched (A, B) · 13:30–14:35 C in the main session · by 14:45 A and B implemented ·
+by 15:10 reviewed and fixed · 15:10–15:45 merge, full suites, screenshot pass · 15:45–16:05 What's New, notes,
+push, artifact · 16:12 hard stop. If a unit is late it ships what passes its gates and the rest is listed as not done.
+
+---
+
 ## v18 execution plan (6-hour budget, started 2026-10-23 00:40)
 
 v17.1/17.2 shipped. v18 builds Phase 3 (the WebGL renderer) plus the parts of Phases 4-5 that fit:
