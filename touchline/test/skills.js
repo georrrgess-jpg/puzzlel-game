@@ -22,7 +22,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
     const run=(lvl,fl,n)=>{ const seen={}; let picks=0, tries=0; for(let i=0;i<n;i++){ const S=sits[i%sits.length]; tries++; const k=v186sPick(lvl,fl,S,rnd); if(k){ picks++; seen[k]=(seen[k]||0)+1; } } return {seen,rate:picks/tries}; };
     const o={MOD40:run('MOD',40,6000),JV65:run('JV',65,6000),V95:run('V',95,6000),V70:run('V',70,6000),JV51:run('JV',51,6000),MOD39:run('MOD',39,6000),MOD58:run('MOD',58,6000),V40:run('V',40,6000)};
     const share=(S,ks)=>{ let n=0,h=0; for(let i=0;i<8000;i++){ const k=v186sPick('V',90,S,rnd); if(k){ n++; if(ks.includes(k)) h++; } } return n?h/n:0; };
-    o.sit={open:share({turn:0.2,d:2.4,sp:3.5,n5:1,vc:-1},['step1','step2']),crowd:share({turn:0.2,d:2.4,sp:3.5,n5:4,vc:-1},['step1','step2']),charge:share({turn:2.8,d:2.2,sp:3,n5:1,vc:3},['cruyff','drag']),calm:share({turn:2.8,d:2.2,sp:3,n5:1,vc:0},['cruyff','drag'])};
+    o.sit={open:share({turn:0.2,d:2.4,sp:3.5,n5:1,vc:-1},['step1','step2']),crowd:share({turn:0.2,d:2.4,sp:3.5,n5:4,vc:-1},['step1','step2']),charge:share({turn:2.35,d:2.2,sp:3,n5:1,vc:3},['cruyff','drag']),calm:share({turn:2.35,d:2.2,sp:3,n5:1,vc:0},['cruyff','drag'])};
     o.rep={MOD40:v186sRepertoire('MOD',40),MOD55:v186sRepertoire('MOD',55),JV65:v186sRepertoire('JV',65),V95:v186sRepertoire('V',95)};
     o.q={MOD:v186sQ(70,'MOD'),JV:v186sQ(70,'JV'),V:v186sQ(70,'V'),lo:v186sQ(40,'V'),hi:v186sQ(90,'V')};
     o.bite={hi:v186sBite(96,48,1),mid:v186sBite(75,72,v186sQ(75,'V')),lo:v186sBite(45,85,v186sQ(45,'V'))}; return o; });
@@ -34,7 +34,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(P.V95.rate>P.V70.rate&&P.V70.rate>P.JV51.rate&&P.JV51.rate>P.MOD39.rate, `moves are tried more often with level and flair: V95 ${P.V95.rate.toFixed(3)} > V70 ${P.V70.rate.toFixed(3)} > JV51 ${P.JV51.rate.toFixed(3)} > MOD39 ${P.MOD39.rate.toFixed(3)}`);
   ok(P.V40.rate<P.V95.rate*0.6, `low flair tries far fewer than high flair at the same level (V40 ${P.V40.rate.toFixed(3)} vs V95 ${P.V95.rate.toFixed(3)})`);
   ok(P.V95.rate<0.4, `moves stay special: even a Varsity star tries one on ${(P.V95.rate*100).toFixed(1)} % of fitting legs (cooldown on top)`);
-  ok(P.sit.crowd<P.sit.open&&P.sit.charge>=P.sit.calm, `the situation shapes the choice: stepovers ${(P.sit.open*100).toFixed(0)} % in space vs ${(P.sit.crowd*100).toFixed(0)} % in a crowd; the Cruyff/drag-back against a charging defender ${(P.sit.charge*100).toFixed(0)} % vs ${(P.sit.calm*100).toFixed(0)} %`);
+  ok(P.sit.crowd<P.sit.open&&P.sit.charge>P.sit.calm, `the situation shapes the choice: stepovers ${(P.sit.open*100).toFixed(0)} % in space vs ${(P.sit.crowd*100).toFixed(0)} % in a crowd; the Cruyff/drag-back against a charging defender ${(P.sit.charge*100).toFixed(0)} % vs ${(P.sit.calm*100).toFixed(0)} %`);
   ok(P.q.MOD<P.q.JV&&P.q.JV<P.q.V&&P.q.lo<P.q.hi, `execution quality: MOD ${P.q.MOD.toFixed(2)} < JV ${P.q.JV.toFixed(2)} < V ${P.q.V.toFixed(2)}; flair 40 ${P.q.lo.toFixed(2)} < 90 ${P.q.hi.toFixed(2)}`);
   ok(P.bite.hi>=0.9&&P.bite.lo<=0.3&&P.bite.mid>P.bite.lo&&P.bite.mid<P.bite.hi, `defender bite: 96 vs 48 ${P.bite.hi.toFixed(2)}, 75 vs 72 ${P.bite.mid.toFixed(2)}, 45 vs 85 ${P.bite.lo.toFixed(2)}`);
 
@@ -62,9 +62,11 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
               if(C&&C.u>0){ const P=st.poseOf(fw); const b=st.ball; const d=Math.hypot((b.x-bx)-(fw.x-px),(b.y-by)-(fw.y-py)); if(d>rec.ballMax) rec.ballMaxU=+C.m.toFixed(2); rec.ballMax=Math.max(rec.ballMax,d); if(d>0.06) rec.ballBad++;
                 const f0=footW(fw,P,0), f1=footW(fw,P,1); const fm=Math.min(Math.hypot(b.x-f0.x,b.y-f0.y),Math.hypot(b.x-f1.x,b.y-f1.y)); const wb=v186sBallPlan(fw,C.u,C.m)[2]; rec.footMin=Math.min(rec.footMin,fm); if(wb>0.5&&fm>rec.reachMax) rec.reachU=+C.m.toFixed(2); if(wb>0.5) rec.reachMax=Math.max(rec.reachMax,fm);
                 const tu=v186sTouchU(fw); if(rec.contact==null&&C.m>=tu){ const i=v186sTouchFoot(fw); const f=footW(fw,P,i); rec.contact={d:Math.hypot(b.x-f.x,b.y-f.y),i,u:+C.u.toFixed(2)}; }
-                if(C.u>=0.95) rec.u1=true; } }
+                if(C.u>=0.95) rec.u1=true;
+                if(!rec.rp&&C.u>=0.5&&typeof v18RpObj==='function'){ const fl=Q=>Q.feet.flatMap(F=>[F.f,F.u,F.l]); const P1=fl(st.poseOf(fw)); const S=v18RpObj(fw); fw.v186k=null; const P0=fl(st.poseOf(fw)); Object.assign(fw,S); const P2=fl(st.poseOf(fw));
+                  rec.rp={same:Math.max(...P1.map((v,i)=>Math.abs(v-P2[i]))),diff:Math.max(...P1.map((v,i)=>Math.abs(v-P0[i]))),fields:Object.keys(S).filter(k=>k.startsWith('v186')).length}; } } }
             if(def.v186rT!=null){ if(!rec.react) rec.react={k:def.v186rk,t:def.v186rT,b:def.v186rb}; const t=st.now-def.v186rT; if(t>=0&&t<=Math.max(250,st.D(250))&&def.v186rk==='sold'){ const on1=st.poseOf(def); V186S.on=false; const off1=st.poseOf(def); V186S.on=true;
-                const yaw=def.yaw==null?((def.face||1)>0?0:Math.PI):def.yaw; const side=Math.sin(def.v186rs-yaw)>=0?1:-1; const i=side>0?1:0; rec.lunge=Math.max(rec.lunge,(on1.feet[i].l-off1.feet[i].l)*side); }
+                const yaw=def.yaw==null?((def.face||1)>0?0:Math.PI):def.yaw; const side=Math.sin(def.v186rs-yaw)>=0?1:-1; const i=side>0?1:0; rec.lunge=Math.max(rec.lunge,on1.feet[i].l*side); rec.lungeD=Math.max(rec.lungeD||0,(on1.feet[i].l-off1.feet[i].l)*side); }
               if(def.trip===def.v186rT) rec.trip=true; } } };
         const leg=(x,y,ms,n)=>{ st.dribble(fw,x,y,ms); let i=0; for(;i<n;i++){ step(); if(def.ov&&Math.hypot(fw.x-def.x,fw.y-def.y)<4.2&&!turn) def.ov=null; if(Math.hypot(fw.x-x,fw.y-y)<0.6) break; } rec.legEnd.push(rec.steps); };
         for(let i=0;i<30;i++) step();
@@ -74,7 +76,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
         return rec; } finally{ Math.random=R0; V186S.on=true; } }
     const out={}; const V={fl:95,lv:'V',ds:50}, MOD={fl:40,lv:'MOD',ds:45};
     for(const k of ['feint','step1','step2','roll','cut','chop','drag','cruyff']){ const a=legRun(k,true,V), b=legRun(k,false,V); let dp=0; for(let i=0;i<Math.min(a.path.length,b.path.length);i++) dp=Math.max(dp,Math.hypot(a.path[i][0]-b.path[i][0],a.path[i][1]-b.path[i][1]));
-      out[k]={ballMaxU:a.ballMaxU,reachU:a.reachU,kinds:Object.keys(a.kinds),u1:a.u1,abort:a.abort,ballBad:a.ballBad,ballMax:+a.ballMax.toFixed(3),reachMax:+a.reachMax.toFixed(2),contact:a.contact,react:a.react,lunge:+a.lunge.toFixed(2),trip:a.trip,T:a.T,dp,legs:a.legEnd.join('/')+' vs '+b.legEnd.join('/'),sameLegs:a.legEnd.join()===b.legEnd.join()&&a.path.length===b.path.length}; }
+      out[k]={rp:a.rp,ballMaxU:a.ballMaxU,reachU:a.reachU,kinds:Object.keys(a.kinds),u1:a.u1,abort:a.abort,ballBad:a.ballBad,ballMax:+a.ballMax.toFixed(3),reachMax:+a.reachMax.toFixed(2),contact:a.contact,react:a.react,lunge:+a.lunge.toFixed(2),lungeD:+(a.lungeD||0).toFixed(2),trip:a.trip,T:a.T,dp,legs:a.legEnd.join('/')+' vs '+b.legEnd.join('/'),sameLegs:a.legEnd.join()===b.legEnd.join()&&a.path.length===b.path.length}; }
     for(const k of ['drag','cut','feint']){ const a=legRun(k,true,MOD); out['MOD_'+k]={kinds:Object.keys(a.kinds),T:a.T,react:a.react,ballBad:a.ballBad}; }
     const m=legRun('cruyff',true,MOD); out.MOD_cruyff={kinds:Object.keys(m.kinds)};
     return out; });
@@ -84,7 +86,8 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
     ok(r.contact&&r.contact.d<=0.3, `${k}: the touching foot is at the ball at the touch (${r.contact?r.contact.d.toFixed(2)+' m, foot '+r.contact.i+' at u '+r.contact.u:'no touch'})`);
     const want=V186S_REACT_T[k]; ok(r.react&&r.react.k===want, `${k}: the defender reacts (${r.react?r.react.k+' bite '+(+r.react.b).toFixed(2):'none'}; expected ${want})`);
     ok(r.dp<1e-6&&r.sameLegs, `${k}: the carrier's path and the leg's end are identical with the move on and off (max diff ${r.dp.toExponential(1)} m, legs end at steps ${r.legs})`); }
-  ok(L.step1.lunge>=0.25&&L.step2.lunge>=0.25, `a sold defender's lunge foot goes the wrong way within 250 ms (step1 ${L.step1.lunge}, step2 ${L.step2.lunge} body units)`);
+  { const R=['feint','step1','step2','roll','cut','chop','drag','cruyff'].map(k=>L[k].rp); ok(R.every(r=>r&&r.same<1e-9&&r.diff>0.05), `replays: a move's pose is rebuilt exactly from the replay snapshot's primitive fields (worst ${Math.max(...R.map(r=>r?r.same:9)).toExponential(1)}; the move changes the feet by up to ${Math.min(...R.map(r=>r?r.diff:0)).toFixed(2)}+ body units)`); }
+  ok(L.step1.lunge>=0.3&&L.step2.lunge>=0.3&&L.step1.lungeD>=0.15&&L.step2.lungeD>=0.15, `a sold defender's lunge foot goes out the wrong way within 250 ms (step1 ${L.step1.lunge}, step2 ${L.step2.lunge} body units to that side; ${L.step1.lungeD} / ${L.step2.lungeD} beyond his own stride)`);
   ok(L.chop.trip&&L.cruyff.trip, `a turned defender with a big rating gap stumbles (chop ${L.chop.trip}, Cruyff ${L.cruyff.trip})`);
   ok(L.MOD_drag.kinds.includes('drag')&&L.MOD_drag.T>L.drag.T*1.25&&L.MOD_cut.T>L.cut.T*1.25, `Modified performs the same move slower (drag-back ${Math.round(L.MOD_drag.T)} vs ${Math.round(L.drag.T)} ms, cut ${Math.round(L.MOD_cut.T)} vs ${Math.round(L.cut.T)} ms)`);
   ok(L.MOD_feint.kinds.includes('feint')&&L.MOD_feint.react&&L.MOD_feint.react.b<0.5&&L.feint.react.b>0.9, `the same feint sells a 45 defender far less from a Modified 40 (bite ${L.MOD_feint.react?(+L.MOD_feint.react.b).toFixed(2):'-'}) than from a Varsity 95 (${(+L.feint.react.b).toFixed(2)})`);

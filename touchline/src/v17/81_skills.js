@@ -286,7 +286,7 @@ function v186sPlants(st,p,C){ for(const i of [0,1]){ const pl=v186sPlantPlan(p,i
 
 /* ---------- the carrier's feet ---------- */
 /* stepover circle for foot i landing on side s (=its own side), progress s01 over its swing; ball (bf,bl) and radius rb in body units */
-function v186sOver(s01,base,bf,bl,rb,s,A){ const K=[[0,base.f,base.u,base.l],[0.35,bf-rb*0.5,rb*1.6+0.05,bl-s*(rb+0.07)],[0.56,bf+rb+0.07,rb*2+0.05,bl-s*0.02],[0.78,bf+rb*0.5,rb*1.4,bl+s*(rb+0.1)],[1,bf-0.04,0,bl+s*(rb+0.18+0.1*A)]];
+function v186sOver(s01,base,bf,bl,rb,s,A){ const K=[[0,base.f,base.u,base.l],[0.35,bf-rb*0.5,rb*1.6+0.08,bl-s*(rb+0.07)],[0.56,bf+rb+0.07,rb*2+0.09,bl-s*0.02],[0.78,bf+rb*0.5,rb*1.5,bl+s*(rb+0.1)],[1,bf-0.04,0,bl+s*(rb+0.18+0.1*A)]];
   return v186sKey(K,s01); }
 function v186sKey(K,x){ if(x<=K[0][0]) return {f:K[0][1],u:K[0][2],l:K[0][3]}; for(let j=1;j<K.length;j++){ if(x<=K[j][0]){ const a=K[j-1], b=K[j], t=smooth((x-a[0])/(b[0]-a[0])); return {f:lerp(a[1],b[1],t),u:lerp(a[2],b[2],t),l:lerp(a[3],b[3],t)}; } }
   const e=K[K.length-1]; return {f:e[1],u:e[2],l:e[3]}; }
