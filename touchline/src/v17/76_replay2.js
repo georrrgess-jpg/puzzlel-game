@@ -19,7 +19,7 @@
 DEFAULT_PREFS.rpAngles='two'; if(PREFS.rpAngles!=='one'&&PREFS.rpAngles!=='two') PREFS.rpAngles='two';
 
 const V185_RP={L1:1100,Lrun:1900,Lpen:1500,L2x:800,tail1:300,lead2:350,tail2:550,rate2x:0.6,
-  fwd:0.07,dn:0.02,tauA:0.18,tauB:0.06,tauE:0.10,yawR:150,pitR:120,pMin:-35,pMax:20,wRun:0.6,frame:22,look:260,lens:0.55,fov:52,fovMax:72,hFov:62,fovLong:38,near:0.12,hide:0.34,
+  fwd:0.07,dn:0.02,tauA:0.18,tauB:0.06,tauE:0.10,yawR:150,yawH:280,pitR:120,pMin:-35,pMax:20,wRun:0.6,frame:22,look:260,lens:0.55,fov:52,fovMax:72,hFov:62,fovLong:38,near:0.12,hide:0.34,
   gEye:3.3,gH:1.45,gFov:40,clear:0.42,hMax:92,gHMax:100};
 const V185_D2R=Math.PI/180;
 
@@ -37,18 +37,21 @@ function v185Name(sc){ try{ const p=typeof Px==='function'?Px(sc.pid):null; if(p
 function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const C=V185_RP, R=typeof V18_BALL_R==='number'?V18_BALL_R:0.18;
   const JD=Math.max(260,st.D(560)), ND=Math.max(130,st.D(280)), sm=Math.max(1,st.spdMul||1), gx=Q.gx, ts=Q.ts, tg=Q.tg;
   const hx=new Float32Array(n), hy=new Float32Array(n), hz=new Float32Array(n), yw=new Float32Array(n), pt=new Float32Array(n), tau=new Float32Array(n);
-  const ex=new Float32Array(n), ey=new Float32Array(n), ez=new Float32Array(n), fv=new Float32Array(n);
+  const ex=new Float32Array(n), ey=new Float32Array(n), ez=new Float32Array(n), fv=new Float32Array(n), te=new Float32Array(n), yr=new Float32Array(n);
   let f0=null, lastY=null, lastP=0, found=0;
   for(let i=0;i<n;i++){ const S=B[i]; let f=v185Fields(S,sc); if(f) found++; else f=f0; if(!f){ continue; } f0=f;
     const s=0.92*(f.hgt||sc.hgt||70)/70; const yaw=f.yaw==null?((f.face||1)>0?0:Math.PI):f.yaw; const cy=Math.cos(yaw), sy=Math.sin(yaw);
     const jt=S.now-(f.jumpT!=null?f.jumpT:-9e9); const jump=jt>=0&&jt<JD; const lift=jump?Math.sin(jt/JD*Math.PI)*0.72:0;
-    const real=(f.spd||0)/sm; let lean=real>0.5?0.02+0.016*Math.min(9,real):0;
+    /* the body lean poseOf gives him: run (gait speed and acceleration), strike, leap, nod */
+    const real=(f.spd||0)/sm; let lean=real>0.5?0.02+0.016*Math.min(9,f.gv!=null?f.gv:real)+v185Cl((f.acS||0)*0.012,-0.12,0.12):0;
+    const kk=f.kickK, kt=S.now-(f.kickT!=null?f.kickT:-9e9), kW=f.kickW||0, kF=f.kickF||260;
+    if(kk&&kk!=='head'&&kk!=='throw'&&kt>=0&&kt<kW+kF){ const big=kk==='shot'||kk==='loft'; if(kt<kW){ const q=kt/kW; lean=-0.06*q*q*(3-2*q)*(big?1:0.5); } else lean=(big?0.12:0.06)*Math.sin(Math.min(1,(kt-kW)/kF*1.6)*Math.PI); }
     if(jump){ const u=jt/JD; lean=0.3*Math.sin(v185Cl((u-0.35)/0.45,0,1)*Math.PI)-0.08*Math.sin(u*Math.PI); }
     /* the nod carries the head forward through the ball (the eye goes with it; the gaze does not dip) */
-    const nt=S.now-(f.nodT!=null?f.nodT:-9e9); if(nt>=0&&nt<ND) lean+=0.22*Math.sin(nt/ND*Math.PI);
+    const nt=S.now-(f.nodT!=null?f.nodT:-9e9); let tilt=jump?0.3*Math.sin(v185Cl((jt/JD-0.4)/0.4,0,1)*Math.PI):0; if(nt>=0&&nt<ND){ const w=Math.sin(nt/ND*Math.PI); lean+=0.22*w; tilt+=0.55*w; } te[i]=jump||(nt>=0&&nt<ND)?0.05:C.tauE;
     /* the running roll into a turn (poseOf: turnLean about the hips' pivot) moves the head sideways */
     const kick=(f.kickT!=null&&S.now-f.kickT>=0&&S.now-f.kickT<(f.kickW||0)+(f.kickF||260)); const ra=real>0.5&&!jump&&!kick?v185Cl(f.turnLean||0,-0.13,0.13)*((f.vy||0)>=0?1:-1):0;
-    const fw=s*(0.02+1.03*Math.sin(lean)), lw=-s*1.63*Math.sin(ra); hx[i]=f.x+cy*fw-sy*lw; hy[i]=s*(0.8+1.03*Math.cos(lean)+lift); hz[i]=f.y+sy*fw+cy*lw;
+    const fw=s*(0.02+tilt*0.05+1.03*Math.sin(lean)), lw=-s*1.63*Math.sin(ra); hx[i]=f.x+cy*fw-sy*lw; hy[i]=s*(0.8+1.03*Math.cos(lean)+lift); hz[i]=f.y+sy*fw+cy*lw;
     /* where he looks */
     const b=S.s.ball, fl=S.s.fl; const bx=b.x, bz=b.y, bh=Math.max(0,b.z||0)+R; let tx,ty,tz, framed=0;
     const dB=Math.hypot(bx-hx[i],bz-hz[i]);
@@ -63,7 +66,8 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
       const pA=Math.atan2(ay-hy[i],Math.hypot(ax-hx[i],az-hz[i])), pB=Math.atan2(bh-hy[i],Math.max(0.05,dB));
       /* a ball below him is framed low in the picture (not centred), and the head never drops below -20 degrees on the run */
       if(dB<1.2&&bh>hy[i]-0.7&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; tau[i]=0.12; continue; } /* the cross arriving at his face: hold, never spin on a point at the lens */
-      const y=yA+dy*w, pB2=cross||pB>-8*V185_D2R?pB:Math.max((-20-15*wS)*V185_D2R,pB+C.frame*V185_D2R); const p=pA+(pB2-pA)*w;
+      let y=yA+dy*w; if(cross&&wS>0){ let dg=Math.atan2(34-hz[i],gx-hx[i])-y; while(dg>Math.PI) dg-=2*Math.PI; while(dg<-Math.PI) dg+=2*Math.PI; y+=dg*0.45*wS; } /* a header: the head starts to turn toward goal as the cross arrives */
+      const pB2=cross||pB>-8*V185_D2R?pB:Math.max((-20-15*wS)*V185_D2R,pB+C.frame*V185_D2R); const p=pA+(pB2-pA)*w;
       if(lastY!=null){ let d=y-lastY; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; yw[i]=lastY+d; } else yw[i]=y; pt[i]=p; lastY=yw[i]; lastP=p; tau[i]=cross?0.12:C.tauA; continue; }
     /* just off his boot or head the ball is too close to give a direction: aim where the shot is going */
     const to=fl&&fl.to&&dB<1.5?fl.to:null; if(!to&&dB<1.5&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; continue; } const y=to?Math.atan2(to.y-hz[i],to.x-hx[i]):Math.atan2(tz-hz[i],tx-hx[i]);
@@ -74,13 +78,15 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
   /* zero-phase smoothing in game time: forward, then backward one-pole */
   const zp=(a,tf)=>{ for(let i=1;i<n;i++){ const dt=Math.max(1,B[i].now-B[i-1].now)/1000, k=1-Math.exp(-dt/tf(i)); a[i]=a[i-1]+(a[i]-a[i-1])*k; }
     for(let i=n-2;i>=0;i--){ const dt=Math.max(1,B[i+1].now-B[i].now)/1000, k=1-Math.exp(-dt/tf(i)); a[i]=a[i+1]+(a[i]-a[i+1])*k; } };
-  const tA=i=>tau[i]||C.tauA, tE=()=>C.tauE;
+  const tA=i=>tau[i]||C.tauA, tE=i=>te[i]||C.tauE;
   zp(yw,tA); zp(pt,tA); zp(hx,tE); zp(hy,tE); zp(hz,tE);
   /* turn-rate and pitch clamps (game time) */
   for(let i=0;i<n;i++) pt[i]=v185Cl(pt[i],C.pMin*V185_D2R,C.pMax*V185_D2R);
-  const rl=(a,r)=>{ for(let i=1;i<n;i++){ const m=r*Math.max(1,B[i].now-B[i-1].now)/1000; a[i]=a[i-1]+v185Cl(a[i]-a[i-1],-m,m); }
-    for(let i=n-2;i>=0;i--){ const m=r*Math.max(1,B[i+1].now-B[i].now)/1000; a[i]=a[i+1]+v185Cl(a[i]-a[i+1],-m,m); } };
-  rl(yw,C.yawR*V185_D2R); rl(pt,C.pitR*V185_D2R);
+  /* a header whips the head round to follow the ball to goal: a faster turn just around the contact */
+  for(let i=0;i<n;i++) yr[i]=(meta.head&&B[i].now>ts-200&&B[i].now<ts+450?C.yawH:C.yawR)*V185_D2R;
+  const rl=(a,r)=>{ for(let i=1;i<n;i++){ const m=(r||yr[i])*Math.max(1,B[i].now-B[i-1].now)/1000; a[i]=a[i-1]+v185Cl(a[i]-a[i-1],-m,m); }
+    for(let i=n-2;i>=0;i--){ const m=(r||yr[i])*Math.max(1,B[i+1].now-B[i].now)/1000; a[i]=a[i+1]+v185Cl(a[i]-a[i+1],-m,m); } };
+  rl(yw,0); rl(pt,C.pitR*V185_D2R);
   /* the eye: head centre, a little forward along the view heading and down; stepped out of anyone else's body */
   let shot=null; for(let i=0;i<n;i++){ const S=B[i]; if(S.now>=ts){ shot=S; break; } }
   const sd=shot?Math.abs(shot.s.ball.x-gx):0, long=sd>20;
