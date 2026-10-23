@@ -4,10 +4,13 @@
    setSides and lets the gap show on the stage:
    - R1 pace: an urgent run (chase, set target, the carrier, the presser) is up to 12 % faster or slower than the median of
      the 22 on the pitch; eta() is scaled the same way so every timeout still fits the run;
-   - R2 take-ons (minimal fallback feint; V186R.feint: true = on unless a later module wraps dribble, 'force', false): a carrier facing a goal-side defender within 6 m drops a
-     shoulder; a better dribbler (ball control minus the defender's tackling) beats him more often: a beaten defender bites
-     (a stab of the leg, hips turned) and is slowed for a moment; a defender who holds makes the carrier check back. The
-     carrier always keeps the ball (the engine's touch list says so);
+   - R2 take-ons (minimal fallback feint; V186R.feint: true = on unless a later module wraps dribble, 'force' = always,
+     false = off): a carrier facing a goal-side defender within 6 m drops a shoulder; a better dribbler (ball control minus
+     the defender's tackling) tries it more often and beats him more often: a beaten defender is sold (he dives in toward
+     the ball with a stab of the leg and his hips turned, held there and slowed for 0.65-1.05 s of stage time) while the
+     carrier goes round him on the far side; a defender who holds makes the carrier check back. The carrier always keeps
+     the ball (the engine's touch list says so);
+   - R3 strength: a much stronger carrier rides a tackle and stays on his feet (the ball still goes);
    - R4 first touch: a footed reception by a poor controller runs up to 0.9 m further off his foot and he steps onto it;
    - R6 defender positioning and reaction: a good tackler pressing the carrier gets tight and closes a little faster; a
      poor one stands up to 0.8 m further off, and when the carrier cuts sharply he is caught flat-footed for a moment.
