@@ -148,7 +148,10 @@ async function snap(p,file,stage){ await p.evaluate(async hl=>{ window.SLCUT=tru
   /* ---------- phone ---------- */
   if(SHOTS){ const q=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true}); const e2=[]; watch(q,e2);
     await startLive(q,'side84p','3d'); await until(q,()=>!!(App.live.stage._p3d),20000); await q.click('[data-a="liveView"][data-v="sideline"]'); await q.waitForTimeout(4000);
-    await snap(q,'p-sideline.png'); const bar=await q.$('#lv-ctrl'); if(bar) await bar.screenshot({path:OUT+'p-controlbar.png'});
+    await snap(q,'p-sideline.png');
+    const hz=await q.evaluate(()=>{ const P=App.live.stage._p3d, c=P.camera; c.updateMatrixWorld(); const f=new P.T.Vector3(); c.getWorldDirection(f); const v=new P.T.Vector3(c.position.x+f.x*1e4,c.position.y,c.position.z+f.z*1e4).project(c); const b=new P.T.Vector3(App.live.stage.ball.x,0.11,App.live.stage.ball.y).project(c); return [(1-v.y)/2,b.x,b.y]; });
+    ok(hz[0]<=0.3&&Math.abs(hz[1])<=1&&Math.abs(hz[2])<=1,'phone 390x844 sideline: horizon in the top 30 % of the frame ('+f2(hz[0])+'), ball in frame');
+    const bar=await q.$('#lv-ctrl'); if(bar) await bar.screenshot({path:OUT+'p-controlbar.png'});
     await q.click('[data-a="liveZoom"][data-v="1"]'); await q.waitForTimeout(1000); await snap(q,'p-sideline-close.png');
     await q.click('[data-a="liveView"][data-v="broadcast"]'); await q.waitForTimeout(2500); await snap(q,'p-broadcast-close.png');
     const ov=await q.evaluate(()=>{ const c=document.querySelector('#lv-ctrl'); return document.documentElement.scrollWidth>innerWidth+1||(c&&c.scrollWidth>c.clientWidth+1); });

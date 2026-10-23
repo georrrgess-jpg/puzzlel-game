@@ -126,7 +126,9 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   /* write a clamped aim back into the spring so the springs carry on from where the head really is */
   const dist=Math.max(4,Math.hypot(A.p.x-ex,A.p.z-ez)); const nx=ex+Math.sin(ya)*dist, nz=ez-Math.cos(ya)*dist, ny=C.h+Math.tan(pa)*dist;
   if(!frozen&&!snap){ A.p.set(nx,ny,nz); }
-  S.q.set(nx-ex,ny-C.h,nz-ez).normalize();
+  /* near-square and tall frames (phones): the view tilts down by up to 0.4 of the half-height so the far stand, not sky, fills the top; the ball stays inside the frame limit */
+  const kt=Math.max(0,Math.min(1,(1.45-asp)/0.35)); let pv=pa; if(kt>0) pv=Math.max(-0.45,pa-Math.max(0,Math.min(hv*0.4*kt,hv*C.limV-(pb-pa))));
+  S.q.set(Math.sin(ya)*Math.cos(pv),Math.sin(pv),-Math.cos(ya)*Math.cos(pv));
   /* reduced motion: hold the framing; cut to a new one when the ball nears the frame edge */
   if(st.rm&&S.init&&!snap){ const cy=Math.atan2(S.dir.x,-S.dir.z), cp=Math.asin(Math.max(-1,Math.min(1,S.dir.y)));
     let nearH=99; for(const p of st.players.values()) if(!p.off) nearH=Math.min(nearH,Math.hypot(prevE.x-p.x,prevE.z-p.y));
