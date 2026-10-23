@@ -19,10 +19,11 @@
    the lens inside his body), v18RpDraw (no minimap over the two-angle replay). Debug: P._rp2.last. */
 DEFAULT_PREFS.rpAngles='two'; if(PREFS.rpAngles!=='one'&&PREFS.rpAngles!=='two') PREFS.rpAngles='two';
 
-const V185_RP={L1:1100,Lrun:1900,Lpen:1500,L2x:800,tail1:300,lead2:350,tail2:550,rate2x:0.6,
+const V185_RP={L1:800,Lrun:1900,Lpen:1500,L2x:800,tail1:300,lead2:350,tail2:550,rate2x:0.6,
   fwd:0.07,dn:0.02,tauA:0.18,tauB:0.06,tauE:0.10,yawR:150,yawH:280,pitR:120,pMin:-35,pMax:20,wRun:0.6,frame:22,look:260,lens:0.55,fov:52,fovMax:72,hFov:62,fovLong:38,near:0.12,hide:0.34,
   gEye:3.3,gH:1.45,gFov:40,clear:0.42,hMax:92,gHMax:100};
 const V185_D2R=Math.PI/180;
+const V185_HID=[0,1,2,4,5,6,8,9,10];
 
 /* the goal event, kept while the goal sequence (and so the replay before the restart) runs */
 const _v185Goal=Stage.prototype.goalSequence;
@@ -102,7 +103,16 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
     ex[i]=X; ey[i]=Y; ez[i]=Z; fv[i]=long&&B[i].now>ts?C.fov+(C.fovLong-C.fov)*v185Cl((B[i].now-ts)/350,0,1):C.fov; }
   /* the eye must not jump: smooth the clearance pushes a little (zero phase, short) */
   zp(ex,()=>0.05); zp(ez,()=>0.05);
-  return {n,ex,ey,ez,yw,pt,fv,hx,hy,hz,long}; }
+  /* occluders: anyone (not a keeper) standing between his eye and the ball within 4 m, or filling the frame within 2 m
+     straight ahead, is not drawn in his camera; the set is padded by 220 ms either side so nobody flickers */
+  const hid=new Array(n).fill(null);
+  for(let i=0;i<n;i++){ const S=B[i], b=S.s.ball; const X=ex[i], Z=ez[i], c=Math.cos(yw[i]), s=Math.sin(yw[i]); const bdx=b.x-X, bdz=b.y-Z, bl=Math.hypot(bdx,bdz);
+    for(const [o,f] of S.m){ if(o===sc||f.off||o.gk||f.gk||!isFinite(f.x)) continue; const ox=f.x-X, oz=f.y-Z, d=Math.hypot(ox,oz); if(d>4) continue;
+      const a=ox*c+oz*s; if(a<0.15) continue; let h=false;
+      if(bl>0.5){ const t=(ox*bdx+oz*bdz)/bl; if(t>0.15&&t<bl-0.25&&Math.abs(ox*bdz-oz*bdx)/bl<0.5) h=true; }
+      if(!h&&d<2.1&&a/d>Math.cos(24*V185_D2R)) h=true;
+      if(h){ for(let j=i;j>=0&&S.now-B[j].now<=220;j--) (hid[j]||(hid[j]=new Set())).add(o); for(let j=i+1;j<n&&B[j].now-S.now<=220;j++) (hid[j]||(hid[j]=new Set())).add(o); } } }
+  return {n,ex,ey,ez,yw,pt,fv,hx,hy,hz,long,hid}; }
 
 /* ---------- replay start: augment st._rp right after 68 creates it ---------- */
 const _v185Replay=v18Replay;
@@ -117,7 +127,7 @@ function v185Setup(st,Q,R){ Q.two=false; Q.pass=1; Q.cam='goal'; Q.rate=V18_RP.r
     Q.tapEl.addEventListener('pointerdown',Q.tap,true); }
   const P=st._p3d, gl=!!(P&&!P.dead); const sc=e?st.pl(e.pid):null; Q.sc=sc||null;
   if(!gl||PREFS.rpAngles==='one'||!e||!sc||sc.off||sc.side!==e.s){ v185Caption(st,Q); return; }
-  const sp=(App.live&&App.live.speed)||1, b0=B[0].now, bE=B[B.length-1].now, ts=Q.ts, tg=Q.tg, ty=e.ty||'open';
+  st._v185ty=e.ty||'open'; const sp=(App.live&&App.live.speed)||1, b0=B[0].now, bE=B[B.length-1].now, ts=Q.ts, tg=Q.tg, ty=e.ty||'open';
   /* the first shot snapshot, and the cross that reached him (the run of snapshots whose flight is homing on him) */
   let k=B.findIndex(S=>S.now>=ts); if(k<0) k=B.length-1;
   /* the cross: the last flight homing on him before the shot (a short gap while he takes it is allowed), back to its start */
@@ -129,8 +139,18 @@ function v185Setup(st,Q,R){ Q.two=false; Q.pass=1; Q.cam='goal'; Q.rate=V18_RP.r
   a0=Math.max(b0,a0); const a1=Math.min(bE,tg+V185_RP.tail1); const c0=Math.max(b0,ts-V185_RP.lead2), c1=Math.min(bE,tg+V185_RP.tail2);
   if(a1-a0<300||c1-c0<300){ v185Caption(st,Q); return; }
   const trk=v185Track(st,Q,B,sc,{head:head||ty==='header',ty}); if(!trk){ v185Caption(st,Q); return; }
+  Q.gz=v185GoalZ(Q,B,sc);
   Q.two=true; Q.cam='eyes'; Q.head=head; Q.crossT=crossT; Q.win=[[a0,a1],[c0,c1]]; Q.trk=trk; Q.t=Q.t0=a0; Q.t1=a1; Q.i=v185Idx(B,a0); Q.rate=sp>=2?V185_RP.rate2x:V18_RP.rate; Q.cams=['eyes'];
   if(gl&&P.dir) P.dir.snap=true; v185Caption(st,Q); }
+
+/* the behind-goal eye: an offset along the line (once per replay) that keeps the lens-to-ball line clearest of bodies
+   from just before the strike to just after it */
+function v185GoalZ(Q,B,sc){ const C=V185_RP, gx=Q.gx, dir=Q.dir, X=gx+dir*C.gEye; let best=0, bs=1e9;
+  for(const dz of [0,-0.4,0.4,-0.8,0.8,-1.2,1.2,-1.6,1.6,-2,2,-2.4,2.4]){ let blk=0;
+    for(const S of B){ if(S.now<Q.ts-350||S.now>Q.ts+300) continue; const b=S.s.ball, Z=v185Cl(34+v185Cl((b.y-34)*0.25,-1.4,1.4)+dz,31,37); const bdx=b.x-X, bdz=b.y-Z, bl=Math.hypot(bdx,bdz); if(bl<1) continue;
+      for(const [o,f] of S.m){ if(o===sc||f.off||!isFinite(f.x)) continue; const ox=f.x-X, oz=f.y-Z, t=(ox*bdx+oz*bdz)/bl; if(t<0.4||t>bl-0.3) continue; const pd=Math.abs(ox*bdz-oz*bdx)/bl; if(pd<0.45){ blk+=1+(0.45-pd); } } }
+    const sc2=blk+Math.abs(dz)*0.15; if(sc2<bs-1e-6){ bs=sc2; best=dz; } }
+  return best; }
 
 /* the two-angle replay is clean picture: no minimap over the scorer's view or the goal-mouth shot (the one-angle replay keeps it) */
 const _v185Draw=v18RpDraw;
@@ -159,13 +179,21 @@ v18RpOverlay=function(st,on){ const el=_v185Ov.apply(this,arguments); if(!on||!e
   const lt=document.createElement('div'); lt.className='v185-rp-lt'; lt.setAttribute('aria-live','polite'); lt.hidden=true; el.appendChild(lt);
   const nx=document.createElement('button'); nx.type='button'; nx.className='v185-rp-next'; nx.hidden=true; nx.setAttribute('aria-label','Next replay angle'); nx.innerHTML='Next angle <span aria-hidden="true">›</span>';
   nx.addEventListener('click',ev=>{ ev.stopPropagation(); if(ev.detail===0){ const Q=st._rp; if(Q&&Q.two&&Q.pass===1&&!st.paused) Q.nextTap=true; } });
-  el.appendChild(nx); return el; };
+  /* Space and Enter press the pill (the global Space shortcut would pause the match instead) */
+  nx.addEventListener('keydown',ev=>{ if(ev.key!==' '&&ev.key!=='Enter') return; const Q=st._rp; if(st.paused) return; ev.preventDefault(); ev.stopPropagation(); if(Q&&Q.two&&Q.pass===1) Q.nextTap=true; });
+  /* the overlay is a group (a role=button parent would flatten the pill for assistive tech); skipping stays a tap anywhere,
+     and a visually hidden Skip replay button gives the keyboard the same */
+  el.setAttribute('role','group'); el.setAttribute('aria-label','Goal replay');
+  const sk=document.createElement('button'); sk.type='button'; sk.className='v185-rp-skip'; sk.textContent='Skip replay';
+  sk.addEventListener('click',ev=>{ ev.stopPropagation(); const Q=st._rp; if(Q&&!Q.done&&!st.paused) Q.skipTap=true; });
+  sk.addEventListener('keydown',ev=>{ if(ev.key===' '||ev.key==='Enter'){ ev.preventDefault(); ev.stopPropagation(); const Q=st._rp; if(Q&&!Q.done&&!st.paused) Q.skipTap=true; } });
+  el.appendChild(sk); el.appendChild(nx); return el; };
 function v185Caption(st,Q){ const host=st.cv&&st.cv.parentElement; const el=host&&host.querySelector(':scope > .v18-rp'); if(!el) return;
   const lt=el.querySelector('.v185-rp-lt'), nx=el.querySelector('.v185-rp-next'); if(!lt) return;
   if(!Q.two){ lt.hidden=true; lt.innerHTML=''; if(nx) nx.hidden=true; return; }
   const T=Q.side0===1?st.a:st.h; const c=(T&&T.c1)||'#d33'; const nm=Q.pass===1&&Q.sc?v185Name(Q.sc):'';
   const t=Q.pass===1?"SCORER'S VIEW":'BEHIND THE GOAL';
-  const nl=lt.cloneNode(false); nl.hidden=false; nl.style.setProperty('--rpc',c); nl.dataset.pass=String(Q.pass);
+  const nl=lt.cloneNode(false); nl.hidden=false; nl.style.setProperty('--rpc',c); nl.dataset.pass=String(Q.pass); if(Q.pass===1&&st._v185ty==='pen') nl.dataset.pen='1';
   nl.innerHTML=`<i></i><b>${t}</b>${nm?`<span>${esc(nm)}</span>`:''}`; lt.replaceWith(nl);
   if(nx) nx.hidden=Q.pass!==1; }
 
@@ -173,15 +201,18 @@ function v185Caption(st,Q){ const host=st.cv&&st.cv.parentElement; const el=host
 (function(){ const D=P3D_MODULES.find(m=>m.name==='director'); if(!D) return; const _pose=D.pose;
   D.pose=function(P,st,mode,eye,tgt){ const Q=st._rp; if(mode==='replay'&&Q&&Q.two&&Q.cam==='goal') return v185GoalPose(P,st,Q,eye,tgt); return _pose.apply(this,arguments); }; })();
 function v185GoalPose(P,st,Q,eye,tgt){ const b=st.ball, R=typeof V18_BALL_R==='number'?V18_BALL_R:0.18, C=V185_RP; const gx=Q.gx, dir=Q.dir, sc=Q.sc;
-  const by=isFinite(b.y)?b.y:34; eye.set(gx+dir*C.gEye,C.gH,34+v185Cl((by-34)*0.25,-1.4,1.4));
+  const by=isFinite(b.y)?b.y:34; eye.set(gx+dir*C.gEye,C.gH,v185Cl(34+v185Cl((by-34)*0.25,-1.4,1.4)+(Q.gz||0),31,37));
   if(st.now<Q.ts&&sc&&isFinite(sc.x)){ tgt.set(sc.x+(b.x-sc.x)*0.3,1.1+(Math.max(0,b.z||0)+R-1.1)*0.3,sc.y+(by-sc.y)*0.3); }
-  else tgt.set(b.x,Math.max(0,b.z||0)+R,by);
+  else { const th=Math.max(0,b.z||0)+R; let ty=th;
+    /* after the goal the aim lifts a little so the posts and the net stay in the picture (the ball sits low, still in frame) */
+    if(st.now>Q.tg){ const k=v185Cl((st.now-Q.tg)/200,0,1), dh=Math.hypot(b.x-eye.x,by-eye.z); if(th<0.9) ty=th+k*dh*0.25; }
+    tgt.set(b.x,ty,by); }
   /* the lens: opened up on tall frames so the goal mouth still reads */
   const asp=Math.max(0.4,P.camera.aspect||1.6); let f=C.gFov; if(asp<1.3) f=Math.min(64,2*Math.atan(Math.tan(C.gFov*V185_D2R/2)*1.3/asp)/V185_D2R); else f=Math.min(f,2*Math.atan(Math.tan(C.gHMax*V185_D2R/2)/asp)/V185_D2R); return f; }
 
 /* ---------- 3-D: the first-person camera (module order 27) ---------- */
 P3D_MODULES.push({name:'rpcam',order:27,
-  init(P){ P._rp2={last:null,nearSet:false,hid:0,head:null,v:new P.T.Vector3(),t:new P.T.Vector3()}; P._rp2eye=null; },
+  init(P){ P._rp2={last:null,nearSet:false,hid:0,head:null,v:new P.T.Vector3(),t:new P.T.Vector3(),fw:new P.T.Vector3()}; P._rp2eye=null; },
   frame(P,st){ const R=P._rp2; if(!R) return; const Q=st._rp, cam=P.camera, C=V185_RP;
     if(Q&&Q.on&&Q.two&&Q.cam==='eyes'&&Q.trk){ const K=Q.trk, i=Math.max(0,Math.min(K.n-1,Q.i)); const y=K.yw[i], p=K.pt[i];
       cam.position.set(K.ex[i],K.ey[i],K.ez[i]); cam.up.set(0,1,0); const cp=Math.cos(p); R.t.set(K.ex[i]+Math.cos(y)*cp*10,K.ey[i]+Math.sin(p)*10,K.ez[i]+Math.sin(y)*cp*10); cam.lookAt(R.t);
@@ -191,8 +222,8 @@ P3D_MODULES.push({name:'rpcam',order:27,
       else vf=Math.min(vf,2*Math.atan(Math.tan(C.hMax*V185_D2R/2)/asp)/V185_D2R);
       if(Math.abs(cam.fov-vf)>1e-4||cam.near!==C.near){ cam.fov=vf; cam.near=C.near; cam.updateProjectionMatrix(); } R.nearSet=true; P._rp2eye=Q.sc; }
     else { P._rp2eye=null; if(R.nearSet){ cam.near=0.3; cam.updateProjectionMatrix(); R.nearSet=false; } }
-    if(Q&&Q.on){ cam.updateMatrixWorld(); const b=st.ball, Rb=typeof V18_BALL_R==='number'?V18_BALL_R:0.18; R.v.set(b.x,Math.max(0,b.z||0)+Rb,b.y).project(cam);
-      const fw=new P.T.Vector3(); cam.getWorldDirection(fw);
+    if(Q&&Q.on&&window.V185_RPDBG){ cam.updateMatrixWorld(); const b=st.ball, Rb=typeof V18_BALL_R==='number'?V18_BALL_R:0.18; R.v.set(b.x,Math.max(0,b.z||0)+Rb,b.y).project(cam);
+      const fw=R.fw; cam.getWorldDirection(fw);
       R.last={cam:Q.two?Q.cam:'goal',pass:Q.pass||1,i:Q.i,now:st.now,eye:[cam.position.x,cam.position.y,cam.position.z],fwd:[fw.x,fw.y,fw.z],near:cam.near,fov:cam.fov,ballNdc:[R.v.x,R.v.y,R.v.z],head:null,hid:0}; }
     else R.last=null; },
   dispose(P){ P._rp2=null; P._rp2eye=null; } });
@@ -201,12 +232,13 @@ P3D_MODULES.push({name:'rpcam',order:27,
 const _v185Fig=v18FigDraw;
 v18FigDraw=function(P,st,p,kit,isRef){ const sc=P&&P._rp2eye; if(!sc||!P._fig) return _v185Fig.apply(this,arguments);
   /* nobody else is drawn with the lens inside or against his body */
-  if(p!==sc){ const c=P.camera.position; if(p&&Math.hypot(p.x-c.x,p.y-c.z)<V185_RP.lens) return false; return _v185Fig.apply(this,arguments); }
+  if(p!==sc){ const c=P.camera.position; if(p&&Math.hypot(p.x-c.x,p.y-c.z)<V185_RP.lens) return false;
+    const Q=st&&st._rp, H=Q&&Q.trk&&Q.trk.hid?Q.trk.hid[Math.max(0,Math.min(Q.trk.n-1,Q.i))]:null; if(H&&H.has(p)) return false; return _v185Fig.apply(this,arguments); }
   const F=P._fig, parts=F.parts; const n0=F._v185n&&F._v185n.length===parts.length?F._v185n:(F._v185n=new Int32Array(parts.length)); for(let i=0;i<parts.length;i++) n0[i]=parts[i].n;
   const r=_v185Fig.apply(this,arguments); const R=P._rp2; if(!r){ if(R&&R.last) R.last.hid=-1; return r; }
   const W=F.s, hx=W[42], hy=W[43], hz=W[44], nx=W[39], ny=W[40], nz=W[41], rr=V185_RP.hide*V185_RP.hide; let k=0;
   for(let i=0;i<parts.length;i++){ const pt=parts[i], im=pt.im; for(let j=n0[i];j<pt.n;j++){ const o=j*16; const x=im[o+12], y=im[o+13], z=im[o+14];
-    if((x-hx)*(x-hx)+(y-hy)*(y-hy)+(z-hz)*(z-hz)<rr||(x-nx)*(x-nx)+(y-ny)*(y-ny)+(z-nz)*(z-nz)<rr){ for(const q of [0,1,2,4,5,6,8,9,10]) im[o+q]=0; k++; } } }
+    if((x-hx)*(x-hx)+(y-hy)*(y-hy)+(z-hz)*(z-hz)<rr||(x-nx)*(x-nx)+(y-ny)*(y-ny)+(z-nz)*(z-nz)<rr){ for(let q=0;q<9;q++) im[o+V185_HID[q]]=0; k++; } } }
   if(R&&R.last){ R.last.hid=k; R.last.head=[hx,hy,hz]; } return r; };
 
 /* ---------- Settings > Match graphics: Goal replays Off / One angle / Two angles ---------- */

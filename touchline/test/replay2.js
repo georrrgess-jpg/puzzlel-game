@@ -29,11 +29,15 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   await p.evaluate(()=>{ App.live.paused=true; }); await until(()=>!App.live.busy,60000);
   /* the sampler: after every render during a replay, the frame's camera, the scorer's rendered head, the nearest other
      player to the eye (from the applied snapshot), the ball in normalised device coordinates and the caption */
-  await p.evaluate(()=>{ window.RS=[]; window.RSHOT=null; const _r=Painter3D.prototype.render; Painter3D.prototype.render=function(){ const r=_r.apply(this,arguments);
+  await p.evaluate(()=>{ window.V185_RPDBG=true; window.RS=[]; window.RSHOT=null; const _r=Painter3D.prototype.render; Painter3D.prototype.render=function(){ const r=_r.apply(this,arguments);
     try{ const st=this.st, Q=st._rp, L=this._rp2&&this._rp2.last; if(Q&&Q.on&&L){ let md=99; const sc=Q.sc; for(const q of st.players.values()){ if(q===sc||q.off) continue; const d=Math.hypot(L.eye[0]-q.x,L.eye[2]-q.y); if(d<md) md=d; }
       const lt=document.querySelector('.v18-rp .v185-rp-lt:not([hidden]) b'); const nx=document.querySelector('.v18-rp .v185-rp-next');
       const fw=L.fwd, bx=st.ball.x, by=Math.max(0,st.ball.z||0)+V18_BALL_R, bz=st.ball.y; const front=(bx-L.eye[0])*fw[0]+(by-L.eye[1])*fw[1]+(bz-L.eye[2])*fw[2], bd=Math.hypot(bx-L.eye[0],by-L.eye[1],bz-L.eye[2]);
-      RS.push({cam:L.cam,pass:L.pass,i:Q.i,now:L.now,eye:L.eye,fwd:L.fwd,near:L.near,fov:L.fov,ndc:L.ballNdc,front,bd,head:L.head,hid:L.hid,md,lt:lt?lt.textContent:'',nx:!!(nx&&!nx.hidden),ts:Q.ts,tg:Q.tg,two:!!Q.two,win:Q.win||null,gx:Q.gx,dir:Q.dir,crossT:Q.crossT==null?null:Q.crossT,rate:Q.rate||0.5});
+      /* occlusion: a drawn body (capsule r 0.3 m, his height) on the line from the lens to the ball */
+      const H=Q.cam==='eyes'&&Q.trk&&Q.trk.hid?Q.trk.hid[Math.max(0,Math.min(Q.trk.n-1,Q.i))]:null; let occ=false; const ddx=bx-L.eye[0], ddz=bz-L.eye[2], dl=Math.hypot(ddx,ddz);
+      if(dl>0.5) for(const q of st.players.values()){ if(q.off||(L.cam==='eyes'&&q===sc)||(H&&H.has(q))) continue; if(L.cam==='eyes'&&Math.hypot(q.x-L.eye[0],q.y-L.eye[2])<V185_RP.lens) continue; const ox=q.x-L.eye[0], oz=q.y-L.eye[2], t=(ox*ddx+oz*ddz)/dl; if(t<0.3||t>dl-0.35) continue;
+        if(Math.abs(ox*ddz-oz*ddx)/dl<0.3){ const yr=L.eye[1]+(by-L.eye[1])*t/dl; if(yr<1.85*(q.hgt||70)/70) { occ=true; break; } } }
+      RS.push({cam:L.cam,pass:L.pass,i:Q.i,now:L.now,eye:L.eye.slice(),fwd:L.fwd.slice(),near:L.near,fov:L.fov,ndc:L.ballNdc.slice(),front,bd,occ,head:L.head&&L.head.slice(),hid:L.hid,md,lt:lt?lt.textContent:'',nx:!!(nx&&!nx.hidden),ts:Q.ts,tg:Q.tg,two:!!Q.two,win:Q.win||null,gx:Q.gx,dir:Q.dir,crossT:Q.crossT==null?null:Q.crossT,rate:Q.rate||0.5});
       if(window.RSHOT) window.RSHOT(L,Q,st); } }catch(e){ console.warn('sampler',e); } return r; }; });
   /* the build-up before the replay is not drawn (software GL is slow; the replay is what is measured): the stage keeps
      stepping in real time, and drawing resumes for good the moment the replay starts */
@@ -52,16 +56,17 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   /* frames with the ball within 1 m of the lens (on his forehead or boot at the contact) cannot frame it in any first-person
      camera; they are left out of the ball-in-frame counts */
   const pct=(fr)=>{ fr=fr.filter(f=>!(f.bd<1)); return fr.length?fr.filter(inFrame).length/fr.length:0; };
+  const vis=(fr)=>{ fr=fr.filter(f=>!(f.bd<1)); return fr.length?fr.filter(f=>inFrame(f)&&!f.occ).length/fr.length:0; };
   const D=180/Math.PI;
   const eyesStats=fr=>{ const E=fr.filter(f=>f.cam==='eyes'); let dHead=0, yMin=9, yMax=0, pMin=90, pMax=-90, turn=0, jump=0, mdMin=99, hid=0, nearOk=true, prev=null;
     for(const f of E){ if(f.head) dHead=Math.max(dHead,Math.hypot(f.eye[0]-f.head[0],f.eye[2]-f.head[2])); yMin=Math.min(yMin,f.eye[1]); yMax=Math.max(yMax,f.eye[1]);
       const pi=Math.asin(Math.max(-1,Math.min(1,f.fwd[1])))*D; pMin=Math.min(pMin,pi); pMax=Math.max(pMax,pi); mdMin=Math.min(mdMin,f.md); hid=Math.max(hid,f.hid||0); if(Math.abs(f.near-0.12)>1e-6) nearOk=false;
       if(prev&&f.i!==prev.i){ const steps=Math.max(1,Math.abs(f.i-prev.i)); const c=f.fwd[0]*prev.fwd[0]+f.fwd[1]*prev.fwd[1]+f.fwd[2]*prev.fwd[2]; turn=Math.max(turn,Math.acos(Math.min(1,c))*D/steps); jump=Math.max(jump,Math.hypot(f.eye[0]-prev.eye[0],f.eye[1]-prev.eye[1],f.eye[2]-prev.eye[2])/steps); }
       prev=f; }
-    const S=E.filter(f=>f.now>=f.ts&&f.now<=f.tg); return {n:E.length,dHead:+dHead.toFixed(3),yMin:+yMin.toFixed(2),yMax:+yMax.toFixed(2),pMin:Math.round(pMin),pMax:Math.round(pMax),turn:+turn.toFixed(2),jump:+jump.toFixed(3),mdMin:+mdMin.toFixed(2),hid,nearOk,ball:+pct(S).toFixed(2),nb:S.length,all:+pct(E).toFixed(2)}; };
+    const S=E.filter(f=>f.now>=f.ts&&f.now<=f.tg); return {n:E.length,dHead:+dHead.toFixed(3),yMin:+yMin.toFixed(2),yMax:+yMax.toFixed(2),pMin:Math.round(pMin),pMax:Math.round(pMax),turn:+turn.toFixed(2),jump:+jump.toFixed(3),mdMin:+mdMin.toFixed(2),hid,nearOk,ball:+pct(S).toFixed(2),vis:+vis(S).toFixed(2),nb:S.length,all:+pct(E).toFixed(2),allVis:+vis(E).toFixed(2)}; };
   const goalStats=fr=>{ const G=fr.filter(f=>f.cam==='goal'&&f.pass===2); let dx0=9, dx1=-9, y0=9, y1=0, back=true;
     for(const f of G){ const dx=f.dir*(f.eye[0]-f.gx); dx0=Math.min(dx0,dx); dx1=Math.max(dx1,dx); y0=Math.min(y0,f.eye[1]); y1=Math.max(y1,f.eye[1]); if(Math.sign(f.fwd[0])!==-f.dir) back=false; }
-    const S=G.filter(f=>f.now>=f.ts); return {n:G.length,dx0:+dx0.toFixed(2),dx1:+dx1.toFixed(2),y0:+y0.toFixed(2),y1:+y1.toFixed(2),back,ball:+pct(S).toFixed(2),nb:S.length,all:+pct(G).toFixed(2)}; };
+    const S=G.filter(f=>f.now>=f.ts); return {n:G.length,dx0:+dx0.toFixed(2),dx1:+dx1.toFixed(2),y0:+y0.toFixed(2),y1:+y1.toFixed(2),back,ball:+pct(S).toFixed(2),vis:+vis(S).toFixed(2),nb:S.length,all:+pct(G).toFixed(2),allVis:+vis(G).toFixed(2)}; };
   const brief=r=>JSON.stringify({n:r.n,bug:r.bug,same:r.same,rp:r.rp,s:Math.round(r.ms/1000),cams:seqOf(r.frames),caps:capsOf(r.frames)});
 
   /* RP2_ONLY=header|pen|long|open: one goal of that type, with a per-frame dump of the eyes pass from the strike (diagnostics) */
@@ -84,6 +89,7 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   ok(es.mdMin>=0.3, 'eyes: never inside another player (nearest body axis '+es.mdMin+' m)');
   ok(es.nb>=3&&es.ball>=0.9, 'eyes: the ball is in frame in >= 90% of frames from the strike to the goal: '+es.ball+' of '+es.nb);
   console.log('  eyes: ball in frame over the whole pass (the run, head up toward goal, included): '+es.all+' of '+es.n);
+  ok(es.vis>=0.9, 'eyes: the ball is in frame and not hidden behind a drawn body in >= 90% of frames from the strike to the goal: '+es.vis);
   ok(es.hid>=1, 'eyes: the scorer\'s head cluster is collapsed in his camera ('+es.hid+' instances)');
   ok(r.after&&Math.abs(r.after.near-0.3)<1e-6&&r.after.eye===0, 'after the replay: near 0.3 and no collapsed head '+JSON.stringify(r.after&&{near:r.after.near,eye:r.after.eye}));
   let gs=goalStats(r.frames); console.log('  goal', JSON.stringify(gs));
@@ -91,6 +97,7 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   ok(gs.y0>=1.2&&gs.y1<=1.8&&gs.back, 'goal: eye height 1.2..1.8 m, looking out at the pitch: '+gs.y0+'..'+gs.y1+' '+gs.back);
   ok(gs.nb>=3&&gs.ball>=0.9, 'goal: the ball is in frame in >= 90% of frames from the strike: '+gs.ball+' of '+gs.nb);
   ok(gs.all>=0.9, 'goal: the ball is in frame in >= 90% of all the frames of the pass: '+gs.all+' of '+gs.n);
+  console.log('  goal: ball in frame and not behind a body, from the strike: '+gs.vis+', whole pass: '+gs.allVis);
   if(ONLY!=='first'){
   /* ---------- 4. speeds ---------- */
   r=await goal({speed:2,side:1}); const w2=r.frames.length?r.frames[0].win:null; const nom=w2?((w2[0][1]-w2[0][0])+(w2[1][1]-w2[1][0]))/(r.frames[0].rate*1000)+0.4:99;

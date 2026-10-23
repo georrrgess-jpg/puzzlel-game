@@ -131,6 +131,7 @@ Per snapshot:
   - Express the view as yaw and pitch, unwrapped.
   - Forward-backward one-pole filter in game time (zero phase, no lag): τ 0.18 s on yaw/pitch, τ 0.10 s on the eye. After the strike, τ 0.06 s on the target so the ball stays framed.
   - Rate clamp: yaw ≤ 150°/s, pitch ≤ 90°/s game time (half that on screen at 0.5x).
+  - As built (v18.5 replay2): pitch ≤ 120°/s game time (60°/s on screen at 0.5x), and yaw ≤ 280°/s for 650 ms around the strike, so the head can follow a header or a first-time finish to goal (at 90/150 the ball left the frame on headers). Not yet judged on moving video for comfort.
   - Pitch clamp [-35°, +20°]. No roll, no stride bob (only `x, y, lift` are used, never `hipU`).
 - **Lens:**
   - Vertical fov 52°. Portrait or phone (aspect < 1): solve for a horizontal of about 62°, capped at 72° vertical.
