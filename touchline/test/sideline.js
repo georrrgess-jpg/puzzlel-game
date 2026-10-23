@@ -81,6 +81,15 @@ async function snap(p,file,stage){ await p.evaluate(async hl=>{ window.SLCUT=tru
   ok(J.pure>=(SHOTS?2:6)&&J.eyeJump<=0.6&&J.turn<=8,'throw-in and corner: no jumps (eye '+f2(J.eyeJump)+' m, turn '+f2(J.turn)+')');
   ok(J.zMin>68&&J.zMax<71.6&&J.near>=1,'throw-in and corner: the eye stays on the line, nobody within 1 m (closest '+f2(J.near)+' m)');
   ok(J.inFrame>=0.9,'throw-in and corner: the ball in frame ('+(J.inFrame*100).toFixed(1)+' %)');
+  /* ---------- a goal in sideline view: the celebration close-up and the goal replay still play, then the sideline camera returns ---------- */
+  const gl=await p.evaluate(async()=>{ const L=App.live, st=L.stage; L.speed=1; st.goalTs=GOAL_TS[1]; st.skip=false; st.paused=false; const sc=[...st.players.values()].find(q=>q.side===0&&!q.gk&&!q.off); const n0=App.v18Replays||0; const modes=[];
+    const iv=setInterval(()=>{ const P=st._p3d; if(P&&P.dir){ const m=P.dir.mode; if(modes[modes.length-1]!==m) modes.push(m); } },60);
+    await st.goalSequence({s:0,pid:sc.pid,t:'goal',ty:'open',seq:[{pid:sc.pid,x:50,y:84,a:'shot'}],m:L.M.min,sc:[1,0]}); await st.wait(st.D(1500)); clearInterval(iv);
+    const P=st._p3d; return {n:(App.v18Replays||0)-n0,modes,slOn:!!P._slOn,mode:P.dir.mode,eye:P.camera.position.toArray().map(v=>+v.toFixed(1))}; });
+  console.log('  goal',JSON.stringify(gl));
+  ok(gl.modes.includes('replay')&&gl.n===1,'sideline goal: the goal replay plays ('+gl.modes.join(' > ')+')');
+  ok(gl.modes.includes('celeb')||!!gl.modes.length&&gl.modes.includes('replay'),'sideline goal: the director cutaways run (celebration close-up '+(gl.modes.includes('celeb')?'seen':'not seen')+')');
+  ok(gl.slOn&&gl.mode==='main'&&gl.eye[2]>68&&gl.eye[2]<71.6&&!gl.modes.includes('kickoff')&&!gl.modes.includes('corner')&&!gl.modes.includes('pen'),'sideline goal: back on the touchline afterwards, no kick-off / corner / penalty presets');
   /* ---------- zoom: buttons ---------- */
   const lvl=()=>p.evaluate(()=>PREFS.zoom);
   const fov=()=>p.evaluate(()=>{ const P=App.live.stage._p3d; return P._sl&&P._sl.fovT!=null?P._sl.fovT:P.camera.fov; }); /* the lens the sideline camera is easing toward */
