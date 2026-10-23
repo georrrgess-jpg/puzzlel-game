@@ -6,8 +6,10 @@
    - Choice (v186xDecide, pure part v186xPick): e.ty 'cross' with a cross delivered to the scorer at least 7 m from goal,
      goalTs >= 0.45 (1x, 2x, 4x), not reduced motion, skipping, shootouts or menu stages. The pick hashes (pid, minute, score,
      side), so live, highlight cards and TouchlineTV show the same finish. Ratings: v186xRate (own helper) reads Px:
-     technique = 0.25 pace + 0.30 passing + 0.45 shooting + position + traits. Force: st._v186xForce or V186X.force
-     ('bike' | 'scissor') for the lab and tests.
+     technique = 0.25 pace + 0.30 passing + 0.45 shooting + position + traits. When the cross is struck the scorer must be
+     within a sprint (+ 6 m) of his spot, so the kick happens at the box, not 30 m out (else the ordinary finish); he then
+     sprints (hurry) to get under it. Force: st._v186xForce or V186X.force ('bike' | 'scissor', skips the odds and the
+     reach check) for the lab and tests. Saves and misses are never specials: their sequences stage no cross.
    - Timing: the cross is launched with head:true and D(150) longer, and the strike is a no-wind 'head' launch (D(430)+90),
      so the goal is emitted exactly when the normal ground finish (wind D(200), D(380)+90, no square-up) would have been.
    - Contact: headOf returns the kicking boot's contact point (from the pose itself, scaled for whichever painter draws),
@@ -17,7 +19,8 @@
      (bike) or rolled (scissor) body; 3-D reads P.pitchB / P.rollB through a one-expression hook in 63_p3d_figures.js, 2-D
      gets the same tilt as a screen rotation (P.rot). All state lives in primitive v186x* fields on the scorer, so the
      replays (68, 76) reproduce the move. Position and facing are scripted from take-off until he is off the turf.
-   - Hooks (wraps only): goalSequence, launch, finish (shownType keeps 'cross'), headOf, update, poseOf, feedPush,
+   - Hooks (wraps only): goalSequence, launch, finish (shownType keeps 'cross'), headOf, jumpLift (the 2-D name plate rides
+     above the top of his body), update, poseOf, feedPush,
      goalBanner, v18Replay (two-angle replay: the scorer's view ends at take-off, so his camera never goes upside down or
      inside his own body; the behind-the-goal pass starts earlier and slows the kick down), Stage.loop (slow motion), the
      lab (scenes 'bike' and 'scissor'). Globals are prefixed v186x / V186X. */
