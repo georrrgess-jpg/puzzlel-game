@@ -16,8 +16,8 @@
      pair the taker with the keeper.
    - Hidden: PREFS.plates off (N or Settings), demo/menu/photo/preview stages, skipping, full time, the walkout, replays,
      from the goal (inNet or any celebration) to the restart, and at half time (no carrier).
-   - Layout (v185PlFit): above the head with a pointer, clamped to the canvas, never over each other, the minimap or the
-     caption; a carrier off screen is pinned to the edge with a chevron; a tag that cannot be placed is hidden.
+   - Layout (v185PlFit): above the head with a pointer, clamped to the canvas, never over each other, the minimap, the
+     caption or TouchlineTV's overlays (in Tactical, nor over the tagged dots and the ball); a carrier off screen is pinned to the edge with a chevron; a tag that cannot be placed is hidden.
    - Accessibility: a visually hidden status line in the live stage names the carrier and the presser (aria-live off). */
 DEFAULT_PREFS.plates=true; if(!('plates' in PREFS)) PREFS.plates=true;
 
@@ -34,8 +34,8 @@ function v185PlCon(a,b){ const x=v185PlLum(a), y=v185PlLum(b); return (Math.max(
 function v185PlNumCol(kit){ const sh=kit&&kit.shirt||'#888888', n=kit&&kit.num||'#ffffff'; if(v185PlCon(n,sh)>=4.5) return n; return v185PlCon('#ffffff',sh)>=v185PlCon('#111111',sh)?'#ffffff':'#111111'; }
 /* the underline: the shirt colour unless it vanishes into the dark glass, then the kit's trim / number colour */
 function v185PlLine(kit){ const g='#0c1014'; for(const c of [kit&&kit.shirt,kit&&kit.trim,kit&&kit.num,'#d8dde3']) if(c&&v185PlCon(c,g)>=2.2) return c; return '#d8dde3'; }
-const V185PL_COLS=new Map();
-function v185PlCols(kit){ let c=V185PL_COLS.get(kit); if(!c){ c={shirt:(kit&&kit.shirt)||'#888888',num:v185PlNumCol(kit),line:v185PlLine(kit),dark:v185PlLum((kit&&kit.shirt)||'#888888')<0.03}; V185PL_COLS.set(kit,c); } return c; }
+const V185PL_COLS=new WeakMap();
+function v185PlCols(kit){ const ok=kit&&typeof kit==='object'; let c=ok?V185PL_COLS.get(kit):null; if(!c){ c={shirt:(kit&&kit.shirt)||'#888888',num:v185PlNumCol(kit),line:v185PlLine(kit),dark:v185PlLum((kit&&kit.shirt)||'#888888')<0.03}; if(ok) V185PL_COLS.set(kit,c); } return c; }
 
 /* ---------- names (cached per stage; rebuilt by setSides) ---------- */
 function v185PlNames(st){ const N=new Map(); const seen=[new Map(),new Map()]; const rows=[];
@@ -209,6 +209,10 @@ function v185PlBlocks(st,S){ const B=S.blocks; let n=0; const W=st.W;
     try{ const host=st.cv.parentElement; const els=host?host.querySelectorAll(':scope > .lv-cap .cap, :scope > .tv-bug, :scope > .tv-lower > *'):[]; if(els.length){ const c=st.cv.getBoundingClientRect(), k=c.width>0?st.W/c.width:1;
       for(const el of els){ if(!el.textContent) continue; const a=el.getBoundingClientRect(); if(a.width>0&&a.height>0&&c.width>0&&caps.length<4) caps.push({x:(a.left-c.left)*k-6,y:(a.top-c.top)*k-6,w:a.width*k+12,h:a.height*k+12}); } } }catch(e){ caps.length=0; } }
   if(S.caps) for(const q of S.caps){ const b=B[n]||(B[n]={}); b.x=q.x; b.y=q.y; b.w=q.w; b.h=q.h; b.k='cap'; n++; }
+  /* Tactical: the tagged players' dots (the carrier's with its halo) and the ball stay uncovered */
+  if(st.mode==='tactical'&&S.slots.size){ const T=st.tacGeom(), r=Math.max(7,T.s*1.25);
+    for(const sl of S.slots.values()){ const p=sl.p; if(!p||!isFinite(p.x)) continue; const rr=(p===st.own?r+5:r)+2, b=B[n]||(B[n]={}); b.x=T.ox+p.x*T.s-rr; b.y=T.oy+p.y*T.s-rr; b.w=b.h=rr*2; b.k='dot'; n++; }
+    const bl=st.ball; if(bl&&isFinite(bl.x)){ const z=bl.z||0, rr=6+z*0.5, b=B[n]||(B[n]={}); b.x=T.ox+bl.x*T.s-rr; b.y=T.oy+bl.y*T.s-z*2.2-rr; b.w=b.h=rr*2; b.k='ball'; n++; } }
   S.nb=n; return n; }
 
 /* ---------- per frame ---------- */
@@ -266,6 +270,13 @@ function v185PlSprite(st,S,sl,kit){ const dpr=st.dpr||1, m=sl.m; const C=S.spr||
   const q=c.getContext('2d'); q.setTransform(dpr,0,0,dpr,0,0); q.clearRect(0,0,w,h); v185DrawPlate(q,1,1,sl.n,kit,{fs:m.fs,glyph:sl.gly,m});
   e.m=m; e.kit=kit; e.dpr=dpr; return c; }
 function v185PlPaint(st,S){ const g=st.ctx; g.save(); const dpr=st.dpr||1; g.setTransform(dpr,0,0,dpr,0,0);
+  /* a tag moved aside (no pointer) keeps a thin leader to its player's head, under the tags */
+  if(st.mode!=='tactical') for(const sl of S.list){ if(!sl.on||sl.a<=0.004||sl.ptr!=null||sl.chev) continue; const r=sl.r, A=sl.an, w=sl.m.w, h=sl.m.h; let fx, fy;
+    if(A.y>=r.y+h){ fx=Math.max(r.x+4,Math.min(r.x+w-4,A.x)); fy=r.y+h; } else if(A.y<=r.y){ fx=Math.max(r.x+4,Math.min(r.x+w-4,A.x)); fy=r.y; }
+    else { fx=A.x<r.x?r.x:r.x+w; fy=Math.max(r.y+3,Math.min(r.y+h-3,A.y)); }
+    const dx=A.x-fx, dy=A.y-fy, d=Math.hypot(dx,dy); if(d<5||d>170) continue; const ex=A.x-dx/d*2, ey=A.y-dy/d*2;
+    g.globalAlpha=Math.min(1,sl.a)*0.8; g.strokeStyle='rgba(8,12,16,.55)'; g.lineWidth=2.5; g.beginPath(); g.moveTo(fx,fy); g.lineTo(ex,ey); g.stroke();
+    g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=1; g.beginPath(); g.moveTo(fx,fy); g.lineTo(ex,ey); g.stroke(); g.fillStyle='#ffffff'; g.beginPath(); g.arc(ex,ey,1.6,0,7); g.fill(); }
   for(let i=S.list.length-1;i>=0;i--){ const sl=S.list[i]; if(!sl.on||sl.a<=0.004) continue; const kit=sl.p.gk?st.kits.gk[sl.p.side]:st.kits.team[sl.p.side]; S.drawn++;
     const m=sl.m, spr=v185PlSprite(st,S,sl,kit), x=Math.round(sl.r.x), y=Math.round(sl.r.y); g.globalAlpha=Math.min(1,sl.a);
     g.drawImage(spr,x-1,y-1,m.w+2,m.h+2); if(sl.ptr!=null||sl.chev) v185PlDeco(g,x,y,m.w,m.h,sl.ptr,sl.ptrUp,sl.chev); }
