@@ -327,6 +327,9 @@ function v18FPut(pt,A,o,B,ex,ey,ez,sx,sy,sz,col,aux){ const i=pt.n; if(i>=pt.max
   m[k]=B[ex]*sx; m[k+1]=B[ex+1]*sx; m[k+2]=B[ex+2]*sx; m[k+3]=0; m[k+4]=B[ey]*sy; m[k+5]=B[ey+1]*sy; m[k+6]=B[ey+2]*sy; m[k+7]=0;
   m[k+8]=B[ez]*sz; m[k+9]=B[ez+1]*sz; m[k+10]=B[ez+2]*sz; m[k+11]=0; m[k+12]=A[o]; m[k+13]=A[o+1]; m[k+14]=A[o+2]; m[k+15]=1;
   const c=pt.ic, j=i*3; c[j]=col[0]; c[j+1]=col[1]; c[j+2]=col[2]; if(pt.ax) pt.ax[i]=aux||0; }
+/* the elbow pole for one arm in body (f,u,l); 71_polish.js replaces it (v18.2). Returns a shared array. */
+const V18_AP=[0,0,0];
+function v18ArmPole(a0,a1,a2,t0,t1,t2,sd,Q,p){ V18_AP[0]=-0.7; V18_AP[1]=-0.5; V18_AP[2]=sd*0.6; return V18_AP; }
 /* allocation-free copy of ik3 (same math): writes joint to out[0..2], clamped target to out[3..5] */
 function v18FIk(R0,R1,R2,T0,T1,T2,a,b,p0,p1,p2,out){ let D0=T0-R0, D1=T1-R1, D2=T2-R2; let d=Math.hypot(D0,D1,D2); const mx=(a+b)*0.999; if(d>mx){ const k=mx/d; T0=R0+D0*k; T1=R1+D1*k; T2=R2+D2*k; D0=T0-R0; D1=T1-R1; D2=T2-R2; d=mx; }
   d=Math.max(d,Math.abs(a-b)+1e-3); const n0=D0/d, n1=D1/d, n2=D2/d; const al=(a*a+d*d-b*b)/(2*d); const h=Math.sqrt(Math.max(0,a*a-al*al));
@@ -365,7 +368,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   for(let i=0;i<2;i++){ const sd=i?1:-1; const ft=Q.feet[i]; const hl=sd*0.09*B; v18FIk(0,hipU,hl,ft.f,ft.u+0.06,ft.l,0.43,0.43,1,0.05,sd*0.12,IK); ankU[i]=IK[4];
     bw(0,hipU,hl,i*9); bw(IK[0],IK[1],IK[2],i*9+3); bw(IK[3],IK[4],IK[5],i*9+6); }
   for(let i=0;i<2;i++){ const sd=i?1:-1; const s0=up2(0,1.5,sd*0.21*B); const a0=s0[0], a1=s0[1], a2=s0[2]; const hd=Q.hands[i]; const t=up2(hd.f,hd.u,hd.l); const t1=Math.max(0.06,t[1]);
-    v18FIk(a0,a1,a2,t[0],t1,t[2],0.3,0.29,-0.7,-0.5,sd*0.6,IK); bw(a0,a1,a2,18+i*9); bw(IK[0],IK[1],IK[2],21+i*9); bw(IK[3],IK[4],IK[5],24+i*9); }
+    const ap=v18ArmPole(a0,a1,a2,t[0],t1,t[2],sd,Q,p); v18FIk(a0,a1,a2,t[0],t1,t[2],0.3,0.29,ap[0],ap[1],ap[2],IK); bw(a0,a1,a2,18+i*9); bw(IK[0],IK[1],IK[2],21+i*9); bw(IK[3],IK[4],IK[5],24+i*9); }
   bw(0,hipU,0,36); { const n=up2(0,1.57,0); bw(n[0],n[1],n[2],39); } { const h=up2(0.02+tilt*0.05,1.83-Math.abs(tilt)*0.02,0); bw(h[0],h[1],h[2],42); }
   for(let k=0;k<45;k++) if(!isFinite(W[k])) return false;
   /* level of detail from the on-screen height */
