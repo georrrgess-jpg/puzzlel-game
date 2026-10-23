@@ -219,3 +219,15 @@
 .swatch i.a{background:radial-gradient(circle at 40% 35%,#fff,var(--a) 55%);box-shadow:0 0 6px var(--a)}
 .swatch i.b{background:radial-gradient(circle at 40% 35%,#fff,var(--a2) 55%);box-shadow:0 0 6px var(--a2)}
 .swatch::after{z-index:1}
+
+/* very narrow phones (iPhone SE / 320px): keep Levels + Shop side by side and the chest bar on screen */
+@media (max-width:350px){
+  #home .row{flex-wrap:nowrap;gap:8px}
+  #home .row .btn.sec{min-width:0;flex:1 1 0;padding:10px 8px;font-size:16px;white-space:nowrap;display:inline-flex;flex-direction:row;align-items:center;justify-content:center;gap:6px}
+  #home .row .btn.sec .bi{margin:0;flex:none;transform:scale(.85)}
+  .tiles4{gap:7px}
+}
+@media (max-width:350px) and (max-height:600px){
+  .homemain{gap:8px}
+  .logo .word{font-size:44px}
+}

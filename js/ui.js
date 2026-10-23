@@ -234,7 +234,10 @@ addEventListener('keydown',e=>{
   else if(k==='escape')$('#backBtn').click();
 });
 const wake=()=>{audio();Music.start()};
-addEventListener('pointerdown',wake,{once:true});addEventListener('keydown',wake,{once:true});
+// iOS Safari only unlocks audio inside certain gestures (touchend/click), so keep trying until it's running
+const WAKE_EVENTS=['pointerdown','touchend','click','keydown'];
+WAKE_EVENTS.forEach(ev=>addEventListener(ev,wakeUntilRunning,{passive:true}));
+function wakeUntilRunning(){wake();if(AU.ctx&&AU.ctx.state==='running')WAKE_EVENTS.forEach(ev=>removeEventListener(ev,wakeUntilRunning))}
 
 buildLogo();applyTheme();BG.start();ensureQuests();checkAch();refreshHUD();renderHome();
 if(loginDue())setTimeout(()=>{if(!$('#modal').classList.contains('on'))showLogin()},800);

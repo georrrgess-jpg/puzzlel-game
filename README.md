@@ -23,6 +23,21 @@ An endless puzzle game that runs in the browser. Just open `index.html`; there i
 - **Keyboard (desktop)**: U or Ctrl+Z undo, H hint, R restart, Esc back, Enter or Space press the main popup button.
 - Progress is saved in `localStorage`, and older saves are migrated automatically.
 
+## Play on your phone
+
+The game is a mobile-first web app. Once it's hosted it can be installed to the home screen and works offline.
+
+1. **Host it with GitHub Pages (one-time):** in the repo go to **Settings → Pages → Build and deployment**. Set **Source: Deploy from a branch**, pick the branch that has the game (and `/ (root)`), then **Save**.
+   After a minute it's live at **https://georrrgess-jpg.github.io/puzzlel-game/**.
+2. **Open that link on your phone.**
+3. **Install it (optional):**
+   - **iPhone (Safari):** Share → **Add to Home Screen**.
+   - **Android (Chrome):** ⋮ menu → **Install app** / **Add to Home screen**.
+
+   It then opens full-screen with its own icon, and plays offline after the first visit.
+
+`sw.js` caches the game for offline play. Bump its `VERSION` whenever you change game files, so installed copies update.
+
 Code layout:
 - `css/style.css` is the base. `css/menus.css`, `hud.css`, `games-grid.css` and `games-fluid.css` add per-area styling on top.
 - `js/core.js`: helpers, saves, themes, level generation.
