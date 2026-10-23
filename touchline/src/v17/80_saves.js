@@ -187,7 +187,7 @@ Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const now=this.now, q=M.D.q; con
   /* 3-D and standing kinds face the shooter through the save and the get-up; 2-D dives use the three-quarter yaw */
   if(v186kIs3D(this)||M.stand){ gk.yawLock=M.yaw; gk.yawLockT=tC+post+this.D(1600); } else if(gk.yawLockT>now) gk.yawLockT=now;
   if(o&&o.aim&&f.home===gk) f.aim={x:M.c.x,y:M.c.y};
-  if(V186K.log) V186K.log.push({k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
+  if(V186K.log) V186K.log.push({act0:gk._act,spd:+((gk.spd||0)/Math.max(1,this.spdMul||1)).toFixed(2),k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
   return D; };
 
 /* ---------- the save branch (replaces ui_stage.js shotSeq's save branch :396-414 for non-penalty saves) ---------- */
@@ -251,14 +251,20 @@ Stage.prototype.launch=function(p,opt){ const C=this._v186ctx;
   if(V186K.on&&C&&p&&opt&&opt.kind==='shot'&&opt.to&&!opt.home&&this.setPiece!=='pen'){ this._v186ctx=null; const gk=this.gkOf(1-p.side);
     if(gk){ if(gk.dive&&!gk.dive.k) gk.dive=null; const self=this, o0=opt.onRelease; opt={...opt,onRelease(f){ if(o0) o0(f); try{ self.v186kBeaten(gk,p,C,opt.to,f); }catch(err){ if(V186K.log) V186K.log.push({err:String(err)}); } }}; } }
   return _v186kLaunch.call(this,p,opt); };
+/* how a keeper is beaten: goals are wrong-footed (68 % for the poorest keeper, 32 % for the best), late or short; a miss going
+   clearly wide or over is watched (a poor keeper sometimes makes a token late dive), a near miss gets a dive that falls short */
+function v186kBeatKind(q,ck,to){ const wide=Math.abs(to.y-34)-3.66, over=(to.z||0)>2.5;
+  if(ck==='miss') return over||wide>1.2? (q<0.3&&Math.random()<0.3?'late':'watch') : (Math.random()<lerp(.4,.1,q)?'late':'short');
+  const r=Math.random(), w=lerp(.68,.32,q), l=lerp(.22,.05,q); return r<w?'wrong':r<w+l?'late':'short'; }
+/* the keeper's torso axis in the world (pelvis, neck) for a pose, as drawn */
+function v186kTorso(p,P,is3){ const lean=P.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=P.hipU; const du=is3?0.77:1.57-hipU; const n=[du*sl,hipU+du*cl,0];
+  return [v186kW(p,P,0,hipU,0,is3),v186kW(p,P,n[0],n[1],0,is3)]; }
 Stage.prototype.v186kBeaten=function(gk,sh,C,to,f){ const q=v186kQ(this,gk), gl=gk.side===0?0:105; const F=this._v186force||{};
-  const wide=Math.abs(to.y-34)-3.66, over=(to.z||0)>2.5; let k;
-  if(C.k==='miss'&&(over||wide>1.2)){ k=q<0.3&&Math.random()<0.3?'late':'watch'; }
-  else { const r=Math.random(); k=r<lerp(.68,.32,q)?'wrong':r<lerp(.68,.32,q)+lerp(.22,.05,q)?'late':'short'; }
-  if(F.beaten) k=F.beaten;
+  let k=v186kBeatKind(q,C.k,to);
+  if(F.beaten&&!(C.k==='goal'&&F.beaten==='watch')) k=F.beaten;
   const z=clamp(to.z||0,0,2.1); let ty=clamp(to.y,GF.y0-0.8,GF.y1+0.8); const set={x:gk.x,y:gk.y};
-  let flip=false, sgn=Math.sign(ty-set.y)||1;
-  if(k==='wrong'){ flip=true; ty=clamp(set.y-sgn*(1.0+Math.random()*1.4),GF.y0-0.6,GF.y1+0.6); }
+  const sgn=Math.sign(ty-set.y)||1;
+  if(k==='wrong'){ ty=clamp(set.y-sgn*(1.0+Math.random()*1.4),GF.y0-0.6,GF.y1+0.6); }
   else if(k==='short'){ const sh0=0.35+Math.random()*0.25; const gap=Math.abs(ty-set.y); ty=gap>1.5? ty-sgn*(sh0+(1-q)*0.3) : set.y+sgn*Math.max(1.4,gap); }
   else if(k==='late'){ if(Math.abs(ty-set.y)<1.5) ty=set.y+sgn*1.6; }
   const M=this.v186kMake(gk,sh,k,{q,ty,z:k==='wrong'?clamp(z+(Math.random()-0.5)*0.5,0,1.9):z,out:'none',set,low:z<0.45,bx:gk.x});
@@ -299,7 +305,7 @@ const _v186kLabRun=labRun;
 labRun=function(scen){ const r=_v186kLabRun.apply(this,arguments); if(scen!=='saves') return r;
   return Promise.resolve(r).then(async()=>{ const st=App.labSt; if(!st||!st.alive) return; const alive=()=>st.alive&&App.labSt===st;
     const P=[...st.players.values()]; const A=P.filter(p=>p.side===0); const fw=A[9]; let i=0; st._v18forcePunt=false;
-    while(alive()){ const L=window.__v186lab||V186K_LAB; const [k,o]=L[i%L.length]; const qs=window.__v186labQ||[0.15,0.6,0.92]; const q=qs[Math.floor(i/L.length)%qs.length]; i++;
+    while(alive()){ if(window.__v186labIdle){ await st.wait(200); continue; } const L=window.__v186lab||V186K_LAB; const [k,o]=L[i%L.length]; const qs=window.__v186labQ||[0.15,0.6,0.92]; const q=qs[Math.floor(i/L.length)%qs.length]; i++;
       st.zoomTo(0.42); st.cam.w=st.cam.tw; st.focus={x:96}; st.cam.x=96; await st.gain(fw); if(!alive()) return;
       const close=k==='smother'; fw.x=close?95:84; fw.y=28+Math.random()*12;
       if(typeof labLog==='function') labLog(`${k} · ${o} · q ${q}`);
