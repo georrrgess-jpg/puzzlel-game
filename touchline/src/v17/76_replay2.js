@@ -15,7 +15,8 @@
    Hooks (wraps and global reassignments only; 66 and 68 are not edited): goalSequence (remembers the event), v18Replay
    (augments st._rp), v18RpEnd (pass 1 end -> pass 2), Stage.loop (Next angle, 2x rate), v18RpOverlay (caption + pill),
    the director's pose ('replay' + Q.cam 'goal'), a P3D module 'rpcam' (27, after director and polish, before the figures
-   so culling uses the first-person camera), v18FigDraw (collapses the scorer's head cluster). Debug: P._rp2.last. */
+   so culling uses the first-person camera), v18FigDraw (collapses the scorer's head cluster, and skips anyone else with
+   the lens inside his body), v18RpDraw (no minimap over the two-angle replay). Debug: P._rp2.last. */
 DEFAULT_PREFS.rpAngles='two'; if(PREFS.rpAngles!=='one'&&PREFS.rpAngles!=='two') PREFS.rpAngles='two';
 
 const V185_RP={L1:1100,Lrun:1900,Lpen:1500,L2x:800,tail1:300,lead2:350,tail2:550,rate2x:0.6,
@@ -128,6 +129,10 @@ function v185Setup(st,Q,R){ Q.two=false; Q.pass=1; Q.cam='goal'; Q.rate=V18_RP.r
   const trk=v185Track(st,Q,B,sc,{head,ty}); if(!trk){ v185Caption(st,Q); return; }
   Q.two=true; Q.cam='eyes'; Q.head=head; Q.crossT=crossT; Q.win=[[a0,a1],[c0,c1]]; Q.trk=trk; Q.t=Q.t0=a0; Q.t1=a1; Q.i=v185Idx(B,a0); Q.rate=sp>=2?V185_RP.rate2x:V18_RP.rate; Q.cams=['eyes'];
   if(gl&&P.dir) P.dir.snap=true; v185Caption(st,Q); }
+
+/* the two-angle replay is clean picture: no minimap over the scorer's view or the goal-mouth shot (the one-angle replay keeps it) */
+const _v185Draw=v18RpDraw;
+v18RpDraw=function(st,Q){ if(!(Q&&Q.two)) return _v185Draw.apply(this,arguments); const mm=st.minimap; st.minimap=false; try{ return _v185Draw.apply(this,arguments); } finally{ st.minimap=mm; } };
 
 /* ---------- pass 2 ---------- */
 function v185Pass2(st,Q){ const B=Q.R.buf, S=B[Q.i];
