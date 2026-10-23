@@ -1,0 +1,6 @@
+/* v18 3-D walkout: over the stage the overlay's opaque backdrop becomes a vignette on the real stadium; outside the
+   stage box (--v18-wx/wy/ww/wh, set from JS) a spread shadow keeps it opaque. The VS card stays opaque. */
+#lv-intro.v18-wk3 .walk:not(.walk-vs){background:transparent}
+#lv-intro.v18-wk3 .walk:not(.walk-vs)::before{content:"";position:absolute;left:var(--v18-wx,0);top:var(--v18-wy,0);width:var(--v18-ww,100%);height:var(--v18-wh,100%);box-shadow:0 0 0 200vmax #04070c;pointer-events:none}
+#lv-intro.v18-wk3 .walk:not(.walk-vs) .walk-bg{background:linear-gradient(90deg,rgba(4,7,12,.72),rgba(4,7,12,.12) 34%,rgba(4,7,12,0) 62%,rgba(4,7,12,.3)),linear-gradient(0deg,rgba(4,7,12,.5),rgba(4,7,12,0) 26%)!important}
+#lv-intro.v18-wk3 .walk:not(.walk-vs) :is(.walk-pitch,.walk-beam,.wk-tok){display:none}
