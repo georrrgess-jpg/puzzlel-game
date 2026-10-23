@@ -4,7 +4,7 @@
 const { chromium, DIST } = require('../_pw');
 const fs=require('fs'); const OUT='test/shots/v185/plates/'; fs.mkdirSync(OUT,{recursive:true});
 const until=async(p,fn,ms,arg)=>{ const end=Date.now()+ms; while(Date.now()<end){ if(await p.evaluate(fn,arg)) return true; await p.waitForTimeout(150); } return false; };
-const HOOK=()=>{ if(window._scHook) return; window._scHook=true; const D=Stage.prototype.draw; Stage.prototype.draw=function(){ if(this.T&&this.T.id==='tv') window.TVST=this; return D.apply(this,arguments); }; };
+const HOOK=()=>{ if(window._scHook) return; window._scHook=true; const D=Stage.prototype.draw; Stage.prototype.draw=function(){ if(this.cv&&this.cv.dataset&&this.cv.dataset.tv) window.TVST=this; return D.apply(this,arguments); }; };
 async function freeze(p,get,file){ await p.evaluate(g=>{ eval(g).paused=true; },get); await p.waitForTimeout(800); await p.screenshot({path:OUT+file}); await p.evaluate(g=>{ eval(g).paused=false; },get); console.log('shot',file); }
 (async()=>{ const b=await chromium.launch(); const errs=[]; const p=await b.newPage({viewport:{width:1440,height:900}}); p.on('pageerror',e=>errs.push(e.message));
   await p.goto(DIST); await p.waitForTimeout(600); await p.evaluate(HOOK);

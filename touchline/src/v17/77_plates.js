@@ -93,7 +93,7 @@ function v185PlDeco(g,x,y,w,h,ptr,ptrUp,chev){
 
 /* ---------- which stages, and when ---------- */
 function v185PlKind(st){ if(st.demo) return 'menu'; const cv=st.cv; if(!cv||!cv.closest) return 'other'; if(cv.id==='lv-canvas') return 'live';
-  if(cv.closest('#anim-lab')) return 'lab'; if((st.T&&st.T.id==='tv')||(typeof App!=='undefined'&&App.hl===st)) return 'tv'; return 'other'; }
+  if(cv.closest('#anim-lab')) return 'lab'; if((st.T&&st.T.id==='tv')||cv.closest('.tv-screen')||(typeof App!=='undefined'&&App.hl===st)) return 'tv'; return 'other'; }
 function v185PlLiveOf(st){ const L=typeof App!=='undefined'&&App.live; return L&&L.stage===st?L:null; }
 /* '' when plates may show; 'hard' resets and draws nothing; 'soft' fades whatever is up */
 function v185PlGate(st,S){ if(S.kind==null||(S.kind==='other'&&S.clk-S.kindT>1000)){ S.kind=v185PlKind(st); S.kindT=S.clk; }
@@ -167,7 +167,18 @@ function v185PlAnchor(st,S,sl,p,out){ const hg=(p.hgt||70)/70;
     if(sl.hf===S.fid) V.set(sl.hx,sl.hy,sl.hz); else V.set(p.x,1.87*hg+(st.jumpLift?st.jumpLift(p):0),p.y);
     V.project(cam); if(!(V.z<1)||!isFinite(V.x)||!isFinite(V.y)) return false; out.x=(V.x+1)/2*st.W; out.y=(1-V.y)/2*st.H;
     V.set(p.x,0,p.y).project(cam); out.fy=V.z<1&&isFinite(V.y)?(1-V.y)/2*st.H:out.y+40; out.ph=Math.max(0,out.fy-out.y); return true; }
-  const lift=st.jumpLift?st.jumpLift(p):0; const a=st.proj(p.x,p.y,2.15*hg+lift); out.x=a[0]; out.y=a[1]; const ft=st.proj(p.x,p.y,0); out.fy=ft[1]; out.ph=Math.max(0,out.fy-out.y); return true; }
+  const ft=st.proj(p.x,p.y,0); out.fy=ft[1]; if(v185Pl2DHead(st,p,ft,out)){ out.ph=Math.max(0,out.fy-out.y); return true; }
+  const lift=st.jumpLift?st.jumpLift(p):0; const a=st.proj(p.x,p.y,2.15*hg+lift); out.x=a[0]; out.y=a[1]; out.ph=Math.max(0,out.fy-out.y); return true; }
+/* 2-D: the top of the head as drawFigure painted it this frame, from the pose blendPose stored on the player (read only):
+   the same body-frame -> screen mapping (lean about the hips, yaw, depth squash, lift, whole-body rotation about the pivot) */
+function v185Pl2DHead(st,p,ft,out){ const Q=p._pose; if(!Q||p._poseT!==st.now||!isFinite(Q.hipU)) return false;
+  const x=ft[0], y=ft[1], k=ft[2], s=k*((p.hgt||70)/70)*1.06; const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw);
+  const DEP=st.depthK!=null?st.depthK:Math.max(0.12,Math.min(0.45,(st.H*0.705/68)/Math.max(1,k)));
+  const lean=Q.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=Q.hipU, tilt=Q.headTilt||0;
+  let f=0.02+tilt*0.05, u=1.86-Math.abs(tilt)*0.02; if(u>hipU){ const du=u-hipU; const f2=f*cl+du*sl; u=hipU+du*cl-f*sl; f=f2; }
+  const dy=f*sa; let hx=f*ca*s, hy=-u*s+dy*s*DEP; const rot=Q.rot||0;
+  if(rot){ const pv=(Q.pivot||0)*s, c=Math.cos(rot), n=Math.sin(rot); hy+=pv; const rx=hx*c-hy*n, ry=hx*n+hy*c; hx=rx; hy=ry-pv; }
+  const cx=x+hx, cy=y-(Q.lift||0)*s+hy; if(!isFinite(cx)||!isFinite(cy)) return false; out.x=cx; out.y=cy-0.165*s; return true; }
 /* 3-D: the figures module solves every body this frame; keep the head centre of the tagged players */
 if(typeof v18FigDraw==='function'){ const _v185FigDraw=v18FigDraw;
   v18FigDraw=function(P,st,p,kit,isRef){ const r=_v185FigDraw.apply(this,arguments);

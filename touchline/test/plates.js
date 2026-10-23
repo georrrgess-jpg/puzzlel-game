@@ -28,7 +28,7 @@ async function startLive(p,seed,renderer,view){
   await p.click('.cta [data-a="playNext"]'); await p.waitForTimeout(400); await p.click('[data-a="kickoff"]');
   return until(p,()=>!!(App.live&&App.live.stage&&App.live.stage.alive&&App.live.stage.own),25000); }
 /* the sampler: one record per draw of the watched stage, taken after the plates painted */
-const SAMPLER=()=>{ window.PLS=[]; window.PLW=window.PLW||(()=>App.live&&App.live.stage); if(window._plHooked) return; window._plHooked=true; const D=Stage.prototype.draw;
+const SAMPLER=()=>{ window.PLS=[]; window.PLW=window.PLW||(()=>App.live&&App.live.stage); if(window._plHooked) return; window._plHooked=true; if(typeof v18FigDraw==='function'){ const FD=v18FigDraw; window.PLH=new Map(); v18FigDraw=function(P,st,p){ const r=FD.apply(this,arguments); if(r&&p&&p.pid!=null&&P&&P._fig&&P._fig.s){ const W=P._fig.s; window.PLH.set(p.pid,[W[42],W[43],W[44],st.now]); } return r; }; } const D=Stage.prototype.draw;
   Stage.prototype.draw=function(){ const r=D.apply(this,arguments); try{ const st=this; if(st.demo){ window.PLDEMO=(window.PLDEMO||0)+((st._pl&&st._pl.drawn)||0); return r; }
     if(!window.PLS||st!==window.PLW()) return r; const S=st._pl; const t=performance.now(); const o=st.own;
     if(o!==window._plO){ window._plO=o; window._plOT=t; }
@@ -36,8 +36,16 @@ const SAMPLER=()=>{ window.PLS=[]; window.PLW=window.PLW||(()=>App.live&&App.liv
       pen:(st.setPiece==='pen'||!!st.so)&&!!st.placed&&!!o&&!st.fl,gkO:o?((st.gkOf(1-o.side)||{}).pid||null):null,paused:!!st.paused,
       drawn:S?S.drawn:0,why:S?S.why:'none',car:S&&S.car?S.car.pid:null,def:S&&S.def?S.def.pid:null,dwhy:S?S.D.why:'',tags:[],blocks:[]};
     if(S){ for(const sl of S.slots.values()){ if(!sl.on||sl.a<=0.004) continue; const p=sl.p; const tg={pid:sl.pid,role:sl.role,a:sl.a,tgt:sl.tgt,cmp:sl.cmp,r:[sl.r.x,sl.r.y,sl.r.w,sl.r.h],an:[sl.an.x,sl.an.y],ptr:sl.ptr,chev:sl.chev};
-        if(st.mode!=='tactical'&&!(st._p3d&&!st._p3d.dead)){ const e=st.proj(p.x,p.y,2.15*(p.hgt||70)/70+st.jumpLift(p)); tg.ex=[e[0],e[1]]; }
-        if(st._p3d&&!st._p3d.dead&&st.mode!=='tactical'){ const P=st._p3d, V=new THREE.Vector3(p.x,1.87*(p.hgt||70)/70+st.jumpLift(p),p.y).project(P.camera); const F=new THREE.Vector3(p.x,0,p.y).project(P.camera); tg.e3=[(V.x+1)/2*st.W,(1-V.y)/2*st.H,(1-F.y)/2*st.H,V.z]; }
+        if(st.mode!=='tactical'&&!(st._p3d&&!st._p3d.dead)){ const Q=p._pose; const [x,y,k]=st.proj(p.x,p.y); const s=k*((p.hgt||70)/70)*1.06;
+          if(Q&&p._poseT===st.now){ /* drawFigure's head: up() about the hips, pr() with yaw and depth, lift, rotation about the pivot */
+            const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw; const DEP=st.depthK!=null?st.depthK:Math.min(0.45,Math.max(0.12,(st.H*0.705/68)/Math.max(1,k)));
+            const up=(f,u,l)=>{ if(u<=Q.hipU) return [f,u,l]; const du=u-Q.hipU; return [f*Math.cos(Q.lean)+du*Math.sin(Q.lean),Q.hipU+du*Math.cos(Q.lean)-f*Math.sin(Q.lean),l]; };
+            const pr=([f,u,l])=>{ const dx=f*Math.cos(yaw)-l*Math.sin(yaw), dy=f*Math.sin(yaw)+l*Math.cos(yaw); return [dx*s,-u*s+dy*s*DEP]; };
+            const t=Q.headTilt||0; let [hx,hy]=pr(up(0.02+t*0.05,1.86-Math.abs(t)*0.02,0)); if(Q.rot){ const pv=(Q.pivot||0)*s; hy+=pv; const a=Math.cos(Q.rot)*hx-Math.sin(Q.rot)*hy, b=Math.sin(Q.rot)*hx+Math.cos(Q.rot)*hy; hx=a; hy=b-pv; }
+            tg.ex=[x+hx,y-(Q.lift||0)*s+hy-0.165*s]; tg.posed=true; }
+          else { const e=st.proj(p.x,p.y,2.15*(p.hgt||70)/70+st.jumpLift(p)); tg.ex=[e[0],e[1]]; } }
+        if(st._p3d&&!st._p3d.dead&&st.mode!=='tactical'){ const P=st._p3d, V=new THREE.Vector3(p.x,1.87*(p.hgt||70)/70+st.jumpLift(p),p.y).project(P.camera); const F=new THREE.Vector3(p.x,0,p.y).project(P.camera); tg.e3=[(V.x+1)/2*st.W,(1-V.y)/2*st.H,(1-F.y)/2*st.H,V.z];
+          const H=window.PLH&&window.PLH.get(p.pid); if(H&&H[3]===st.now){ /* the head the figures module solved this frame, its top (head radius 0.2 body units) */ const U=new THREE.Vector3(H[0],H[1]+0.2*0.92*(p.hgt||70)/70,H[2]).project(P.camera); tg.h3=[(U.x+1)/2*st.W,(1-U.y)/2*st.H,U.z]; } }
         rec.tags.push(tg); }
       for(let i=0;i<(S.nb||0);i++){ const b=S.blocks[i]; rec.blocks.push([b.x,b.y,b.w,b.h,b.k]); } }
     window.PLS.push(rec); }catch(e){ window.PLERR=String(e); } return r; }; };
@@ -72,7 +80,7 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   console.log('  2-D 1x',JSON.stringify({frames:S.length,carrierFrames:C.n,match:f2(C.match),ancMax:f2(C.ancMax),def:Dd,layout:L}));
   ok(S.length>200,'enough frames sampled ('+S.length+')');
   ok(C.n>=60&&C.match>=0.95,'the carrier tag is st.own after the stability delay in >= 95 % of frames ('+(C.match*100).toFixed(1)+' % of '+C.n+')');
-  ok(C.anc>=60&&C.ancMax<=2,'2-D: the carrier anchor is within 2 px of the projected head top (max '+f2(C.ancMax)+' px)');
+  ok(C.anc>=60&&C.ancMax<=2,'2-D: the carrier anchor is within 2 px of the drawn head top (drawFigure\'s head from the stored pose; max '+f2(C.ancMax)+' px)');
   ok(S.some(s=>s.tags.some(t=>t.role==='def')),'a defender tag appears');
   ok(Dd.aba===0,'the defender never flickers back and forth (A-B-A within 1.5 s: '+Dd.aba+')');
   ok(Dd.short===0,'no defender tag shown for less than 250 ms ('+Dd.short+')');
@@ -201,7 +209,10 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   await p.evaluate(SAMPLER); await p.click('[data-a="liveSpeed"][data-v="1"]');
   await p.waitForTimeout(+process.env.PL_3MS||22000); S=await take(p); L=layout(S);
   let a3=0, dx=0, inBody=0; for(const s of S){ for(const t of s.tags){ if(t.role!=='car'||!t.e3||t.e3[3]>=1) continue; a3++; const d=Math.abs(t.an[0]-t.e3[0]); dx=Math.max(dx,d); const h=t.e3[2]-t.e3[1]; if(t.an[1]>=t.e3[1]-Math.max(6,h*0.25)&&t.an[1]<=t.e3[1]+h*0.25) inBody++; } }
-  console.log('  3-D broadcast',JSON.stringify({frames:S.length,anchors:a3,dxMax:f2(dx),headY:inBody,layout:{n:L.n,out:L.out,over:L.over,block:L.block}}));
+  const head3=S=>{ let n=0, mx=0; for(const s of S) for(const t of s.tags){ if(t.role!=='car'||!t.h3||!(t.h3[2]<1)) continue; n++; mx=Math.max(mx,Math.hypot(t.an[0]-t.h3[0],t.an[1]-t.h3[1])); } return {n,mx}; };
+  const hd3=head3(S);
+  console.log('  3-D broadcast',JSON.stringify({frames:S.length,anchors:a3,dxMax:f2(dx),headY:inBody,head:{n:hd3.n,max:f2(hd3.mx)},layout:{n:L.n,out:L.out,over:L.over,block:L.block}}));
+  ok(hd3.n>=5&&hd3.mx<=3,'3-D: the carrier anchor is within 3 px of the head top the figures module solved this frame, projected through the painter camera ('+hd3.n+' frames, max '+f2(hd3.mx)+' px)');
   ok(a3>=5,'3-D: carrier anchors sampled ('+a3+')');
   ok(dx<=40,'3-D: the anchor is within 40 px horizontally of the projected figure (max '+f2(dx)+' px)');
   ok(a3&&inBody/a3>=0.95,'3-D: the anchor sits at the projected head height ('+inBody+'/'+a3+')');
@@ -212,6 +223,7 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   await p.evaluate(()=>A.liveView({dataset:{v:'sideline'}})); await until(p,()=>!!App.live.stage._p3d._slOn,8000); await p.waitForTimeout(800); await take(p);
   await p.waitForTimeout(+process.env.PL_3MS||16000); S=await take(p); L=layout(S); const sl=S.filter(s=>s.drawn).length;
   ok(sl>=4&&L.n>=4&&!L.out&&!L.over&&!L.block,'3-D sideline: tags drawn ('+sl+' frames), layout rules hold '+JSON.stringify({n:L.n,bad:L.bad}));
+  { const h=head3(S); ok(h.n>=3&&h.mx<=3,'3-D sideline: the carrier anchor is within 3 px of the solved head top ('+h.n+' frames, max '+f2(h.mx)+' px)'); }
   if(SHOTS) await shot(p,'d-3d-sideline.png',true);
   await p.close();
 
