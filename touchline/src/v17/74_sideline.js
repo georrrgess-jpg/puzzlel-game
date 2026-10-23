@@ -56,7 +56,7 @@ function v184PaintZoom(){ const ae=document.activeElement, fk=ae&&ae.dataset&&/Z
 /* the mouse wheel over the match canvas: one level per notch, with a short cooldown; the page scrolls at the ends */
 const V184_WHEEL={t:0,dir:0};
 document.addEventListener('wheel',e=>{ const t=e.target; if(!t||!t.closest||!t.closest('#lv-stage,.hl-stage')) return; if(App.modal&&!t.closest('.hl-stage')) return;
-  const dy=e.deltaY||0; if(Math.abs(dy)<0.5||e.ctrlKey) return; const d=dy<0?1:-1, now=performance.now();
+  const dy=e.deltaY||0; if(Math.abs(dy)<0.5||e.ctrlKey) return; const d=dy<0?1:-1, now=e.timeStamp||performance.now();
   const i=v184ZoomIdx(), can=(PREFS.view||'broadcast')!=='tactical'&&(d>0?i<V184_ZOOMS.length-1:i>0);
   if(now-V184_WHEEL.t<240&&V184_WHEEL.dir===d){ if(can) e.preventDefault(); return; }
   if(v184StepZoom(d)){ e.preventDefault(); V184_WHEEL.t=now; V184_WHEEL.dir=d; } },{passive:false});

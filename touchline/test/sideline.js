@@ -81,16 +81,16 @@ const f2=x=>+(+x).toFixed(2);
   const lvl=()=>p.evaluate(()=>PREFS.zoom);
   const fov=()=>p.evaluate(()=>App.live.stage._p3d.camera.fov);
   const settle=()=>p.waitForTimeout(1300);
-  const seen={btn:new Set(),key:new Set(),wheel:new Set()}; let dirOk=true;
+  const seen={btn:new Set(),key:new Set(),wheel:new Set()}; let dirOk=true, lvOk=true;
   const step=async(how,fn,want)=>{ const f0=await fov(); const l0=await lvl(); await fn(); const l1=await lvl(); seen[how].add(l1); await settle(); const f1=await fov();
     const zi=['wide','normal','close','tight']; const exp=Math.sign(zi.indexOf(l0)-zi.indexOf(l1)); /* zoom in -> smaller fov */
     if(l1!==l0&&!(Math.sign(f1-f0)===exp&&Math.abs(f1-f0)>0.3)){ dirOk=false; console.log('  fov did not follow',how,l0,'->',l1,f2(f0),f2(f1)); }
-    if(want&&l1!==want){ dirOk=false; console.log('  level',how,'expected',want,'got',l1); } };
+    if(want&&l1!==want){ lvOk=false; console.log('  level',how,'expected',want,'got',l1); } };
   await p.evaluate(()=>{ App.live.stage.paused=false; });
   await step('btn',()=>p.click('[data-a="liveZoom"][data-v="-1"]'),'wide');
   ok(await p.evaluate(()=>document.querySelector('[data-a="liveZoom"][data-v="-1"]').getAttribute('aria-disabled')==='true'&&document.querySelector('[data-a="liveZoom"][data-v="1"]').getAttribute('aria-disabled')==='false'),'Wide: zoom out is aria-disabled, zoom in is not');
   if(SHOTS) await p.screenshot({path:OUT+'d-sideline-wide.png'});
-  await p.click('[data-a="liveZoom"][data-v="-1"]'); ok(await lvl()==='wide','a click on a disabled end does nothing');
+  await p.click('[data-a="liveZoom"][data-v="-1"]',{force:true}); ok(await lvl()==='wide','a click on a disabled end does nothing');
   for(const w of ['normal','close','tight']){ await step('btn',()=>p.click('[data-a="liveZoom"][data-v="1"]'),w); if(SHOTS&&w!=='normal') await p.screenshot({path:OUT+`d-sideline-${w}.png`}); }
   ok(await p.evaluate(()=>document.querySelector('[data-a="liveZoom"][data-v="1"]').getAttribute('aria-disabled')==='true'&&document.querySelector('.v184-zl').textContent==='Tight'),'Tight: zoom in is aria-disabled, the label reads Tight');
   ok(seen.btn.size===4,'buttons reach every level ('+[...seen.btn]+')');
@@ -101,11 +101,14 @@ const f2=x=>+(+x).toFixed(2);
   /* ---------- wheel ---------- */
   const box=await p.evaluate(()=>{ const r=document.querySelector('#lv-stage').getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2]; }); await p.mouse.move(box[0],box[1]);
   for(const w of ['close','normal','wide']) await step('wheel',async()=>{ await p.mouse.wheel(0,120); await p.waitForTimeout(320); },w);
-  await step('wheel',async()=>{ await p.mouse.wheel(0,-120); await p.mouse.wheel(0,-120); await p.waitForTimeout(320); },'normal');
-  ok(await lvl()==='normal','two quick wheel notches inside the cooldown move one level');
+  /* two notches 0 ms apart (dispatched in one task, so the busy software-GL main thread cannot space them out) */
+  const two=await p.evaluate(()=>{ const el=document.querySelector('#lv-canvas'); const r=[]; for(let i=0;i<2;i++){ const e=new WheelEvent('wheel',{deltaY:-120,bubbles:true,cancelable:true}); el.dispatchEvent(e); r.push(e.defaultPrevented); } return {z:PREFS.zoom,r}; });
+  seen.wheel.add(two.z); await settle();
+  ok(two.z==='normal'&&two.r[0]&&two.r[1],'two quick wheel notches inside the cooldown move one level and both are consumed '+JSON.stringify(two));
+  await p.waitForTimeout(300);
   for(const w of ['close','tight']) await step('wheel',async()=>{ await p.mouse.wheel(0,-120); await p.waitForTimeout(320); },w);
   ok(seen.wheel.size===4,'the wheel reaches every level ('+[...seen.wheel]+')');
-  ok(dirOk,'every level change moves the sideline lens the right way (fov)');
+  ok(dirOk,'every level change moves the sideline lens the right way (fov)'); ok(lvOk,'every button press, key and wheel notch moved exactly one level');
   /* ---------- broadcast: the camera width ---------- */
   await p.click('[data-a="liveView"][data-v="broadcast"]'); await p.waitForTimeout(900);
   const bw=async()=>p.evaluate(()=>{ const s=App.live.stage; return {tw:s.cam.tw,w:s.cam.w,base:s.bw*s.zoom,k:s.v184K()}; });
@@ -118,12 +121,12 @@ const f2=x=>+(+x).toFixed(2);
   await p.click('[data-a="liveView"][data-v="tactical"]'); await p.waitForTimeout(500);
   ok(await p.evaluate(()=>[...document.querySelectorAll('[data-a="liveZoom"]')].every(b=>b.getAttribute('aria-disabled')==='true')),'Tactical: both zoom buttons are aria-disabled');
   if(SHOTS) await p.screenshot({path:OUT+'d-tactical.png'});
-  const z0=await lvl(); await p.click('[data-a="liveZoom"][data-v="1"]'); await p.evaluate(()=>document.activeElement&&document.activeElement.blur()); await p.keyboard.press('+'); await p.mouse.move(box[0],box[1]); await p.mouse.wheel(0,-120); await p.waitForTimeout(300);
+  const z0=await lvl(); await p.click('[data-a="liveZoom"][data-v="1"]',{force:true}); await p.evaluate(()=>document.activeElement&&document.activeElement.blur()); await p.keyboard.press('+'); await p.mouse.move(box[0],box[1]); await p.mouse.wheel(0,-120); await p.waitForTimeout(300);
   ok(await lvl()===z0,'Tactical: button, key and wheel leave the zoom alone');
   const cyc=[]; for(let i=0;i<3;i++){ await p.keyboard.press('v'); await p.waitForTimeout(250); cyc.push(await p.evaluate(()=>App.live.stage.mode)); }
   ok(cyc.join()==='broadcast,sideline,tactical','V cycles Broadcast -> Sideline -> Tactical ('+cyc+')');
   /* ---------- PREFS survive a reload ---------- */
-  await p.keyboard.press('v'); await p.keyboard.press('v'); await p.waitForTimeout(300); await p.click('[data-a="liveZoom"][data-v="-1"]'); const keep=[await lvl(),await p.evaluate(()=>PREFS.view)];
+  await p.keyboard.press('v'); await p.keyboard.press('v'); await p.waitForTimeout(300); await p.click('[data-a="liveZoom"][data-v="1"]'); const keep=[await lvl(),await p.evaluate(()=>PREFS.view)];
   await p.reload(); await p.waitForTimeout(900);
   const back=await p.evaluate(()=>[PREFS.zoom,PREFS.view]);
   ok(back[0]===keep[0]&&back[1]===keep[1]&&keep[1]==='sideline','zoom level and view survive a reload ('+back+')');
