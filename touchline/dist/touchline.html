@@ -13985,7 +13985,9 @@ DEFAULT_PREFS.rtier=null; if(!('rtier' in PREFS)) PREFS.rtier=null;
 
 /* which kind of stage this is (decided on its first draw, when its canvas is in the page) */
 function v18KindOf(st){ if(st.demo) return 'menu'; const cv=st.cv; if(!cv||!cv.closest) return 'other';
-  if(cv.id==='lv-canvas') return 'live'; if(cv.closest('#anim-lab')) return 'lab'; if(cv.closest('.tv-stage,#tv-stage,.tvx,.tv-cv,[data-tv]')) return 'tv';
+  if(cv.id==='lv-canvas') return 'live'; if(cv.closest('#anim-lab')) return 'lab';
+  /* TouchlineTV (teams id 'tv'), match-report highlights (App.hl) and Season Wrapped clips (App.wrSt) */
+  if((st.T&&st.T.id==='tv')||App.hl===st||App.wrSt===st) return 'tv';
   try{ if(getComputedStyle(cv).visibility==='hidden') return 'photo'; }catch(e){} return 'other'; }
 
 class Painter3D {
