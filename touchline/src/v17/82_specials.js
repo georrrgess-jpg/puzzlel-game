@@ -110,9 +110,9 @@ function v186xFrame(p,tau,T){ const kind=p.v186xk; if(tau<-T.to) return null;
         const k=v186xLp([0.5,0.12*sd,0.02],[0.06,0.1*sd,0],s2); k[2]+=0.12*Math.sin(Math.PI*s2); feet[K]=k;
         hands[0]=v186xLp([-0.2,-0.42,0.04],[0.04,-0.3,1.0],s); hands[1]=v186xLp([-0.2,0.42,0.04],[0.04,0.3,1.0],s); }
       tilt=0.25*(1-u); } }
-  else { const g=p.v186xg||1; const C=[0.35,0.5*g,1.2]; const gi=g>0?1:0, fi=1-gi; /* goal-side and far hand; the boot meets the ball out beside him, on the goal side */
+  else { const g=p.v186xg||1; const C=[0.35,0.5*g,1.2]; const gi=g>0?1:0, fi=1-gi; /* goal-side and far hand; the boot meets the ball out beside him, on the goal side; the goal-side arm goes up for balance (within reach of its shoulder, so it never points along the ball's line) */
     const kCock=[0.1,-0.15*g,0.55], kFol=[0.3,0.8*g,1.3], kLie=[0.2,0.75*g,0.1], sTuck=[-0.05,-0.05*g,0.3], sLie=[0.1,0.55*g,0.05];
-    const hS=[[0.2,-0.45,1.2],[0.2,0.45,1.2]], hG=[-0.25,0.85*g,1.35], hF=[0.0,-0.7*g,0.7], hGl=[0.25,0.45*g,0.6], hFt=[0.15,-0.55*g,0.03];
+    const hS=[[0.2,-0.45,1.2],[0.2,0.45,1.2]], hG=[-0.1,-0.22*g,1.89], hF=[0.0,-0.7*g,0.7], hGl=[0.25,0.45*g,0.6], hFt=[0.15,-0.55*g,0.03];
     if(tau<-T.st){ const u=(tau+T.to)/Math.max(1,T.to-T.st); ra=g*0.5*v186xSm(u); lift=0.1*v186xEo(u);
       feet[N]=u<0.5?[0,-0.1*g,0]:v186xLp([0,-0.1*g,0],sTuck,v186xSm((u-0.5)/0.5));
       feet[K]=v186xBz([0.05,0.1*g,0],[-0.1,-0.05*g,0.35],kCock,v186xSm(u));
