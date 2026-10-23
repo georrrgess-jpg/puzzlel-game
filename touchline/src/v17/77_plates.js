@@ -66,8 +66,7 @@ function v185PlRR(g,x,y,w,h,r){ g.beginPath(); if(g.roundRect) g.roundRect(x,y,w
 function v185DrawPlate(g,x,y,info,kit,o){ o=o||{}; const fs=o.fs||13, glyph=o.glyph||''; const m=o.m||v185PlMeasure(g,info,fs,glyph,!!o.compact,o.maxW||400);
   const C=v185PlCols(kit), h=m.h, w=m.w, glass='rgba(8,12,16,.84)', r=Math.min(3,h*0.16); x=Math.round(x); y=Math.round(y);
   g.save(); g.globalAlpha=Math.max(0,Math.min(1,o.alpha==null?1:o.alpha));
-  /* pointer: a small notch in the glass colour between the tag and the head */
-  if(o.ptr!=null){ const px=Math.round(o.ptr), s=V185PL.ptr; g.fillStyle=glass; g.beginPath(); if(o.ptrUp){ g.moveTo(px-s,y); g.lineTo(px,y-s); g.lineTo(px+s,y); } else { g.moveTo(px-s,y+h); g.lineTo(px,y+h+s); g.lineTo(px+s,y+h); } g.closePath(); g.fill(); }
+  v185PlDeco(g,x,y,w,h,o.ptr,o.ptrUp,'');
   /* body: number block + glass, one rounded outline (1 px dark border instead of a blur) */
   v185PlRR(g,x,y,w,h,r); g.fillStyle=glass; g.fill(); g.save(); g.clip();
   if(m.wNum){ g.fillStyle=C.shirt; g.fillRect(x,y,m.wNum,h); if(C.dark){ g.fillStyle='rgba(255,255,255,.14)'; g.fillRect(x+m.wNum-1,y,1,h); } }
@@ -82,12 +81,15 @@ function v185DrawPlate(g,x,y,info,kit,o){ o=o||{}; const fs=o.fs||13, glyph=o.gl
     for(let i=0;i<5;i++){ const a=-Math.PI/2+i*Math.PI*2/5, rr=br*0.42; if(i) g.lineTo(bx+Math.cos(a)*rr,by+Math.sin(a)*rr); else g.moveTo(bx+Math.cos(a)*rr,by+Math.sin(a)*rr); } g.closePath(); g.fill();
     g.strokeStyle='rgba(20,24,28,.55)'; g.lineWidth=0.8; g.beginPath(); for(let i=0;i<5;i++){ const a=-Math.PI/2+i*Math.PI*2/5; g.moveTo(bx+Math.cos(a)*br*0.42,by+Math.sin(a)*br*0.42); g.lineTo(bx+Math.cos(a)*br*0.95,by+Math.sin(a)*br*0.95); } g.stroke(); }
   else if(glyph==='gk'){ const ch=Math.round(h*0.6), cw=m.wGly-Math.round(fs*0.45); v185PlRR(g,cx,Math.round(cy-ch/2),cw,ch,2); g.fillStyle='rgba(255,255,255,.2)'; g.fill(); g.font=`800 ${Math.round(fs*0.66)}px ${V185PL.font}`; g.textAlign='center'; g.fillStyle='#ffffff'; g.fillText('GK',cx+cw/2,cy+0.5); }
-  /* chevron toward a carrier who is off screen */
-  if(o.chev){ const s=6; g.fillStyle='rgba(255,255,255,.92)'; g.beginPath();
-    if(o.chev==='l'){ g.moveTo(x-3,y+h/2-s); g.lineTo(x-3-s,y+h/2); g.lineTo(x-3,y+h/2+s); } else if(o.chev==='r'){ g.moveTo(x+w+3,y+h/2-s); g.lineTo(x+w+3+s,y+h/2); g.lineTo(x+w+3,y+h/2+s); }
-    else if(o.chev==='u'){ g.moveTo(x+w/2-s,y-3); g.lineTo(x+w/2,y-3-s); g.lineTo(x+w/2+s,y-3); } else { g.moveTo(x+w/2-s,y+h+3); g.lineTo(x+w/2,y+h+3+s); g.lineTo(x+w/2+s,y+h+3); }
-    g.closePath(); g.fill(); }
+  v185PlDeco(g,x,y,w,h,null,false,o.chev);
   g.restore(); return m; }
+/* the pointer (a notch in the glass colour toward the head) and the chevron toward a carrier who is off screen */
+function v185PlDeco(g,x,y,w,h,ptr,ptrUp,chev){
+  if(ptr!=null){ const px=Math.round(ptr), s=V185PL.ptr; g.fillStyle='rgba(8,12,16,.84)'; g.beginPath(); if(ptrUp){ g.moveTo(px-s,y); g.lineTo(px,y-s); g.lineTo(px+s,y); } else { g.moveTo(px-s,y+h); g.lineTo(px,y+h+s); g.lineTo(px+s,y+h); } g.closePath(); g.fill(); }
+  if(chev){ const s=6; g.fillStyle='rgba(255,255,255,.92)'; g.beginPath();
+    if(chev==='l'){ g.moveTo(x-3,y+h/2-s); g.lineTo(x-3-s,y+h/2); g.lineTo(x-3,y+h/2+s); } else if(chev==='r'){ g.moveTo(x+w+3,y+h/2-s); g.lineTo(x+w+3+s,y+h/2); g.lineTo(x+w+3,y+h/2+s); }
+    else if(chev==='u'){ g.moveTo(x+w/2-s,y-3); g.lineTo(x+w/2,y-3-s); g.lineTo(x+w/2+s,y-3); } else { g.moveTo(x+w/2-s,y+h+3); g.lineTo(x+w/2,y+h+3+s); g.lineTo(x+w/2+s,y+h+3); }
+    g.closePath(); g.fill(); } }
 
 /* ---------- which stages, and when ---------- */
 function v185PlKind(st){ if(st.demo) return 'menu'; const cv=st.cv; if(!cv||!cv.closest) return 'other'; if(cv.id==='lv-canvas') return 'live';
@@ -145,7 +147,7 @@ function v185PlSelect(st,S){ const now=S.clk, o=st.own&&st.players.get(st.own.pi
   if(car&&!f&&car===o){
     if(pen) def=st.gkOf(1-car.side);
     else if(!(st.hands||st.placed)){ const pick=v185PlPickDef(st,car,S.D,now);
-      if(pick!==S.dc){ S.dc=pick; S.dcT=S.D.why==='beat'||S.D.why==='chase'?now-V185PL.fast8:now; }
+      if(pick!==S.dc){ S.dc=pick; S.dcT=S.D.why==='beat'||S.D.why==='chase'||(pick&&pick.chase===car)?now-V185PL.fast8:now; }
       if(pick){ S.defNull=0; if(pick===S.def||now-S.dcT>=(spd>=8?V185PL.fast8:V185PL.stable)) def=pick; else if(S.def&&S.def.side!==car.side&&!S.def.off) def=S.def; }
       else { if(!S.defNull) S.defNull=now||1; if(S.def&&now-S.defNull<V185PL.defGrace&&S.def.side!==car.side) def=S.def; } } }
   else if(hold&&S.def&&!S.defDrop) def=S.def;
@@ -182,8 +184,11 @@ function v185PlFit(r,x,y,w,h,blocks,nb,W,H){ const pad=V185PL.pad; const cx=v=>M
   let cands=[[cx(x),cy(y)]]; const x0=x, y0=y;
   for(let pass=0;pass<3;pass++){ const next=[];
     for(const [px,py] of cands){ r.x=px; r.y=py; r.w=w; r.h=h; let hit=null; for(let i=0;i<nb;i++){ if(v185PlHit(r,blocks[i])){ hit=blocks[i]; break; } } if(!hit) return true;
-      next.push([px,cy(hit.y-h-3)],[px,cy(hit.y+hit.h+3)],[cx(hit.x-w-3),py],[cx(hit.x+hit.w+3),py]); }
-    next.sort((a,b)=>Math.hypot(a[0]-x0,a[1]-y0)-Math.hypot(b[0]-x0,b[1]-y0)); cands=next.slice(0,8); }
+      const U=[px,cy(hit.y-h-3)], D=[px,cy(hit.y+hit.h+3)], L=[cx(hit.x-w-3),py], R=[cx(hit.x+hit.w+3),py];
+      /* another tag: beside it on the player's side, then above, the other side, and below last (below would sit on the players) */
+      if(hit.k==='tag'){ const right=x0+w/2>=hit.x+hit.w/2; next.push(right?R:L,U,right?L:R,D); }
+      else { const A=[U,D,L,R]; A.sort((a,b)=>Math.hypot(a[0]-x0,a[1]-y0)-Math.hypot(b[0]-x0,b[1]-y0)); next.push(...A); } }
+    cands=next.slice(0,12); }
   return false; }
 /* obstacles on the HUD: the minimap and the live caption (DOM, read at most every 250 ms) */
 function v185PlBlocks(st,S){ const B=S.blocks; let n=0; const W=st.W;
@@ -219,7 +224,7 @@ function v185PlLayout(st,S,dtR){ const W=st.W, H=st.H, g=st.ctx, tac=st.mode==='
     if(off&&sl.role!=='car') continue; if(sl.role==='car'&&off) carOff=true; if(carOff&&sl.role!=='car') continue;
     /* size: compact on phones, in Tactical, and for figures under ~28 px (with a 4 px band so it never flickers) */
     if(tac||phone) sl.cmp=true; else sl.cmp=sl.cmp?A.ph<32:A.ph<28;
-    const fs=tac?11:(phone?(sl.role==='car'?12:11):(sl.role==='car'||sl.role==='inc'?13:12));
+    const big=sl.role==='car'||sl.role==='inc'; const fs=tac?11:phone?(big?12:11):W>=900?(big?14:12.5):(big?13:12);
     const n=v185PlName(st,p), glyph=p.gk?'gk':(sl.role==='def'?'':'ball'); const m=v185PlMeasure(g,n,fs,glyph,sl.cmp,W*(phone?0.34:0.3)); sl.m=m; sl.n=n; sl.gly=glyph;
     const w=m.w, h=m.h; let tx, ty, ptrUp=false;
     if(tac){ tx=A.x+A.ph+4; ty=A.y-A.ph-h*0.35; }
@@ -239,9 +244,15 @@ function v185PlLayout(st,S,dtR){ const W=st.W, H=st.H, g=st.ctx, tac=st.mode==='
     /* the placed tag (with its pointer zone) is an obstacle for the lower-priority ones */
     const b=B[nb]||(B[nb]={}); b.x=r.x-2; b.y=r.y-(sl.ptrUp?V185PL.ptr+1:2); b.w=w+4; b.h=h+4+V185PL.ptr+1; b.k='tag'; nb++; }
   S.nbAll=nb; }
+/* each tag is drawn once into a small bitmap (per player, size, glyph, kit and pixel ratio) and blitted every frame */
+function v185PlSprite(st,sl,kit){ const dpr=st.dpr||1, m=sl.m; if(sl.spr&&sl.spm===m&&sl.spk===kit&&sl.spd===dpr) return sl.spr;
+  const c=sl.spr||document.createElement('canvas'); const w=m.w+2, h=m.h+2; c.width=Math.ceil(w*dpr); c.height=Math.ceil(h*dpr);
+  const q=c.getContext('2d'); q.setTransform(dpr,0,0,dpr,0,0); q.clearRect(0,0,w,h); v185DrawPlate(q,1,1,sl.n,kit,{fs:m.fs,glyph:sl.gly,m});
+  sl.spr=c; sl.spm=m; sl.spk=kit; sl.spd=dpr; return c; }
 function v185PlPaint(st,S){ const g=st.ctx; g.save(); const dpr=st.dpr||1; g.setTransform(dpr,0,0,dpr,0,0);
   for(let i=S.list.length-1;i>=0;i--){ const sl=S.list[i]; if(!sl.on||sl.a<=0.004) continue; const kit=sl.p.gk?st.kits.gk[sl.p.side]:st.kits.team[sl.p.side]; S.drawn++;
-    v185DrawPlate(g,sl.r.x,sl.r.y,sl.n,kit,{fs:sl.m.fs,glyph:sl.gly,m:sl.m,alpha:sl.a,ptr:sl.ptr,ptrUp:sl.ptrUp,chev:sl.chev}); }
+    const m=sl.m, spr=v185PlSprite(st,sl,kit), x=Math.round(sl.r.x), y=Math.round(sl.r.y); g.globalAlpha=Math.min(1,sl.a);
+    g.drawImage(spr,x-1,y-1,m.w+2,m.h+2); if(sl.ptr!=null||sl.chev) v185PlDeco(g,x,y,m.w,m.h,sl.ptr,sl.ptrUp,sl.chev); }
   g.restore(); }
 
 /* ---------- screen readers: a quiet status line (never announced; the commentary already is) ---------- */

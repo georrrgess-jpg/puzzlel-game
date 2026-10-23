@@ -94,7 +94,7 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   /* two players stacked at the same point: the tags still never overlap */
   { const r=await p.evaluate(()=>{ const st=App.live.stage, S=st._pl; const ps=[...st.players.values()].filter(q=>!q.off&&!q.gk); const a=ps.find(q=>q.side===0), c=ps.find(q=>q.side===1);
       const L=v185PlLayout, out=[]; S.slots.clear(); for(const [q,role] of [[a,'car'],[c,'def']]){ S.slots.set(q.pid,{pid:q.pid,p:q,role,a:1,tgt:1,r:{x:0,y:0,w:0,h:0},ox:0,oy:0,vx:0,vy:0,init:false,on:false,hf:-1,cmp:false,ptr:null,chev:'',an:{x:0,y:0,fy:0,ph:0}}); }
-      const sx=a.x, sy=a.y, cx=c.x, cy=c.y; c.x=a.x; c.y=a.y; try{ L(st,S,16); for(const sl of S.slots.values()) out.push({on:sl.on,r:[sl.r.x,sl.r.y,sl.r.w,sl.r.h]}); } finally{ a.x=sx; a.y=sy; c.x=cx; c.y=cy; } return out; });
+      const sx=a.x, sy=a.y, cx=c.x, cy=c.y; a.x=c.x=st.ball.x; a.y=c.y=st.ball.y; try{ L(st,S,16); for(const sl of S.slots.values()) out.push({on:sl.on,r:[sl.r.x,sl.r.y,sl.r.w,sl.r.h]}); } finally{ a.x=sx; a.y=sy; c.x=cx; c.y=cy; } return out; });
     ok(r.length===2&&r.every(q=>q.on)&&!hit(r[0].r,r[1].r),'two players stacked at one point: both tags placed, no overlap '+JSON.stringify(r.map(q=>q.r.map(Math.round)))); }
   /* a carrier at the minimap corner: his tag steps out of the minimap */
   { const r=await p.evaluate(()=>{ const hit=(a,b)=>a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1]+a[3]; const st=App.live.stage, S=st._pl; const q=[...st.players.values()].find(z=>!z.off&&!z.gk); const sl={pid:q.pid,p:q,role:'car',a:1,tgt:1,r:{x:0,y:0,w:0,h:0},ox:0,oy:0,vx:0,vy:0,init:false,on:false,hf:-1,cmp:false,ptr:null,chev:'',an:{x:0,y:0,fy:0,ph:0}};
