@@ -19,7 +19,7 @@
    - All state is in a new p.dive object per save (never mutated) plus primitives on the mover, so replays copy it.
    - Fixes: the outfield interception lunge (72) no longer fires for shots and claims homing into a keeper's hands; the dive
      is timed to the release instead of being started before the shooter has squared up.
-   Switch: V186K.on. Lab scene 'saves' (forced kinds via st._v186force = {k, q, out}). */
+   Switch: V186K.on. Lab scene 'saves' (forced kinds via st._v186kforce = {k, q, out}). */
 
 const V186K={on:true, log:null};
 const V186K_B={lean:.9,average:1,stocky:1.14};
@@ -31,11 +31,11 @@ const V186K_STAND={stand:1,high:1,scoop:1,tipOver:1,watch:1};
 const V186K_ACT={stand:'gkcatch',high:'gkcatch',scoop:'gkscoop',lowdive:'gklow',dive:'dive',tipOver:'gktip',smother:'gksmother',wrong:'dive',late:'dive',short:'dive',watch:'gkwatch'};
 
 /* ---------- ratings (own helper: keeper and shooter, cached as primitives on the mover) ---------- */
-function v186kQ(st,p){ if(!p) return 0.6; const F=st&&st._v186force; if(F&&F.q!=null) return F.q; if(st&&st._v186q!=null) return st._v186q; if(p.v186q!=null) return p.v186q;
+function v186kQ(st,p){ if(!p) return 0.6; const F=st&&st._v186kforce; if(F&&F.q!=null) return F.q; if(st&&st._v186kq!=null) return st._v186kq; if(p.v186kq!=null) return p.v186kq;
   let q=0.6; try{ const C=typeof App!=='undefined'?App.C:null; const pl=C&&typeof findPerson==='function'?findPerson(C,p.pid):null;
     if(pl&&pl.sk){ const G=(typeof eff==='function'?eff(pl,'GK'):pl.sk.gk)+1.7*((pl.tr&&pl.tr.stop)||0); if(isFinite(G)) q=clamp((G-35)/60,0,1); } }catch(e){}
-  p.v186q=q; return q; }
-function v186kShQ(st,pid){ const F=st&&st._v186force; if(F&&F.sq!=null) return F.sq;
+  p.v186kq=q; return q; }
+function v186kShQ(st,pid){ const F=st&&st._v186kforce; if(F&&F.sq!=null) return F.sq;
   try{ const C=typeof App!=='undefined'?App.C:null; const pl=C&&typeof findPerson==='function'?findPerson(C,pid):null; if(pl&&pl.sk&&isFinite(pl.sk.sho)) return clamp((pl.sk.sho-35)/60,0,1); }catch(e){} return 0.5; }
 
 /* ---------- geometry: the drawn hand of a pose in the world (same solve as the painters) ---------- */
@@ -50,8 +50,11 @@ function v186kHand(p,P,i,is3,yaw){ const B=V186K_B[(p.look&&p.look.build)]||1, s
   const dx=t[0]-s0[0], dy=t[1]-s0[1], dz=t[2]-s0[2], d=Math.hypot(dx,dy,dz), mx=0.59*0.999; if(d>mx){ const k=mx/d; t=[s0[0]+dx*k,s0[1]+dy*k,s0[2]+dz*k]; }
   return v186kW(p,P,t[0],t[1],t[2],is3,yaw); }
 /* the ball's centre at contact: between the gloves, or just beyond the fingertips of one hand (D.lim 0/1, 2 = both) */
-function v186kCentre(st,p,P,lim,is3,yaw){ const R=is3?(typeof V18_BALL_R==='number'?V18_BALL_R:0.176):BALL_R;
-  if(lim===2){ const a=v186kHand(p,P,0,is3,yaw), b=v186kHand(p,P,1,is3,yaw); return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,z:(a.z+b.z)/2}; }
+/* bey: a flat dive in 2-D holds the (0.48 m) ball just beyond the gloves along the body line, so the disc does not cover his head */
+const V186K_FLAT={dive:1,lowdive:1,smother:1};
+function v186kCentre(st,p,P,lim,is3,yaw,bey){ const R=is3?(typeof V18_BALL_R==='number'?V18_BALL_R:0.176):BALL_R;
+  if(lim===2){ const a=v186kHand(p,P,0,is3,yaw), b=v186kHand(p,P,1,is3,yaw); const m={x:(a.x+b.x)/2,y:(a.y+b.y)/2,z:(a.z+b.z)/2}; if(!bey||is3) return m;
+    const c=v186kW(p,P,0,1.15,0,is3,yaw); const ex=m.x-c.x, ey=m.y-c.y, ez=m.z-c.z, el=Math.hypot(ex,ey,ez)||1; const k=R*0.9/el; return {x:m.x+ex*k,y:m.y+ey*k,z:m.z+ez*k}; }
   const h=v186kHand(p,P,lim,is3,yaw), c=v186kW(p,P,0,1.15,0,is3,yaw); const ex=h.x-c.x, ey=h.y-c.y, ez=h.z-c.z, el=Math.hypot(ex,ey,ez)||1; const k=R*0.8/el;
   return {x:h.x+ex*k,y:h.y+ey*k,z:h.z+ez*k}; }
 
@@ -71,9 +74,9 @@ function v186kKeys(D){ const k=D.k, s=D.s, out=D.out; const caught=out==='catch'
       [.72,caught?[.78,.12,0,0,0,.1, .04,0,-.14, .04,0,.14, .24,1.3,-.08, .24,1.3,.08]:[.74,0,0,0,0,0, .04,0,-.16, .04,0,.16, .4,1.4,-.25, .4,1.45,.25]],
       [1,caught?V186K_HOLD:SET]]}; }
     case 'scoop': return {uc:.5,keys:[[0,SET],
-      [.3,[.62,.55,0,0,0,.3, 0,0,-.2, .08,0,.2, .5,.6,-.1, .5,.6,.1]],
-      [.5,[.55,1.15,0,0,0,.5, -.24,0,-.08, .16,0,.2, .64,.18,-.07, .64,.18,.07]],
-      [.76,caught?[.66,.45,0,0,0,.25, -.05,0,-.14, .08,0,.16, .28,1.12,-.08, .28,1.12,.08]:[.6,.7,0,0,0,.4, -.1,0,-.14, .1,0,.18, .55,.6,-.2, .55,.6,.2]],
+      [.3,[.74,.6,0,0,0,.3, 0,0,-.2, .08,0,.2, .5,.6,-.1, .5,.6,.1]],
+      [.5,[.72,1.25,0,0,0,.5, -.24,0,-.08, .16,0,.2, .64,.18,-.07, .64,.18,.07]],
+      [.76,caught?[.76,.45,0,0,0,.25, -.05,0,-.14, .08,0,.16, .28,1.12,-.08, .28,1.12,.08]:[.74,.7,0,0,0,.4, -.1,0,-.14, .1,0,.18, .55,.6,-.2, .55,.6,.2]],
       [1,caught?V186K_HOLD:SET]]};
     case 'lowdive': { const R=s; return {uc:.55,keys:[[0,SET],
       [.25,[.62,.22,0,-.18,.3,.1, .02,0,-.22, .05,0,.48, .32,.95,-.14, .36,.95,.42]],
@@ -86,25 +89,25 @@ function v186kKeys(D){ const k=D.k, s=D.s, out=D.out; const caught=out==='catch'
       [.22,[.6,.2,0,-.12,.55,.05, 0,0,-.2, .05,0,.44, .35,1.1,-.3, .36,1.15,.34]],
       [.42,[.74,.08,.3,-R*0.55,.55,0, -.06,.02,-.16, .14,.24,.2, .2,1.8,-.12, .2,1.86,.2]],
       [.6,tip?[.8,0,.44,-R,.55,-.12, -.08,.04,-.1, .2,.32,.14, H[3],H[4],H[5], H[0],H[1],H[2]]:[.8,0,.44,-R,.55,-.12, -.08,.04,-.1, .2,.32,.14, H[0],H[1],H[2], H[3],H[4],H[5]]],
-      [.8,caught?[.8,0,.06,-1.45,.55,.1, 0,0,-.07, .04,.06,.07, .22,1.5,-.04, .24,1.55,.1]:[.8,0,.06,-1.45,.55,0, 0,0,-.07, .04,.06,.07, .2,1.95,-.12, .22,2.0,.18]],
-      [1,caught?[.8,0,0,-1.5,.55,.15, .04,.08,-.07, .08,.14,.07, .26,1.42,-.03, .28,1.45,.09]:[.8,0,0,-1.5,.55,.05, 0,0,-.07, .04,.04,.07, .25,1.75,-.2, .28,1.8,.26]]]}; }
+      [.8,caught?[.8,0,.06,-1.45,.18,.1, 0,0,-.07, .04,.06,.07, .22,1.5,-.04, .24,1.55,.1]:[.8,0,.06,-1.45,.18,0, 0,0,-.07, .04,.06,.07, .2,1.95,-.12, .22,2.0,.18]],
+      [1,caught?[.8,0,0,-1.5,.18,.15, .04,.08,-.07, .08,.14,.07, .26,1.42,-.03, .28,1.45,.09]:[.8,0,0,-1.5,.18,.05, 0,0,-.07, .04,.04,.07, .25,1.75,-.2, .28,1.8,.26]]]}; }
     case 'tipOver': { const L=s; return {uc:.55,keys:[[0,SET],
       [.3,[.64,.08,0,0,0,-.1, -.16,0,-.2, .02,0,.2, .3,1.35,-.3, .3,1.45,.3]],
       [.55,[.82,-.32,L,-.3,0,-.42, -.26,.16,-.12, 0,.32,.14, .22,1.5,-.55, -.04,2.1,.24]],
       [.8,[.74,-.12,0,-.05,0,-.12, -.32,0,-.14, 0,.1,.14, .14,1.4,-.42, .1,1.65,.3]],
       [1,[.78,.05,0,0,0,0, -.05,0,-.14, .02,0,.14, .1,1.0,-.27, .1,1.0,.27]]]}; }
     case 'smother': { const R=s; return {uc:.6,keys:[[0,SET],
-      [.35,[.56,.42,0,0,0,.32, .04,0,-.3, .04,0,.3, .45,.55,-.42, .45,.55,.42]],
-      [.6,[.62,.12,0,-R,.2,.3, .02,.06,-.12, .1,.1,.14, .52,1.05,-.08, .52,1.08,.1]],
-      [.82,caught?[.6,.3,0,-1.4,.2,.42, .26,.3,-.06, .3,.36,.06, .36,1.15,-.06, .36,1.12,.06]:[.62,.15,0,-1.4,.2,.3, .05,.1,-.1, .12,.12,.12, .5,1.2,-.25, .52,1.25,.25]],
-      [1,caught?[.6,.3,0,-1.4,.2,.42, .28,.32,-.06, .32,.38,.06, .36,1.15,-.06, .36,1.12,.06]:[.62,.15,0,-1.4,.2,.3, .05,.1,-.1, .12,.12,.12, .45,1.1,-.25, .47,1.15,.25]]]}; }
+      [.35,[.72,.5,0,0,0,.32, .04,0,-.3, .04,0,.3, .45,.55,-.42, .45,.55,.42]],
+      [.6,[.74,.12,0,-R,.2,.3, .02,.06,-.12, .1,.1,.14, .52,1.05,-.08, .52,1.08,.1]],
+      [.82,caught?[.74,.3,0,-1.4,.2,.42, .26,.3,-.06, .3,.36,.06, .36,1.15,-.06, .36,1.12,.06]:[.74,.15,0,-1.4,.2,.3, .05,.1,-.1, .12,.12,.12, .5,1.2,-.25, .52,1.25,.25]],
+      [1,caught?[.74,.3,0,-1.4,.2,.42, .28,.32,-.06, .32,.38,.06, .36,1.15,-.06, .36,1.12,.06]:[.74,.15,0,-1.4,.2,.3, .05,.1,-.1, .12,.12,.12, .45,1.1,-.25, .47,1.15,.25]]]}; }
     case 'watch': return {uc:.4,keys:[[0,SET],
       [.4,[.74,.06,0,0,0,-.1, .02,0,-.2, .06,0,.3, .28,1.1,-.3, .3,1.12,.3]],
       [1,[.8,.02,0,0,0,-.05, .02,0,-.14, .04,0,.16, .1,1.0,-.27, .1,1.0,.27]]]};
     default: /* wrong / late / short: a dive (or a low dive) that does not reach */ { const R=s; return D.low?
       {uc:.55,keys:[[0,SET],[.25,[.62,.22,0,-.18,.3,.1, .02,0,-.22, .05,0,.48, .32,.95,-.14, .36,.95,.42]],[.55,[.8,0,.08,-R,.3,0, -.03,.04,-.07, .05,.02,.08, .26,1.97,.03, .3,2.06,.15]],[1,[.8,0,0,-1.55,.3,0, 0,0,-.07, .02,.04,.07, .3,1.9,-.1, .34,1.95,.2]]]} :
       {uc:.6,keys:[[0,SET],[.22,[.6,.2,0,-.12,.55,.05, 0,0,-.2, .05,0,.44, .35,1.1,-.3, .36,1.15,.34]],[.42,[.74,.08,.3,-R*0.55,.55,0, -.06,.02,-.16, .14,.24,.2, .2,1.8,-.12, .2,1.86,.2]],
-       [.6,[.8,0,.44,-R,.55,-.12, -.08,.04,-.1, .2,.32,.14, .08,2.06,0, .1,2.1,.13]],[1,[.8,0,0,-1.5,.55,0, 0,0,-.07, .04,.04,.07, .2,1.95,-.12, .22,2.0,.18]]]}; } } }
+       [.6,[.8,0,.44,-R,.55,-.12, -.08,.04,-.1, .2,.32,.14, .08,2.06,0, .1,2.1,.13]],[1,[.8,0,0,-1.5,.18,0, 0,0,-.07, .04,.04,.07, .2,1.95,-.12, .22,2.0,.18]]]}; } } }
 function v186kVec(KS,ph){ const K=KS.keys; if(ph<=K[0][0]) return K[0][1]; for(let i=1;i<K.length;i++){ if(ph<=K[i][0]){ const a=K[i-1], b=K[i]; const w=smooth((ph-a[0])/Math.max(1e-6,b[0]-a[0])); return a[1].map((x,j)=>x+(b[1][j]-x)*w); } } return K[K.length-1][1]; }
 function v186kP(v,n,act){ const V=n<0?v186kMirror(v):v; return {rot:V[3],pivot:V[4],lift:V[2],hipU:V[0],lean:V[1],feet:[{f:V[6],u:V[7],l:V[8]},{f:V[9],u:V[10],l:V[11]}],hands:[{f:V[12],u:V[13],l:V[14]},{f:V[15],u:V[16],l:V[17]}],headTilt:V[5],headTurn:0,prop:null,mouth:false,act}; }
 /* pose phase of a dive object at a stage time: 0..uc before the pose's contact moment, uc..1 after it */
@@ -128,16 +131,16 @@ function v186kN(){ let u=0; for(let i=0;i<4;i++) u+=Math.random(); return (u-2)/
 /* where the keeper sets for a shot from (sx,sy): on the line from the middle of his goal to the ball, ~1-1.6 m off the line */
 function v186kSetSpot(gk,sx,sy,q){ const gl=gk.side===0?0:105, pd=gk.side===0?1:-1; const off=1.0+0.6*q; const y=clamp(34+(sy-34)*0.3,29.5,38.5); return {x:gl+pd*off,y}; }
 /* solve the kind's parameter so the contact point is at height zc; returns {s, d (contact offset from the body), z} */
-function v186kSolve(D,pseudo,is3,yaw,lo,hi,zc){ const z=s=>v186kCentre(null,pseudo,v186kAt(D,s),D.lim,is3,yaw).z; let a=lo,b=hi; const za=z(a), zb=z(b); const inc=zb>za;
+function v186kSolve(D,pseudo,is3,yaw,lo,hi,zc){ const bey=!!V186K_FLAT[D.k]; const z=s=>v186kCentre(null,pseudo,v186kAt(D,s),D.lim,is3,yaw,bey).z; let a=lo,b=hi; const za=z(a), zb=z(b); const inc=zb>za;
   if(inc?zc<=za:zc>=za){ a=b=lo; } else if(inc?zc>=zb:zc<=zb){ a=b=hi; } else { for(let i=0;i<22;i++){ const m=(a+b)/2, zm=z(m); if((zm<zc)===inc) a=m; else b=m; } }
-  const s=(a+b)/2; const c=v186kCentre(null,pseudo,v186kAt(D,s),D.lim,is3,yaw); return {s,d:{x:c.x-pseudo.x,y:c.y-pseudo.y},z:c.z}; }
+  const s=(a+b)/2; const c=v186kCentre(null,pseudo,v186kAt(D,s),D.lim,is3,yaw,bey); return {s,d:{x:c.x-pseudo.x,y:c.y-pseudo.y},z:c.z}; }
 /* choose the save kind and outcome for an engine save event */
-Stage.prototype.v186kPlan=function(e,gk,sh,sx,sy){ const F=this._v186force||{}; const q=v186kQ(this,gk), sq=v186kShQ(this,e.pid);
+Stage.prototype.v186kPlan=function(e,gk,sh,sx,sy){ const F=this._v186kforce||{}; const q=v186kQ(this,gk), sq=v186kShQ(this,e.pid);
   const gl=gk.side===0?0:105, pd=gk.side===0?1:-1; const set=v186kSetSpot(gk,sx,sy,q); const dist=Math.hypot(sx-gl,sy-34);
   const cor=!!e.cor; const W=V186K_BANDS[e.ty]||V186K_BANDS.open; const r=Math.random(); let band=r<W[0]?0:r<W[0]+W[1]?1:2;
-  let ty=34+clamp(v186kN()*lerp(1.0,2.6,sq),-3.3,3.3); let z=band===0?0.03+Math.random()*0.25:band===1?0.55+Math.random()*0.95:1.65+Math.random()*0.5;
+  let ty=clamp(set.y+v186kN()*lerp(0.7,2.6,sq),34-3.3,34+3.3); /* placed relative to where the keeper stands: a weak shooter hits it near him, a good one finds the corners */ let z=band===0?0.03+Math.random()*0.25:band===1?0.55+Math.random()*0.95:1.65+Math.random()*0.5;
   let k, out;
-  if(cor){ if(band===2||Math.random()<0.35){ k='tipOver'; z=1.9+Math.random()*0.25; ty=34+clamp(v186kN()*1.4,-2.4,2.4); } else { ty=34+(Math.random()<0.5?-1:1)*(2.6+Math.random()*0.7); k=band===0?'lowdive':'dive'; } out='corner'; }
+  if(cor){ if(band===2||Math.random()<0.35){ k='tipOver'; z=1.9+Math.random()*0.25; ty=clamp(set.y+clamp(v186kN()*0.5,-1,1),34-2.6,34+2.6); } /* over the bar only from where he stands (within 1 m); wider it is a dive round the post */ else { ty=34+(Math.random()<0.5?-1:1)*(2.6+Math.random()*0.7); k=band===0?'lowdive':'dive'; } out='corner'; }
   else { const close=dist<13.5&&(e.ty==='break'||e.ty==='solo'||e.ty==='tapin'||(e.xg||0)>=0.25);
     if(close&&band<2&&Math.random()<0.75){ k='smother'; band=0; z=0.02+Math.random()*0.12; }
     else { const dy=Math.abs(ty-set.y);
@@ -146,7 +149,9 @@ Stage.prototype.v186kPlan=function(e,gk,sh,sx,sy){ const F=this._v186force||{}; 
       else if(dy<0.6||(dy<1.6&&Math.random()<q*(1.6-dy)/1.0)) k=band===2?'high':'stand';
       else k='dive'; }
     const reach=Math.abs(ty-set.y); const pc={stand:.55+.43*q,high:.5+.45*q,scoop:.55+.42*q,lowdive:.22+.6*q,dive:reach>2.2?.1+.6*q:.25+.6*q,smother:.38+.55*q}[k];
-    out=Math.random()<(reach>lerp(2.3,3.2,q)&&(k==='dive'||k==='lowdive')?pc*0.25:pc)?'catch':'parry'; }
+    /* pace: the time he has to see it (distance over a strike of 22-34 m/s by the shooter's rating); a close, hard shot is parried more */
+    const win=dist/lerp(22,34,sq), pf=clamp(0.6+win*0.6,0.65,1);
+    out=Math.random()<(reach>lerp(2.3,3.2,q)&&(k==='dive'||k==='lowdive')?pc*0.25:pc)*pf?'catch':'parry'; }
   if(F.k){ k=F.k; if(F.out) out=F.out; if(F.ty!=null) ty=F.ty; if(F.z!=null) z=F.z; else if(k==='scoop'||k==='lowdive'||k==='smother') z=0.06; else if(k==='high') z=1.85; else if(k==='tipOver') z=2.0; else if(k==='stand') z=0.9; else if(k==='dive') z=0.95+Math.random()*0.6;
     if(k==='stand'||k==='high'||k==='scoop') ty=set.y+(Math.random()-0.5)*0.6; else if((k==='dive'||k==='lowdive')&&Math.abs(ty-set.y)<1.6) ty=set.y+(Math.random()<0.5?-1:1)*(1.8+Math.random()*1.2); }
   ty=clamp(ty,GF.y0+0.35,GF.y1-0.35); z=Math.min(z,2.2);
@@ -163,7 +168,7 @@ Stage.prototype.v186kMake=function(gk,sh,k,o){ const is3=v186kIs3D(this), q=o.q;
   const lookYaw=sh?Math.atan2(sh.y-by,sh.x-bx):(pd>0?0:Math.PI); const yaw=(is3||stand)?lookYaw:(gk.side===0?1.15:Math.PI-1.15);
   /* which side he goes to (n=+1: his left) */
   let n; if(!is3&&!stand) n=-pd; else n=(o.ty-by)*Math.cos(yaw)>=0?1:-1; /* lateral axis (+l) is (-sin yaw, cos yaw) */
-  if(o.flip) n=-n; if(smo) n=Math.random()<0.5?1:-1;
+  if(o.flip) n=-n; if(smo) n=is3?(Math.random()<0.5?1:-1):-pd; /* 2-D: down head and hands first toward the forward */
   const low=o.z<0.5, kk=k;
   const lim=k==='dive'&&o.out==='corner'?(n>0?0:1) : k==='tipOver'?(n>0?1:0) : 2;
   const D0={k:kk,n,out:o.out||'none',lim,low:!!(o.low!=null?o.low:low),q,s:0};
@@ -177,7 +182,7 @@ Stage.prototype.v186kMake=function(gk,sh,k,o){ const is3=v186kIs3D(this), q=o.q;
   /* the gloves always meet the ball in front of the line */
   const cin=pd*(x1+sol.d.x-gl); if(cin<0.4) x1+=pd*(0.4-cin);
   x1=pd>0?Math.max(x1,gl+0.25):Math.min(x1,gl-0.25); y1=clamp(y1,GF.y0-2.5,GF.y1+2.5);
-  return {D:D0,x1,y1,yaw:lookYaw,stand,c:{x:x1+sol.d.x,y:y1+sol.d.y,z:sol.z}}; };
+  return {D:D0,x1,y1,yaw:lookYaw,syaw:yaw,stand,c:{x:x1+sol.d.x,y:y1+sol.d.y,z:sol.z}}; };
 
 /* the lead time of a kind (ms at 1x) and its follow-through */
 const V186K_A={stand:260,high:280,scoop:300,lowdive:330,dive:300,tipOver:320,smother:380,wrong:300,late:300,short:300,watch:240};
@@ -186,7 +191,12 @@ const V186K_POST={stand:420,high:420,scoop:480,lowdive:520,dive:560,tipOver:520,
 Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const now=this.now, q=M.D.q; const tA=f.t0+f.dur; const react=Math.max(30,this.D(lerp(170,70,q))); const tR=now+react;
   const Ld=this.D((V186K_A[M.D.k]||300)*(0.85+0.35*q)); let t0=Math.max(tR,tA-Ld); let tC=tA;
   if(M.D.k==='late'){ t0=Math.max(tR,tA-0.4*Ld); tC=t0+Ld; }
+  /* the scripted carry never outruns him (0.9x his top speed): a far spot starts earlier (never before his reaction); if it is still out of
+     reach the contact comes in toward him (the ball homes to the live gloves, so it simply meets him nearer) */
+  const vm=7.2*(this.spdMul||1)/1000, need=Math.hypot(M.x1-gk.x,M.y1-gk.y);
+  if(M.D.k!=='late'&&need>0.2) t0=Math.max(tR,Math.min(t0,tC-need/(0.9*vm)));
   if(tC-t0<45) t0=tC-45;
+  const cap=vm*Math.max(1,tC-t0); if(need>cap){ const w=1-cap/need, dx=(M.x1-gk.x)*w, dy=(M.y1-gk.y)*w; M={...M,x1:M.x1-dx,y1:M.y1-dy,c:{x:M.c.x-dx,y:M.c.y-dy,z:M.c.z},clip:+(need-cap).toFixed(2)}; }
   const post=Math.max(90,this.D(V186K_POST[M.D.k]||500));
   const fin=M.stand?0:(M.D.n>0?-1:1); /* sign of the final roll */
   const D={...M.D, t:t0, tR, tP0:tC, tA, post, dir:(fin||1)*(gk.x>52.5?1:-1), x0:gk.x, y0:gk.y, x1:M.x1, y1:M.y1, stand:M.stand, cx:M.c.x, cy:M.c.y, cz:M.c.z, catch:M.D.out==='catch', rel:now};
@@ -194,21 +204,27 @@ Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const now=this.now, q=M.D.q; con
   /* 3-D and standing kinds face the shooter through the save and the get-up; 2-D dives use the three-quarter yaw */
   if(v186kIs3D(this)||M.stand){ gk.yawLock=M.yaw; gk.yawLockT=tC+post+(M.stand?this.D(250):Math.max(260,this.D(700))); } /* through the get-up, then free (a parry is chased facing the ball) */ else if(gk.yawLockT>now) gk.yawLockT=now;
   if(o&&o.aim&&f.home===gk) f.aim={x:M.c.x,y:M.c.y};
-  if(V186K.log) V186K.log.push({pid:gk.pid,act0:gk._act,spd:+((gk.spd||0)/Math.max(1,this.spdMul||1)).toFixed(2),k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
+  if(V186K.log) V186K.log.push({pid:gk.pid,act0:gk._act,carry:+Math.hypot(M.x1-gk.x,M.y1-gk.y).toFixed(2),cms:Math.round(tC-t0),vm:+(vm*1000).toFixed(1),clip:M.clip||0,spd:+((gk.spd||0)/Math.max(1,this.spdMul||1)).toFixed(2),k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
   return D; };
 
 /* ---------- the save branch (replaces ui_stage.js shotSeq's save branch :396-414 for non-penalty saves) ---------- */
-Stage.prototype.v186kSave=async function(e){
-  const p=this.pl(e.pid); if(!p){ this.emit(e); return; }
-  const s=e.s, dir=s===0?1:-1, gx=s===0?105:0;
-  /* the approach mirrors ui_stage.js shotSeq :387-395; keep the two in step */
+/* the shooter's approach (mirrors ui_stage.js shotSeq :387-395; keep the two in step). A hook: another unit may define it first (a header or
+   free-kick set-up) and return {head, h}; it must leave the shooter in possession, ready to strike */
+if(!Stage.prototype.v186kApproach) Stage.prototype.v186kApproach=async function(e,p,gk){ const s=e.s, dir=s===0?1:-1, gx=s===0?105:0;
   await this.gain(p); if(this.own!==p) await this.gain(p);
   let [sx,sy]= e.x!=null? livePos(s,e.x,Math.max(e.y,70)) : [gx-dir*16,34];
-  const gk=this.gkOf(1-s); const q0=v186kQ(this,gk); if(q0>=0.5){ gk.ov=v186kSetSpot(gk,sx,sy,q0); gk.v186set=1; } /* a good keeper reads where it will come from and takes his angle early */
+  const q0=v186kQ(this,gk); if(q0>=0.5){ gk.ov=v186kSetSpot(gk,sx,sy,q0); gk.v186set=1; } /* a good keeper reads where it will come from and takes his angle early */
   p.ov={x:sx,y:sy}; await this.until(()=>this.own!==p||Math.hypot(p.x-sx,p.y-sy)<1.2, this.eta(p,sx,sy)+400);
   if(this.own!==p) await this.gain(p);
   if(Math.abs(p.x-gx)>29.5){ sx=gx-dir*27; p.ov={x:sx,y:p.y}; await this.until(()=>Math.abs(p.x-gx)<=29.5, this.eta(p,sx,p.y)+400); }
-  this.stageSpace(e,p); const plan=this.v186kPlan(e,gk,p,p.x,p.y); const q=plan.q;
+  this.stageSpace(e,p); return {}; };
+/* a strike staged elsewhere (another unit's own finish copy) can still get a beaten dive or a watch: call this just before its shot launch */
+Stage.prototype.v186kShotCtx=function(kind,e){ if(V186K.on) this._v186ctx={k:kind==='goal'?'goal':'miss',e}; };
+Stage.prototype.v186kSave=async function(e){
+  const p=this.pl(e.pid); if(!p){ this.emit(e); return; }
+  const s=e.s, dir=s===0?1:-1, gx=s===0?105:0;
+  const gk=this.gkOf(1-s); const A=(await this.v186kApproach(e,p,gk))||{};
+  const plan=this.v186kPlan(e,gk,p,p.x,p.y); const q=plan.q;
   /* a good keeper is set on his angle before the strike; a poor one is still drifting across when it is struck */
   gk.v186set=0; const SS=plan.k==='smother'? (()=>{ const gl=gk.side===0?0:105, ux=p.x-gl, uy=p.y-34, ul=Math.hypot(ux,uy)||1, off=lerp(3,6,q); return {x:gl+ux/ul*off,y:34+uy/ul*off}; })() : plan.set;
   if(plan.k==='smother'){ gk.ov={...SS}; gk.hurry=true; }
@@ -217,11 +233,12 @@ Stage.prototype.v186kSave=async function(e){
   await this.wait(this.D(220));
   if(!gk.v186set&&plan.k!=='smother') gk.ov={...SS};
   const self=this; let M=null; const ty=plan.ty;
-  const h=plan.band===0?0.12:plan.band===1?0.4:0.55; const zT=plan.z;
+  const h=A.h!=null?A.h:plan.band===0?0.12:plan.band===1?0.4:0.55; const zT=plan.z;
   const arm=f=>{ gk.hurry=false; M=self.v186kMake(gk,p,plan.k,{q,ty,z:zT,out:plan.out,set:{x:gk.x,y:gk.y}}); self.v186kArm(gk,p,M,f,{aim:true}); };
   const dur=this.D(340)+120;
-  await this.launch(p,{home:gk,hands:true,dur,h,hFn:()=>this.shotH(s,{x:gk.x,y:ty,z:zT},h),kind:'shot',onRelease:arm});
+  await this.launch(p,{home:gk,hands:true,dur,h,hFn:()=>this.shotH(s,{x:gk.x,y:ty,z:zT},h),kind:'shot',head:!!A.head,onRelease:arm});
   const D=gk.dive; const out=plan.out; const corner=out==='corner'; const k=plan.k;
+  e._how=corner?'tip':out==='catch'?'catch':'parry'; e._v186k=k; /* for the commentary (Design A): what the keeper was shown doing */
   if(corner){ this.emit(e); e._done=1; }
   if(out!=='catch'){ if(this.own===gk){ this.own=null; this.hands=false; }
     const sg=Math.sign(ty-34)||1;
@@ -234,7 +251,7 @@ Stage.prototype.v186kSave=async function(e){
   if(!e._done) this.emit(e);
   const fs=D&&D.k===k&&(k==='dive'||k==='lowdive')&&Math.abs(ty-plan.set.y)>2.2;
   this.onCaption(k==='tipOver'?'TIPPED OVER THE BAR':corner?'TIPPED AROUND THE POST':k==='smother'&&out==='catch'?'SMOTHERED':out==='parry'?(fs&&q>=0.75?'WHAT A SAVE!':'PARRIED!'):fs&&q>=0.75?'WHAT A SAVE!':'SAVED','shot');
-  this.hype=Math.max(this.hype,fs?0.6:0.4); this.clearStaged();
+  this.hype=Math.max(this.hype,fs?0.5:0.4); this.clearStaged(); /* below the 0.55 GOAL! boards / flashes threshold */
   await this.wait(this.D(380)+120);
   if(corner){ gk.dive=null; gk.ov=null; if(this.ts>=0.45&&!this.skip) await this.cornerKick(s,sg2(ty)); else { const m=this.nearest(1-s,gx-dir*8,34); if(m) await this.fetch(m,false); } }
   else if(out==='parry'){ gk.dive=null; const d=this.nearest(1-s,this.ball.x,this.ball.y); const fetcher=d&&dist2(d,this.ball)<dist2(gk,this.ball)?d:gk; await this.fetch(fetcher,fetcher===gk);
@@ -257,7 +274,7 @@ Stage.prototype.finish=function(e,pl){ if(!V186K.on||!e||e.ty==='pen') return _v
 const _v186kLaunch=Stage.prototype.launch;
 Stage.prototype.launch=function(p,opt){ const C=this._v186ctx;
   if(V186K.on&&C&&p&&opt&&opt.kind==='shot'&&opt.to&&!opt.home&&this.setPiece!=='pen'){ this._v186ctx=null; const gk=this.gkOf(1-p.side);
-    if(gk){ if(gk.dive&&!gk.dive.k) gk.dive=null; const self=this, o0=opt.onRelease; opt={...opt,onRelease(f){ if(o0) o0(f); try{ self.v186kBeaten(gk,p,C,opt.to,f); }catch(err){ if(V186K.log) V186K.log.push({err:String(err)}); } }}; } }
+    if(gk){ if(gk.dive&&!gk.dive.k) gk.dive=null; const self=this, o0=opt.onRelease; opt={...opt,onRelease(f){ if(o0) o0(f); try{ self.v186kBeaten(gk,p,C,f.to||opt.to,f); }catch(err){ if(V186K.log) V186K.log.push({err:String(err)}); } }}; } }
   return _v186kLaunch.call(this,p,opt); };
 /* how a keeper is beaten: goals are wrong-footed (68 % for the poorest keeper, 32 % for the best), late or short; a miss going
    clearly wide or over is watched (a poor keeper sometimes makes a token late dive), a near miss gets a dive that falls short */
@@ -267,16 +284,36 @@ function v186kBeatKind(q,ck,to){ const wide=Math.abs(to.y-34)-3.66, over=(to.z||
 /* the keeper's torso axis in the world (pelvis, neck) for a pose, as drawn */
 function v186kTorso(p,P,is3){ const lean=P.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=P.hipU; const du=is3?0.77:1.57-hipU; const n=[du*sl,hipU+du*cl,0];
   return [v186kW(p,P,0,hipU,0,is3),v186kW(p,P,n[0],n[1],0,is3)]; }
-Stage.prototype.v186kBeaten=function(gk,sh,C,to,f){ const q=v186kQ(this,gk), gl=gk.side===0?0:105; const F=this._v186force||{};
-  let k=v186kBeatKind(q,C.k,to);
-  if(F.beaten&&!(C.k==='goal'&&F.beaten==='watch')) k=F.beaten;
-  const z=clamp(to.z||0,0,2.1); let ty=clamp(to.y,GF.y0-0.8,GF.y1+0.8); const set={x:gk.x,y:gk.y};
-  const sgn=Math.sign(ty-set.y)||1;
-  if(k==='wrong'){ ty=clamp(set.y-sgn*(1.0+Math.random()*1.4),GF.y0-0.6,GF.y1+0.6); }
-  else if(k==='short'){ const sh0=0.35+Math.random()*0.25; const gap=Math.abs(ty-set.y); ty=gap>1.5? ty-sgn*(sh0+(1-q)*0.3) : set.y+sgn*Math.max(1.4,gap); }
-  else if(k==='late'){ if(Math.abs(ty-set.y)<1.5) ty=set.y+sgn*1.6; }
-  const M=this.v186kMake(gk,sh,k,{q,ty,z:k==='wrong'?clamp(z+(Math.random()-0.5)*0.5,0,1.9):z,out:'none',set,low:z<0.45,bx:gk.x});
-  this.v186kArm(gk,sh,M,f,null); };
+/* the drawn body as segments (shoulder-hand, hip-ankle, pelvis-head) with their half-thickness, for the clearance check */
+function v186kSegs(p,P,is3,yaw){ const B=V186K_B[(p.look&&p.look.build)]||1, lean=P.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=P.hipU; const S=[];
+  const up=(f,u,l)=>{ const du=is3?u-0.8:u-hipU; if(du<=0) return is3?[f,hipU+du,l]:[f,u,l]; return [f*cl+du*sl,hipU+du*cl-f*sl,l]; };
+  for(const i of [0,1]){ const sd=i?1:-1, s0=up(0,1.5,sd*0.21*B); S.push([v186kW(p,P,s0[0],s0[1],s0[2],is3,yaw),v186kHand(p,P,i,is3,yaw),0.06]);
+    const F=P.feet[i]; S.push([v186kW(p,P,0,hipU,sd*0.1,is3,yaw),v186kW(p,P,F.f,F.u+0.06,F.l,is3,yaw),0.08]); }
+  const [a,b]=v186kTorso(p,P,is3); S.push([a,{x:b.x+(b.x-a.x)*0.3,y:b.y+(b.y-a.y)*0.3,z:b.z+(b.z-a.z)*0.3},0.14]); return S; }
+function v186kSegD(c,a,b){ const vx=b.x-a.x, vy=b.y-a.y, vz=b.z-a.z, L=vx*vx+vy*vy+vz*vz||1e-9; const t=clamp(((c.x-a.x)*vx+(c.y-a.y)*vy+(c.z-a.z)*vz)/L,0,1); return Math.hypot(a.x+vx*t-c.x,a.y+vy*t-c.y,a.z+vz*t-c.z); }
+/* the closest the ball's real flight comes to the keeper's drawn body (space and time, over the last part of the flight): surface gap in m */
+Stage.prototype.v186kClear=function(gk,D,f,yaw){ const is3=v186kIs3D(this), R=v186kBR(this), T=f.to; if(!T||!f.from) return 9; let best=9;
+  for(let i=0;i<=14;i++){ const u=0.5+0.5*i/14, now=f.t0+f.dur*u; if(now<D.t) continue; const e=typeof this.flE==='function'?this.flE(f,u):u;
+    const c={x:lerp(f.from.x,T.x,e),y:lerp(f.from.y,T.y,e),z:Math.max(0,lerp(f.from.z||0,T.z||0,u)+(f.h||0)*4*u*(1-u))+R};
+    const w=clamp((now-D.t)/Math.max(1,D.tP0-D.t),0,1); const p={x:lerp(D.x0,D.x1,w),y:lerp(D.y0,D.y1,w),yaw,hgt:gk.hgt,look:gk.look,side:gk.side,gk:1};
+    const P=this.v186kPose(p,D,now); for(const [a,b,th] of v186kSegs(p,P,is3,yaw)) best=Math.min(best,v186kSegD(c,a,b)-th-R); }
+  return best; };
+Stage.prototype.v186kBeaten=function(gk,sh,C,to,f){ const q=v186kQ(this,gk), R=v186kBR(this); const F=this._v186kforce||{};
+  let k=v186kBeatKind(q,C.k,to); const forced=!!(F.beaten&&!(C.k==='goal'&&F.beaten==='watch'));
+  if(forced) k=F.beaten;
+  const z=clamp(to.z||0,0,2.1), ty0=clamp(to.y,GF.y0-0.8,GF.y1+0.8); const set={x:gk.x,y:gk.y};
+  const sgn=Math.sign(ty0-set.y)||1;
+  /* contact targets: wrong-footed goes the other way; short and late always stop on the near side of the ball (the gloves never reach or pass it) */
+  const tgt=k=>{ if(k==='wrong') return clamp(set.y-sgn*(1.0+Math.random()*1.4),GF.y0-0.6,GF.y1+0.6);
+    if(k==='short'||k==='late'){ const sh0=0.35+Math.random()*0.25+(k==='short'?(1-q)*0.3:0); return ty0-sgn*(sh0+R+0.25); } return ty0; };
+  let ty=tgt(k);
+  if(!forced&&(k==='short'||k==='late')&&sgn*(ty-set.y)<0.9){ k='wrong'; ty=tgt(k); } /* no room to dive at it: he is beaten the other way */
+  const zz=k==='wrong'?clamp(z+(Math.random()-0.5)*0.5,0,1.9):z;
+  /* never through the keeper: check the drawn body against the ball's real flight; if it would touch, he goes (further) the other way */
+  for(let i=0;i<5;i++){ const M=this.v186kMake(gk,sh,k,{q,ty,z:zz,out:'none',set,low:z<0.45,bx:gk.x}); const D=this.v186kArm(gk,sh,M,f,null);
+    if(k==='watch') return; const gap=this.v186kClear(gk,D,f,M.syaw); if(V186K.log) V186K.log.push({pid:gk.pid,beat:k,gap:+gap.toFixed(2),try:i});
+    if(gap>0.05) return;
+    if(k!=='wrong'&&!forced){ k='wrong'; ty=tgt(k); } else ty=clamp(ty-sgn*0.6,GF.y0-1.5,GF.y1+1.5); } };
 
 /* ---------- per-step: intercept fix, sounds, scripted body motion, ball held in the gloves ---------- */
 const _v186kUpd=Stage.prototype.update;
@@ -293,13 +330,23 @@ Stage.prototype.update=function(dt){ const now=this.now; const f=this.fl;
 
 /* ---------- handsOf / poseOf / blendPose ---------- */
 const _v186kHands=Stage.prototype.handsOf;
-Stage.prototype.handsOf=function(p){ const D=p&&p.gk&&p.dive; if(!V186K.on||!D||!D.k||this.now<D.t) return _v186kHands.apply(this,arguments);
+Stage.prototype.handsOf=function(p){ const D=p&&p.gk&&p.dive;
+  /* 3-D get-up after one of these dives: he faces the shooter and rolls along the goal line, so the held ball follows the drawn gloves
+     (the base get-up offsets it along pitch x, which is the 2-D screen roll) */
+  if(V186K.on&&p&&p.gk&&!D&&p.v186kG!=null&&this.own===p&&this.hands&&v186kIs3D(this)){ const uT=this.now-(p.upT||-9e9), UD=Math.max(260,this.D(650)); const P=p._pose;
+    if(uT>=0&&uT<UD&&P&&P.act==='getup'&&P.hands){ const R=v186kBR(this), c=v186kCentre(this,p,P,2,true), gl=p.side===0?0:105, pd=p.side===0?1:-1; let x=c.x; if(pd*(x-gl)<0.3) x=gl+pd*0.3; return {x,y:c.y,z:Math.max(0,c.z-R)}; } }
+  if(!V186K.on||!D||!D.k||this.now<D.t) return _v186kHands.apply(this,arguments);
   const is3=v186kIs3D(this), P=this.v186kPose(p,D), R=v186kBR(this); const lim=D.k==='wrong'||D.k==='late'||D.k==='short'?2:D.lim;
-  const c=v186kCentre(this,p,P,lim,is3); return {x:c.x,y:c.y,z:Math.max(0,c.z-R)}; };
+  const c=v186kCentre(this,p,P,lim,is3,undefined,lim===2&&V186K_FLAT[D.k]); return {x:c.x,y:c.y,z:Math.max(0,c.z-R)}; };
 
 const _v186kPoseOf=Stage.prototype.poseOf;
-Stage.prototype.poseOf=function(p,isRef){ const P=_v186kPoseOf.apply(this,arguments); if(isRef||!p||!p.gk||!V186K.on) return P; const D=p.dive; if(!D||!D.k||this.now<D.t) return P;
-  if(D.stand) p._dv=null; /* standing kinds never trigger the roll-to-knee get-up */
+/* the get-up after one of these dives lasts lerp(900,550,q) ms at 1x (a poor keeper is slower up): the base get-up clock is rescaled */
+function v186kUpScale(st,p){ const UD=Math.max(260,st.D(650)), W=Math.max(260,st.D(lerp(900,550,clamp(p.v186kG,0,1)))); if(p.v186kU0==null) p.v186kU0=p.upT==null?-9e9:p.upT;
+  const el=st.now-p.v186kU0; if(el<0||el>=W){ if(el>=W&&el<W+2000) p.upT=st.now-UD-1; p.v186kG=null; p.v186kU0=null; return; } p.upT=st.now-el*UD/W; }
+Stage.prototype.poseOf=function(p,isRef){ if(!isRef&&p&&p.gk&&V186K.on){ if(p.dive&&!p.dive.k) p.v186kG=null; else if(!p.dive&&p.v186kG!=null) v186kUpScale(this,p); }
+  const P=_v186kPoseOf.apply(this,arguments); if(isRef||!p||!p.gk||!V186K.on) return P; const D=p.dive; if(!D||!D.k||this.now<D.t) return P;
+  /* standing kinds never trigger the roll-to-knee get-up (the base stamps upT in the same call, so it is reset here, every frame) */
+  if(D.stand){ p._dv=null; p.upT=-9e9; p.v186kG=null; p.v186kU0=null; } else { p.v186kG=D.q; p.v186kU0=null; }
   return this.v186kPose(p,D); };
 
 const _v186kBlend=Stage.prototype.blendPose;
@@ -317,7 +364,7 @@ labRun=function(scen){ const r=_v186kLabRun.apply(this,arguments); if(scen!=='sa
       st.zoomTo(0.42); st.cam.w=st.cam.tw; st.focus={x:96}; st.cam.x=96; await st.gain(fw); if(!alive()) return;
       const close=k==='smother'; fw.x=close?95:84; fw.y=28+Math.random()*12;
       if(typeof labLog==='function') labLog(`${k} · ${o} · q ${q}`);
-      if(k==='goal'){ st._v186force={q,beaten:o}; await st.finish({s:0,pid:fw.pid,t:'goal',ty:'open',m:10,sc:[1,0]},fw); if(!alive()) return; st._v186force=null; await st.wait(st.D(900)); const g=st.gkOf(1); if(g){ g.dive=null; } st.inNet=null; st.ball.ing=null; await st.wait(st.D(300)); }
-      else if(k==='miss'){ st._v186force={q,beaten:o}; await st.shotSeq({s:0,pid:fw.pid,t:'miss',ty:'open',x:40,y:84}); st._v186force=null; }
-      else { st._v186force={q,k,out:o}; await st.shotSeq({s:0,pid:fw.pid,t:'save',ty:close?'break':'open',x:40,y:close?90:84,cor:o==='corner'?1:0,xg:close?0.3:0.1}); st._v186force=null; }
+      if(k==='goal'){ st._v186kforce={q,beaten:o}; await st.finish({s:0,pid:fw.pid,t:'goal',ty:'open',m:10,sc:[1,0]},fw); if(!alive()) return; st._v186kforce=null; await st.wait(st.D(900)); const g=st.gkOf(1); if(g){ g.dive=null; } st.inNet=null; st.ball.ing=null; await st.wait(st.D(300)); }
+      else if(k==='miss'){ st._v186kforce={q,beaten:o}; await st.shotSeq({s:0,pid:fw.pid,t:'miss',ty:'open',x:40,y:84}); st._v186kforce=null; }
+      else { st._v186kforce={q,k,out:o}; await st.shotSeq({s:0,pid:fw.pid,t:'save',ty:close?'break':'open',x:40,y:close?90:84,cor:o==='corner'?1:0,xg:close?0.3:0.1}); st._v186kforce=null; }
       if(!alive()) return; await st.wait(st.D(500)); } }); };

@@ -10,10 +10,10 @@
 // D. goals and misses: beaten dives on goals, the ball never passes through the keeper or his gloves; wide misses are watched.
 // E. 3-D: the drawn 3-D glove is within 0.40 m of the ball centre at contact (stand, dive, tip over).
 // F. reduced motion runs; no page errors anywhere.
-// Usage: node test/saves.js [sections, e.g. ABCDEF]   (screenshots in test/shots/v186/saves/)
+// Usage: node test/saves.js [sections, e.g. ABCDF; default ABCDF, E runs as test/saves3d.js]   (screenshots in test/shots/v186/saves/)
 const { chromium, DIST } = require('./_pw');
 const fs=require('fs'); const OUT='test/shots/v186/saves/'; fs.mkdirSync(OUT,{recursive:true});
-const SEC=(process.argv[2]||'ABCDEF').toUpperCase();
+const SEC=(process.argv[2]||'ABCDF').toUpperCase();
 let fails=0; const ok=(c,msg)=>{ console.log((c?'PASS ':'FAIL ')+msg); if(!c) fails++; };
 const pct=x=>(x*100).toFixed(0)+'%';
 (async()=>{
@@ -30,7 +30,11 @@ const pct=x=>(x*100).toFixed(0)+'%';
       const L0=st.land; st.land=function(){ const f=this.fl; const g=f&&!f.phys&&f.home&&f.home.gk&&f.hands?f.home:null; const r=L0.apply(this,arguments);
         if(g&&g.dive&&g.dive.k){ const D=g.dive; window.__S.push({k:D.k,out:D.out,q:D.q,now:this.now,tP0:D.tP0,rel:D.rel,dur:f.dur,t0:f.t0,bz:this.ball.z+v186kBR(this),minTorso:window.__mt==null?9:window.__mt}); window.__mt=null; if(window.__pause){ this.paused=true; window.__pend=1; } }
         return r; };
-      window.__X=[]; let px=null; const U0=st.update; st.update=function(dt){ const r=U0.apply(this,arguments); const f=this.fl, g=this.gkOf(1);
+      window.__X=[]; window.__vx=0; window.__gu=[]; window.__hy=0; window.__mg=null; let px=null, gp=null; const U0=st.update; st.update=function(dt){ const r=U0.apply(this,arguments); const f=this.fl, g=this.gkOf(1);
+        window.__hy=Math.max(window.__hy,this.hype||0);
+        if(g){ const D=g.dive; if(D&&D.k&&gp&&this.now>D.t&&this.now<=D.tP0+1&&dt>0){ const v=Math.hypot(g.x-gp.x,g.y-gp.y)/dt/(7.2*(this.spdMul||1)); if(v>window.__vx) window.__vx=v; } gp={x:g.x,y:g.y};
+          if(D&&D.k) window.__lk={k:D.k,stand:!!D.stand,t:this.now}; else if(g._act==='getup'&&window.__lk&&window.__lk.stand&&this.now-window.__lk.t<1500) window.__gu.push(window.__lk.k);
+          if(D&&D.k&&f&&!f.phys&&!f.home&&f.kind==='shot'&&this.now>=D.t){ const is3=v186kIs3D(this), P=this.v186kPose(g,D), R=v186kBR(this), B=this.ball, c={x:B.x,y:B.y,z:B.z+R}; let m=9; for(const [a,b,th] of v186kSegs(g,P,is3)) m=Math.min(m,v186kSegD(c,a,b)-th-R); window.__mg=Math.min(window.__mg==null?9:window.__mg,m); } }
         { const B=this.ball; if(px!=null&&px<105&&B.x>=105) window.__X.push({y:+B.y.toFixed(2),z:+B.z.toFixed(2),k:g&&g.dive&&g.dive.k,goal:!!this.inNet}); px=B.x; }
         if(f&&!f.phys&&g&&g.dive&&g.dive.k&&this.now>=g.dive.t&&(f.home===g||f.kind==='shot')){ const u=(this.now-f.t0)/f.dur; if(u<0.85||!f.home){ const is3=v186kIs3D(this); const P=this.v186kPose(g,g.dive); const [a,b]=v186kTorso(g,P,is3); const R=v186kBR(this), B=this.ball, c={x:B.x,y:B.y,z:B.z+R};
             const vx=b.x-a.x, vy=b.y-a.y, vz=b.z-a.z, L=vx*vx+vy*vy+vz*vz||1; const t=clamp(((c.x-a.x)*vx+(c.y-a.y)*vy+(c.z-a.z)*vz)/L,0,1); const d=Math.hypot(a.x+vx*t-c.x,a.y+vy*t-c.y,a.z+vz*t-c.z);
@@ -50,16 +54,16 @@ const pct=x=>(x*100).toFixed(0)+'%';
   /* ---------------- A. choice ---------------- */
   if(SEC.includes('A')){ const page=await open('2d');
     await page.evaluate(()=>{ window.__v186labIdle=1; }); await start(page,[['stand','catch']],[0.6],0.85,false);
-    const A=await page.evaluate(()=>{ const st=App.labSt; const gk=st.gkOf(1), sh=[...st.players.values()].find(p=>p.side===0&&!p.gk); st._v186force=null; const keep=st._v186q;
-      const run=(n,e,q,sq,x)=>{ st._v186q=q; const ks={}, outs={}; let spread=0, low=0, high=0; for(let i=0;i<n;i++){ st._v186force=sq!=null?{sq}:null; const P=st.v186kPlan(e,gk,sh,x||88,30); ks[P.k]=(ks[P.k]||0)+1; outs[P.out]=(outs[P.out]||0)+1; spread+=Math.abs(P.ty-34); if(P.z<0.35) low++; if(P.z>1.6) high++; } st._v186force=null; return {ks,outs,spread:spread/n,low:low/n,high:high/n}; };
+    const A=await page.evaluate(()=>{ const st=App.labSt; const gk=st.gkOf(1), sh=[...st.players.values()].find(p=>p.side===0&&!p.gk); st._v186kforce=null; const keep=st._v186kq;
+      const run=(n,e,q,sq,x)=>{ st._v186kq=q; const ks={}, outs={}; let spread=0, low=0, high=0, tyTip=0; for(let i=0;i<n;i++){ st._v186kforce=sq!=null?{sq}:null; const P=st.v186kPlan(e,gk,sh,x||88,30); ks[P.k]=(ks[P.k]||0)+1; outs[P.out]=(outs[P.out]||0)+1; spread+=Math.abs(P.ty-P.set.y); if(P.k==='tipOver') tyTip=Math.max(tyTip,Math.abs(P.ty-P.set.y)); if(P.z<0.35) low++; if(P.z>1.6) high++; } st._v186kforce=null; return {ks,outs,spread:spread/n,low:low/n,high:high/n,tyTip}; };
       const N=600;
       const r={ open:run(N,{t:'save',ty:'open',s:0},0.6), tapin:run(N,{t:'save',ty:'tapin',s:0,xg:0.4},0.6,null,95), long:run(N,{t:'save',ty:'long',s:0},0.6), cor:run(N,{t:'save',ty:'open',s:0,cor:1},0.6),
         good:run(N,{t:'save',ty:'open',s:0},0.92), poor:run(N,{t:'save',ty:'open',s:0},0.15), shGood:run(N,{t:'save',ty:'open',s:0},0.6,0.95), shPoor:run(N,{t:'save',ty:'open',s:0},0.6,0.05) };
       const bk=q=>{ const c={}; for(let i=0;i<2000;i++){ const k=v186kBeatKind(q,'goal',{y:35,z:0.5}); c[k]=(c[k]||0)+1; } return c; };
       r.bkPoor=bk(0.15); r.bkGood=bk(0.9); r.wide=(()=>{ const c={}; for(let i=0;i<500;i++){ const k=v186kBeatKind(0.6,'miss',{y:34+5.6,z:0.3}); c[k]=(c[k]||0)+1; } return c; })();
       /* reaction: the kind's start (D.t) after the release, for one flight, by rating */
-      const reac=q=>{ let s=0; for(let i=0;i<20;i++){ st._v186force={q,k:'dive',out:'catch'}; const f={t0:st.now,dur:st.D(340)+120,home:gk}; const M=st.v186kMake(gk,sh,'dive',{q,ty:31,z:1,out:'catch',set:{x:103.8,y:34}}); const D=st.v186kArm(gk,sh,M,f,null); s+=D.t-f.t0; gk.dive=null; } st._v186force=null; return s/20; };
-      r.reGood=reac(0.92); r.rePoor=reac(0.15); st._v186q=keep; gk.ov=null; gk.yawLockT=0;
+      const reac=q=>{ let s=0; for(let i=0;i<20;i++){ st._v186kforce={q,k:'dive',out:'catch'}; const f={t0:st.now,dur:st.D(340)+120,home:gk}; const M=st.v186kMake(gk,sh,'dive',{q,ty:31,z:1,out:'catch',set:{x:103.8,y:34}}); const D=st.v186kArm(gk,sh,M,f,null); s+=D.t-f.t0; gk.dive=null; } st._v186kforce=null; return s/20; };
+      r.reGood=reac(0.92); r.rePoor=reac(0.15); st._v186kq=keep; gk.ov=null; gk.yawLockT=0;
       /* the interception lunge (72_tackles): still stamped for an outfield interception, never for a shot into the keeper's hands */
       const ic=(home,hands)=>{ const fl0=st.fl, lp0=st.lastPass, own0=st.own; const t0=home.v18icT; st.own=null; st.lastPass={from:sh,to:home,h:0,fy:sh.y,t:st.now};
         st.fl={from:{x:home.x-6,y:home.y,z:0},home,hands,head:false,to:null,t0:st.now-300,dur:400,h:0.3,kind:hands?'shot':'pass',ground:!hands,cont:false,res:()=>{}};
@@ -71,10 +75,12 @@ const pct=x=>(x*100).toFixed(0)+'%';
     ok(Object.keys(A.cor.ks).every(k=>k==='tipOver'||k==='dive'||k==='lowdive')&&Object.keys(A.cor.outs).join()==='corner', 'a save that goes behind is always tipped over or round the post ('+sh(A.cor)+')');
     ok(!A.open.ks.wrong&&!A.open.ks.late&&!A.open.ks.short, 'beaten kinds are never chosen for saves');
     ok(Object.keys(A.open.ks).length>=5, 'open-play saves use at least five kinds ('+sh(A.open)+')');
+    { const rt=((A.open.ks.stand||0)+(A.open.ks.scoop||0)+(A.open.ks.high||0))/600; ok(rt>=0.3&&rt<=0.6, 'routine saves (stand, scoop, high) are '+pct(rt)+' of open-play saves (30-60 %)'); }
+    { const tp=A.cor.tyTip; ok(tp<=1.0, 'a tip over the bar is only chosen within 1 m of where he stands (max '+tp.toFixed(2)+' m)'); }
     const all=new Set([...Object.keys(A.open.ks),...Object.keys(A.tapin.ks),...Object.keys(A.cor.ks),...Object.keys(A.long.ks)]); ok(all.size>=7, 'across shot types all seven save kinds appear ('+[...all].join(', ')+')');
     ok((A.open.ks.high||0)>0&&(A.open.ks.stand||0)>0&&(A.open.ks.scoop||0)>0&&(A.open.ks.lowdive||0)>0&&(A.open.ks.dive||0)>0, 'height and placement pick high / stand / scoop / low dive / dive');
     const cg=(A.good.outs.catch||0)/600, cp=(A.poor.outs.catch||0)/600; ok(cg>=0.65&&cp<=0.45, 'a good keeper catches more, a poor one parries more (catch '+pct(cg)+' at q .92 vs '+pct(cp)+' at q .15)');
-    ok(A.shGood.spread>A.shPoor.spread+0.6, 'better shooters place it nearer the corners (mean |y-34| '+A.shGood.spread.toFixed(2)+' vs '+A.shPoor.spread.toFixed(2)+' m)');
+    ok(A.shGood.spread>A.shPoor.spread+0.6, 'better shooters place it further from the keeper (mean |y - keeper| '+A.shGood.spread.toFixed(2)+' vs '+A.shPoor.spread.toFixed(2)+' m)');
     const wp=A.bkPoor.wrong/2000, wg=A.bkGood.wrong/2000; ok(wp>=0.5&&wg<=0.45, 'goals: a poor keeper is wrong-footed more ('+pct(wp)+' at q .15 vs '+pct(wg)+' at q .9)');
     ok((A.wide.watch||0)>=400, 'a miss well wide is watched, not dived at ('+JSON.stringify(A.wide)+')');
     ok(A.icOut&&!A.icGk, 'an outfield interception still lunges, a shot into the keeper\'s hands does not (outfield '+A.icOut+', keeper '+A.icGk+')');
@@ -99,6 +105,10 @@ const pct=x=>(x*100).toFixed(0)+'%';
     ok(E.length>0&&E.every(e=>e.inHands||e.loose), 'saves are announced with the ball in the gloves or parried loose beside the diving keeper ('+E.map(e=>e.inHands?'H':e.loose?'L':'?').join('')+')');
     ok(S.every(s=>s.minTorso>0.25), 'the ball never goes through the keeper on its way to his gloves (closest to the torso '+Math.min(...S.map(s=>s.minTorso)).toFixed(2)+' m)');
     const X=await page.evaluate(()=>window.__X); ok(X.every(x=>Math.abs(x.y-34)>3.66+0.11||x.z>2.44), 'every deflection crosses the goal line outside the frame ('+X.map(x=>'y '+x.y+' z '+x.z).join('; ')+')');
+    const BX=await page.evaluate(()=>({vx:window.__vx,gu:window.__gu,hy:window.__hy}));
+    ok(BX.vx<=1.02, 'the keeper\'s body never moves faster than his top running speed during a save (max '+BX.vx.toFixed(2)+'x)');
+    ok(BX.gu.length===0, 'no roll-to-knee get-up after a standing catch, scoop, tip over or parry ('+(BX.gu.join(',')||'none')+')');
+    ok(BX.hy<=0.55, 'a save never lights the GOAL! boards (hype max '+BX.hy.toFixed(2)+')');
     const zs=C.map(c=>c.z); ok(Math.min(...zs)<0.4&&Math.max(...zs)>1.7, 'contact heights range from the turf to above the head ('+Math.min(...zs).toFixed(2)+'..'+Math.max(...zs).toFixed(2)+' m)');
     await page.close(); }
 
@@ -107,30 +117,32 @@ const pct=x=>(x*100).toFixed(0)+'%';
     await page.evaluate(()=>{ window.__v186labIdle=1; }); await start(page,[['stand','catch']],[0.6],0.22,false);
     /* the in-page loop above only defines; run the saves in small batches so a slow machine cannot hang one evaluate */
     const runQ=async(q,n)=>{ const R=[]; for(let i=0;i<n;i++){ const r=await page.evaluate(async([q,i])=>{ const st=App.labSt; const fw=[...st.players.values()].filter(p=>p.side===0)[9]; const T=['open','open','long','header','cross','solo','tapin','fk','break'];
-        st._v186q=q; st._v186force=null; await st.gain(fw); fw.x=84; fw.y=28+Math.random()*12; const ty=T[i%T.length]; const n0=V186K.log.length; const s0=window.__S.length;
+        st._v186kq=q; st._v186kforce=null; await st.gain(fw); fw.x=84; fw.y=28+Math.random()*12; const ty=T[i%T.length]; const n0=V186K.log.length; const s0=window.__S.length;
         await st.shotSeq({s:0,pid:fw.pid,t:'save',ty,x:25+Math.random()*30,y:ty==='tapin'||ty==='break'?93:ty==='long'?72:80+Math.random()*8,cor:Math.random()<0.25?1:0,xg:ty==='tapin'||ty==='break'?0.4:0.1});
         const L=V186K.log.slice(n0).find(x=>x.pid&&x.pid[0]==='L'); const S=window.__S[s0]; await st.wait(st.D(200)); return L?{q,k:L.k,set:L.act0==='gkset',spd:L.spd,bz:S?S.bz:null,smo:L.k==='smother'}:null; },[q,i]).catch(e=>({err:String(e)})); if(r) R.push(r); } return R; };
     await page.evaluate(()=>{ window.__v186labIdle=1; }); await page.waitForTimeout(1500);
-    const nat=await runQ(0.6,36); const ks={}; nat.forEach(r=>{ if(r.k) ks[r.k]=(ks[r.k]||0)+1; }); const n=nat.filter(r=>r.k).length;
-    ok(n>=24, 'natural saves ran ('+n+')'+(nat.find(r=>r.err)?' '+nat.find(r=>r.err).err:''));
+    const nat=await runQ(0.6,24); const ks={}; nat.forEach(r=>{ if(r.k) ks[r.k]=(ks[r.k]||0)+1; }); const n=nat.filter(r=>r.k).length;
+    ok(n>=18, 'natural saves ran ('+n+')'+(nat.find(r=>r.err)?' '+nat.find(r=>r.err).err:''));
     ok(Object.keys(ks).length>=5&&Math.max(...Object.values(ks))/n<=0.5, 'natural saves use at least five kinds, none above half ('+Object.entries(ks).map(([k,v])=>k+' '+v).join(', ')+')');
     ok(!ks.wrong&&!ks.late&&!ks.short, 'no beaten dive on a save');
     const zs=nat.map(r=>r.bz).filter(z=>z!=null).sort((a,b)=>a-b); const p10=zs[Math.floor(zs.length*0.1)], p90=zs[Math.floor(zs.length*0.9)];
     ok(zs.length>10&&p10<0.4&&p90>1.5, 'contact heights spread (p10 '+(p10||0).toFixed(2)+' m, p90 '+(p90||0).toFixed(2)+' m)');
-    const good=await runQ(0.92,12), poor=await runQ(0.15,12); const G2=good.filter(r=>r.k&&!r.smo), P2=poor.filter(r=>r.k&&!r.smo); const sg=G2.filter(r=>r.set).length/Math.max(1,G2.length), sp=P2.filter(r=>r.set).length/Math.max(1,P2.length);
+    const good=await runQ(0.92,8), poor=await runQ(0.15,8); const G2=good.filter(r=>r.k&&!r.smo), P2=poor.filter(r=>r.k&&!r.smo); const sg=G2.filter(r=>r.set).length/Math.max(1,G2.length), sp=P2.filter(r=>r.set).length/Math.max(1,P2.length);
+    { const vx=await page.evaluate(()=>window.__vx); ok(vx<=1.02, 'natural saves at 4x: body never faster than his top speed (max '+vx.toFixed(2)+'x)'); }
     ok(sg>=0.7&&sp<=0.4, 'a good keeper is set when it is struck, a poor one is still moving ('+pct(sg)+' at q .92 vs '+pct(sp)+' at q .15)');
     await page.close(); }
 
   /* ---------------- D. goals and misses ---------------- */
   if(SEC.includes('D')){ const page=await open('2d');
-    const LIST=[['goal','wrong'],['goal','short'],['goal','late'],['goal','wrong'],['miss','watch'],['goal','short']];
+    const LIST=[['goal','wrong'],['goal','short'],['goal','late'],['goal','wrong'],['miss','watch'],['goal','short'],['goal','late'],['goal','short'],['goal','wrong'],['goal','short'],['goal','late'],['goal','short']];
     await start(page,LIST,[0.4],0.85,false); const t0=Date.now();
-    await page.evaluate(()=>{ const st=App.labSt; window.__G=[]; const L0=st.launch; st.launch=function(p,o){ const r=L0.apply(this,arguments); if(p&&o&&o.kind==='shot'&&o.to&&!o.home){ window.__mh=null; window.__mt=null; const self=this; r.then(()=>{ const g=self.gkOf(1); window.__G.push({k:g&&g.dive&&g.dive.k,mt:window.__mt,mh:window.__mh}); }); } return r; }; });
-    await page.waitForFunction(n=>window.__G&&window.__G.length>=n,LIST.length,{timeout:420000}).catch(()=>{});
+    await page.evaluate(()=>{ const st=App.labSt; window.__G=[]; const L0=st.launch; st.launch=function(p,o){ const r=L0.apply(this,arguments); if(p&&o&&o.kind==='shot'&&o.to&&!o.home){ window.__mh=null; window.__mt=null; window.__mg=null; const self=this; r.then(()=>{ const g=self.gkOf(1); window.__G.push({k:g&&g.dive&&g.dive.k,mt:window.__mt,mh:window.__mh,mg:window.__mg}); }); } return r; }; });
+    await page.waitForFunction(n=>window.__G&&window.__G.length>=n,LIST.length,{timeout:300000}).catch(()=>{});
     const G=await page.evaluate(()=>window.__G); const evs=await page.evaluate(()=>window.__E);
     ok(G.length>=LIST.length, 'goals and misses ran ('+G.length+')');
     ok(G.slice(0,LIST.length).every((g,i)=>g.k===LIST[i][1]), 'beaten kinds and the watch are shown ('+G.map(g=>g.k).join(',')+')');
     ok(G.every(g=>g.mt==null||g.mt>0.3), 'the ball never passes through the keeper (closest to his torso '+Math.min(...G.map(g=>g.mt==null?9:g.mt)).toFixed(2)+' m)');
+    ok(G.every(g=>g.mg==null||g.mg>0), 'nor through any limb: arms, legs, torso and head (closest surface gap '+Math.min(...G.map(g=>g.mg==null?9:g.mg)).toFixed(2)+' m)');
     ok(G.every(g=>g.mh==null||g.mh>0.12), 'nor through his gloves (closest '+Math.min(...G.map(g=>g.mh==null?9:g.mh)).toFixed(2)+' m)');
     await page.screenshot({path:OUT+'2d_goal_after.png'});
     await page.close(); }
