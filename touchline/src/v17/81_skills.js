@@ -4,16 +4,19 @@
    stage already does: the body (feet, hands, lean, hip height, roll, head) through the poseOf layer, the ball through the
    carry target (footOf while a move runs, dribLead faded out), and the nearest defender's reaction (pose, plus a short
    planted or wrong-footed step through the detour hook, which no event waits on).
-   Moves: body feint, single and double stepover, sole roll (straight, when a defender stands ahead within ~3 m), outside cut,
-   inside chop, drag-back and Cruyff turn (when the leg turns the carrier through 0.9-3.1 rad). Who does what: a flair rating
+   Moves: body feint, single and double stepover, sole roll (straight: decided during the leg, once, when a defender comes up
+   ahead 1.4-5.2 m away with enough leg left for the sell; started at his trigger distance, or at the last moment the move still
+   fits), outside cut, inside chop, drag-back and Cruyff turn (when the leg turns the carrier through 0.9-3.1 rad, against the
+   nearest opponent within 3.5 m; with nobody near, a turn move is five times rarer). Who does what: a flair rating
    built from the engine's skills (there is no dribbling attribute), the level's repertoire (Modified knows the feint, cut and
    drag-back, a stepover only for its best; JV adds the chop, Cruyff and the double stepover; Varsity stars do everything) and
    a chance per leg that grows with flair and the level, with a cooldown per player. Lower ratings perform them slower (longer
    settle), with a smaller sell, less hip drop, wider arms, a wobbling ball and a heavy last touch.
    Straight moves are locked to the stride: they start when the fake foot begins its swing, so the stepover circle, the wide
    landing and the go touch fall on real steps; planted feet are pinned to the turf (world anchors) so nothing skates.
-   Defenders: sold (lunges the wrong way: stepovers, roll), frozen (a feint stops him dead), turned (chop, Cruyff, drag-back,
-   cut; a big rating gap makes him stumble). Only when the engine's next touch lets the carrier keep the ball; otherwise the
+   Defenders: sold (lunges the wrong way: stepovers, roll), frozen (a feint stops his press), turned (chop, Cruyff, drag-back,
+   cut; a big rating gap makes him stumble); kept 0.95 m or more off the carrier's path until he is past; a weak fake (bite under
+   0.32) is only read. Only when the engine's next touch lets the carrier keep the ball; otherwise the
    defender reads it (barely reacts) and his tackle follows as before.
    State is primitive fields on the movers (v186*), so the goal replays (68, 76) show the moves.
    Switch: V186S.on. Tuning: V186S.rate (chance multiplier), V186S.bite (defender steps). Lab: 'skills' and 'skillsmod'. */
