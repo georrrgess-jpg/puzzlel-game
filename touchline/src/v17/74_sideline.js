@@ -84,7 +84,9 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   const o=st.own; const att=o&&!st.fl?(o.side===0?1:-1):0;
   const lead=Math.max(-6,Math.min(6,att*2.2+S.b.vx*0.3));
   /* aim a little above the play, more so for far play, so the action sits just below the middle with the far stand above */
-  const ax=S.b.x+lead, az=S.b.z, ay=1.2+Math.min(40,Math.hypot(ax-S.e.p,az-C.z))*0.028+Math.min(4,bh)*0.5;
+  /* on tall frames (phones) the lens is opened up for width, so the head tilts a little down instead (less sky) */
+  const ka=Math.max(0,Math.min(1,((cam.aspect||1.6)-1.05)/0.5));
+  const ax=S.b.x+lead, az=S.b.z, ay=0.55+0.65*ka+Math.min(40,Math.hypot(ax-S.e.p,az-C.z))*0.028*ka+Math.min(4,bh)*0.5;
   /* 2. the eye: a heavy slide along the line after the play, never bobbing */
   const ex0=Math.max(C.x0,Math.min(C.x1,S.b.x+lead*0.6));
   if(snap){ S.e.p=ex0; S.e.v=0; } else if(!frozen){ const r=v18Damp(S.e.p,S.e.v,ex0,C.omEye,dt); S.e.p=r[0]; S.e.v=r[1]; }
