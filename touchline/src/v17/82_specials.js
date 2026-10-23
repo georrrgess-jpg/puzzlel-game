@@ -202,6 +202,9 @@ function v186xPlateTop(st,p,out){ const P=p._pose; if(!P||P.act!=='v186x'||!P.fe
   out.y=Math.min(out.y,top-0.2*s); }
 if(typeof v185Pl2DHead==='function'){ const _v186xPlHead=v185Pl2DHead;
   v185Pl2DHead=function(st,p,ft,out){ const r=_v186xPlHead.apply(this,arguments); if(r&&p&&p.v186xk&&p.v186xc!=null){ try{ v186xPlateTop(st,p,out); }catch(e){} } return r; }; }
+/* the 3-D plate rides above the raised boot and the ball too (77 anchors it on the drawn head, which is near the turf mid-kick) */
+if(typeof v18FigDraw==='function'){ const _v186xFig=v18FigDraw;
+  v18FigDraw=function(P,st,p){ const r=_v186xFig.apply(this,arguments); try{ const e=r&&p&&p.v186xk&&p.v186xc!=null&&st&&st._pl&&st._pl.hd&&st._pl.hd.get&&st._pl.hd.get(p.pid); if(e){ const S=0.92*(p.hgt||70)/70; e[0]=p.x; e[2]=p.y; e[1]=Math.max(e[1],2.1*S,((st.ball&&st.ball.z)||0)+0.45); } }catch(err){} return r; }; }
 
 /* ---------- after every step: facing and position scripted through the move ---------- */
 const _v186xUpd=Stage.prototype.update;

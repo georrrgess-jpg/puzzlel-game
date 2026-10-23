@@ -35,7 +35,7 @@ Stage.prototype.dribLead=function(o,sp,dt,now){
   if(!S||now-S.t>220){ /* a fresh possession (the receiving touch): the interval starts now */
     const n=v184Cad(sp); S=o.v184={t:now,c0:c,next:Math.ceil(c+n*0.75-1e-6),L:v184Peak(sp),out:0,hx,hy,wait:false,qa:null,qc:0}; }
   S.t=now;
-  const dribbling=sp>1.6&&!o.plant&&!this.so;
+  const dribbling=sp>1.6&&!o.plant&&!this.so&&!o.v186k; /* a v18.6 skill move (81) owns the ball and its touches */
   let want=0;
   if(dribbling){
     const q0=()=>S.qa!=null?S.qa+(1-S.qa)*(c-S.qc)/Math.max(0.3,S.next-S.qc):(c-S.c0)/Math.max(0.5,S.next-S.c0);
@@ -137,7 +137,7 @@ Stage.prototype.poseOf=function(p,isRef){
       if(rcv){ const u=(now-tT)/TD; const R=p.v184R, reached=R&&v184Ago(tT,p.v184Rt)<60; const i=reached?R.foot:v184RcvFoot(this,p,'t'+tT,bl);
         const w=(1-smooth(u))*0.9*(reached?1:smooth(Math.min(1,u/0.25))); v184Meet(F,i,bf,bl,hs,w,0.06,0.05*smooth(u),v184Off(this,p)); met=true; }
       /* 2b. dribble touches: the touching foot meets the back of the ball around the touch (held until the touch registers) */
-      const S=p.v184; if(S&&now-S.t<160&&P.act==='loco'){ const c=v184Cpos(p);
+      const S=p.v184; if(S&&now-S.t<160&&P.act==='loco'&&!p.v186k){ const c=v184Cpos(p);
         const pre=S.next-c; if(pre>-0.5&&pre<0.34){ const w=pre<=0?1:smooth(1-pre/0.34); v184Meet(F,v184Foot(S.next),bf,bl,hs,w,0.06,0,v184Off(this,p)); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } /* eyes down onto the ball for the touch */
         else { const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07,0,v184Off(this,p)); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } } } } }
   v184Limit(p,F,B0,B1,now,met);

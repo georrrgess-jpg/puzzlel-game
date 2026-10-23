@@ -111,7 +111,7 @@ Stage.prototype.land=function(){ const f=this.fl; const r=v186rLand.apply(this,a
 /* R2: the fallback take-on (switchable). Nothing happens when a skill-move module has claimed the dribble. */
 function v186rTakeOn(st,p,x,y){ if(!V186R.feint||!v186rLive(st)||st.hands||st.own!==p||p.gk||!v186rHas(p)||st.rm) return null;
   /* a later module (the skill-move unit) wrapping dribble owns the take-on: this fallback stands aside unless forced */
-  if(V186R.feint!=='force'&&(typeof st.v186Move==='function'||st._v186skill||Stage.prototype.dribble!==v186rDribbleW)) return null;
+  if(V186R.feint!=='force'&&(typeof st.v186Move==='function'||st._v186skill||(Stage.prototype.dribble!==v186rDribbleW&&!(typeof V186S==='object'&&V186S&&!V186S.on)))) return null;
   const now=st.now; if(p.v186fT!=null&&now-p.v186fT<Math.max(400,st.D(1400))) return null;
   const dir=p.side===0?1:-1, hx=x-p.x, hy=y-p.y, hl=Math.hypot(hx,hy); if(hl<1.5) return null; let best=null, bd=6;
   for(const q of st.players.values()){ if(q.side===p.side||q.off||q.gk||q.ov||q.chase||!v186rHas(q)) continue; const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy);
