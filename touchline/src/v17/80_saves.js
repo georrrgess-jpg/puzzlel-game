@@ -111,6 +111,10 @@ function v186kP(v,n,act){ const V=n<0?v186kMirror(v):v; return {rot:V[3],pivot:V
 function v186kPh(D,KS,now){ if(now<=D.t) return 0; if(now<D.tP0) return KS.uc*clamp((now-D.t)/Math.max(1,D.tP0-D.t),0,1); return KS.uc+(1-KS.uc)*clamp((now-D.tP0)/Math.max(1,D.post),0,1); }
 Stage.prototype.v186kPose=function(p,D,now){ const KS=v186kKeys(D); const ph=v186kPh(D,KS,now==null?this.now:now); const P=v186kP(v186kVec(KS,ph),D.n,V186K_ACT[D.k]||'dive'); P.v186=D.t; P.v186ph=ph;
   if(D.k==='watch'){ const b=this.ball, a=Math.atan2(b.y-p.y,b.x-p.x), y=p.yaw==null?0:p.yaw; P.headTurn=clamp(-Math.atan2(Math.sin(a-y),Math.cos(a-y)),-1.1,1.1)*0.8; P.headTilt=clamp(-(b.z||0)*0.12,-0.45,0.1); }
+  /* a poor keeper dives less tidily: legs apart and a knee up in flight, and after contact the free arm flaps (the contact limbs never move) */
+  if(!D.stand&&D.q<0.55){ const m=(0.55-D.q)/0.55*Math.sin(Math.PI*clamp(ph,0,1)); const F=P.feet, sd=D.n>0?1:-1;
+    F[0]={f:F[0].f-0.12*m,u:F[0].u+0.1*m,l:F[0].l-0.16*m}; F[1]={f:F[1].f+0.16*m,u:F[1].u+0.22*m,l:F[1].l+0.12*m};
+    if(ph>KS.uc+0.05&&D.lim!==2){ const fr=D.lim?0:1, w=m*smooth(clamp((ph-KS.uc)/0.2,0,1)); const H=P.hands[fr]; P.hands[fr]={f:H.f+0.25*w,u:H.u-0.35*w,l:H.l+(fr?1:-1)*0.3*w}; } }
   return P; };
 /* the contact pose with parameter s, for planning */
 function v186kAt(D,s){ const E={...D,s}; const KS=v186kKeys(E); return v186kP(v186kVec(KS,KS.uc),D.n,'plan'); }
@@ -187,7 +191,7 @@ Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const now=this.now, q=M.D.q; con
   /* 3-D and standing kinds face the shooter through the save and the get-up; 2-D dives use the three-quarter yaw */
   if(v186kIs3D(this)||M.stand){ gk.yawLock=M.yaw; gk.yawLockT=tC+post+this.D(1600); } else if(gk.yawLockT>now) gk.yawLockT=now;
   if(o&&o.aim&&f.home===gk) f.aim={x:M.c.x,y:M.c.y};
-  if(V186K.log) V186K.log.push({act0:gk._act,spd:+((gk.spd||0)/Math.max(1,this.spdMul||1)).toFixed(2),k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
+  if(V186K.log) V186K.log.push({pid:gk.pid,act0:gk._act,spd:+((gk.spd||0)/Math.max(1,this.spdMul||1)).toFixed(2),k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
   return D; };
 
 /* ---------- the save branch (replaces ui_stage.js shotSeq's save branch :396-414 for non-penalty saves) ---------- */
@@ -197,11 +201,11 @@ Stage.prototype.v186kSave=async function(e){
   /* the approach mirrors ui_stage.js shotSeq :387-395; keep the two in step */
   await this.gain(p); if(this.own!==p) await this.gain(p);
   let [sx,sy]= e.x!=null? livePos(s,e.x,Math.max(e.y,70)) : [gx-dir*16,34];
+  const gk=this.gkOf(1-s); const q0=v186kQ(this,gk); if(q0>=0.5){ gk.ov=v186kSetSpot(gk,clamp(sx,gx-dir*29.5,gx+dir*29.5),sy,q0); gk.v186set=1; } /* a good keeper reads where it will come from and takes his angle early */
   p.ov={x:sx,y:sy}; await this.until(()=>this.own!==p||Math.hypot(p.x-sx,p.y-sy)<1.2, this.eta(p,sx,sy)+400);
   if(this.own!==p) await this.gain(p);
   if(Math.abs(p.x-gx)>29.5){ sx=gx-dir*27; p.ov={x:sx,y:p.y}; await this.until(()=>Math.abs(p.x-gx)<=29.5, this.eta(p,sx,p.y)+400); }
-  this.stageSpace(e,p);
-  const gk=this.gkOf(1-s); const plan=this.v186kPlan(e,gk,p,p.x,p.y); const q=plan.q;
+  this.stageSpace(e,p); const plan=this.v186kPlan(e,gk,p,p.x,p.y); const q=plan.q;
   /* a good keeper is set on his angle before the strike; a poor one is still drifting across when it is struck */
   gk.v186set=0; const SS=plan.k==='smother'? (()=>{ const gl=gk.side===0?0:105, ux=p.x-gl, uy=p.y-34, ul=Math.hypot(ux,uy)||1, off=lerp(3,6,q); return {x:gl+ux/ul*off,y:34+uy/ul*off}; })() : plan.set;
   if(plan.k==='smother'){ gk.ov={...SS}; gk.hurry=true; }

@@ -41,8 +41,9 @@ const pct=x=>(x*100).toFixed(0)+'%';
       const hs=[0,1].map(i=>v186kHand(g,P,i,is3)); const d=Math.min(...hs.map(h=>Math.hypot(h.x-c.x,h.y-c.y,h.z-c.z))); const W=window.__w3;
       let d3=null; if(W){ const H=[[W[24],W[26],W[25]],[W[33],W[35],W[34]]]; d3=Math.min(...H.map(h=>Math.hypot(h[0]-c.x,h[1]-c.y,h[2]-c.z))); }
       const cv=st.cv.getBoundingClientRect(); const [x,y,k]=st.proj(g.x,g.y,0);
-      return {k:D.k,out:D.out,q:D.q,d,d3,act:g._act,z:c.z,x:cv.left+x,y:cv.top+y,kk:k,cl:cv.left,ct:cv.top,W:cv.width,H:cv.height}; });
-    if(shot){ const w=Math.min(R.W,Math.max(220,R.kk*5.5)), h=Math.min(R.H,Math.max(160,R.kk*3.8)); await page.screenshot({path:shot,clip:{x:Math.max(R.cl,R.x-w/2),y:Math.max(R.ct,R.y-h*0.78),width:w,height:h}}).catch(()=>{}); }
+      return {k:D.k,out:D.out,q:D.q,d,d3,act:g._act,z:c.z,x:cv.left+x,y:cv.top+y,kk:k,cl:cv.left,ct:cv.top,W:cv.width,H:cv.height,is3}; });
+    if(shot&&R.is3) await page.screenshot({path:shot}).catch(()=>{});
+    else if(shot){ const w=Math.min(R.W,Math.max(220,R.kk*5.5)), h=Math.min(R.H,Math.max(160,R.kk*3.8)); await page.screenshot({path:shot,clip:{x:Math.max(R.cl,R.x-w/2),y:Math.max(R.ct,R.y-h*0.78),width:w,height:h}}).catch(()=>{}); }
     await page.evaluate(()=>{ window.__pend=0; App.labSt.paused=false; }); return R; };
 
   /* ---------------- A. choice ---------------- */
@@ -100,7 +101,7 @@ const pct=x=>(x*100).toFixed(0)+'%';
     const runQ=async(q,n)=>{ const R=[]; for(let i=0;i<n;i++){ const r=await page.evaluate(async([q,i])=>{ const st=App.labSt; const fw=[...st.players.values()].filter(p=>p.side===0)[9]; const T=['open','open','long','header','cross','solo','tapin','fk','break'];
         st._v186q=q; st._v186force=null; await st.gain(fw); fw.x=84; fw.y=28+Math.random()*12; const ty=T[i%T.length]; const n0=V186K.log.length; const s0=window.__S.length;
         await st.shotSeq({s:0,pid:fw.pid,t:'save',ty,x:25+Math.random()*30,y:ty==='tapin'||ty==='break'?93:ty==='long'?72:80+Math.random()*8,cor:Math.random()<0.25?1:0,xg:ty==='tapin'||ty==='break'?0.4:0.1});
-        const L=V186K.log[n0]; const S=window.__S[s0]; await st.wait(st.D(200)); return L?{q,k:L.k,set:L.act0==='gkset',spd:L.spd,bz:S?S.bz:null}:null; },[q,i]).catch(e=>({err:String(e)})); if(r) R.push(r); } return R; };
+        const L=V186K.log.slice(n0).find(x=>x.pid&&x.pid[0]==='L'); const S=window.__S[s0]; await st.wait(st.D(200)); return L?{q,k:L.k,set:L.act0==='gkset',spd:L.spd,bz:S?S.bz:null,smo:L.k==='smother'}:null; },[q,i]).catch(e=>({err:String(e)})); if(r) R.push(r); } return R; };
     await page.evaluate(()=>{ window.__v186labIdle=1; }); await page.waitForTimeout(1500);
     const nat=await runQ(0.6,36); const ks={}; nat.forEach(r=>{ if(r.k) ks[r.k]=(ks[r.k]||0)+1; }); const n=nat.filter(r=>r.k).length;
     ok(n>=24, 'natural saves ran ('+n+')'+(nat.find(r=>r.err)?' '+nat.find(r=>r.err).err:''));
@@ -108,7 +109,7 @@ const pct=x=>(x*100).toFixed(0)+'%';
     ok(!ks.wrong&&!ks.late&&!ks.short, 'no beaten dive on a save');
     const zs=nat.map(r=>r.bz).filter(z=>z!=null).sort((a,b)=>a-b); const p10=zs[Math.floor(zs.length*0.1)], p90=zs[Math.floor(zs.length*0.9)];
     ok(zs.length>10&&p10<0.4&&p90>1.5, 'contact heights spread (p10 '+(p10||0).toFixed(2)+' m, p90 '+(p90||0).toFixed(2)+' m)');
-    const good=await runQ(0.92,12), poor=await runQ(0.15,12); const sg=good.filter(r=>r.set).length/Math.max(1,good.length), sp=poor.filter(r=>r.set).length/Math.max(1,poor.length);
+    const good=await runQ(0.92,12), poor=await runQ(0.15,12); const G2=good.filter(r=>r.k&&!r.smo), P2=poor.filter(r=>r.k&&!r.smo); const sg=G2.filter(r=>r.set).length/Math.max(1,G2.length), sp=P2.filter(r=>r.set).length/Math.max(1,P2.length);
     ok(sg>=0.7&&sp<=0.4, 'a good keeper is set when it is struck, a poor one is still moving ('+pct(sg)+' at q .92 vs '+pct(sp)+' at q .15)');
     await page.close(); }
 
