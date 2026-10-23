@@ -36,7 +36,7 @@ Stage.prototype.v184Zoom=function(snap){ if(!this.bw) return; this.cam.tw=this.b
 function v184ZoomCtl(act,view){ const i=v184ZoomIdx(), off=view==='tactical', z=V184_ZOOMS[i];
   const dOut=off||i===0, dIn=off||i===V184_ZOOMS.length-1;
   return `<div class="seg v184-zoom${off?' v184-off':''}" role="group" aria-label="Zoom${off?' (not used in Tactical)':''}"><button type="button" data-a="${act}" data-v="-1" aria-label="Zoom out" aria-disabled="${dOut}" title="Zoom out (−)">−</button><span class="v184-zl" aria-live="polite" title="Zoom level">${off?'Fit':z[1]}</span><button type="button" data-a="${act}" data-v="1" aria-label="Zoom in" aria-disabled="${dIn}" title="Zoom in (+)">+</button></div>`; }
-function v184ViewSeg(act,view,attrs){ return `<div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['sideline','Sideline'],['tactical','Tactical']].map(([k,l])=>`<button type="button" class="${view===k?'on':''}" data-a="${act}" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>`; }
+function v184ViewSeg(act,view){ return `<div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['sideline','Sideline'],['tactical','Tactical']].map(([k,l])=>`<button type="button" class="${view===k?'on':''}" data-a="${act}" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>`; }
 const V184_VIEWS=['broadcast','sideline','tactical'];
 function v184NextView(v){ const i=V184_VIEWS.indexOf(v||'broadcast'); return V184_VIEWS[(i<0?0:i+1)%V184_VIEWS.length]; }
 /* a view switch on a stage: snap the width under the cut (2-D), the 3-D painter fades between broadcast and sideline */
@@ -47,9 +47,12 @@ function v184StepZoom(d){ const view=PREFS.view||'broadcast'; if(view==='tactica
   for(const st of [App.live&&App.live.stage,App.hl]) if(st&&st.alive) st.v184Zoom(false);
   v184PaintZoom(); return true; }
 /* refresh every zoom control on the page (the live bar is rebuilt by updateLive, the replay card in place) */
-function v184PaintZoom(){ if(App.live&&typeof updateLive==='function') try{ updateLive(); }catch(e){}
+function v184PaintZoom(){ const ae=document.activeElement, fk=ae&&ae.dataset&&/Zoom$/.test(ae.dataset.a||'')?[ae.dataset.a,ae.dataset.v]:null;
+  if(App.live&&typeof updateLive==='function') try{ updateLive(); }catch(e){}
   document.querySelectorAll('.v184-zoom').forEach(el=>{ const act=(el.querySelector('[data-a]')||{}).dataset; if(!act||act.a==='liveZoom') return;
-    const w=document.createElement('div'); w.innerHTML=v184ZoomCtl(act.a,PREFS.view||'broadcast'); el.replaceWith(w.firstChild); }); }
+    const w=document.createElement('div'); w.innerHTML=v184ZoomCtl(act.a,PREFS.view||'broadcast'); el.replaceWith(w.firstChild); });
+  /* keep keyboard focus on the zoom button that was used (the bar is rebuilt) */
+  if(fk&&!document.activeElement.isConnected||fk&&document.activeElement===document.body){ const b=document.querySelector(`[data-a="${fk[0]}"][data-v="${fk[1]}"]`); if(b) b.focus({preventScroll:true}); } }
 /* the mouse wheel over the match canvas: one level per notch, with a short cooldown; the page scrolls at the ends */
 const V184_WHEEL={t:0,dir:0};
 document.addEventListener('wheel',e=>{ const t=e.target; if(!t||!t.closest||!t.closest('#lv-stage,.hl-stage')) return; if(App.modal&&!t.closest('.hl-stage')) return;
@@ -63,9 +66,10 @@ const _v184CamPose=Painter3D.prototype.camPose;
 Painter3D.prototype.camPose=function(st,opt){ const now=performance.now();
   const S=this._sl||(this._sl={shown:null,swAt:0,lastT:0,init:false,cuts:0,frames:0,e:{p:0,v:0},o:{x:0,vx:0,z:0,vz:0},b:{x:52.5,vx:0,z:34,vz:0},a:null,dir:null,fov:42,fv:0,eye:null,near:99});
   const m=st.mode==='sideline'&&!opt?'sideline':'broadcast';
-  if(S.shown==null||now-S.lastT>600){ if(S.shown!==m) S.init=false; S.shown=m; S.swAt=0; }
+  /* first frame, or back from the tactical board (no 3-D frame in between): adopt the view at once, as a cut */
+  if(S.shown==null||S.tac){ if(S.shown!==m){ S.init=false; if(this.dir&&S.shown!=null) this.dir.snap=true; } S.shown=m; S.swAt=0; S.tac=false; }
   else if(m!==S.shown){ const P=this; if(!S.swAt){ v18Cut(st,170); S.swAt=now+85; if(P.dir) P.dir.cutAt=S.swAt; } if(now>=S.swAt){ S.shown=m; S.swAt=0; S.init=false; } }
-  S.lastT=now; S.frames++;
+  S.frames++;
   if(S.shown!=='sideline'){ this._slOn=false; return _v184CamPose.apply(this,arguments); }
   this._slOn=true; v184SidelinePose(this,st,S,now); };
 
@@ -79,7 +83,7 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   else if(!frozen){ let r=v18Damp(S.b.x,S.b.vx,bx,C.omBall,dt); S.b.x=r[0]; S.b.vx=r[1]; r=v18Damp(S.b.z,S.b.vz,bz,C.omBall,dt); S.b.z=r[0]; S.b.vz=r[1]; }
   const o=st.own; const att=o&&!st.fl?(o.side===0?1:-1):0;
   const lead=Math.max(-6,Math.min(6,att*2.2+S.b.vx*0.3));
-  const ax=S.b.x+lead, az=S.b.z, ay=0.72+Math.min(4,bh)*0.55;
+  const ax=S.b.x+lead, az=S.b.z, ay=1.2+Math.min(4,bh)*0.5;
   /* 2. the eye: a heavy slide along the line after the play, never bobbing */
   const ex0=Math.max(C.x0,Math.min(C.x1,S.b.x+lead*0.6));
   if(snap){ S.e.p=ex0; S.e.v=0; } else if(!frozen){ const r=v18Damp(S.e.p,S.e.v,ex0,C.omEye,dt); S.e.p=r[0]; S.e.v=r[1]; }
@@ -99,7 +103,7 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   const prevE=S.pe.copy(S.eye);
   let ex=Math.max(C.x0-4,Math.min(C.x1+4,S.e.p+S.o.x)), ez=Math.max(C.z-0.4,Math.min(C.zBack,C.z+S.o.z));
   /* a step never faster than a brisk walk, outside cuts */
-  if(!snap&&S.init){ const mv=Math.hypot(ex-prevE.x,ez-prevE.z), mx=Math.max(0.05,5.5*dt); if(mv>mx){ ex=prevE.x+(ex-prevE.x)*mx/mv; ez=prevE.z+(ez-prevE.z)*mx/mv; } }
+  if(!snap&&S.init&&!st.rm){ const mv=Math.hypot(ex-prevE.x,ez-prevE.z), mx=Math.max(0.05,4.5*dt); if(mv>mx){ ex=prevE.x+(ex-prevE.x)*mx/mv; ez=prevE.z+(ez-prevE.z)*mx/mv; } }
   S.eye.set(ex,C.h,ez); cam.position.copy(S.eye); cam.up.set(0,1,0);
   for(const p of st.players.values()){ if(p.off) continue; const d=Math.hypot(ex-p.x,ez-p.y); if(d<near) near=d; } S.near=near;
   /* 4. the lens: the zoom level's field of view (vertical), opened up on narrow frames so the width never gets too tight */
@@ -122,10 +126,12 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
   S.q.set(nx-ex,ny-C.h,nz-ez).normalize();
   /* reduced motion: hold the framing; cut to a new one when the ball nears the frame edge */
   if(st.rm&&S.init&&!snap){ const cy=Math.atan2(S.dir.x,-S.dir.z), cp=Math.asin(Math.max(-1,Math.min(1,S.dir.y)));
-    if(Math.abs(yb-cy)<hh*0.7&&Math.abs(pb-cp)<hv*0.8&&Math.hypot(prevE.x-ex,prevE.z-ez)<3){ S.q.copy(S.dir); cam.position.copy(prevE); S.eye.copy(prevE); } else { snap=true; } }
+    let nearH=99; for(const p of st.players.values()) if(!p.off) nearH=Math.min(nearH,Math.hypot(prevE.x-p.x,prevE.z-p.y));
+    if(Math.abs(yb-cy)<hh*0.7&&Math.abs(pb-cp)<hv*0.8&&Math.hypot(prevE.x-ex,prevE.z-ez)<3&&nearH>1.6){ S.near=nearH; S.q.copy(S.dir); cam.position.copy(prevE); S.eye.copy(prevE); } else { snap=true; } }
   else if(!snap&&S.init){ const ang=S.dir.angleTo(S.q), mx=C.rate*dt; if(ang>mx&&ang>1e-6){ const k=mx/ang; S.q.lerpVectors(S.dir,S.q,k).normalize(); } }
   S.dir.copy(S.q); if(snap) S.cuts++;
   S.init=true; S.snapNow=snap;
   cam.lookAt(S.tmp.copy(cam.position).addScaledVector(S.dir,40)); }
 
+{ const _tac=Stage.prototype.drawTac; Stage.prototype.drawTac=function(){ const P=this._p3d; if(P&&P._sl) P._sl.tac=true; return _tac.apply(this,arguments); }; }
 /* the director: in sideline view the kick-off, corner and penalty presets give way to the sideline camera (66 checks P._slOn) */
