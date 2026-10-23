@@ -23,6 +23,25 @@ comparison sheet this plan asks for.
 
 ---
 
+## v18 execution plan (6-hour budget, started 2026-10-23 00:40)
+
+v17.1/17.2 shipped. v18 builds Phase 3 (the WebGL renderer) plus the parts of Phases 4-5 that fit:
+1. **Core** (`src/v17/60_p3d_core.js`, done first): three.js vendored (`vendor/`), Painter3D attached per stage by
+   `rendererFor(kind)`, module registry, broadcast gantry camera that zooms by lens, weather lighting, tiers, watchdog
+   and 2-D fallback. 2-D canvas stays on top as the HUD.
+2. **In parallel, three agents in worktrees** (one file set each, no overlap):
+   - characters `63_p3d_figures.js`: part-instanced toon figures with outlines, faces, 13 hair styles, kit patterns
+     and numbers, boots, gloves, refs/ARs with flags, coaches via `P.extra`;
+   - pitch/stadium/crowd `61_p3d_pitch.js`, `62_p3d_stadium.js`: grass, geometric markings, goals with live nets, main
+     stand, bleachers, boards, scoreboard, floodlights, sky per weather, instanced shader-animated crowd;
+   - ball/director/replays/tiers `64_p3d_ball.js`, `66_p3d_director.js`, `67_p3d_tiers.js`, `68_replay.js`: ball,
+     contact shadow, streaks, camera presets (penalty, corner, celebration close-up, cuts), goal replays, tier probe,
+     `#perf` overlay, lab 2-D/3-D toggle, `test/stage3d.js`.
+3. **Integration and gate**: merge, adversarial review workflow (correctness, performance, visual), character gate sheet
+   (2-D vs 3-D at three distances), fixes.
+4. **Ship**: full suite, screenshots desktop/phone and weathers, What's New, notes, push.
+Deferred unless time remains: 3-D walkout dolly, 3-D trophy fireworks, Courier photos in 3-D (they stay 2-D).
+
 ## 0. The decision: keep the simulation, replace the painter with a WebGL renderer, keep 2D as the fallback
 
 ### What exists (see `DEVELOPER_NOTES.md` and the map in §A)
