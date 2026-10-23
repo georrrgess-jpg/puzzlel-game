@@ -78,7 +78,8 @@ the merge.
   one frame outside cuts, the eye never inside a player or past the near rail, every zoom level reachable by button, key
   and wheel and saved across reloads.
 - Figures: a close-up sheet (3, 6, 12 m) and the wide shot show no joint gaps; frame time at tier A within 10% of v18.3.
-- Touches: the ball is within 0.35 m of a foot at every dribble touch, the touch foot alternates, and the ball never moves
+- Touches: the ball is within 0.35 m of the touching foot at every dribble touch and of the kicking foot when a strike
+  releases it, sprinting touches (every third step) alternate feet, and the ball never rolls back or moves
   more than its own speed allows in a step.
 - Screenshots inspected: desktop and phone, two themes, broadcast/sideline/tactical, all four zoom levels.
 

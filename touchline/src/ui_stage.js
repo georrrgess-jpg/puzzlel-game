@@ -172,6 +172,8 @@ class Stage {
   /* the forehead rises with the leap, so a cross meets it at the top of the jump */
   jumpLift(p){ const jt=this.now-(p.jumpT||-9e9), JD=Math.max(260,this.D(560)); return jt>=0&&jt<JD? Math.sin(jt/JD*Math.PI)*0.72 : 0; }
   headOf(p){ const a=this.yawOf(p); return {x:p.x+Math.cos(a)*0.16, y:p.y+Math.sin(a)*0.16, z:1.66+this.jumpLift(p)}; }
+  /* how far ahead of the foot the dribbled ball runs (metres along his direction of travel) */
+  dribLead(o,sp,dt,now){ let lead=0; if(sp>1.6&&!o.plant&&!this.so){ o.dribD=(o.dribD||0)+sp*dt; const TD=1.8+Math.min(9,sp)*0.12; if(o.dribD>=TD){ o.dribD-=TD; o.touchT=now; this.snd('touch'); } const u=o.dribD/TD; const L=Math.min(0.8,0.2+sp*0.065); lead=L*(u<0.16?smooth(u/0.16):1-smooth((u-0.16)/0.84)); } else o.dribD=0; return lead; }
   placeBallAtOwner(){ const o=this.own; if(!o) return; const t=this.hands?this.handsOf(o):this.footOf(o); this.ball.x=t.x; this.ball.y=t.y; this.ball.z=t.z; }
   /* what kind of strike a release is, and how long the backswing takes on the stage clock */
   /* opt.head = the flight is aimed at the receiver's head; opt.nod = this player is heading it */
@@ -774,8 +776,8 @@ class Stage {
       if(this.hands) t=this.handsOf(o);
       else if(this.headBall===o) t=this.headOf(o); /* met in the air: it stays on his head for the instant before he nods it on */
       else { t=this.footOf(o); const sp=(o.spd||0)/Math.max(1,this.spdMul||1), mv=Math.hypot(o.vx||0,o.vy||0);
-        // close control: every couple of strides he knocks it a yard ahead and runs onto it
-        let lead=0; if(sp>1.6&&!o.plant&&!this.so){ o.dribD=(o.dribD||0)+sp*dt; const TD=1.8+Math.min(9,sp)*0.12; if(o.dribD>=TD){ o.dribD-=TD; o.touchT=now; this.snd('touch'); } const u=o.dribD/TD; const L=Math.min(0.8,0.2+sp*0.065); lead=L*(u<0.16?smooth(u/0.16):1-smooth((u-0.16)/0.84)); } else o.dribD=0;
+        // close control: every couple of strides he knocks it a yard ahead and runs onto it (dribLead; v18.4 syncs it to the stride)
+        const lead=this.dribLead(o,sp,dt,now);
         if(mv>0.6&&lead>0){ const ux=o.vx/mv, uy=o.vy/mv; t={x:t.x+ux*lead, y:t.y+uy*lead, z:0}; }
         const f0=this.footOf(o), ex=t.x-f0.x, ey=t.y-f0.y, el=Math.hypot(ex,ey); if(el>1.3){ t.x=f0.x+ex/el*1.3; t.y=f0.y+ey/el*1.3; } }
       // the ball travels with him (feed-forward of his own motion) and is steered onto the foot, never jumping
