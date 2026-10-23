@@ -6,12 +6,12 @@ const fs=require('fs'), path=require('path');
 const scen=process.argv[2]||'skills', rend=process.argv[3]||'2d', only=(process.argv[4]||'').split(',').filter(Boolean);
 const OUT=path.join(__dirname,'shots','v186','skills'); fs.mkdirSync(OUT,{recursive:true});
 (async()=>{
-  const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome',args:rend==='3d'?['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']:[]});
+  const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
   const page=await browser.newPage({viewport:{width:1100,height:640}});
   const errs=[]; page.on('pageerror',e=>errs.push(e.message+' '+(e.stack||'').split('\n')[1]));
   await page.goto(DIST+'#anim-lab'); await page.waitForTimeout(900);
   await page.evaluate(([s,r,o])=>{ PREFS.renderer=r==='3d'?'3d':'2d'; if(o.length) window.__seq=o; labRun(s); },[scen,rend,only]);
-  await page.waitForFunction(()=>App.labSt&&App.labSt._v186lab,null,{timeout:20000});
+  await page.waitForFunction(()=>App.labSt&&App.labSt._v186lab,null,{timeout:150000});
   await page.evaluate(()=>{ const st=App.labSt; if(window.__seq) st._v186seq=window.__seq; const P=[...st.players.values()]; const fw=P.filter(p=>p.side===0)[9]; st.focus=fw; window.__fw=fw;
     const U=[0.1,0.3,0.5,0.7,0.9]; const W=window.__W={q:[],done:{}}; const up=st.update;
     st.update=function(dt){ const r=up.call(this,dt); this.zoomTo(window.__Z||0.2); const o=fw; if(o.v186k){ const C=v186sClock(this,o); const key=o.v186k+'@'+o.v186t0; const d=W.done[key]||(W.done[key]=0);

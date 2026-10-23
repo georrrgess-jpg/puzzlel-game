@@ -241,7 +241,7 @@ function v186sTouchFoot(p){ const k=p.v186k, sf=p.v186sf; if(!k) return null; if
 /* when (in the move clock's m) the go touch / sell happen */
 function v186sTouchU(p){ const k=p.v186k, M=V186S_MV[k], Dd=p.v186dd||0.5; if(!M.turn) return M.go+0.72*(1-Dd);
   return k==='cut'?0.4:k==='chop'?0.4:k==='drag'?0.3:0.46; }
-function v186sSellM(p){ const k=p.v186k, Dd=p.v186dd||0.5; if(k==='step1'||k==='feint') return 1-Dd; if(k==='step2') return 1.5-Dd; if(k==='roll') return 0.75*(1-Dd);
+function v186sSellM(p){ const k=p.v186k, Dd=p.v186dd||0.5; if(k==='step1') return 0.5*(1-Dd); if(k==='feint') return 0.6*(1-Dd); if(k==='step2') return 0.5+0.5*(1-Dd); if(k==='roll') return 0.6*(1-Dd);
   return k==='cut'?0.45:k==='chop'?0.45:k==='drag'?0.55:0.5; }
 
 /* ---------- the defender's reaction ---------- */
@@ -252,7 +252,7 @@ function v186sReact(st,p,q){ const now=st.now; if(q.chase||q.glide||q.off||q.gk)
   /* the wrong way, in world terms: the fake side of the carrier (sold, frozen), or the way he was running (turned: momentum) */
   const ang=kind==='turned'?Math.atan2(q.vy||0,q.vx||0):y0+sf*Math.PI/2;
   q.v186rT=now; q.v186rk=kind; q.v186rs=Math.hypot(q.vx||0,q.vy||0)<0.3&&kind==='turned'?y0+Math.PI:ang; q.v186rb=b; q.v186rx=q.x; q.v186ry=q.y; q.v186rp=p.pid;
-  q.v186rd=st.D(kind==='turned'?420:kind==='freeze'?420:460);
+  q.v186rd=st.D(kind==='turned'?420:kind==='freeze'?420:560);
   if(kind==='turned'&&b>0.8&&!v186sTackling(q,now)) q.trip=now; }
 function v186sTackling(p,now){ const a=t=>t==null?1e9:now-t; return Math.min(a(p.v18slT),a(p.v18icT),a(p.v18pkT),a(p.v18shT),a(p.slideT))<1100; }
 /* the defender's step: planted (sold, frozen) or carried on by his momentum (turned), never while chasing or told where to stand */
@@ -407,8 +407,8 @@ labRun=function(scen){ const r=_v186sLabRun.apply(this,arguments); if(scen!=='sk
     fw.v186fl=star?95:40; fw.v186lv=star?'V':'MOD'; def.v186ds=star?50:45; def.v186lv=star?'V':'MOD';
     /* everyone else out of the way, holding shape */
     for(const q of P){ if(q!==fw&&q!==def&&!q.gk){ q.ov={x:q.side===0?20+q.y*0.2:85+q.y*0.1,y:q.y}; } }
-    let n=0; const seq=st._v186seq||V186S_LABSEQ;
-    while(alive()){ const k=seq[n++%seq.length]; const known=v186sKnows(k,fw.v186lv,fw.v186fl); st._v186force=known?k:null; st._v186forceK=k; st.zoomTo(0.42); st.focus=null;
+    let n=0;
+    while(alive()){ const seq=st._v186seq||V186S_LABSEQ; const k=seq[n++%seq.length]; const known=v186sKnows(k,fw.v186lv,fw.v186fl); st._v186force=known?k:null; st._v186forceK=k; st.zoomTo(0.42); st.focus=null;
       await st.gain(fw); if(!alive()) return; fw.x=46; fw.y=44; fw.vx=0; fw.vy=0; fw.ov={x:47,y:44}; def.x=V186S_MV[k].turn?57.5:60; def.y=44; def.ov=null; def.vx=0; def.vy=0; def.v186rT=null; st.cam.x=58;
       await st.wait(st.D(500)); if(!alive()) return;
       if(!V186S_MV[k].turn){ def.ov={x:59,y:44}; const g=st.dribble(fw,70,44.5,2400); await st.until(()=>Math.hypot(fw.x-def.x,fw.y-def.y)<4.2,3000); def.ov=null; await g; }
