@@ -161,3 +161,35 @@
 .cell.rot .ghost,.cell.rot.ok .ghost{fill:#ffffff14}
 .cell.rot.pv .ghost{z-index:3}
 .cell.rot.pv .ndl{opacity:.45}
+
+/* ================= polish pass: hardware detail + ambient glints ================= */
+/* corner bolts on the Lights Out and Spin Lock boards */
+.grid.lo::after,.grid.sl::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+  --gb:#ffffffa0 0 .8px,#d9dee8 1.6px,#7a8192 3.2px,#1d2030 4.2px,transparent 5px;
+  background:radial-gradient(circle at 11px 11px,var(--gb)),radial-gradient(circle at calc(100% - 11px) 11px,var(--gb)),
+    radial-gradient(circle at 11px calc(100% - 11px),var(--gb)),radial-gradient(circle at calc(100% - 11px) calc(100% - 11px),var(--gb))}
+/* rivets on the dial bezel */
+.cell.rot .dial{background:
+  radial-gradient(circle at 18% 18%,#fff 0 .7px,#b9c0cf 1.3px,#454b5b 2.3px,transparent 2.9px),
+  radial-gradient(circle at 82% 18%,#fff 0 .7px,#b9c0cf 1.3px,#454b5b 2.3px,transparent 2.9px),
+  radial-gradient(circle at 18% 82%,#fff 0 .7px,#b9c0cf 1.3px,#454b5b 2.3px,transparent 2.9px),
+  radial-gradient(circle at 82% 82%,#fff 0 .7px,#b9c0cf 1.3px,#454b5b 2.3px,transparent 2.9px),
+  conic-gradient(from 210deg,#f4f6fb,#8c95a8 10%,#e6eaf2 22%,#5f6779 38%,#dfe4ee 52%,#7b8397 66%,#f7f8fc 80%,#9aa2b4 90%,#f4f6fb)}
+/* slow idle glint sweeping across the dial board and the tile tray (one cheap layer per board) */
+.grid.sl::before,.slidebox::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:5;
+  background:linear-gradient(105deg,transparent 42%,#ffffff1c 49%,#ffffff2a 50%,#ffffff1c 51%,transparent 58%) no-repeat;
+  background-size:300% 100%;background-position:120% 0;animation:gg-sweep 7s ease-in-out 1.5s infinite}
+@keyframes gg-sweep{0%{background-position:120% 0;opacity:0}8%{opacity:1}40%{background-position:-20% 0;opacity:1}46%,100%{background-position:-20% 0;opacity:0}}
+/* neighbours turn a beat after the tapped dial: a ripple instead of a lockstep */
+.cell.rot .ndl{transition-delay:var(--wd,0ms)}
+.cell.rot.tick .dial{animation-delay:var(--wd,0ms)}
+/* Lights Out: brushed metal socket ring under each bulb, warmed by the glass when lit */
+.cell.light::before{content:'';position:absolute;inset:8%;border-radius:50%;z-index:1;pointer-events:none;
+  background:conic-gradient(from 200deg,#8a90a0,#2a2d3a 18%,#c2c7d2 36%,#3a3d4c 55%,#9aa0ae 74%,#2a2d3a 88%,#8a90a0);
+  -webkit-mask:radial-gradient(closest-side,transparent 84%,#000 86%);mask:radial-gradient(closest-side,transparent 84%,#000 86%);
+  opacity:.55;transition:opacity .35s}
+.cell.light.on::before{opacity:.9}
+/* plate screws */
+.cell.light::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+  --gs:#ffffff55 0 .6px,#6c7182 1.4px,#0000 2.2px;
+  background:radial-gradient(circle at 9% 9%,var(--gs)),radial-gradient(circle at 91% 9%,var(--gs)),radial-gradient(circle at 9% 91%,var(--gs)),radial-gradient(circle at 91% 91%,var(--gs))}

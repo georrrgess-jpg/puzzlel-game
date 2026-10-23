@@ -138,6 +138,8 @@ MAKERS.tubes=function({R,tier,board,api}){
       /* liquid that just left this tube drains away from the top */
       ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',COLORS[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
       if(t.length&&!FL_RM)for(let b=0;b<2;b++){const u=el('i','bub');u.style.setProperty('--n',t.length);u.style.left=(28+Math.random()*40)+'%';u.style.animationDelay=-(Math.random()*3+b*1.5).toFixed(2)+'s';e.appendChild(u)}
+      e.appendChild(el('i','gf-tk'));e.appendChild(el('i','gf-sh'));
+      if(t.length===cap&&uniform(t))e.appendChild(el('i','gf-gl'));
       e.classList.toggle('sel',i===sel);
       e.classList.toggle('done',t.length===cap&&uniform(t));
       e.classList.remove('hint');e.removeAttribute('data-h');

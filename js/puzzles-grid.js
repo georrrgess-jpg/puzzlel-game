@@ -134,13 +134,13 @@ MAKERS.rotate=function({R,tier,board,api}){
   function tap(i){
     if(api.over())return;
     const need=((sol[i]-U[i])%4+4)%4!==0,wasOk=ang.map(a=>a%4===0);
-    for(const q of gfx.hits(i,n,offs))ang[q]++;
+    for(const q of gfx.hits(i,n,offs)){ang[q]++;cells[q].style.setProperty('--wd',(q===i?0:55)+'ms')}
     U[i]=(U[i]+1)%4;moves++;sfx.ratchet();buzz(8);
     cells.forEach(c=>c.classList.remove('hint'));render();api.commit();
     const[cx,cy]=centerOf(cells[i]);ring(cx,cy,'var(--acc)',cells[i].offsetWidth*2.2);
     gfx.hits(i,n,offs).forEach(j=>{const c=cells[j];c.classList.remove('lock');
       if(!wasOk[j]&&ang[j]%4===0){setTimeout(()=>{if(!gfx.live(c))return;gfx.pulse(c,'lock');const[px,py]=centerOf(c);burst(px,py,'#6be585',10,.65);ring(px,py,'#6be585',c.offsetWidth*1.5,450)},260)}
-      else gfx.pulse(c,'tick')});
+      else{c.style.setProperty('--wd',(j===i?0:55)+'ms');gfx.pulse(c,'tick')}});
     need?api.good(cells[i]):api.meh();
     if(ang.every(a=>a%4===0)){
       clearPv();wrap.classList.add('open');

@@ -130,3 +130,38 @@
 .rdots i.d{background:radial-gradient(circle at 35% 35%,#fff,var(--good) 62%);box-shadow:0 0 8px var(--good)}
 .rdots i.c{background:radial-gradient(circle at 35% 35%,#fff,var(--acc) 62%);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 35%,transparent),0 0 10px var(--acc);animation:rdc 1s ease-in-out infinite alternate}
 @keyframes rdc{from{transform:scale(1.15)}to{transform:scale(1.5)}}
+
+/* ================= polish pass (gf-) ================= */
+/* Flood: squash-and-stretch jelly capture instead of a plain scale */
+.floodgrid i.cap{animation-name:gf-jelly}
+@keyframes gf-jelly{0%{transform:scale(1)}28%{transform:scale(1.28,.84)}52%{transform:scale(.9,1.14)}72%{transform:scale(1.06,.96)}88%{transform:scale(.98,1.02)}100%{transform:scale(1)}}
+/* Flood: soft inner rim on every jelly cell */
+.floodgrid i{background-clip:padding-box}
+.floodgrid i.own::before{animation:gf-gloss 2.6s ease-in-out infinite alternate}
+@keyframes gf-gloss{from{opacity:.75;transform:translateX(0)}to{opacity:1;transform:translateX(6%)}}
+
+/* Tubes: measurement tick marks printed on the glass */
+.gf-tk{position:absolute;right:9%;top:4px;width:22%;height:calc(var(--seg)*4);pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(180deg,transparent 0 calc(var(--seg) - 1.5px),#ffffffa0 calc(var(--seg) - 1.5px) var(--seg)) right top/100% 100% no-repeat,
+    repeating-linear-gradient(180deg,transparent 0 calc(var(--seg)/2 - 1px),#ffffff50 calc(var(--seg)/2 - 1px) calc(var(--seg)/2)) right top/55% 100% no-repeat;
+  opacity:.8;mix-blend-mode:screen}
+/* Tubes: liquid settles with a decaying wobble after a pour */
+.seg.new.top::before{animation:gf-settle .9s ease-out .45s both,slosh 2.2s ease-in-out 1.35s infinite alternate}
+@keyframes gf-settle{0%{transform:rotate(-14deg) scaleX(.9) translateY(-2px)}25%{transform:rotate(10deg) scaleX(.95)}50%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}100%{transform:rotate(-4deg) scaleX(.97)}}
+/* Tubes: completed tube gets a glint sweeping down the glass */
+.gf-gl{position:absolute;inset:4px;border-radius:0 0 calc(var(--seg)*.56) calc(var(--seg)*.56);overflow:hidden;pointer-events:none;z-index:3}
+.gf-gl::before{content:'';position:absolute;left:-30%;right:-30%;top:0;height:28%;
+  background:linear-gradient(170deg,transparent 30%,#ffffffb0 50%,transparent 70%);transform:translateY(-120%);animation:gf-glint 2.8s ease-in-out .9s infinite}
+@keyframes gf-glint{0%{transform:translateY(-120%)}45%,100%{transform:translateY(420%)}}
+/* Tubes: shadow pool under each tube to seat it on the table */
+.tube .gf-sh{position:absolute;left:-10%;right:-10%;bottom:-12px;height:10px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at center,#00000070,transparent 70%);z-index:-1}
+.tube.sel .gf-sh{opacity:.4;transform:translateY(24px) scale(.8)}
+
+/* Pads: physical press depth and an engraved ring around the symbol */
+.pad:active{transform:translateY(4px) scale(.95)}
+.pad span::before{content:'';position:absolute;left:50%;top:50%;width:1.9em;height:1.9em;margin:-.95em 0 0 -.95em;border-radius:50%;pointer-events:none;
+  box-shadow:inset 0 2px 3px #0007,0 1px 0 #ffffff26,0 0 0 1.5px color-mix(in srgb,var(--pc) 45%,transparent)}
+.pad.lit span::before{box-shadow:0 0 0 2px #fff,0 0 14px #fff;animation:gf-ring .45s ease-out both}
+@keyframes gf-ring{from{transform:scale(.7)}to{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.gf-gl::before,.floodgrid i.own::before{animation:none}}
