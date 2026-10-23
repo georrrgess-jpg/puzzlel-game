@@ -223,7 +223,7 @@ P3D_MODULES.push({name:'pitch',order:10,
     P.scene.background=new P.T.Color(L.sky[1]);
     /* light tuning on top of the core's per-weather set-up */
     if(k==='night'){ P.sun.color.set('#fff4e4'); P.sun.intensity=3.0; P.hemi.color.set('#3d4a60'); P.hemi.groundColor.set('#16301c'); P.hemi.intensity=0.6; if(P.scene.fog){ P.scene.fog.color.set('#0a1224'); P.scene.fog.near=170; P.scene.fog.far=620; } }
-    else if(k==='golden'){ P.sun.intensity=2.5; P.hemi.intensity=0.95; }
+    else if(k==='golden'){ P.sun.color.set('#ffcb92'); P.sun.intensity=2.4; P.hemi.intensity=1.05; }
     else if(k==='clear'){ P.sun.intensity=2.3; P.hemi.intensity=1.0; }
     /* a distance haze in every weather so the outer ground melts into the horizon instead of ending on a hard edge */
     if(!P.scene.fog) P.scene.fog=new P.T.Fog(L.sky[1],260,1100); else if(k!=='night') P.scene.fog.color.set(L.sky[1]); else P.scene.fog.color.set(L.sky[1]);

@@ -77,7 +77,7 @@ P3D_MODULES.push({name:'stadium',order:12,
     const aisles=[]; for(let k=1;k<9;k++) aisles.push(LX0+k*(LX1-LX0)/9);
     const secs=(x0,x1,ais)=>{ const out=[]; let a=x0; for(const m of ais){ out.push([a,m-0.6]); a=m+0.6; } out.push([a,x1]); return out; };
     const lowSecs=secs(LX0,LX1,aisles);
-    const zl=i=>0.95+0.4*i, yl=i=>-6-0.8*i;
+    const zl=i=>0.95+0.34*i, yl=i=>-6-0.8*i;
     B.color(CONC).box(LX0,LX1,-6.0,-5.75,0,1.3);                      /* front wall */
     B.color(tm.c1).box(LX0,LX1,-5.76,-5.70,0.45,1.18);                  /* padding */
     B.color(CONC2).box(LX0,LX1,-5.75,-4.35,-0.02,0.03,true);             /* walkway */
@@ -95,7 +95,7 @@ P3D_MODULES.push({name:'stadium',order:12,
     for(const [x0,x1] of [[LX0,CX0],[CX1,LX1]]){ B.color(CLAD).box(x0,x1,yBack-0.4,yBack,0,zBack+1.25); B.color(tm.c1).box(x0,x1,yBack+0.01,yBack+0.05,zBack+0.75,zBack+1.05); }
     B.color(CLAD).box(LX0-0.4,LX0,yBack-0.4,-5.75,0,1.6).box(LX1,LX1+0.4,yBack-0.4,-5.75,0,1.6);
     /* ===== hospitality / press band ===== */
-    const zF0=zBack+1.25, zF1=zF0+0.95, zW1=zF1+2.35;
+    const zF0=zBack+1.25, zF1=zF0+0.9, zW1=zF1+1.95;
     B.color(CONC2).box(CX0,CX1,-17.6,yBack,0,zF0); B.color(CLAD).box(CX0,CX1,yBack-0.2,yBack+0.02,zBack,zF0); B.color(tm.c1).box(CX0,CX1,yBack+0.02,yBack+0.05,zBack+0.75,zBack+1.0);
     B.color(teamDark).box(CX0,CX1,yBack-0.2,yBack+0.05,zF0,zF1);
     S.rib={x0:CX0,x1:CX1,y:yBack+0.06,z0:zF0+0.08,z1:zF1-0.08};
@@ -108,13 +108,13 @@ P3D_MODULES.push({name:'stadium',order:12,
     B.color('#c3c7cc').box(CX0,CX1,yBack-0.5,yBack-0.05,zF1,zF1+0.1); B.color(CLAD).box(CX0,CX1,yBack-0.5,yBack-0.05,zW1-0.1,zW1+0.15);
     B.color(CONC).box(CX0,CX1,-17.6,yBack-0.3,zW1,zW1+0.35);
     /* ===== upper tier ===== */
-    const NU=det>0?8:6, yu=j=>-17.8-0.8*j, zu=j=>zW1+0.75+0.45*j; const upSecs=secs(CX0,CX1,[1,2,3,4].map(k=>CX0+k*(CX1-CX0)/5));
+    const NU=det>0?7:5, yu=j=>-17.8-0.8*j, zu=j=>zW1+0.6+0.4*j; const upSecs=secs(CX0,CX1,[1,2,3,4].map(k=>CX0+k*(CX1-CX0)/5));
     B.color(CONC).box(CX0,CX1,-17.85,-17.55,zW1,zW1+1.15); B.color(tm.c1).box(CX0,CX1,-17.56,-17.5,zW1+0.4,zW1+0.95);
     for(let j=0;j<NU;j++){ const yf=yu(j), yb=yf-0.8, z=zu(j), zp=j?zu(j-1):zW1+1.15;
       B.color(j%2?'#8b9197':'#80868d').quad([CX0,yf,z],[CX1,yf,z],[CX1,yb,z],[CX0,yb,z]); B.color('#70767d').quad([CX0,yf,zp],[CX1,yf,zp],[CX1,yf,z],[CX0,yf,z]);
       for(const [s0,s1] of upSecs){ B.color(seatUp).box(s0+0.1,s1-0.1,yf-0.62,yf-0.28,z+0.38,z+0.44); B.color(v18sMix(seatUp,'#000000',0.2)).box(s0+0.1,s1-0.1,yf-0.75,yf-0.66,z+0.4,z+0.85);
         for(let x=s0+0.55;x<s1-0.2;x+=0.56) S.seats.push({x:x+(rnd()-0.5)*0.08,y:yf-0.47,z:z+0.44,r:0,zone:'U',row:j,tone:0.16+0.02*j}); } }
-    const yUB=yu(NU-1)-0.8, zUB=zu(NU-1), zR=zUB+2.3;
+    const yUB=yu(NU-1)-0.8, zUB=zu(NU-1), zR=zUB+1.95;
     B.color(CLAD).box(CX0,CX1,yUB-0.4,yUB,0,zR);
     for(const x of [CX0,CX1]){ const s=x===CX0?-1:1; B.color(CLAD).box(Math.min(x,x+s*0.35),Math.max(x,x+s*0.35),yUB-0.4,yBack,0,zW1+0.35).box(Math.min(x,x+s*0.35),Math.max(x,x+s*0.35),yUB-0.4,-17.5,zW1+0.35,zR); }
     /* roof, ribs, fascia, downlights */
@@ -123,8 +123,8 @@ P3D_MODULES.push({name:'stadium',order:12,
     for(let x=CX0;x<=CX1+0.01;x+=(CX1-CX0)/14) B.color(STEEL).box(x-0.12,x+0.12,yUB-0.4,yRF,zR+0.35,zR+0.55);
     B.color(teamDark).box(CX0-0.6,CX1+0.6,yRF-0.3,yRF,zR-0.5,zR+0.55); B.color(tm.c1).box(CX0-0.6,CX1+0.6,yRF+0.0,yRF+0.03,zR-0.25,zR-0.08);
     for(let x=CX0+1.2;x<CX1-0.8;x+=2.75){ L.color('#fff6e0').box(x-0.32,x+0.32,yRF-0.55,yRF-0.15,zR-0.72,zR-0.5); S.dl.push([x,yRF-0.35,zR-0.75]); }
-    /* video board hanging at halfway */
-    const VB={x0:46.4,x1:58.6,y:yRF-0.95,z0:zW1+0.9,z1:zR-1.0}; S.vb=VB;
+    /* video board hanging at halfway, in front of the press band */
+    const VB={x0:46.4,x1:58.6,y:yBack-0.08,z0:zF1+0.22,z1:zF1+3.07}; /* hung low over the press band so the broadcast frame always shows it */ S.vb=VB;
     B.color(DARK).box(VB.x0-0.35,VB.x1+0.35,VB.y-0.5,VB.y,VB.z0-0.35,VB.z1+0.35); B.color(teamDark).box(VB.x0-0.35,VB.x1+0.35,VB.y+0.001,VB.y+0.03,VB.z0-0.35,VB.z0-0.12);
     if(det>0) for(const x of [VB.x0+1,VB.x1-1]) B.color(STEEL).tube([x,VB.y-0.25,VB.z1+0.35],[x,VB.y-0.25,zR],0.03,4);
     /* ===== end bleachers (open aluminium), ball-stop netting, end boards, photographers ===== */
@@ -327,7 +327,7 @@ P3D_MODULES.push({name:'crowd',order:20,
     C.hype+=(h-C.hype)*Math.min(1,(P.dt||0.016)*(h>C.hype?8:2.5)); C.u.uHype.value=C.hype; C.u.uTime.value=st.rm?0:now/1000;
     /* flashes: st.bulbs on the main stand, photographers while the goal is on */
     const bp=C.bp, bc=C.bc, nb=C.bul; let k=0; const B=st.bulbs||[];
-    for(let i=0;i<B.length&&k<nb;i++){ const q=B[i]; if(now<q.t) continue; const a=1-(now-q.t)/220; if(a<=0) continue; const ri=q.row*10/7; bp[k*3]=q.x; bp[k*3+1]=0.95+0.4*ri+1.1; bp[k*3+2]=-6-0.8*ri-0.5; bc[k*3]=bc[k*3+1]=bc[k*3+2]=a; k++; }
+    for(let i=0;i<B.length&&k<nb;i++){ const q=B[i]; if(now<q.t) continue; const a=1-(now-q.t)/220; if(a<=0) continue; const ri=q.row*10/7; bp[k*3]=q.x; bp[k*3+1]=0.95+0.34*ri+1.1; bp[k*3+2]=-6-0.8*ri-0.5; bc[k*3]=bc[k*3+1]=bc[k*3+2]=a; k++; }
     if(S&&S.photogs&&h>0.5){ for(let j=0;j<S.photogs.length;j++){ const p=S.photogs[j]; if(k>=nb) break; if(Math.random()<0.25){ bp[k*3]=p[0]; bp[k*3+1]=p[2]; bp[k*3+2]=p[1]; bc[k*3]=bc[k*3+1]=bc[k*3+2]=1; k++; } } }
     const used=k; for(;k<(C.lastUsed||0);k++){ bc[k*3]=bc[k*3+1]=bc[k*3+2]=0; bp[k*3+1]=-50; } C.lastUsed=used;
     if(used||C.hadB){ C.pa.needsUpdate=true; C.ca.needsUpdate=true; } C.hadB=used>0; },
