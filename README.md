@@ -19,6 +19,8 @@ An endless puzzle game that runs in the browser. Just open `index.html`; there i
 - **Audio**: all synthesized with Web Audio. That covers generative background music (menu and calm in-game moods) and a full SFX set, with separate volume controls.
 - **Visuals**: an animated parallax background, glossy 3D boards, flip and ripple waves, particles, pour droplets and celebratory win screens.
 - **Accessibility**: colour-blind symbols, reduced-motion support, and haptics and audio toggles.
+- **Level intro**: a banner at the start of each level names the puzzle and states the ★★★ goal, plus your best result.
+- **Keyboard (desktop)**: U or Ctrl+Z undo, H hint, R restart, Esc back, Enter or Space press the main popup button.
 - Progress is saved in `localStorage`, and older saves are migrated automatically.
 
 Code layout:

@@ -51,7 +51,18 @@ function startLevel(n,opts={}){
   $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;
   refreshHUD();show('play');sfx.whoosh();
   const me=cur,go=()=>{if(cur===me&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
-  if(!S.seen[type])showHowTo(type,go);else go();
+  if(!S.seen[type])showHowTo(type,go);else{go();showIntro()}
+}
+/* level intro: a short banner that names the puzzle and states the 3-star goal */
+function showIntro(){
+  if(!cur)return;$$('.lvintro').forEach(e=>e.remove());
+  const c=cur,i=INFO[c.type],L=c.last,best=c.daily?0:S.stars[c.level]||0;
+  const goal=L?`★★★ in ${L.s3} moves or fewer`:c.type==='memory'?'★★★ with at most 1 slip':'';
+  const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
+    <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':'LEVEL '+c.level}</small><b>${i.name}</b>
+    ${goal?`<em>${goal}</em>`:''}${best?`<span class="lvi-best">Your best: ${'★'.repeat(best)}${'☆'.repeat(3-best)}</span>`:''}</div>`);
+  $('#play').appendChild(b);
+  setTimeout(()=>b.classList.add('out'),1500);setTimeout(()=>b.remove(),2100);
 }
 let nudgeT=0,nudges=0;
 function resetNudge(full){
@@ -211,6 +222,17 @@ $('#hintBtn').onclick=useHint;
 $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};
 $('#restartBtn').onclick=()=>{if(cur){sfx.click();startLevel(cur.level,{daily:cur.daily})}};
 $('#skipBtn').onclick=skipLevel;
+// desktop shortcuts: U/Z undo, H hint, R restart, Enter or Space presses the main popup button, Esc goes back
+addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('input'))return;
+  const m=$('#modal.on'),k=e.key.toLowerCase();
+  if(m&&(k==='enter'||k===' ')){const b=$('.mbtns .btn:last-child',m);if(b&&!b.disabled){e.preventDefault();b.click()}return}
+  if(m||!$('#play').classList.contains('active'))return;
+  if(k==='u'||(k==='z'&&(e.ctrlKey||e.metaKey))){e.preventDefault();undo()}
+  else if(k==='h')useHint();
+  else if(k==='r')$('#restartBtn').click();
+  else if(k==='escape')$('#backBtn').click();
+});
 const wake=()=>{audio();Music.start()};
 addEventListener('pointerdown',wake,{once:true});addEventListener('keydown',wake,{once:true});
 

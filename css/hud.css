@@ -401,3 +401,23 @@
 @media (prefers-reduced-motion:reduce){
   .htstage{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}.hst{grid-area:auto}.hst.sa{opacity:1}.sdots,.fing{display:none}
 }
+
+/* level intro banner */
+.lvintro{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:20;background:radial-gradient(circle at 50% 45%,#0007,transparent 65%);animation:lvi-bg .3s ease both}
+.lvintro.out{animation:lvi-out .55s cubic-bezier(.5,0,.75,0) forwards}
+@keyframes lvi-bg{from{opacity:0}}
+@keyframes lvi-out{to{opacity:0;transform:translateY(-40px) scale(.9)}}
+.lvi-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px 34px 18px;border-radius:28px;text-align:center;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 32%,var(--bg2)),color-mix(in srgb,var(--bg1) 92%,#000));
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--tc) 70%,#fff3),0 0 40px color-mix(in srgb,var(--tc) 45%,transparent),0 24px 60px #000b,inset 0 2px 0 #ffffff30;
+  animation:lvi-in .6s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes lvi-in{from{transform:scale(.4) rotate(-6deg);opacity:0}}
+.lvi-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(110deg,transparent 35%,#ffffff30 50%,transparent 65%);background-size:250% 100%;animation:lvi-sh 1.4s .3s ease-in-out both;pointer-events:none}
+@keyframes lvi-sh{from{background-position:120% 0}to{background-position:-60% 0}}
+.lvi-ic{width:64px;height:64px;margin-top:-50px;border-radius:50%;display:grid;place-items:center;font-size:34px;background:radial-gradient(circle at 35% 30%,#ffffff70,var(--tc) 55%,color-mix(in srgb,var(--tc) 60%,#000));box-shadow:0 0 0 4px #ffffff30,0 8px 20px #0008,0 0 26px var(--tc);animation:lvi-ic .7s .1s cubic-bezier(.3,1.8,.5,1) both}
+@keyframes lvi-ic{from{transform:scale(0) rotate(-90deg)}}
+.lvi-card small{font-size:12px;letter-spacing:3px;color:var(--dim);font-weight:700;margin-top:6px}
+.lvi-card b{font-size:30px;line-height:1.05;text-shadow:0 3px 0 #0006}
+.lvi-card em{font-style:normal;font-weight:700;color:var(--acc);font-size:15px;margin-top:4px;padding:4px 12px;border-radius:99px;background:#0004;animation:lvi-goal .5s .35s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes lvi-goal{from{transform:translateY(10px);opacity:0}}
+.lvi-best{font-size:12.5px;color:var(--dim);font-weight:600}
