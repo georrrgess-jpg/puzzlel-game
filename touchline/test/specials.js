@@ -192,7 +192,8 @@ async function rp3dSuite(browser){
   const RP=page.evaluate(async()=>{ const L=App.live, st=L.stage; window.NODRAW=true; L.speed=1; st.goalTs=GOAL_TS[1]; st.skip=false; V186X.force='bike';
     const pl=[...st.players.values()].filter(q=>q.side===0&&!q.gk&&!q.off); const sc=pl[pl.length-1], mate=pl[Math.max(0,pl.length-4)];
     const n0=App.v18Replays||0; const M0=JSON.stringify([L.M.sc,L.M.min,L.view.min]);
-    await st.goalSequence({s:0,pid:sc.pid,t:'goal',ty:'cross',seq:[{pid:mate.pid,x:10,y:85,a:'cross'},{pid:sc.pid,x:47,y:90,a:'shot'}],m:L.M.min,sc:[1,0]}); V186X.force=null;
+    const ev={s:0,pid:sc.pid,t:'goal',ty:'cross',seq:[{pid:mate.pid,x:10,y:85,a:'cross'},{pid:sc.pid,x:47,y:90,a:'shot'}],m:L.M.min,sc:[1,0]}; st.clipStart(ev); /* as a highlight starts it: everyone in shape round the move */
+    await st.goalSequence(ev); V186X.force=null;
     return {n:(App.v18Replays||0)-n0,same:M0===JSON.stringify([L.M.sc,L.M.min,L.view.min]),log:V186X.log.slice(-1)[0]||null}; });
   for(const k of ['RSH1','RSH2']){ const t0=Date.now(); while(Date.now()-t0<240000){ const v=await page.evaluate(k=>window[k]&&App.live.stage.paused?window[k]:null,k); if(v){ await sleep(1500); await page.screenshot({path:`${SH}rp3d_${v}.png`}); await page.evaluate(()=>{ App.live.stage.paused=false; }); break; } await sleep(200); } }
   const R=await RP;

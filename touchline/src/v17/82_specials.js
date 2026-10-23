@@ -68,7 +68,7 @@ Stage.prototype.goalSequence=async function(e){ let K=null;
 function v186xDur(kind,ts){ const M=V186X_MS[kind]||V186X_MS.bike, k=ts||1, d=ms=>Math.max(55,ms*k); return {set:d(M.set),to:d(M.to),st:d(M.st),fall:d(M.fall),lie:d(M.lie),up:d(M.up)}; }
 /* ms from contact: negative before it, 0 while the ball is on the boot (not yet released), then ms since the release */
 function v186xTau(st,p){ const r=p.v186xr; if(r!=null&&r>=0) return st.now-r; return Math.min(0,st.now-p.v186xc); }
-function v186xClear(p){ p.v186xk=null; p.v186xc=null; p.v186xr=null; p.v186xs=null; p.v186xy0=null; p.v186xpx=null; p.v186xpy=null; p.v186xdx=null; p.v186xdy=null; p.v186xl=null; }
+function v186xClear(p){ if(p.v186xh){ p.hurry=false; p.v186xh=0; } p.v186xk=null; p.v186xc=null; p.v186xr=null; p.v186xs=null; p.v186xy0=null; p.v186xpx=null; p.v186xpy=null; p.v186xdx=null; p.v186xdy=null; p.v186xl=null; }
 
 /* ---------- body frame <-> world (his yaw frame, body units: F forward, L to his left, H height above the turf) ----------
    The same whole-body transform the 3-D figures apply (63: lift, then roll or pitch about the pivot); 2-D draws the same tilt. */
@@ -146,7 +146,9 @@ Stage.prototype.launch=function(p,opt){ const K=this._v186x;
   if(!K||this.skip||!opt||this.rm) return _v186xLaunch.apply(this,arguments);
   try{
     /* the cross to the scorer: aimed at his boot's contact point, a little longer (the strike has no wind-up) */
-    if(!K.armed&&opt.home&&opt.home.pid===K.pid&&p&&p!==opt.home&&p.side===opt.home.side&&(opt.h||0)>2&&!opt.hands&&!this.hands){
+    /* only when he can get under it: his spot within a sprint of where he is (else the ordinary finish) */
+    const reach=h=>{ const o=h.ov&&isFinite(h.ov.x)?h.ov:null; return !o||Math.hypot(o.x-h.x,o.y-h.y)<=this.spd()*1.5*(opt.dur+this.D(150))/1000*0.75+1.5; };
+    if(!K.armed&&opt.home&&opt.home.pid===K.pid&&p&&p!==opt.home&&p.side===opt.home.side&&(opt.h||0)>2&&!opt.hands&&!this.hands&&reach(opt.home)){
       const pl=opt.home, st=this, on0=opt.onRelease; K.armed=true; K.pl=pl;
       const gx=K.s===0?105:0, dir=K.s===0?1:-1; const at=pl.ov&&isFinite(pl.ov.x)?pl.ov:pl; const ca=Math.atan2(p.y-at.y,p.x-at.x); let yaw, gs=1, kf;
       if(K.kind==='bike'){ const away=dir>0?Math.PI:0; yaw=away+v186xCl(v186xAd(ca,away),-0.5,0.5); kf=Math.cos(yaw)>0?1:0; }
@@ -154,6 +156,7 @@ Stage.prototype.launch=function(p,opt){ const K=this._v186x;
         yaw=c+v186xCl(v186xAd(ca,c),-0.35,0.35); gs=Math.sin(gy-yaw)>=0?1:-1; kf=gs>0?1:0; }
       yaw=Math.atan2(Math.sin(yaw),Math.cos(yaw));
       const o2=Object.assign({},opt,{head:true,dur:opt.dur+this.D(150),onRelease:f=>{ if(on0) on0(f); pl.jumpT=-9e9;
+        if(!pl.hurry&&pl.ov&&Math.hypot(pl.ov.x-pl.x,pl.ov.y-pl.y)>2){ pl.hurry=true; pl.v186xh=1; } /* he sprints to get under the ball */
         pl.v186xk=K.kind; pl.v186xs=st.now; pl.v186xc=st.now+f.dur; pl.v186xr=-1; pl.v186xts=st.ts; pl.v186xy=yaw; pl.v186xg=gs; pl.v186xf=kf; pl.v186xy0=null; pl.v186xpx=null; pl.v186xl=0; K.tc=pl.v186xc; K.ts=st.ts; }});
       return _v186xLaunch.call(this,p,o2); }
     /* the strike: off the boot at the contact point (a 'head' launch: no wind-up, no square-up turn), the kick sound, the caption */
@@ -199,7 +202,7 @@ Stage.prototype.v186xStep=function(p){ const now=this.now;
   else if(rd<0||rd<T.fall+T.lie+T.up*0.5){ p.yaw=p.v186xy; p.face=Math.cos(p.yaw)>=0?1:-1; }
   /* from take-off until he is off the turf he stays where he jumped (carried on a little by his run-in) */
   if(now>=tTO&&(r<0||rd<T.fall+T.lie)){
-    if(p.v186xpx==null){ p.v186xpx=p.x; p.v186xpy=p.y; const v=Math.hypot(p.vx||0,p.vy||0); const dd=Math.min(0.45,v*T.to/1000*0.5); p.v186xdx=v>0.05?p.vx/v*dd:0; p.v186xdy=v>0.05?p.vy/v*dd:0; if(!p.celeb) p.ov={x:p.x,y:p.y}; }
+    if(p.v186xpx==null){ if(p.v186xh){ p.hurry=false; p.v186xh=0; } p.v186xpx=p.x; p.v186xpy=p.y; const v=Math.hypot(p.vx||0,p.vy||0); const dd=Math.min(0.45,v*T.to/1000*0.5); p.v186xdx=v>0.05?p.vx/v*dd:0; p.v186xdy=v>0.05?p.vy/v*dd:0; if(!p.celeb) p.ov={x:p.x,y:p.y}; }
     const u=v186xEo((now-tTO)/Math.max(1,T.to)); p.x=p.v186xpx+p.v186xdx*u; p.y=p.v186xpy+p.v186xdy*u; p.vx=0; p.vy=0; p.spd=0;
     if(p.ov&&!p.celeb){ p.ov.x=p.x; p.ov.y=p.y; } }
   if(r>=0&&!p.v186xl&&rd>=T.fall*0.85){ p.v186xl=1; this.kickTurf(p.x,p.y,7,1.1); }
