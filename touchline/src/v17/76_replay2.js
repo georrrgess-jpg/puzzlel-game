@@ -193,7 +193,11 @@ function v185Caption(st,Q){ const host=st.cv&&st.cv.parentElement; const el=host
 function v185GoalPose(P,st,Q,eye,tgt){ const b=st.ball, R=typeof V18_BALL_R==='number'?V18_BALL_R:0.18, C=V185_RP; const gx=Q.gx, dir=Q.dir, sc=Q.sc;
   const by=isFinite(b.y)?b.y:34; eye.set(gx+dir*C.gEye,C.gH,34+v185Cl((by-34)*0.25,-1.4,1.4));
   if(st.now<Q.ts&&sc&&isFinite(sc.x)){ tgt.set(sc.x+(b.x-sc.x)*0.3,1.1+(Math.max(0,b.z||0)+R-1.1)*0.3,sc.y+(by-sc.y)*0.3); }
-  else tgt.set(b.x,Math.max(0,b.z||0)+R,by);
+  else { /* aim a little ahead along the ball's path: the director's damped target lags a fast shot by about 0.3 s */
+    const G=Q._v185g, t=st.now; let L=G&&G.t===t?G.l:[0,0,0];
+    if(G&&t>G.t&&t-G.t<200){ const k=0.3/((t-G.t)/1000); L=[(b.x-G.x)*k,(by-G.y)*k,((b.z||0)-G.z)*k]; const ll=Math.hypot(L[0],L[1],L[2]); if(ll>6) L=L.map(v=>v*6/ll); }
+    if(!G||t!==G.t) Q._v185g={t,x:b.x,y:by,z:b.z||0,l:L};
+    tgt.set(b.x+L[0],Math.max(0,(b.z||0)+L[2])+R,by+L[1]); }
   /* the lens: opened up on tall frames so the goal mouth still reads */
   const asp=Math.max(0.4,P.camera.aspect||1.6); let f=C.gFov; if(asp<1.3) f=Math.min(64,2*Math.atan(Math.tan(C.gFov*V185_D2R/2)*1.3/asp)/V185_D2R); else f=Math.min(f,2*Math.atan(Math.tan(C.gHMax*V185_D2R/2)/asp)/V185_D2R); return f; }
 

@@ -323,6 +323,7 @@ document.addEventListener('keydown',e=>{ if(e.key!=='n'&&e.key!=='N') return; if
 const _v185PlSettings=VIEWS.settings;
 VIEWS.settings=function(){ const h=_v185PlSettings.apply(this,arguments); if(h.indexOf('data-k="plates"')>=0) return h;
   const add=`<label class="toggle v185-plset"><input type="checkbox" data-c="pref" data-k="plates" ${PREFS.plates!==false?'checked':''}> Player name plates (ball carrier and defender, N)</label>`;
-  let i=h.indexOf('v18-rpset'), j=i<0?-1:h.indexOf('</label>',i); if(j>=0) return h.slice(0,j+8)+add+h.slice(j+8);
+  let i=h.indexOf('class="field v185-rpset"'), j=i<0?-1:h.indexOf('</div>',i); if(j>=0) return h.slice(0,j+6)+add+h.slice(j+6); /* after 76's Goal replays select */
+  i=h.indexOf('v18-rpset'); j=i<0?-1:h.indexOf('</label>',i); if(j>=0) return h.slice(0,j+8)+add+h.slice(j+8);
   i=h.indexOf('class="field v17-rend"'); j=i<0?-1:h.indexOf('</div>',i); if(j>=0) return h.slice(0,j+6)+add+h.slice(j+6);
   return h; };
