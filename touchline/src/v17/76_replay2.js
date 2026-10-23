@@ -63,7 +63,9 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
     else { const cross=!!(fl&&fl.home===sc&&fl.kind!=='shot'&&(meta.head||(fl.h||0)>1.5));
       /* head up toward goal while he runs, a glance down onto the ball on touches, eyes on the ball for the strike */
       const wS=v185Cl(1-(ts-S.now)/C.look,0,1); let w=cross?1:Math.max(C.wRun*v185Cl((4.5-dB)/2.5,0,1),wS);
-      let ax=hx[i]+cy*14, ay=0.25, az=hz[i]+sy*14; if(Math.abs(f.x-gx)<32){ ax+=(gx-ax)*0.4; ay+=(0.9-ay)*0.4; az+=(34-az)*0.4; }
+      /* a penalty run-up: eyes on the goal mouth and the keeper, the ball on the spot framed low in the picture */
+      const pen=meta.ty==='pen', pull=pen?1:0.4; if(pen) w=Math.max(w,v185Cl((5-dB)/2,0,1));
+      let ax=hx[i]+cy*14, ay=0.25, az=hz[i]+sy*14; if(pen||Math.abs(f.x-gx)<32){ ax+=(gx-ax)*pull; ay+=(0.9-ay)*pull; az+=(34-az)*pull; }
       /* blend the directions (not the points), so a ball at his feet turns the head, and the pitch is framed below */
       const yA=Math.atan2(az-hz[i],ax-hx[i]), yB=Math.atan2(bz-hz[i],bx-hx[i]); let dy=dB<0.9?0:yB-yA; while(dy>Math.PI) dy-=2*Math.PI; while(dy<-Math.PI) dy+=2*Math.PI;
       const pA=Math.atan2(ay-hy[i],Math.hypot(ax-hx[i],az-hz[i])), pB=Math.atan2(bh-hy[i],Math.max(0.05,dB));
