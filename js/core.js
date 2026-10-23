@@ -80,5 +80,7 @@ function bagOrder(b){
 function typeFor(n){const b=Math.floor((n-1)/6);return bagOrder(b)[(n-1)%6]}
 const tierFor=n=>Math.floor((n-1)/6);
 const isBonus=n=>n%10===0;
+const MAKERS={};
+const starsFor=(v,s3,s2)=>v<=s3?3:v<=s2?2:1;
 const WORLDS=['Twilight Grove','Crystal Caves','Neon Harbor','Sunken Temple','Cloud Citadel','Ember Peaks','Starfall Bay','Clockwork City','Aurora Fields','Moonlit Maze','Prism Desert','Cosmic Garden'];
 const worldName=c=>WORLDS[c%WORLDS.length]+(c>=WORLDS.length?' '+'I'.repeat(Math.floor(c/WORLDS.length)+1):'');
