@@ -43,7 +43,7 @@ const V18P={X0:-6,X1:111,Y0:-4,Y1:72,TW:2048,TH:1328};
 function v18sPitchCanvas(){ const {X0,X1,Y0,Y1,TW,TH}=V18P, kx=TW/(X1-X0), ky=TH/(Y1-Y0); const cv=v18sCanvas(TW,TH), q=cv.getContext('2d');
   const PX=x=>(x-X0)*kx, PY=y=>(y-Y0)*ky; const r=rngFrom(0x51a7e);
   /* mown bands across the whole surface (continuing faintly into the run-off) */
-  for(let i=-2;i<22;i++){ const x0=PX(i*5.25), x1=PX((i+1)*5.25); q.fillStyle=i%2?'#4a9a51':'#3c8745'; q.fillRect(Math.floor(x0),0,Math.ceil(x1-x0)+1,TH); }
+  for(let i=-2;i<22;i++){ const x0=PX(i*5.25), x1=PX((i+1)*5.25); q.fillStyle=i%2?'#549a55':'#458a47'; q.fillRect(Math.floor(x0),0,Math.ceil(x1-x0)+1,TH); }
   /* run-off: darker, less manicured beyond ~1.8 m outside the lines */
   { q.save(); q.fillStyle='rgba(18,52,24,.42)'; q.beginPath(); q.rect(0,0,TW,TH); q.rect(PX(-1.8),PY(-1.8),PX(106.8)-PX(-1.8),PY(69.8)-PY(-1.8)); q.fill('evenodd'); q.restore();
     const edge=(x0,y0,x1,y1)=>{ const g=q.createLinearGradient(x0,y0,x1,y1); g.addColorStop(0,'rgba(18,52,24,.22)'); g.addColorStop(1,'rgba(18,52,24,0)'); return g; };
@@ -53,9 +53,9 @@ function v18sPitchCanvas(){ const {X0,X1,Y0,Y1,TW,TH}=V18P, kx=TW/(X1-X0), ky=TH
   for(let i=0;i<520;i++){ const x=r()*TW, y=r()*TH, rad=(8+r()*70)*(r()<0.15?2.2:1), dark=r()<0.55, a=0.03+r()*0.05; const g=q.createRadialGradient(x,y,0,x,y,rad); g.addColorStop(0,dark?`rgba(10,40,14,${a})`:`rgba(190,240,140,${a*0.8})`); g.addColorStop(1,'rgba(0,0,0,0)'); q.fillStyle=g; q.fillRect(x-rad,y-rad,rad*2,rad*2); }
   /* wear: goalmouths, the keeper's line, penalty spots, the centre spot, the linesmen's channels */
   const wear=(x,y,rx,ry,a,n,seed)=>{ const rr=rngFrom(seed); const cx=PX(x), cy=PY(y), RX=rx*kx, RY=ry*ky;
-    const g=q.createRadialGradient(0,0,0,0,0,1); g.addColorStop(0,`rgba(122,124,66,${a*0.75})`); g.addColorStop(0.6,`rgba(106,120,60,${a*0.35})`); g.addColorStop(1,'rgba(112,116,58,0)');
+    const g=q.createRadialGradient(0,0,0,0,0,1); g.addColorStop(0,`rgba(118,126,74,${a*0.6})`); g.addColorStop(0.6,`rgba(104,122,66,${a*0.28})`); g.addColorStop(1,'rgba(112,116,58,0)');
     q.save(); q.translate(cx,cy); q.scale(RX,RY); q.fillStyle=g; q.beginPath(); q.arc(0,0,1,0,7); q.fill(); q.restore();
-    for(let i=0;i<n;i++){ const an=rr()*6.283, u=Math.pow(rr(),0.7); const px=cx+Math.cos(an)*u*RX, py=cy+Math.sin(an)*u*RY; const f=1-u; q.fillStyle=rr()<0.5?`rgba(92,80,48,${(0.06+rr()*0.14)*f})`:`rgba(150,150,90,${(0.05+rr()*0.12)*f})`; q.fillRect(px,py,1+rr()*2.2,1+rr()*1.6); } };
+    for(let i=0;i<n;i++){ const an=rr()*6.283, u=Math.pow(rr(),0.7); const px=cx+Math.cos(an)*u*RX, py=cy+Math.sin(an)*u*RY; const f=1-u; q.fillStyle=rr()<0.5?`rgba(98,94,64,${(0.05+rr()*0.10)*f})`:`rgba(160,164,110,${(0.05+rr()*0.10)*f})`; q.fillRect(px,py,1+rr()*2.2,1+rr()*1.6); } };
   for(const gx of [0,105]){ const s=gx?-1:1; wear(gx+s*2.2,34,3.2,5.2,0.62,1400,gx+3); wear(gx+s*0.6,34,1.0,4.6,0.5,700,gx+5); wear(gx+s*11,34,1.3,1.1,0.45,260,gx+7); wear(gx+s*7.5,34,4.5,8,0.12,300,gx+9); }
   wear(52.5,34,1.7,1.4,0.42,300,77); wear(52.5,34,5,4,0.07,200,78);
   for(let x=4;x<101;x+=9){ wear(x+r()*3,-0.6,2.2,0.7,0.10,40,x); wear(x+r()*3,68.6,2.2,0.7,0.10,40,x+500); }
@@ -83,9 +83,9 @@ function v18sCrestCanvas(P,st){ const S=512, cv=v18sCanvas(S,S), q=cv.getContext
   return tex; }
 
 /* ---------- marking ribbons ---------- */
-function v18sMarkGeo(T){ const P=[],S=[],Tn=[],Bw=[]; const y=0.012;
+function v18sMarkGeo(T){ const P=[],S=[],Tn=[],Bw=[],Ae=[]; const y=0.012;
   const seg=(x0,z0,x1,z1,hw)=>{ let tx=x1-x0, tz=z1-z0; const l=Math.hypot(tx,tz)||1; tx/=l; tz/=l; const sx=-tz, sz=tx;
-    const V=(x,z,s,t)=>{ P.push(x,y,z); S.push(sx*s,0,sz*s); Tn.push(tx*t,0,tz*t); Bw.push(hw); };
+    const V=(x,z,s,t)=>{ P.push(x,y,z); S.push(sx*s,0,sz*s); Tn.push(tx*t,0,tz*t); Bw.push(hw); Ae.push(s); };
     V(x0,z0,1,-1); V(x1,z1,1,1); V(x1,z1,-1,1); V(x0,z0,1,-1); V(x1,z1,-1,1); V(x0,z0,-1,-1); };
   const poly=pts=>{ for(let i=1;i<pts.length;i++) seg(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1],0.06); };
   const circ=(cx,cy,r,a0,a1,N)=>{ const pts=[]; for(let i=0;i<=N;i++){ const a=a0+(a1-a0)*i/N; pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)]); } poly(pts); };
@@ -97,8 +97,8 @@ function v18sMarkGeo(T){ const P=[],S=[],Tn=[],Bw=[]; const y=0.012;
   circ(0,0,1,0,PI/2,10); circ(105,0,1,PI/2,PI,10); circ(0,68,1,-PI/2,0,10); circ(105,68,1,PI,1.5*PI,10);
   /* spots: discs (radius 0.11 m) */
   for(const [cx,cz] of [[52.5,34],[11,34],[94,34]]){ const N=14; for(let i=0;i<N;i++){ const a0=i/N*2*PI, a1=(i+1)/N*2*PI;
-    P.push(cx,y,cz, cx,y,cz, cx,y,cz); S.push(0,0,0, Math.cos(a0),0,Math.sin(a0), Math.cos(a1),0,Math.sin(a1)); Tn.push(0,0,0,0,0,0,0,0,0); Bw.push(0.11,0.11,0.11); } }
-  const g=new T.BufferGeometry(); g.setAttribute('position',new T.Float32BufferAttribute(P,3)); g.setAttribute('aSide',new T.Float32BufferAttribute(S,3)); g.setAttribute('aTan',new T.Float32BufferAttribute(Tn,3)); g.setAttribute('aBase',new T.Float32BufferAttribute(Bw,1));
+    P.push(cx,y,cz, cx,y,cz, cx,y,cz); S.push(0,0,0, Math.cos(a0),0,Math.sin(a0), Math.cos(a1),0,Math.sin(a1)); Tn.push(0,0,0,0,0,0,0,0,0); Bw.push(0.11,0.11,0.11); Ae.push(0,1,1); } }
+  const g=new T.BufferGeometry(); g.setAttribute('position',new T.Float32BufferAttribute(P,3)); g.setAttribute('aSide',new T.Float32BufferAttribute(S,3)); g.setAttribute('aTan',new T.Float32BufferAttribute(Tn,3)); g.setAttribute('aBase',new T.Float32BufferAttribute(Bw,1)); g.setAttribute('aE',new T.Float32BufferAttribute(Ae,1));
   const nrm=new Float32Array(P.length); for(let i=1;i<nrm.length;i+=3) nrm[i]=1; g.setAttribute('normal',new T.BufferAttribute(nrm,3));
   g.boundingSphere=new T.Sphere(new T.Vector3(52.5,0,34),70); return g; }
 
@@ -120,13 +120,13 @@ function v18sNetBase(gx){ const {y0,y1,H,DB,DT,ZB}=GF, dir=gx?1:-1, lerp=(a,b,t)
 
 /* ---------- weather looks: sky top/horizon/bottom, stars, tree tint, outer ground, pitch pool, fog ---------- */
 const V18_WX={
-  clear:  {sky:['#3f78c0','#a9cbe9','#7d9a86'],stars:0,tree:'#3d5a4f',treeK:1.0,gnd:'#2b5a31',pool:0.25,lamps:0},
-  golden: {sky:['#32467a','#f2a86a','#7a6a58'],stars:0,tree:'#3b3a3c',treeK:1.0,gnd:'#3a5228',pool:0.30,lamps:0.6},
-  cloud:  {sky:['#6f7c8b','#b4bec8','#7f8a84'],stars:0,tree:'#46564f',treeK:1.0,gnd:'#2c5432',pool:0.35,lamps:0.7},
-  rain:   {sky:['#4b5561','#86919c','#5b6660'],stars:0,tree:'#3c4a46',treeK:1.0,gnd:'#26482c',pool:0.45,lamps:0.85},
+  clear:  {sky:['#3f78c0','#a9cbe9','#7d9a86'],stars:0,tree:'#3d5a4f',treeK:1.0,gnd:'#33472f',pool:0.25,lamps:0},
+  golden: {sky:['#32467a','#f2a86a','#7a6a58'],stars:0,tree:'#3b3a3c',treeK:1.0,gnd:'#454528',pool:0.30,lamps:0.6},
+  cloud:  {sky:['#6f7c8b','#b4bec8','#7f8a84'],stars:0,tree:'#46564f',treeK:1.0,gnd:'#34452f',pool:0.35,lamps:0.7},
+  rain:   {sky:['#4b5561','#86919c','#5b6660'],stars:0,tree:'#3c4a46',treeK:1.0,gnd:'#2a3a2b',pool:0.45,lamps:0.85},
   snow:   {sky:['#8793a1','#c6d0da','#b8c2cb'],stars:0,tree:'#5d6a70',treeK:1.0,gnd:'#9aa7a6',pool:0.35,lamps:0.8},
-  fog:    {sky:['#8e98a3','#b1bac3','#9aa3a8'],stars:0,tree:'#7f8a90',treeK:1.0,gnd:'#2f5034',pool:0.40,lamps:0.85},
-  night:  {sky:['#02040b','#0e1a33','#050a10'],stars:1,tree:'#060a10',treeK:1.0,gnd:'#0d2414',pool:1.0,lamps:1}};
+  fog:    {sky:['#8e98a3','#b1bac3','#9aa3a8'],stars:0,tree:'#7f8a90',treeK:1.0,gnd:'#36463a',pool:0.40,lamps:0.85},
+  night:  {sky:['#02040b','#0e1a33','#050a10'],stars:1,tree:'#060a10',treeK:1.0,gnd:'#0b1a10',pool:1.0,lamps:1}};
 
 P3D_MODULES.push({name:'pitch',order:10,
   init(P){ const T=P.T, st=P.st, S=P.pitch={}; const tr=o=>P.track(o);
@@ -151,18 +151,20 @@ P3D_MODULES.push({name:'pitch',order:10,
           diffuseColor.rgb*=mix(1.0,pool,uPool); }`); };
     const pw=V18P.X1-V18P.X0, ph=V18P.Y1-V18P.Y0;
     const pitch=S.mesh=new T.Mesh(tr(new T.PlaneGeometry(pw,ph)),pm); pitch.rotation.x=-Math.PI/2; pitch.position.set((V18P.X0+V18P.X1)/2,0,(V18P.Y0+V18P.Y1)/2); pitch.receiveShadow=true; P.scene.add(pitch);
-    if(P.ground){ P.ground.position.y=-0.03; }
+    if(P.ground){ P.ground.position.y=-0.03; P.ground.scale.set(3.2,3.2,1); }
     /* ----- crest decal ----- */
     const ctex=v18sCrestCanvas(P,st); const cm=tr(new T.MeshLambertMaterial({map:ctex,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));
     const cr=new T.Mesh(tr(new T.PlaneGeometry(14,14)),cm); cr.rotation.x=-Math.PI/2; cr.position.set(52.5,0.004,34); cr.receiveShadow=true; cr.renderOrder=1; P.scene.add(cr);
     /* ----- markings ----- */
     S.mu={uPx:{value:0.0006}};
-    const mm=tr(new T.MeshLambertMaterial({color:'#f3f6ef',polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
+    const mm=tr(new T.MeshLambertMaterial({color:'#f3f6ef',transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
     mm.onBeforeCompile=sh=>{ Object.assign(sh.uniforms,S.mu);
-      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 aSide; attribute vec3 aTan; attribute float aBase; uniform float uPx;')
+      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute vec3 aSide; attribute vec3 aTan; attribute float aBase; attribute float aE; uniform float uPx; varying float vE;')
         .replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
         { vec4 wc=modelMatrix*vec4(position,1.0); vec3 tc=cameraPosition-wc.xyz; float dist=length(tc); vec3 vd=tc/dist; float fs=length(aSide-dot(aSide,vd)*vd);
-          float hw=max(aBase,uPx*dist/max(fs,0.12)); transformed+=aSide*hw+aTan*hw; }`); };
+          float hw=max(aBase,uPx*dist/max(fs,0.12)); transformed+=aSide*hw+aTan*hw; vE=aE; }`);
+      /* analytic edge anti-aliasing: crisp lines even without MSAA (tier C) */
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vE;').replace('#include <color_fragment>','#include <color_fragment>\n{ float e=abs(vE), fw=max(fwidth(vE),1e-4); diffuseColor.a*=clamp((1.0-e)/fw+0.3,0.0,1.0); }'); };
     const marks=new T.Mesh(tr(v18sMarkGeo(T)),mm); marks.receiveShadow=true; marks.renderOrder=2; marks.frustumCulled=false; P.scene.add(marks);
     /* ----- goals ----- */
     const fb=v18sGB(T); v18sGoalFrame(T,fb); const frame=new T.Mesh(tr(fb.geo()),tr(new T.MeshLambertMaterial({vertexColors:true}))); frame.castShadow=true; P.scene.add(frame);
@@ -181,7 +183,7 @@ P3D_MODULES.push({name:'pitch',order:10,
       fragmentShader:`uniform vec3 top; uniform vec3 hor; uniform vec3 bot; uniform float stars; varying vec3 vD;
         float h3(vec3 p){ p=fract(p*0.3183099+0.1); p*=17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
         void main(){ float y=vD.y; vec3 c=y>0.0?mix(hor,top,pow(clamp(y/0.55,0.0,1.0),0.7)):mix(hor,bot,clamp(-y*6.0,0.0,1.0));
-          if(stars>0.0&&y>0.06){ vec3 q=floor(vD*260.0); float s=h3(q); float tw=step(0.9965,s)*smoothstep(0.06,0.25,y); c+=vec3(0.9,0.93,1.0)*tw*stars*(0.35+0.65*h3(q+7.0)); }
+          if(stars>0.0&&y>0.06){ vec3 q=floor(vD*620.0); float s=h3(q); float tw=step(0.9982,s)*smoothstep(0.06,0.25,y); c+=vec3(0.9,0.93,1.0)*tw*stars*(0.35+0.65*h3(q+7.0)); }
           gl_FragColor=vec4(c,1.0);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -204,7 +206,7 @@ P3D_MODULES.push({name:'pitch',order:10,
   frame(P,st){ const S=P.pitch; if(!S) return; const T=P.T;
     if(S.wk!==P._wxKey) this.weather(P,st);
     /* markings: minimum half-width ~0.7 px whatever the zoom */
-    const cam=P.camera; S.mu.uPx.value=2*Math.tan(cam.fov*Math.PI/360)/Math.max(150,st.H)*(P.tier.aa?0.72:0.95);
+    const cam=P.camera; S.mu.uPx.value=2*Math.tan(cam.fov*Math.PI/360)/Math.max(150,st.H)*1.0;
     /* nets: follow the 2-D spring (netPoint) while disturbed, then settle back once */
     for(const N of S.nets){ const D=st.netD&&st.netD[N.gx]; const on=D&&D.c&&Math.abs(D.a)>0.003; if(!on&&!N.dirty) continue; const b=N.base, p=N.pos;
       if(on){ const cx=D.c.x, cy=D.c.y, cz=D.c.z, nx=D.n[0], ny=D.n[1], nz=D.n[2], a=D.a; for(let i=0;i<b.length;i+=3){ const x=b[i], y=b[i+1], z=b[i+2]; const d2=(x-cx)*(x-cx)+(y-cy)*(y-cy)+(z-cz)*(z-cz); const w=Math.exp(-d2/0.5)*a; p[i]=x+nx*w; p[i+1]=z+nz*w; p[i+2]=y+ny*w; } N.dirty=true; }
@@ -220,9 +222,11 @@ P3D_MODULES.push({name:'pitch',order:10,
     S.treeMat.color.set(L.tree); if(P.ground&&P.ground.material&&P.ground.material.color) P.ground.material.color.set(L.gnd);
     P.scene.background=new P.T.Color(L.sky[1]);
     /* light tuning on top of the core's per-weather set-up */
-    if(k==='night'){ P.sun.color.set('#fff2dc'); P.sun.intensity=2.7; P.hemi.color.set('#40527a'); P.hemi.groundColor.set('#13281a'); P.hemi.intensity=0.75; if(P.scene.fog){ P.scene.fog.color.set('#0a1224'); P.scene.fog.near=170; P.scene.fog.far=620; } }
+    if(k==='night'){ P.sun.color.set('#fff4e4'); P.sun.intensity=3.0; P.hemi.color.set('#3d4a60'); P.hemi.groundColor.set('#16301c'); P.hemi.intensity=0.6; if(P.scene.fog){ P.scene.fog.color.set('#0a1224'); P.scene.fog.near=170; P.scene.fog.far=620; } }
     else if(k==='golden'){ P.sun.intensity=2.5; P.hemi.intensity=0.95; }
-    else if(k==='clear'){ P.sun.intensity=2.6; }
-    if(P.scene.fog&&k!=='night') P.scene.fog.color.set(L.sky[1]); },
+    else if(k==='clear'){ P.sun.intensity=2.3; P.hemi.intensity=1.0; }
+    /* a distance haze in every weather so the outer ground melts into the horizon instead of ending on a hard edge */
+    if(!P.scene.fog) P.scene.fog=new P.T.Fog(L.sky[1],260,1100); else if(k!=='night') P.scene.fog.color.set(L.sky[1]); else P.scene.fog.color.set(L.sky[1]);
+    S.sky.bot.value.set(L.sky[1]); },
   resize(P){},
   dispose(P){ P.pitch=null; } });

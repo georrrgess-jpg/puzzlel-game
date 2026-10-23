@@ -25,12 +25,18 @@ const info=page=>page.evaluate(()=>{ const s=(App.live&&App.live.stage)||App.lab
     for(let i=0;i<4;i++){ await p.click('#lv canvas, canvas',{force:true}).catch(()=>{}); await wait(250); }
     await wait(3000); return p; };
   const setWx=async(p,wx)=>{ await p.evaluate(w=>{ const s=App.live&&App.live.stage; if(s){ s.wx=w; s.wxp=null; } },wx); await wait(2600); };
-  if(has('live')||has('tiers')){ const p=await live({viewport:{width:1440,height:900},deviceScaleFactor:1},'d',{tier:'A'});
+  if(has('live')||has('tiers')||has('views')){ const p=await live({viewport:{width:1440,height:900},deviceScaleFactor:1},'d',{tier:'A'});
     if(has('live')){ for(const [n,wx] of [['night',{k:'clear',night:true}],['clear',{k:'clear',night:false}],['golden',{k:'golden',night:false}],['rain',{k:'rain',night:false}]]){ await setWx(p,wx);
         await p.screenshot({path:OUT+`live-${n}.png`}); console.log('live',n,JSON.stringify(await info(p))); }
       await setWx(p,{k:'clear',night:true});
       /* a goal moment: hype up, so the stands erupt and the boards flash */
       await p.evaluate(()=>{ const s=App.live.stage; s.hype=1; if(s.popBulbs) s.popBulbs(); }); await wait(1500); await p.screenshot({path:OUT+'live-hype.png'}); console.log('live hype',JSON.stringify(await info(p))); }
+    if(has('views')){ /* inspection angles (not the broadcast camera): the camera pose is overridden for these frames only */
+      for(const [n,wx,pos,at] of [['v-stand-night',{k:'clear',night:true},[52,14,30],[52,6,-14]],['v-end-night',{k:'clear',night:true},[18,9,40],[-6,2,30]],['v-ground-night',{k:'clear',night:true},[52.5,60,150],[52.5,0,10]],['v-ground-day',{k:'clear',night:false},[52.5,60,150],[52.5,0,10]],['v-corner-golden',{k:'golden',night:false},[85,22,70],[30,8,0]],['v-net-bulge',{k:'clear',night:true},[12,4,44],[-1,1.2,33]]]){
+        if(n==='v-net-bulge') await p.evaluate(()=>{ const s=App.live.stage; s.updNet=function(){}; s.netD[0]={a:0.45,va:0,tgt:0,c:{x:-1.7,y:33.5,z:1.0},n:[-0.9,0,0.2],touch:s.now}; });
+        await p.evaluate(([w,pos,at])=>{ const s=App.live.stage; s.wx=w; const P=s._p3d; if(!P._camPose0) P._camPose0=P.camPose; P.camPose=function(){ const c=this.camera; c.fov=40; c.updateProjectionMatrix(); c.position.set(...pos); c.lookAt(...at); }; },[wx,pos,at]); await wait(2600);
+        await p.screenshot({path:OUT+n+'.png',clip:await p.evaluate(()=>{ const r=document.querySelector('canvas.v18-gl').getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; })}); console.log('view',n,JSON.stringify(await info(p))); }
+      await p.evaluate(()=>{ const P=App.live.stage._p3d; P.camPose=P._camPose0; }); }
     if(has('tiers')){ for(const t of ['A','B','C']){ await p.evaluate(t=>{ PREFS.rtier=t; const s=App.live.stage; if(s._p3d) s._p3d.dispose(); s._p3d=undefined; s.wx={k:'clear',night:true}; },t); await wait(3500);
         console.log('tier',t,JSON.stringify(await info(p))); await p.screenshot({path:OUT+`tier-${t}.png`}); } }
     await p.close(); }
