@@ -198,7 +198,7 @@ async function rp3dSuite(browser){
   ok(R.n===1&&R.same, `3-D live: the forced bicycle kick goal is replayed once, match state untouched`);
   ok(F.length>0&&F.every(f=>f.v186x), `3-D replay: the special's replay window is set (${F.length} frames)`);
   ok(eyes.length>0&&goal.length>0, `3-D replay: both angles play (scorer's view ${eyes.length} frames, behind the goal ${goal.length})`);
-  ok(eyes.length>0&&f0.tc!=null&&eyes.every(f=>f.now<=f0.tc-T.to+45&&f.act!=='v186x'), `3-D replay: the scorer's view ends as he leaves the ground (last eyes frame ${eyes.length?(Math.max(...eyes.map(f=>f.now))-(f0.tc-T.to)).toFixed(0):'-'} ms after take-off; never in the kick's pose)`);
+  ok(eyes.length>0&&f0.tc!=null&&eyes.every(f=>f.now<f0.tc-T.to&&f.act!=="v186x"), `3-D replay: the scorer's view ends as he leaves the ground (last eyes frame ${eyes.length?(Math.max(...eyes.map(f=>f.now))-(f0.tc-T.to)).toFixed(0):'-'} ms after take-off; never in the kick's pose)`);
   ok(F.every(f=>f.upY>0.5), `3-D replay: the camera is never upside down (min up.y ${F.length?Math.min(...F.map(f=>f.upY)).toFixed(2):'-'})`);
   ok(goal.some(f=>f.th<=-1.3), `3-D replay: the behind-the-goal pass shows him horizontal (min pitch ${goal.length?Math.min(...goal.map(f=>f.th)).toFixed(2):'-'})`);
   ok(errs.length===0, `3-D replay: no page errors${errs.length?' '+errs.slice(0,3).join(' | '):''}`);

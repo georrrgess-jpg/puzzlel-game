@@ -252,7 +252,7 @@ if(typeof v18Replay==='function'){ const _v186xReplay=v18Replay;
 function v186xRpAdjust(st,Q,K){ const B=Q.R&&Q.R.buf; if(!B||!B.length) return; const T=v186xDur(K.kind,K.ts), tc=K.tc, rel=K.rel!=null?K.rel:tc, tTO=tc-T.to;
   Q.v186x={kind:K.kind,s0:tTO-T.st*0.5,s1:rel+T.fall,f:V186X.slow};
   if(!(Q.two&&Q.win&&Q.win.length===2&&typeof v185Idx==='function')) return;
-  const b0=B[0].now; let a0=Q.win[0][0]; if(Q.crossT!=null) a0=Math.max(b0,Math.min(a0,Q.crossT-300)); const a1=Math.min(Q.win[0][1],tTO+40);
+  const b0=B[0].now; let a0=Q.win[0][0]; if(Q.crossT!=null) a0=Math.max(b0,Math.min(a0,Q.crossT-300)); const a1=Math.min(Q.win[0][1],tTO-10);
   const c0=Math.max(b0,Math.min(Q.win[1][0],tc-T.set*0.6)); Q.win[1]=[c0,Q.win[1][1]];
   if(Q.pass===1&&a1-a0>=400){ Q.win[0]=[a0,a1]; Q.t=Q.t0=a0; Q.t1=a1; Q.i=v185Idx(B,a0); }
   else { Q.pass=2; Q.cam='goal'; Q.t=Q.t0=c0; Q.t1=Q.win[1][1]; Q.i=v185Idx(B,c0); if(Q.cams) Q.cams=['goal']; if(typeof v185Caption==='function') v185Caption(st,Q); } }
