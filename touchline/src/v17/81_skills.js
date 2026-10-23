@@ -105,9 +105,10 @@ Stage.prototype.playMinute=function(out,M,W){ try{ const t=(M&&M.touch||[]).map(
   const r=_v186sPM.apply(this,arguments); const me=this._v186mt; Promise.resolve(r).then(()=>{ if(this._v186mt===me) this._v186mt=null; },()=>{}); return r; };
 const _v186sGoal=Stage.prototype.goalSequence;
 Stage.prototype.goalSequence=function(e){ this._v186mt=null; const solo=!!(e&&e.ty==='solo'), st=this; let oc=null;
-  if(solo) this._v186solo=true;
+  /* goal sequences (replayed, also from the scorer's eyes) get no random moves: only a solo goal's named move at the defender it beats */
+  this._v186gs=(this._v186gs||0)+1;
   if(solo&&V186S.on){ oc=this.onCaption; this.onCaption=function(t,k){ if(t==='SKILL!'){ const n=v186sSolo(st,e); if(n) t=n; } return oc.apply(this,arguments.length>1?[t,k]:[t]); }; }
-  const r=_v186sGoal.apply(this,arguments); const back=()=>{ if(oc&&st.onCaption!==oc) st.onCaption=oc; st._v186solo=false; }; if(solo) Promise.resolve(r).then(back,back); return r; };
+  const r=_v186sGoal.apply(this,arguments); const back=()=>{ if(oc&&st.onCaption!==oc) st.onCaption=oc; st._v186gs=Math.max(0,(st._v186gs||1)-1); }; Promise.resolve(r).then(back,back); return r; };
 /* a solo goal's "SKILL!" moment: with probability 0.7 a named straight move from his repertoire replaces the hurdle */
 function v186sSolo(st,e){ if(!v186sAllowedSolo(st)) return null; const now=st.now; let pl=null, beat=null;
   for(const q of st.players.values()){ if(q.side===e.s&&q.jumpT===now) pl=q; if(q.side!==e.s&&q.slideT===now) beat=q; }
@@ -129,7 +130,7 @@ Stage.prototype.dribble=function(p,x,y,ms){ const T=this._v186mt; let keep=true;
 /* the leg has begun (p.ov is its target): decide */
 function v186sLegStart(st,L){ const p=L.p, now=st.now; L.arm=null; const Z=st._v186st||(st._v186st={legs:0,can:0,cool:0,fit:0,pick:0,arm:0,trig:0,rem:0,lost:0,S:[]});
   Z.legs++; const pend=p.v186pend; p.v186pend=null; if(p.v186k||!v186sCan(st,p)) return; Z.can++; const force=st._v186force||null;
-  if(!pend&&!force&&st._v186solo) return; /* a solo goal's run: only the named move at the beaten defender */
+  if(!pend&&!force&&st._v186gs) return; /* inside a goal sequence: only a solo goal's named move */
   if(!pend&&!force&&now-(p.v186last!=null?p.v186last:-9e9)<st.D(V186S.cool)){ Z.cool++; return; }
   const R=v186sRate(st,p); const mv=Math.hypot(p.vx||0,p.vy||0); const h=mv>0.8?Math.atan2(p.vy,p.vx):v186sYaw(p);
   const tg=Math.atan2(L.y-p.y,L.x-p.x), da=v186sAng(tg-h), turn=Math.abs(da); const hx=Math.cos(h), hy=Math.sin(h);
@@ -375,9 +376,10 @@ function v186sPoseC(st,p,P){ if(P.act!=='loco'&&P.act!=='idle') return; if(v186s
     else if(k==='cruyff'){ const iK=sc>0?0:1; const fk=v186sBump(u,0,0.3,0.42,0.6); const hk=v186sBump(u,0.35,0.45,0.6,0.85);
       lean=-0.06*fk+0.06*hk; tilt=0.25*fk; roll=-sc*0.08*A*hk; hip=-0.06*hipK*hk-0.03*fk; ht=sc*0.3*hk;
       hand(1-iK,0.22,1.42,(iK?-1:1)*0.62,fk); hand(iK,-0.32,1.18,(iK?1:-1)*0.36,fk); hand(1-iK,0.1,1.2,(iK?-1:1)*0.5,hk*(1-fk)); } }
+  /* the first-person replay camera sits in his head (its track is built from his position, yaw and lean): his feet and hands
+     move, his body and head do not */
+  const Q=st._rp; if(Q&&Q.two&&Q.cam==='eyes'&&Q.sc===p){ roll=0; hip=0; lean=0; ht=0; tilt=0; }
   P.hipU+=hip*env; P.lean+=lean*env; P.headTurn=(P.headTurn||0)+ht*env; P.headTilt=(P.headTilt||0)+tilt*env;
-  /* the first-person replay camera sits in his head: no body roll for him there */
-  const Q=st._rp; if(Q&&Q.two&&Q.cam==='eyes'&&Q.sc===p) roll=0;
   if(P.act==='idle') P.act='loco';
   P.v186rb=roll*env; P.v186rw=env; }
 function v186sPoseD(st,p,P){ if(P.act!=='loco'&&P.act!=='idle') return; if(v186sTackling(p,st.now)) return;
