@@ -67,7 +67,9 @@ async function v186rOffRun(st,R){ const {e,p,s,dir}=R; const W=st._v186W||1500;
   const hold=(q,x,y)=>{ const ov={x,y}; q.ov=ov; R.holds.set(q,ov); };
   hold(o,o.x,o.y); const L=st.offLine(s);
   /* everyone in the defending team holds (at 8x a midfielder covers 15 m while the lines show, so nobody may drift into the line) */
-  for(const q of st.players.values()){ if(q.side===s||q.off) continue; const ahead=dir*(L-q.x); q.chase=null; q.trail=null; q.meet=null; hold(q,!q.gk&&ahead>-0.5&&ahead<6?clamp(q.x-dir*1,2,103):q.x,q.y); }
+  /* a line camped on its own goal line pushes out further (a runner cannot be shown beyond it inside the six-yard box) */
+  const gx=s===0?105:0, push=clamp(dir*(L-(gx-dir*8)),1,8);
+  for(const q of st.players.values()){ if(q.side===s||q.off) continue; const ahead=dir*(L-q.x); q.chase=null; q.trail=null; q.meet=null; hold(q,!q.gk&&ahead>-0.5&&ahead<6?clamp(q.x-dir*push,2,103):q.x,q.y); }
   /* the runner goes for the line; update() keeps his target at the live line + m */
   const oy=clamp(lerp(p.y,34,0.25),6,62); p.chase=null; p.meet=null; p.trail=null;
   R.pov={x:clamp(st.offLine(s)+dir*R.m,3,102),y:oy}; p.ov=R.pov; p.hurry=true; p.offRun=true; st._v186off=R;
