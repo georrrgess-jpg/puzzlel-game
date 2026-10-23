@@ -4,15 +4,19 @@
       walking with it (both feet tap it along), 2 at a jog (the same foot), 3 at a sprint (feet alternate). After a touch
       the ball runs ahead of the foot on a constant-deceleration profile, lead = L*4q(1-q) over the touch interval q in
       [0,1], so it leaves the boot quickly, slows and is met again; the peak L grows with speed. A sharp change of direction
-      brings the next touch forward, and the lead shrinks while he turns so the ball never swings wide of him. When the lead
-      has to come back (he plants to strike, slows or stops) it shrinks no faster than he moves: the ball stops, it never rolls
-      back into his feet.
+      brings the next touch forward (never inside the foot's reach window, and without a jump in the lead), and the lead shrinks
+      while he turns so the ball never swings wide of him. With a defender within 4 m the touches are shorter and closer. When
+      the lead has to come back (he plants to strike, pulls up at the end of a run, stops) it shrinks about as fast as he moves
+      onto it: the ball slows and stops rather than rolling back into his feet.
    2. The touching foot meets the ball: over the last third of a contact before a touch and the first tenth of a stride after it (before that foot lands), that
       foot's target is pulled onto the back of the ball (both in 2-D and 3-D, which share poseOf). A received pass is met the
-      same way: the nearer foot reaches for the ball over its last ~140 ms and gives a little as it arrives (cushion).
+      same way: one foot, chosen once per reception (the ball side, else the swinging foot, never a planted one), reaches for the
+      ball over its last ~140-220 ms and gives a little as it arrives (cushion). All of these are offsets from the base pose that
+      move at a limited rate (v184Limit), so no foot target ever jumps; none is applied to a ball behind him or during a tackle.
    3. Strikes make contact when the ball leaves: the stage releases the ball at the end of the wind-up (kickT + kickW), so
       the swing is retimed to backswing (first 62%), downswing accelerating into the ball (to 100%), then the follow-through;
-      the contact point is the back of the ball and the standing foot is planted beside it.
+      the contact point is the back of the ball (latched in the first quarter of the wind-up, never mid-swing) and the standing
+      foot is planted on a fixed spot of turf beside it.
    Nothing the simulation, the tests or the event timing read is written: only dribLead's return value (the ball's drawn
    offset), cosmetic fields on the player (v184*) and the pose. Switch: V184T.on. */
 const V184T={on:true, uc:0.9};
@@ -23,27 +27,31 @@ function v184Cpos(p){ return (p.ph||0)/Math.PI-2*V184T.uc; }
 const v184Foot=m=>((Math.round(m)%2)+2)%2;
 
 const _v184DribLead=Stage.prototype.dribLead;
+/* nearest opponent of a carrier (metres) */
+function v184Press(st,o){ let d=1e9; for(const q of st.players.values()){ if(q.side===o.side||q.off||q.ref) continue; const e=Math.hypot(q.x-o.x,q.y-o.y); if(e<d) d=e; } return d; }
 Stage.prototype.dribLead=function(o,sp,dt,now){
   if(!V184T.on||this.rm) return _v184DribLead.apply(this,arguments);
   let S=o.v184; const c=v184Cpos(o); const mv=Math.hypot(o.vx||0,o.vy||0), hx=mv>0.3?o.vx/mv:null, hy=mv>0.3?o.vy/mv:null;
   if(!S||now-S.t>220){ /* a fresh possession (the receiving touch): the interval starts now */
-    const n=v184Cad(sp); S=o.v184={t:now,c0:c,next:Math.ceil(c+n*0.75-1e-6),L:v184Peak(sp),out:0,hx,hy,wait:false}; }
+    const n=v184Cad(sp); S=o.v184={t:now,c0:c,next:Math.ceil(c+n*0.75-1e-6),L:v184Peak(sp),out:0,hx,hy,wait:false,qa:null,qc:0}; }
   S.t=now;
   const dribbling=sp>1.6&&!o.plant&&!this.so;
   let want=0;
   if(dribbling){
-    if(hx!=null&&S.hx!=null&&S.hx*hx+S.hy*hy<0.8&&c-S.c0>0.3*(S.next-S.c0)) S.next=Math.min(S.next,Math.floor(c)+1); /* turning: touch it again at the next contact */
-    if(c>=S.next){ const m=Math.floor(c); const n=v184Cad(sp); S.c0=m; S.next=m+n; S.L=v184Peak(sp); S.hx=hx; S.hy=hy; S.wait=false;
-      o.v184T=now; o.v184F=v184Foot(m); this.snd('touch'); }
-    const q=Math.max(0,Math.min(1,(c-S.c0)/Math.max(0.5,S.next-S.c0)));
+    const q0=()=>S.qa!=null?S.qa+(1-S.qa)*(c-S.qc)/Math.max(0.3,S.next-S.qc):(c-S.c0)/Math.max(0.5,S.next-S.c0);
+    /* turning: touch it again soon, but never inside the foot's reach window, and without a jump in the lead */
+    if(hx!=null&&S.hx!=null&&S.hx*hx+S.hy*hy<0.8&&c-S.c0>0.3*(S.next-S.c0)){ const nx=Math.max(Math.floor(c)+1,Math.ceil(c+0.34)); if(nx<S.next){ const q=Math.max(0,Math.min(1,q0())); S.qa=q; S.qc=c; S.next=nx; } }
+    if(c>=S.next){ const m=Math.floor(c); let n=v184Cad(sp), L=v184Peak(sp); if(v184Press(this,o)<4){ n=Math.min(n,2); L*=0.55; } /* tight control with a defender close */
+      S.c0=m; S.next=m+n; S.L=L; S.hx=hx; S.hy=hy; S.wait=false; S.qa=null; o.v184T=now; o.v184F=v184Foot(m); this.snd('touch'); }
+    const q=Math.max(0,Math.min(1,q0()));
     let al=1; if(hx!=null&&S.hx!=null) al=Math.max(0.25,S.hx*hx+S.hy*hy);
     want=S.wait?0:S.L*4*q*(1-q)*al;
     /* he is about to pull up (the end of his run): the last touches shrink so the ball stops at his feet, not a yard beyond */
     if(o.ov&&isFinite(o.ov.x)) want=Math.min(want,Math.max(0,Math.hypot(o.ov.x-o.x,o.ov.y-o.y)-0.15)*0.6); }
   else { /* standing on it, planting or shielding: when he sets off again the first contact is a touch */
-    S.wait=true; S.c0=c; S.next=Math.ceil(c+0.2); }
-  /* the lead comes back no faster than he moves (the ball slows to a stop; it never rolls back) */
-  const back=(Math.max(1,mv)*0.95+0.35)*dt; S.out=Math.max(want,S.out-back);
+    S.wait=true; S.c0=c; S.next=Math.ceil(c+0.2); S.qa=null; }
+  /* the lead comes back about as fast as he moves onto it (the ball slows to a stop; at most a slow roll back to a stopped man) */
+  const back=(mv*0.95+0.25)*dt; S.out=Math.max(want,S.out-back);
   if(!dribbling) o.dribD=0;
   return S.out; };
 
@@ -55,40 +63,77 @@ const V184_BR=0.11; /* ball radius, m */
 function v184Meet(F,i,bf,bl,hs,w,up,give){ if(!(w>0)) return; const o=F[i]; if(!o) return; const sd=i?1:-1;
   let tf=bf-(V184_BR+0.07+(give||0))/hs, tl=bl-sd*0.02/hs; tf=Math.max(-0.2,Math.min(0.62,tf)); tl=Math.max(-0.42,Math.min(0.42,tl)); if(tl*sd<0.02) tl=sd*0.02;
   F[i]={f:o.f+(tf-o.f)*w,u:o.u+((up==null?0.07:up)-o.u)*w,l:o.l+(tl-o.l)*w}; }
+/* which foot takes a pass: chosen once per reception (p.v184R) - the ball side when it is clearly to one side, else the foot that is
+   swinging (never a planted one), else the right */
+function v184RcvFoot(st,p,key,bl){ const R=p.v184R; if(R&&R.key===key) return R.foot; let foot=1;
+  if(Math.abs(bl)>0.08) foot=bl>0?1:0;
+  else { const sp=(p.spd||0)/Math.max(1,st.spdMul||1); if(sp>0.5){ const G=gaitOf(Math.min(9,p.gv!=null?p.gv:sp),st.spdMul||1), Dd=Math.min(0.68,G.L/G.cw); const ph01=(((p.ph||0)/(2*Math.PI))%1+1)%1;
+      const u1=(ph01+0.5)%1; foot=u1>=Dd?1:ph01>=Dd?0:v184Foot(Math.ceil(v184Cpos(p))); } }
+  p.v184R={key,foot,t:st.now}; return foot; }
+const v184Ago=(now,t)=>t==null?1e9:now-t;
+/* the layer's foot offsets (final minus base pose) move at most V184T.rate body units per stage ms; repeated calls at the same
+   instant reuse the last offsets; after a gap (off screen, a kick) they restart from zero */
+V184T.rate=0.006;
+function v184Limit(p,F,B0,B1,now,met){ let L=p.v184L; if(!L){ if(!met) return; L=p.v184L={t:now,o:[[0,0,0],[0,0,0]]}; }
+  const gap=now-L.t; if(gap>400){ L.o=[[0,0,0],[0,0,0]]; L.t=now; }
+  const dt=Math.max(0,now-L.t), mx=Math.min(0.25,V184T.rate*dt); let any=false;
+  for(let i=0;i<2;i++){ const Bs=i?B1:B0, Fi=F[i], o=L.o[i];
+    if(dt>0){ const d0=Fi.f-Bs.f-o[0], d1=Fi.u-Bs.u-o[1], d2=Fi.l-Bs.l-o[2]; const dl=Math.hypot(d0,d1,d2), k=dl>mx?mx/dl:1; o[0]+=d0*k; o[1]+=d1*k; o[2]+=d2*k; }
+    F[i]={f:Bs.f+o[0],u:Bs.u+o[1],l:Bs.l+o[2]}; if(Math.abs(o[0])+Math.abs(o[1])+Math.abs(o[2])>1e-4) any=true; }
+  if(dt>0) L.t=now; if(!any&&!met) p.v184L=null; }
 
 const _v184Pose=Stage.prototype.poseOf;
 Stage.prototype.poseOf=function(p,isRef){
   if(isRef||!V184T.on||this.rm||!p) return _v184Pose.apply(this,arguments);
   const now=this.now, b=this.ball, own=this.own===p&&!this.hands&&this.headBall!==p&&!this.placed;
   const kt=now-(p.kickT||-9e9), W=p.kickW||0, Fd=p.kickF||260, kk=p.kickK; const kicking=kt>=0&&kt<W+Fd&&kk&&kk!=='head'&&kk!=='throw'&&kk!=='punt';
-  /* the stage's own receiving prod (front foot only) is replaced by the reach below */
-  const tT=p.touchT, TD=Math.max(70,this.D(170)); const rcv=own&&!kicking&&tT!=null&&now-tT>=0&&now-tT<TD;
-  let P; if(rcv){ p.touchT=-9e9; try{ P=_v184Pose.apply(this,arguments); } finally{ p.touchT=tT; } } else P=_v184Pose.apply(this,arguments);
+  /* the stage's own receiving prod (front foot only) is replaced by the cushion below; not during a plant-turn or a tackle's own pose */
+  const tT=p.touchT, TD=Math.max(70,this.D(170));
+  const tackling=Math.min(v184Ago(now,p.v18slT),v184Ago(now,p.v18icT),v184Ago(now,p.v18pkT),v184Ago(now,p.v18shT))<1100;
+  let rcv=own&&!kicking&&!p.plant&&!tackling&&tT!=null&&now-tT>=0&&now-tT<TD;
+  let P; if(rcv){ p.touchT=-9e9; try{ P=_v184Pose.apply(this,arguments); } finally{ p.touchT=tT; }
+    if(P&&P.act!=='loco'&&P.act!=='idle'){ rcv=false; P=_v184Pose.apply(this,arguments); } }
+  else P=_v184Pose.apply(this,arguments);
   if(!P||!P.feet||!P.feet[0]||!P.feet[1]) return P;
   const F=P.feet;
-  /* 3. strikes: the contact point is read from the ball until it leaves, then kept for the follow-through */
-  if(kicking&&P.act==='kick'){ const big=kk==='shot'||kk==='loft'; const [bf,bl,hs]=v184Body(p,b.x,b.y);
+  /* 3. strikes: the contact is latched on the first frames of the wind-up (never mid-swing); the kicking foot then follows the
+     ball until it leaves, and the standing foot is planted at a fixed spot on the turf beside it */
+  if(kicking&&P.act==='kick'){ p.v184L=null; const big=kk==='shot'||kk==='loft'; const [bf,bl,hs]=v184Body(p,b.x,b.y);
     let K=p.v184K&&p.v184K.k===p.kickT?p.v184K:null;
-    if(kt<W&&this.own===p&&!this.hands&&(b.z||0)<0.5&&bf>0.1&&bf<1.15&&Math.abs(bl)<0.55){ K=p.v184K={k:p.kickT,f:Math.max(0.12,Math.min(0.62,bf-(V184_BR+0.06)/hs)),l:Math.max(-0.1,Math.min(0.3,bl)),pf:Math.max(-0.05,Math.min(0.5,bf-0.12/hs)),pl:Math.min(-0.16,bl-0.25/hs)}; }
-    const near=!!K; const con=near?{f:K.f,u:0.09,l:K.l}:{f:0.3,u:0.1,l:0.06};
+    if(!K&&kt<W&&kt<=Math.max(30,W*0.25)&&this.own===p&&!this.hands&&(b.z||0)<0.5&&bf>0.1&&bf<1.9&&Math.abs(bl)<0.6){
+      const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw);
+      K=p.v184K={k:p.kickT,t0:kt,f:0,l:0,px:b.x-ca*0.12+sa*0.25,py:b.y-sa*0.12-ca*0.25}; }
+    const near=!!K;
+    if(near&&kt<W&&this.own===p){ K.f=Math.max(0.12,Math.min(0.62,bf-(V184_BR+0.06)/hs)); K.l=Math.max(-0.1,Math.min(0.3,bl)); }
+    const ramp=near?smooth(Math.min(1,Math.max(0,kt-K.t0)/Math.max(1,W*0.5))):0;
+    const con=near?{f:K.f,u:0.09,l:lerp(0.06,K.l,ramp)}:{f:0.3,u:0.1,l:0.06};
     const back={f:-0.46,u:big?0.5:0.3}, top={f:big?0.62:0.48,u:big?0.9:0.42,l:con.l}, rest={f:0.06,u:0,l:0.06};
     let ff,fu,fl;
     if(kt<W){ const s=kt/W; if(s<0.62){ const q=smooth(s/0.62); ff=lerp(0.04,back.f,q); fu=lerp(0,back.u,q); fl=lerp(0.06,con.l,q); }
       else { const q=(s-0.62)/0.38, e=q*q; ff=lerp(back.f,con.f,e); fu=lerp(back.u,con.u,e)+0.05*Math.sin(Math.PI*q); fl=con.l; } }
     else { const u=(kt-W)/Fd; if(u<0.4){ const q=smooth(u/0.4); ff=lerp(con.f,top.f,q); fu=lerp(con.u,top.u,q); fl=con.l; } else { const q=smooth((u-0.4)/0.6); ff=lerp(top.f,rest.f,q); fu=lerp(top.u,rest.u,q); fl=lerp(top.l,rest.l,q); } }
     F[1]={f:ff,u:fu,l:fl};
-    if(near){ /* the standing foot is planted beside the ball through the downswing and contact */
-      const pw=kt<W?smooth(Math.min(1,kt/(W*0.62))):1-smooth(Math.min(1,(kt-W)/(Fd*0.5)));
-      F[0]={f:lerp(F[0].f,K.pf,pw),u:F[0].u*(1-pw),l:lerp(F[0].l,K.pl,pw)}; }
+    if(near){ /* the standing foot: a fixed spot on the turf beside the ball, reached over the backswing, held through contact */
+      const [pf0,pl0]=v184Body(p,K.px,K.py); const pf=Math.max(-0.3,Math.min(0.7,pf0)), pl=Math.max(-0.5,Math.min(-0.12,pl0));
+      const pw=kt<W?ramp:1-smooth(Math.min(1,(kt-W)/(Fd*0.5)));
+      F[0]={f:lerp(F[0].f,pf,pw),u:F[0].u*(1-pw),l:lerp(F[0].l,pl,pw)}; }
     return P; }
-  /* 2a. receiving: the nearer foot reaches for the arriving ball over its last ~140 ms */
-  const f=this.fl; if(f&&f.home===p&&!f.hands&&!f.head&&!f.phys&&!kicking&&(P.act==='loco'||P.act==='idle')){ const rem=f.t0+f.dur-now, A=Math.max(90,this.D(140));
-    if(rem>=0&&rem<A&&(b.z||0)<0.6){ const [bf,bl,hs]=v184Body(p,b.x,b.y); v184Meet(F,bl>=0?1:0,Math.min(bf,0.6),bl,hs,smooth(1-rem/A)*0.9,0.06+Math.min(0.25,b.z||0)); } return P; }
-  if(!own) return P;
-  const [bf,bl,hs]=v184Body(p,b.x,b.y);
-  if(rcv){ const u=(now-tT)/TD; v184Meet(F,bl>=0?1:0,bf,bl,hs,(1-smooth(u))*0.9,0.06,0.05*smooth(u)); }
-  /* 2b. dribble touches: the touching foot meets the back of the ball around the touch */
-  const S=p.v184; if(S&&now-S.t<160&&P.act==='loco'){ const c=v184Cpos(p);
-    const pre=S.next-c; if(pre>=0&&pre<0.34){ const w=smooth(1-pre/0.34); v184Meet(F,v184Foot(S.next),bf,bl,hs,w,0.06); P.headTilt=(P.headTilt||0)+0.1*w; } /* eyes down onto the ball for the touch */
-    const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07); P.headTilt=(P.headTilt||0)+0.1*w; } }
+  /* 2. reaches, cushions and dribble touches: computed as offsets from the base pose, then rate-limited (v184Limit) so a foot target
+     never jumps, whatever the ball does (a pass landing, a ball dropping into reach, a sharp cut) */
+  const f=this.fl, home=f&&f.home===p&&!f.hands&&!f.head&&!f.phys;
+  if(!own&&!home&&!p.v184L) return P;
+  const B0=F[0], B1=F[1]; let met=false;
+  if(home&&!kicking&&!tackling&&(P.act==='loco'||P.act==='idle')){ /* 2a. receiving: one foot (chosen once) reaches for the arriving ball */
+    const rem=f.t0+f.dur-now, A=Math.max(140,this.D(220));
+    if(rem>=0&&rem<A&&(b.z||0)<0.9){ const [bf,bl,hs]=v184Body(p,b.x,b.y); if(bf>0.1){ const i=v184RcvFoot(this,p,f.t0,bl); p.v184Rt=now;
+      v184Meet(F,i,Math.min(bf,0.6),bl,hs,smooth(1-rem/A)*0.9,0.06+Math.min(0.25,b.z||0)); met=true; } } }
+  else if(own){ const [bf,bl,hs]=v184Body(p,b.x,b.y);
+    if(bf>0.1){
+      if(rcv){ const u=(now-tT)/TD; const R=p.v184R, reached=R&&v184Ago(tT,p.v184Rt)<60; const i=reached?R.foot:v184RcvFoot(this,p,'t'+tT,bl);
+        const w=(1-smooth(u))*0.9*(reached?1:smooth(Math.min(1,u/0.25))); v184Meet(F,i,bf,bl,hs,w,0.06,0.05*smooth(u)); met=true; }
+      /* 2b. dribble touches: the touching foot meets the back of the ball around the touch (held until the touch registers) */
+      const S=p.v184; if(S&&now-S.t<160&&P.act==='loco'){ const c=v184Cpos(p);
+        const pre=S.next-c; if(pre>-0.5&&pre<0.34){ const w=pre<=0?1:smooth(1-pre/0.34); v184Meet(F,v184Foot(S.next),bf,bl,hs,w,0.06); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } /* eyes down onto the ball for the touch */
+        else { const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } } } } }
+  v184Limit(p,F,B0,B1,now,met);
   return P; };
