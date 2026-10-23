@@ -71,6 +71,10 @@ async function labRatings(b){ const page=await newPage(b); await page.goto(DIST+
       for(let i=0;i<6;i++){ st.fl=null; st.own=fw; st.hands=false; fw.ov={x:58,y:34}; df.ov={x:63.5,y:34}; await st.until(()=>dist2(fw,fw.ov)<0.4&&dist2(df,df.ov)<0.4,3000); fw.v186fT=null; df.ov=null;
         const k0=V186R.log.feint.length; await st.dribble(fw,70,34,900); const f=V186R.log.feint[k0]; if(!f) continue; n++; if(f.beat) beat++; if(fw.x>df.x+0.3) past++; }
       fw.ov=null; st.demoCalm=true; return {n,beat,past}; };
+    /* R6 positioning: how close a pressing defender gets to a carrier who stands still */
+    const press=async(tkl)=>{ df.v186r_tkl=tkl; st.demoCalm=false; st.fl=null; st.own=fw; st.hands=false; fw.ov={x:60,y:34}; df.ov={x:66,y:36}; await st.until(()=>dist2(fw,fw.ov)<0.4&&dist2(df,df.ov)<0.4,3000); df.ov=null; await st.wait(1600);
+      let s=0,n=0; for(let i=0;i<20;i++){ s+=dist2(fw,df); n++; await st.wait(40); } fw.ov=null; st.demoCalm=true; return +(s/n).toFixed(2); };
+    out.pressHi=await press(95); out.pressLo=await press(30);
     out.runHi=await run(99,30); out.runLo=await run(30,99); fw.v186r_ctrl=df.v186r_tkl=null; V186R.feint=feint0;
     /* R4 first touch: the same pass received by a poor and a clean controller */
     const mid=P.find(p=>p.pid==='L07'); const touch=async(ctrl)=>{ mid.v186r_pace=60; mid.v186r_ctrl=ctrl; const pk=[];
@@ -124,6 +128,7 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
     ok(R.duelHi.tries>=15&&R.duelHi.beats/R.duelHi.tries>=0.85, `take-on, control 95 vs tackling 40: tries ${R.duelHi.tries}/60, beats ${R.duelHi.beats}`);
     ok(R.duelLo.tries<=20&&R.duelLo.beats/Math.max(1,R.duelLo.tries)<=0.15, `take-on, control 40 vs tackling 95: tries ${R.duelLo.tries}/60, beats ${R.duelLo.beats}`);
     ok(R.runHi.n>0&&R.runHi.past>=Math.ceil(R.runHi.beat*0.6)&&(R.runLo.n===0||R.runLo.past<=R.runLo.n-R.runLo.beat), `dribbles past a defender: strong dribbler ${R.runHi.past}/${R.runHi.n} (beat ${R.runHi.beat}), weak ${R.runLo.past}/${R.runLo.n} (beat ${R.runLo.beat})`);
+    ok(R.pressLo-R.pressHi>=0.35, `a good tackler presses tighter: tackling 95 stands ${R.pressHi} m from the carrier, tackling 30 ${R.pressLo} m`);
     const mL=Math.max(...R.ftLo), mH=Math.max(...R.ftHi), avg=a=>a.reduce((s,v)=>s+v,0)/a.length;
     ok(avg(R.ftLo)-avg(R.ftHi)>=0.35&&mL<=1.4, `first touch: control 20 runs ${avg(R.ftLo).toFixed(2)} m off the foot (max ${mL}), control 95 ${avg(R.ftHi).toFixed(2)} m (max ${mH})`);
     const M=R.miss; ok(M.hiWide<=1.2&&M.loWide>=2.0, `wide misses from 20 m: finishing 95 ${M.hiWide.toFixed(2)} m beyond the post, finishing 30 ${M.loWide.toFixed(2)} m`);

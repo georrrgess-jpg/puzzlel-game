@@ -9,8 +9,8 @@
      (a stab of the leg, hips turned) and is slowed for a moment; a defender who holds makes the carrier check back. The
      carrier always keeps the ball (the engine's touch list says so);
    - R4 first touch: a footed reception by a poor controller runs up to 0.9 m further off his foot and he steps onto it;
-   - R6 defender reaction: when the carrier cuts sharply, a poor tackler pressing him is caught flat-footed for a moment;
-     a good one closes a little faster.
+   - R6 defender positioning and reaction: a good tackler pressing the carrier gets tight and closes a little faster; a
+     poor one stands up to 0.8 m further off, and when the carrier cuts sharply he is caught flat-footed for a moment.
    R5 (shot technique on misses) is in 79_realism.js with the close-range miss fix.
    Ratings live on each mover as primitive fields p.v186r_pace/ctrl/fin/tkl/str/kp (5-99), so replays copy them and a test
    can override them. A player with no record (the Lab, the menu demo) is neutral: none of the effects apply to him.
@@ -59,8 +59,11 @@ function v186rK(st,p,urgent){ if(!urgent||!v186rLive(st)||p.ref||p.ar||p.gk||p.c
   return k; }
 
 const v186rWant=Stage.prototype.v17want;
-Stage.prototype.v17want=function(p,v,d,sp,urgent){ const k=v186rK(this,p,urgent); if(k===1) return v186rWant.apply(this,arguments);
-  return v186rWant.call(this,p,v*k,d,sp,urgent); };
+Stage.prototype.v17want=function(p,v,d,sp,urgent){ const k=v186rK(this,p,urgent);
+  /* positioning: a poor tackler pressing the carrier stops short (up to 0.8 m further off); a good one gets tight */
+  let so=0; if(p===this._v186rPres&&urgent&&!p.ov&&!p.chase&&v186rHas(p)&&v186rLive(this)) so=0.8*(1-v186rA(this,p,'tkl'));
+  if(k===1&&!so) return v186rWant.apply(this,arguments);
+  return v186rWant.call(this,p,v*k,Math.max(0,d-so),sp,urgent); };
 
 /* eta (a timeout budget) follows the same factor, so a slower runner is never cut short */
 const v186rEta=Stage.prototype.eta;
