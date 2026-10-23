@@ -17,7 +17,7 @@
    defender reads it (barely reacts) and his tackle follows as before.
    State is primitive fields on the movers (v186*), so the goal replays (68, 76) show the moves.
    Switch: V186S.on. Tuning: V186S.rate (chance multiplier), V186S.bite (defender steps). Lab: 'skills' and 'skillsmod'. */
-const V186S={on:true, rate:0.9, solo:0.7, bite:true, cool:3500, minTs:0.45};
+const V186S={on:true, rate:1.2, solo:0.7, bite:true, cool:3500, minTs:0.45};
 const V186S_LV={V:1,JV:0.85,MOD:0.7};
 const V186S_MV={
   feint:{nc:1.75,trig:2.7,turn:0,min:{V:0,JV:0,MOD:0},w:1.0,go:0.5,cap:'BODY FEINT!'},
@@ -49,12 +49,14 @@ function v186sBite(flair,dsk,q){ return clamp(0.55+(flair-dsk)/45,0.12,1)*(0.55+
 /* ---------- the pure picker (unit-tested): repertoire by level and flair, situation fit, chance per leg ---------- */
 function v186sKnows(k,lvl,flair){ const m=V186S_MV[k].min[lvl]; return m!=null&&flair>=m; }
 function v186sRepertoire(lvl,flair){ return V186S_KINDS.filter(k=>v186sKnows(k,lvl,flair)); }
-/* S: {turn (rad between his heading and the leg), d (defender ahead, m, or null), sp (real speed m/s), n5 (opponents within 5 m)} */
+/* S: {turn (rad between his heading and the leg), d (straight: the defender ahead, m; turn: the nearest opponent within 3.5 m, the man he
+   turns away from; or null), sp (real speed m/s), n5 (opponents within 5 m)}. Straight moves need the defender 1.4-1.6 m away or more:
+   a feint or stepover done toe-to-toe is not a footballer's choice. */
 function v186sFits(k,S){ const t=S.turn, d=S.d;
-  switch(k){ case 'feint': return t<0.5&&d!=null&&d<6;
-    case 'step1': return t<0.5&&d!=null&&d<6&&S.sp<5.6;
-    case 'step2': return t<0.5&&d!=null&&d<6&&S.sp<5.0;
-    case 'roll': return t<0.5&&d!=null&&d<4.5&&S.sp<4.6;
+  switch(k){ case 'feint': return t<0.5&&d!=null&&d>=1.4&&d<6;
+    case 'step1': return t<0.5&&d!=null&&d>=1.6&&d<6&&S.sp<5.6;
+    case 'step2': return t<0.5&&d!=null&&d>=1.6&&d<6&&S.sp<5.0;
+    case 'roll': return t<0.5&&d!=null&&d>=1.6&&d<4.5&&S.sp<4.6;
     case 'cut': return t>=0.9&&t<1.6;
     case 'chop': return t>=1.5&&t<2.4;
     case 'drag': return t>2.2;
@@ -65,7 +67,8 @@ function v186sChance(lvl,q,turn){ return ({V:0.45,JV:0.32,MOD:0.2}[lvl]||0.3)*(0
 function v186sPick(lvl,flair,S,rnd,force){ rnd=rnd||Math.random; const q=v186sQ(flair,lvl);
   if(force){ return v186sKnows(force,lvl,flair)||lvl==='lab'?force:null; }
   const C=v186sRepertoire(lvl,flair).filter(k=>v186sFits(k,S)); if(!C.length) return null;
-  if(rnd()>=v186sChance(lvl,q,S.turn>=0.9)) return null;
+  /* a turn with nobody to turn away from stays rare */
+  if(rnd()>=v186sChance(lvl,q,S.turn>=0.9)*(S.turn>=0.9&&S.d==null?0.2:1)) return null;
   /* the fancier the move, the more it is the star's choice */
   /* the situation shapes the choice: a defender charging in is sold (feint, stepover) or turned (Cruyff, drag-back); one backing off is
      shown the ball (stepovers, roll); a crowd (3+ within 5 m) calls for tight moves (drag-back, roll, chop) rather than stepovers */
@@ -87,7 +90,7 @@ function v186sBR(st){ return v184Is3D(st)?(typeof V18_BALL_R==='number'?V18_BALL
 function v186sDuty(st,p){ const sp=st.spdMul||1, real=(p.spd||0)/Math.max(1,sp); const G=gaitOf(Math.min(9,p.gv!=null?p.gv:real),sp); return clamp(Math.min(0.68,G.L/G.cw),0.22,0.68); }
 function v186sLab(st){ return typeof App!=='undefined'&&App.labSt===st; }
 /* may this carrier start a move at all (gating per the design: speed, skip, reduced motion, shootouts, keepers, demo, lab) */
-function v186sCan(st,p){ if(!V186S.on||!p||st.rm||st.skip||st.so||st.demo||st._v186off||st.ts<V186S.minTs||st.hands||st.placed||st.fl||st.own!==p||p.gk||p.off||p.slow||p.celeb||p.glide) return false;
+function v186sCan(st,p){ if(!V186S.on||!p||st.rm||st.skip||st.so||st.demo||st._v186soff||st.ts<V186S.minTs||st.hands||st.placed||st.fl||st.own!==p||p.gk||p.off||p.slow||p.celeb||p.glide) return false;
   if(v186sLab(st)&&!st._v186lab) return false;
   for(const q of st.players.values()) if(q.chase===p) return false;
   return true; }
@@ -95,6 +98,11 @@ function v186sCan(st,p){ if(!V186S.on||!p||st.rm||st.skip||st.so||st.demo||st._v
 function v186sAhead(st,p,hx,hy){ let best=null, bd=1e9; for(const q of st.players.values()){ if(q.side===p.side||q.off||q.ref) continue;
     if(q.gk&&!(Math.abs(q.x-(q.side===0?0:105))<16.5&&Math.abs(q.y-34)<20.2)) continue;
     const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy); if(d<0.05||d>8) continue; if((dx*hx+dy*hy)/d<0.4) continue; if(d<bd){ bd=d; best=q; } }
+  return best?{q:best,d:bd}:null; }
+/* nearest opponent to the carrier or the ball within r, in any direction (keeper only inside his box), as {q,d} */
+function v186sNear(st,p,r){ let best=null, bd=1e9; const b=st.ball; for(const q of st.players.values()){ if(q.side===p.side||q.off||q.ref) continue;
+    if(q.gk&&!(Math.abs(q.x-(q.side===0?0:105))<16.5&&Math.abs(q.y-34)<20.2)) continue;
+    const d=Math.min(Math.hypot(q.x-p.x,q.y-p.y),b?Math.hypot(q.x-b.x,q.y-b.y):1e9); if(d<r&&d<bd){ bd=d; best=q; } }
   return best?{q:best,d:bd}:null; }
 function v186sN5(st,p){ let n=0; for(const q of st.players.values()){ if(q.side!==p.side&&!q.off&&!q.ref&&Math.hypot(q.x-p.x,q.y-p.y)<5) n++; } return n; }
 
@@ -113,42 +121,61 @@ Stage.prototype.goalSequence=function(e){ this._v186mt=null; const solo=!!(e&&e.
 function v186sSolo(st,e){ if(!v186sAllowedSolo(st)) return null; const now=st.now; let pl=null, beat=null;
   for(const q of st.players.values()){ if(q.side===e.s&&q.jumpT===now) pl=q; if(q.side!==e.s&&q.slideT===now) beat=q; }
   if(!pl||!beat) return null; const R=v186sRate(st,pl); const C=v186sRepertoire(R.lvl,R.flair).filter(k=>!V186S_MV[k].turn);
-  if(!C.length||Math.random()>=V186S.solo) return null; const k=st._v186force&&C.includes(st._v186force)?st._v186force:C[Math.floor(Math.random()*C.length)];
+  if(!C.length||Math.random()>=V186S.solo) return null; const k=st._v186sforce&&C.includes(st._v186sforce)?st._v186sforce:C[Math.floor(Math.random()*C.length)];
   pl.jumpT=-9e9; beat.slideT=-9e9; pl.v186pend=k; pl.v186pd=beat.pid; return V186S_MV[k].cap; }
 function v186sAllowedSolo(st){ return V186S.on&&!st.rm&&!st.skip&&!st.so&&!st.demo&&st.ts>=V186S.minTs&&!(v186sLab(st)&&!st._v186lab); }
 
 /* no moves while the ball is walked to a dead-ball spot or back to the centre after a goal */
 for(const nm of ['setupDeadBall','restartAfterGoal']){ const prev=Stage.prototype[nm]; if(typeof prev!=='function') continue;
-  Stage.prototype[nm]=function(){ this._v186off=(this._v186off||0)+1; let r; try{ r=prev.apply(this,arguments); } catch(e){ this._v186off--; throw e; }
-    const done=()=>{ this._v186off=Math.max(0,(this._v186off||1)-1); }; Promise.resolve(r).then(done,done); return r; }; }
+  Stage.prototype[nm]=function(){ this._v186soff=(this._v186soff||0)+1; let r; try{ r=prev.apply(this,arguments); } catch(e){ this._v186soff--; throw e; }
+    const done=()=>{ this._v186soff=Math.max(0,(this._v186soff||1)-1); }; Promise.resolve(r).then(done,done); return r; }; }
 /* ---------- the dribble leg: remembered, never awaited differently ---------- */
 const _v186sDrib=Stage.prototype.dribble;
 Stage.prototype.dribble=function(p,x,y,ms){ const T=this._v186mt; let keep=true;
   if(T&&p){ const i=T.i++; const nx=T.t[i+1]; if(nx!=null){ const q=this.pl(nx); keep=!q||q.side===p.side; } else if(T.nx!=null) keep=T.nx===p.side; }
   this._v186leg={p,x,y,ms,t0:this.now,on:false,keep}; return _v186sDrib.apply(this,arguments); };
 
-/* the leg has begun (p.ov is its target): decide */
-function v186sLegStart(st,L){ const p=L.p, now=st.now; L.arm=null; const Z=st._v186st||(st._v186st={legs:0,can:0,cool:0,fit:0,pick:0,arm:0,trig:0,rem:0,lost:0,S:[]});
-  Z.legs++; const pend=p.v186pend; p.v186pend=null; if(p.v186k||!v186sCan(st,p)) return; Z.can++; const force=st._v186force||null;
+/* the leg has begun (p.ov is its target): a turn move is decided now (against the nearest opponent, the man he turns away from);
+   a straight leg is scanned step by step (v186sScan) and decided once, when a defender comes up ahead */
+function v186sLegStart(st,L){ const p=L.p, now=st.now; L.arm=null; L.scan=null; const Z=st._v186st||(st._v186st={legs:0,can:0,cool:0,fit:0,pick:0,arm:0,trig:0,rem:0,lost:0,near:0,S:[]});
+  Z.legs++; const pend=p.v186pend; p.v186pend=null; if(p.v186k||!v186sCan(st,p)) return; Z.can++; const force=st._v186sforce||null;
   if(!pend&&!force&&st._v186gs) return; /* inside a goal sequence: only a solo goal's named move */
-  if(!pend&&!force&&now-(p.v186last!=null?p.v186last:-9e9)<st.D(V186S.cool)){ Z.cool++; return; }
   const R=v186sRate(st,p); const mv=Math.hypot(p.vx||0,p.vy||0); const h=mv>0.8?Math.atan2(p.vy,p.vx):v186sYaw(p);
   const tg=Math.atan2(L.y-p.y,L.x-p.x), da=v186sAng(tg-h), turn=Math.abs(da); const hx=Math.cos(h), hy=Math.sin(h);
-  const A=v186sAhead(st,p,turn<0.9?Math.cos(tg):hx,turn<0.9?Math.sin(tg):hy); const sp=(p.spd||0)/Math.max(1,st.spdMul||1);
+  if(pend){ let def=null; if(p.v186pd){ def=st.pl(p.v186pd); p.v186pd=null; } if(!def){ const A=v186sAhead(st,p,Math.cos(tg),Math.sin(tg)); def=A?A.q:null; }
+    L.arm={k:pend,def:def?def.pid:null,pend:true,R}; Z.pick++; Z.arm++; v186sTrigger(st,L); return; }
+  if(force){ const m=V186S_MV[force]; if(!m) return;
+    if(m.turn){ if(turn<0.9) return; const N=v186sNear(st,p,4.2)||v186sAhead(st,p,hx,hy); v186sTurnBegin(st,L,p,force,h,da,N?N.q:null,R); return; }
+    if(turn>=0.9) return; const A=v186sAhead(st,p,Math.cos(tg),Math.sin(tg)); L.arm={k:force,def:A?A.q.pid:null,pend:false,R}; Z.arm++; return; }
+  /* every leg is scanned for a straight move once he runs along it; a turn leg first rolls for a turn move */
+  L.scan={R}; if(turn<0.9) return;
+  if(now-(p.v186last!=null?p.v186last:-9e9)<st.D(V186S.cool)){ Z.cool++; return; }
+  const sp=(p.spd||0)/Math.max(1,st.spdMul||1); const N=v186sNear(st,p,3.5);
   /* his momentum: closing speed toward the carrier (+ = charging in, - = backing off) */
-  let vc=0; if(A){ const q=A.q, ux=(p.x-q.x)/A.d, uy=(p.y-q.y)/A.d; vc=((q.vx||0)*ux+(q.vy||0)*uy)/Math.max(1,st.spdMul||1); }
-  const S={turn,d:A?A.d:null,sp,n5:v186sN5(st,p),vc}; if(Z.S.length<60) Z.S.push([+turn.toFixed(2),A?+A.d.toFixed(1):null,+sp.toFixed(1),Math.round(R.flair)]);
-  let k=null;
-  if(pend){ k=pend; }
-  else if(force){ const m=V186S_MV[force]; if(m&&(m.turn?turn>=0.9:turn<0.9)) k=force; }
-  else { if(v186sRepertoire(R.lvl,R.flair).some(x=>v186sFits(x,S))) Z.fit++; k=v186sPick(R.lvl,R.flair,S); }
-  if(!k) return; Z.pick++;
-  const M=V186S_MV[k]; let def=A?A.q:null; if(pend&&p.v186pd){ const b=st.pl(p.v186pd); if(b) def=b; p.v186pd=null; }
-  if(M.turn){ const sc=Math.sign(da)||(def?Math.sign((def.x-p.x)*-hy+(def.y-p.y)*hx)||1:1);
-    v186sBegin(st,p,k,{y0:h,side:sc,def,keep:L.keep,R}); return; }
-  /* straight: armed until the defender is within trigger distance (and the leg is long enough), then locked to the stride */
-  L.arm={k,def:def?def.pid:null,pend:!!pend,R}; Z.arm++;
-  if(pend) v186sTrigger(st,L); }
+  let vc=0; if(N){ const q=N.q, dd=Math.max(0.1,Math.hypot(p.x-q.x,p.y-q.y)), ux=(p.x-q.x)/dd, uy=(p.y-q.y)/dd; vc=((q.vx||0)*ux+(q.vy||0)*uy)/Math.max(1,st.spdMul||1); }
+  const S={turn,d:N?N.d:null,sp,n5:v186sN5(st,p),vc}; if(Z.S.length<60) Z.S.push([+turn.toFixed(2),N?+N.d.toFixed(1):null,+sp.toFixed(1),Math.round(R.flair)]);
+  if(v186sRepertoire(R.lvl,R.flair).some(x=>v186sFits(x,S))) Z.fit++;
+  const k=v186sPick(R.lvl,R.flair,S); if(!k||!V186S_MV[k].turn) return; Z.pick++; if(N) Z.near++;
+  v186sTurnBegin(st,L,p,k,h,da,N?N.q:null,R); }
+function v186sTurnBegin(st,L,p,k,h,da,def,R){ const hx=Math.cos(h), hy=Math.sin(h);
+  const sc=Math.sign(da)||(def?Math.sign((def.x-p.x)*-hy+(def.y-p.y)*hx)||1:1);
+  v186sBegin(st,p,k,{y0:h,side:sc,def,keep:L.keep,R}); }
+/* a leg, each step once he runs along it: when a defender comes up ahead (within 5.2 m but not closer than 1.4 m) with enough of the leg
+   left, the chance is rolled once for this leg; a pick is armed and fires at the move's trigger distance (v186sStep) */
+function v186sScan(st,L){ const p=L.p, Z=st._v186st; const tg=Math.atan2(L.y-p.y,L.x-p.x); const A=v186sAhead(st,p,Math.cos(tg),Math.sin(tg));
+  if(!A||A.d>5.2||A.d<1.4) return;
+  /* not while he is still turning onto the leg */
+  { const mv=Math.hypot(p.vx||0,p.vy||0); const h=mv>0.8?Math.atan2(p.vy,p.vx):v186sYaw(p); if(Math.abs(v186sAng(tg-h))>=0.5) return; }
+  const sp=(p.spd||0)/Math.max(1,st.spdMul||1), G=gaitOf(Math.max(1,sp),st.spdMul||1), rem=Math.hypot(L.x-p.x,L.y-p.y)-0.6;
+  if(rem<G.cw*(0.35+0.3*(1-v186sDuty(st,p)))){ L.scan=null; return; }
+  const R=L.scan.R; L.scan=null; const now=st.now;
+  if(now-(p.v186last!=null?p.v186last:-9e9)<st.D(V186S.cool)){ if(Z) Z.cool++; return; }
+  const mv=Math.hypot(p.vx||0,p.vy||0); const h=mv>0.8?Math.atan2(p.vy,p.vx):v186sYaw(p); const turn=Math.abs(v186sAng(tg-h));
+  const q=A.q, ux=(p.x-q.x)/A.d, uy=(p.y-q.y)/A.d; const vc=((q.vx||0)*ux+(q.vy||0)*uy)/Math.max(1,st.spdMul||1);
+  const S={turn,d:A.d,sp,n5:v186sN5(st,p),vc}; if(Z&&Z.S.length<60) Z.S.push([+turn.toFixed(2),+A.d.toFixed(1),+sp.toFixed(1),Math.round(R.flair)]);
+  if(Z&&v186sRepertoire(R.lvl,R.flair).some(x=>v186sFits(x,S))) Z.fit++;
+  const k=v186sPick(R.lvl,R.flair,S); if(!k||V186S_MV[k].turn) return; if(Z){ Z.pick++; Z.arm++; }
+  L.arm={k,def:q.pid,pend:false,R}; }
 /* geometry: which side the carrier passes the defender on (go side), as + = his left */
 function v186sGoSide(p,q,tx,ty){ const ax=q.x-p.x, ay=q.y-p.y, bx=tx-p.x, by=ty-p.y; const c=ax*by-ay*bx, n=Math.hypot(ax,ay)*Math.hypot(bx,by)||1;
   return Math.abs(c/n)>0.08?Math.sign(c):0; }
@@ -162,20 +189,21 @@ function v186sTrigger(st,L){ const p=L.p, a=L.arm; if(!a) return; L.arm=null; co
   let sg=g0||(w(toSw(0))<w(toSw(1))?(a.k==='step2'?-1:1):(a.k==='step2'?1:-1));
   if(a.pend||!g0||Math.abs(g0)<1){ if(w(toSw(first(-sg)))+0.3<w(toSw(first(sg)))) sg=-sg; }
   let dly=w(toSw(first(sg)));
-  const rem=Math.hypot(L.x-p.x,L.y-p.y)-0.6, G=gaitOf(Math.max(1,(p.spd||0)/Math.max(1,st.spdMul||1)),st.spdMul||1), mc=V186S_MV[a.k].go+0.72*(1-Dd);
+  const rem=Math.hypot(L.x-p.x,L.y-p.y)-0.6, G=gaitOf(Math.max(1,(p.spd||0)/Math.max(1,st.spdMul||1)),st.spdMul||1), mc=v186sSellK(a.k,Dd)+0.23;
   if(!a.pend&&rem<G.cw*(dly+mc+0.12)){ const o=w(toSw(first(-sg))); if(rem>=G.cw*(o+mc+0.12)){ sg=-sg; dly=o; } else return; }
   v186sBegin(st,p,a.k,{y0:yaw,side:-sg,def,keep:L.keep,R:a.R,ph0:(p.ph||0)+dly*2*Math.PI,Dd,w0:dly}); }
 
 /* ---------- start / end ---------- */
 function v186sBegin(st,p,k,o){ const M=V186S_MV[k], R=o.R||v186sRate(st,p), q=R.q, now=st.now;
-  p.v186k=k; p.v186t0=now; p.v186y0=o.y0; p.v186sf=o.side; p.v186q=q; p.v186ab=null; p.v186bf0=null; p.v186bl0=null; p.v186sold=0; p.v186tc=0;
+  p.v186k=k; p.v186t0=now; p.v186y0=o.y0; p.v186sf=o.side; p.v186sq=q; p.v186ab=null; p.v186bf0=null; p.v186bl0=null; p.v186sold=0; p.v186tc=0;
   p.v186tt=0; p.v186A0x=null; p.v186A0y=null; p.v186A1x=null; p.v186A1y=null; p.v186keep=o.keep!==false; p.v186def=o.def?o.def.pid:null;
   p.v186bite=o.def?v186sBite(R.flair,v186sRate(st,o.def).dsk,q):0;
   if(M.turn){ p.v186T=st.D(M.T*(1.3-0.45*q)); p.v186ph0=null; p.v186nc=0; p.v186dd=0.5; }
   else { p.v186ph0=o.ph0; p.v186dd=o.Dd; p.v186nc=M.nc+0.4*(1-q); const sm=Math.max(1,st.spdMul||1), sp=Math.max(1.5,(p.spd||0)/sm); const G=gaitOf(sp,sm);
     /* the time floor (ms per stride cycle, a little slower than his stride): a carrier who slows to a walk still finishes */
     p.v186Tc=1.15*1000*G.cw/Math.max(3*sm,p.spd||0); p.v186w0=o.w0||0; p.v186T=p.v186Tc*(p.v186nc+p.v186w0); }
-  st._v186n=(st._v186n||0)+1; (st._v186log||(st._v186log=[])).push({k,pid:p.pid,t:now,q:+q.toFixed(2),fl:R.flair,lvl:R.lvl,keep:p.v186keep,def:p.v186def,bite:+p.v186bite.toFixed(2)}); if(st._v186log.length>200) st._v186log.shift();
+  const d0=o.def?Math.hypot(o.def.x-p.x,o.def.y-p.y):null;
+  st._v186n=(st._v186n||0)+1; (st._v186log||(st._v186log=[])).push({k,pid:p.pid,t:now,q:+q.toFixed(2),fl:R.flair,lvl:R.lvl,keep:p.v186keep,def:p.v186def,bite:+p.v186bite.toFixed(2),d0:d0==null?null:+d0.toFixed(2),react:null}); if(st._v186log.length>200) st._v186log.shift();
   if(v186sLab(st)&&typeof labLog==='function') labLog(`${(V186S_MV[k].cap||k).replace('!','')} · flair ${Math.round(R.flair)} (${R.lvl}) · q ${q.toFixed(2)} · bite ${p.v186bite.toFixed(2)}`); }
 function v186sEnd(p,now){ p.v186k=null; p.v186last=now; p.v186A0x=p.v186A0y=p.v186A1x=p.v186A1y=null; p.v186bf0=p.v186bl0=null; }
 /* move clock: u in [0,1] (and m, in stride cycles, for the straight moves). Straight moves follow the stride phase, with a time
@@ -189,7 +217,7 @@ function v186sEnv(st,p,u){ let w=u<=0?0:u>=1?0:smooth(u/0.12)*(1-smooth((u-0.85)
 
 /* ---------- the plan of each move: ball path (metres in the yaw0 frame, from the body centre) ---------- */
 /* returns [f,l,wb]: wb = how much the move owns the ball (the rest is the live carry) */
-function v186sBallPlan(p,u,m){ const k=p.v186k, sf=p.v186sf, sg=-sf, q=p.v186q, A=0.55+0.45*q, Dd=p.v186dd||0.5; const f0=p.v186bf0, l0=p.v186bl0;
+function v186sBallPlan(p,u,m){ const k=p.v186k, sf=p.v186sf, sg=-sf, q=p.v186sq, A=0.55+0.45*q, Dd=p.v186dd||0.5; const f0=p.v186bf0, l0=p.v186bl0;
   if(f0==null) return [0,0,0]; const wob=0.12*(1-q)*Math.sin(m*Math.PI*2.2);
   let f=f0, l=l0, wx=0;
   if(!V186S_MV[k].turn){ const go=V186S_MV[k].go, mc=go+0.72*(1-Dd); const ride=0.46+0.04*q;
@@ -217,13 +245,20 @@ Stage.prototype.dribLead=function(o,sp,dt,now){ const r=_v186sLead.apply(this,ar
 /* ---------- per step: legs, triggers, clocks, sells, anchors, aborts ---------- */
 function v186sStep(st){ const now=st.now, L=st._v186leg;
   if(L&&!L.on){ const p=L.p; if(st.own===p&&p.ov&&p.ov.x===L.x&&p.ov.y===L.y){ L.on=true; v186sLegStart(st,L); } else if(now-L.t0>6000) st._v186leg=null; }
+  if(L&&L.on&&L.scan&&!L.arm){ const p=L.p; if(st.own!==p||!p.ov||p.ov.x!==L.x||p.ov.y!==L.y||p.v186k||st._v186gs) L.scan=null; else if(v186sCan(st,p)) v186sScan(st,L); }
   if(L&&L.on&&L.arm){ const p=L.p; if(st.own!==p||!p.ov||p.ov.x!==L.x||p.ov.y!==L.y||!v186sCan(st,p)) L.arm=null;
     else { if(!L.arm.def){ const mv=Math.hypot(p.vx||0,p.vy||0); const tg=Math.atan2(L.y-p.y,L.x-p.x); const A=v186sAhead(st,p,Math.cos(tg),Math.sin(tg)); if(A&&A.d<V186S_MV[L.arm.k].trig+1.5) L.arm.def=A.q.pid; }
       const def=L.arm.def?st.pl(L.arm.def):null; const d=def?Math.hypot(def.x-p.x,def.y-p.y):0; const M=V186S_MV[L.arm.k];
       const rem=Math.hypot(L.x-p.x,L.y-p.y)-0.6; const sp=Math.max(1,(p.spd||0)/Math.max(1,st.spdMul||1)); const G=gaitOf(sp,st.spdMul||1);
       /* the ball close to his feet (not out ahead from the last touch) */
       const yw=v186sYaw(p), bfw=(st.ball.x-p.x)*Math.cos(yw)+(st.ball.y-p.y)*Math.sin(yw);
-      if(rem<G.cw*(M.go+0.62)){ L.arm=null; if(st._v186st) st._v186st.rem++; } else if((def&&d<=M.trig&&bfw<0.82)||L.arm.pend) v186sTrigger(st,L); } }
+      /* the leg left for the sell (need0) and for it plus the wait for the stepping foot (need1): a defender who keeps his distance,
+         or stands where the leg ends, is beaten at the last moment the move still fits */
+      /* (the sell must fit; when the leg ends sooner than the go touch, his next touch (a pass, another leg) simply takes over) */
+      const need0=G.cw*(v186sSellK(L.arm.k,v186sDuty(st,p))+0.35), need1=need0+G.cw*0.5;
+      /* too late: the leg is nearly done, or the defender is already on top of him (no toe-to-toe stepovers) */
+      if(!L.arm.pend&&rem<need0){ L.arm=null; if(st._v186st) st._v186st.rem++; } else if(!L.arm.pend&&def&&d<1.5&&!st._v186sforce){ L.arm=null; if(st._v186st) st._v186st.lost++; }
+      else if((def&&bfw<0.82&&(d<=M.trig||(rem<need1+0.2&&d<=M.trig+1.8)))||L.arm.pend){ if(st._v186st) st._v186st.trig++; v186sTrigger(st,L); } } }
   for(const p of st.players.values()){ if(!p.v186k) continue; const C=v186sClock(st,p); if(!C) continue; const u=C.u, M=V186S_MV[p.v186k];
     /* abort: lost the ball, a strike, a tackle closing in (unless nearly done), skipping, a speed change */
     if(p.v186ab==null){ let ab=st.own!==p||st.hands||st.placed||!!st.fl||st.skip||st.rm||st.ts<V186S.minTs||p.off;
@@ -253,30 +288,50 @@ function v186sTouchFoot(p){ const k=p.v186k, sf=p.v186sf; if(!k) return null; if
 /* when (in the move clock's m) the go touch / sell happen */
 function v186sTouchU(p){ const k=p.v186k, M=V186S_MV[k], Dd=p.v186dd||0.5; if(!M.turn) return M.go+0.72*(1-Dd);
   return k==='cut'?0.4:k==='chop'?0.4:k==='drag'?0.3:0.46; }
-function v186sSellM(p){ const k=p.v186k, Dd=p.v186dd||0.5; if(k==='step1') return 0.5*(1-Dd); if(k==='feint') return 0.6*(1-Dd); if(k==='step2') return 0.5+0.5*(1-Dd); if(k==='roll') return 0.6*(1-Dd);
+function v186sSellM(p){ return v186sSellK(p.v186k,p.v186dd||0.5); }
+function v186sSellK(k,Dd){ if(k==='step1') return 0.5*(1-Dd); if(k==='feint') return 0.6*(1-Dd); if(k==='step2') return 0.5+0.5*(1-Dd); if(k==='roll') return 0.6*(1-Dd);
   return k==='cut'?0.45:k==='chop'?0.45:k==='drag'?0.55:0.5; }
 
 /* ---------- the defender's reaction ---------- */
 function v186sReact(st,p,q){ const now=st.now; if(q.chase||q.glide||q.off||q.gk) return; if(Math.hypot(q.x-p.x,q.y-p.y)>5) return;
-  const k=p.v186k; let kind=p.v186keep?V186S_REACT[k]:'read'; const b=p.v186keep?p.v186bite:0.15;
+  /* a weak fake (bite under 0.32) is read: he keeps pressing and only turns his head */
+  const k=p.v186k; const b=p.v186keep?p.v186bite:0.15; let kind=p.v186keep&&b>=0.32?V186S_REACT[k]:'read';
   if(kind==='turned'&&k==='cut'&&Math.hypot(q.x-p.x,q.y-p.y)>3.2) return;
   const y0=p.v186y0, sf=p.v186sf;
   /* the wrong way, in world terms: the fake side of the carrier (sold, frozen), or the way he was running (turned: momentum) */
   const ang=kind==='turned'?Math.atan2(q.vy||0,q.vx||0):y0+sf*Math.PI/2;
   q.v186rT=now; q.v186rk=kind; q.v186rs=Math.hypot(q.vx||0,q.vy||0)<0.3&&kind==='turned'?y0+Math.PI:ang; q.v186rb=b; q.v186rx=q.x; q.v186ry=q.y; q.v186rp=p.pid;
-  q.v186rd=st.D(kind==='turned'?420:kind==='freeze'?420:560);
+  q.v186rd=st.D(kind==='turned'||kind==='read'?420:200+360*b);
+  const lg=st._v186log; if(lg&&lg.length){ const e=lg[lg.length-1]; if(e.pid===p.pid&&e.t===p.v186t0) e.react=kind; }
   if(kind==='turned'&&b>0.8&&!v186sTackling(q,now)) q.trip=now; }
 function v186sTackling(p,now){ const a=t=>t==null?1e9:now-t; return Math.min(a(p.v18slT),a(p.v18icT),a(p.v18pkT),a(p.v18shT),a(p.slideT))<1100; }
-/* the defender's step: planted (sold, frozen) or carried on by his momentum (turned), never while chasing or told where to stand */
+/* the defender's step, never while chasing or told where to stand: sold = a lunge to the fake side of his live (goal-side) target;
+   frozen = he stops pressing (creeps toward his target) with a small lean to the fake side; turned = carried on by his momentum from
+   where he was. Sold, frozen or turned, he is kept at least 0.95 m to one side of the carrier's remaining path until the carrier is
+   past him (the carrier's path is the engine's and never changes), so the two never run into each other. */
 const _v186sDetour=Stage.prototype.detour;
 Stage.prototype.detour=function(p){ const w=_v186sDetour.apply(this,arguments); if(w||p.v186rT==null||!V186S.bite) return w;
-  const t=this.now-p.v186rT; if(t<0||t>(p.v186rd||400)) return w; if(p.chase||p.ov||p.meet||p.trail||p.glide||p===this.own||p.v186rk==='read') return w;
-  const b=p.v186rb||0, ca=Math.cos(p.v186rs), sa=Math.sin(p.v186rs); const st=p.v186rk==='sold'?0.35+0.75*b:p.v186rk==='turned'?0.4+0.7*b:0.12*b;
-  return {x:clamp(p.v186rx+ca*st,1,104), y:clamp(p.v186ry+sa*st,1,67)}; };
+  const t=this.now-p.v186rT, rd=p.v186rd||400; if(t<0||t>Math.max(rd,this.D(1400))) return w;
+  if(p.chase||p.ov||p.meet||p.trail||p.glide||p===this.own||p.v186rk==='read') return w;
+  const b=p.v186rb||0, kind=p.v186rk, ca=Math.cos(p.v186rs), sa=Math.sin(p.v186rs); let x=p.tx, y=p.ty;
+  if(t<=rd){ if(kind==='turned'){ const s=0.4+0.7*b; x=p.v186rx+ca*s; y=p.v186ry+sa*s; }
+    else if(kind==='sold'){ const s=0.35+0.75*b; x=p.tx+ca*s; y=p.ty+sa*s; }
+    else { x=lerp(p.x,p.tx,0.35)+ca*0.12*b; y=lerp(p.y,p.ty,0.35)+sa*0.12*b; } }
+  const c=this.pl(p.v186rp); if(c){ const o=v186sOffPath(this,c,p,x,y,kind==='turned'?0:ca,kind==='turned'?0:sa); x=o.x; y=o.y; }
+  if(t>rd&&x===p.tx&&y===p.ty) return w;
+  return {x:clamp(x,1,104), y:clamp(y,1,67)}; };
+/* target (x,y) for defender q moved to at least 0.95 m to one side of carrier c's remaining leg (his own side; the fake side (fx,fy)
+   when he stands on the line), while c has not passed him */
+function v186sOffPath(st,c,q,x,y,fx,fy){ const L=st._v186leg; if(!L||L.p!==c||st.own!==c) return {x,y};
+  const dx=L.x-c.x, dy=L.y-c.y, len=Math.hypot(dx,dy); if(len<0.6) return {x,y}; const ux=dx/len, uy=dy/len, nx=-uy, ny=ux;
+  const aq=(q.x-c.x)*ux+(q.y-c.y)*uy; if(aq<-0.4||aq>len+1.2) return {x,y};
+  const lq=(q.x-c.x)*nx+(q.y-c.y)*ny, ff=fx*nx+fy*ny; const fs=Math.abs(lq)>0.3?Math.sign(lq):(Math.sign(ff)||Math.sign(lq)||1);
+  const at=(x-c.x)*ux+(y-c.y)*uy, lt=((x-c.x)*nx+(y-c.y)*ny)*fs; if(lt>=0.95) return {x,y};
+  return {x:c.x+ux*at+nx*fs*0.95, y:c.y+uy*at+ny*fs*0.95}; }
 
 /* ---------- pinned feet ---------- */
 /* plan of the planted feet: [foot, m0 (pinned from), m1 (released at), f, l] in body units, for the current move */
-function v186sPlantPlan(p,i){ const k=p.v186k, sf=p.v186sf, Dd=p.v186dd||0.5, sd=i?1:-1; const A=0.55+0.45*(p.v186q||0);
+function v186sPlantPlan(p,i){ const k=p.v186k, sf=p.v186sf, Dd=p.v186dd||0.5, sd=i?1:-1; const A=0.55+0.45*(p.v186sq||0);
   if(k==='step1'||k==='feint'||k==='roll'){ const iF=sf>0?1:0; if(i!==iF) return null; return [1-Dd,1.0]; }
   if(k==='step2'){ const iF=sf>0?1:0; if(i===iF) return [1.5-Dd,1.5]; return [1-Dd,1.0]; }
   const sc=sf, iS=k==='cut'?(sc>0?0:1):(sc>0?1:0); if(i!==iS) return null;
@@ -296,7 +351,7 @@ function v186sPush(s01,base,ball,rb,s,ctc){ const c={f:ball.f-0.02,u:0.05,l:ball
   const K=[[0,base.f,base.u,base.l],[0.5,ball.f-0.16,0.11,ball.l-s*(rb+0.07)],[0.72,c.f,c.u,c.l],[0.9,ball.f+0.04,0.06,ball.l+s*0.02]]; const t=v186sKey(K,s01);
   return t; }
 /* a foot target in body units for foot i at move time (m or u), or null for the base gait; base: the base pose's foot */
-function v186sFootPlan(st,p,i,m,base){ const k=p.v186k, sf=p.v186sf, sg=-sf, Dd=p.v186dd||0.5, A=0.55+0.45*(p.v186q||0), sd=i?1:-1;
+function v186sFootPlan(st,p,i,m,base){ const k=p.v186k, sf=p.v186sf, sg=-sf, Dd=p.v186dd||0.5, A=0.55+0.45*(p.v186sq||0), sd=i?1:-1;
   const hs=v186sHs(st,p), rb=v186sBR(st)/hs; const B=base||{f:0.02,u:0,l:sd*0.1};
   /* the ball in body units (for contacts) */
   const b=st.ball; const bb=v184Body(p,b.x,b.y,st); const ball={f:bb[0],l:bb[1]};
@@ -357,7 +412,7 @@ Stage.prototype.poseOf=function(p,isRef){ const P=_v186sPose.apply(this,argument
 function v186sPoseC(st,p,P){ if(P.act!=='loco'&&P.act!=='idle') return; if(v186sTackling(p,st.now)) return;
   const kt=st.now-(p.kickT||-9e9); if(kt>=0&&kt<(p.kickW||0)+(p.kickF||260)) return;
   const C=v186sClock(st,p); if(!C||C.u<=0||C.u>=1) return; const env=v186sEnv(st,p,C.u); if(!(env>0)) return;
-  const k=p.v186k, M=V186S_MV[k], q=p.v186q||0, A=0.55+0.45*q, sf=p.v186sf, sg=-sf, Dd=p.v186dd||0.5, m=C.m, u=C.u; const F=P.feet, H=P.hands;
+  const k=p.v186k, M=V186S_MV[k], q=p.v186sq||0, A=0.55+0.45*q, sf=p.v186sf, sg=-sf, Dd=p.v186dd||0.5, m=C.m, u=C.u; const F=P.feet, H=P.hands;
   for(const i of [0,1]){ const r=v186sFootPlan(st,p,i,M.turn?u:m,F[i]); if(!r||!r.t) continue; const w=clamp(r.w*env,0,1); if(!(w>0)) continue; const b=F[i];
     F[i]={f:lerp(b.f,r.t.f,w),u:Math.max(0,lerp(b.u,r.t.u,w)),l:lerp(b.l,r.t.l,w)}; }
   /* body: roll (+ = head to his right), hip height, lean, head */
@@ -421,10 +476,10 @@ labRun=function(scen){ const r=_v186sLabRun.apply(this,arguments); if(scen!=='sk
     /* everyone else out of the way, holding shape */
     for(const q of P){ if(q!==fw&&q!==def&&!q.gk){ q.ov={x:q.side===0?20+q.y*0.2:85+q.y*0.1,y:q.y}; } }
     let n=0;
-    while(alive()){ const seq=st._v186seq||(typeof window!=="undefined"&&window.__v186seq)||V186S_LABSEQ; const k=seq[n++%seq.length]; const known=v186sKnows(k,fw.v186lv,fw.v186fl); st._v186force=known?k:null; st._v186forceK=k; st.zoomTo(0.42); st.focus=null;
+    while(alive()){ const seq=st._v186seq||(typeof window!=="undefined"&&window.__v186seq)||V186S_LABSEQ; const k=seq[n++%seq.length]; const known=v186sKnows(k,fw.v186lv,fw.v186fl); st._v186sforce=known?k:null; st._v186sforceK=k; st.zoomTo(0.42); st.focus=null;
       await st.gain(fw); if(!alive()) return; fw.x=46; fw.y=44; fw.vx=0; fw.vy=0; fw.ov={x:47,y:44}; def.x=V186S_MV[k].turn?57.5:60; def.y=44; def.ov=null; def.vx=0; def.vy=0; def.v186rT=null; st.cam.x=58;
       await st.wait(st.D(500)); if(!alive()) return;
       if(!V186S_MV[k].turn){ def.ov={x:59,y:44}; const g=st.dribble(fw,70,44.5,2400); await st.until(()=>Math.hypot(fw.x-def.x,fw.y-def.y)<4.2,3000); def.ov=null; await g; }
       else { const ty=k==='cut'?{x:58,y:36}:k==='chop'?{x:47,y:38}:{x:44,y:44.3}; await st.dribble(fw,54,44,900); if(!alive()) return; await st.dribble(fw,ty.x,ty.y,1600); }
       if(!alive()) return; fw.ov={x:fw.x,y:fw.y}; await st.wait(st.D(900)); }
-    st._v186force=null; }); };
+    st._v186sforce=null; }); };
