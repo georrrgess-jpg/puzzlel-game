@@ -83,6 +83,10 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   console.log('  cost',JSON.stringify({mean:+mean.mean.toFixed(4),median:+mean.med.toFixed(4),max:f2(mean.max),n:mean.n}));
   ok(mean.mean<0.5,'the plates cost '+mean.mean.toFixed(3)+' ms per frame on average (software, shared machine; budget 0.5 ms)');
   if(SHOTS){ await shot(p,'d-2d-broadcast.png'); }
+  /* presentation only: running the plates never writes a field of the stage or of any mover */
+  ok(await p.evaluate(()=>{ const st=App.live.stage; const prim=v=>v===null||['number','string','boolean','undefined'].includes(typeof v);
+    const snap=()=>{ const o={}; for(const k of Object.keys(st)) if(prim(st[k])) o[k]=st[k]; o.own=st.own&&st.own.pid; o.fl=!!st.fl; o.ball=JSON.stringify(st.ball); o.m=[...st.players.values()].map(q=>Object.keys(q).filter(k=>prim(q[k])).map(k=>k+'='+q[k]).join(',')).join('|'); return JSON.stringify(o); };
+    const was=st.paused; st.paused=true; const a=snap(); for(let i=0;i<5;i++) v185PlFrame(st); const b=snap(); st.paused=was; return a===b; }),'presentation only: the plates write no stage or player field');
   /* every zoom level, sideline and tactical */
   for(const [view,zoom] of [['broadcast','wide'],['broadcast','close'],['broadcast','tight'],['sideline','normal'],['sideline','tight'],['tactical','normal']]){
     await p.evaluate(([v,z])=>{ PREFS.zoom=z; savePrefs(); A.liveView({dataset:{v}}); App.live.stage.v184Zoom(true); },[view,zoom]); await p.waitForTimeout(600); await take(p);
@@ -103,6 +107,12 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
       for(let y=-3;y<=20&&!best;y+=0.5) for(let x=0;x<=105&&!best;x+=0.5){ const a=st.proj(x,y,2.15*(q.hgt||70)/70); const r=[a[0]-40,a[1]-27,80,21]; if(a[0]<st.W-20&&hit(r,[M.x,M.y,M.w,M.h])) best=[x,y]; }
       if(!best) return {skip:true}; q.x=best[0]; q.y=best[1]; try{ v185PlLayout(st,S,16); } finally{ q.x=sx; q.y=sy; } const B=S.blocks[0]; return {on:sl.on,r:[sl.r.x,sl.r.y,sl.r.w,sl.r.h],b:[B.x,B.y,B.w,B.h],k:B.k}; });
     ok(r.skip||(r.on&&r.k==='mini'&&!hit(r.r,r.b)),'a carrier under the minimap: the tag is placed clear of it '+JSON.stringify(r)); }
+  /* a carrier far off the left of the frame: his tag is pinned to the edge with a chevron; a defender off screen is hidden */
+  { const r=await p.evaluate(()=>{ const st=App.live.stage, S=st._pl; const ps=[...st.players.values()].filter(z=>!z.off&&!z.gk); const q=ps.find(z=>z.side===0), d=ps.find(z=>z.side===1);
+      const mk=(z,role)=>({pid:z.pid,p:z,role,a:1,tgt:1,r:{x:0,y:0,w:0,h:0},ox:0,oy:0,vx:0,vy:0,init:false,on:false,hf:-1,cmp:false,ptr:null,chev:'',an:{x:0,y:0,fy:0,ph:0}});
+      S.slots.clear(); const a=mk(q,'car'), b=mk(d,'def'); S.slots.set(q.pid,a); S.slots.set(d.pid,b); const sv=[q.x,q.y,d.x,d.y]; q.x=d.x=st.cam.x-st.cam.w*1.6; q.y=d.y=34;
+      try{ v185PlLayout(st,S,16); } finally{ q.x=sv[0]; q.y=sv[1]; d.x=sv[2]; d.y=sv[3]; } return {car:{on:a.on,chev:a.chev,r:[a.r.x,a.r.y,a.r.w,a.r.h].map(Math.round),ax:Math.round(a.an.x)},def:b.on,W:st.W}; });
+    ok(r.car.on&&r.car.chev==='l'&&r.car.r[0]>=15&&!r.def,'a carrier off the left edge: pinned at the edge with a chevron, the defender hidden '+JSON.stringify(r)); }
   /* ---------- hidden states ---------- */
   await p.evaluate(()=>{ App.live.paused=true; }); await until(p,()=>!App.live.busy,90000);
   await p.evaluate(()=>{ const st=App.live.stage; st.paused=false; });

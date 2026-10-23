@@ -127,7 +127,7 @@ function v185PlPickDef(st,c,D,now){ let closest=null, cd=1e9; D.why='';
 function v185PlNew(){ return {clk:0,last:performance.now(),kind:null,kindT:0,fid:0,slots:new Map(),oc:null,ocT:0,lastOwn:null,car:null,fo:null,foT:0,foFrom:null,foShot:false,foHead:false,incP:null,
   D:{cur:null,chal:null,chalT:0,why:''},dc:null,dcT:0,def:null,defT:0,defNull:0,carFor:null,want:[],blocks:[],capT:-1e9,cap:null,sr:null,srT:-1e9,srTxt:'',srPend:null,
   perf:{n:0,sum:0,max:0,ring:new Float32Array(600),i:0},log:{car:[],def:[]},why:''}; }
-function v185PlReset(S){ S.slots.clear(); S.oc=null; S.lastOwn=null; S.car=null; S.fo=null; S.foFrom=null; S.incP=null; S.D.cur=null; S.D.chal=null; S.dc=null; S.def=null; S.carFor=null; }
+function v185PlReset(S){ S.slots.clear(); if(S.spr) S.spr.clear(); S.oc=null; S.lastOwn=null; S.car=null; S.fo=null; S.foFrom=null; S.incP=null; S.D.cur=null; S.D.chal=null; S.dc=null; S.def=null; S.carFor=null; }
 function v185PlLog(S,k,p){ const L=S.log[k]; const id=p?p.pid:null; if(!L.length||L[L.length-1].pid!==id){ L.push({pid:id,t:S.clk}); if(L.length>400) L.splice(0,100); } }
 
 /* who gets a tag this frame: fills S.want with [pid, role, alpha, player] */
@@ -144,7 +144,7 @@ function v185PlSelect(st,S){ const now=S.clk, o=st.own&&st.players.get(st.own.pi
   /* turnover or a new carrier: the defender is chosen fresh */
   if(car&&car!==S.carFor){ S.carFor=car; S.D.cur=null; S.D.chal=null; S.dc=null; S.defDrop=false; }
   const spd=(v185PlLiveOf(st)||{}).speed||1;
-  if(car&&!f&&car===o){
+  if(car&&!f&&(car===o||pen)){
     if(pen) def=st.gkOf(1-car.side);
     else if(!(st.hands||st.placed)){ const pick=v185PlPickDef(st,car,S.D,now);
       if(pick!==S.dc){ S.dc=pick; S.dcT=S.D.why==='beat'||S.D.why==='chase'||(pick&&pick.chase===car)?now-V185PL.fast8:now; }
@@ -193,8 +193,11 @@ function v185PlFit(r,x,y,w,h,blocks,nb,W,H){ const pad=V185PL.pad; const cx=v=>M
 /* obstacles on the HUD: the minimap and the live caption (DOM, read at most every 250 ms) */
 function v185PlBlocks(st,S){ const B=S.blocks; let n=0; const W=st.W;
   if(st.minimap&&st.mode!=='tactical'){ const w=Math.min(170,W*0.22), h=w*68/105, x0=W-w-10, y0=10; const b=B[n]||(B[n]={}); b.x=x0-3-6; b.y=y0-3-6; b.w=w+6+12; b.h=h+6+12; b.k='mini'; n++; }
-  if(S.clk-S.capT>250||S.clk<S.capT){ S.capT=S.clk; S.cap=null; try{ const host=st.cv.parentElement; const el=host&&host.querySelector(':scope > .lv-cap .cap, :scope > .hl-cap'); if(el&&el.textContent){ const a=el.getBoundingClientRect(), c=st.cv.getBoundingClientRect(); if(a.width>0&&c.width>0){ const k=st.W/c.width; S.cap={x:(a.left-c.left)*k-6,y:(a.top-c.top)*k-6,w:a.width*k+12,h:a.height*k+12}; } } }catch(e){ S.cap=null; } }
-  if(S.cap){ const b=B[n]||(B[n]={}); b.x=S.cap.x; b.y=S.cap.y; b.w=S.cap.w; b.h=S.cap.h; b.k='cap'; n++; }
+  /* DOM overlays on the stage: the live caption, TouchlineTV's REPLAY bug and lower third */
+  if(S.clk-S.capT>250||S.clk<S.capT){ S.capT=S.clk; const caps=S.caps||(S.caps=[]); caps.length=0;
+    try{ const host=st.cv.parentElement; const els=host?host.querySelectorAll(':scope > .lv-cap .cap, :scope > .tv-bug, :scope > .tv-lower > *'):[]; if(els.length){ const c=st.cv.getBoundingClientRect(), k=c.width>0?st.W/c.width:1;
+      for(const el of els){ if(!el.textContent) continue; const a=el.getBoundingClientRect(); if(a.width>0&&a.height>0&&c.width>0&&caps.length<4) caps.push({x:(a.left-c.left)*k-6,y:(a.top-c.top)*k-6,w:a.width*k+12,h:a.height*k+12}); } } }catch(e){ caps.length=0; } }
+  if(S.caps) for(const q of S.caps){ const b=B[n]||(B[n]={}); b.x=q.x; b.y=q.y; b.w=q.w; b.h=q.h; b.k='cap'; n++; }
   S.nb=n; return n; }
 
 /* ---------- per frame ---------- */
@@ -228,7 +231,8 @@ function v185PlLayout(st,S,dtR){ const W=st.W, H=st.H, g=st.ctx, tac=st.mode==='
     const n=v185PlName(st,p), glyph=p.gk?'gk':(sl.role==='def'?'':'ball'); const m=v185PlMeasure(g,n,fs,glyph,sl.cmp,W*(phone?0.34:0.3)); sl.m=m; sl.n=n; sl.gly=glyph;
     const w=m.w, h=m.h; let tx, ty, ptrUp=false;
     if(tac){ tx=A.x+A.ph+4; ty=A.y-A.ph-h*0.35; }
-    else { tx=A.x-w/2; ty=A.y-V185PL.gap-h; if(ty<V185PL.pad&&A.fy+V185PL.gap+h<H-V185PL.pad&&!off){ ty=A.fy+V185PL.gap; ptrUp=true; } }
+    else if(off){ const M=V185PL.pad+10; tx=Math.max(M,Math.min(W-M-w,A.x-w/2)); ty=Math.max(M,Math.min(H-M-h,A.y-V185PL.gap-h)); }
+    else { tx=A.x-w/2; ty=A.y-V185PL.gap-h; if(ty<V185PL.pad&&A.fy+V185PL.gap+h<H-V185PL.pad){ ty=A.fy+V185PL.gap; ptrUp=true; } }
     const r=sl.r; if(!v185PlFit(r,tx,ty,w,h,B,nb,W,H)) continue;
     /* ease the offset from the anchor (critically damped, ~14/s); snap when new, under reduced motion, or if the eased spot collides */
     const gx=r.x-A.x, gy=r.y-A.y;
@@ -245,13 +249,14 @@ function v185PlLayout(st,S,dtR){ const W=st.W, H=st.H, g=st.ctx, tac=st.mode==='
     const b=B[nb]||(B[nb]={}); b.x=r.x-2; b.y=r.y-(sl.ptrUp?V185PL.ptr+1:2); b.w=w+4; b.h=h+4+V185PL.ptr+1; b.k='tag'; nb++; }
   S.nbAll=nb; }
 /* each tag is drawn once into a small bitmap (per player, size, glyph, kit and pixel ratio) and blitted every frame */
-function v185PlSprite(st,sl,kit){ const dpr=st.dpr||1, m=sl.m; if(sl.spr&&sl.spm===m&&sl.spk===kit&&sl.spd===dpr) return sl.spr;
-  const c=sl.spr||document.createElement('canvas'); const w=m.w+2, h=m.h+2; c.width=Math.ceil(w*dpr); c.height=Math.ceil(h*dpr);
+function v185PlSprite(st,S,sl,kit){ const dpr=st.dpr||1, m=sl.m; const C=S.spr||(S.spr=new Map()); let e=C.get(sl.pid);
+  if(e&&e.m===m&&e.kit===kit&&e.dpr===dpr) return e.c;
+  if(!e){ e={c:document.createElement('canvas'),m:null,kit:null,dpr:0}; C.set(sl.pid,e); } const c=e.c, w=m.w+2, h=m.h+2; c.width=Math.ceil(w*dpr); c.height=Math.ceil(h*dpr);
   const q=c.getContext('2d'); q.setTransform(dpr,0,0,dpr,0,0); q.clearRect(0,0,w,h); v185DrawPlate(q,1,1,sl.n,kit,{fs:m.fs,glyph:sl.gly,m});
-  sl.spr=c; sl.spm=m; sl.spk=kit; sl.spd=dpr; return c; }
+  e.m=m; e.kit=kit; e.dpr=dpr; return c; }
 function v185PlPaint(st,S){ const g=st.ctx; g.save(); const dpr=st.dpr||1; g.setTransform(dpr,0,0,dpr,0,0);
   for(let i=S.list.length-1;i>=0;i--){ const sl=S.list[i]; if(!sl.on||sl.a<=0.004) continue; const kit=sl.p.gk?st.kits.gk[sl.p.side]:st.kits.team[sl.p.side]; S.drawn++;
-    const m=sl.m, spr=v185PlSprite(st,sl,kit), x=Math.round(sl.r.x), y=Math.round(sl.r.y); g.globalAlpha=Math.min(1,sl.a);
+    const m=sl.m, spr=v185PlSprite(st,S,sl,kit), x=Math.round(sl.r.x), y=Math.round(sl.r.y); g.globalAlpha=Math.min(1,sl.a);
     g.drawImage(spr,x-1,y-1,m.w+2,m.h+2); if(sl.ptr!=null||sl.chev) v185PlDeco(g,x,y,m.w,m.h,sl.ptr,sl.ptrUp,sl.chev); }
   g.restore(); }
 
