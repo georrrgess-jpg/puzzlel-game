@@ -16,7 +16,7 @@
    can override them. A player with no record (the Lab, the menu demo) is neutral: none of the effects apply to him.
    Event timing, results and event order are untouched. */
 
-const V186R={on:true,feint:true,log:{off:[],thr:[],miss:[],feint:[],ft:[]}};
+const V186R={on:true,feint:true,setMiss:true,log:{off:[],thr:[],miss:[],feint:[],ft:[]}};
 const V186R_K=['pace','ctrl','fin','tkl','str','kp'];
 function v186rLog(k,o){ const L=V186R.log[k]; if(!L) return; L.push(o); if(L.length>400) L.shift(); }
 
@@ -77,6 +77,7 @@ function v186rPre(st){ const o=st.own&&!st.hands?st.own:null; st._v186rPres=null
 
 /* R4: after the frame, a heavy first touch keeps the ball running on from the foot for a moment */
 function v186rPost(st,dt){ const o=st.own; if(!o||st.fl||st.hands||st.placed||st.headBall===o||o.v186ftT==null) return;
+  if(o.plant||(o.kickT||-9e9)>=o.v186ftT){ o.v186ftT=null; return; } /* he is already shaping to strike it: no heavy touch */
   const u=(st.now-o.v186ftT)/Math.max(140,st.D(420)); if(u<0||u>=1){ if(u>=1) o.v186ftT=null; return; }
   const ex=(1-o.v186ftQ)*0.9*(u<0.22?smooth(u/0.22):1-smooth((u-0.22)/0.78)); if(ex<0.01) return;
   const f=st.footOf(o), b=st.ball; let ux=o.v186ftDx, uy=o.v186ftDy; const mv=Math.hypot(o.vx||0,o.vy||0); if(mv>0.6){ ux=o.vx/mv; uy=o.vy/mv; }
@@ -125,3 +126,8 @@ Stage.prototype.poseOf=function(p,isRef){ const P=v186rPose.apply(this,arguments
       if(p.v186dBeat){ P.rot=(P.rot||0)+0.24*e*p.v186dS; P.pivot=P.pivot||0.2; P.hipU-=0.09*e; P.lean+=0.1*e; }
       else { P.hipU-=0.06*e; P.lean-=0.03*e; } } }
   return P; };
+
+/* R3 strength: a much stronger carrier rides the challenge and stays on his feet (the ball still goes, as the engine says) */
+const v186rTake=Stage.prototype.v18tTake;
+Stage.prototype.v18tTake=function(p,o){ if(o&&p&&v186rHas(o)&&v186rHas(p)&&v186rLive(this)&&(o.v186r_str-p.v186r_str)>15&&o.trip===this.now){ o.trip=-9e9; o.v186ride=this.now; v186rLog('feint',{ride:o.pid,tkl:p.pid,gap:o.v186r_str-p.v186r_str}); }
+  return v186rTake.apply(this,arguments); };

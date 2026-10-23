@@ -2,7 +2,7 @@
    Presentation only: engine.js, results, event order and RNG streams are untouched.
    1. Offside (the engine emits {t:'offside',pid} with no position; the stage paints the picture):
       - the same sequence at every speed (playMinute no longer sends 4x/8x to quickFlag);
-      - the passer holds the ball and the defenders near the line hold it (a one-metre step up, the trap), so the line is
+      - the passer holds the ball and the defenders within 12 m of the line hold it (the back line steps up a metre: the trap), so the line is
         still while the runner goes; the runner's target follows the live line each frame (line + 1.2..2.6 m);
       - the pass is played only when he is beyond the second-last defender (keeper counted), the ball and halfway; the
         check is repeated at the instant of release, and only then is the freeze frame drawn;
@@ -42,7 +42,7 @@ Stage.prototype.playMinute=async function(out,M,W){
 function v186rOffFallback(st,R,why){ const S=st._v186offStat||(st._v186offStat={calls:0,lines:0,fb:0}); S.fb++;
   if(!st.skip){ const ar=st.arFor(R.e.s); if(ar){ ar.flag='up'; ar.flagT=st.now; } st.blow('pen'); }
   st.emit(R.e); if(!st.skip) st.onCaption('OFFSIDE','set');
-  v186rLog('off',{pid:R.e.pid,fb:why,m:R.e.m,skip:!!st.skip}); }
+  v186rLog('off',{pid:R.e.pid,fb:why,m:R.e.m,skip:!!st.skip,diag:R.diag||null}); }
 
 /* release every position this call held (only those still holding our own target) */
 function v186rOffRelease(st,R){ for(const [q,ov] of R.holds){ if(q.ov===ov) q.ov=null; } R.holds.clear();
@@ -66,17 +66,17 @@ async function v186rOffRun(st,R){ const {e,p,s,dir}=R; const W=st._v186W||1500;
   /* freeze the picture: the passer holds the ball, the back line holds (one metre up: the trap) */
   const hold=(q,x,y)=>{ const ov={x,y}; q.ov=ov; R.holds.set(q,ov); };
   hold(o,o.x,o.y); const L=st.offLine(s);
-  for(const q of st.players.values()){ if(q.side===s||q.off||q.gk||q.ov||q.chase) continue; if(Math.abs(q.x-L)<6) hold(q,clamp(q.x-dir*1,2,103),q.y); }
+  for(const q of st.players.values()){ if(q.side===s||q.off||q.gk||q.chase) continue; const ahead=dir*(L-q.x); if(ahead>12) continue; q.trail=null; q.meet=null; hold(q,ahead>-0.5&&ahead<6?clamp(q.x-dir*1,2,103):q.x,q.y); }
   /* the runner goes for the line; update() keeps his target at the live line + m */
   const oy=clamp(lerp(p.y,34,0.25),6,62); p.chase=null; p.meet=null; p.trail=null;
   R.pov={x:clamp(st.offLine(s)+dir*R.m,3,102),y:oy}; p.ov=R.pov; p.hurry=true; p.offRun=true; st._v186off=R;
   R.focus={x:(o.x+R.pov.x)/2}; st.focus=R.focus;
   const ok=()=>dir*(p.x-st.offLine(s))>=R.m-0.3&&dir*(p.x-st.ball.x)>=0.5;
-  const settled=()=>{ for(const [q,ov] of R.holds){ if(q!==o&&q.ov===ov&&Math.hypot(q.x-ov.x,q.y-ov.y)>0.25) return false; } return true; };
+  const settled=()=>{ for(const [q,ov] of R.holds){ if(q!==o&&q.ov===ov&&Math.hypot(q.x-ov.x,q.y-ov.y)>0.3&&(q.spd||0)>0.4*(st.spdMul||1)) return false; } return true; };
   await st.until(()=>st.own!==o||(ok()&&settled()), st.eta(p,R.pov.x,R.pov.y,1.3)*1.6+st.D(400));
   if(st.skip) return v186rOffFallback(st,R,'skip');
   if(st.own!==o) return v186rOffFallback(st,R,'lost');
-  if(!ok()) return v186rOffFallback(st,R,'timeout');
+  if(!ok()){ R.diag={mL:+(dir*(p.x-st.offLine(s))).toFixed(2),m:+R.m.toFixed(2),mB:+(dir*(p.x-st.ball.x)).toFixed(2),toT:+Math.hypot(p.x-R.pov.x,p.y-R.pov.y).toFixed(2),tx:+R.pov.x.toFixed(1),settled:settled()}; return v186rOffFallback(st,R,'timeout'); }
   /* the pass: the call is made, and the freeze frame drawn, only if he is beyond the line at the instant it is played */
   const ar=st.arFor(s); const d=dist2(o,p); let rel=null;
   await st.launch(o,{home:p,dur:st.D(560)*clamp(d/18,0.6,1.5),h:st.passH(o,p,d),onRelease:()=>{ R.released=true;
@@ -173,9 +173,36 @@ const v186rShotSeq=Stage.prototype.shotSeq;
 Stage.prototype.shotSeq=async function(e){ const miss=e&&e.t==='miss'&&e.ty!=='pen', save=e&&e.t==='save'&&e.ty!=='pen';
   if(!miss&&!save) return v186rShotSeq.apply(this,arguments);
   const st=this, em=this.emit; const gk=()=>this.gkOf(1-e.s);
+  if(miss&&V186R.on&&V186R.setMiss&&!this.skip&&!this.clip&&(e.ty==='header'||e.ty==='corner'||e.ty==='fk')){ const p=this.pl(e.pid);
+    if(p&&!p.off&&!p.gk){ let done=false; try{ done=await v186rSetMiss(this,e,p); } finally{ if(this._v186miss===e) this._v186miss=null; if(this.setPiece==='fk'&&e.ty==='fk') this.setPiece=null; } if(done) return; } }
   if(miss) this._v186miss=e;
   if(save) this.emit=function(x){ if(x===e&&!x._how){ const k=gk(); x._how=(k&&x.cor)?'tip':(k&&st.own===k&&st.hands)?'catch':'parry'; } return em.apply(this,arguments); };
   try{ return await v186rShotSeq.apply(this,arguments); } finally{ if(this._v186miss===e) this._v186miss=null; if(save&&this.emit!==em) this.emit=em; } };
+
+/* D4 (misses only; the save branch belongs to the keeper-saves unit): a missed header comes from a cross met with the head,
+   a missed free kick from a dead ball with a wall. Returns false (nothing shown yet) when the picture cannot be built. */
+async function v186rSetMiss(st,e,p){ const s=e.s, dir=s===0?1:-1, gx=s===0?105:0; const gk=st.gkOf(1-s);
+  const over=Math.random()<0.45, sg=Math.random()<0.5?-1:1; let to, cap;
+  if(e.ty==='fk'){ const pt={pid:p.pid,a:'setup',x:e.x!=null?e.x:50,y:e.x!=null?clamp(e.y,72,82):76};
+    await st.setupDeadBall(e,pt); if(st.skip||st.own!==p) return false;
+    to=over?{x:gx+dir*0.4,y:34+(Math.random()-.5)*5,z:2.75+Math.random()*0.8}:{x:gx+dir*0.4,y:34+sg*(4.2+Math.random()*2),z:0.6+Math.random()*1.2};
+    st._v186miss=e; if(gk) gk.dive={dir:Math.sign(to.y-gk.y)||1,t:st.now+st.windOf('shot')+Math.max(st.D(70),st.D(460)+140-Math.max(150,st.D(250)))};
+    await st.launch(p,{to,dur:st.D(460)+140,h:1.3,kind:'shot',cont:true}); cap=e._how==='over'?'OVER THE BAR':e._how==='wide'?'WIDE':null; }
+  else { let crosser=null, cw=-1; for(const q of st.players.values()){ if(q.side!==s||q===p||q.gk||q.off) continue; const w=Math.abs(q.y-34)-Math.abs(q.x-(gx-dir*20))*0.3; if(w>cw){ cw=w; crosser=q; } }
+    if(!crosser) return false; await st.gain(crosser); if(st.skip||st.own!==crosser||st.hands) return false;
+    const [hx,hy]=e.x!=null?livePos(s,e.x,clamp(e.y,88,95)):[gx-dir*8,34]; p.ov={x:hx,y:hy}; p.chase=null; p.meet=null;
+    const wy=crosser.y<34?7:61; await st.dribble(crosser,clamp(gx-dir*15,4,101),wy,450); if(st.skip||st.own!==crosser) return false;
+    const df=st.nearest(1-s,hx,hy); if(df&&dist2(df,p)<9){ df.ov={x:hx+dir*0.9,y:hy+(hy<34?1.1:-1.1)}; }
+    await st.until(()=>dist2(p,p.ov)<1.2, st.eta(p,hx,hy)+300); if(st.skip||st.own!==crosser) return false;
+    const JD=Math.max(260,st.D(560)); p.jumpT=st.now+9e6; const dd=dist2(crosser,p);
+    await st.launch(crosser,{home:p,head:true,dur:st.D(760)*clamp(dd/20,0.7,1.6),h:4.2,onRelease:f=>{ p.jumpT=st.now+f.dur-JD*0.5; }});
+    if(st.skip||st.own!==p){ p.jumpT=-9e9; return true; }
+    to=over?{x:gx+dir*0.4,y:34+(Math.random()-.5)*4,z:2.7+Math.random()*0.6}:{x:gx+dir*0.4,y:34+sg*(4.1+Math.random()*1.4),z:0.5+Math.random()*1.3};
+    st._v186miss=e; if(gk) gk.dive={dir:Math.sign(to.y-gk.y)||1,t:st.now+Math.max(st.D(70),st.D(380)+120-Math.max(150,st.D(250)))};
+    e._head=true; await st.launch(p,{to,dur:st.D(380)+120,h:0.3,kind:'shot',nod:true,cont:true}); cap=e._how==='over'?'HEADED OVER':e._how==='wide'?'HEADED WIDE':null; }
+  st.setPiece=null; st.emit(e); if(cap) st.onCaption(cap,'shot'); st.clearStaged(); for(const q of st.players.values()) if(q.side===s&&q.ov&&!q.gk) q.ov=null;
+  v186rLog('miss',{pid:p.pid,set:e.ty,how:e._how});
+  await st.wait(st.D(260)); if(gk) gk.dive=null; await st.goalKick(1-s); return true; }
 
 const v186rLaunch=Stage.prototype.launch;
 Stage.prototype.launch=function(p,opt){ const e=this._v186miss;
@@ -199,9 +226,10 @@ const V186R_LINES={
   catch:['Strong hands from {g} to keep out {p}.','{g} gathers {p}\'s effort.','{g} gets down well to deny {p}.','{g} spreads himself and smothers it.'],
   parry:['{g} parries {p}\'s shot away.','Big stop from {g}! He beats it away.','{p} forces a fine save from {g}.'],
   tip:['{g} tips {p}\'s effort round the post.','Fingertip save from {g}! Corner.','{g} at full stretch to turn it round the post.']};
+V186R_LINES.hover=['{p} heads it over the bar.','{p} gets his head to it but it climbs over.','{p} rises well but nods it over.']; V186R_LINES.hwide=['{p} glances his header wide.','{p} heads it just wide of the post.','{p} can only steer his header wide.'];
 V186R_LINES.smother=V186R_LINES.catch; V186R_LINES.dive=V186R_LINES.catch;
 if(typeof feedPush==='function'){ const v186rFeedPush=feedPush;
   feedPush=function(e,quiet){ const L=App.live, n0=L&&L.feed?L.feed.length:0; const r=v186rFeedPush.apply(this,arguments);
-    try{ if(V186R.on&&e&&e._how&&(e.t==='miss'||e.t==='save')&&L&&L.feed&&L.feed.length>n0&&V186R_LINES[e._how]){ const f=L.feed[0];
-        const P=id=>esc(pname(Px(id))); f.txt=pickLine(V186R_LINES[e._how],e.m+e.pid+(e.xg||0)+n0).replace('{p}',P(e.pid)).replace('{g}',e.gk?P(e.gk):'the keeper'); f.how=e._how; } }catch(err){}
+    try{ if(V186R.on&&e&&e._how&&(e.t==='miss'||e.t==='save')&&L&&L.feed&&L.feed.length>n0&&V186R_LINES[e._how]){ const f=L.feed[0]; const key=e._head&&(e._how==='over'||e._how==='wide')?'h'+e._how:e._how;
+        const P=id=>esc(pname(Px(id))); f.txt=pickLine(V186R_LINES[key],e.m+e.pid+(e.xg||0)+n0).replace('{p}',P(e.pid)).replace('{g}',e.gk?P(e.gk):'the keeper'); f.how=e._how; } }catch(err){}
     return r; }; }
