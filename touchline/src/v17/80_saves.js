@@ -109,7 +109,10 @@ function v186kVec(KS,ph){ const K=KS.keys; if(ph<=K[0][0]) return K[0][1]; for(l
 function v186kP(v,n,act){ const V=n<0?v186kMirror(v):v; return {rot:V[3],pivot:V[4],lift:V[2],hipU:V[0],lean:V[1],feet:[{f:V[6],u:V[7],l:V[8]},{f:V[9],u:V[10],l:V[11]}],hands:[{f:V[12],u:V[13],l:V[14]},{f:V[15],u:V[16],l:V[17]}],headTilt:V[5],headTurn:0,prop:null,mouth:false,act}; }
 /* pose phase of a dive object at a stage time: 0..uc before the pose's contact moment, uc..1 after it */
 function v186kPh(D,KS,now){ if(now<=D.t) return 0; if(now<D.tP0) return KS.uc*clamp((now-D.t)/Math.max(1,D.tP0-D.t),0,1); return KS.uc+(1-KS.uc)*clamp((now-D.tP0)/Math.max(1,D.post),0,1); }
-Stage.prototype.v186kPose=function(p,D,now){ const KS=v186kKeys(D); const ph=v186kPh(D,KS,now==null?this.now:now); const P=v186kP(v186kVec(KS,ph),D.n,V186K_ACT[D.k]||'dive'); P.v186=D.t; P.v186ph=ph;
+/* keyframes are built once per dive object (a dive is never mutated; a replay's copy just builds its own) */
+const V186K_KC=new WeakMap();
+function v186kKS(D){ let K=V186K_KC.get(D); if(!K){ K=v186kKeys(D); V186K_KC.set(D,K); } return K; }
+Stage.prototype.v186kPose=function(p,D,now){ const KS=v186kKS(D); const ph=v186kPh(D,KS,now==null?this.now:now); const P=v186kP(v186kVec(KS,ph),D.n,V186K_ACT[D.k]||'dive'); P.v186=D.t; P.v186ph=ph;
   if(D.k==='watch'){ const b=this.ball, a=Math.atan2(b.y-p.y,b.x-p.x), y=p.yaw==null?0:p.yaw; P.headTurn=clamp(-Math.atan2(Math.sin(a-y),Math.cos(a-y)),-1.1,1.1)*0.8; P.headTilt=clamp(-(b.z||0)*0.12,-0.45,0.1); }
   /* a poor keeper dives less tidily: legs apart and a knee up in flight, and after contact the free arm flaps (the contact limbs never move) */
   if(!D.stand&&D.q<0.55){ const m=(0.55-D.q)/0.55*Math.sin(Math.PI*clamp(ph,0,1)); const F=P.feet, sd=D.n>0?1:-1;
@@ -201,7 +204,7 @@ Stage.prototype.v186kSave=async function(e){
   /* the approach mirrors ui_stage.js shotSeq :387-395; keep the two in step */
   await this.gain(p); if(this.own!==p) await this.gain(p);
   let [sx,sy]= e.x!=null? livePos(s,e.x,Math.max(e.y,70)) : [gx-dir*16,34];
-  const gk=this.gkOf(1-s); const q0=v186kQ(this,gk); if(q0>=0.5){ gk.ov=v186kSetSpot(gk,clamp(sx,gx-dir*29.5,gx+dir*29.5),sy,q0); gk.v186set=1; } /* a good keeper reads where it will come from and takes his angle early */
+  const gk=this.gkOf(1-s); const q0=v186kQ(this,gk); if(q0>=0.5){ gk.ov=v186kSetSpot(gk,sx,sy,q0); gk.v186set=1; } /* a good keeper reads where it will come from and takes his angle early */
   p.ov={x:sx,y:sy}; await this.until(()=>this.own!==p||Math.hypot(p.x-sx,p.y-sy)<1.2, this.eta(p,sx,sy)+400);
   if(this.own!==p) await this.gain(p);
   if(Math.abs(p.x-gx)>29.5){ sx=gx-dir*27; p.ov={x:sx,y:p.y}; await this.until(()=>Math.abs(p.x-gx)<=29.5, this.eta(p,sx,p.y)+400); }
