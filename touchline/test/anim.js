@@ -24,7 +24,7 @@ const { chromium } = require('./_pw');
   await page.waitForFunction(()=>window.__sw===1&&App.labSt.fl,null,{timeout:40000}); const inFlight=await page.evaluate(()=>!!App.labSt.fl);
   await page.waitForFunction(()=>window.__ev.length>=1,null,{timeout:20000}); ok(inFlight, 'switching to 8× the instant a shot is struck still lands it and fires the event ('+(await page.evaluate(()=>window.__ev[0]))+')');
   // 4. a caught ball is in the keeper's gloves
-  await page.evaluate(()=>{ App.labSt.ts=0.85; App.labSt.goalTs=0.85; });
+  await page.evaluate(()=>{ App.labSt.ts=0.85; App.labSt.goalTs=0.85; App.labSt._v186kforce={k:'dive',out:'catch'}; }); /* v18.6 keepers pick among many save kinds: ask for the diving catch this check measures */
   const caught=await page.evaluate(async()=>{ const st=App.labSt; let res=null; const L0=st.land; st.land=function(){ const f=this.fl; const r=L0.apply(this,arguments); if(!res&&f&&!f.phys&&f.home&&f.home.gk&&f.hands&&f.home.dive){ const h=this.handsOf(f.home); res={d:Math.hypot(this.ball.x-h.x,this.ball.y-h.y,this.ball.z-h.z),dive:true}; } return r; };
     for(let i=0;i<1500&&!res;i++) await new Promise(r=>requestAnimationFrame(r)); return res; });
   ok(caught&&caught.d<0.6, 'a diving catch puts the ball in the gloves ('+(caught?caught.d.toFixed(2)+' m':'no catch seen')+')');
