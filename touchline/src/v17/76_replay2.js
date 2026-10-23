@@ -69,7 +69,7 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
       const pA=Math.atan2(ay-hy[i],Math.hypot(ax-hx[i],az-hz[i])), pB=Math.atan2(bh-hy[i],Math.max(0.05,dB));
       /* a ball below him is framed low in the picture (not centred), and the head never drops below -20 degrees on the run */
       if(dB<1.2&&bh>hy[i]-0.7&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; tau[i]=0.12; continue; } /* the cross arriving at his face: hold, never spin on a point at the lens */
-      let y=yA+dy*w; if(cross&&wS>0){ let dg=Math.atan2(34-hz[i],gx-hx[i])-y; while(dg>Math.PI) dg-=2*Math.PI; while(dg<-Math.PI) dg+=2*Math.PI; y+=dg*0.45*wS; } /* a header: the head starts to turn toward goal as the cross arrives */
+      let y=yA+dy*w; if(cross&&wS>0){ let dg=Math.atan2(34-hz[i],gx-hx[i])-y; while(dg>Math.PI) dg-=2*Math.PI; while(dg<-Math.PI) dg+=2*Math.PI; y+=dg*0.75*wS; } /* a header: the head starts to turn toward goal as the cross arrives */
       const pB2=cross||pB>-8*V185_D2R?pB:Math.max((-20-15*wS)*V185_D2R,pB+C.frame*V185_D2R); const p=pA+(pB2-pA)*w;
       if(lastY!=null){ let d=y-lastY; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; yw[i]=lastY+d; } else yw[i]=y; pt[i]=p; lastY=yw[i]; lastP=p; tau[i]=cross?0.12:C.tauA; continue; }
     /* just off his boot or head the ball is too close to give a direction: aim where the shot is going */
@@ -85,8 +85,8 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
   zp(yw,tA); zp(pt,tA); zp(hx,tE); zp(hy,tE); zp(hz,tE);
   /* turn-rate and pitch clamps (game time) */
   for(let i=0;i<n;i++) pt[i]=v185Cl(pt[i],C.pMin*V185_D2R,C.pMax*V185_D2R);
-  /* a header whips the head round to follow the ball to goal: a faster turn just around the contact */
-  for(let i=0;i<n;i++) yr[i]=(meta.head&&B[i].now>ts-200&&B[i].now<ts+450?C.yawH:C.yawR)*V185_D2R;
+  /* the head whips round to follow the ball to goal (a header, a first-time finish): a faster turn just around the contact */
+  for(let i=0;i<n;i++) yr[i]=(B[i].now>ts-200&&B[i].now<ts+450?C.yawH:C.yawR)*V185_D2R;
   const rl=(a,r)=>{ for(let i=1;i<n;i++){ const m=(r||yr[i])*Math.max(1,B[i].now-B[i-1].now)/1000; a[i]=a[i-1]+v185Cl(a[i]-a[i-1],-m,m); }
     for(let i=n-2;i>=0;i--){ const m=(r||yr[i])*Math.max(1,B[i+1].now-B[i].now)/1000; a[i]=a[i+1]+v185Cl(a[i]-a[i+1],-m,m); } };
   rl(yw,0); rl(pt,C.pitR*V185_D2R);
@@ -126,7 +126,7 @@ function v185Setup(st,Q,R){ Q.two=false; Q.pass=1; Q.cam='goal'; Q.rate=V18_RP.r
   if(sp>=2&&ty!=='pen') a0=Math.max(a0,Math.min(ts-V185_RP.L2x,crossT!=null?crossT-200:ts));
   a0=Math.max(b0,a0); const a1=Math.min(bE,tg+V185_RP.tail1); const c0=Math.max(b0,ts-V185_RP.lead2), c1=Math.min(bE,tg+V185_RP.tail2);
   if(a1-a0<300||c1-c0<300){ v185Caption(st,Q); return; }
-  const trk=v185Track(st,Q,B,sc,{head,ty}); if(!trk){ v185Caption(st,Q); return; }
+  const trk=v185Track(st,Q,B,sc,{head:head||ty==='header',ty}); if(!trk){ v185Caption(st,Q); return; }
   Q.two=true; Q.cam='eyes'; Q.head=head; Q.crossT=crossT; Q.win=[[a0,a1],[c0,c1]]; Q.trk=trk; Q.t=Q.t0=a0; Q.t1=a1; Q.i=v185Idx(B,a0); Q.rate=sp>=2?V185_RP.rate2x:V18_RP.rate; Q.cams=['eyes'];
   if(gl&&P.dir) P.dir.snap=true; v185Caption(st,Q); }
 
