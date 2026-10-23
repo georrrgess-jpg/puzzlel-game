@@ -43,7 +43,9 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
     const s=0.92*(f.hgt||sc.hgt||70)/70; const yaw=f.yaw==null?((f.face||1)>0?0:Math.PI):f.yaw; const cy=Math.cos(yaw), sy=Math.sin(yaw);
     const jt=S.now-(f.jumpT!=null?f.jumpT:-9e9); const jump=jt>=0&&jt<JD; const lift=jump?Math.sin(jt/JD*Math.PI)*0.72:0;
     /* the body lean poseOf gives him: run (gait speed and acceleration), strike, leap, nod */
-    const real=(f.spd||0)/sm; let lean=real>0.5?0.02+0.016*Math.min(9,f.gv!=null?f.gv:real)+v185Cl((f.acS||0)*0.012,-0.12,0.12):0;
+    const real=(f.spd||0)/sm, vx=f.vx||0, vy=f.vy||0; let mf=1, ml=0; if(Math.hypot(vx,vy)>0.05){ const ps=Math.atan2(vy,vx)-yaw; mf=Math.cos(ps); ml=Math.sin(ps); }
+    const back=mf<-0.4, shuf=!back&&Math.abs(ml)>0.72;
+    let lean=real>0.5?(back?-0.05:shuf?0.05:0.02+0.016*Math.min(9,f.gv!=null?f.gv:real))+v185Cl((f.acS||0)*0.012,-0.12,0.12):(f.hipsHands?-0.03:0);
     const kk=f.kickK, kt=S.now-(f.kickT!=null?f.kickT:-9e9), kW=f.kickW||0, kF=f.kickF||260;
     if(kk&&kk!=='head'&&kk!=='throw'&&kt>=0&&kt<kW+kF){ const big=kk==='shot'||kk==='loft'; if(kt<kW){ const q=kt/kW; lean=-0.06*q*q*(3-2*q)*(big?1:0.5); } else lean=(big?0.12:0.06)*Math.sin(Math.min(1,(kt-kW)/kF*1.6)*Math.PI); }
     if(jump){ const u=jt/JD; lean=0.3*Math.sin(v185Cl((u-0.35)/0.45,0,1)*Math.PI)-0.08*Math.sin(u*Math.PI); }
