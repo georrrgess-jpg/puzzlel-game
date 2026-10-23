@@ -29,13 +29,14 @@ const MON=()=>{ /* runs in the page: monitors freeze lines, holds and captions *
   const capHow={'HEADED OVER':'over','HEADED WIDE':'wide','OVER THE BAR':'over','WIDE':'wide','OFF THE POST!':'post','OFF THE BAR!':'bar','SAVED':'catch','PARRIED!':'parry','TIPPED AROUND THE POST':'tip'};
   const tick=()=>{ const st=(App.live&&App.live.stage)||App.labSt||window.__lab; if(st&&st.alive){
       if(!st.__capW){ st.__capW=1; const oc=st.onCaption; st.onCaption=function(t,k){ if(lastShot&&k==='shot'&&capHow[t]){ A.cap.push({t,how:lastShot._how}); if(lastShot._how&&lastShot._how!==capHow[t]) A.capMis++; } return oc.apply(this,arguments); }; }
-      const m=st.offMark; if(m&&m.v186&&st.now-m.t>=0&&st.now-m.t<Math.max(700,st.D(1500))-40){ const d=Math.abs(v186rDefLine(st,m.s)-m.x); const k=m.t.toFixed(0); A.dev[k]=Math.max(A.dev[k]||0,d); } }
+      const m=st.offMark; if(m&&m.v186&&st.now-m.t>=0&&st.now-m.t<Math.max(700,st.D(1500))-40){ const d=Math.abs(v186rDefLine(st,m.s)-m.x); const k=m.t.toFixed(0); A.dev[k]=Math.max(A.dev[k]||0,d);
+        if(d>0.3&&!(A.devD=A.devD||{})[k]){ A.devD[k]={d:+d.toFixed(2),age:Math.round(st.now-m.t),ts:st.ts,def:[...st.players.values()].filter(q=>q.side!==m.s&&!q.off).map(q=>({pid:q.pid,x:+q.x.toFixed(1),ov:!!q.ov,ch:!!q.chase,gk:!!q.gk})).sort((a,b)=>m.s===0?b.x-a.x:a.x-b.x).slice(0,3)}; } } }
     requestAnimationFrame(tick); }; requestAnimationFrame(tick); };
 const goalPass=[];
 async function collect(page){ const r=await page.evaluate(()=>({off:V186R.log.off,thr:V186R.log.thr,miss:V186R.log.miss,A:window.__rz}));
   goalPass.push(...(r.A.gp||[]));
   allOff.push(...r.off); allThr.push(...r.thr); allMiss.push(...r.miss); allDev.push(...Object.values(r.A.dev)); leaks+=r.A.leak; capMis+=r.A.capMis; capN+=r.A.cap.length;
-  if(r.A.leak) console.log('  holds left after a call:',JSON.stringify(r.A.leakD)); return r; }
+  if(r.A.leak) console.log('  holds left after a call:',JSON.stringify(r.A.leakD)); if(r.A.devD) console.log('  line drift:',JSON.stringify(r.A.devD)); return r; }
 
 async function labOffside(b,speed,mode,n){ const page=await newPage(b); await page.goto(DIST+'#anim-lab'); await page.waitForTimeout(800);
   await page.evaluate(MON);
@@ -144,7 +145,7 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
   const lines=allOff.filter(o=>o.mL!=null), fbs=allOff.filter(o=>o.fb), nCalls=lines.length+fbs.length;
   const mins=k=>lines.length?Math.min(...lines.map(o=>o[k])):NaN;
   console.log(`  offside calls with a freeze line: ${lines.length}; margins at release (min / mean): defender ${mins('mD').toFixed(2)} / ${(lines.reduce((s,o)=>s+o.mD,0)/Math.max(1,lines.length)).toFixed(2)} m, ball ${mins('mB').toFixed(2)} m, halfway ${mins('half').toFixed(1)} m; by speed ${JSON.stringify(lines.reduce((m,o)=>{ const k=o.ts>=0.7?'1x':o.ts>=0.35?'2x':o.ts>=0.18?'4x':'8x'; m[k]=(m[k]||0)+1; return m; },{}))}`);
-  console.log(`  fallbacks (no line): ${fbs.length} ${JSON.stringify(fbs.map(o=>o.fb))}`);
+  console.log(`  fallbacks (no line): ${fbs.length} ${JSON.stringify(fbs.map(o=>({fb:o.fb,diag:o.diag})))}`);
   ok(lines.length>=8, `offside calls with a freeze line seen (${lines.length})`);
   ok(lines.every(o=>o.mD>=0.5&&o.mB>=0.5&&o.half>0), `every flagged runner is beyond the second-last defender and the ball at release (worst ${mins('mD').toFixed(2)} / ${mins('mB').toFixed(2)} m)`);
   ok(lines.every(o=>Math.abs(o.markX-o.lineX)<0.05&&o.ax===o.px), 'the defender line is drawn at the line at release and the attacker line at the runner');
