@@ -126,7 +126,7 @@ function updateLive(scoreOnly){
    ${v184ViewSeg('liveView',view)}${v184ZoomCtl('liveZoom',view)}
    <button class="btn sm" data-a="liveTactics">Tactics</button>${typeof soundBtn==='function'?soundBtn():''}
    ${!M.htDone&&M.htOn?'<button class="btn sm ghost" data-a="liveSkip" data-to="ht">Skip to half</button>':''}<button class="btn sm ghost" data-a="liveSkip" data-to="ft">Skip to end</button>
-   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · + − zoom · M sound</span>`);
+   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · + − zoom · M sound · N names</span>`);
 }
 const waitMs=ms=>new Promise(r=>setTimeout(r,ms));
 /* animate one resolved minute; every visible event is announced by the stage itself */
