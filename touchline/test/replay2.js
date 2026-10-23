@@ -12,7 +12,7 @@
    node test/replay2.js            (RP2_SHOTS=1 also writes screenshots to test/shots/v185/replay2/, RP2_W/RP2_H the viewport,
                                      RP2_THEME a theme preset, RP2_ONLY=shots to skip the measurements) */
 const { chromium, DIST } = require('./_pw'); const fs=require('fs');
-const W=+process.env.RP2_W||900, H=+process.env.RP2_H||600, SHOTS=!!process.env.RP2_SHOTS, ONLY=process.env.RP2_ONLY||'', THEME=process.env.RP2_THEME||'';
+const W=+process.env.RP2_W||760, H=+process.env.RP2_H||480, TIER=process.env.RP2_TIER||'C', SHOTS=!!process.env.RP2_SHOTS, ONLY=process.env.RP2_ONLY||'', THEME=process.env.RP2_THEME||'';
 const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recursive:true});
 (async()=>{ const t0=Date.now(); const b=await chromium.launch(); const mobile=W<600;
   const p=await b.newPage({viewport:{width:W,height:H},deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile}); const errs=[];
@@ -20,7 +20,7 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
   const until=async(fn,ms,arg)=>{ const end=Date.now()+ms; while(Date.now()<end){ if(await p.evaluate(fn,arg)) return true; await p.waitForTimeout(200); } return false; };
   await p.goto(DIST); await p.waitForTimeout(600);
-  await p.evaluate(th=>{ PREFS.renderer='3d'; PREFS.rtier=null; PREFS.replays=true; PREFS.rpAngles='two'; PREFS.view='broadcast'; PREFS.zoom='normal'; if(th&&typeof applyThemePreset==='function') try{ applyThemePreset(th); }catch(e){} savePrefs(); },THEME);
+  await p.evaluate(([th,tier])=>{ PREFS.renderer='3d'; PREFS.rtier=tier; PREFS.replays=true; PREFS.rpAngles='two'; PREFS.view='broadcast'; PREFS.zoom='normal'; if(th){ PREFS.theme={preset:th,custom:null}; try{ applyTheme(); }catch(e){} } savePrefs(); },[THEME,TIER]);
   await p.click('[data-a="newCareerForm"][data-slot="1"]'); await p.fill('#nc-name','RP Coach'); await p.fill('#nc-seed','rp2angles');
   await p.click('[data-a="ncNext"]'); await p.waitForTimeout(200); await p.click('[data-a="createCareer"]'); await p.waitForTimeout(800);
   await p.click('.cta [data-a="playNext"]'); await p.waitForTimeout(400); await p.click('[data-a="kickoff"]');
@@ -142,7 +142,7 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
         for(const [k,t] of marks){ if(SHOTQ.includes(k)) continue; const hit=t!=null?n>=t:Math.abs(b.x-Q.gx)<3.2&&n>=ts; if(hit){ SHOTQ.push(k); window.SHOTK=k; st.paused=true; return; } } }; });
       const run=goal({speed:1,ty}); const want=['p1-early','p1-mid','p1-strike','p1-keeper','p2-strike','p2-3m','p2-bulge']; const got=new Set();
       const end=Date.now()+300000; while(Date.now()<end){ const k=await p.evaluate(()=>{ const s=App.live.stage; return s.paused&&window.SHOTK?window.SHOTK:null; });
-        if(k){ await p.waitForTimeout(700); await p.screenshot({path:`${SHOTDIR}${tag}-${ty}-${k}.png`}); got.add(k); await p.evaluate(()=>{ window.SHOTK=null; App.live.stage.paused=false; }); }
+        if(k){ await p.waitForTimeout(700); if(process.env.RP2_DIAG) console.log(k, await p.evaluate(()=>{ const st=App.live.stage, P=st._p3d, L=P._rp2.last, Q=st._rp; return JSON.stringify({sc:Q.sc&&Q.sc.num,scSide:Q.sc&&Q.sc.side,eye:L.eye.map(v=>+v.toFixed(2)),head:L.head&&L.head.map(v=>+v.toFixed(2)),fwd:L.fwd.map(v=>+v.toFixed(2)),ndc:L.ballNdc.map(v=>+v.toFixed(2)),hid:L.hid,near:Q.R.buf[Q.i].m.filter(([o])=>o.num!=null).map(([o,q])=>[o.num,o.side,+Math.hypot(q.x-L.eye[0],q.y-L.eye[2]).toFixed(2)]).sort((a,b)=>a[2]-b[2]).slice(0,4)}); })); await p.screenshot({path:`${SHOTDIR}${tag}-${ty}-${k}.png`}); got.add(k); await p.evaluate(()=>{ window.SHOTK=null; App.live.stage.paused=false; }); }
         if(await p.evaluate(()=>!App.live.stage._rp&&window.SHOTQ.length>0)) break; await p.waitForTimeout(120); }
       await run; await p.evaluate(()=>{ window.RSHOT=null; App.live.stage.paused=false; }); console.log('shots', ty, view, [...got].join(' ')); }
     await p.evaluate(()=>{ PREFS.view='broadcast'; v184SetView(App.live.stage,'broadcast'); }); }

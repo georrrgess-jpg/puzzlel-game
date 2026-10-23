@@ -19,7 +19,7 @@
 DEFAULT_PREFS.rpAngles='two'; if(PREFS.rpAngles!=='one'&&PREFS.rpAngles!=='two') PREFS.rpAngles='two';
 
 const V185_RP={L1:1100,Lrun:1900,Lpen:1500,L2x:800,tail1:300,lead2:350,tail2:550,rate2x:0.6,
-  fwd:0.10,dn:0.02,tauA:0.18,tauB:0.06,tauE:0.10,yawR:150,pitR:90,pMin:-35,pMax:20,fov:52,fovMax:72,hFov:62,fovLong:38,near:0.12,hide:0.34,
+  fwd:0.10,dn:0.02,tauA:0.18,tauB:0.06,tauE:0.10,yawR:150,pitR:120,pMin:-35,pMax:20,wRun:0.6,frame:22,look:260,lens:0.55,fov:52,fovMax:72,hFov:62,fovLong:38,near:0.12,hide:0.34,
   gEye:3.3,gH:1.45,gFov:40,clear:0.42};
 const V185_D2R=Math.PI/180;
 
@@ -50,15 +50,18 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
     const dB=Math.hypot(bx-hx[i],bz-hz[i]);
     if(S.now>=tg&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; tau[i]=C.tauB; continue; }
     if(S.now>=ts){ tx=bx; ty=bh; tz=bz; const k=v185Cl(1-(S.now-ts)/260,0,1); framed=k; tau[i]=C.tauB; }
-    else { const cross=!!(fl&&fl.home===sc&&fl.kind!=='shot'&&(meta.head||(fl.h||0)>1.5)); let w=cross?1:v185Cl((5-dB)/3,0,1);
-      let ax=hx[i]+cy*14, ay=1.1, az=hz[i]+sy*14; if(Math.abs(f.x-gx)<32){ ax+=(gx-ax)*0.4; ay+=(1.2-ay)*0.4; az+=(34-az)*0.4; }
+    else { const cross=!!(fl&&fl.home===sc&&fl.kind!=='shot'&&(meta.head||(fl.h||0)>1.5));
+      /* head up toward goal while he runs, a glance down onto the ball on touches, eyes on the ball for the strike */
+      const wS=v185Cl(1-(ts-S.now)/C.look,0,1); let w=cross?1:Math.max(C.wRun*v185Cl((4.5-dB)/2.5,0,1),wS);
+      let ax=hx[i]+cy*14, ay=0.25, az=hz[i]+sy*14; if(Math.abs(f.x-gx)<32){ ax+=(gx-ax)*0.4; ay+=(0.9-ay)*0.4; az+=(34-az)*0.4; }
       /* blend the directions (not the points), so a ball at his feet turns the head, and the pitch is framed below */
       const yA=Math.atan2(az-hz[i],ax-hx[i]), yB=Math.atan2(bz-hz[i],bx-hx[i]); let dy=yB-yA; while(dy>Math.PI) dy-=2*Math.PI; while(dy<-Math.PI) dy+=2*Math.PI;
       const pA=Math.atan2(ay-hy[i],Math.hypot(ax-hx[i],az-hz[i])), pB=Math.atan2(bh-hy[i],Math.max(0.05,dB));
-      const y=yA+dy*w, pB2=pB<-10*V185_D2R?pB+Math.min(15.6*V185_D2R,(-pB-10*V185_D2R)*0.5):pB; const p=pA+(pB2-pA)*w;
+      /* a ball below him is framed low in the picture (not centred), and the head never drops below -20 degrees on the run */
+      const y=yA+dy*w, pB2=cross||pB>-8*V185_D2R?pB:Math.max((-20-15*wS)*V185_D2R,pB+C.frame*V185_D2R); const p=pA+(pB2-pA)*w;
       if(lastY!=null){ let d=y-lastY; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; yw[i]=lastY+d; } else yw[i]=y; pt[i]=p; lastY=yw[i]; lastP=p; tau[i]=cross?0.12:C.tauA; continue; }
     const y=Math.atan2(tz-hz[i],tx-hx[i]); let p=Math.atan2(ty-hy[i],Math.max(0.05,Math.hypot(tx-hx[i],tz-hz[i])));
-    if(framed>0&&p<-10*V185_D2R) p+=Math.min(15.6*V185_D2R,(-p-10*V185_D2R)*0.5)*framed;
+    if(framed>0&&p<-10*V185_D2R) p+=Math.min(C.frame*V185_D2R,(-p-10*V185_D2R)*0.6)*framed;
     if(lastY!=null){ let d=y-lastY; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; yw[i]=lastY+d; } else yw[i]=y; pt[i]=p; lastY=yw[i]; lastP=p; }
   if(found<n*0.6) return null;
   /* zero-phase smoothing in game time: forward, then backward one-pole */
@@ -67,8 +70,10 @@ function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const
   const tA=i=>tau[i]||C.tauA, tE=()=>C.tauE;
   zp(yw,tA); zp(pt,tA); zp(hx,tE); zp(hy,tE); zp(hz,tE);
   /* turn-rate and pitch clamps (game time) */
-  for(let i=0;i<n;i++){ pt[i]=v185Cl(pt[i],C.pMin*V185_D2R,C.pMax*V185_D2R); if(i){ const dt=Math.max(1,B[i].now-B[i-1].now)/1000, my=C.yawR*V185_D2R*dt, mp=C.pitR*V185_D2R*dt;
-    yw[i]=yw[i-1]+v185Cl(yw[i]-yw[i-1],-my,my); pt[i]=pt[i-1]+v185Cl(pt[i]-pt[i-1],-mp,mp); } }
+  for(let i=0;i<n;i++) pt[i]=v185Cl(pt[i],C.pMin*V185_D2R,C.pMax*V185_D2R);
+  const rl=(a,r)=>{ for(let i=1;i<n;i++){ const m=r*Math.max(1,B[i].now-B[i-1].now)/1000; a[i]=a[i-1]+v185Cl(a[i]-a[i-1],-m,m); }
+    for(let i=n-2;i>=0;i--){ const m=r*Math.max(1,B[i+1].now-B[i].now)/1000; a[i]=a[i+1]+v185Cl(a[i]-a[i+1],-m,m); } };
+  rl(yw,C.yawR*V185_D2R); rl(pt,C.pitR*V185_D2R);
   /* the eye: head centre, a little forward along the view heading and down; stepped out of anyone else's body */
   let shot=null; for(let i=0;i<n;i++){ const S=B[i]; if(S.now>=ts){ shot=S; break; } }
   const sd=shot?Math.abs(shot.s.ball.x-gx):0, long=sd>20;
@@ -168,7 +173,9 @@ P3D_MODULES.push({name:'rpcam',order:27,
 
 /* ---------- the scorer's own head is not in his camera ---------- */
 const _v185Fig=v18FigDraw;
-v18FigDraw=function(P,st,p,kit,isRef){ const sc=P&&P._rp2eye; if(!sc||p!==sc||!P._fig) return _v185Fig.apply(this,arguments);
+v18FigDraw=function(P,st,p,kit,isRef){ const sc=P&&P._rp2eye; if(!sc||!P._fig) return _v185Fig.apply(this,arguments);
+  /* nobody else is drawn with the lens inside or against his body */
+  if(p!==sc){ const c=P.camera.position; if(p&&Math.hypot(p.x-c.x,p.y-c.z)<V185_RP.lens) return false; return _v185Fig.apply(this,arguments); }
   const F=P._fig, parts=F.parts; const n0=F._v185n&&F._v185n.length===parts.length?F._v185n:(F._v185n=new Int32Array(parts.length)); for(let i=0;i<parts.length;i++) n0[i]=parts[i].n;
   const r=_v185Fig.apply(this,arguments); const R=P._rp2; if(!r){ if(R&&R.last) R.last.hid=-1; return r; }
   const W=F.s, hx=W[42], hy=W[43], hz=W[44], nx=W[39], ny=W[40], nz=W[41], rr=V185_RP.hide*V185_RP.hide; let k=0;
