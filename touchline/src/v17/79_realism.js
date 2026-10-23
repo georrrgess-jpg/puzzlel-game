@@ -66,16 +66,23 @@ async function v186rOffRun(st,R){ const {e,p,s,dir}=R; const W=st._v186W||1500;
   /* freeze the picture: the passer holds the ball, the back line holds (one metre up: the trap) */
   const hold=(q,x,y)=>{ const ov={x,y}; q.ov=ov; R.holds.set(q,ov); };
   hold(o,o.x,o.y); const L=st.offLine(s);
-  /* everyone in the defending team holds (at 8x a midfielder covers 15 m while the lines show, so nobody may drift into the line) */
-  /* a line camped on its own goal line pushes out further (a runner cannot be shown beyond it inside the six-yard box) */
-  const gx=s===0?105:0, push=clamp(dir*(L-(gx-dir*8)),1,8);
-  for(const q of st.players.values()){ if(q.side===s||q.off) continue; const ahead=dir*(L-q.x); q.chase=null; q.trail=null; q.meet=null; hold(q,!q.gk&&ahead>-0.5&&ahead<6?clamp(q.x-dir*push,2,103):q.x,q.y); }
+  /* the back line holds (a jockeying hold: a slow sideways sway, x fixed); a line camped on its own goal line pushes out
+     further (a runner cannot be shown beyond it inside the six-yard box). Midfielders and the keeper keep moving with the
+     shape; update() keeps them off the held line (a midfielder never drops deeper than it, the keeper never comes past it) */
+  const gx=s===0?105:0, push=clamp(dir*(L-(gx-dir*8)),1,8), band=Math.max(6,push+2); R.sway=[]; R.free=[]; R.hold=hold;
+  for(const q of st.players.values()){ if(q.side===s||q.off) continue; const ahead=dir*(L-q.x);
+    if(!q.gk&&ahead<band){ q.chase=null; q.trail=null; q.meet=null; hold(q,clamp(q.x-dir*push,2,103),q.y); R.sway.push({q,ov:q.ov,y:q.y,ph:Math.random()*6.283}); }
+    else R.free.push(q); }
   /* the runner goes for the line; update() keeps his target at the live line + m */
   const oy=clamp(lerp(p.y,34,0.25),6,62); p.chase=null; p.meet=null; p.trail=null;
   R.pov={x:clamp(st.offLine(s)+dir*R.m,3,102),y:oy}; p.ov=R.pov; p.hurry=true; p.offRun=true; st._v186off=R;
-  R.focus={x:(o.x+R.pov.x)/2}; st.focus=R.focus;
+  /* on a narrow (phone) view the camera sits nearer the line so the runner is not cut off at the edge */
+  R.focus={x:st.W<560&&st.cam&&st.cam.w?clamp(st.offLine(s)-dir*Math.min(8,st.cam.w*0.22),0,105):(o.x+R.pov.x)/2}; st.focus=R.focus;
   const ok=()=>dir*(p.x-st.offLine(s))>=R.m-0.3&&dir*(p.x-st.ball.x)>=0.5;
-  const settled=()=>{ for(const [q,ov] of R.holds){ if(q!==o&&q.ov===ov&&Math.hypot(q.x-ov.x,q.y-ov.y)>0.3&&(q.spd||0)>0.4*(st.spdMul||1)) return false; } return true; };
+  /* settled: every held back-liner is on his mark (x only: the sway is sideways) and the second-last defender has stopped
+     moving up or down the pitch (within 0.1 m for 150 ms) */
+  let dlX=null, dlT=0; const settled=()=>{ for(const b of R.sway){ if(b.q.ov===b.ov&&Math.abs(b.q.x-b.ov.x)>0.3) return false; }
+    const dl=v186rDefLine(st,s); if(dlX==null||Math.abs(dl-dlX)>0.1){ dlX=dl; dlT=st.now; return false; } return st.now-dlT>=Math.max(60,st.D(150)); };
   await st.until(()=>st.own!==o||(ok()&&settled()), st.eta(p,R.pov.x,R.pov.y,1.3)*1.6+st.D(400));
   if(st.skip) return v186rOffFallback(st,R,'skip');
   if(st.own!==o) return v186rOffFallback(st,R,'lost');
@@ -106,7 +113,16 @@ async function v186rOffRun(st,R){ const {e,p,s,dir}=R; const W=st._v186W||1500;
 /* the runner's target follows the line every frame while he waits for the pass */
 const v186rUpdOff=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const R=this._v186off; if(R&&!R.released&&R.pov&&R.p.ov===R.pov) R.pov.x=clamp(this.offLine(R.s)+R.dir*R.m,3,102);
-  return v186rUpdOff.apply(this,arguments); };
+  if(R&&R.sway){ const w=6.283/Math.max(900,this.D(1600)); for(const b of R.sway){ if(b.q.ov===b.ov) b.ov.y=clamp(b.y+0.25*Math.sin(this.now*w+b.ph),1,67); } }
+  const r=v186rUpdOff.apply(this,arguments);
+  if(R&&R.free&&this._v186off===R){ try{ v186rOffKeep(this,R); }catch(err){} }
+  return r; };
+/* while a call is on: a free midfielder never drops deeper than the held back line, the keeper never comes past it */
+function v186rOffKeep(st,R){ const dir=R.dir; let Ld=null; for(const b of R.sway){ if(b.q.off) continue; if(Ld==null||dir*(b.q.x-Ld)>0) Ld=b.q.x; } if(Ld==null) return;
+  for(const q of R.free){ if(q.off) continue;
+    const sv=R.soft&&R.soft.get(q); if(sv&&q.ov===sv) sv.x=q.gk?Ld+dir*2.4:Ld-dir*1.6; /* a soft hold follows the line */
+    if(q.gk){ const g=dir*(q.x-Ld); if(g<2.2&&!q.ov){ R.hold(q,Ld+dir*2.4,q.y); (R.soft||(R.soft=new Map())).set(q,q.ov); } if(g<1.2){ q.x=Ld+dir*1.2; if(dir*(q.vx||0)<0) q.vx=0; } }
+    else { const g=dir*(Ld-q.x); if(g<2&&!q.ov){ R.hold(q,Ld-dir*1.6,q.y); (R.soft||(R.soft=new Map())).set(q,q.ov); } if(g<1){ q.x=Ld-dir*1; if(dir*(q.vx||0)>0) q.vx=0; } } } }
 
 /* ---------- the two-line freeze frame ---------- */
 function v186rOffAlpha(st,m){ const t=(st.now-m.t)/Math.max(700,st.D?st.D(1500):1500); if(t>=1) return -1; return t<0.15?t/0.15:1-Math.max(0,(t-0.6)/0.4); }
@@ -119,17 +135,22 @@ Stage.prototype.drawOffMark=function(g){ const m=this.offMark; if(!m||m.ax==null
   g.save(); g.globalAlpha=al*0.95; g.lineCap='round'; g.strokeStyle='#ffffff'; g.lineWidth=4.6; g.beginPath(); g.moveTo(a1[0],a1[1]); g.lineTo(b1[0],b1[1]); g.stroke();
   g.strokeStyle='#e5302a'; g.lineWidth=2.4; g.stroke(); g.restore(); };
 
-/* Tactical: the same two lines and band, with the same lifetime as the broadcast (it used to clear after a fixed 1500 ms) */
-const v186rDrawTac=Stage.prototype.drawTac;
-Stage.prototype.drawTac=function(g){ const m=this.offMark; if(!m) return v186rDrawTac.apply(this,arguments);
-  this.offMark=null; let r; try{ r=v186rDrawTac.apply(this,arguments); } finally{ if(this.offMark==null) this.offMark=m; }
-  const al=v186rOffAlpha(this,m); if(al<0){ if(this.offMark===m) this.offMark=null; return r; }
-  const {s,ox,oy}=this.tacGeom(); const X=x=>ox+x*s, y0=oy, y1=oy+68*s;
+/* Tactical: the same two lines and band, with the same lifetime as the broadcast (it used to clear after a fixed 1500 ms).
+   They are painted where the original paints its line (under the referee, the players and the ball): for the length of
+   the original call offMark reads as null and the first read paints them. */
+function v186rTacLines(st,g,m,al){ const {s,ox,oy}=st.tacGeom(); const X=x=>ox+x*s, y0=oy, y1=oy+68*s;
   g.save();
   if(m.ax!=null){ g.globalAlpha=al*0.24; g.fillStyle='#ff6a4d'; g.fillRect(Math.min(X(m.x),X(m.ax)),y0,Math.abs(X(m.ax)-X(m.x)),y1-y0); }
   g.globalAlpha=al*0.9; g.strokeStyle='rgba(255,211,107,1)'; g.setLineDash([6,5]); g.lineWidth=2; g.beginPath(); g.moveTo(X(m.x),y0); g.lineTo(X(m.x),y1); g.stroke(); g.setLineDash([]);
   if(m.ax!=null){ g.strokeStyle='#ffffff'; g.lineWidth=4; g.beginPath(); g.moveTo(X(m.ax),y0); g.lineTo(X(m.ax),y1); g.stroke(); g.strokeStyle='#e5302a'; g.lineWidth=2; g.stroke(); }
-  g.restore(); return r; };
+  g.restore(); }
+const v186rDrawTac=Stage.prototype.drawTac;
+Stage.prototype.drawTac=function(g){ const m=this.offMark; if(!m) return v186rDrawTac.apply(this,arguments);
+  const al=v186rOffAlpha(this,m); if(al<0){ this.offMark=null; return v186rDrawTac.apply(this,arguments); }
+  const me=this; let drawn=false, set=false, nv=null;
+  Object.defineProperty(this,'offMark',{configurable:true,enumerable:true,get(){ if(!drawn){ drawn=true; try{ v186rTacLines(me,g,m,al); }catch(err){} } return null; },set(v){ set=true; nv=v; }});
+  try{ return v186rDrawTac.apply(this,arguments); }
+  finally{ delete this.offMark; this.offMark=set?nv:m; if(!drawn) v186rTacLines(this,g,m,al); } };
 
 /* 3-D: a second line (white edge, red core) at the attacker and a translucent band, faded like the defender line */
 (function(){ if(typeof P3D_MODULES==='undefined') return; const M=P3D_MODULES.find(x=>x.name==='ball'); if(!M||!M.offside) return; const prev=M.offside;
@@ -147,7 +168,7 @@ Stage.prototype.drawTac=function(g){ const m=this.offMark; if(!m) return v186rDr
 
 /* ---------- D2 throw-ins: the team that put it out never takes it, unless an opponent's block sent it out ---------- */
 Stage.prototype.throwIn=async function(){ const o=this.own; if(!o||this.hands||o.gk||this.skip) return; const s0=o.side, d0=s0===0?1:-1; const far=o.y<34;
-  let side=Math.random()<0.65?1-s0:s0; let blk=null;
+  let side=V186R.forceBlock?s0:Math.random()<0.65?1-s0:s0; let blk=null;
   if(side===s0){ let bd=5; for(const q of this.players.values()){ if(q.side===s0||q.off||q.gk) continue; const d=dist2(q,o); if(d<bd){ bd=d; blk=q; } } if(!blk) side=1-s0; }
   if(!V186R.on){ side=Math.random()<0.65?1-s0:s0; blk=null; }
   let tx, ty=far?-0.8:68.8;
@@ -174,14 +195,14 @@ Stage.prototype.throwIn=async function(){ const o=this.own; if(!o||this.hands||o
 /* ---------- D3 + R5: misses scaled by distance and finishing; D5: what was shown is recorded on the event ---------- */
 const v186rShotSeq=Stage.prototype.shotSeq;
 Stage.prototype.shotSeq=async function(e){ const miss=e&&e.t==='miss'&&e.ty!=='pen';
-  if(!miss) return v186rShotSeq.apply(this,arguments);
+  if(!miss){ this._v186shown=e; try{ return await v186rShotSeq.apply(this,arguments); } finally{ if(this._v186shown===e) this._v186shown=null; } }
   if(miss&&V186R.on&&V186R.setMiss&&!this.skip&&!this.clip&&(e.ty==='header'||e.ty==='corner'||e.ty==='fk')){ const p=this.pl(e.pid);
-    if(p&&!p.off&&!p.gk){ let done=false; try{ done=await v186rSetMiss(this,e,p); } finally{ if(this._v186miss===e) this._v186miss=null; if(this.setPiece==='fk'&&e.ty==='fk') this.setPiece=null; } if(done) return; } }
+    if(p&&!p.off&&!p.gk){ let done=false; try{ done=await v186rSetMiss(this,e,p); } finally{ if(this._v186miss===e) this._v186miss=null; if((this.setPiece==='fk'&&e.ty==='fk')||(this.setPiece==='corner'&&e.ty==='corner')) this.setPiece=null; } if(done) return; } }
   this._v186miss=e;
   try{ return await v186rShotSeq.apply(this,arguments); } finally{ if(this._v186miss===e) this._v186miss=null; } };
 
 /* D4 (misses only; the save branch belongs to the keeper-saves unit): a missed header comes from a cross met with the head,
-   a missed free kick from a dead ball with a wall. Returns false (nothing shown yet) when the picture cannot be built. */
+   a missed corner header from a corner kick, a missed free kick from a dead ball with a wall. Returns false (nothing shown yet) when the picture cannot be built. */
 async function v186rSetMiss(st,e,p){ const s=e.s, dir=s===0?1:-1, gx=s===0?105:0; const gk=st.gkOf(1-s);
   const over=Math.random()<0.45, sg=Math.random()<0.5?-1:1; let to, cap;
   if(e.ty==='fk'){ const pt={pid:p.pid,a:'setup',x:e.x!=null?e.x:50,y:e.x!=null?clamp(e.y,72,82):76};
@@ -190,9 +211,12 @@ async function v186rSetMiss(st,e,p){ const s=e.s, dir=s===0?1:-1, gx=s===0?105:0
     st._v186miss=e; if(gk) gk.dive={dir:Math.sign(to.y-gk.y)||1,t:st.now+st.windOf('shot')+Math.max(st.D(70),st.D(460)+140-Math.max(150,st.D(250)))};
     await st.launch(p,{to,dur:st.D(460)+140,h:1.3,kind:'shot',cont:true}); cap=e._how==='over'?'OVER THE BAR':e._how==='wide'?'WIDE':null; }
   else { let crosser=null, cw=-1; for(const q of st.players.values()){ if(q.side!==s||q===p||q.gk||q.off) continue; const w=Math.abs(q.y-34)-Math.abs(q.x-(gx-dir*20))*0.3; if(w>cw){ cw=w; crosser=q; } }
-    if(!crosser) return false; await st.gain(crosser); if(st.skip||st.own!==crosser||st.hands) return false;
-    const [hx,hy]=e.x!=null?livePos(s,e.x,clamp(e.y,88,95)):[gx-dir*8,34]; p.ov={x:hx,y:hy}; p.chase=null; p.meet=null;
-    const wy=crosser.y<34?7:61; await st.dribble(crosser,clamp(gx-dir*15,4,101),wy,450); if(st.skip||st.own!==crosser) return false;
+    if(!crosser) return false; const [hx,hy]=e.x!=null?livePos(s,e.x,clamp(e.y,88,95)):[gx-dir*8,34];
+    if(e.ty==='corner'){ /* a corner header: from a corner kick, as a corner-header goal is shown */ const near=crosser.y<34;
+      await st.setupCorner(e,{pid:crosser.pid,a:'corner',x:s===0?(near?2:98):(near?98:2),y:99}); if(st.skip||st.own!==crosser||st.hands) return false;
+      p.ov={x:hx,y:hy}; p.chase=null; p.meet=null; }
+    else { await st.gain(crosser); if(st.skip||st.own!==crosser||st.hands) return false; p.ov={x:hx,y:hy}; p.chase=null; p.meet=null;
+      const wy=crosser.y<34?7:61; await st.dribble(crosser,clamp(gx-dir*15,4,101),wy,450); if(st.skip||st.own!==crosser) return false; }
     const df=st.nearest(1-s,hx,hy); if(df&&dist2(df,p)<9){ df.ov={x:hx+dir*0.9,y:hy+(hy<34?1.1:-1.1)}; }
     await st.until(()=>dist2(p,p.ov)<1.2, st.eta(p,hx,hy)+300); if(st.skip||st.own!==crosser) return false;
     const JD=Math.max(260,st.D(560)); p.jumpT=st.now+9e6; const dd=dist2(crosser,p);
@@ -221,10 +245,12 @@ Stage.prototype.goalSequence=async function(){ this._v186goal=(this._v186goal||0
 function v186rMiss(st,p,to,e){ const gx=p.side===0?105:0, b=st.ball; const d=Math.hypot(gx-b.x,34-b.y);
   const how=to.z>=2.6?'over':Math.abs(to.y-34)>=4.1?'wide':to.z>2.2?'bar':'post'; e._how=how; if(!V186R.on) return;
   const a=v186rA(st,p,'fin'), sg=Math.sign(to.y-34)||1; const y0=to.y, z0=to.z;
-  if(how==='wide'){ const off=d<9? 3.95+Math.random()*0.65 : 3.95+(0.15+(1-a)*(0.95+Math.random()*3.3)+a*Math.random()*0.4)*clamp((d-6)/14,0.35,1); to.y=34+sg*Math.min(off,8.5); }
+  let yL=null; if(how==='wide'){ const off=d<9? 4.05+Math.random()*0.55 : 3.95+(0.15+(1-a)*(0.95+Math.random()*3.3)+a*Math.random()*0.4)*clamp((d-6)/14,0.35,1);
+    /* where it crosses the goal line (outside the post), then on along the same line to the target behind it */
+    yL=34+sg*Math.min(off,8.5); const den=gx-b.x; to.y=Math.abs(den)>0.4?clamp(yL+(yL-b.y)*(to.x-gx)/den,34-14,34+14):yL; }
   else if(how==='over'){ to.z=d<9? 2.6+Math.random()*0.35 : 2.65+(0.1+(1-a)*(0.3+Math.random()*2.2))*clamp((d-6)/14,0.35,1); }
   const k=st.gkOf(1-p.side); if(k&&k.dive&&k.dive.t>st.now) k.dive.dir=Math.sign(to.y-k.y)||k.dive.dir;
-  v186rLog('miss',{pid:p.pid,how,d:+d.toFixed(1),fin:p.v186r_fin,a:+a.toFixed(2),y:+to.y.toFixed(2),z:+to.z.toFixed(2),y0:+y0.toFixed(2),z0:+z0.toFixed(2)}); }
+  v186rLog('miss',{pid:p.pid,how,d:+d.toFixed(1),fin:p.v186r_fin,a:+a.toFixed(2),y:+(yL!=null?yL:to.y).toFixed(2),ty:+to.y.toFixed(2),z:+to.z.toFixed(2),y0:+y0.toFixed(2),z0:+z0.toFixed(2)}); }
 
 /* the commentary line follows what was shown */
 const V186R_LINES={
@@ -234,13 +260,15 @@ const V186R_LINES={
   bar:['{p} smashes it against the bar!','Off the crossbar from {p}!','{p} rattles the bar.'],
   catch:['Strong hands from {g} to keep out {p}.','{g} gathers {p}\'s effort.','{g} gets down well to deny {p}.','{g} spreads himself and smothers it.'],
   parry:['{g} parries {p}\'s shot away.','Big stop from {g}! He beats it away.','{p} forces a fine save from {g}.'],
-  tip:['{g} tips {p}\'s effort round the post.','Fingertip save from {g}! Corner.','{g} at full stretch to turn it round the post.']};
+  tip:['{g} tips {p}\'s effort round the post.','Fingertip save from {g}! Round the post for a corner.','{g} at full stretch to turn it round the post.'],
+  tipover:['{g} tips {p}\'s effort over the bar.','Fingertip save from {g}! Over for a corner.','{g} arches back and turns it over the bar.']};
 V186R_LINES.hover=['{p} heads it over the bar.','{p} gets his head to it but it climbs over.','{p} rises well but nods it over.']; V186R_LINES.hwide=['{p} glances his header wide.','{p} heads it just wide of the post.','{p} can only steer his header wide.'];
 V186R_LINES.smother=V186R_LINES.catch; V186R_LINES.dive=V186R_LINES.catch;
 if(typeof feedPush==='function'){ const v186rFeedPush=feedPush;
   feedPush=function(e,quiet){ const L=App.live, n0=L&&L.feed?L.feed.length:0; const r=v186rFeedPush.apply(this,arguments);
     try{ /* a save another unit did not tag: read what the stage shows as it is announced (in the gloves, or pushed away) */
-      const st=L&&L.stage; if(V186R.on&&e&&e.t==='save'&&!e._how&&st&&e.ty!=='pen'){ const k=st.gkOf(1-e.s); e._how=(k&&e.cor)?'tip':(k&&st.own===k&&st.hands)?'catch':'parry'; }
+      const st=L&&L.stage; if(V186R.on&&e&&e.t==='save'&&!e._how&&st&&e.ty!=='pen'&&!quiet&&!L.skipping&&!st.skip&&st._v186shown===e){ const k=st.gkOf(1-e.s);
+        e._how=(k&&e.cor)?(k.dive&&k.dive.k==='tipOver'?'tipover':'tip'):(k&&st.own===k&&st.hands)?'catch':'parry'; }
       if(V186R.on&&e&&e._how&&(e.t==='miss'||e.t==='save')&&L&&L.feed&&L.feed.length>n0&&V186R_LINES[e._how]){ const f=L.feed[0]; const key=e._head&&(e._how==='over'||e._how==='wide')?'h'+e._how:e._how;
         const P=id=>esc(pname(Px(id))); f.txt=pickLine(V186R_LINES[key],e.m+e.pid+(e.xg||0)+n0).replace('{p}',P(e.pid)).replace('{g}',e.gk?P(e.gk):'the keeper'); f.how=e._how; } }catch(err){}
     return r; }; }

@@ -8,9 +8,11 @@
 // Misses: from under 9 m just wide (|y-34| <= 4.7) or just over (z <= 3.0); captions and commentary agree (e._how).
 // Ratings (Lab, overridden on the movers): pace 99 vs 50 shows in sprint times; ball control shows in the first touch;
 // take-on gaps show in beat rates and who ends goal-side; finishing shows in how far misses go.
-// No page errors. Usage: node test/realism.js [lab|live|all]   (QUICK=1: fewer live runs)
+// Close-range wide misses (real flights in the Lab) cross the goal line outside the frame.
+// No page errors. Usage: node test/realism.js [lab|live|all|full]
+//   off: the Lab offside calls only; all (default, run_all): the Lab plus two short live runs (8x broadcast, 2x sideline); full: five live runs over seeds and speeds.
 const { chromium, DIST } = require('./_pw');
-const part=process.argv[2]||'all', QUICK=!!process.env.QUICK;
+const part=process.argv[2]||'all', FULL=part==='full'||part==='live', LAB=part==='lab'||part==='all'||part==='full'||part==='off', LIVE=part!=='lab'&&part!=='off', OFFONLY=part==='off';
 let fails=0; const ok=(c,msg)=>{ console.log((c?'PASS ':'FAIL ')+msg); if(!c) fails++; };
 const SHOTS='test/shots/v186/realism/';
 const allOff=[], allThr=[], allMiss=[], allDev=[]; let leaks=0, capMis=0, capN=0, fb=0, calls=0;
@@ -26,7 +28,7 @@ const MON=()=>{ /* runs in the page: monitors freeze lines, holds and captions *
       o=Object.assign({},o,{onRelease:f=>{ if(dir*(q.x-p.x)>0.5) A.gp.push(+(dir*(q.x-st.offLine(p.side))).toFixed(2)); if(R) return R(f); }}); return LA.call(this,p,o); }
     return LA.apply(this,arguments); };
   let lastShot=null; const SH=Stage.prototype.shotSeq; Stage.prototype.shotSeq=async function(e){ lastShot=e; try{ return await SH.apply(this,arguments); } finally{ lastShot=null; } };
-  const capHow={'HEADED OVER':'over','HEADED WIDE':'wide','OVER THE BAR':'over','WIDE':'wide','OFF THE POST!':'post','OFF THE BAR!':'bar','SAVED':'catch','PARRIED!':'parry','TIPPED AROUND THE POST':'tip'};
+  const capHow={'HEADED OVER':'over','HEADED WIDE':'wide','OVER THE BAR':'over','WIDE':'wide','OFF THE POST!':'post','OFF THE BAR!':'bar','SAVED':'catch','PARRIED!':'parry','TIPPED AROUND THE POST':'tip','TIPPED OVER THE BAR':'tipover','SMOTHERED':'smother'};
   const tick=()=>{ const st=(App.live&&App.live.stage)||App.labSt||window.__lab; if(st&&st.alive){
       if(!st.__capW){ st.__capW=1; const oc=st.onCaption; st.onCaption=function(t,k){ if(lastShot&&k==='shot'&&capHow[t]){ A.cap.push({t,how:lastShot._how}); if(lastShot._how&&lastShot._how!==capHow[t]) A.capMis++; } return oc.apply(this,arguments); }; }
       const m=st.offMark; if(m&&m.v186&&st.now-m.t>=0&&st.now-m.t<Math.max(700,st.D(1500))-40){ const d=Math.abs(v186rDefLine(st,m.s)-m.x); const k=m.t.toFixed(0); A.dev[k]=Math.max(A.dev[k]||0,d);
@@ -85,11 +87,18 @@ async function labRatings(b){ const page=await newPage(b); await page.goto(DIST+
     out.ftLo=await touch(20); out.ftHi=await touch(95); mid.v186r_ctrl=mid.v186r_pace=null;
     /* R5 + D3: misses by finishing and distance */
     const sh=P.find(p=>p.pid==='L08'); const miss=(fin,dist,how)=>{ sh.v186r_pace=60; sh.v186r_fin=fin; const r=[]; for(let i=0;i<60;i++){ sh.x=105-dist; sh.y=34; st.ball.x=sh.x+0.5; st.ball.y=34; const sg=i%2?1:-1;
-        const to=how==='wide'?{x:105.4,y:34+sg*(4.2+Math.random()*2.6),z:0.3}:{x:105.4,y:34,z:2.75+Math.random()}; const e={t:'miss'}; v186rMiss(st,sh,to,e); r.push(how==='wide'?Math.abs(to.y-34):to.z); } return r; };
+        const to=how==='wide'?{x:105.4,y:34+sg*(4.2+Math.random()*2.6),z:0.3}:{x:105.4,y:34,z:2.75+Math.random()}; const e={t:'miss'}; v186rMiss(st,sh,to,e);
+        const yc=st.ball.y+(to.y-st.ball.y)*(105-st.ball.x)/(to.x-st.ball.x); r.push(how==='wide'?Math.abs(yc-34):to.z); } return r; };
     const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
     out.miss={hiWide:mean(miss(95,20,'wide'))-3.66, loWide:mean(miss(30,20,'wide'))-3.66, hiOver:mean(miss(95,20,'over')), loOver:mean(miss(30,20,'over')),
       closeWide:Math.max(...miss(30,5,'wide')), closeOver:Math.max(...miss(30,5,'over'))};
     sh.v186r_fin=sh.v186r_pace=null;
+    /* D3: real tap-in misses through shotSeq; the ball's crossing of the goal line is sampled every frame */
+    const cr=[]; let cur=null, px=null, py=null, pz=null; const U=st.update; st.update=function(dt){ const r=U.apply(this,arguments); const b=this.ball;
+      if(cur&&px!=null&&px<105&&b.x>=105&&cur.cy==null){ const f=(105-px)/((b.x-px)||1e-6); cur.cy=+(py+(b.y-py)*f).toFixed(2); cur.cz=+(pz+(b.z-pz)*f).toFixed(2); } px=b.x; py=b.y; pz=b.z; return r; };
+    for(let i=0;i<14;i++){ st.ts=0.3; const ex=42+Math.random()*16, ey=94+Math.random()*4; cur={ex:+ex.toFixed(1),ey:+ey.toFixed(1)};
+      const e={t:'miss',s:0,pid:sh.pid,x:ex,y:ey,ty:'tapin',xg:0.3,m:10}; await st.shotSeq(e); cur.how=e._how; cr.push(cur); cur=null; }
+    st.update=U; out.cross=cr;
     return out; });
   await page.close(); return R; }
 
@@ -97,7 +106,9 @@ async function labThrow(b,n){ const page=await newPage(b); await page.goto(DIST+
   await page.evaluate(MON); await page.evaluate(()=>{ PREFS.renderer='2d'; labRun('throwin'); }); await page.waitForFunction(()=>App.labSt&&App.labSt.players.size>0);
   await page.click('[data-a="labSpeed"][data-v="2"]');
   /* on three throw-ins in four an opponent stands within 3 m of the man who kicks it out (a block is possible) */
-  await page.evaluate(()=>{ const st=App.labSt; let i=0; const T=st.throwIn; st.throwIn=function(){ const o=this.own; if(o&&(i++%4!==3)){ const q=[...this.players.values()].find(p=>p.side!==o.side&&!p.gk); q.x=o.x+1.6; q.y=o.y+1.2; q.ov=null; q._px=null; } return T.apply(this,arguments); }; });
+  await page.evaluate(()=>{ const st=App.labSt; let i=0; const T=st.throwIn; st.throwIn=async function(){ const o=this.own; const k=i++; V186R.forceBlock=false;
+      if(o&&(k%4!==3)){ const q=[...this.players.values()].find(p=>p.side!==o.side&&!p.gk); q.x=o.x+1.6; q.y=o.y+1.2; q.ov=null; q._px=null; V186R.forceBlock=k%2===0; }
+      try{ return await T.apply(this,arguments); } finally{ V186R.forceBlock=false; } }; });
   const t0=Date.now(); let shot=0;
   while(Date.now()-t0<90000){ const k=await page.evaluate(()=>V186R.log.thr.length); if(k>=n) break;
     if(!shot&&await page.evaluate(()=>V186R.log.thr.some(t=>t.block))){ await page.waitForTimeout(250); await page.screenshot({path:`${SHOTS}lab_throwin_block.png`}); shot=1; }
@@ -122,7 +133,7 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
 
 (async()=>{ const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
   require('fs').mkdirSync(SHOTS,{recursive:true});
-  if(part==='lab'||part==='all'){
+  if(LAB&&!OFFONLY){
     const R=await labRatings(b); console.log('  ratings',JSON.stringify(R));
     const g=R.gap, q=R.eq; ok(g.ta&&g.tc&&g.tc/g.ta>=1.12, `pace 99 vs 50 over 30 m: ${g.ta} vs ${g.tc} ms (ratio ${(g.tc/g.ta).toFixed(3)}); first 5 m ${g.a5} vs ${g.c5} ms`);
     ok(q.ta&&q.tc&&Math.abs(q.tc/q.ta-1)<0.03, `equal pace runs level (${q.ta} vs ${q.tc} ms)`);
@@ -134,29 +145,33 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
     ok(avg(R.ftLo)-avg(R.ftHi)>=0.35&&mL<=1.4, `first touch: control 20 runs ${avg(R.ftLo).toFixed(2)} m off the foot (max ${mL}), control 95 ${avg(R.ftHi).toFixed(2)} m (max ${mH})`);
     const M=R.miss; ok(M.hiWide<=1.2&&M.loWide>=2.0, `wide misses from 20 m: finishing 95 ${M.hiWide.toFixed(2)} m beyond the post, finishing 30 ${M.loWide.toFixed(2)} m`);
     ok(M.loOver>M.hiOver+0.4, `over the bar from 20 m: finishing 95 z ${M.hiOver.toFixed(2)}, finishing 30 z ${M.loOver.toFixed(2)}`);
-    ok(M.closeWide<=4.7&&M.closeOver<=3.0, `misses from 5 m stay close: widest ${M.closeWide.toFixed(2)} (|y-34|), highest z ${M.closeOver.toFixed(2)}`);
-    for(const [sp,mode,n] of [[1,'broadcast',2],[2,'sideline',2],[4,'tactical',2],[8,'broadcast',3]]) await labOffside(b,sp,mode,n);
-    await labThrow(b,10);
+    ok(M.closeWide<=4.7&&M.closeWide>=3.9&&M.closeOver<=3.0, `misses from 5 m stay close: widest ${M.closeWide.toFixed(2)} (|y-34| at the goal line), highest z ${M.closeOver.toFixed(2)}`);
+    const X=R.cross.filter(c=>c.cy!=null&&(c.how==='wide'||c.how==='over')), inF=X.filter(c=>Math.abs(c.cy-34)<3.66+0.11&&c.cz<2.44+0.11);
+    ok(X.length>=6&&inF.length===0, `tap-in misses cross the goal line outside the frame (${X.length} sampled, ${inF.length} inside: ${JSON.stringify(inF.slice(0,3))})`);
   }
-  if(part==='live'||part==='all'){
-    const runs=QUICK?[[8,'v186probe',200],[4,'v186probe2',200]]:[[8,'v186probe',260],[8,'realism-b',260],[4,'v186probe2',260],[2,'realism-c',150,'sideline'],[1,'realism-d',120]];
+  if(LAB){ for(const [sp,mode,n] of [[1,'broadcast',2],[2,'sideline',2],[4,'tactical',2],[8,'broadcast',3]]) await labOffside(b,sp,mode,n);
+    if(!OFFONLY) await labThrow(b,10); }
+  let slow=false;
+  if(LIVE){
+    const runs=FULL?[[8,'v186probe',260],[8,'realism-b',260],[4,'v186probe2',260],[2,'realism-c',150,'sideline'],[1,'realism-d',120]]:[[8,'v186probe',170],[2,'realism-c',90,'sideline']];
+    slow=runs.some(r=>r[0]<=2);
     for(const [sp,seed,secs,view] of runs) await live(b,sp,seed,secs,view);
   }
   const lines=allOff.filter(o=>o.mL!=null), fbs=allOff.filter(o=>o.fb), nCalls=lines.length+fbs.length;
   const mins=k=>lines.length?Math.min(...lines.map(o=>o[k])):NaN;
   console.log(`  offside calls with a freeze line: ${lines.length}; margins at release (min / mean): defender ${mins('mD').toFixed(2)} / ${(lines.reduce((s,o)=>s+o.mD,0)/Math.max(1,lines.length)).toFixed(2)} m, ball ${mins('mB').toFixed(2)} m, halfway ${mins('half').toFixed(1)} m; by speed ${JSON.stringify(lines.reduce((m,o)=>{ const k=o.ts>=0.7?'1x':o.ts>=0.35?'2x':o.ts>=0.18?'4x':'8x'; m[k]=(m[k]||0)+1; return m; },{}))}`);
   console.log(`  fallbacks (no line): ${fbs.length} ${JSON.stringify(fbs.map(o=>({fb:o.fb,diag:o.diag})))}`);
-  ok(lines.length>=8, `offside calls with a freeze line seen (${lines.length})`);
+  const needL=(LAB?8:0)+(LIVE?1:0); ok(lines.length>=needL, `offside calls with a freeze line seen (${lines.length}, at least ${needL})`);
   ok(lines.every(o=>o.mD>=0.5&&o.mB>=0.5&&o.half>0), `every flagged runner is beyond the second-last defender and the ball at release (worst ${mins('mD').toFixed(2)} / ${mins('mB').toFixed(2)} m)`);
   ok(lines.every(o=>Math.abs(o.markX-o.lineX)<0.05&&o.ax===o.px), 'the defender line is drawn at the line at release and the attacker line at the runner');
   ok(allDev.length>0&&Math.max(...allDev)<=0.3, `the second-last defender stays on the drawn line while it shows (worst ${allDev.length?Math.max(...allDev).toFixed(3):'-'} m over ${allDev.length} lines)`);
   ok(fbs.filter(o=>!o.skip).length<=Math.max(1,Math.floor(nCalls*0.1)), `calls without a picture stay rare (${fbs.length} of ${nCalls})`);
   ok(leaks===0, `no hold is left on a defender after a call (${leaks})`);
   const thrBad=allThr.filter(t=>t.side===t.kicker&&!t.block);
-  ok(allThr.length>0&&thrBad.length===0&&(part!=='lab'||allThr.some(t=>t.block)), `throw-ins: the team that put it out never takes it unblocked (${allThr.length} throw-ins, ${allThr.filter(t=>t.block).length} blocked, ${thrBad.length} wrong)`);
-  const close=allMiss.filter(m=>m.d<9); ok(close.every(m=>m.how==='post'||m.how==='bar'||Math.abs(m.y-34)<=4.7||m.z<=3.0), `close-range misses stay close (${close.length}: ${close.map(m=>m.how+' '+(m.how==='over'?m.z:m.y)).join(', ')})`);
+  if(!OFFONLY) ok((allThr.length>0||!(LAB||FULL))&&thrBad.length===0&&(!LAB||allThr.some(t=>t.block)), `throw-ins: the team that put it out never takes it unblocked (${allThr.length} throw-ins, ${allThr.filter(t=>t.block).length} blocked, ${thrBad.length} wrong)`);
+  const close=allMiss.filter(m=>m.d<9); ok(close.every(m=>m.how==='wide'?Math.abs(m.y-34)<=4.7&&Math.abs(m.y-34)>=3.9:m.how==='over'?m.z<=3.0&&m.z>=2.55:true), `close-range misses stay close (${close.length}: ${close.map(m=>m.how+' '+(m.how==='over'?m.z:m.y)).join(', ')})`);
   ok(capMis===0, `miss and save captions match the commentary category (${capN} checked, ${capMis} mismatched)`);
   const gpOff=goalPass.filter(m=>m>0.2); console.log(`  goal-sequence forward passes: ${goalPass.length}, receiver beyond the line at release: ${gpOff.length} ${JSON.stringify(gpOff)}`);
-  if(part!=='lab') ok(gpOff.length===0, `goal sequences: no forward pass to an offside receiver (${gpOff.length} of ${goalPass.length})`);
+  if(LIVE) ok(gpOff.length===0, `goal sequences: no forward pass to an offside receiver (${gpOff.length} of ${goalPass.length})`);
   ok(errs.length===0, 'no page errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
   await b.close(); console.log(fails?`${fails} FAILED`:'ALL PASS'); process.exit(fails?1:0); })();

@@ -75,15 +75,19 @@ Stage.prototype.eta=function(p,x,y,mult){ const t=v186rEta.apply(this,arguments)
 
 /* per frame, before the steering: who presses the carrier, and did the carrier just cut sharply? */
 function v186rPre(st){ const o=st.own&&!st.hands?st.own:null; st._v186rPres=null;
-  const B=st._v186rBeat; if(B&&B.size){ for(const q of B){ if(st.skip||!V186R.on||st.now-q.v186bT>q.v186bD){ if(q.ov===q.v186bOv) q.ov=null; q.v186bOv=null; B.delete(q); } } }
+  const B=st._v186rBeat; if(B&&B.size){ for(const q of B){ if(st.skip||!V186R.on||st.now-q.v186bT>q.v186bD){ if(q.ov===q.v186bOv) q.ov=null; q.v186bOv=null; B.delete(q); continue; }
+      /* the carrier and the ball go round him, never through him: a soft push apart on the defender only */
+      for(const [c,r] of [[st.own&&st.own!==q?st.own:null,0.75],[st.fl?null:st.ball,0.5]]){ if(!c) continue; const dx=q.x-c.x, dy=q.y-c.y, d=Math.hypot(dx,dy); if(d<r&&d>1e-3){ const k=(r-d)*0.5/d; q.x+=dx*k; q.y+=dy*k; } } } }
   if(!o||!v186rLive(st)||st.demoCalm){ st._v186rYH=null; return; }
   st._v186rPres=st.nearest(1-o.side,st.ball.x,st.ball.y);
-  const now=st.now, y=st.yawOf(o); let H=st._v186rYH; if(!H||H.p!==o){ H=st._v186rYH={p:o,q:[]}; }
-  H.q.push([now,y]); const win=Math.max(80,st.D(250)); while(H.q.length>2&&now-H.q[0][0]>win) H.q.shift();
-  const y0=H.q[0][1]; if(Math.abs(Math.atan2(Math.sin(y-y0),Math.cos(y-y0)))>0.8&&(!st._v186rCut||now-st._v186rCut.t>Math.max(90,st.D(300)))){ st._v186rCut={t:now,p:o}; H.q=[[now,y]]; } }
+  const now=st.now, y=st.yawOf(o); let H=st._v186rYH; if(!H||H.p!==o){ H=st._v186rYH={p:o,t0:now,y0:y,t1:now,y1:y}; }
+  /* two samples: the window start (t0,y0) and a newer one (t1,y1) that takes over when the start falls out of the window */
+  const win=Math.max(80,st.D(250)); if(now-H.t0>win){ H.t0=H.t1; H.y0=H.y1; H.t1=now; H.y1=y; } else if(now-H.t1>win*0.5){ H.t1=now; H.y1=y; }
+  const y0=H.y0; if(Math.abs(Math.atan2(Math.sin(y-y0),Math.cos(y-y0)))>0.8&&(!st._v186rCut||now-st._v186rCut.t>Math.max(90,st.D(300)))){ st._v186rCut={t:now,p:o}; H.t0=H.t1=now; H.y0=H.y1=y; } }
 
 /* R4: after the frame, a heavy first touch keeps the ball running on from the foot for a moment */
 function v186rPost(st,dt){ const o=st.own; if(!o||st.fl||st.hands||st.placed||st.headBall===o||o.v186ftT==null) return;
+  if(o.v186k){ o.v186ftT=null; return; } /* a skill move (another unit) owns the ball path */
   if(o.plant||(o.kickT||-9e9)>=o.v186ftT){ o.v186ftT=null; return; } /* he is already shaping to strike it: no heavy touch */
   const u=(st.now-o.v186ftT)/Math.max(140,st.D(420)); if(u<0||u>=1){ if(u>=1) o.v186ftT=null; return; }
   const ex=(1-o.v186ftQ)*0.9*(u<0.22?smooth(u/0.22):1-smooth((u-0.22)/0.78)); if(ex<0.01) return;
@@ -117,7 +121,8 @@ function v186rTakeOn(st,p,x,y){ if(!V186R.feint||!v186rLive(st)||st.hands||st.ow
   p.v186fT=now; p.v186fS=side; best.v186dT=now; best.v186dS=side; best.v186dBeat=beat;
   if(beat){ best.v186bT=now+Math.max(60,st.D(160)); best.v186bD=Math.max(260,st.D(650+400*(1-v186rA(st,best,'tkl'))));
     /* sold: he dives in toward the ball and is held there, slowed, while the carrier goes round him */
-    best.v186bOv={x:best.x+(p.x-best.x)*0.4,y:best.y+(p.y-best.y)*0.4+side*0.5}; best.ov=best.v186bOv; (st._v186rBeat||(st._v186rBeat=new Set())).add(best);
+    const gx=side*(-hy/hl), gy=side*(hx/hl); /* unit vector toward the side the carrier goes; the defender bites the other way */
+    best.v186bOv={x:clamp(best.x+(p.x-best.x)*0.4-gx*0.8,1,104),y:clamp(best.y+(p.y-best.y)*0.4-gy*0.8,1,67)}; best.ov=best.v186bOv; (st._v186rBeat||(st._v186rBeat=new Set())).add(best);
     best.kickT=now+Math.max(40,st.D(120)); best.kickW=0; best.kickK='pass'; best.kickF=st.D(260); st.look(best,p.x,p.y,st.D(500)); }
   v186rLog('feint',{att:p.pid,def:best.pid,gap:+D.gap.toFixed(1),beat,d:+bd.toFixed(2)});
   return {q:best,beat,side}; }
@@ -126,8 +131,10 @@ const v186rDribble=Stage.prototype.dribble;
 const v186rDribbleW=function(p,x,y,ms){ let T=null; try{ if(this.own===p) T=v186rTakeOn(this,p,x,y); }catch(e){ T=null; }
   if(T&&!T.beat){ /* the defender holds his ground: he checks back and goes again shorter */ const dir=p.side===0?1:-1;
     x=clamp(p.x+(x-p.x)*0.35-dir*0.6,4,101); y=clamp(p.y+(y-p.y)*0.35+T.side*1.2,3,65); }
-  else if(T){ /* beaten: he goes round the defender on the far side */ const q=T.q, hx=x-p.x, hy=y-p.y, hl=Math.hypot(hx,hy)||1; const cr=Math.sign(hx*(q.y-p.y)-hy*(q.x-p.x))||1;
-    y=clamp(y+(hx/hl)*(-cr)*1.4,3,65); x=clamp(x-(hy/hl)*(-cr)*1.4,4,101); }
+  else if(T){ /* beaten: he goes round the defender on the far side, through a point beside and just past him */ const q=T.q, hx=x-p.x, hy=y-p.y, hl=Math.hypot(hx,hy)||1; const cr=Math.sign(hx*(q.y-p.y)-hy*(q.x-p.x))||1;
+    const nx=(-hy/hl)*(-cr), ny=(hx/hl)*(-cr); y=clamp(y+ny*1.4,3,65); x=clamp(x+nx*1.4,4,101);
+    const wx=clamp(q.x+(hx/hl)*0.6+nx*1.4,4,101), wy=clamp(q.y+(hy/hl)*0.6+ny*1.4,3,65), me=this, half=Math.round((ms||300)*0.5);
+    return v186rDribble.call(this,p,wx,wy,half).then(()=>me.own===p&&!me.skip?v186rDribble.call(me,p,x,y,half):undefined); }
   return v186rDribble.call(this,p,x,y,ms); };
 Stage.prototype.dribble=v186rDribbleW;
 
