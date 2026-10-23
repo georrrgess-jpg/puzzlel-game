@@ -63,7 +63,7 @@ P3D_MODULES.push({name:'director',order:25,
     if(mode==='kickoff'){ v18GantryPose(P,52.5,72,0.74,30,eye,tgt); return 30; }
     if(mode==='pen'){ const gx=st.so?105:(b.x>52.5?105:0), dir=gx===105?1:-1; const sx=st.so&&!st.placed&&!(st.fl&&st.fl.kind==='shot')?94:b.x, sy=st.so&&!st.placed?34:b.y;
       eye.set(sx-dir*10.5,1.75,sy+3.2); tgt.set(gx-dir*0.8,1.05,34); return 30; }
-    if(mode==='corner'){ const gx=b.x>52.5?105:0, dir=gx===105?1:-1; eye.set(gx-dir*2.5,12.5,68+3.5); tgt.set(gx-dir*7.5,0.4,34.5); return 37; }
+    if(mode==='corner'){ const gx=b.x>52.5?105:0, dir=gx===105?1:-1; eye.set(gx-dir*2.5,12.5,68+3.5); tgt.set(gx-dir*8.5,0.4,34); return 33; }
     if(mode==='celeb'){ const sc=P.dir.cel; if(!sc) return false; const gx=sc.side===0?105:0, dir=gx===105?1:-1; const late=sc.celebT!=null&&st.now-sc.celebT>(st.D?st.D(1100):1100);
       const back=late?11.2:8.6; eye.set(sc.x-dir*2.6,late?3.1:2.3,Math.min(sc.y+back,74)); if(eye.z-sc.y<6) eye.z=sc.y+6; tgt.set(sc.x,1.12,sc.y); return late?32:29; }
     if(mode==='replay'){ /* high behind the goal with a slow push-in; the lens tightens as the ball comes toward it */
