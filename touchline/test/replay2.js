@@ -91,9 +91,9 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   /* ---------- 5. skip controls ---------- */
   const skip=async(how)=>{ await p.evaluate(()=>{ window.SEEN=[]; window.RSHOT=(L)=>{ SEEN.push(L.cam); }; });
     const run=goal({speed:1}); const saw=await until(()=>window.SEEN.includes('eyes')&&!!document.querySelector('.v18-rp'),180000); const tq=Date.now(); let t2=null;
-    if(saw&&how==='tap') await p.click('.v18-rp',{force:true,position:{x:W/2,y:H/3}}).catch(()=>{});
+    let tEnd=null; if(saw&&how==='tap'){ await p.click('.v18-rp',{force:true,position:{x:W/2,y:H/3}}).catch(()=>{}); if(await until(()=>!App.live.stage._rp,30000)) tEnd=Date.now()-tq; }
     if(saw&&how==='next'){ await p.click('.v185-rp-next').catch(e=>console.log('click',e.message)); const n0=await p.evaluate(()=>SEEN.length); if(await until(()=>SEEN.includes('goal'),30000)) t2=await p.evaluate(n0=>SEEN.slice(n0).indexOf('goal'),n0); }
-    const rr=await run; await p.evaluate(()=>{ window.RSHOT=null; }); return {saw,r:rr,dt:Date.now()-tq,t2}; };
+    const rr=await run; await p.evaluate(()=>{ window.RSHOT=null; }); return {saw,r:rr,dt:tEnd==null?99999:tEnd,t2}; };
   let k=await skip('tap'); ok(k.saw&&k.r.n===1&&!seqOf(k.r.frames).includes('goal')&&k.dt<15000, 'skip: a tap in pass 1 ends the whole replay '+JSON.stringify({n:k.r.n,cams:seqOf(k.r.frames),ms:k.dt}));
   k=await skip('next'); ok(k.saw&&k.t2!=null&&k.t2<=2&&k.r.n===1&&JSON.stringify(seqOf(k.r.frames))==='["eyes","goal"]', 'Next angle: jumps to pass 2 (within '+k.t2+' rendered frames), one replay '+JSON.stringify({n:k.r.n,cams:seqOf(k.r.frames)}));
   /* ---------- 7-8. header and penalty ---------- */
