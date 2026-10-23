@@ -20,7 +20,7 @@
    defender reads it (barely reacts) and his tackle follows as before.
    State is primitive fields on the movers (v186*), so the goal replays (68, 76) show the moves.
    Switch: V186S.on. Tuning: V186S.rate (chance multiplier), V186S.bite (defender steps). Lab: 'skills' and 'skillsmod'. */
-const V186S={on:true, rate:1.2, solo:0.7, bite:true, cool:3500, minTs:0.45};
+const V186S={on:true, rate:1.5, solo:0.7, bite:true, cool:3500, minTs:0.45};
 const V186S_LV={V:1,JV:0.85,MOD:0.7};
 const V186S_MV={
   feint:{nc:1.75,trig:2.7,turn:0,min:{V:0,JV:0,MOD:0},w:1.0,go:0.5,cap:'BODY FEINT!'},
