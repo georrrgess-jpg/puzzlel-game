@@ -180,10 +180,10 @@ Stage.prototype.finish=function(e,pl){ const K=this._v186x;
 /* the cross homes in on the contact point, and update holds the ball there until the strike */
 const _v186xHead=Stage.prototype.headOf;
 Stage.prototype.headOf=function(p){ if(p&&p.v186xk&&!(p.v186xr>=0)&&p.v186xc!=null){ try{ const c=this.v186xContact(p); if(c) return c; }catch(e){} } return _v186xHead.apply(this,arguments); };
-/* his head's height change through the move (what the 2-D name plate reads to sit above the head; 3-D plates use the solved head) */
+/* the top of his body through the move (head, or a boot raised above it, with the ball on it): the 2-D name plate sits above that, never on the kick (3-D plates use the solved head) */
 const _v186xJump=Stage.prototype.jumpLift;
 Stage.prototype.jumpLift=function(p){ const r=_v186xJump.apply(this,arguments); if(!p||!p.v186xk||p.v186xc==null) return r;
-  try{ const F=v186xFrame(p,v186xTau(this,p),v186xDur(p.v186xk,p.v186xts)); if(!F) return r; const h=v186xFwd(0.02,1.83,0,F.ra?0:F.th,F.ra,F.lift,0.8)[2]; return r+(h-1.83)*v186xScale(this,p).S; }catch(e){ return r; } };
+  try{ const F=v186xFrame(p,v186xTau(this,p),v186xDur(p.v186xk,p.v186xts)); if(!F) return r; const h=Math.max(v186xFwd(0.02,1.83,0,F.ra?0:F.th,F.ra,F.lift,0.8)[2],F.feet[0][2]+0.3,F.feet[1][2]+0.3); return r+(h-1.83)*v186xScale(this,p).S; }catch(e){ return r; } };
 
 /* ---------- after every step: facing and position scripted through the move ---------- */
 const _v186xUpd=Stage.prototype.update;
