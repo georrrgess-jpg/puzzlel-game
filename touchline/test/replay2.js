@@ -20,7 +20,8 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
   const until=async(fn,ms,arg)=>{ const end=Date.now()+ms; while(Date.now()<end){ if(await p.evaluate(fn,arg)) return true; await p.waitForTimeout(200); } return false; };
   await p.goto(DIST); await p.waitForTimeout(600);
-  await p.evaluate(([th,tier])=>{ PREFS.renderer='3d'; PREFS.rtier=tier; PREFS.replays=true; PREFS.rpAngles='two'; PREFS.view='broadcast'; PREFS.zoom='normal'; if(th){ PREFS.theme={preset:th,custom:null}; try{ applyTheme(); }catch(e){} } savePrefs(); },[THEME,TIER]);
+  await p.evaluate(([th,tier])=>{ PREFS.renderer='3d'; PREFS.rtier=tier; PREFS.replays=true; PREFS.rpAngles='two'; PREFS.view='broadcast'; PREFS.zoom='normal'; if(th){ if(!PRESETS.some(q=>q.k===th)) throw new Error('RP2_THEME: no theme preset '+th+' (presets: '+PRESETS.map(q=>q.k).join(' ')+')'); PREFS.theme={preset:th,custom:null}; try{ applyTheme(); }catch(e){} } savePrefs(); },[THEME,TIER]);
+  if(THEME) console.log('  theme', THEME, 'computed --bg', await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()));
   await p.click('[data-a="newCareerForm"][data-slot="1"]'); await p.fill('#nc-name','RP Coach'); await p.fill('#nc-seed','rp2angles');
   await p.click('[data-a="ncNext"]'); await p.waitForTimeout(200); await p.click('[data-a="createCareer"]'); await p.waitForTimeout(800);
   await p.click('.cta [data-a="playNext"]'); await p.waitForTimeout(400); await p.click('[data-a="kickoff"]');
@@ -154,7 +155,8 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
   if(SHOTS){ const tag=(process.env.RP2_TAG||((mobile?'phone':'desk')+(THEME?'-'+THEME:'')));
     await p.evaluate(()=>{ const s=App.live.stage; if(!s._p3d||s._p3d.dead){ s._v18off=false; s._p3d=undefined; } }); await until(()=>{ const s=App.live.stage; return !!(s._p3d&&!s._p3d.dead); },20000);
     for(const [ty,view] of [['open','broadcast'],['header','broadcast'],['pen','broadcast'],['long','sideline']]){ if(process.env.RP2_TYPES&&!process.env.RP2_TYPES.split(',').includes(ty)) continue;
-      await p.evaluate(v=>{ PREFS.view=v; v184SetView(App.live.stage,v); },view); await p.waitForTimeout(400);
+      await p.evaluate(v=>{ A.liveView({dataset:{v}}); },view); await p.waitForTimeout(400);
+      console.log('  view', view, JSON.stringify(await p.evaluate(()=>{ const P=App.live.stage._p3d; return {pref:PREFS.view,slOn:!!(P&&P._slOn),btn:[...document.querySelectorAll('[data-a="liveView"]')].filter(b=>b.classList.contains('on')||b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.v)}; })));
       /* pause the replay at chosen moments: early run, a touch, just after the strike, ball near the keeper; pass 2: strike, ball 3 m out, bulge */
       await p.evaluate(()=>{ window.SHOTQ=[]; window.SHOTN=0; window.RSHOT=(L,Q,st)=>{ if(st.paused||!Q.two) return; const ts=Q.ts, tg=Q.tg, b=st.ball, n=st.now; const marks=Q.pass===1?[['p1-early',Q.win[0][0]+120],['p1-mid',(Q.win[0][0]+ts)/2],['p1-strike',ts+100],['p1-keeper',tg-120]]:[['p2-strike',ts],['p2-3m',null],['p2-bulge',tg+200]];
         for(const [k,t] of marks){ if(SHOTQ.includes(k)) continue; const hit=t!=null?n>=t:Math.abs(b.x-Q.gx)<3.2&&n>=ts; if(hit){ SHOTQ.push(k); window.SHOTK=k; st.paused=true; return; } } }; });
@@ -163,6 +165,6 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
         if(k){ await p.waitForTimeout(700); if(process.env.RP2_DIAG) console.log(k, await p.evaluate(()=>{ const st=App.live.stage, P=st._p3d, L=P._rp2.last, Q=st._rp; return JSON.stringify({sc:Q.sc&&Q.sc.num,scSide:Q.sc&&Q.sc.side,eye:L.eye.map(v=>+v.toFixed(2)),head:L.head&&L.head.map(v=>+v.toFixed(2)),fwd:L.fwd.map(v=>+v.toFixed(2)),ndc:L.ballNdc.map(v=>+v.toFixed(2)),hid:L.hid,near:Q.R.buf[Q.i].m.filter(([o])=>o.num!=null).map(([o,q])=>[o.num,o.side,+Math.hypot(q.x-L.eye[0],q.y-L.eye[2]).toFixed(2)]).sort((a,b)=>a[2]-b[2]).slice(0,4)}); })); await p.screenshot({path:`${SHOTDIR}${tag}-${ty}-${k}.png`}); got.add(k); await p.evaluate(()=>{ window.SHOTK=null; App.live.stage.paused=false; }); }
         if(await p.evaluate(()=>!App.live.stage._rp&&window.SHOTQ.length>0)) break; await p.waitForTimeout(120); }
       const rr=await run; await p.evaluate(()=>{ window.RSHOT=null; App.live.stage.paused=false; }); console.log('shots', ty, view, [...got].join(' '), JSON.stringify(eyesStats(rr.frames.filter(f=>true))), JSON.stringify(goalStats(rr.frames))); }
-    await p.evaluate(()=>{ PREFS.view='broadcast'; v184SetView(App.live.stage,'broadcast'); }); }
+    await p.evaluate(()=>{ A.liveView({dataset:{v:'broadcast'}}); }); }
   console.log(errs.length?'ERRORS\n'+errs.join('\n'):'ERRORS none'); if(errs.length) fails++;
   console.log((fails?fails+' FAILED':'ALL PASS')+' in '+Math.round((Date.now()-t0)/1000)+' s'); await b.close(); process.exit(fails?1:0); })();
