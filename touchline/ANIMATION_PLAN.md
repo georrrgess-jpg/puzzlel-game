@@ -23,6 +23,26 @@ comparison sheet this plan asks for.
 
 ---
 
+## v18.5 execution plan: two-angle goal replays and player plates (queued after v18.4; started 15:42 UTC, 2026-10-23)
+
+The full designs, with verified file references, edge cases, tests and screenshots, are in `V18_5_DESIGN.md`. Presentation only:
+no change to `engine.js`; `sync`, `goalcap`, `postcap`, `v13_audit` keep passing.
+1. **Two-angle goal replays** (`src/v17/76_replay2.js` + css, `test/replay2.js`): after a goal (3-D, 1x/2x, where replays play today)
+   the recorded clip plays twice: SCORER'S VIEW, a first-person camera at the scorer's eye height following his run, touch and strike
+   (his own head hidden from his camera), then BEHIND THE GOAL, a low camera in front of the end boards with the net in the foreground
+   and the ball flying at the lens. Each pass has a lower-third caption; a dissolve joins them; tap anywhere still skips the whole
+   replay and a "Next angle" pill jumps to the second pass. Settings: Goal replays Off / One angle / Two angles (default Two; the
+   existing `PREFS.replays` stays the master switch). 2-D keeps today's replay. Wraps only (no edits to 66 or 68).
+2. **Player plates** (`src/v17/77_plates.js`, `test/plates.js`): a broadcast tag above the ball carrier (number block in the shirt
+   colour, short name, team-colour underline, ball glyph) and a smaller one above the opponent engaging him (chosen by distance,
+   chasing and goal-side, with hysteresis so it never flickers), drawn on the HUD canvas in 2-D and 3-D (projected from the 3-D head),
+   in Broadcast and Sideline at every zoom (numbers-only markers in Tactical), clamped to the screen, never over each other, the
+   scoreboard or the minimap, with fades. Off during replays, celebrations, the walkout and skipping. Set pieces, penalties and
+   keepers have their own rules (see the design). Settings: Player plates on/off (default on) and the N key; an aria-live line names
+   the carrier for screen readers.
+Units run in parallel worktrees, each reviewed adversarially by two reviewers and fixed before the merge; then the merged build is
+reviewed for cross-unit problems, the gate suites run, screenshots are inspected, What's New and DEVELOPER_NOTES 18.5 are written.
+
 ## v18.4 execution plan: sideline camera, zoom levels, figure polish, ball touches (3-hour budget, 13:12–16:12 UTC, 2026-10-23)
 
 Goal: a new **Sideline** camera that watches the match from the touchline at standing height, the way a player on
