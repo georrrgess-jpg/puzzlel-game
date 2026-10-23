@@ -179,15 +179,15 @@ function v186sBallPlan(p,u,m){ const k=p.v186k, sf=p.v186sf, sg=-sf, q=p.v186q, 
   if(f0==null) return [0,0,0]; const wob=0.12*(1-q)*Math.sin(m*Math.PI*2.2);
   let f=f0, l=l0, wx=0;
   if(!V186S_MV[k].turn){ const go=V186S_MV[k].go, mc=go+0.72*(1-Dd); const ride=0.46+0.04*q;
-    const a=v186sSm(0,0.35,m); f=lerp(f0,ride,a); l=lerp(l0,0,a)+wob*a;
+    const a=v186sSm(0,clamp(0.25+0.6*(f0-ride),0.25,0.6),m); f=lerp(f0,ride,a); l=lerp(l0,0,a)+wob*a;
     if(k==='roll'){ const ms=0.5*(1-Dd), me=1-Dd; const r=v186sSm(ms,me,m); l+=sg*0.28*r; f-=0.04*r; }
     const g=v186sSm(mc,mc+0.22,m); const heavy=0.3*(1-q)*(q<0.5?1:0.4); f+=(0.2+heavy)*g; l+=sg*(k==='roll'?0.14:0.3)*A*g;
     wx=v186sSm(mc+0.25,(p.v186nc||1.75),m); }
   else { const sc=sf;
     if(k==='cut'){ const a=v186sSm(0,0.3,u), c=v186sSm(0.38,0.58,u); f=lerp(f0,0.5,a)+0.12*c; l=lerp(l0,0,a)*(1-c)+sc*0.36*A*c+wob*a*(1-c); wx=v186sSm(0.6,1,u); }
-    else if(k==='chop'){ const a=v186sSm(0,0.3,u), c=v186sSm(0.34,0.56,u); f=lerp(lerp(f0,0.62,a),0.3,c); l=lerp(lerp(l0,0,a),sc*0.34,c)+wob*a*(1-c); wx=v186sSm(0.6,1,u); }
+    else if(k==='chop'){ const a=v186sSm(0,0.3,u), c=v186sSm(0.32,0.6,u); f=lerp(lerp(f0,0.62,a),0.3,c); l=lerp(lerp(l0,0,a),sc*0.34,c)+wob*a*(1-c); wx=v186sSm(0.6,1,u); }
     else if(k==='drag'){ const a=v186sSm(0,0.24,u), c=v186sSm(0.28,0.6,u); f=lerp(lerp(f0,0.52,a),0.04,c); l=lerp(lerp(l0,0,a),-0.02*sc,c); wx=v186sSm(0.62,1,u); }
-    else if(k==='cruyff'){ const a=v186sSm(0,0.32,u), c1=v186sSm(0.4,0.52,u), c2=v186sSm(0.5,0.64,u); f=lerp(lerp(lerp(f0,0.52,a),0.05,c1),-0.18,c2); l=lerp(lerp(lerp(l0,-0.02*sc,a),0.24*sc,c1),0.28*sc,c2); wx=v186sSm(0.64,1,u); } }
+    else if(k==='cruyff'){ const a=v186sSm(0,0.32,u), c1=v186sSm(0.34,0.62,u), c2=v186sSm(0.58,0.76,u); f=lerp(lerp(lerp(f0,0.52,a),0.05,c1),-0.18,c2); l=lerp(lerp(lerp(l0,-0.02*sc,a),0.24*sc,c1),0.28*sc,c2); wx=v186sSm(0.72,1,u); } }
   return [f,l,smooth(u/0.1)*(1-wx)]; }
 
 /* the carry target: the move's ball point, handed back to the live foot point */
@@ -207,7 +207,9 @@ function v186sStep(st){ const now=st.now, L=st._v186leg;
     else { if(!L.arm.def){ const mv=Math.hypot(p.vx||0,p.vy||0); const tg=Math.atan2(L.y-p.y,L.x-p.x); const A=v186sAhead(st,p,Math.cos(tg),Math.sin(tg)); if(A&&A.d<V186S_MV[L.arm.k].trig+1.5) L.arm.def=A.q.pid; }
       const def=L.arm.def?st.pl(L.arm.def):null; const d=def?Math.hypot(def.x-p.x,def.y-p.y):0; const M=V186S_MV[L.arm.k];
       const rem=Math.hypot(L.x-p.x,L.y-p.y)-0.6; const sp=Math.max(1,(p.spd||0)/Math.max(1,st.spdMul||1)); const G=gaitOf(sp,st.spdMul||1);
-      if(rem<G.cw*(M.go+0.62)) L.arm=null; else if((def&&d<=M.trig)||L.arm.pend) v186sTrigger(st,L); } }
+      /* the ball close to his feet (not out ahead from the last touch) */
+      const yw=v186sYaw(p), bfw=(st.ball.x-p.x)*Math.cos(yw)+(st.ball.y-p.y)*Math.sin(yw);
+      if(rem<G.cw*(M.go+0.62)) L.arm=null; else if((def&&d<=M.trig&&bfw<0.82)||L.arm.pend) v186sTrigger(st,L); } }
   for(const p of st.players.values()){ if(!p.v186k) continue; const C=v186sClock(st,p); if(!C) continue; const u=C.u, M=V186S_MV[p.v186k];
     /* abort: lost the ball, a strike, a tackle closing in (unless nearly done), skipping, a speed change */
     if(p.v186ab==null){ let ab=st.own!==p||st.hands||st.placed||!!st.fl||st.skip||st.rm||st.ts<V186S.minTs||p.off;
@@ -232,6 +234,8 @@ function v186sStep(st){ const now=st.now, L=st._v186leg;
 const _v186sUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v186sUpd.apply(this,arguments); if(V186S.on){ try{ v186sStep(this); }catch(e){ if(!this._v186err){ this._v186err=1; console.warn('v18.6 skills',e); } } } return r; };
 
+/* which foot makes the move's touch on the ball */
+function v186sTouchFoot(p){ const k=p.v186k, sf=p.v186sf; if(!k) return null; if(!V186S_MV[k].turn) return sf>0?0:1; return k==='cut'?(sf>0?1:0):(sf>0?0:1); }
 /* when (in the move clock's m) the go touch / sell happen */
 function v186sTouchU(p){ const k=p.v186k, M=V186S_MV[k], Dd=p.v186dd||0.5; if(!M.turn) return M.go+0.72*(1-Dd);
   return k==='cut'?0.4:k==='chop'?0.4:k==='drag'?0.3:0.46; }
