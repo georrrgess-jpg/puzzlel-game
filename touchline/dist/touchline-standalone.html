@@ -2144,6 +2144,16 @@ canvas.v18-hud{position:relative;z-index:1}
 #lv-intro.v18-wk3 .walk:not(.walk-vs) .walk-bg{background:linear-gradient(90deg,rgba(4,7,12,.72),rgba(4,7,12,.12) 34%,rgba(4,7,12,0) 62%,rgba(4,7,12,.3)),linear-gradient(0deg,rgba(4,7,12,.5),rgba(4,7,12,0) 26%)!important}
 #lv-intro.v18-wk3 .walk:not(.walk-vs) :is(.walk-pitch,.walk-beam,.wk-tok){display:none}
 
+/* v18.4 zoom control (74_sideline.js): a - / + pair with the level name between them */
+.v184-zoom{align-items:center;flex-wrap:nowrap}
+.v184-zoom button{min-width:32px;padding:5px 9px;font-size:1rem;line-height:1;color:var(--text)}
+.v184-zoom button[aria-disabled="true"]{opacity:.35;cursor:default}
+.v184-zoom button[aria-disabled="true"]:hover{color:var(--text)}
+.v184-zoom .v184-zl{min-width:4.6em;text-align:center;font-weight:700;font-size:.8rem;color:var(--muted);user-select:none}
+.v184-zoom.v184-off .v184-zl{opacity:.6}
+.v184-hlc{gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:520px){ .v184-zoom button{min-width:30px;padding:4px 7px} .v184-zoom .v184-zl{min-width:3.9em;font-size:.74rem} }
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -9243,7 +9253,7 @@ function reportModal(f,m){
       return `<div class="card"><h3>${esc([h,a][i].town)}</h3>${pitchSVGh(cells)}</div>`; }).join('')}</div><p class="tiny muted">Coarse zones only: twelve areas, filled from the formation positions of players who touched the ball and the recorded locations of shots and defensive actions. This is an estimate, not tracking data.</p>`;
   } else if(tab==='high'){
     const goals=(lg.ev||[]).filter(e=>e.t==='goal');
-    const v=PREFS.view||'broadcast'; body=`<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="lab">Goal replays</span><div class="seg">${[['broadcast','Broadcast'],['tactical','Tactical']].map(([k,l])=>`<button class="${v===k?'on':''}" data-a="hlView" data-v="${k}">${l}</button>`).join('')}</div></div><div class="hl-stage"><canvas id="hl-canvas" aria-label="Goal replay"></canvas></div><div id="hl-cap" class="small muted" style="text-align:center;min-height:1.4em;margin-top:6px">Choose a goal to replay its recorded build-up.</div></div>
+    const v=PREFS.view||'broadcast'; body=`<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="lab">Goal replays</span><div class="row v184-hlc">${v184ViewSeg('hlView',v)}${v184ZoomCtl('hlZoom',v)}</div></div><div class="hl-stage"><canvas id="hl-canvas" aria-label="Goal replay"></canvas></div><div id="hl-cap" class="small muted" style="text-align:center;min-height:1.4em;margin-top:6px">Choose a goal to replay its recorded build-up.</div></div>
      <div class="list">${goals.map((e,i)=>`<div class="li"><span class="mono muted">${e.m}'</span>${crest([h,a][e.s],18)}<div class="grow">${pLink(e.pid)} <span class="muted small">${esc(GOAL_TYPE_NAME[e.ty]||'')}${e.ast?' · assist '+esc(pname(Px(e.ast))):''}</span></div>${e.seq?`<button class="btn sm" data-a="replayGoal" data-f="${f.id}" data-i="${i}">Replay</button>`:'<span class="tiny muted">No build-up recorded</span>'}</div>`).join('')||'<div class="muted">No goals in this game.</div>'}</div><p class="tiny muted">Replays draw only what was recorded when the match was played. Watching them never changes the result.</p>`;
   } else {
     body=`<div class="grid g2">${[0,1].map(i=>{ const L=lg.lu&&lg.lu[i]; if(!L) return ''; const sch=[h,a][i]; return `<div class="card"><h3>${esc(sch.town)} · ${esc(L.form)}${L.strat&&L.strat!=='balanced'?` · ${esc(STRATS[L.strat]?.n||'')}`:''}${L.speech&&L.speech!=='none'?` · Talk: ${esc(SPEECHES[L.speech]?.n||'')}`:''}</h3><div class="pitchwrap" style="max-width:300px">${pitchLines()}${L.slots.map(s=>{ const p=Px(s.pid); return `<div class="tok" style="left:${s.x}%;top:${100-s.y}%;cursor:default">${L.caps.includes(s.pid)?'<span class="cap">C</span>':''}<span class="dot" style="background:${sch.c1};color:${sch.c2};width:30px;height:30px">${p?p.num:''}</span><span class="nm">${esc(p?p.ln:'')}</span></div>`; }).join('')}</div></div>`; }).join('')}</div>`;
@@ -9416,13 +9426,13 @@ class Stage {
     this.poss=0; this.cam={x:52.5,w:46,tw:46}; this.trail=[]; this.flash=0; this.hype=0; this.shake=0; this.conf=[]; this.bulge=null; this.bulbs=[];
     this.netD={0:{a:0,va:0,tgt:0,c:null,n:null,touch:-9e9},105:{a:0,va:0,tgt:0,c:null,n:null,touch:-9e9}};
     this.sfx=!!opts.sfx; this.celebFor=opts.celebFor||defaultCelebFor; this.board=opts.board||null; this.grassPat=null;
-    this.waiters=[]; this.timers=[]; this.skip=false; this.ts=1; this.goalTs=1; this.alive=true; this.now=0; this.t0=performance.now(); this.lastReal=0; this.paused=false; this.pendingKick=null; this.focus=null; this.so=false; this.zoom=1;
+    this.waiters=[]; this.timers=[]; this.skip=false; this.ts=1; this.goalTs=1; this.alive=true; this.now=0; this.t0=performance.now(); this.lastReal=0; this.paused=false; this.pendingKick=null; this.focus=null; this.so=false; this.zoom=1; this.v184z=!!opts.uzoom;
     this.crowd=this.genCrowd(); this.resize();
     this.loop=this.loop.bind(this); this.raf=requestAnimationFrame(this.loop);
     this.ro = typeof ResizeObserver!=='undefined' ? new ResizeObserver(()=>this.resize()) : null; if(this.ro) this.ro.observe(canvas.parentElement);
   }
   destroy(){ if(this.sfx&&typeof Sound!=='undefined'&&Sound.crowd&&Sound.crowd.hush) Sound.hush(false); this.alive=false; cancelAnimationFrame(this.raf); this.timers.forEach(clearTimeout); this.waiters.forEach(w=>w.res()); this.waiters=[]; if(this.ro) this.ro.disconnect(); }
-  resize(){ const pe=this.cv.parentElement; const r={width:pe.clientWidth||pe.getBoundingClientRect().width, height:pe.clientHeight||pe.getBoundingClientRect().height}; /* layout size: unaffected by opening animations */ const dpr=Math.min(1.5,window.devicePixelRatio||1)*(this.rs||1); this.dpr=dpr; this._cc=null; this.W=Math.max(200,r.width); this.H=Math.max(150,r.height); this.cv.width=this.W*dpr; this.cv.height=this.H*dpr; this.cv.style.width=this.W+'px'; this.cv.style.height=this.H+'px'; this.ctx.setTransform(dpr,0,0,dpr,0,0); this.bgTac=null; this.bw=clamp(this.W/30,20,38); this.cam.w=this.cam.tw=this.bw*this.zoom; }
+  resize(){ const pe=this.cv.parentElement; const r={width:pe.clientWidth||pe.getBoundingClientRect().width, height:pe.clientHeight||pe.getBoundingClientRect().height}; /* layout size: unaffected by opening animations */ const dpr=Math.min(1.5,window.devicePixelRatio||1)*(this.rs||1); this.dpr=dpr; this._cc=null; this.W=Math.max(200,r.width); this.H=Math.max(150,r.height); this.cv.width=this.W*dpr; this.cv.height=this.H*dpr; this.cv.style.width=this.W+'px'; this.cv.style.height=this.H+'px'; this.ctx.setTransform(dpr,0,0,dpr,0,0); this.bgTac=null; this.bw=clamp(this.W/30,20,38); this.cam.w=this.cam.tw=this.bw*this.zoom*(this.v184K?this.v184K():1); }
   genCrowd(){ const r=rngFrom(hashStr(this.T.id||'crowd')); const out=[]; const pal=[this.h.c1,this.h.c2,this.h.c1,'#d8dde3','#5b6573',this.a.c1,'#2d333b','#c49a6c','#8a5a3c']; for(let row=0;row<13;row++){ const up=row>=7; const R=up?row+1:row; for(let x=-24;x<130;x+=(up?0.95:1.1)+r()*0.55){ const away=x>92&&r()<0.6; const fl=r()<0.035?(away?this.a.c1:(r()<0.5?this.h.c1:this.h.c2)):null; out.push({x, row:R, c:away?this.a.c1:pal[Math.floor(r()*pal.length)], sk:LOOK.skin[Math.floor(r()*12)], ph:r()*6.28, s:0.82+r()*0.4, flag:fl}); } } return out; }
   /* ---------- roster ---------- */
   setSides(sides){
@@ -10120,7 +10130,7 @@ class Stage {
       else { const k=j++; const [bx,by]=this.base(p); p.ov={x:lerp(p.x,bx,0.35),y:lerp(p.y,by,0.35)}; p.sad=!p.gk; p.slow=true; } }
     this.zoomTo(w===-1?0.9:1.1); this.focus=w===-1?{x:52.5}:{x:hx}; this.hype=w===-1?0.3:1; if(w!==-1) this.burst(w); }
   halftime(){ for(const p of this.players.values()) p.card=null; this.kickoffShape(1); this.snap(); }
-  zoomTo(f){ this.zoom=f; this.cam.tw=this.bw*f; }
+  zoomTo(f){ this.zoom=f; this.cam.tw=this.bw*f*(this.v184K?this.v184K():1); }
   burst(side){ if(this.rm) return; const cols=side===0?[this.h.c1,this.h.c2,'#ffd36b']:[this.a.c1,this.a.c2,'#ffd36b']; for(let i=0;i<150;i++) this.conf.push({x:this.W*(0.1+Math.random()*0.8),y:-10-Math.random()*this.H*0.4,vx:(Math.random()-.5)*60,vy:60+Math.random()*120,r:Math.random()*6.28,vr:(Math.random()-.5)*8,c:cols[i%cols.length],life:3+Math.random()*1.5,w:5+Math.random()*5}); }
   popBulbs(){ if(this.rm) return; for(let i=0;i<40;i++) this.bulbs.push({x:-20+Math.random()*145,row:Math.random()*7,t:this.now+Math.random()*900}); }
   /* the goal is described the way the broadcast showed it */
@@ -10821,7 +10831,7 @@ function openLive(M,fid,speed,resumed){
   App.live={M,fid,speed,paused:resumed&&M.phase!=='ht',done:false,speech:'none',proceeded:false,tab:'feed',feed:[],mom:[],busy:false,loopId:Math.random(),
     view:{sc:[...M.sc], st:cloneSt(M.st), min:M.min, phase:M.phase, so:M.so?[...M.so.sc]:null}, pending:null};
   buildLive(); const L=App.live;
-  L.stage=new Stage($('#lv-canvas'),{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',onCaption:liveCaption,emit:liveEmit,section:C.section,weather:weatherFor(f),relabel:true,sfx:true,board:()=>({h:boardName(Sx(f.h)),a:boardName(Sx(f.a)),sc:L.view.sc,min:L.view.phase==='so'?'PENS':L.view.min?`${L.view.min}'`:'KICKOFF'})});
+  L.stage=new Stage($('#lv-canvas'),{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',uzoom:true,onCaption:liveCaption,emit:liveEmit,section:C.section,weather:weatherFor(f),relabel:true,sfx:true,board:()=>({h:boardName(Sx(f.h)),a:boardName(Sx(f.a)),sc:L.view.sc,min:L.view.phase==='so'?'PENS':L.view.min?`${L.view.min}'`:'KICKOFF'})});
   L.stage.setSides(M.sides); for(let i=0;i<2;i++) L.stage.setKeeper(i,M.sides[i].gk);
   L.stage.kickoffShape(M.min>=40&&M.min<80?1:0); L.stage.snap();
   for(const e of M.ev) feedPush(e,true);
@@ -10914,10 +10924,10 @@ function updateLive(scoreOnly){
   const view=PREFS.view||'broadcast';
   set(`<button class="btn ico" data-a="livePause" aria-label="${L.paused?'Resume':'Pause'}" title="${L.paused?'Resume':'Pause'} (Space)">${L.paused?'▶':'❚❚'}</button>
    <div class="seg" role="group" aria-label="Speed">${[1,2,4,8].map(s=>`<button class="${L.speed===s?'on':''}" data-a="liveSpeed" data-v="${s}" aria-pressed="${L.speed===s}">${s}×</button>`).join('')}</div>
-   <div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['tactical','Tactical']].map(([k,l])=>`<button class="${view===k?'on':''}" data-a="liveView" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>
+   ${v184ViewSeg('liveView',view)}${v184ZoomCtl('liveZoom',view)}
    <button class="btn sm" data-a="liveTactics">Tactics</button>${typeof soundBtn==='function'?soundBtn():''}
    ${!M.htDone&&M.htOn?'<button class="btn sm ghost" data-a="liveSkip" data-to="ht">Skip to half</button>':''}<button class="btn sm ghost" data-a="liveSkip" data-to="ft">Skip to end</button>
-   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · M sound</span>`);
+   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · + − zoom · M sound</span>`);
 }
 const waitMs=ms=>new Promise(r=>setTimeout(r,ms));
 /* animate one resolved minute; every visible event is announced by the stage itself */
@@ -11333,7 +11343,8 @@ A.retrySave = ()=> saveNow();
 A.liveSpeed = el => { App.live.speed=+el.dataset.v; App.C.settings.speed=+el.dataset.v; queueSave(); updateLive(); };
 A.livePause = ()=>{ const L=App.live; if(!L||L.done||L.M.phase==='ht'||L.skipping) return; L.paused=!L.paused; if(L.stage) L.stage.paused=L.paused; $('.live')?.classList.toggle('paused',L.paused);
   if(L.paused){ App.C.live={fid:L.fid,M:L.M}; queueSave(); Sound.crowdStop(); } else { Sound.crowdStart(); if(!L.busy){ L.loopId=Math.random(); liveLoop(L.loopId); } } updateLive(); };
-A.liveView = el => { const L=App.live; PREFS.view=el.dataset.v; savePrefs(); if(L&&L.stage){ L.stage.mode=el.dataset.v; L.stage.bgTac=null; } updateLive(); };
+A.liveView = el => { const L=App.live; PREFS.view=el.dataset.v; savePrefs(); if(L&&L.stage) v184SetView(L.stage,el.dataset.v); updateLive(); };
+A.liveZoom = el => { if(el.getAttribute&&el.getAttribute('aria-disabled')==='true') return; v184StepZoom(+el.dataset.v); };
 A.liveTab = el => { const L=App.live; L.tab=el.dataset.v; document.querySelectorAll('.lv-panel .tab').forEach(t=>t.classList.toggle('on',t.dataset.v===L.tab)); renderFeed(); };
 A.liveTactics = ()=>{ const L=App.live; L.tab='tac'; document.querySelectorAll('.lv-panel .tab').forEach(t=>t.classList.remove('on')); const S=L.M.sides[L.M.user]; $('#lv-pbody').innerHTML=`<div style="padding-top:8px"><h3>Tactics</h3>${tacSliders(S.tac,'lt')}<div class="field" style="margin-top:10px"><label for="lt-form">Formation</label><select id="lt-form" data-c="liveForm">${opts(Object.keys(FORMS).map(x=>[x,x]),S.form)}</select></div><p class="tiny muted">Changes apply from the next minute.</p><button class="btn sm" data-a="liveTab" data-v="feed">Back to commentary</button></div>`; };
 A.liveSkip = el => { const L=App.live; if(!L||L.done||L.skipping) return; const M=L.M; const C=App.C; const to=el.dataset.to;
@@ -11354,14 +11365,15 @@ A.awardsNight = el => { App.modal={type:'awardsNight',yr:+el.dataset.y}; renderM
 A.closeCeremony = el => { const c=el.closest('.ceremony'); if(c){ if(c._fw) c._fw.stop(); c.classList.add('out'); setTimeout(()=>c.remove(),300); } };
 A.replayGoal = el => { const C=App.C; const f=C.fixtures[el.dataset.f]; const lg=C.logs[f.id]; const e=(lg.ev||[]).filter(x=>x.t==='goal')[+el.dataset.i]; if(!e||!e.seq) return; const cv=$('#hl-canvas'); if(!cv) return;
   if(App.hl&&App.hl.cv!==cv){ App.hl.destroy(); App.hl=null; }
-  if(!App.hl){ App.hl=new Stage(cv,{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',section:C.section,sfx:true,onCaption:(t)=>{ const c=$('#hl-cap'); if(c) c.textContent=t; }}); }
+  if(!App.hl){ App.hl=new Stage(cv,{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',uzoom:true,section:C.section,sfx:true,onCaption:(t)=>{ const c=$('#hl-cap'); if(c) c.textContent=t; }}); }
   const st=App.hl; st.cancel(); const gen=(st.replayGen=(st.replayGen||0)+1);
   setTimeout(()=>{ if(!st.alive||st.replayGen!==gen) return; st.skip=false; st.setSides(lg.lu.map(L=>({slots:L.slots,off:{}})));
     lg.lu.forEach((L,i)=>{ const g=L.slots.find(s=>s.role==='GK'); if(g) st.setKeeper(i,g.pid); });
     st.clipStart(e); st.goalTs=0.9;
     const cap=$('#hl-cap'); if(cap) cap.textContent=`${e.m}' ${pname(Px(e.pid))} · ${GOAL_TYPE_NAME[e.ty]||''}${e.ast?' · assist '+pname(Px(e.ast)):''}`;
     st.goalSequence(e); },0); };
-A.hlView = el => { PREFS.view=el.dataset.v; savePrefs(); if(App.hl){ App.hl.mode=el.dataset.v; App.hl.bgTac=null; } document.querySelectorAll('[data-a=hlView]').forEach(b=>b.classList.toggle('on',b.dataset.v===el.dataset.v)); };
+A.hlView = el => { PREFS.view=el.dataset.v; savePrefs(); if(App.hl) v184SetView(App.hl,el.dataset.v); document.querySelectorAll('[data-a=hlView]').forEach(b=>{ const on=b.dataset.v===el.dataset.v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); v184PaintZoom(); };
+A.hlZoom = el => { if(el.getAttribute&&el.getAttribute('aria-disabled')==='true') return; v184StepZoom(+el.dataset.v); };
 A.cerAgain = el => { const c=el.closest('.ceremony'); if(c&&c._fw) c._fw.restart(); Sound.goal(); };
 /* ---------- change / input handlers ---------- */
 CH.search = el => { App.q=el.value; const q=el.value.trim().toLowerCase(); const box=$('#sres'); if(!box) return; if(q.length<2){ box.innerHTML=''; return; } const C=App.C; const out=[];
@@ -11413,7 +11425,7 @@ function onPointerUp(e){ if(benchUp(e)) return; if(!drag) return; const d=drag; 
   App.params.sel=String(d.i); changed(); }
 function onKey(e){
   const typing=e.target&&e.target.matches&&e.target.matches('input,select,textarea');
-  if(App.live&&!typing&&!App.modal){ if(e.key===' '){ e.preventDefault(); A.livePause(); return; } if(['1','2','3','4'].includes(e.key)){ A.liveSpeed({dataset:{v:[1,2,4,8][+e.key-1]}}); return; } if(e.key==='v'||e.key==='V'){ A.liveView({dataset:{v:(PREFS.view||'broadcast')==='broadcast'?'tactical':'broadcast'}}); return; } }
+  if(App.live&&!typing&&!App.modal){ if(e.key===' '){ e.preventDefault(); A.livePause(); return; } if(['1','2','3','4'].includes(e.key)){ A.liveSpeed({dataset:{v:[1,2,4,8][+e.key-1]}}); return; } if(e.key==='v'||e.key==='V'){ A.liveView({dataset:{v:v184NextView(PREFS.view)}}); return; } if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='+'||e.key==='=')){ v184StepZoom(1); return; } if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='-'||e.key==='_')){ v184StepZoom(-1); return; } }
   if(e.key==='Escape'){ const cer=document.querySelector('.ceremony'); if(cer){ A.closeCeremony(cer.querySelector('button')); return; } if(App.drawer){ A.closeDrawer(); return; } if(App.modal){ A.closeModal(); return; } }
   const tok=e.target.closest&&e.target.closest('#pitch .tok');
   if(tok && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){ const {sid,lu}=curLuCtx(); if(!canEdit(sid)) return; e.preventDefault(); const i=+tok.dataset.slot; const s=lu.slots[i]; const st=App.snap!==false?4:2; const dx={ArrowLeft:-st,ArrowRight:st}[e.key]||0, dy={ArrowUp:st,ArrowDown:-st}[e.key]||0; moveSlot(lu,i,s.x+dx,s.y+dy); App.params.sel=String(i); changed(); setTimeout(()=>$(`#pitch .tok[data-slot="${i}"]`)?.focus({preventScroll:true}),0); }
@@ -15303,8 +15315,9 @@ P3D_MODULES.push({name:'director',order:25,
     if(st.inNet&&st.flash>0.5) D.goalT=st.now;
     const live=st.mode!=='tactical';
     if(!live) return 'main';
-    if(st.so) return 'pen';
-    if(st.setPiece==='pen'&&(st.placed||(st.fl&&st.fl.kind==='shot')||(st.focus&&st.focus.y===34&&!st.focus.pid))) return 'pen';
+    const sl=!!P._slOn; /* sideline view (74): the sideline camera covers kick-offs, corners and penalties itself */
+    if(st.so&&!sl) return 'pen';
+    if(!sl&&st.setPiece==='pen'&&(st.placed||(st.fl&&st.fl.kind==='shot')||(st.focus&&st.focus.y===34&&!st.focus.pid))) return 'pen';
     /* celebration close-up: entered at hype > 0.6 after a goal, held while the scorer has the focus */
     if(!st.rm&&st.now-D.goalT<20000){ const sc=this.scorer(st);
       if(sc&&(D.mode==='celeb'&&D.cel===sc||st.hype>0.6)){ D.cel=sc; return 'celeb'; } }
@@ -15312,8 +15325,8 @@ P3D_MODULES.push({name:'director',order:25,
     { const gx=b.x>52.5?105:0; const atFlag=Math.abs(b.x-gx)<1.8&&(b.y<1.8||b.y>66.2)&&(b.z||0)<0.4&&!st.fl;
       const f=st.fl, fromFlag=f&&f.from&&Math.abs(f.from.x-gx)<2.6&&(f.from.y<2.6||f.from.y>65.4);
       if(atFlag||fromFlag) D.cnrT=st.now;
-      if(!st.inNet&&Math.abs(b.x-gx)<30&&st.now-D.cnrT<(st.D?st.D(2600):2600)) return 'corner'; }
-    if(st.pendingKick&&!st.fl||this.kickoff(st)) return 'kickoff';
+      if(!sl&&!st.inNet&&Math.abs(b.x-gx)<30&&st.now-D.cnrT<(st.D?st.D(2600):2600)) return 'corner'; }
+    if(!sl&&(st.pendingKick&&!st.fl||this.kickoff(st))) return 'kickoff';
     return 'main'; },
   /* the ball resting on the centre spot with both teams in their own halves: a kick-off */
   kickoff(st){ const b=st.ball; if(st.fl||Math.hypot(b.x-52.5,b.y-34)>1.2||st.so) return false;
@@ -15337,7 +15350,7 @@ P3D_MODULES.push({name:'director',order:25,
     D.mainTgt.copy(D.mainEye).addScaledVector(D.fwd,L); const fov0=cam.fov;
     /* main adjustments: far-side play tilts the frame toward it and lifts the gantry a little */
     const r0=v18Damp(D.by,D.byv,st.ball.y,1.3,dt); D.by=r0[0]; D.byv=r0[1];
-    if(st.mode!=='tactical'){ const far=Math.max(0,Math.min(1,1-D.by/68)); D.mainEye.y+=far*2.2; D.mainTgt.z+=Math.max(-3,Math.min(3,(D.by-D.mainTgt.z)*0.12)); }
+    if(st.mode!=='tactical'&&!P._slOn){ const far=Math.max(0,Math.min(1,1-D.by/68)); D.mainEye.y+=far*2.2; D.mainTgt.z+=Math.max(-3,Math.min(3,(D.by-D.mainTgt.z)*0.12)); }
     /* 2. preset and its pose */
     const now=performance.now(); let snap=D.snap||D.fresh||!!st.rm; /* reduced motion: cut between framings, never fly */ if(D.cutAt&&now>=D.cutAt){ D.cutAt=0; snap=true; }
     const mode=this.pick(P,st); if(mode==='replay'&&D.mode!=='replay') snap=true; if(mode!=='replay'&&D.mode==='replay') snap=true;
@@ -16086,6 +16099,147 @@ const _v18tuPose=Stage.prototype.poseOf;
 Stage.prototype.poseOf=function(p,isRef){ const P=_v18tuPose.apply(this,arguments);
   if(!V18T.punt||isRef||!P||P.act!=='punt') return P; const K=this._v18pk; if(!K||K.p!==p) return P;
   const r=this.v18tPuntPitch(K,this.v18pkt(K)); if(r!=null) P.bootT=[null,r]; return P; };
+
+/* ===================== v18.4 Sideline camera and zoom levels (74) =====================
+   Presentation only: nothing here touches engine.js, the stage's simulation, results or events.
+   1. Zoom levels. PREFS.zoom = 'wide' | 'normal' | 'close' | 'tight' (default normal, saved with savePrefs). Stages built
+      with {uzoom:true} (the live match and the goal-replay card) multiply their camera width by Stage.v184K() where
+      zoomTo and resize set it (ui_stage.js), so scripted framings (penalties, celebrations, set pieces) keep their relative
+      zoom; a change only moves cam.tw, so it eases in through the stage's own zoom easing. Tactical ignores zoom.
+      In 3-D the broadcast gantry reads cam.w as before; the sideline camera turns the level into its lens.
+   2. Sideline view (st.mode 'sideline'). 2-D: the broadcast drawing framed tighter (V184_SL2D on the camera width).
+      3-D: Painter3D.camPose is wrapped. The eye stands on the near touchline (stage y ~70.7, inside the near rail at
+      71.6) at 2.0 m, a coach in the technical area or a substitute warming up, and looks across at the far side
+      (dugouts, LED boards, main stand). It slides along the line after the play through a heavy critically damped
+      spring (v18Damp), clamped to x 18..87, and never bobs. The head turns and tilts toward a smoothed ball point with a
+      small lead toward the attack, through its own springs, rate-limited and kept so the ball stays inside the frame.
+      Anything within ~3 m of the eye (a throw-in taker, the near assistant, a ball run out) makes it step back toward
+      the rail and along the line through a faster spring. The director (66) then treats this pose as its 'main' pose:
+      in sideline view its kick-off, corner and penalty presets are not used, the goal replay and the celebration
+      close-up still play with their blends and fades, and its far-side gantry lift is skipped (P._slOn).
+      Switching broadcast <-> sideline is a 120-180 ms fade-through-black cut (v18Cut); restarts and half time cut too.
+      Reduced motion (st.rm): the camera holds still and cuts to a new framing when the ball nears the frame edge.
+   State lives on P._sl; P._slOn says whether the current frame is a sideline frame. */
+
+const V184_ZOOMS=[['wide','Wide',1.3,46],['normal','Normal',1,34],['close','Close',0.78,26],['tight','Tight',0.6,19]];
+const V184_SL2D=0.72;
+const V184_SL={z:70.7,zBack:71.32,h:2.0,x0:18,x1:87,omEye:0.8,omAvoid:3.4,omBall:3.2,omAim:2.6,omFov:3,rate:1.2,clear:3.6,limH:0.66,limV:0.6};
+DEFAULT_PREFS.zoom='normal'; if(!V184_ZOOMS.some(z=>z[0]===PREFS.zoom)) PREFS.zoom='normal';
+
+function v184ZoomIdx(){ const i=V184_ZOOMS.findIndex(z=>z[0]===PREFS.zoom); return i<0?1:i; }
+function v184ZoomF(){ return V184_ZOOMS[v184ZoomIdx()][2]; }
+/* the camera-width factor for a stage: user zoom (live stage and replay card only), tighter in 2-D sideline view */
+Stage.prototype.v184K=function(){ if(!this.v184z||this.mode==='tactical') return 1; let k=v184ZoomF();
+  if(this.mode==='sideline'&&!(this._p3d&&!this._p3d.dead)) k*=V184_SL2D; return k; };
+/* re-apply the factor: eases through cam.tw, or snaps (a view switch) */
+Stage.prototype.v184Zoom=function(snap){ if(!this.bw) return; this.cam.tw=this.bw*this.zoom*this.v184K(); if(snap) this.cam.w=this.cam.tw; if(this.requestDraw) this.requestDraw(); };
+
+/* ---------- controls: markup, state and input ---------- */
+function v184ZoomCtl(act,view){ const i=v184ZoomIdx(), off=view==='tactical', z=V184_ZOOMS[i];
+  const dOut=off||i===0, dIn=off||i===V184_ZOOMS.length-1;
+  return `<div class="seg v184-zoom${off?' v184-off':''}" role="group" aria-label="Zoom${off?' (not used in Tactical)':''}"><button type="button" data-a="${act}" data-v="-1" aria-label="Zoom out" aria-disabled="${dOut}" title="Zoom out (−)">−</button><span class="v184-zl" aria-live="polite" title="Zoom level">${off?'Fit':z[1]}</span><button type="button" data-a="${act}" data-v="1" aria-label="Zoom in" aria-disabled="${dIn}" title="Zoom in (+)">+</button></div>`; }
+function v184ViewSeg(act,view){ return `<div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['sideline','Sideline'],['tactical','Tactical']].map(([k,l])=>`<button type="button" class="${view===k?'on':''}" data-a="${act}" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>`; }
+const V184_VIEWS=['broadcast','sideline','tactical'];
+function v184NextView(v){ const i=V184_VIEWS.indexOf(v||'broadcast'); return V184_VIEWS[(i<0?0:i+1)%V184_VIEWS.length]; }
+/* a view switch on a stage: snap the width under the cut (2-D), the 3-D painter fades between broadcast and sideline */
+function v184SetView(st,v){ if(!st) return; st.mode=v; st.bgTac=null; st.v184Zoom(true); if(st.requestDraw) st.requestDraw(); }
+/* step the zoom level; returns true when it changed */
+function v184StepZoom(d){ const view=PREFS.view||'broadcast'; if(view==='tactical') return false; const i=v184ZoomIdx(), j=Math.max(0,Math.min(V184_ZOOMS.length-1,i+d)); if(j===i) return false;
+  PREFS.zoom=V184_ZOOMS[j][0]; savePrefs();
+  for(const st of [App.live&&App.live.stage,App.hl]) if(st&&st.alive) st.v184Zoom(false);
+  v184PaintZoom(); return true; }
+/* refresh every zoom control on the page (the live bar is rebuilt by updateLive, the replay card in place) */
+function v184PaintZoom(){ const ae=document.activeElement, fk=ae&&ae.dataset&&/Zoom$/.test(ae.dataset.a||'')?[ae.dataset.a,ae.dataset.v]:null;
+  if(App.live&&typeof updateLive==='function') try{ updateLive(); }catch(e){}
+  document.querySelectorAll('.v184-zoom').forEach(el=>{ const act=(el.querySelector('[data-a]')||{}).dataset; if(!act||act.a==='liveZoom') return;
+    const w=document.createElement('div'); w.innerHTML=v184ZoomCtl(act.a,PREFS.view||'broadcast'); el.replaceWith(w.firstChild); });
+  /* keep keyboard focus on the zoom button that was used (the bar is rebuilt) */
+  if(fk&&!document.activeElement.isConnected||fk&&document.activeElement===document.body){ const b=document.querySelector(`[data-a="${fk[0]}"][data-v="${fk[1]}"]`); if(b) b.focus({preventScroll:true}); } }
+/* the mouse wheel over the match canvas: one level per notch, with a short cooldown; the page scrolls at the ends */
+const V184_WHEEL={t:0,dir:0};
+document.addEventListener('wheel',e=>{ const t=e.target; if(!t||!t.closest||!t.closest('#lv-stage,.hl-stage')) return; if(App.modal&&!t.closest('.hl-stage')) return;
+  const dy=e.deltaY||0; if(Math.abs(dy)<0.5||e.ctrlKey) return; const d=dy<0?1:-1, now=e.timeStamp||performance.now();
+  const i=v184ZoomIdx(), can=(PREFS.view||'broadcast')!=='tactical'&&(d>0?i<V184_ZOOMS.length-1:i>0);
+  if(now-V184_WHEEL.t<240&&V184_WHEEL.dir===d){ if(can) e.preventDefault(); return; }
+  if(v184StepZoom(d)){ e.preventDefault(); V184_WHEEL.t=now; V184_WHEEL.dir=d; } },{passive:false});
+
+/* ---------- the 3-D sideline camera ---------- */
+const _v184CamPose=Painter3D.prototype.camPose;
+Painter3D.prototype.camPose=function(st,opt){ const now=performance.now();
+  const S=this._sl||(this._sl={shown:null,swAt:0,lastT:0,init:false,cuts:0,frames:0,e:{p:0,v:0},o:{x:0,vx:0,z:0,vz:0},b:{x:52.5,vx:0,z:34,vz:0},a:null,dir:null,fov:42,fv:0,eye:null,near:99});
+  const m=st.mode==='sideline'&&!opt?'sideline':'broadcast';
+  /* first frame, or back from the tactical board (no 3-D frame in between): adopt the view at once, as a cut */
+  if(S.shown==null||S.tac){ if(S.shown!==m){ S.init=false; if(this.dir&&S.shown!=null) this.dir.snap=true; } S.shown=m; S.swAt=0; S.tac=false; }
+  else if(m!==S.shown){ const P=this; if(!S.swAt){ v18Cut(st,170); S.swAt=now+85; if(P.dir) P.dir.cutAt=S.swAt; } if(now>=S.swAt){ S.shown=m; S.swAt=0; S.init=false; } }
+  S.frames++;
+  if(S.shown!=='sideline'){ this._slOn=false; return _v184CamPose.apply(this,arguments); }
+  this._slOn=true; v184SidelinePose(this,st,S,now); };
+
+function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=st.ball, D=P.dir; const dt=Math.min(0.1,P.dt||0.016);
+  if(!S.a){ S.a={p:new T.Vector3(),v:new T.Vector3()}; S.dir=new T.Vector3(); S.eye=new T.Vector3(); S.pe=new T.Vector3(); S.tmp=new T.Vector3(); S.q=new T.Vector3(); }
+  const frozen=!!(st._rp&&st._rp.on); /* goal replay: the director films it; the sideline springs hold their state */
+  let snap=!S.init||!!(D&&(D.fresh||D.snap||(D.cutAt&&now>=D.cutAt)));
+  /* 1. the smoothed ball (x along the line, z across) and the point the eye aims at */
+  const bx=isFinite(b.x)?b.x:52.5, bz=isFinite(b.y)?b.y:34, bh=Math.max(0,b.z||0);
+  if(snap){ S.b.x=bx; S.b.z=bz; S.b.vx=0; S.b.vz=0; }
+  else if(!frozen){ let r=v18Damp(S.b.x,S.b.vx,bx,C.omBall,dt); S.b.x=r[0]; S.b.vx=r[1]; r=v18Damp(S.b.z,S.b.vz,bz,C.omBall,dt); S.b.z=r[0]; S.b.vz=r[1]; }
+  const o=st.own; const att=o&&!st.fl?(o.side===0?1:-1):0;
+  const lead=Math.max(-6,Math.min(6,att*2.2+S.b.vx*0.3));
+  /* aim a little above the play, more so for far play, so the action sits just below the middle with the far stand above */
+  /* on tall frames (phones) the lens is opened up for width, so the head tilts a little down instead (less sky) */
+  const ka=Math.max(0,Math.min(1,((cam.aspect||1.6)-1.05)/0.5));
+  const ax=S.b.x+lead, az=S.b.z, ay=0.55+0.65*ka+Math.min(40,Math.hypot(ax-S.e.p,az-C.z))*0.028*ka+Math.min(4,bh)*0.5;
+  /* 2. the eye: a heavy slide along the line after the play, never bobbing */
+  const ex0=Math.max(C.x0,Math.min(C.x1,S.b.x+lead*0.6));
+  if(snap){ S.e.p=ex0; S.e.v=0; } else if(!frozen){ const r=v18Damp(S.e.p,S.e.v,ex0,C.omEye,dt); S.e.p=r[0]; S.e.v=r[1]; }
+  /* 3. clearance: anything within C.clear of the eye pushes it back toward the rail and along the line (faster spring) */
+  let wantX=0, wantZ=0, near=99;
+  if(!frozen){ const objs=[]; for(const p of st.players.values()) if(!p.off) objs.push(p); if(st.ref) objs.push(st.ref); for(const a of st.ars||[]) objs.push(a); objs.push(b);
+    const zb=C.zBack-C.z; let close=0;
+    for(const q of objs){ const d=Math.hypot(S.e.p-q.x,C.z-q.y); if(d<C.clear+1.2) close=Math.max(close,Math.min(1,(C.clear+1.2-d)/1.6)); }
+    wantZ=zb*close*close*(3-2*close);
+    for(let it=0;it<3;it++){ let push=0; const ex=S.e.p+wantX, ez=C.z+wantZ;
+      for(const q of objs){ const dz=ez-q.y; if(Math.abs(dz)>=C.clear) continue; const need=Math.sqrt(C.clear*C.clear-dz*dz); const dx=ex-q.x; if(Math.abs(dx)>=need) continue;
+        let s=Math.sign(dx); if(Math.abs(dx)<0.15) s=ex<52.5?1:-1; if(ex+s*(need-Math.abs(dx))>C.x1+4||ex+s*(need-Math.abs(dx))<C.x0-4) s=-s;
+        const p=s*need-dx; if(Math.abs(p)>Math.abs(push)) push=p; }
+      if(Math.abs(push)<1e-3) break; wantX+=push; } }
+  if(snap){ S.o.x=wantX; S.o.vx=0; S.o.z=wantZ; S.o.vz=0; }
+  else if(!frozen){ let r=v18Damp(S.o.x,S.o.vx,wantX,C.omAvoid,dt); S.o.x=r[0]; S.o.vx=r[1]; r=v18Damp(S.o.z,S.o.vz,wantZ,C.omAvoid,dt); S.o.z=r[0]; S.o.vz=r[1]; }
+  const prevE=S.pe.copy(S.eye);
+  let ex=Math.max(C.x0-4,Math.min(C.x1+4,S.e.p+S.o.x)), ez=Math.max(C.z-0.4,Math.min(C.zBack,C.z+S.o.z));
+  /* a step never faster than a brisk walk, outside cuts */
+  if(!snap&&S.init&&!st.rm){ const mv=Math.hypot(ex-prevE.x,ez-prevE.z), mx=Math.max(0.05,4.5*dt); if(mv>mx){ ex=prevE.x+(ex-prevE.x)*mx/mv; ez=prevE.z+(ez-prevE.z)*mx/mv; } }
+  S.eye.set(ex,C.h,ez); cam.position.copy(S.eye); cam.up.set(0,1,0);
+  for(const p of st.players.values()){ if(p.off) continue; const d=Math.hypot(ex-p.x,ez-p.y); if(d<near) near=d; } S.near=near;
+  /* 4. the lens: the zoom level's field of view (vertical), opened up on narrow frames so the width never gets too tight */
+  const zl=V184_ZOOMS[v184ZoomIdx()][3]; const asp=Math.max(0.5,cam.aspect||1.6); const hMin=2*Math.atan(Math.tan(zl*Math.PI/360)*1.45);
+  let vf=zl*Math.PI/180; if(asp<1.45) vf=Math.min(70*Math.PI/180,2*Math.atan(Math.tan(hMin/2)/asp)); const fovT=vf*180/Math.PI; S.fovT=fovT;
+  if(snap||st.rm){ S.fov=fovT; S.fv=0; } else { const r=v18Damp(S.fov,S.fv,fovT,C.omFov,dt); S.fov=r[0]; S.fv=r[1]; }
+  if(Math.abs(cam.fov-S.fov)>1e-4){ cam.fov=S.fov; cam.updateProjectionMatrix(); }
+  /* 5. the head: aim springs toward the ball point, then the ball is kept inside the frame and the turn rate is limited */
+  const A=S.a; S.tmp.set(ax,ay,az);
+  if(snap){ A.p.copy(S.tmp); A.v.set(0,0,0); } else if(!frozen){ v18DampV(A,S.tmp,C.omAim,dt); }
+  const hv=S.fov*Math.PI/360, hh=Math.atan(Math.tan(hv)*asp);
+  /* yaw / pitch of the aim and of the ball, seen from the eye */
+  const yawOf=(x,z)=>Math.atan2(x-ex,ez-z), pitOf=(x,y,z)=>Math.atan2(y-C.h,Math.hypot(x-ex,z-ez));
+  let ya=yawOf(A.p.x,A.p.z), pa=pitOf(A.p.x,A.p.y,A.p.z); const yb=yawOf(bx,bz), pb=pitOf(bx,bh+0.11,bz);
+  if(!frozen){ const lh=hh*C.limH, lv=hv*C.limV; let dyw=yb-ya; if(dyw>lh) ya=yb-lh; else if(dyw<-lh) ya=yb+lh; let dp=pb-pa; if(dp>lv) pa=pb-lv; else if(dp<-lv) pa=pb+lv; }
+  pa=Math.max(-0.33,Math.min(0.2,pa)); ya=Math.max(-1.45,Math.min(1.45,ya));
+  /* write a clamped aim back into the spring so the springs carry on from where the head really is */
+  const dist=Math.max(4,Math.hypot(A.p.x-ex,A.p.z-ez)); const nx=ex+Math.sin(ya)*dist, nz=ez-Math.cos(ya)*dist, ny=C.h+Math.tan(pa)*dist;
+  if(!frozen&&!snap){ A.p.set(nx,ny,nz); }
+  S.q.set(nx-ex,ny-C.h,nz-ez).normalize();
+  /* reduced motion: hold the framing; cut to a new one when the ball nears the frame edge */
+  if(st.rm&&S.init&&!snap){ const cy=Math.atan2(S.dir.x,-S.dir.z), cp=Math.asin(Math.max(-1,Math.min(1,S.dir.y)));
+    let nearH=99; for(const p of st.players.values()) if(!p.off) nearH=Math.min(nearH,Math.hypot(prevE.x-p.x,prevE.z-p.y));
+    if(Math.abs(yb-cy)<hh*0.7&&Math.abs(pb-cp)<hv*0.8&&Math.hypot(prevE.x-ex,prevE.z-ez)<3&&nearH>1.6){ S.near=nearH; S.q.copy(S.dir); cam.position.copy(prevE); S.eye.copy(prevE); } else { snap=true; } }
+  else if(!snap&&S.init){ const ang=S.dir.angleTo(S.q), mx=C.rate*dt; if(ang>mx&&ang>1e-6){ const k=mx/ang; S.q.lerpVectors(S.dir,S.q,k).normalize(); } }
+  S.dir.copy(S.q); if(snap) S.cuts++;
+  S.init=true; S.snapNow=snap;
+  cam.lookAt(S.tmp.copy(cam.position).addScaledVector(S.dir,40)); }
+
+{ const _tac=Stage.prototype.drawTac; Stage.prototype.drawTac=function(){ const P=this._p3d; if(P&&P._sl) P._sl.tac=true; return _tac.apply(this,arguments); }; }
+/* the director: in sideline view the kick-off, corner and penalty presets give way to the sideline camera (66 checks P._slOn) */
 
 </script>
 </body></html>
