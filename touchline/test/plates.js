@@ -1,14 +1,15 @@
 /* v18.5 player plates (src/v17/77_plates.js). Every frame of the live stage is sampled through an outer wrapper round
    Stage.prototype.draw (after the plates have painted):
    1. 2-D live match at 1x (1440x900): the carrier tag is st.own in >= 95 % of frames where own has been held >= 300 ms with
-      no flight; its anchor is within 2 px of st.proj at the 2-D head-top height; the defender never flickers (no A-B-A
+      no flight; its anchor is within 2 px of the head top drawFigure painted (pose stored by blendPose); the defender never flickers (no A-B-A
       within 1.5 s, no tag shorter than 250 ms, switches per minute of play reported and bounded); tags never overlap each
       other, the minimap or the caption, and stay inside the canvas, at every zoom level, in Sideline and in Tactical.
    2. Hidden: replays, from the goal to the restart, plates off (Settings value), the walkout, full time, skipping, the
       title-screen demo. Penalties/shootouts (lab 'pens'): exactly the taker and the other side's keeper.
    3. Hysteresis on a synthetic stage (v185PlSelect / v185PlPickDef): an oscillating challenger never switches, a clearly
       closer one wins within 600 ms, a committed chase wins on the next frame, nobody near clears the tag within 800 ms.
-   4. 3-D (forced, tier C, 960x600): broadcast and sideline; the anchor sits on the projected head of the figure.
+   4. 3-D (forced, tier C, 960x600): broadcast and sideline; the anchor is within 3 px of the head top the figures module
+      solved that frame (captured by a test-side wrapper round v18FigDraw), projected through the painter's camera.
    5. Phone 390x844: compact tags, layout rules, every zoom.
    6. Settings checkbox and the N key (toggle, toast, survives a reload); contrast >= 4.5 for every kit pair of a career;
       the draw costs little (mean ms per frame reported, bounded generously for software rendering); no page errors.
