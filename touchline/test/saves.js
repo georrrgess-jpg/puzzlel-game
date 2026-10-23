@@ -30,7 +30,8 @@ const pct=x=>(x*100).toFixed(0)+'%';
       const L0=st.land; st.land=function(){ const f=this.fl; const g=f&&!f.phys&&f.home&&f.home.gk&&f.hands?f.home:null; const r=L0.apply(this,arguments);
         if(g&&g.dive&&g.dive.k){ const D=g.dive; window.__S.push({k:D.k,out:D.out,q:D.q,now:this.now,tP0:D.tP0,rel:D.rel,dur:f.dur,t0:f.t0,bz:this.ball.z+v186kBR(this),minTorso:window.__mt==null?9:window.__mt}); window.__mt=null; if(window.__pause){ this.paused=true; window.__pend=1; } }
         return r; };
-      const U0=st.update; st.update=function(dt){ const r=U0.apply(this,arguments); const f=this.fl, g=this.gkOf(1);
+      window.__X=[]; let px=null; const U0=st.update; st.update=function(dt){ const r=U0.apply(this,arguments); const f=this.fl, g=this.gkOf(1);
+        { const B=this.ball; if(px!=null&&px<105&&B.x>=105) window.__X.push({y:+B.y.toFixed(2),z:+B.z.toFixed(2),k:g&&g.dive&&g.dive.k,goal:!!this.inNet}); px=B.x; }
         if(f&&!f.phys&&g&&g.dive&&g.dive.k&&this.now>=g.dive.t&&(f.home===g||f.kind==='shot')){ const u=(this.now-f.t0)/f.dur; if(u<0.85||!f.home){ const is3=v186kIs3D(this); const P=this.v186kPose(g,g.dive); const [a,b]=v186kTorso(g,P,is3); const R=v186kBR(this), B=this.ball, c={x:B.x,y:B.y,z:B.z+R};
             const vx=b.x-a.x, vy=b.y-a.y, vz=b.z-a.z, L=vx*vx+vy*vy+vz*vz||1; const t=clamp(((c.x-a.x)*vx+(c.y-a.y)*vy+(c.z-a.z)*vz)/L,0,1); const d=Math.hypot(a.x+vx*t-c.x,a.y+vy*t-c.y,a.z+vz*t-c.z);
             let dh=9; if(!f.home){ for(const i of [0,1]){ const h=v186kHand(g,P,i,is3); dh=Math.min(dh,Math.hypot(h.x-c.x,h.y-c.y,h.z-c.z)); } } window.__mt=Math.min(window.__mt==null?9:window.__mt,d); window.__mh=Math.min(window.__mh==null?9:window.__mh,dh); } }
@@ -91,6 +92,7 @@ const pct=x=>(x*100).toFixed(0)+'%';
     ok(S.every(s=>Math.abs(s.dur-D0)<0.01)&&em.length>0&&em.every(x=>x!=null&&x>=-0.01&&x<=67), 'the flight lasts D(340)+120 as before and each save is announced in the frame the ball arrives (+'+em.map(x=>x==null?'-':x.toFixed(0)).join(',')+' ms)');
     ok(E.length>0&&E.every(e=>e.inHands||e.loose), 'saves are announced with the ball in the gloves or parried loose beside the diving keeper ('+E.map(e=>e.inHands?'H':e.loose?'L':'?').join('')+')');
     ok(S.every(s=>s.minTorso>0.25), 'the ball never goes through the keeper on its way to his gloves (closest to the torso '+Math.min(...S.map(s=>s.minTorso)).toFixed(2)+' m)');
+    const X=await page.evaluate(()=>window.__X); ok(X.every(x=>Math.abs(x.y-34)>3.66+0.11||x.z>2.44), 'every deflection crosses the goal line outside the frame ('+X.map(x=>'y '+x.y+' z '+x.z).join('; ')+')');
     const zs=C.map(c=>c.z); ok(Math.min(...zs)<0.4&&Math.max(...zs)>1.7, 'contact heights range from the turf to above the head ('+Math.min(...zs).toFixed(2)+'..'+Math.max(...zs).toFixed(2)+' m)');
     await page.close(); }
 

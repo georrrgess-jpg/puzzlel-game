@@ -189,7 +189,7 @@ Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const now=this.now, q=M.D.q; con
   const D={...M.D, t:t0, tR, tP0:tC, tA, post, dir:(fin||1)*(gk.x>52.5?1:-1), x0:gk.x, y0:gk.y, x1:M.x1, y1:M.y1, stand:M.stand, cx:M.c.x, cy:M.c.y, cz:M.c.z, catch:M.D.out==='catch', rel:now};
   gk.dive=D; gk.ov={x:gk.x,y:gk.y}; gk.v186L=0;
   /* 3-D and standing kinds face the shooter through the save and the get-up; 2-D dives use the three-quarter yaw */
-  if(v186kIs3D(this)||M.stand){ gk.yawLock=M.yaw; gk.yawLockT=tC+post+this.D(1600); } else if(gk.yawLockT>now) gk.yawLockT=now;
+  if(v186kIs3D(this)||M.stand){ gk.yawLock=M.yaw; gk.yawLockT=tC+post+(M.stand?this.D(250):Math.max(260,this.D(700))); } /* through the get-up, then free (a parry is chased facing the ball) */ else if(gk.yawLockT>now) gk.yawLockT=now;
   if(o&&o.aim&&f.home===gk) f.aim={x:M.c.x,y:M.c.y};
   if(V186K.log) V186K.log.push({pid:gk.pid,act0:gk._act,spd:+((gk.spd||0)/Math.max(1,this.spdMul||1)).toFixed(2),k:D.k,out:D.out,q,n:D.n,t:D.t,tR,tC,tA,rel:now,dur:f.dur,ts:this.ts,set:!!gk.v186set,c:M.c,is3:v186kIs3D(this),late:t0===tR&&tR>tA-Ld});
   return D; };
@@ -222,8 +222,9 @@ Stage.prototype.v186kSave=async function(e){
   if(corner){ this.emit(e); e._done=1; }
   if(out!=='catch'){ if(this.own===gk){ this.own=null; this.hands=false; }
     const sg=Math.sign(ty-34)||1;
-    if(corner&&k==='tipOver'){ /* fingertips over the bar: up and over, onto the roof of the net or behind it */ await this.launch(null,{to:{x:gx+dir*1.5,y:clamp(this.ball.y+(Math.random()-0.5)*1.2,30,38),z:3.0},dur:this.D(260)+60,h:0.35,kind:'clear',cont:true}); }
-    else if(corner){ /* round the post and behind: a corner */ await this.launch(null,{to:{x:gx+dir*1.3,y:34+sg*(7+Math.random()*2.5),z:0.2},dur:this.D(420)+80,h:k==='lowdive'?0.3:1.1,kind:'clear'}); this.ownLock={x:this.ball.x,y:this.ball.y}; }
+    if(corner&&k==='tipOver'){ /* fingertips over the bar: up and over (the whole ball clears the crossbar), onto the roof of the net or behind it */ await this.launch(null,{to:{x:gx+dir*1.6,y:clamp(this.ball.y+(Math.random()-0.5)*1.2,30,38),z:3.4},dur:this.D(260)+60,h:0.5,kind:'clear',cont:true}); }
+    else if(corner){ /* round the post and behind: a corner. The deflection crosses the line at least 0.6 m outside the post */ const b=this.ball, tx=gx+dir*1.3, fr=clamp((gx-b.x)/((tx-b.x)||1e-3),0.05,1); let yt=34+sg*(7+Math.random()*2.5); const need=b.y+(34+sg*4.3-b.y)/fr; if(sg>0?yt<need:yt>need) yt=need; yt=clamp(yt,34-16,34+16);
+      await this.launch(null,{to:{x:tx,y:yt,z:0.2},dur:this.D(420)+80,h:k==='lowdive'?0.3:1.1,kind:'clear'}); this.ownLock={x:this.ball.x,y:this.ball.y}; }
     else if(k==='stand'||k==='high'||k==='scoop'){ /* spilled: it comes off his chest or gloves and drops in front of him */ this.startFree({x:-dir*(2+Math.random()*2),y:(Math.random()-0.5)*4,z:k==='scoop'?0.5:1.6},{max:1800}); }
     else if(k==='smother'){ /* squirms loose a couple of metres */ this.startFree({x:-dir*(3+Math.random()*3),y:(Math.random()<0.5?-1:1)*(3+Math.random()*4),z:0.4},{max:1800}); }
     else { /* palmed away from goal, wide of the post */ this.startFree({x:-dir*(4+Math.random()*5),y:sg*(12+Math.random()*6),z:(k==='lowdive'?1:4)+Math.random()*3},{max:1800}); } }
