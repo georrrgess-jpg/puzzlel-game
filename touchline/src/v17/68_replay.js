@@ -16,7 +16,7 @@ const V18_RP={keep:5200,after:1200,lead:900,tail:550,rate:0.5,dis:380};
 const V18_RP_STAGE=['now','ball','own','hands','fl','inNet','bulge','flash','hype','shake','v17M','v17tr','v17bs','v17sq','trail','turf','offMark','focus','netD','headBall','setPiece','placed','poss','cush','_v17cf','_v17c','conf'];
 function v18RpLive(st){ const L=typeof App!=='undefined'&&App.live; return !!(L&&L.stage===st&&st.cv&&st.cv.id==='lv-canvas'); }
 function v18RpWant(st){ if(!v18RpLive(st)||!st.alive) return false; const L=App.live; if(PREFS.replays===false) return false;
-  if(st.skip||st.so||L.skipping||L.done||st.mode==='tactical') return false; if((L.speed||1)>=4) return false; return true; }
+  if(st.skip||st.so||st.rm||L.skipping||L.done||st.mode==='tactical') return false; if((L.speed||1)>=4) return false; return true; }
 const v18RpPrim=v=>v===null||v===undefined||typeof v==='number'||typeof v==='string'||typeof v==='boolean';
 function v18RpObj(o,ref){ const s={}; for(const k in o){ const v=o[k]; if(v18RpPrim(v)) s[k]=v; else if(k==='dive'||k==='glide'||k==='ov') s[k]=ref?v:{...v}; } return s; }
 const V18_RP_DEL={};
@@ -32,11 +32,11 @@ Stage.prototype.goalSequence=async function(e){ this._rb=v18RpWant(this)?{buf:[]
   try{ return await _v18rpGoal.apply(this,arguments); } finally{ this._rb=null; } };
 const _v18rpUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v18rpUpd.apply(this,arguments); const R=this._rb;
-  if(R&&!R.stop&&!this.skip){ const B=R.buf; B.push(v18RpSnap(this));
+  if(R&&!R.stop&&!this.skip){ const B=R.buf; if(((R.k=(R.k||0)+1)&1)===0) B.push(v18RpSnap(this)); /* 60 Hz is plenty at 0.5x and halves the cost */
     if(R.ts==null&&this.fl&&this.fl.kind==='shot') R.ts=this.now;
     if(R.tg==null&&this.inNet&&this.ball&&this.ball.ing!=null){ R.tg=this.now; R.side=Math.max(-1,Math.min(1,(34-this.ball.y)/4)); }
     if(R.tg!=null&&this.now>R.tg+V18_RP.after) R.stop=true;
-    if(R.tg==null){ while(R.h<B.length&&B[R.h].now<this.now-V18_RP.keep) R.h++; if(R.h>240){ B.splice(0,R.h); R.h=0; } } }
+    if(R.tg==null){ while(R.h<B.length&&B[R.h].now<this.now-V18_RP.keep) R.h++; if(R.h>120){ B.splice(0,R.h); R.h=0; } } }
   return r; };
 
 /* the overlay: REPLAY bug, a skip hint, and a tap target */
@@ -70,7 +70,7 @@ function v18RpEnd(st,why){ const Q=st._rp; if(!Q||Q.done) return; Q.done=true; Q
   v18RpOverlay(st,false); if(Q.tapEl) Q.tapEl.removeEventListener('pointerdown',Q.tap,true);
   st._rp=null; st.acc=0; st.lastReal=performance.now()-st.t0; if(st.requestDraw) st.requestDraw(); App.v18Replays=(App.v18Replays||0)+1; Q.res(); }
 
-async function v18Replay(st){ const R=st._rb; if(!R||R.tg==null||!v18RpWant(st)) return; const B=R.buf.slice(R.h); if(B.length<20) return;
+async function v18Replay(st){ const R=st._rb; if(!R||R.tg==null||!v18RpWant(st)) return; const B=R.buf.slice(R.h); if(B.length<10) return;
   const ts=R.ts!=null?R.ts:R.tg-400; const t0=Math.max(B[0].now,ts-V18_RP.lead), t1=Math.min(B[B.length-1].now,R.tg+V18_RP.tail); if(t1-t0<300) return;
   let i=0; while(i<B.length-1&&B[i+1].now<=t0) i++;
   return new Promise(res=>{ const Q=st._rp={on:false,done:false,t:t0,t0,t1,i,R:{buf:B},res,gx:R.gx,dir:R.dir,side:R.side||0,side0:R.gx===105?0:1,fov:34};
@@ -90,7 +90,7 @@ Stage.prototype.loop=function(ts){ const Q=this._rp; if(!Q||!Q.on) return _v18rp
   if(this.wx&&this.updWeather&&!this.paused) this.updWeather(step/1000);
   const B=Q.R.buf; while(Q.i<B.length-1&&B[Q.i+1].now<=Q.t) Q.i++;
   if(Q.tapEl) Q.tapEl.style.pointerEvents=this.paused?'none':'';
-  const V=this._v17; if(!V||V.always||(typeof v17Vis==='undefined'||v17Vis.on(this.cv))){ const since=ts-(this._ld||0); if(since>=15.5||since<0){ this._ld=ts; v18RpDraw(this,Q,B[Q.i],false); } }
+  const V=this._v17; if(!V||V.always||(typeof v17Vis==='undefined'||v17Vis.on(this.cv))){ const since=ts-(this._ld||0); if(since>=(this.paused?480:15.5)||since<0){ this._ld=ts; v18RpDraw(this,Q,B[Q.i],false); } }
   this.raf=requestAnimationFrame(this.loop); };
 const _v18rpCancel=Stage.prototype.cancel;
 Stage.prototype.cancel=function(){ if(this._rp) v18RpEnd(this,'skip'); return _v18rpCancel.apply(this,arguments); };

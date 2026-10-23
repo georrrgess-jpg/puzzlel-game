@@ -16,12 +16,14 @@ Stage.prototype.drawLerp=function(){ const t0=performance.now(); try{ return _v1
 /* ---------- the probe ---------- */
 const V18_PROBE={warm:8,n:60};
 const _v18tRender=Painter3D.prototype.render;
-Painter3D.prototype.render=function(){ const t=performance.now(); const r=_v18tRender.apply(this,arguments); if(this.dead) return r;
-  const st=this.st; const Q=this._probe||(this._probe={on:PREFS.renderer==='auto'&&!PREFS.rtier&&['live','lab','tv'].includes(this.kind),k:0,last:0,iv:[]});
-  if(Q.on){ if(st.paused||document.hidden) Q.last=0; else { if(Q.last){ Q.k++; if(Q.k>V18_PROBE.warm) Q.iv.push(Math.min(250,t-Q.last)); } Q.last=t; }
-    if(Q.iv.length>=V18_PROBE.n){ Q.on=false; v18ProbeDecide(this,Q.iv); } }
+Painter3D.prototype.render=function(){ const t=performance.now(); const r=_v18tRender.apply(this,arguments); if(this.dead) return r; const cpu=performance.now()-t;
+  const st=this.st; const Q=this._probe||(this._probe={on:PREFS.renderer==='auto'&&!PREFS.rtier&&['live','lab','tv'].includes(this.kind),k:0,last:0,iv:[],cpu:[]});
+  if(Q.on){ if(st.paused||document.hidden) Q.last=0; else { if(Q.last){ Q.k++; if(Q.k>V18_PROBE.warm){ Q.iv.push(Math.min(250,t-Q.last)); Q.cpu.push(cpu); } } Q.last=t; }
+    if(Q.iv.length>=V18_PROBE.n){ Q.on=false; v18ProbeDecide(this,Q.iv,Q.cpu); } }
   return r; };
-function v18ProbeDecide(P,iv){ const s=iv.slice().sort((a,b)=>a-b); const med=s[s.length>>1]; const order=['A','B','C']; let i=order.indexOf(P.tier.name); const i0=i;
+function v18ProbeDecide(P,iv,cpu){ const s=iv.slice().sort((a,b)=>a-b); const med=s[s.length>>1]; const cs=(cpu||[]).slice().sort((a,b)=>a-b); const cmed=cs.length?cs[cs.length>>1]:0;
+  /* a steady ~30 fps cadence with a cheap painter is a frame cap (power saving, 30 Hz screen), not a slow GPU: keep the tier, do not store it */
+  if(med>28&&med<40&&cmed<9&&s[Math.floor(s.length*0.9)]<45){ P.probe={median:Math.round(med*10)/10,cpu:Math.round(cmed*10)/10,from:P.tier.name,to:P.tier.name,capped:true}; return; } const order=['A','B','C']; let i=order.indexOf(P.tier.name); const i0=i;
   if(med>30) i=2; else if(med>21) i=Math.min(2,i+1);
   P.probe={median:Math.round(med*10)/10,from:order[i0],to:order[i]};
   if(i===2&&med>42&&P.kind!=='lab'){ PREFS.rtier='C'; savePrefs(); v18Off=true; P.st._v18off=true; P.dispose(); if(typeof toast==='function') toast('Switched to classic 2D graphics for speed'); return; }

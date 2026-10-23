@@ -216,7 +216,7 @@ P3D_MODULES.push({name:'stadium',order:12,
       S.coneU={uI:{value:0.06}};
       const mat=new T.ShaderMaterial({uniforms:S.coneU,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,fog:false,
         vertexShader:'attribute float aT; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ vT=aT; vec4 w=modelMatrix*vec4(position,1.0); vN=normalize(mat3(modelMatrix)*normal); vV=normalize(cameraPosition-w.xyz); gl_Position=projectionMatrix*viewMatrix*w; }',
-        fragmentShader:'uniform float uI; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ float e=pow(abs(dot(normalize(vN),normalize(vV))),1.6); float a=uI*e*pow(1.0-vT,1.1)*smoothstep(0.0,0.08,vT); gl_FragColor=vec4(vec3(1.0,0.95,0.84)*a,1.0); }'});
+        fragmentShader:'uniform float uI; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ float e=pow(abs(dot(normalize(vN),normalize(vV))),1.6); float a=uI*e*pow(1.0-vT,1.1)*smoothstep(0.0,0.08,vT); gl_FragColor=vec4(vec3(1.0,0.95,0.84)*a,1.0);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'});
       S.cones=new T.Mesh(tr(g),tr(mat)); S.cones.renderOrder=7; S.cones.frustumCulled=false; P.scene.add(S.cones); }
     /* the two head coaches (figures module draws them) */
     S.coachKit={shirt:'#1b2230',shorts:'#1b2230',num:'#fff',socks:'#111',dark:'#11161f',light:'#2a3242'};
@@ -256,7 +256,7 @@ function v18sFanGeo(T){ const pos=[], nrm=[], part=[];
   quad([-0.165,0.5,0.135],[0.165,0.5,0.135],[0.165,0.6,0.135],[-0.165,0.6,0.135],4); quad([0.165,0.5,-0.135],[-0.165,0.5,-0.135],[-0.165,0.6,-0.135],[0.165,0.6,-0.135],4);
   quad([0.165,0.5,0.135],[0.165,0.5,-0.135],[0.165,0.6,-0.135],[0.165,0.6,0.135],4); quad([-0.165,0.5,-0.135],[-0.165,0.5,0.135],[-0.165,0.6,0.135],[-0.165,0.6,-0.135],4);
   /* head */
-  { const sg=new T.SphereGeometry(0.118,7,5).toNonIndexed(); sg.scale(1,1.08,1); sg.translate(0,0.75,0.01); const p=sg.attributes.position.array, n=sg.attributes.normal.array; for(let i=0;i<p.length;i++){ pos.push(p[i]); nrm.push(n[i]); } for(let i=0;i<p.length/3;i++) part.push(1); sg.dispose(); }
+  { const sg=new T.SphereGeometry(0.118,5,4).toNonIndexed(); sg.scale(1,1.08,1); sg.translate(0,0.75,0.01); const p=sg.attributes.position.array, n=sg.attributes.normal.array; for(let i=0;i<p.length;i++){ pos.push(p[i]); nrm.push(n[i]); } for(let i=0;i<p.length/3;i++) part.push(1); sg.dispose(); }
   /* arms */
   box(-0.31,-0.21,0.06,0.53,-0.05,0.05,2); box(0.21,0.31,0.06,0.53,-0.05,0.05,3);
   const g=new T.BufferGeometry(); g.setAttribute('position',new T.Float32BufferAttribute(pos,3)); g.setAttribute('normal',new T.Float32BufferAttribute(nrm,3)); g.setAttribute('aPart',new T.Float32BufferAttribute(part,1)); return g; }

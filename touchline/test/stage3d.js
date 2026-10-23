@@ -4,7 +4,7 @@
    to 2-D and the match goes on, skip to the end gives the engine's score, no page errors. node test/stage3d.js */
 const { chromium, DIST } = require('./_pw');
 (async()=>{ const t0=Date.now(); const b=await chromium.launch(); const p=await b.newPage({viewport:{width:900,height:600}}); const errs=[];
-  p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{ if(m.type()==='error'&&!/GL Driver|WebGL/i.test(m.text())) errs.push('console: '+m.text()); });
+  p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{ if(m.type()==='error'&&!/GL Driver/i.test(m.text())) errs.push('console: '+m.text()); });
   let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
   const until=async(fn,ms,arg)=>{ const end=Date.now()+ms; while(Date.now()<end){ if(await p.evaluate(fn,arg)) return true; await p.waitForTimeout(250); } return false; };
   /* ---------- lab ---------- */

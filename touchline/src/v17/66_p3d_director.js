@@ -17,8 +17,8 @@
    State lives on P.dir; nothing the simulation reads is written. */
 
 /* critically damped follow (Unity's SmoothDamp form): stable at any frame time, never overshoots */
-function v18Damp(x,v,tgt,om,dt){ const k=om*dt, e=1/(1+k+0.48*k*k+0.235*k*k*k); const ch=x-tgt, tmp=(v+om*ch)*dt; const nv=(v-om*tmp)*e; return [tgt+(ch+tmp)*e,nv]; }
-function v18DampV(S,tgt,om,dt){ for(const c of ['x','y','z']){ const r=v18Damp(S.p[c],S.v[c],tgt[c],om,dt); S.p[c]=r[0]; S.v[c]=r[1]; } }
+function v18Damp(x,v,tgt,om,dt){ if(!isFinite(tgt)) return [isFinite(x)?x:0,0]; if(!isFinite(x)||!isFinite(v)) return [tgt,0]; const k=om*dt, e=1/(1+k+0.48*k*k+0.235*k*k*k); const ch=x-tgt, tmp=(v+om*ch)*dt; const nv=(v-om*tmp)*e; return [tgt+(ch+tmp)*e,nv]; }
+function v18DampV(S,tgt,om,dt){ let r=v18Damp(S.p.x,S.v.x,tgt.x,om,dt); S.p.x=r[0]; S.v.x=r[1]; r=v18Damp(S.p.y,S.v.y,tgt.y,om,dt); S.p.y=r[0]; S.v.y=r[1]; r=v18Damp(S.p.z,S.v.z,tgt.z,om,dt); S.p.z=r[0]; S.v.z=r[1]; }
 
 /* a fade through black on the stage host; the camera cuts at its darkest moment */
 function v18Cut(st,ms){ const P=st&&st._p3d; if(!P||P.dead||!P.dir) return; ms=ms||120; const host=P.canvas.parentElement; if(!host) return;
@@ -78,7 +78,7 @@ P3D_MODULES.push({name:'director',order:25,
     const r0=v18Damp(D.by,D.byv,st.ball.y,1.3,dt); D.by=r0[0]; D.byv=r0[1];
     if(st.mode!=='tactical'){ const far=Math.max(0,Math.min(1,1-D.by/68)); D.mainEye.y+=far*2.2; D.mainTgt.z+=Math.max(-3,Math.min(3,(D.by-D.mainTgt.z)*0.12)); }
     /* 2. preset and its pose */
-    const now=performance.now(); let snap=D.snap||D.fresh; if(D.cutAt&&now>=D.cutAt){ D.cutAt=0; snap=true; }
+    const now=performance.now(); let snap=D.snap||D.fresh||!!st.rm; /* reduced motion: cut between framings, never fly */ if(D.cutAt&&now>=D.cutAt){ D.cutAt=0; snap=true; }
     const mode=this.pick(P,st); if(mode==='replay'&&D.mode!=='replay') snap=true; if(mode!=='replay'&&D.mode==='replay') snap=true;
     const want=this.pose(P,st,mode,D.e,D.t); const on=want!==false;
     if(on&&(D.w<0.02&&D.mode!==mode||snap)){ D.eye.p.copy(D.e); D.tgt.p.copy(D.t); D.eye.v.set(0,0,0); D.tgt.v.set(0,0,0); D.fov=want; D.fv=0; }

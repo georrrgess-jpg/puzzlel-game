@@ -17,7 +17,9 @@ const V18_TIERS={
   A:{name:'A',shadow:2048,crowd:6000,aa:true,detail:2,pr:1.5},
   B:{name:'B',shadow:1024,crowd:2600,aa:true,detail:1,pr:1.25},
   C:{name:'C',shadow:0,crowd:900,aa:false,detail:0,pr:1}};
-let v18Off=false;   /* set when 3-D failed this session (lost context, too slow): 'auto' then stays 2-D */
+let v18Off=false;
+/* the 3-D wide shot frames a little tighter than the 2-D one (perspective makes mid-pitch players smaller than the 2-D painter's) */
+const V18_FRAME=0.86;   /* set when 3-D failed this session (lost context, too slow): 'auto' then stays 2-D */
 
 /* WebGL2 availability and whether it is a software rasteriser (SwiftShader / llvmpipe / Microsoft Basic Render) */
 const v18GL=(()=>{ let info=null; return ()=>{ if(info) return info; info={ok:false,software:false,name:''};
@@ -50,7 +52,8 @@ class Painter3D {
     const cv=document.createElement('canvas'); cv.className='v18-gl'; cv.setAttribute('aria-hidden','true'); host.insertBefore(cv,st.cv); st.cv.classList.add('v18-hud'); this.canvas=cv;
     this._lost=e=>{ e.preventDefault(); console.warn('v18: WebGL context lost, back to 2-D'); v18Off=true; this.st._v18off=true; this.dispose(); if(this.st.requestDraw) this.st.requestDraw(); };
     cv.addEventListener('webglcontextlost',this._lost);
-    const R=this.renderer=new T.WebGLRenderer({canvas:cv,antialias:this.tier.aa,powerPreference:'high-performance',alpha:false,stencil:false});
+    let R; try{ R=this.renderer=new T.WebGLRenderer({canvas:cv,antialias:this.tier.aa,powerPreference:'high-performance',alpha:false,stencil:false}); }
+    catch(e){ cv.removeEventListener('webglcontextlost',this._lost); cv.remove(); st.cv.classList.remove('v18-hud'); throw e; }
     R.outputColorSpace=T.SRGBColorSpace; R.toneMapping=T.NeutralToneMapping; R.toneMappingExposure=1.0;
     R.shadowMap.enabled=this.tier.shadow>0; R.shadowMap.type=T.PCFShadowMap;
     this.scene=new T.Scene(); this.camera=new T.PerspectiveCamera(30,1,0.3,1200); this.scene.add(this.camera);
@@ -93,7 +96,7 @@ class Painter3D {
      touchline spans w metres, and pitches down so the near touchline sits near the bottom edge. */
   /* Like a real gantry camera it dollies only for wide shots (w 30..64 m); tighter shots (penalties, celebrations, the
      lab, phones) keep the gantry position and narrow the lens, aiming between the frame centre and the play (ball y). */
-  camPose(st,opt){ const cam=this.camera, c=st.cam; const w=Math.max(3,c.w), elev=(opt&&opt.elev)||0.62, fov0=(opt&&opt.fov)||30;
+  camPose(st,opt){ const cam=this.camera, c=st.cam; const w=Math.max(3,c.w*V18_FRAME), elev=(opt&&opt.elev)||0.62, fov0=(opt&&opt.fov)||30;
     const wPos=Math.min(64,Math.max(30,w)), k=w/wPos;
     const vf=fov0*Math.PI/180, hf=2*Math.atan(Math.tan(vf/2)*cam.aspect); const below=vf/2*0.88;
     const dn=(wPos/2)/Math.tan(hf/2)/Math.cos(below);

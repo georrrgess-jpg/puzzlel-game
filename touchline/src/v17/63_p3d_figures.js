@@ -278,6 +278,7 @@ function v18FigInit(P){ const T=P.T, tier=P.tier||{detail:2,shadow:0}; const F=P
   F.numCv=v18FCanvas(1024,1024); F.numG=F.numCv.getContext('2d'); F.numTex=P.track(new T.CanvasTexture(F.numCv));
   const aniso=Math.min(4,P.renderer.capabilities.getMaxAnisotropy?P.renderer.capabilities.getMaxAnisotropy():1);
   for(const t of [F.kitTex,F.faceTex,F.numTex]){ t.colorSpace=T.SRGBColorSpace; t.premultiplyAlpha=true; t.anisotropy=aniso; }
+  F.kitTex.generateMipmaps=false; F.kitTex.minFilter=T.LinearFilter; /* rows are packed: mipmaps would bleed one kit into the next at a distance */
   F.mKit=v18FKitMat(P,F.kitTex,'kit',U); F.mFace=v18FKitMat(P,F.faceTex,'cell',U);
   F.mNum=P.track(new T.MeshToonMaterial({color:'#ffffff',map:F.numTex,gradientMap:P.gradientMap,alphaTest:0.5,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
   F.mNum.onBeforeCompile=sh=>{ sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aCell;').replace('#include <uv_vertex>','#include <uv_vertex>\n#ifdef USE_MAP\nvMapUv=vec2(mod(aCell,8.0)+0.02+vMapUv.x*0.96, 7.0-floor(aCell/8.0)+0.02+vMapUv.y*0.96)/8.0;\n#endif'); sh.fragmentShader=sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*0.14;'); }; F.mNum.customProgramCacheKey=()=>'v18f-num';
@@ -339,7 +340,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   F.sph.center.set(p.x,0.95,p.y); if(!F.frustum.intersectsSphere(F.sph)) return false;
   const gk=!!p.gk&&!isRef; kit=kit||(isRef?V18_REFKIT:{shirt:'#888888',shorts:'#333333',socks:'#888888',num:'#ffffff'});
   let Q; try{ Q=st.blendPose(p,st.poseOf(p,isRef)); }catch(e){ return false; } if(!Q||!Q.feet||!Q.hands||!Q.feet[0]||!Q.feet[1]||!Q.hands[0]||!Q.hands[1]) return false;
-  const L=p.look||defaultLook('ref',12); const B=isRef?1:(V18F_B[L.build]||1); const S=0.92*(p.hgt||70)/70;
+  const L=p.look||(window.V18F_REFLOOK||(window.V18F_REFLOOK=defaultLook('ref',12))); const B=isRef?1:(V18F_B[L.build]||1); const S=0.92*(p.hgt||70)/70;
   const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw; const cY=Math.cos(yaw), sY=Math.sin(yaw);
   const lean=Q.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=Q.hipU, lift=Q.lift||0, tilt=Q.headTilt||0, hturn=Q.headTurn||0;
   if(!isFinite(hipU+lean+lift+tilt+hturn+(Q.rot||0)+(Q.pivot||0))) return false;
