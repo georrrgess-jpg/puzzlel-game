@@ -1,0 +1,1 @@
+/* three.js r186 (MIT, see three-LICENSE), bundled by esbuild: npx esbuild@0.27.3 vendor/three-entry.js --bundle --minify --format=iife --global-name=THREE --legal-comments=none --outfile=vendor/three.min.js (needs three@0.186.1 in node_modules) */

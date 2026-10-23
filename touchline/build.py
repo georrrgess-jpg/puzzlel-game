@@ -13,6 +13,8 @@ FONTS=[('Big Shoulders Display','bs-reg','400 599','normal'),('Big Shoulders Dis
  ('Crimson Pro','cp-reg','300 900','normal'),('Crimson Pro','cp-it','300 900','italic')]
 fonts='\n'.join(f"@font-face{{font-family:'{fam}';src:url(data:font/woff;base64,{base64.b64encode(pathlib.Path('fonts/'+f+'.woff').read_bytes()).decode()}) format('woff');font-weight:{w};font-style:{st};font-display:swap}}" for fam,f,w,st in FONTS)
 js='\n'.join((src/f).read_text().replace("if (typeof module !== 'undefined') module.exports","// node export removed;\nif (false) module.exports") for f in ['data.js','names2.js','mascots.js','mascots2.js','looks.js','engine.js','ui_core.js','ui_sound.js','ui_views.js','ui_match.js','ui_stage.js','ui_live.js','ui_fx.js','ui_features.js','ui_main.js','ui_v8.js','ui_spec.js','ui_kits.js','ui_wrapped.js','ui_announcer.js','ui_mixer.js','ui_schedule.js','ui_capsule.js','ui_sandbox.js','ui_polish.js','ui_v14.js','ui_v15.js']+['v17/'+f.name for f in V17 if f.suffix=='.js'])
+# three.js (vendor/three.min.js, MIT) as its own script before the game: defines the THREE global for the 3-D renderer
+three=(pathlib.Path('vendor')/'three.min.js').read_text() if (pathlib.Path('vendor')/'three.min.js').exists() else ''
 html=f'''<title>Touchline</title>
 <meta name="description" content="Touchline: Varsity Soccer Manager">
 <style>
@@ -20,6 +22,9 @@ html=f'''<title>Touchline</title>
 {css}
 </style>
 <div id="app"></div>
+<script>
+{three}
+</script>
 <script>
 "use strict";
 {js}
