@@ -120,7 +120,7 @@ const HELPERS=()=>{ window.T2={
   /* ---------- renderer preference: Settings row, persists across reload ---------- */
   await page.evaluate(()=>A.go({dataset:{r:'settings'}})); await page.waitForTimeout(300);
   const row=await page.evaluate(()=>{ const s=document.querySelector('#set-renderer'); const card=s&&s.closest('.card'); return s?{opts:[...s.options].map(o=>o.textContent),val:s.value,card:card&&card.querySelector('h3').textContent,label:document.querySelector('label[for="set-renderer"]').textContent}:null; });
-  ok(row&&row.card==='Appearance'&&row.label==='Match graphics'&&row.opts.join('|')==='Auto (recommended)|Classic 2D'&&row.val==='auto','Settings > Appearance has the Match graphics row ('+JSON.stringify(row)+')');
+  ok(row&&row.card==='Appearance'&&row.label==='Match graphics'&&row.opts.join('|')==='Auto (recommended)|3D broadcast|Classic 2D'&&row.val==='auto','Settings > Appearance has the Match graphics row ('+JSON.stringify(row)+')');
   await page.selectOption('#set-renderer','2d'); await page.waitForTimeout(100);
   ok(await page.evaluate(()=>PREFS.renderer==='2d'&&JSON.parse(localStorage.getItem(PREF_KEY)).renderer==='2d'),'choosing Classic 2D sets PREFS.renderer and saves it');
   await page.evaluate(()=>saveNow()); await page.reload(); await page.waitForTimeout(1000); await page.evaluate(HELPERS);

@@ -11710,6 +11710,9 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['🎬','Matches in 3D','Live matches are now broadcast in full 3D on computers and phones that can handle it: a floodlit high-school ground with a main stand, press box, video scoreboard, bleachers behind the goals and a crowd in your colors that erupts when you score. Settings > Match graphics switches between Auto, 3D broadcast and Classic 2D.'],
+  ['🧍','Players with faces','Every player is a detailed 3D model built from their look: face, hair style, skin tone and build, your kit with its pattern, numbers front and back, collar and cuffs, socks, boots and keeper gloves. The referee and linesmen run the line with their flags and cards.'],
+  ['🎥','A real broadcast crew','The camera director cuts to a low angle behind the penalty taker, a high angle for corners and a close-up of the scorer, and every goal gets an instant replay from behind the goal. Tap to skip; turn replays off in Settings.'],
   ['🏟️','A stadium that looks the part','Floodlights wash the pitch smoothly instead of leaving green patches, mown stripes catch the light, and goalmouths and spots look like worn grass. Pitch lines are crisper and thicker near the camera, and night, golden hour and rain each get their own lighting. The crowd is now made of actual fans in your team\'s colors, with hats, scarves and a gentle sway, darker toward the back of the stand.'],
   ['🎥','A calmer camera, smoother players','The broadcast camera now follows play like a real cameraman: it looks ahead of a fast ball, stops tugging at every dribble and keeps the goal mouth in view as attacks close in. Facing, stride, kicks, jumps and celebrations move fluidly between frames even on slower devices.'],
   ['⚽','The ball behaves','The ball rolls the way it travels, long shots and crosses bend in the air, and it squashes a little on the bounce. Players set themselves before striking it, settle after the kick and slow into position instead of stopping dead.'],
@@ -13986,7 +13989,9 @@ const V18_TIERS={
   A:{name:'A',shadow:2048,crowd:6000,aa:true,detail:2,pr:1.5},
   B:{name:'B',shadow:1024,crowd:2600,aa:true,detail:1,pr:1.25},
   C:{name:'C',shadow:0,crowd:900,aa:false,detail:0,pr:1}};
-let v18Off=false;   /* set when 3-D failed this session (lost context, too slow): 'auto' then stays 2-D */
+let v18Off=false;
+/* the 3-D wide shot frames a little tighter than the 2-D one (perspective makes mid-pitch players smaller than the 2-D painter's) */
+const V18_FRAME=0.86;   /* set when 3-D failed this session (lost context, too slow): 'auto' then stays 2-D */
 
 /* WebGL2 availability and whether it is a software rasteriser (SwiftShader / llvmpipe / Microsoft Basic Render) */
 const v18GL=(()=>{ let info=null; return ()=>{ if(info) return info; info={ok:false,software:false,name:''};
@@ -14019,7 +14024,8 @@ class Painter3D {
     const cv=document.createElement('canvas'); cv.className='v18-gl'; cv.setAttribute('aria-hidden','true'); host.insertBefore(cv,st.cv); st.cv.classList.add('v18-hud'); this.canvas=cv;
     this._lost=e=>{ e.preventDefault(); console.warn('v18: WebGL context lost, back to 2-D'); v18Off=true; this.st._v18off=true; this.dispose(); if(this.st.requestDraw) this.st.requestDraw(); };
     cv.addEventListener('webglcontextlost',this._lost);
-    const R=this.renderer=new T.WebGLRenderer({canvas:cv,antialias:this.tier.aa,powerPreference:'high-performance',alpha:false,stencil:false});
+    let R; try{ R=this.renderer=new T.WebGLRenderer({canvas:cv,antialias:this.tier.aa,powerPreference:'high-performance',alpha:false,stencil:false}); }
+    catch(e){ cv.removeEventListener('webglcontextlost',this._lost); cv.remove(); st.cv.classList.remove('v18-hud'); throw e; }
     R.outputColorSpace=T.SRGBColorSpace; R.toneMapping=T.NeutralToneMapping; R.toneMappingExposure=1.0;
     R.shadowMap.enabled=this.tier.shadow>0; R.shadowMap.type=T.PCFShadowMap;
     this.scene=new T.Scene(); this.camera=new T.PerspectiveCamera(30,1,0.3,1200); this.scene.add(this.camera);
@@ -14062,7 +14068,7 @@ class Painter3D {
      touchline spans w metres, and pitches down so the near touchline sits near the bottom edge. */
   /* Like a real gantry camera it dollies only for wide shots (w 30..64 m); tighter shots (penalties, celebrations, the
      lab, phones) keep the gantry position and narrow the lens, aiming between the frame centre and the play (ball y). */
-  camPose(st,opt){ const cam=this.camera, c=st.cam; const w=Math.max(3,c.w), elev=(opt&&opt.elev)||0.62, fov0=(opt&&opt.fov)||30;
+  camPose(st,opt){ const cam=this.camera, c=st.cam; const w=Math.max(3,c.w*V18_FRAME), elev=(opt&&opt.elev)||0.62, fov0=(opt&&opt.fov)||30;
     const wPos=Math.min(64,Math.max(30,w)), k=w/wPos;
     const vf=fov0*Math.PI/180, hf=2*Math.atan(Math.tan(vf/2)*cam.aspect); const below=vf/2*0.88;
     const dn=(wPos/2)/Math.tan(hf/2)/Math.cos(below);
@@ -14569,7 +14575,7 @@ P3D_MODULES.push({name:'stadium',order:12,
       S.coneU={uI:{value:0.06}};
       const mat=new T.ShaderMaterial({uniforms:S.coneU,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,fog:false,
         vertexShader:'attribute float aT; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ vT=aT; vec4 w=modelMatrix*vec4(position,1.0); vN=normalize(mat3(modelMatrix)*normal); vV=normalize(cameraPosition-w.xyz); gl_Position=projectionMatrix*viewMatrix*w; }',
-        fragmentShader:'uniform float uI; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ float e=pow(abs(dot(normalize(vN),normalize(vV))),1.6); float a=uI*e*pow(1.0-vT,1.1)*smoothstep(0.0,0.08,vT); gl_FragColor=vec4(vec3(1.0,0.95,0.84)*a,1.0); }'});
+        fragmentShader:'uniform float uI; varying float vT; varying vec3 vN; varying vec3 vV; void main(){ float e=pow(abs(dot(normalize(vN),normalize(vV))),1.6); float a=uI*e*pow(1.0-vT,1.1)*smoothstep(0.0,0.08,vT); gl_FragColor=vec4(vec3(1.0,0.95,0.84)*a,1.0);\n#include <tonemapping_fragment>\n#include <colorspace_fragment>\n}'});
       S.cones=new T.Mesh(tr(g),tr(mat)); S.cones.renderOrder=7; S.cones.frustumCulled=false; P.scene.add(S.cones); }
     /* the two head coaches (figures module draws them) */
     S.coachKit={shirt:'#1b2230',shorts:'#1b2230',num:'#fff',socks:'#111',dark:'#11161f',light:'#2a3242'};
@@ -14609,7 +14615,7 @@ function v18sFanGeo(T){ const pos=[], nrm=[], part=[];
   quad([-0.165,0.5,0.135],[0.165,0.5,0.135],[0.165,0.6,0.135],[-0.165,0.6,0.135],4); quad([0.165,0.5,-0.135],[-0.165,0.5,-0.135],[-0.165,0.6,-0.135],[0.165,0.6,-0.135],4);
   quad([0.165,0.5,0.135],[0.165,0.5,-0.135],[0.165,0.6,-0.135],[0.165,0.6,0.135],4); quad([-0.165,0.5,-0.135],[-0.165,0.5,0.135],[-0.165,0.6,0.135],[-0.165,0.6,-0.135],4);
   /* head */
-  { const sg=new T.SphereGeometry(0.118,7,5).toNonIndexed(); sg.scale(1,1.08,1); sg.translate(0,0.75,0.01); const p=sg.attributes.position.array, n=sg.attributes.normal.array; for(let i=0;i<p.length;i++){ pos.push(p[i]); nrm.push(n[i]); } for(let i=0;i<p.length/3;i++) part.push(1); sg.dispose(); }
+  { const sg=new T.SphereGeometry(0.118,5,4).toNonIndexed(); sg.scale(1,1.08,1); sg.translate(0,0.75,0.01); const p=sg.attributes.position.array, n=sg.attributes.normal.array; for(let i=0;i<p.length;i++){ pos.push(p[i]); nrm.push(n[i]); } for(let i=0;i<p.length/3;i++) part.push(1); sg.dispose(); }
   /* arms */
   box(-0.31,-0.21,0.06,0.53,-0.05,0.05,2); box(0.21,0.31,0.06,0.53,-0.05,0.05,3);
   const g=new T.BufferGeometry(); g.setAttribute('position',new T.Float32BufferAttribute(pos,3)); g.setAttribute('normal',new T.Float32BufferAttribute(nrm,3)); g.setAttribute('aPart',new T.Float32BufferAttribute(part,1)); return g; }
@@ -14966,6 +14972,7 @@ function v18FigInit(P){ const T=P.T, tier=P.tier||{detail:2,shadow:0}; const F=P
   F.numCv=v18FCanvas(1024,1024); F.numG=F.numCv.getContext('2d'); F.numTex=P.track(new T.CanvasTexture(F.numCv));
   const aniso=Math.min(4,P.renderer.capabilities.getMaxAnisotropy?P.renderer.capabilities.getMaxAnisotropy():1);
   for(const t of [F.kitTex,F.faceTex,F.numTex]){ t.colorSpace=T.SRGBColorSpace; t.premultiplyAlpha=true; t.anisotropy=aniso; }
+  F.kitTex.generateMipmaps=false; F.kitTex.minFilter=T.LinearFilter; /* rows are packed: mipmaps would bleed one kit into the next at a distance */
   F.mKit=v18FKitMat(P,F.kitTex,'kit',U); F.mFace=v18FKitMat(P,F.faceTex,'cell',U);
   F.mNum=P.track(new T.MeshToonMaterial({color:'#ffffff',map:F.numTex,gradientMap:P.gradientMap,alphaTest:0.5,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
   F.mNum.onBeforeCompile=sh=>{ sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aCell;').replace('#include <uv_vertex>','#include <uv_vertex>\n#ifdef USE_MAP\nvMapUv=vec2(mod(aCell,8.0)+0.02+vMapUv.x*0.96, 7.0-floor(aCell/8.0)+0.02+vMapUv.y*0.96)/8.0;\n#endif'); sh.fragmentShader=sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*0.14;'); }; F.mNum.customProgramCacheKey=()=>'v18f-num';
@@ -15027,7 +15034,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   F.sph.center.set(p.x,0.95,p.y); if(!F.frustum.intersectsSphere(F.sph)) return false;
   const gk=!!p.gk&&!isRef; kit=kit||(isRef?V18_REFKIT:{shirt:'#888888',shorts:'#333333',socks:'#888888',num:'#ffffff'});
   let Q; try{ Q=st.blendPose(p,st.poseOf(p,isRef)); }catch(e){ return false; } if(!Q||!Q.feet||!Q.hands||!Q.feet[0]||!Q.feet[1]||!Q.hands[0]||!Q.hands[1]) return false;
-  const L=p.look||defaultLook('ref',12); const B=isRef?1:(V18F_B[L.build]||1); const S=0.92*(p.hgt||70)/70;
+  const L=p.look||(window.V18F_REFLOOK||(window.V18F_REFLOOK=defaultLook('ref',12))); const B=isRef?1:(V18F_B[L.build]||1); const S=0.92*(p.hgt||70)/70;
   const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw; const cY=Math.cos(yaw), sY=Math.sin(yaw);
   const lean=Q.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=Q.hipU, lift=Q.lift||0, tilt=Q.headTilt||0, hturn=Q.headTurn||0;
   if(!isFinite(hipU+lean+lift+tilt+hturn+(Q.rot||0)+(Q.pivot||0))) return false;
@@ -15256,8 +15263,8 @@ P3D_MODULES.push({name:'ball',order:40,
    State lives on P.dir; nothing the simulation reads is written. */
 
 /* critically damped follow (Unity's SmoothDamp form): stable at any frame time, never overshoots */
-function v18Damp(x,v,tgt,om,dt){ const k=om*dt, e=1/(1+k+0.48*k*k+0.235*k*k*k); const ch=x-tgt, tmp=(v+om*ch)*dt; const nv=(v-om*tmp)*e; return [tgt+(ch+tmp)*e,nv]; }
-function v18DampV(S,tgt,om,dt){ for(const c of ['x','y','z']){ const r=v18Damp(S.p[c],S.v[c],tgt[c],om,dt); S.p[c]=r[0]; S.v[c]=r[1]; } }
+function v18Damp(x,v,tgt,om,dt){ if(!isFinite(tgt)) return [isFinite(x)?x:0,0]; if(!isFinite(x)||!isFinite(v)) return [tgt,0]; const k=om*dt, e=1/(1+k+0.48*k*k+0.235*k*k*k); const ch=x-tgt, tmp=(v+om*ch)*dt; const nv=(v-om*tmp)*e; return [tgt+(ch+tmp)*e,nv]; }
+function v18DampV(S,tgt,om,dt){ let r=v18Damp(S.p.x,S.v.x,tgt.x,om,dt); S.p.x=r[0]; S.v.x=r[1]; r=v18Damp(S.p.y,S.v.y,tgt.y,om,dt); S.p.y=r[0]; S.v.y=r[1]; r=v18Damp(S.p.z,S.v.z,tgt.z,om,dt); S.p.z=r[0]; S.v.z=r[1]; }
 
 /* a fade through black on the stage host; the camera cuts at its darkest moment */
 function v18Cut(st,ms){ const P=st&&st._p3d; if(!P||P.dead||!P.dir) return; ms=ms||120; const host=P.canvas.parentElement; if(!host) return;
@@ -15317,7 +15324,7 @@ P3D_MODULES.push({name:'director',order:25,
     const r0=v18Damp(D.by,D.byv,st.ball.y,1.3,dt); D.by=r0[0]; D.byv=r0[1];
     if(st.mode!=='tactical'){ const far=Math.max(0,Math.min(1,1-D.by/68)); D.mainEye.y+=far*2.2; D.mainTgt.z+=Math.max(-3,Math.min(3,(D.by-D.mainTgt.z)*0.12)); }
     /* 2. preset and its pose */
-    const now=performance.now(); let snap=D.snap||D.fresh; if(D.cutAt&&now>=D.cutAt){ D.cutAt=0; snap=true; }
+    const now=performance.now(); let snap=D.snap||D.fresh||!!st.rm; /* reduced motion: cut between framings, never fly */ if(D.cutAt&&now>=D.cutAt){ D.cutAt=0; snap=true; }
     const mode=this.pick(P,st); if(mode==='replay'&&D.mode!=='replay') snap=true; if(mode!=='replay'&&D.mode==='replay') snap=true;
     const want=this.pose(P,st,mode,D.e,D.t); const on=want!==false;
     if(on&&(D.w<0.02&&D.mode!==mode||snap)){ D.eye.p.copy(D.e); D.tgt.p.copy(D.t); D.eye.v.set(0,0,0); D.tgt.v.set(0,0,0); D.fov=want; D.fv=0; }
@@ -15359,12 +15366,14 @@ Stage.prototype.drawLerp=function(){ const t0=performance.now(); try{ return _v1
 /* ---------- the probe ---------- */
 const V18_PROBE={warm:8,n:60};
 const _v18tRender=Painter3D.prototype.render;
-Painter3D.prototype.render=function(){ const t=performance.now(); const r=_v18tRender.apply(this,arguments); if(this.dead) return r;
-  const st=this.st; const Q=this._probe||(this._probe={on:PREFS.renderer==='auto'&&!PREFS.rtier&&['live','lab','tv'].includes(this.kind),k:0,last:0,iv:[]});
-  if(Q.on){ if(st.paused||document.hidden) Q.last=0; else { if(Q.last){ Q.k++; if(Q.k>V18_PROBE.warm) Q.iv.push(Math.min(250,t-Q.last)); } Q.last=t; }
-    if(Q.iv.length>=V18_PROBE.n){ Q.on=false; v18ProbeDecide(this,Q.iv); } }
+Painter3D.prototype.render=function(){ const t=performance.now(); const r=_v18tRender.apply(this,arguments); if(this.dead) return r; const cpu=performance.now()-t;
+  const st=this.st; const Q=this._probe||(this._probe={on:PREFS.renderer==='auto'&&!PREFS.rtier&&['live','lab','tv'].includes(this.kind),k:0,last:0,iv:[],cpu:[]});
+  if(Q.on){ if(st.paused||document.hidden) Q.last=0; else { if(Q.last){ Q.k++; if(Q.k>V18_PROBE.warm){ Q.iv.push(Math.min(250,t-Q.last)); Q.cpu.push(cpu); } } Q.last=t; }
+    if(Q.iv.length>=V18_PROBE.n){ Q.on=false; v18ProbeDecide(this,Q.iv,Q.cpu); } }
   return r; };
-function v18ProbeDecide(P,iv){ const s=iv.slice().sort((a,b)=>a-b); const med=s[s.length>>1]; const order=['A','B','C']; let i=order.indexOf(P.tier.name); const i0=i;
+function v18ProbeDecide(P,iv,cpu){ const s=iv.slice().sort((a,b)=>a-b); const med=s[s.length>>1]; const cs=(cpu||[]).slice().sort((a,b)=>a-b); const cmed=cs.length?cs[cs.length>>1]:0;
+  /* a steady ~30 fps cadence with a cheap painter is a frame cap (power saving, 30 Hz screen), not a slow GPU: keep the tier, do not store it */
+  if(med>28&&med<40&&cmed<9&&s[Math.floor(s.length*0.9)]<45){ P.probe={median:Math.round(med*10)/10,cpu:Math.round(cmed*10)/10,from:P.tier.name,to:P.tier.name,capped:true}; return; } const order=['A','B','C']; let i=order.indexOf(P.tier.name); const i0=i;
   if(med>30) i=2; else if(med>21) i=Math.min(2,i+1);
   P.probe={median:Math.round(med*10)/10,from:order[i0],to:order[i]};
   if(i===2&&med>42&&P.kind!=='lab'){ PREFS.rtier='C'; savePrefs(); v18Off=true; P.st._v18off=true; P.dispose(); if(typeof toast==='function') toast('Switched to classic 2D graphics for speed'); return; }
@@ -15422,7 +15431,7 @@ const V18_RP={keep:5200,after:1200,lead:900,tail:550,rate:0.5,dis:380};
 const V18_RP_STAGE=['now','ball','own','hands','fl','inNet','bulge','flash','hype','shake','v17M','v17tr','v17bs','v17sq','trail','turf','offMark','focus','netD','headBall','setPiece','placed','poss','cush','_v17cf','_v17c','conf'];
 function v18RpLive(st){ const L=typeof App!=='undefined'&&App.live; return !!(L&&L.stage===st&&st.cv&&st.cv.id==='lv-canvas'); }
 function v18RpWant(st){ if(!v18RpLive(st)||!st.alive) return false; const L=App.live; if(PREFS.replays===false) return false;
-  if(st.skip||st.so||L.skipping||L.done||st.mode==='tactical') return false; if((L.speed||1)>=4) return false; return true; }
+  if(st.skip||st.so||st.rm||L.skipping||L.done||st.mode==='tactical') return false; if((L.speed||1)>=4) return false; return true; }
 const v18RpPrim=v=>v===null||v===undefined||typeof v==='number'||typeof v==='string'||typeof v==='boolean';
 function v18RpObj(o,ref){ const s={}; for(const k in o){ const v=o[k]; if(v18RpPrim(v)) s[k]=v; else if(k==='dive'||k==='glide'||k==='ov') s[k]=ref?v:{...v}; } return s; }
 const V18_RP_DEL={};
@@ -15438,11 +15447,11 @@ Stage.prototype.goalSequence=async function(e){ this._rb=v18RpWant(this)?{buf:[]
   try{ return await _v18rpGoal.apply(this,arguments); } finally{ this._rb=null; } };
 const _v18rpUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v18rpUpd.apply(this,arguments); const R=this._rb;
-  if(R&&!R.stop&&!this.skip){ const B=R.buf; B.push(v18RpSnap(this));
+  if(R&&!R.stop&&!this.skip){ const B=R.buf; if(((R.k=(R.k||0)+1)&1)===0) B.push(v18RpSnap(this)); /* 60 Hz is plenty at 0.5x and halves the cost */
     if(R.ts==null&&this.fl&&this.fl.kind==='shot') R.ts=this.now;
     if(R.tg==null&&this.inNet&&this.ball&&this.ball.ing!=null){ R.tg=this.now; R.side=Math.max(-1,Math.min(1,(34-this.ball.y)/4)); }
     if(R.tg!=null&&this.now>R.tg+V18_RP.after) R.stop=true;
-    if(R.tg==null){ while(R.h<B.length&&B[R.h].now<this.now-V18_RP.keep) R.h++; if(R.h>240){ B.splice(0,R.h); R.h=0; } } }
+    if(R.tg==null){ while(R.h<B.length&&B[R.h].now<this.now-V18_RP.keep) R.h++; if(R.h>120){ B.splice(0,R.h); R.h=0; } } }
   return r; };
 
 /* the overlay: REPLAY bug, a skip hint, and a tap target */
@@ -15476,7 +15485,7 @@ function v18RpEnd(st,why){ const Q=st._rp; if(!Q||Q.done) return; Q.done=true; Q
   v18RpOverlay(st,false); if(Q.tapEl) Q.tapEl.removeEventListener('pointerdown',Q.tap,true);
   st._rp=null; st.acc=0; st.lastReal=performance.now()-st.t0; if(st.requestDraw) st.requestDraw(); App.v18Replays=(App.v18Replays||0)+1; Q.res(); }
 
-async function v18Replay(st){ const R=st._rb; if(!R||R.tg==null||!v18RpWant(st)) return; const B=R.buf.slice(R.h); if(B.length<20) return;
+async function v18Replay(st){ const R=st._rb; if(!R||R.tg==null||!v18RpWant(st)) return; const B=R.buf.slice(R.h); if(B.length<10) return;
   const ts=R.ts!=null?R.ts:R.tg-400; const t0=Math.max(B[0].now,ts-V18_RP.lead), t1=Math.min(B[B.length-1].now,R.tg+V18_RP.tail); if(t1-t0<300) return;
   let i=0; while(i<B.length-1&&B[i+1].now<=t0) i++;
   return new Promise(res=>{ const Q=st._rp={on:false,done:false,t:t0,t0,t1,i,R:{buf:B},res,gx:R.gx,dir:R.dir,side:R.side||0,side0:R.gx===105?0:1,fov:34};
@@ -15496,7 +15505,7 @@ Stage.prototype.loop=function(ts){ const Q=this._rp; if(!Q||!Q.on) return _v18rp
   if(this.wx&&this.updWeather&&!this.paused) this.updWeather(step/1000);
   const B=Q.R.buf; while(Q.i<B.length-1&&B[Q.i+1].now<=Q.t) Q.i++;
   if(Q.tapEl) Q.tapEl.style.pointerEvents=this.paused?'none':'';
-  const V=this._v17; if(!V||V.always||(typeof v17Vis==='undefined'||v17Vis.on(this.cv))){ const since=ts-(this._ld||0); if(since>=15.5||since<0){ this._ld=ts; v18RpDraw(this,Q,B[Q.i],false); } }
+  const V=this._v17; if(!V||V.always||(typeof v17Vis==='undefined'||v17Vis.on(this.cv))){ const since=ts-(this._ld||0); if(since>=(this.paused?480:15.5)||since<0){ this._ld=ts; v18RpDraw(this,Q,B[Q.i],false); } }
   this.raf=requestAnimationFrame(this.loop); };
 const _v18rpCancel=Stage.prototype.cancel;
 Stage.prototype.cancel=function(){ if(this._rp) v18RpEnd(this,'skip'); return _v18rpCancel.apply(this,arguments); };
