@@ -1,7 +1,7 @@
 // v18.6 skill moves: close-up frames of every move from the lab ('skills' / 'skillsmod'), paused at fixed points of each move
 // (u = .1 .3 .5 .7 .9), cropped round the carrier. Usage: node test/skills_sheet.js [scene] [2d|3d] [moves,comma,separated]
 // -> test/shots/v186/skills/<scene>-<renderer>-<move>-<u>.png
-const { chromium, DIST } = require('./_pw');
+const { chromium } = require('./_pw'); const DIST=process.env.V186DIST||require('./_pw').DIST;
 const fs=require('fs'), path=require('path');
 const scen=process.argv[2]||'skills', rend=process.argv[3]||'2d', only=(process.argv[4]||'').split(',').filter(Boolean);
 const OUT=path.join(__dirname,'shots','v186','skills'); fs.mkdirSync(OUT,{recursive:true});

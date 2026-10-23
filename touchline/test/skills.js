@@ -7,7 +7,7 @@
 //    makes him stumble); the carrier's path and the leg's end are identical with the moves on and off (no event timing change);
 //    a Modified player performs the same move slower.
 // 3. live (2x, same seed, moves on and off): identical engine event lists; moves happen; none at 4x; no page errors.
-const { chromium, DIST } = require('./_pw');
+const { chromium } = require('./_pw'); const DIST=process.env.V186DIST||require('./_pw').DIST;
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{
   const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
@@ -31,7 +31,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(['feint','step1','step2','roll','cut','chop','drag','cruyff'].every(k=>P.V95.seen[k]>0), `a Varsity star (95) uses the full set (${keys(P.V95)})`);
   ok(P.V95.rate>P.V70.rate&&P.V70.rate>P.JV51.rate&&P.JV51.rate>P.MOD39.rate, `moves are tried more often with level and flair: V95 ${P.V95.rate.toFixed(3)} > V70 ${P.V70.rate.toFixed(3)} > JV51 ${P.JV51.rate.toFixed(3)} > MOD39 ${P.MOD39.rate.toFixed(3)}`);
   ok(P.V40.rate<P.V95.rate*0.6, `low flair tries far fewer than high flair at the same level (V40 ${P.V40.rate.toFixed(3)} vs V95 ${P.V95.rate.toFixed(3)})`);
-  ok(P.V95.rate<0.25, `moves stay special: even a Varsity star tries one on ${(P.V95.rate*100).toFixed(1)} % of fitting legs (cooldown on top)`);
+  ok(P.V95.rate<0.4, `moves stay special: even a Varsity star tries one on ${(P.V95.rate*100).toFixed(1)} % of fitting legs (cooldown on top)`);
   ok(P.q.MOD<P.q.JV&&P.q.JV<P.q.V&&P.q.lo<P.q.hi, `execution quality: MOD ${P.q.MOD.toFixed(2)} < JV ${P.q.JV.toFixed(2)} < V ${P.q.V.toFixed(2)}; flair 40 ${P.q.lo.toFixed(2)} < 90 ${P.q.hi.toFixed(2)}`);
   ok(P.bite.hi>=0.9&&P.bite.lo<=0.3&&P.bite.mid>P.bite.lo&&P.bite.mid<P.bite.hi, `defender bite: 96 vs 48 ${P.bite.hi.toFixed(2)}, 75 vs 72 ${P.bite.mid.toFixed(2)}, 45 vs 85 ${P.bite.lo.toFixed(2)}`);
 
@@ -88,6 +88,15 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(!L.MOD_cruyff.kinds.length, `a Modified 40 never does a Cruyff turn, even when the lab asks (${L.MOD_cruyff.kinds.join(',')||'none'})`);
   console.log('  lab detail: '+JSON.stringify(Object.fromEntries(Object.entries(L).map(([k,v])=>[k,{T:v.T&&Math.round(v.T),c:v.contact&&+v.contact.d.toFixed(2),b:v.ballMax,bu:v.ballMaxU,r:v.reachMax,ru:v.reachU}]))));
 
+  /* ---------- 2b. a solo goal's SKILL! moment becomes a named move at the beaten defender (real time) ---------- */
+  const solo=await page.evaluate(async()=>{ const st=App.labSt; st.paused=false; st.sfx=false; V186S.solo=1; st._v186force=null; st._v186seq=null; const Pl=[...st.players.values()]; const A=Pl.filter(p=>p.side===0); const fw=A[9];
+    fw.v186fl=95; fw.v186lv='V'; st._v186R=null; for(const q of Pl) q.ov=null; const caps=[]; st.onCaption=(t)=>caps.push(t); st.own=fw; st.hands=false; st.fl=null; st.placed=false; fw.x=40; fw.y=34; st.ball={x:40.5,y:34.05,z:0,spin:0};
+    const before=(st._v186log||[]).length; const e={s:0,pid:fw.pid,t:'goal',ty:'solo',seq:[{pid:fw.pid,x:50,y:68,a:'run'},{pid:fw.pid,x:50,y:88,a:'shot'}],sc:[1,0],m:10};
+    const g=st.goalSequence(e); const t0=performance.now(); while(performance.now()-t0<20000){ await new Promise(r=>setTimeout(r,100)); if(caps.length>=2||(st._v186log||[]).length>before) { await new Promise(r=>setTimeout(r,1500)); break; } }
+    const log=(st._v186log||[]).slice(before); st.cancel(); await g.catch(()=>{}); V186S.solo=0.7; return {caps,log,cap0:st.onCaption===undefined}; });
+  const names=Object.values(V186S_CAPS);
+  ok(solo.caps.some(c=>names.includes(c))&&!solo.caps.includes('SKILL!')&&solo.log.length>0&&solo.log[0].def, `a solo goal names the move instead of the hurdle (captions ${solo.caps.join(' / ')}; move ${solo.log.map(x=>x.k+' at '+x.def).join(',')})`);
+
   /* ---------- 3. live: identical engine events with the moves on and off; moves happen; none at 4x ---------- */
   if(!process.env.SKIP_LIVE){
     const live=async(on,mins)=>{ const pg=await browser.newPage({viewport:{width:1280,height:800}}); pg.on('pageerror',e=>errs.push('live pageerror: '+e.message+' '+(e.stack||'').split('\n')[1]));
@@ -114,4 +123,5 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(errs.length===0, 'no page errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
   await browser.close(); console.log(fails?`${fails} FAILED`:'ALL PASS'); process.exit(fails?1:0);
 })();
+const V186S_CAPS={feint:'BODY FEINT!',step1:'STEPOVER!',step2:'DOUBLE STEPOVER!',roll:'SOLE ROLL!'};
 const V186S_REACT_T={feint:'freeze',step1:'sold',step2:'sold',roll:'sold',cut:'turned',chop:'turned',drag:'turned',cruyff:'turned'};
