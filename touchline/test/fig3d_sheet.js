@@ -34,6 +34,10 @@ async function lineup(b){ const p=await b.newPage({viewport:{width:1400,height:7
   await p.waitForTimeout(2500); await p.screenshot({path:OUT+'lineup-back.png'});
   await p.evaluate(()=>{ window.__extras=__mk(0,false); window.__cam={fov:9,pos:[50.5,1.9,72],look:[50.2,1.35,62.8]}; });
   await p.waitForTimeout(2500); await p.screenshot({path:OUT+'lineup-close.png'});
+  /* poses: celebrations (heart prop, open mouth), whole-body roll (dive, airplane) and pitch (fall, backflip), slide, header, strike */
+  await p.evaluate(()=>{ const st=App.labSt, n=st.now; const X=__mk(0,false).slice(0,10); const set=[{celeb:true,celebType:'heart',celebT:n-600},{celeb:true,celebType:'kneeslide',celebT:n-400},{celeb:true,celebType:'airplane',celebT:n-400,spd:0},{celeb:true,celebType:'backflip',celebT:n-560},{fallT:n-500},{slideT:n-200},{gk:true,dive:{t:n-200,dir:1}},{jumpT:n-250},{kickT:n-205,kickW:200,kickF:340,kickK:'shot'},{celeb:true,celebType:'classic',celebT:n-300}];
+    X.forEach((e,i)=>{ Object.assign(e.o,set[i],{x:47.4+i*1.15,yaw:i===6?0:Math.PI/2-0.5}); if(i===6) e.kit=X[6].kit; e.o._pose=null; }); window.__extras=X; st.ref.x=-50; st.ars[0].x=-50; window.__cam={fov:22,pos:[52.6,2.6,75],look:[52.6,0.9,62.8]}; });
+  await p.waitForTimeout(2500); await p.screenshot({path:OUT+'poses.png'});
   await p.evaluate(()=>{ window.__cam={fov:30,pos:[53,14,94],look:[53,0.5,60]}; });
   await p.waitForTimeout(2500); await p.screenshot({path:OUT+'lineup-far.png'}); console.log('lineup far', JSON.stringify(await info(p)));
   await p.close(); }
@@ -42,7 +46,7 @@ async function lab(b){ const p=await b.newPage({viewport:{width:1100,height:700}
   await p.goto(DIST+'#anim-lab'); await p.waitForTimeout(900);
   const box=await p.evaluate(()=>{ const r=document.querySelector('#anim-lab .lab-cv').getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; });
   /* 3-D: a telephoto from the gantry on the ball (the camera module is not part of this branch) */
-  await p.evaluate(()=>{ P3D_MODULES.push({name:'sheet-labcam',order:5,frame(P,st){ const b=st.ball; const fx=st.focus&&st.focus.x!=null?st.focus.x:b.x, fy=st.focus&&st.focus.y!=null?st.focus.y:b.y; P.camera.fov=22; P.camera.updateProjectionMatrix(); P.camera.position.set(fx,7.5,fy+21); P.camera.lookAt(fx,0.7,fy); }}); });
+  await p.evaluate(()=>{ P3D_MODULES.push({name:'sheet-labcam',order:5,frame(P,st){ const b=st.ball; const fx=st.focus&&st.focus.x!=null?st.focus.x:b.x, fy=st.focus&&st.focus.y!=null?st.focus.y:b.y; P.camera.fov=22; P.camera.updateProjectionMatrix(); P.camera.position.set(fx,6,fy+16); P.camera.lookAt(fx,0.8,fy); }}); });
   /* each scene runs on the 2-D path in real time, is paused at the moment, shot in 2-D, then the same paused moment is shot in 3-D */
   for(const [sc,ts] of [['run',[2600]],['keeper',[3600,4400]],['header',[3800,4600]],['tackle',[2600,3400]],['pens',[3800,4800]]]){
     for(let k=0;k<ts.length;k++){ await p.evaluate(([s,t])=>{ PREFS.renderer='2d'; PREFS.rtier=t; setTimeout(()=>labRun(s),0); },[sc,tier]); await p.waitForTimeout(ts[k]);
@@ -54,9 +58,18 @@ async function live(b){ for(const mode of ['3d','2d']){ const p=await b.newPage(
   await p.goto(DIST); await p.waitForTimeout(500);
   await p.evaluate(([m,t])=>{ PREFS.renderer=m; PREFS.rtier=t; const d=document.createElement('div'); d.style.cssText='position:fixed;inset:0;z-index:9999;background:#000'; const c=document.createElement('canvas'); c.id='lv-canvas'; c.style.cssText='width:100%;height:100%;display:block'; d.appendChild(c); document.body.appendChild(d);
     const T=demoTeams(); const looks={}; const mk=(side,form)=>({slots:FORMS[form].map(([role,x,y],i)=>{ const pid=`f${side}${i}`; looks[pid]={num:i+1,look:defaultLook(pid+'k',11),h:66+(i*5)%9}; return {pid,role,x,y}; }),off:{}});
-    const st=new Stage(c,T,{minimap:false,lookup:pid=>looks[pid]}); window.__st=st; st.setSides([mk(0,'4-3-3'),mk(1,'4-4-2')]); st.setKeeper(0,'f00'); st.setKeeper(1,'f10'); st.kickoffShape(0); st.snap();
+    if(m==='3d') P3D_MODULES.push({name:'sheet-livecam',order:5,frame(P,st){ const x=st.cam.x; P.camera.fov=28; P.camera.updateProjectionMatrix(); P.camera.position.set(x,21,68+33); P.camera.lookAt(x,0,30); }});
+    const st=new Stage(c,T,{minimap:false,lookup:pid=>looks[pid],weather:{k:'clear',night:false}}); window.__st=st; st.setSides([mk(0,'4-3-3'),mk(1,'4-4-2')]); st.setKeeper(0,'f00'); st.setKeeper(1,'f10'); st.kickoffShape(0); st.snap();
     (async()=>{ await st.tapOff(); const sc=st.pl('f09'); await st.gain(sc); })(); },[mode,tier]);
   await p.waitForTimeout(mode==='3d'?6000:3000); await p.screenshot({path:OUT+`live-${mode}.png`}); if(mode==='3d') console.log('live', JSON.stringify(await info(p)));
+  if(mode==='3d'){ /* measurement: every figure in view (22 players, referee, 2 ARs) plus 2 coaches pushed to P.extra = 27 */
+    await p.evaluate(()=>{ const st=window.__st; st.paused=true; const ck=kitFinish({shirt:'#1f2937',pc:'#1f2937',trim:'#ffffff',shorts:'#1f2937',socks:'#1f2937',num:'#ffffff',pat:'plain',sleeve:'long',collar:'polo',sockPat:'plain',shortsPat:'plain',numStyle:'solid'});
+      const co=[0,1].map(i=>({x:i?60:45,y:-1,yaw:Math.PI/2,face:1,ph:0,spd:0,seed:i,hgt:72,look:defaultLook('coach'+i,10),num:'',kickT:-9e9,trip:-9e9,jumpT:-9e9}));
+      P3D_MODULES.length; const P=st._p3d; P.mods.push({name:'sheet-coach',order:25,frame(P){ for(const o of co) P.extra.push({o,kit:ck,isRef:false}); }}); P.mods.sort((a,b)=>(a.order||50)-(b.order||50));
+      const cm=P.mods.find(m=>m.name==='sheet-livecam'); cm.frame=(P)=>{ P.camera.fov=40; P.camera.updateProjectionMatrix(); P.camera.position.set(52.5,48,68+62); P.camera.lookAt(52.5,0,30); }; });
+    await p.waitForTimeout(3000); await p.screenshot({path:OUT+'live-all27.png'}); console.log('27 figures', JSON.stringify(await info(p)), await p.evaluate(()=>window.__st._p3d._fig.byName.torso.n+' torsos'));
+    for(const t of ['B','C']){ await p.evaluate(t=>{ PREFS.rtier=t; const st=window.__st; const P=st._p3d; const cm=P.mods.find(m=>m.name==='sheet-livecam'), cc=P.mods.find(m=>m.name==='sheet-coach'); window.__keep=[cm,cc]; P.dispose(); st._p3d=undefined; P3D_MODULES.push(cm,cc); },t);
+      await p.waitForTimeout(3500); console.log('27 figures tier '+t, JSON.stringify(await info(p))); await p.evaluate(()=>{ for(const m of window.__keep){ const i=P3D_MODULES.indexOf(m); if(i>=0) P3D_MODULES.splice(i,1); } }); } }
   await p.close(); } }
 
 (async()=>{ const b=await chromium.launch(); try{

@@ -101,7 +101,7 @@ function v18FHairGeo(style,seg){ const nu=seg*2+6, nv=seg+3; const pos=[], idx=[
   return parts.length>1?v18FMerge(parts):g; }
 
 /* torso ring table (torso frame: origin at the hip joint centre, y along the spine): [y, rx, rz, cz] */
-const V18F_TORSO=[[0.115,0,0,0],[0.12,0.238,0.155,0],[0.15,0.24,0.156,0],[0.22,0.232,0.148,0],[0.34,0.238,0.15,0],[0.46,0.25,0.158,0.008],[0.56,0.258,0.165,0.012],[0.64,0.258,0.156,0.006],[0.7,0.248,0.142,0],[0.75,0.222,0.126,0],[0.79,0.165,0.104,0],[0.82,0.085,0.07,0],[0.835,0.07,0.062,0],[0.84,0,0,0]];
+const V18F_TORSO=[[0.115,0,0,0],[0.12,0.222,0.148,0],[0.15,0.224,0.149,0],[0.22,0.214,0.142,0],[0.34,0.222,0.146,0],[0.46,0.24,0.156,0.008],[0.56,0.252,0.163,0.012],[0.64,0.254,0.155,0.006],[0.7,0.246,0.142,0],[0.75,0.222,0.126,0],[0.79,0.165,0.104,0],[0.82,0.085,0.07,0],[0.835,0.07,0.062,0],[0.84,0,0,0]];
 function v18FTorsoAt(y){ const R=V18F_TORSO; for(let i=1;i<R.length;i++) if(y<=R[i][0]){ const a=R[i-1], b=R[i], t=(y-a[0])/(b[0]-a[0]||1); return [a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t,a[3]+(b[3]-a[3])*t]; } return [0.07,0.06,0]; }
 function v18FPatch(th0,th1,y0,y1,flipU,nx,ny,off){ /* a decal patch on the torso surface (superellipse 2.5), uv 0..1 across the number cell */
   const pos=[], uv=[], idx=[]; const sq=2.5;
@@ -138,7 +138,7 @@ function v18FBuildGeos(detail){ const N=detail>=2?12:detail>=1?9:7, Nt=detail>=2
   const tw=V18F_C.torso[1]/V18F_AW, tv=y=>Math.max(0,Math.min(1,(y-0.12)/0.715));
   G.torso=v18FLoft(V18F_TORSO.map(r=>[r[0],r[1],r[2],0,r[3],0,tw,tv(r[0])]),Nt,2.5);
   const shv=y=>Math.max(0,Math.min(1,(y+0.1)/0.355));
-  G.shorts=v18FLoft([[-0.1,0,0],[-0.085,0.17,0.12],[-0.05,0.225,0.15],[0.02,0.245,0.16],[0.12,0.235,0.155],[0.16,0.225,0.15],[0.2,0.218,0.146],[0.255,0.21,0.142],[0.26,0,0]].map(r=>[r[0],r[1],r[2],0,0,s0,sw,shv(r[0])]),Nt,2.4);
+  G.shorts=v18FLoft([[-0.1,0,0],[-0.085,0.16,0.115],[-0.05,0.212,0.145],[0.02,0.228,0.152],[0.12,0.22,0.148],[0.16,0.21,0.143],[0.2,0.204,0.14],[0.255,0.198,0.136],[0.26,0,0]].map(r=>[r[0],r[1],r[2],0,0,s0,sw,shv(r[0])]),Nt,2.4);
   G.neck=v18FLoft([[-0.03,0,0],[-0.01,0.064,0.062],[0.05,0.058,0.056,0,0.004],[0.15,0.054,0.054,0,0.008],[0.21,0.05,0.05,0,0.008],[0.23,0,0]],Math.max(8,N-2));
   G.head=v18FHeadGeo(hs);
   G.band=v18FLoft([[0.03,0.126,0.142],[0.072,0.122,0.138]],Nt);
@@ -158,7 +158,7 @@ function v18FBuildGeos(detail){ const N=detail>=2?12:detail>=1?9:7, Nt=detail>=2
 function v18FCanvas(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
 function v18FKitSig(kit,isRef){ return isRef?'REF':[kit.shirt,kit.pc,kit.trim,kit.shorts,kit.socks,kit.num,kit.pat,kit.sleeve,kit.sleeveC,kit.collar,kit.sockPat,kit.shortsPat,kit.numStyle].join('|'); }
 function v18FPaintKit(g,r,kit,isRef){ const y0=r*V18F_RH, H=V18F_RH; const trim=isRef?'#f5c518':(kit.trim||kit.num||'#ffffff'); const sh=kit.shirt||'#888', slc=isRef?sh:(kit.sleeveC||sh);
-  const vY=v=>y0+(1-v)*H; g.save(); g.globalCompositeOperation='source-over'; g.clearRect(0,y0,V18F_AW,H);
+  const vY=v=>y0+H*(0.96-0.92*v); g.save(); g.globalCompositeOperation='source-over'; g.clearRect(0,y0,V18F_AW,H);
   const box=(x,w)=>{ g.beginPath(); g.rect(x,y0,w,H); g.clip(); };
   /* shirt body: u around the torso (0.5 = chest centre), v hem -> collar; front a = 2-4u, back a = 4u-4 / 4u */
   const TW=V18F_C.torso[1]; g.save(); box(0,TW); g.fillStyle=sh; g.fillRect(0,y0,TW,H);
@@ -174,7 +174,7 @@ function v18FPaintKit(g,r,kit,isRef){ const y0=r*V18F_RH, H=V18F_RH; const trim=
   if(cl==='crew'||cl==='polo'){ g.fillStyle=trim; g.fillRect(0,vY(1),TW,H*0.05); if(cl==='polo'){ g.beginPath(); g.moveTo(cx-34,vY(0.96)); g.lineTo(cx-4,vY(0.86)); g.lineTo(cx-20,vY(0.83)); g.closePath(); g.moveTo(cx+34,vY(0.96)); g.lineTo(cx+4,vY(0.86)); g.lineTo(cx+20,vY(0.83)); g.closePath(); g.fill(); g.fillRect(cx-1.5,vY(0.95),3,H*0.12); g.fillStyle=mix(trim,'#000000',0.35); for(const v of [0.9,0.86]){ g.fillRect(cx-2,vY(v)-1,4,3); } } }
   else if(cl==='wrap'){ g.fillStyle=trim; g.fillRect(0,vY(1),TW,H*0.035); g.strokeStyle=trim; g.lineWidth=7; g.beginPath(); g.moveTo(cx-30,vY(0.99)); g.lineTo(cx+10,vY(0.87)); g.moveTo(cx+30,vY(0.99)); g.lineTo(cx-10,vY(0.87)); g.stroke(); }
   else { g.fillStyle=trim; g.fillRect(0,vY(1),TW,H*0.03); g.beginPath(); g.moveTo(cx-36,vY(1.005)); g.lineTo(cx+36,vY(1.005)); g.lineTo(cx,vY(0.855)); g.closePath(); g.fill();
-    g.globalCompositeOperation='destination-out'; g.beginPath(); g.moveTo(cx-26,vY(1.01)); g.lineTo(cx+26,vY(1.01)); g.lineTo(cx,vY(0.885)); g.closePath(); g.fill(); g.globalCompositeOperation='source-over'; }
+    g.globalCompositeOperation='destination-out'; g.beginPath(); g.moveTo(cx-30,vY(1.01)); g.lineTo(cx+30,vY(1.01)); g.lineTo(cx,vY(0.875)); g.closePath(); g.fill(); g.globalCompositeOperation='source-over'; }
   /* crest on his right breast (u ~ 0.57); pixels are ~1.5x wider than tall in body space, so draw it squashed */
   const ky=H/256; if(!isRef){ const ux=TW*0.428, vy=vY(0.7); g.fillStyle=trim; g.beginPath(); g.moveTo(ux-17,vy-15*ky); g.lineTo(ux+17,vy-15*ky); g.lineTo(ux+17,vy+2*ky); g.quadraticCurveTo(ux+14,vy+14*ky,ux,vy+20*ky); g.quadraticCurveTo(ux-14,vy+14*ky,ux-17,vy+2*ky); g.closePath(); g.fill();
     g.fillStyle=sh; g.beginPath(); g.moveTo(ux-11,vy-10*ky); g.lineTo(ux+11,vy-10*ky); g.lineTo(ux+11,vy+1*ky); g.quadraticCurveTo(ux+9,vy+9*ky,ux,vy+13*ky); g.quadraticCurveTo(ux-9,vy+9*ky,ux-11,vy+1*ky); g.closePath(); g.fill(); g.fillStyle=trim; g.fillRect(ux-2,vy-6*ky,4,12*ky); }
@@ -228,7 +228,7 @@ function v18FPaintFace(g,i,L,skin,hair,open){ const cs=256, x0=(i%8)*cs, y0=Math
     if(L.brows==='arched'){ g.moveTo(cx-e*-14,by+3); g.quadraticCurveTo(cx,by-7,cx+e*-1*-14,by+2); } else if(L.brows==='straight'){ g.moveTo(cx-14,by); g.lineTo(cx+14,by); } else { g.moveTo(cx+e*14,by+3); g.quadraticCurveTo(cx,by-4,cx-e*14,by+1); }
     g.stroke(); }
   /* nose shadow and nostrils (the nose itself is geometry) */
-  g.fillStyle=hexA(skinD,0.5); g.beginPath(); g.ellipse(X(0),Y(-0.27),10,4,0,0,7); g.fill();
+  g.fillStyle=hexA(skinD,0.22); g.beginPath(); g.ellipse(X(0),Y(-0.3),7,2.5,0,0,7); g.fill();
   if(L.freckles){ g.fillStyle=hexA(mix(skin,'#7a3b1e',0.5),0.6); for(let k=0;k<14;k++){ const a=k*2.4, r=8+(k*7)%18; g.beginPath(); g.arc(X(0)+Math.cos(a)*r*2.2,Y(-0.12)+Math.sin(a)*r*0.5,1.6,0,7); g.fill(); } }
   /* facial hair */
   const fh=L.facial; const fc=mix(hair,skin,0.25);
@@ -251,9 +251,11 @@ function v18FPaintFace(g,i,L,skin,hair,open){ const cs=256, x0=(i%8)*cs, y0=Math
 function v18FKitMat(P,tex,mode,U){ /* mode 'kit': atlas row per instance (aRow), 'cell': 8x8 cell per instance (aCell); both mix the instance colour under alpha */
   const m=P.track(new P.T.MeshToonMaterial({color:'#ffffff',map:tex,gradientMap:P.gradientMap}));
   m.onBeforeCompile=sh=>{ sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float '+(mode==='kit'?'aRow':'aCell')+';')
-      .replace('#include <uv_vertex>','#include <uv_vertex>\n#ifdef USE_MAP\n'+(mode==='kit'?`vMapUv.y=(aRow+0.006+vMapUv.y*0.988)/${V18F_NR}.0;`:'vMapUv=vec2(mod(aCell,8.0)+0.01+vMapUv.x*0.98, 7.0-floor(aCell/8.0)+0.01+vMapUv.y*0.98)/8.0;')+'\n#endif');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>','#ifdef USE_MAP\nvec4 kT=texture2D(map,vMapUv);\n#if defined(USE_COLOR)||defined(USE_INSTANCING_COLOR)\ndiffuseColor.rgb=diffuseColor.rgb*vColor.rgb*(1.0-kT.a)+kT.rgb;\n#else\ndiffuseColor.rgb=diffuseColor.rgb*(1.0-kT.a)+kT.rgb;\n#endif\n#endif').replace('#include <color_fragment>',''); };
+      .replace('#include <uv_vertex>','#include <uv_vertex>\n#ifdef USE_MAP\n'+(mode==='kit'?`vMapUv.y=(aRow+0.04+vMapUv.y*0.92)/${V18F_NR}.0;`:'vMapUv=vec2(mod(aCell,8.0)+0.01+vMapUv.x*0.98, 7.0-floor(aCell/8.0)+0.01+vMapUv.y*0.98)/8.0;')+'\n#endif');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>','#ifdef USE_MAP\nvec4 kT=texture2D(map,vMapUv);\n#if defined(USE_COLOR)||defined(USE_INSTANCING_COLOR)\ndiffuseColor.rgb=diffuseColor.rgb*vColor.rgb*(1.0-kT.a)+kT.rgb;\n#else\ndiffuseColor.rgb=diffuseColor.rgb*(1.0-kT.a)+kT.rgb;\n#endif\n#endif').replace('#include <color_fragment>','').replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*0.14;'); };
   m.customProgramCacheKey=()=>'v18f-'+mode; return m; }
+/* plain instance-coloured toon (skin, hair, boots' props) with the same slight lift of the shadow band */
+function v18FPlainMat(P){ const m=P.track(new P.T.MeshToonMaterial({color:'#ffffff',gradientMap:P.gradientMap})); m.onBeforeCompile=sh=>{ sh.fragmentShader=sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*0.14;'); }; m.customProgramCacheKey=()=>'v18f-plain'; return m; }
 function v18FOutlineMat(P,U){ const m=P.track(new P.T.MeshBasicMaterial({color:'#15110f',side:P.T.BackSide}));
   m.onBeforeCompile=sh=>{ sh.uniforms.uOlPx=U.uOlPx; sh.uniforms.uPxK=U.uPxK; sh.uniforms.uFar=U.uFar;
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uOlPx; uniform float uPxK; uniform float uFar;').replace('#include <project_vertex>',
@@ -278,8 +280,8 @@ function v18FigInit(P){ const T=P.T, tier=P.tier||{detail:2,shadow:0}; const F=P
   for(const t of [F.kitTex,F.faceTex,F.numTex]){ t.colorSpace=T.SRGBColorSpace; t.premultiplyAlpha=true; t.anisotropy=aniso; }
   F.mKit=v18FKitMat(P,F.kitTex,'kit',U); F.mFace=v18FKitMat(P,F.faceTex,'cell',U);
   F.mNum=P.track(new T.MeshToonMaterial({color:'#ffffff',map:F.numTex,gradientMap:P.gradientMap,alphaTest:0.5,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));
-  F.mNum.onBeforeCompile=sh=>{ sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aCell;').replace('#include <uv_vertex>','#include <uv_vertex>\n#ifdef USE_MAP\nvMapUv=vec2(mod(aCell,8.0)+0.02+vMapUv.x*0.96, 7.0-floor(aCell/8.0)+0.02+vMapUv.y*0.96)/8.0;\n#endif'); }; F.mNum.customProgramCacheKey=()=>'v18f-num';
-  F.mPlain=P.toon('#ffffff'); F.mOl=v18FOutlineMat(P,U);
+  F.mNum.onBeforeCompile=sh=>{ sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float aCell;').replace('#include <uv_vertex>','#include <uv_vertex>\n#ifdef USE_MAP\nvMapUv=vec2(mod(aCell,8.0)+0.02+vMapUv.x*0.96, 7.0-floor(aCell/8.0)+0.02+vMapUv.y*0.96)/8.0;\n#endif'); sh.fragmentShader=sh.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance+=diffuseColor.rgb*0.14;'); }; F.mNum.customProgramCacheKey=()=>'v18f-num';
+  F.mPlain=v18FPlainMat(P); F.mOl=v18FOutlineMat(P,U);
   const flagCv=v18FCanvas(64,64), fg=flagCv.getContext('2d'); for(let i=0;i<4;i++) for(let j=0;j<4;j++){ fg.fillStyle=(i+j)%2?'#f6c514':'#e8322b'; fg.fillRect(i*16,j*16,16,16); } const flagTex=P.track(new T.CanvasTexture(flagCv)); flagTex.colorSpace=T.SRGBColorSpace;
   F.mFlag=P.track(new T.MeshToonMaterial({map:flagTex,gradientMap:P.gradientMap,side:T.DoubleSide}));
   const bc=v18FCanvas(64,64), bg=bc.getContext('2d'); const gr=bg.createRadialGradient(32,32,2,32,32,31); gr.addColorStop(0,'rgba(0,0,0,0.62)'); gr.addColorStop(0.55,'rgba(0,0,0,0.38)'); gr.addColorStop(1,'rgba(0,0,0,0)'); bg.fillStyle=gr; bg.fillRect(0,0,64,64);
