@@ -2154,6 +2154,32 @@ canvas.v18-hud{position:relative;z-index:1}
 .v184-hlc{gap:8px;flex-wrap:wrap;justify-content:flex-end}
 @media (max-width:520px){ .v184-zoom button{min-width:30px;padding:4px 7px} .v184-zoom .v184-zl{min-width:3.9em;font-size:.74rem} }
 
+/* v18.5 two-angle goal replays: lower-third caption per pass and the Next angle pill (inside .v18-rp) */
+.v185-rp-lt{position:absolute;left:14px;bottom:16px;display:flex;align-items:stretch;max-width:calc(100% - 170px);height:34px;border-radius:4px;overflow:hidden;
+  background:linear-gradient(90deg,rgba(8,12,18,.9),rgba(8,12,18,.78));box-shadow:0 4px 16px rgba(0,0,0,.38);color:#fff;pointer-events:none;
+  animation:v185ltIn .42s cubic-bezier(.2,.8,.2,1) both}
+.v185-rp-lt[hidden]{display:none}
+.v185-rp-lt i{flex:none;width:6px;background:var(--rpc,#d33)}
+.v185-rp-lt b{flex:none;padding:0 12px 0 11px;font:800 15px/34px "Big Shoulders Display","Arial Narrow",sans-serif;letter-spacing:.16em;white-space:nowrap}
+.v185-rp-lt span{min-width:0;padding:0 14px 0 12px;border-left:1px solid rgba(255,255,255,.16);font:600 13px/34px "Instrument Sans",system-ui,sans-serif;color:rgba(255,255,255,.86);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v185-rp-next{position:absolute;right:14px;bottom:16px;min-height:44px;min-width:44px;padding:0 16px 0 18px;border:1px solid rgba(255,255,255,.28);border-radius:22px;
+  background:rgba(8,12,18,.72);color:#fff;font:700 13px/1 "Instrument Sans",system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.32);
+  -webkit-tap-highlight-color:transparent;animation:v185ltIn .42s .2s cubic-bezier(.2,.8,.2,1) both;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.v185-rp-next span{display:inline-block;margin-left:4px;font-size:17px;line-height:0;vertical-align:-1px}
+.v185-rp-next[hidden]{display:none}
+.v185-rp-next:hover{background:rgba(20,26,36,.86);border-color:rgba(255,255,255,.5)}
+.v185-rp-next:focus-visible{outline:2px solid var(--accent,#ffb000);outline-offset:2px}
+.v18-rp.out .v185-rp-lt,.v18-rp.out .v185-rp-next{animation:v18rpOut .24s ease-in both}
+@keyframes v185ltIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+@media (max-width:520px){.v185-rp-lt{left:10px;bottom:10px;height:28px;max-width:calc(100% - 128px)}.v185-rp-lt b{font-size:12px;line-height:28px;padding:0 9px 0 8px;letter-spacing:.12em}
+  .v185-rp-lt span{font-size:11px;line-height:28px;padding:0 10px 0 8px}.v185-rp-next{right:10px;bottom:4px;padding:0 12px 0 14px;font-size:12px}}
+.v185-rp-skip{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (max-width:520px){.v185-rp-lt[data-pen="1"]{bottom:auto;top:50px}}
+@media (prefers-reduced-motion:reduce){.v185-rp-lt,.v185-rp-next{animation:none}}
+
+/* v18.5 player plates: the canvas tags are decorative; this line names the carrier for screen readers on demand */
+.v185-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -10929,7 +10955,7 @@ function updateLive(scoreOnly){
    ${v184ViewSeg('liveView',view)}${v184ZoomCtl('liveZoom',view)}
    <button class="btn sm" data-a="liveTactics">Tactics</button>${typeof soundBtn==='function'?soundBtn():''}
    ${!M.htDone&&M.htOn?'<button class="btn sm ghost" data-a="liveSkip" data-to="ht">Skip to half</button>':''}<button class="btn sm ghost" data-a="liveSkip" data-to="ft">Skip to end</button>
-   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · + − zoom · M sound</span>`);
+   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · + − zoom · M sound · N names</span>`);
 }
 const waitMs=ms=>new Promise(r=>setTimeout(r,ms));
 /* animate one resolved minute; every visible event is announced by the stage itself */
@@ -16423,6 +16449,573 @@ Stage.prototype.poseOf=function(p,isRef){
         else { const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07,0,v184Off(this,p)); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } } } } }
   v184Limit(p,F,B0,B1,now,met);
   return P; };
+
+/* ===================== v18.5 two-angle goal replays (76) =====================
+   Presentation only: nothing here touches engine.js or the simulation. The recorded clip of 68_replay.js (snapshots of
+   every mover, the ball and the flight) plays twice in 3-D at 1x/2x:
+   1. SCORER'S VIEW: a first-person camera at the scorer's eye height. The track is built once at replay start from the
+      snapshots (his x, y, yaw, speed, leap): head position (lean and leap included, never the stride bob), a look point
+      (ahead of him toward goal, pulled down onto the ball on touches, the cross for a header, the ball itself from the
+      strike), then zero-phase smoothing (a forward-backward one-pole filter in game time), turn-rate and pitch clamps, so
+      it never lurches. The camera uses the same snapshot index as the world (Q.i), so ball, legs and lens never judder
+      against each other. His own head, hair, band and neck are collapsed in his camera (v18FigDraw wrap).
+   2. a 380 ms dissolve, then BEHIND THE GOAL: a low camera just in front of the end boards, net and posts in the
+      foreground, looking out at the scorer; the ball flies at the lens and the net bulges toward it (director pose wrap).
+   Each pass has a lower-third caption; tap anywhere still skips the whole replay; a "Next angle" pill jumps to pass 2.
+   Settings: Goal replays Off / One angle / Two angles (PREFS.replays stays the master switch; PREFS.rpAngles 'one' is
+   exactly the v18 replay). 2-D, tactical, 4x/8x, shootouts and reduced motion are unchanged (68 decides).
+   Hooks (wraps and global reassignments only; 66 and 68 are not edited): goalSequence (remembers the event), v18Replay
+   (augments st._rp), v18RpEnd (pass 1 end -> pass 2), Stage.loop (Next angle, 2x rate), v18RpOverlay (caption + pill),
+   the director's pose ('replay' + Q.cam 'goal'), a P3D module 'rpcam' (27, after director and polish, before the figures
+   so culling uses the first-person camera), v18FigDraw (collapses the scorer's head cluster, and skips anyone else with
+   the lens inside his body), v18RpDraw (no minimap over the two-angle replay). Debug: P._rp2.last. */
+DEFAULT_PREFS.rpAngles='two'; if(PREFS.rpAngles!=='one'&&PREFS.rpAngles!=='two') PREFS.rpAngles='two';
+
+const V185_RP={L1:800,Lrun:1900,Lpen:1500,L2x:800,tail1:300,lead2:350,tail2:550,rate2x:0.6,
+  fwd:0.07,dn:0.02,tauA:0.18,tauB:0.06,tauE:0.10,yawR:150,yawH:280,pitR:120,pMin:-35,pMax:20,wRun:0.6,frame:22,look:260,lens:0.55,fov:52,fovMax:72,hFov:62,fovLong:38,near:0.12,hide:0.34,
+  gEye:3.3,gH:1.45,gFov:40,clear:0.42,hMax:92,gHMax:100};
+const V185_D2R=Math.PI/180;
+const V185_HID=[0,1,2,4,5,6,8,9,10];
+
+/* the goal event, kept while the goal sequence (and so the replay before the restart) runs */
+const _v185Goal=Stage.prototype.goalSequence;
+Stage.prototype.goalSequence=async function(e){ this._v185e=e?{pid:e.pid,ty:e.ty,s:e.s,seq:e.seq}:null;
+  try{ return await _v185Goal.apply(this,arguments); } finally{ this._v185e=null; } };
+
+function v185Idx(B,t){ let i=0; while(i<B.length-1&&B[i+1].now<=t) i++; return i; }
+function v185Fields(S,sc){ const m=S.m; for(let k=0;k<m.length;k++) if(m[k][0]===sc) return m[k][1]; return null; }
+const v185Cl=(v,a,b)=>v<a?a:v>b?b:v;
+function v185Name(sc){ try{ const p=typeof Px==='function'?Px(sc.pid):null; if(p&&(p.ln||p.fn)) return (p.fn?String(p.fn).charAt(0)+'. ':'')+(p.ln||''); }catch(e){} return sc&&sc.num!=null&&sc.num!==''?'No. '+sc.num:''; }
+
+/* ---------- the first-person track (once per replay, O(n)) ---------- */
+function v185Track(st,Q,B,sc,meta){ const n=B.length; if(n<6) return null; const C=V185_RP, R=typeof V18_BALL_R==='number'?V18_BALL_R:0.18;
+  const JD=Math.max(260,st.D(560)), ND=Math.max(130,st.D(280)), sm=Math.max(1,st.spdMul||1), gx=Q.gx, ts=Q.ts, tg=Q.tg;
+  const hx=new Float32Array(n), hy=new Float32Array(n), hz=new Float32Array(n), yw=new Float32Array(n), pt=new Float32Array(n), tau=new Float32Array(n);
+  const ex=new Float32Array(n), ey=new Float32Array(n), ez=new Float32Array(n), fv=new Float32Array(n), te=new Float32Array(n), yr=new Float32Array(n);
+  let f0=null, lastY=null, lastP=0, found=0;
+  for(let i=0;i<n;i++){ const S=B[i]; let f=v185Fields(S,sc); if(f) found++; else f=f0; if(!f){ continue; } f0=f;
+    const s=0.92*(f.hgt||sc.hgt||70)/70; const yaw=f.yaw==null?((f.face||1)>0?0:Math.PI):f.yaw; const cy=Math.cos(yaw), sy=Math.sin(yaw);
+    const jt=S.now-(f.jumpT!=null?f.jumpT:-9e9); const jump=jt>=0&&jt<JD; const lift=jump?Math.sin(jt/JD*Math.PI)*0.72:0;
+    /* the body lean poseOf gives him: run (gait speed and acceleration), strike, leap, nod */
+    const real=(f.spd||0)/sm, vx=f.vx||0, vy=f.vy||0; let mf=1, ml=0; if(Math.hypot(vx,vy)>0.05){ const ps=Math.atan2(vy,vx)-yaw; mf=Math.cos(ps); ml=Math.sin(ps); }
+    const back=mf<-0.4, shuf=!back&&Math.abs(ml)>0.72;
+    let lean=real>0.5?(back?-0.05:shuf?0.05:0.02+0.016*Math.min(9,f.gv!=null?f.gv:real))+v185Cl((f.acS||0)*0.012,-0.12,0.12):(f.hipsHands?-0.03:0);
+    const kk=f.kickK, kt=S.now-(f.kickT!=null?f.kickT:-9e9), kW=f.kickW||0, kF=f.kickF||260;
+    if(kk&&kk!=='head'&&kk!=='throw'&&kt>=0&&kt<kW+kF){ const big=kk==='shot'||kk==='loft'; if(kt<kW){ const q=kt/kW; lean=-0.06*q*q*(3-2*q)*(big?1:0.5); } else lean=(big?0.12:0.06)*Math.sin(Math.min(1,(kt-kW)/kF*1.6)*Math.PI); }
+    if(jump){ const u=jt/JD; lean=0.3*Math.sin(v185Cl((u-0.35)/0.45,0,1)*Math.PI)-0.08*Math.sin(u*Math.PI); }
+    /* the nod carries the head forward through the ball (the eye goes with it; the gaze does not dip) */
+    const nt=S.now-(f.nodT!=null?f.nodT:-9e9); let tilt=jump?0.3*Math.sin(v185Cl((jt/JD-0.4)/0.4,0,1)*Math.PI):0; if(nt>=0&&nt<ND){ const w=Math.sin(nt/ND*Math.PI); lean+=0.22*w; tilt+=0.55*w; } te[i]=jump||(nt>=0&&nt<ND)?0.05:C.tauE;
+    /* the running roll into a turn (poseOf: turnLean about the hips' pivot) moves the head sideways */
+    const kick=(f.kickT!=null&&S.now-f.kickT>=0&&S.now-f.kickT<(f.kickW||0)+(f.kickF||260)); const ra=real>0.5&&!jump&&!kick?v185Cl(f.turnLean||0,-0.13,0.13)*((f.vy||0)>=0?1:-1):0;
+    const fw=s*(0.02+tilt*0.05+1.03*Math.sin(lean)), lw=-s*1.63*Math.sin(ra); hx[i]=f.x+cy*fw-sy*lw; hy[i]=s*(0.8+1.03*Math.cos(lean)+lift); hz[i]=f.y+sy*fw+cy*lw;
+    /* where he looks */
+    const b=S.s.ball, fl=S.s.fl; const bx=b.x, bz=b.y, bh=Math.max(0,b.z||0)+R; let tx,ty,tz, framed=0;
+    const dB=Math.hypot(bx-hx[i],bz-hz[i]);
+    if(S.now>=tg&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; tau[i]=C.tauB; continue; }
+    if(S.now>=ts){ tx=bx; ty=bh; tz=bz; const k=v185Cl(1-(S.now-ts)/260,0,1); framed=k; tau[i]=C.tauB; }
+    else { const cross=!!(fl&&fl.home===sc&&fl.kind!=='shot'&&(meta.head||(fl.h||0)>1.5));
+      /* head up toward goal while he runs, a glance down onto the ball on touches, eyes on the ball for the strike */
+      const wS=v185Cl(1-(ts-S.now)/C.look,0,1); let w=cross?1:Math.max(C.wRun*v185Cl((4.5-dB)/2.5,0,1),wS);
+      /* a penalty run-up: eyes on the goal mouth and the keeper, the ball on the spot framed low in the picture */
+      const pen=meta.ty==='pen', pull=pen?1:0.4; if(pen) w=Math.max(w,v185Cl((5-dB)/2,0,1));
+      let ax=hx[i]+cy*14, ay=0.25, az=hz[i]+sy*14; if(pen||Math.abs(f.x-gx)<32){ ax+=(gx-ax)*pull; ay+=(0.9-ay)*pull; az+=(34-az)*pull; }
+      /* blend the directions (not the points), so a ball at his feet turns the head, and the pitch is framed below */
+      const yA=Math.atan2(az-hz[i],ax-hx[i]), yB=Math.atan2(bz-hz[i],bx-hx[i]); let dy=dB<0.9?0:yB-yA; while(dy>Math.PI) dy-=2*Math.PI; while(dy<-Math.PI) dy+=2*Math.PI;
+      const pA=Math.atan2(ay-hy[i],Math.hypot(ax-hx[i],az-hz[i])), pB=Math.atan2(bh-hy[i],Math.max(0.05,dB));
+      /* a ball below him is framed low in the picture (not centred), and the head never drops below -20 degrees on the run */
+      if(dB<1.2&&bh>hy[i]-0.7&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; tau[i]=0.12; continue; } /* the cross arriving at his face: hold, never spin on a point at the lens */
+      let y=yA+dy*w; if(cross&&wS>0){ let dg=Math.atan2(34-hz[i],gx-hx[i])-y; while(dg>Math.PI) dg-=2*Math.PI; while(dg<-Math.PI) dg+=2*Math.PI; y+=dg*0.75*wS; } /* a header: the head starts to turn toward goal as the cross arrives */
+      const pB2=cross||pB>-8*V185_D2R?pB:Math.max((-20-15*wS)*V185_D2R,pB+C.frame*V185_D2R); const p=pA+(pB2-pA)*w;
+      if(lastY!=null){ let d=y-lastY; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; yw[i]=lastY+d; } else yw[i]=y; pt[i]=p; lastY=yw[i]; lastP=p; tau[i]=cross?0.12:C.tauA; continue; }
+    /* just off his boot or head the ball is too close to give a direction: aim where the shot is going */
+    const to=fl&&fl.to&&dB<1.5?fl.to:null; if(!to&&dB<1.5&&lastY!=null){ yw[i]=lastY; pt[i]=lastP; continue; } const y=to?Math.atan2(to.y-hz[i],to.x-hx[i]):Math.atan2(tz-hz[i],tx-hx[i]);
+    let p=to&&bh>hy[i]-0.6?Math.atan2((to.z||0)+R-hy[i],Math.max(0.05,Math.hypot(to.x-hx[i],to.y-hz[i]))):Math.atan2(ty-hy[i],Math.max(0.05,Math.hypot(tx-hx[i],tz-hz[i])));
+    if(framed>0&&p<-10*V185_D2R) p+=Math.min(C.frame*V185_D2R,(-p-10*V185_D2R)*0.6)*framed;
+    if(lastY!=null){ let d=y-lastY; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI; yw[i]=lastY+d; } else yw[i]=y; pt[i]=p; lastY=yw[i]; lastP=p; }
+  if(found<n*0.6) return null;
+  /* zero-phase smoothing in game time: forward, then backward one-pole */
+  const zp=(a,tf)=>{ for(let i=1;i<n;i++){ const dt=Math.max(1,B[i].now-B[i-1].now)/1000, k=1-Math.exp(-dt/tf(i)); a[i]=a[i-1]+(a[i]-a[i-1])*k; }
+    for(let i=n-2;i>=0;i--){ const dt=Math.max(1,B[i+1].now-B[i].now)/1000, k=1-Math.exp(-dt/tf(i)); a[i]=a[i+1]+(a[i]-a[i+1])*k; } };
+  const tA=i=>tau[i]||C.tauA, tE=i=>te[i]||C.tauE;
+  zp(yw,tA); zp(pt,tA); zp(hx,tE); zp(hy,tE); zp(hz,tE);
+  /* turn-rate and pitch clamps (game time) */
+  for(let i=0;i<n;i++) pt[i]=v185Cl(pt[i],C.pMin*V185_D2R,C.pMax*V185_D2R);
+  /* the head whips round to follow the ball to goal (a header, a first-time finish): a faster turn just around the contact */
+  for(let i=0;i<n;i++) yr[i]=(B[i].now>ts-200&&B[i].now<ts+450?C.yawH:C.yawR)*V185_D2R;
+  const rl=(a,r)=>{ for(let i=1;i<n;i++){ const m=(r||yr[i])*Math.max(1,B[i].now-B[i-1].now)/1000; a[i]=a[i-1]+v185Cl(a[i]-a[i-1],-m,m); }
+    for(let i=n-2;i>=0;i--){ const m=(r||yr[i])*Math.max(1,B[i+1].now-B[i].now)/1000; a[i]=a[i+1]+v185Cl(a[i]-a[i+1],-m,m); } };
+  rl(yw,0); rl(pt,C.pitR*V185_D2R);
+  /* the eye: head centre, a little forward along the view heading and down; stepped out of anyone else's body */
+  let shot=null; for(let i=0;i<n;i++){ const S=B[i]; if(S.now>=ts){ shot=S; break; } }
+  const sd=shot?Math.abs(shot.s.ball.x-gx):0, long=sd>20;
+  for(let i=0;i<n;i++){ const c=Math.cos(yw[i]), s=Math.sin(yw[i]); let X=hx[i]+c*C.fwd, Z=hz[i]+s*C.fwd; const Y=hy[i]-C.dn;
+    for(const [o,f] of B[i].m){ if(o===sc||f.off||!isFinite(f.x)) continue; const dx=X-f.x, dz=Z-f.y, d=Math.hypot(dx,dz); if(d<C.clear&&Y<1.95*(f.hgt||70)/70){
+      /* push straight away from his axis, but never more than 0.22 m from the scorer's head */
+      const k=(C.clear-d)/(d||1e-3); let nx=X+dx*k, nz=Z+dz*k; const ox=nx-hx[i], oz=nz-hz[i], ol=Math.hypot(ox,oz); if(ol>0.22){ nx=hx[i]+ox*0.22/ol; nz=hz[i]+oz*0.22/ol; } X=nx; Z=nz; } }
+    ex[i]=X; ey[i]=Y; ez[i]=Z; fv[i]=long&&B[i].now>ts?C.fov+(C.fovLong-C.fov)*v185Cl((B[i].now-ts)/350,0,1):C.fov; }
+  /* the eye must not jump: smooth the clearance pushes a little (zero phase, short) */
+  zp(ex,()=>0.05); zp(ez,()=>0.05);
+  /* occluders: anyone (not a keeper) standing between his eye and the ball within 4 m, or filling the frame within 2 m
+     straight ahead, is not drawn in his camera; the set is padded by 220 ms either side so nobody flickers */
+  const hid=new Array(n).fill(null);
+  for(let i=0;i<n;i++){ const S=B[i], b=S.s.ball; const X=ex[i], Z=ez[i], c=Math.cos(yw[i]), s=Math.sin(yw[i]); const bdx=b.x-X, bdz=b.y-Z, bl=Math.hypot(bdx,bdz);
+    for(const [o,f] of S.m){ if(o===sc||f.off||o.gk||f.gk||!isFinite(f.x)) continue; const ox=f.x-X, oz=f.y-Z, d=Math.hypot(ox,oz); if(d>4) continue;
+      const a=ox*c+oz*s; if(a<0.15) continue; let h=false;
+      if(bl>0.5){ const t=(ox*bdx+oz*bdz)/bl; if(t>0.15&&t<bl-0.25&&Math.abs(ox*bdz-oz*bdx)/bl<0.5) h=true; }
+      if(!h&&d<2.1&&a/d>Math.cos(24*V185_D2R)) h=true;
+      if(h){ for(let j=i;j>=0&&S.now-B[j].now<=220;j--) (hid[j]||(hid[j]=new Set())).add(o); for(let j=i+1;j<n&&B[j].now-S.now<=220;j++) (hid[j]||(hid[j]=new Set())).add(o); } } }
+  return {n,ex,ey,ez,yw,pt,fv,hx,hy,hz,long,hid}; }
+
+/* ---------- replay start: augment st._rp right after 68 creates it ---------- */
+const _v185Replay=v18Replay;
+v18Replay=function(st){ const R=st&&st._rb; const pr=_v185Replay.apply(this,arguments); const Q=st&&st._rp;
+  if(Q&&!Q.done&&!Q._v185&&R){ Q._v185=true; try{ v185Setup(st,Q,R); }catch(e){ console.warn('v18.5 replay',e); Q.two=false; Q.cam='goal'; Q.pass=1; v185Caption(st,Q); } }
+  return pr; };
+function v185Setup(st,Q,R){ Q.two=false; Q.pass=1; Q.cam='goal'; Q.rate=V18_RP.rate; const B=Q.R.buf; const e=st._v185e;
+  Q.tg=R.tg; Q.ts=R.ts!=null?R.ts:R.tg-400;
+  /* the pill: Next angle steals its own taps from the overlay's skip handler (which captures on the overlay) */
+  if(Q.tapEl&&Q.tap){ const t0=Q.tap; Q.tapEl.removeEventListener('pointerdown',t0,true);
+    Q.tap=ev=>{ const b=ev.target&&ev.target.closest&&ev.target.closest('.v185-rp-next'); if(b){ ev.preventDefault(); ev.stopPropagation(); if(!st.paused&&Q.two&&Q.pass===1) Q.nextTap=true; return; } t0(ev); };
+    Q.tapEl.addEventListener('pointerdown',Q.tap,true); }
+  const P=st._p3d, gl=!!(P&&!P.dead); const sc=e?st.pl(e.pid):null; Q.sc=sc||null;
+  if(!gl||PREFS.rpAngles==='one'||!e||!sc||sc.off||sc.side!==e.s){ v185Caption(st,Q); return; }
+  st._v185ty=e.ty||'open'; const sp=(App.live&&App.live.speed)||1, b0=B[0].now, bE=B[B.length-1].now, ts=Q.ts, tg=Q.tg, ty=e.ty||'open';
+  /* the first shot snapshot, and the cross that reached him (the run of snapshots whose flight is homing on him) */
+  let k=B.findIndex(S=>S.now>=ts); if(k<0) k=B.length-1;
+  /* the cross: the last flight homing on him before the shot (a short gap while he takes it is allowed), back to its start */
+  const isX=S=>!!(S.s.fl&&S.s.fl.home===sc&&S.s.fl.kind!=='shot'); let j=k; while(j>0&&!isX(B[j-1])&&B[k].now-B[j-1].now<700) j--; if(j>0&&isX(B[j-1])){ while(j>0&&isX(B[j-1])) j--; } else j=k;
+  const fk=B[k].s.fl, head=!!(fk&&(fk.head||fk.nod)); const crossT=j<k?B[j].now:null;
+  let L=V185_RP.L1; if(ty==='break'||ty==='solo') L=V185_RP.Lrun; else if(ty==='pen') L=V185_RP.Lpen;
+  let a0=ts-L; if(crossT!=null&&(head||ty==='header'||ty==='corner')) a0=Math.min(a0,crossT-300);
+  if(sp>=2&&ty!=='pen') a0=Math.max(a0,Math.min(ts-V185_RP.L2x,crossT!=null?crossT-200:ts));
+  a0=Math.max(b0,a0); const a1=Math.min(bE,tg+V185_RP.tail1); const c0=Math.max(b0,ts-V185_RP.lead2), c1=Math.min(bE,tg+V185_RP.tail2);
+  if(a1-a0<300||c1-c0<300){ v185Caption(st,Q); return; }
+  const trk=v185Track(st,Q,B,sc,{head:head||ty==='header',ty}); if(!trk){ v185Caption(st,Q); return; }
+  Q.two=true; Q.cam='eyes'; Q.head=head; Q.crossT=crossT; Q.win=[[a0,a1],[c0,c1]]; Q.trk=trk; Q.t=Q.t0=a0; Q.t1=a1; Q.i=v185Idx(B,a0); Q.rate=sp>=2?V185_RP.rate2x:V18_RP.rate; Q.cams=['eyes'];
+  if(gl&&P.dir) P.dir.snap=true; v185Caption(st,Q); }
+
+/* the two-angle replay is clean picture: no minimap over the scorer's view or the goal-mouth shot (the one-angle replay keeps it) */
+const _v185Draw=v18RpDraw;
+v18RpDraw=function(st,Q){ if(!(Q&&Q.two)) return _v185Draw.apply(this,arguments); const mm=st.minimap; st.minimap=false; try{ return _v185Draw.apply(this,arguments); } finally{ st.minimap=mm; } };
+
+/* ---------- pass 2 ---------- */
+function v185Pass2(st,Q){ const B=Q.R.buf, S=B[Q.i];
+  if(S&&st.cv.isConnected){ try{ v18RpDraw(st,Q,S,true); }catch(e){} }
+  Q.pass=2; Q.cam='goal'; Q.nextTap=false; Q.t=Q.t0=Q.win[1][0]; Q.t1=Q.win[1][1]; Q.i=v185Idx(B,Q.t); if(Q.cams) Q.cams.push('goal');
+  const P=st._p3d; if(P&&!P.dead&&P.dir) P.dir.snap=true; v185Caption(st,Q); if(st.requestDraw) st.requestDraw(); }
+const _v185End=v18RpEnd;
+v18RpEnd=function(st,why){ const Q=st&&st._rp;
+  if(Q&&!Q.done&&why==='end'&&Q.two&&Q.pass===1&&st.alive&&!st.skip&&st.cv.isConnected&&st._p3d&&!st._p3d.dead&&v18RpWant(st)){ v185Pass2(st,Q); return; }
+  return _v185End.apply(this,arguments); };
+const _v185Loop=Stage.prototype.loop;
+Stage.prototype.loop=function(ts){ const Q=this._rp;
+  if(Q&&Q.on&&Q.two&&!Q.done){
+    if(Q.nextTap){ Q.nextTap=false; if(Q.pass===1&&this.alive&&!this.skip&&this.cv.isConnected&&this._p3d&&!this._p3d.dead&&v18RpWant(this)) v185Pass2(this,Q); }
+    /* 2x: a slightly faster replay (68 advances Q.t at its own rate; the difference is added here) */
+    if(Q.rate&&Q.rate!==V18_RP.rate&&!this.paused){ const real=ts-this.t0; const step=Math.min(50,Math.max(0,real-this.lastReal)); Q.t+=step*(Q.rate-V18_RP.rate); } }
+  return _v185Loop.apply(this,arguments); };
+
+/* ---------- overlay: lower-third caption and the Next angle pill ---------- */
+const _v185Ov=v18RpOverlay;
+v18RpOverlay=function(st,on){ const el=_v185Ov.apply(this,arguments); if(!on||!el) return el;
+  const lt=document.createElement('div'); lt.className='v185-rp-lt'; lt.setAttribute('aria-live','polite'); lt.hidden=true; el.appendChild(lt);
+  const nx=document.createElement('button'); nx.type='button'; nx.className='v185-rp-next'; nx.hidden=true; nx.setAttribute('aria-label','Next replay angle'); nx.innerHTML='Next angle <span aria-hidden="true">›</span>';
+  nx.addEventListener('click',ev=>{ ev.stopPropagation(); if(ev.detail===0){ const Q=st._rp; if(Q&&Q.two&&Q.pass===1&&!st.paused) Q.nextTap=true; } });
+  /* Space and Enter press the pill (the global Space shortcut would pause the match instead) */
+  nx.addEventListener('keydown',ev=>{ if(ev.key!==' '&&ev.key!=='Enter') return; const Q=st._rp; if(st.paused) return; ev.preventDefault(); ev.stopPropagation(); if(Q&&Q.two&&Q.pass===1) Q.nextTap=true; });
+  /* the overlay is a group (a role=button parent would flatten the pill for assistive tech); skipping stays a tap anywhere,
+     and a visually hidden Skip replay button gives the keyboard the same */
+  el.setAttribute('role','group'); el.setAttribute('aria-label','Goal replay');
+  const sk=document.createElement('button'); sk.type='button'; sk.className='v185-rp-skip'; sk.textContent='Skip replay';
+  sk.addEventListener('click',ev=>{ ev.stopPropagation(); const Q=st._rp; if(Q&&!Q.done&&!st.paused) Q.skipTap=true; });
+  sk.addEventListener('keydown',ev=>{ if(ev.key===' '||ev.key==='Enter'){ ev.preventDefault(); ev.stopPropagation(); const Q=st._rp; if(Q&&!Q.done&&!st.paused) Q.skipTap=true; } });
+  el.appendChild(sk); el.appendChild(nx); return el; };
+function v185Caption(st,Q){ const host=st.cv&&st.cv.parentElement; const el=host&&host.querySelector(':scope > .v18-rp'); if(!el) return;
+  const lt=el.querySelector('.v185-rp-lt'), nx=el.querySelector('.v185-rp-next'); if(!lt) return;
+  if(!Q.two){ lt.hidden=true; lt.innerHTML=''; if(nx) nx.hidden=true; return; }
+  const T=Q.side0===1?st.a:st.h; const c=(T&&T.c1)||'#d33'; const nm=Q.pass===1&&Q.sc?v185Name(Q.sc):'';
+  const t=Q.pass===1?"SCORER'S VIEW":'BEHIND THE GOAL';
+  const nl=lt.cloneNode(false); nl.hidden=false; nl.style.setProperty('--rpc',c); nl.dataset.pass=String(Q.pass); if(Q.pass===1&&st._v185ty==='pen') nl.dataset.pen='1';
+  nl.innerHTML=`<i></i><b>${t}</b>${nm?`<span>${esc(nm)}</span>`:''}`; lt.replaceWith(nl);
+  if(nx) nx.hidden=Q.pass!==1; }
+
+/* ---------- 3-D: the behind-the-goal pose (director) ---------- */
+(function(){ const D=P3D_MODULES.find(m=>m.name==='director'); if(!D) return; const _pose=D.pose;
+  D.pose=function(P,st,mode,eye,tgt){ const Q=st._rp; if(mode==='replay'&&Q&&Q.two&&Q.cam==='goal') return v185GoalPose(P,st,Q,eye,tgt); return _pose.apply(this,arguments); }; })();
+function v185GoalPose(P,st,Q,eye,tgt){ const b=st.ball, R=typeof V18_BALL_R==='number'?V18_BALL_R:0.18, C=V185_RP; const gx=Q.gx, dir=Q.dir, sc=Q.sc;
+  const by=isFinite(b.y)?b.y:34; eye.set(gx+dir*C.gEye,C.gH,34+v185Cl((by-34)*0.25,-1.4,1.4));
+  if(st.now<Q.ts&&sc&&isFinite(sc.x)){ tgt.set(sc.x+(b.x-sc.x)*0.3,1.1+(Math.max(0,b.z||0)+R-1.1)*0.3,sc.y+(by-sc.y)*0.3); }
+  else tgt.set(b.x,Math.max(0,b.z||0)+R,by);
+  /* the lens: opened up on tall frames so the goal mouth still reads */
+  const asp=Math.max(0.4,P.camera.aspect||1.6); let f=C.gFov; if(asp<1.3) f=Math.min(64,2*Math.atan(Math.tan(C.gFov*V185_D2R/2)*1.3/asp)/V185_D2R); else f=Math.min(f,2*Math.atan(Math.tan(C.gHMax*V185_D2R/2)/asp)/V185_D2R); return f; }
+
+/* ---------- 3-D: the first-person camera (module order 27) ---------- */
+P3D_MODULES.push({name:'rpcam',order:27,
+  init(P){ P._rp2={last:null,nearSet:false,hid:0,head:null,v:new P.T.Vector3(),t:new P.T.Vector3(),fw:new P.T.Vector3()}; P._rp2eye=null; },
+  frame(P,st){ const R=P._rp2; if(!R) return; const Q=st._rp, cam=P.camera, C=V185_RP;
+    if(Q&&Q.on&&Q.two&&Q.cam==='eyes'&&Q.trk){ const K=Q.trk, i=Math.max(0,Math.min(K.n-1,Q.i)); const y=K.yw[i], p=K.pt[i];
+      cam.position.set(K.ex[i],K.ey[i],K.ez[i]); cam.up.set(0,1,0); const cp=Math.cos(p); R.t.set(K.ex[i]+Math.cos(y)*cp*10,K.ey[i]+Math.sin(p)*10,K.ez[i]+Math.sin(y)*cp*10); cam.lookAt(R.t);
+      /* the lens: 52 degrees vertical; on tall frames solve for ~62 horizontal, capped */
+      const asp=Math.max(0.3,cam.aspect||1.6); let vf=K.fv[i]; if(asp<1){ vf=Math.min(C.fovMax,2*Math.atan(Math.tan(C.hFov*V185_D2R/2)/asp)/V185_D2R); if(K.long&&K.fv[i]<C.fov) vf*=K.fv[i]/C.fov; }
+      /* very wide strips (a short stage): the horizontal angle stays under ~92 degrees, no fish-eye */
+      else vf=Math.min(vf,2*Math.atan(Math.tan(C.hMax*V185_D2R/2)/asp)/V185_D2R);
+      if(Math.abs(cam.fov-vf)>1e-4||cam.near!==C.near){ cam.fov=vf; cam.near=C.near; cam.updateProjectionMatrix(); } R.nearSet=true; P._rp2eye=Q.sc; }
+    else { P._rp2eye=null; if(R.nearSet){ cam.near=0.3; cam.updateProjectionMatrix(); R.nearSet=false; } }
+    if(Q&&Q.on&&window.V185_RPDBG){ cam.updateMatrixWorld(); const b=st.ball, Rb=typeof V18_BALL_R==='number'?V18_BALL_R:0.18; R.v.set(b.x,Math.max(0,b.z||0)+Rb,b.y).project(cam);
+      const fw=R.fw; cam.getWorldDirection(fw);
+      R.last={cam:Q.two?Q.cam:'goal',pass:Q.pass||1,i:Q.i,now:st.now,eye:[cam.position.x,cam.position.y,cam.position.z],fwd:[fw.x,fw.y,fw.z],near:cam.near,fov:cam.fov,ballNdc:[R.v.x,R.v.y,R.v.z],head:null,hid:0}; }
+    else R.last=null; },
+  dispose(P){ P._rp2=null; P._rp2eye=null; } });
+
+/* ---------- the scorer's own head is not in his camera ---------- */
+const _v185Fig=v18FigDraw;
+v18FigDraw=function(P,st,p,kit,isRef){ const sc=P&&P._rp2eye; if(!sc||!P._fig) return _v185Fig.apply(this,arguments);
+  /* nobody else is drawn with the lens inside or against his body */
+  if(p!==sc){ const c=P.camera.position; if(p&&Math.hypot(p.x-c.x,p.y-c.z)<V185_RP.lens) return false;
+    const Q=st&&st._rp, H=Q&&Q.trk&&Q.trk.hid?Q.trk.hid[Math.max(0,Math.min(Q.trk.n-1,Q.i))]:null; if(H&&H.has(p)) return false; return _v185Fig.apply(this,arguments); }
+  const F=P._fig, parts=F.parts; const n0=F._v185n&&F._v185n.length===parts.length?F._v185n:(F._v185n=new Int32Array(parts.length)); for(let i=0;i<parts.length;i++) n0[i]=parts[i].n;
+  const r=_v185Fig.apply(this,arguments); const R=P._rp2; if(!r){ if(R&&R.last) R.last.hid=-1; return r; }
+  const W=F.s, hx=W[42], hy=W[43], hz=W[44], nx=W[39], ny=W[40], nz=W[41], rr=V185_RP.hide*V185_RP.hide; let k=0;
+  for(let i=0;i<parts.length;i++){ const pt=parts[i], im=pt.im; for(let j=n0[i];j<pt.n;j++){ const o=j*16; const x=im[o+12], y=im[o+13], z=im[o+14];
+    if((x-hx)*(x-hx)+(y-hy)*(y-hy)+(z-hz)*(z-hz)<rr||(x-nx)*(x-nx)+(y-ny)*(y-ny)+(z-nz)*(z-nz)<rr){ for(let q=0;q<9;q++) im[o+V185_HID[q]]=0; k++; } } }
+  if(R&&R.last){ R.last.hid=k; R.last.head=[hx,hy,hz]; } return r; };
+
+/* ---------- Settings > Match graphics: Goal replays Off / One angle / Two angles ---------- */
+CH.rpMode=el=>{ const v=el.value; if(v==='off') PREFS.replays=false; else { PREFS.replays=true; PREFS.rpAngles=v==='one'?'one':'two'; } savePrefs(); };
+const _v185Settings=VIEWS.settings;
+VIEWS.settings=function(){ const h=_v185Settings.apply(this,arguments); const i=h.indexOf('<label class="toggle v18-rpset">'); const j=i<0?-1:h.indexOf('</label>',i); if(j<0) return h;
+  const cur=PREFS.replays===false?'off':PREFS.rpAngles==='one'?'one':'two';
+  const sel=`<div class="field v185-rpset"><label class="lab" for="set-replays">Goal replays</label><select id="set-replays" data-c="rpMode" data-k="replays">${[['off','Off'],['one','One angle'],['two','Two angles']].map(([v,l])=>`<option value="${v}" ${v===cur?'selected':''}>${l}</option>`).join('')}</select><span class="tiny muted">After a goal in live matches (3-D, 1x and 2x). Two angles: the scorer's view, then behind the goal.</span></div>`;
+  return h.slice(0,i)+sel+h.slice(j+8); };
+
+/* ===================== v18.5 Player plates (77) =====================
+   Presentation only: reads the Stage after it has drawn and never writes a simulation field (all state is on st._pl).
+   Up to two broadcast tags on the HUD canvas: one above the ball carrier (number block in the shirt colour, short name on
+   dark glass, team-colour underline, ball glyph, pointer to the head) and a smaller one above the opponent engaging him.
+   - Hook: Stage.prototype.draw is wrapped, so the tags are painted after the broadcast (2-D or 3-D), the minimap, the
+     weather and the goal flash, in the same task as drawLerp (they never lag the figures). Replay frames (68's
+     apply-draw-restore, st._rp.on) draw nothing and update nothing.
+   - Anchors: 3-D projects the head top through the painter's camera after P.render() (the figures module's head centre is
+     captured by a wrapper round v18FigDraw, else a standing-height estimate); 2-D uses st.proj at the 2-D figure's
+     head-top height; Tactical puts compact tags beside the dots.
+   - Selection (v185PlSelect): the carrier is st.own once it has been stable for 250 ms of real time; a pass receiver is
+     shown "incoming" at 60 % from half the flight; the shooter's tag holds 700 ms after the strike, a header 400 ms, a
+     loose ball 400 ms. The defender (v185PlPickDef) is scored by distance, chasing (p.chase, set by the v18.3 tackles)
+     and goal-side, with hysteresis (keep within 11 m; a challenger must beat him by 1.5 m for 400 ms, except a committed
+     chase, which wins at once). Set pieces, throw-ins and keeper holds show the taker only; penalties and shootouts
+     pair the taker with the keeper.
+   - Hidden: PREFS.plates off (N or Settings), demo/menu/photo/preview stages, skipping, full time, the walkout, replays,
+     from the goal (inNet or any celebration) to the restart, and at half time (no carrier).
+   - Layout (v185PlFit): above the head with a pointer, clamped to the canvas, never over each other, the minimap, the
+     caption or TouchlineTV's overlays (in Tactical, nor over the tagged dots and the ball); a carrier off screen is pinned to the edge with a chevron; a tag that cannot be placed is hidden.
+   - Accessibility: a visually hidden status line in the live stage names the carrier and the presser (aria-live off). */
+DEFAULT_PREFS.plates=true; if(!('plates' in PREFS)) PREFS.plates=true;
+
+const V185PL={stable:250,fast8:600,inc:0.5,shotHold:700,headHold:400,looseHold:400,defGrace:500,enter:8,enterChase:10,keep:11,beat:1.5,beatT:400,
+  fin:180,fout:260,frm:120,gap:6,ptr:5,pad:6,off:40,om:14,font:'"Big Shoulders Display","Arial Narrow",sans-serif',gen:0,err:0};
+const V185PL_KINDS={live:1,lab:1,tv:1};
+try{ if(document.fonts&&document.fonts.addEventListener) document.fonts.addEventListener('loadingdone',()=>{ V185PL.gen++; }); }catch(e){}
+
+/* ---------- colour helpers (WCAG relative luminance and contrast) ---------- */
+function v185PlLum(hex){ const m=/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(hex||'').trim()); if(!m) return 0.5; let h=m[1]; if(h.length===3) h=h.replace(/./g,'$&$&');
+  const c=[0,2,4].map(i=>{ const v=parseInt(h.slice(i,i+2),16)/255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); }); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]; }
+function v185PlCon(a,b){ const x=v185PlLum(a), y=v185PlLum(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); }
+/* the number colour on the shirt: the kit's own if it reads (>= 4.5), else white or near-black, whichever reads better */
+function v185PlNumCol(kit){ const sh=kit&&kit.shirt||'#888888', n=kit&&kit.num||'#ffffff'; if(v185PlCon(n,sh)>=4.5) return n; return v185PlCon('#ffffff',sh)>=v185PlCon('#111111',sh)?'#ffffff':'#111111'; }
+/* the underline: the shirt colour unless it vanishes into the dark glass, then the kit's trim / number colour */
+function v185PlLine(kit){ const g='#0c1014'; for(const c of [kit&&kit.shirt,kit&&kit.trim,kit&&kit.num,'#d8dde3']) if(c&&v185PlCon(c,g)>=2.2) return c; return '#d8dde3'; }
+const V185PL_COLS=new WeakMap();
+function v185PlCols(kit){ const ok=kit&&typeof kit==='object'; let c=ok?V185PL_COLS.get(kit):null; if(!c){ c={shirt:(kit&&kit.shirt)||'#888888',num:v185PlNumCol(kit),line:v185PlLine(kit),dark:v185PlLum((kit&&kit.shirt)||'#888888')<0.03}; if(ok) V185PL_COLS.set(kit,c); } return c; }
+
+/* ---------- names (cached per stage; rebuilt by setSides) ---------- */
+function v185PlNames(st){ const N=new Map(); const seen=[new Map(),new Map()]; const rows=[];
+  for(const p of st.players.values()){ let P=null; try{ P=(typeof Px==='function'&&typeof App!=='undefined'&&App.C)?Px(p.pid):null; }catch(e){ P=null; }
+    const ln=P&&P.ln?String(P.ln).trim():'', fn=P&&P.fn?String(P.fn).trim():''; rows.push([p,ln,fn]); if(ln){ const k=ln.toLowerCase(), m=seen[p.side&1]; m.set(k,(m.get(k)||0)+1); } }
+  for(const [p,ln,fn] of rows){ const dup=ln&&seen[p.side&1].get(ln.toLowerCase())>1; const short=ln?((dup&&fn?fn[0]+'. ':'')+ln).toUpperCase():'';
+    N.set(p.pid,{num:p.num==null?'':String(p.num),short,full:(fn+' '+ln).trim(),g:-1,w:null}); }
+  st._plN=N; return N; }
+function v185PlName(st,p){ const N=st._plN||v185PlNames(st); let n=N.get(p.pid); if(!n){ n={num:p.num==null?'':String(p.num),short:'',full:'',g:-1,w:null}; N.set(p.pid,n); } return n; }
+
+/* ---------- the plate graphic (shared: Feature 1 may reuse it for a scorer tag) ---------- */
+/* metrics for one tag at font size fs: {h, wNum, wName, wGly, w, name (possibly truncated)}; cached on the name record */
+function v185PlMeasure(g,info,fs,glyph,compact,maxW){ const key=fs+(compact?'c':'')+glyph+'|'+Math.round(maxW/8); if(info.g!==V185PL.gen){ info.g=V185PL.gen; info.w=null; }
+  const W=info.w||(info.w=new Map()); let m=W.get(key); if(m) return m;
+  const h=Math.round(fs*1.62), pad=Math.round(fs*0.55); g.save(); if('letterSpacing' in g) g.letterSpacing='0px';
+  g.font=`800 ${Math.round(fs*1.08)}px ${V185PL.font}`; const tn=info.num?g.measureText(info.num).width:0; const wNum=info.num?Math.max(Math.round(h*1.0),Math.ceil(tn+fs*0.9)):0;
+  let wGly=0; if(glyph==='ball') wGly=Math.round(h*0.42)+Math.round(fs*0.45); else if(glyph==='gk'){ g.font=`800 ${Math.round(fs*0.66)}px ${V185PL.font}`; wGly=Math.ceil(g.measureText('GK').width+fs*0.62)+Math.round(fs*0.45); }
+  let name=info.short||''; if(compact&&name.length>7) name=name.slice(0,6)+'…';
+  g.font=`800 ${fs}px ${V185PL.font}`; if('letterSpacing' in g) g.letterSpacing=(fs*0.06).toFixed(2)+'px';
+  let tw=name?g.measureText(name).width:0; const room=maxW-wNum-wGly-pad*2;
+  if(name&&tw>room){ while(name.length>2&&tw>room){ name=name.slice(0,-2)+'…'; tw=g.measureText(name).width; } }
+  g.restore();
+  const wName=name?Math.ceil(tw)+pad*2+(wGly?wGly-Math.round(fs*0.45)+Math.round(fs*0.2):0):(wGly?wGly+pad:0);
+  m={h,wNum,wName,wGly,w:wNum+wName,name,fs,pad}; W.set(key,m); return m; }
+function v185PlRR(g,x,y,w,h,r){ g.beginPath(); if(g.roundRect) g.roundRect(x,y,w,h,r); else g.rect(x,y,w,h); }
+/* draw a plate with its top-left at (x, y). info {num, short}, kit (stage kit), o {fs, glyph:'ball'|'gk'|'', compact, alpha,
+   ptr: x of the pointer or null, ptrUp: pointer above instead of below, chev: 'l'|'r'|'u'|'d'|'' , m: metrics} */
+function v185DrawPlate(g,x,y,info,kit,o){ o=o||{}; const fs=o.fs||13, glyph=o.glyph||''; const m=o.m||v185PlMeasure(g,info,fs,glyph,!!o.compact,o.maxW||400);
+  const C=v185PlCols(kit), h=m.h, w=m.w, glass='rgba(8,12,16,.84)', r=Math.min(3,h*0.16); x=Math.round(x); y=Math.round(y);
+  g.save(); g.globalAlpha=Math.max(0,Math.min(1,o.alpha==null?1:o.alpha));
+  v185PlDeco(g,x,y,w,h,o.ptr,o.ptrUp,'');
+  /* body: number block + glass, one rounded outline (1 px dark border instead of a blur) */
+  v185PlRR(g,x,y,w,h,r); g.fillStyle=glass; g.fill(); g.save(); g.clip();
+  if(m.wNum){ g.fillStyle=C.shirt; g.fillRect(x,y,m.wNum,h); if(C.dark){ g.fillStyle='rgba(255,255,255,.14)'; g.fillRect(x+m.wNum-1,y,1,h); } }
+  const lw=fs>=12?3:2; if(m.wName){ g.fillStyle=C.line; g.fillRect(x+m.wNum,y+h-lw,m.wName,lw); }
+  g.restore(); g.strokeStyle='rgba(0,0,0,.55)'; g.lineWidth=1; v185PlRR(g,x-0.5,y-0.5,w+1,h+1,r+0.5); g.stroke();
+  g.textBaseline='middle'; const cy=y+(h-(m.wName?lw:0))/2+0.5;
+  if(m.wNum){ if('letterSpacing' in g) g.letterSpacing='0px'; g.font=`800 ${Math.round(fs*1.08)}px ${V185PL.font}`; g.textAlign='center'; g.fillStyle=C.num; g.fillText(info.num,x+m.wNum/2,cy); }
+  let cx=x+m.wNum+m.pad;
+  if(m.name){ g.font=`800 ${fs}px ${V185PL.font}`; if('letterSpacing' in g) g.letterSpacing=(fs*0.06).toFixed(2)+'px'; g.textAlign='left'; g.fillStyle='#ffffff'; g.fillText(m.name,cx,cy); if('letterSpacing' in g) g.letterSpacing='0px'; cx=x+w-m.pad-(m.wGly?m.wGly-Math.round(fs*0.45):0); }
+  else if(m.wGly) cx=x+m.wNum+Math.round(m.pad*0.5);
+  if(glyph==='ball'){ const br=Math.round(h*0.21), bx=cx+br, by=cy; g.fillStyle='#ffffff'; g.beginPath(); g.arc(bx,by,br,0,7); g.fill(); g.fillStyle='#14181c'; g.beginPath();
+    for(let i=0;i<5;i++){ const a=-Math.PI/2+i*Math.PI*2/5, rr=br*0.42; if(i) g.lineTo(bx+Math.cos(a)*rr,by+Math.sin(a)*rr); else g.moveTo(bx+Math.cos(a)*rr,by+Math.sin(a)*rr); } g.closePath(); g.fill();
+    g.strokeStyle='rgba(20,24,28,.55)'; g.lineWidth=0.8; g.beginPath(); for(let i=0;i<5;i++){ const a=-Math.PI/2+i*Math.PI*2/5; g.moveTo(bx+Math.cos(a)*br*0.42,by+Math.sin(a)*br*0.42); g.lineTo(bx+Math.cos(a)*br*0.95,by+Math.sin(a)*br*0.95); } g.stroke(); }
+  else if(glyph==='gk'){ const ch=Math.round(h*0.6), cw=m.wGly-Math.round(fs*0.45); v185PlRR(g,cx,Math.round(cy-ch/2),cw,ch,2); g.fillStyle='rgba(255,255,255,.2)'; g.fill(); g.font=`800 ${Math.round(fs*0.66)}px ${V185PL.font}`; g.textAlign='center'; g.fillStyle='#ffffff'; g.fillText('GK',cx+cw/2,cy+0.5); }
+  v185PlDeco(g,x,y,w,h,null,false,o.chev);
+  g.restore(); return m; }
+/* the pointer (a notch in the glass colour toward the head) and the chevron toward a carrier who is off screen */
+function v185PlDeco(g,x,y,w,h,ptr,ptrUp,chev){
+  if(ptr!=null){ const px=Math.round(ptr), s=V185PL.ptr; g.fillStyle='rgba(8,12,16,.84)'; g.beginPath(); if(ptrUp){ g.moveTo(px-s,y); g.lineTo(px,y-s); g.lineTo(px+s,y); } else { g.moveTo(px-s,y+h); g.lineTo(px,y+h+s); g.lineTo(px+s,y+h); } g.closePath(); g.fill(); }
+  if(chev){ const s=6; g.fillStyle='rgba(255,255,255,.92)'; g.beginPath();
+    if(chev==='l'){ g.moveTo(x-3,y+h/2-s); g.lineTo(x-3-s,y+h/2); g.lineTo(x-3,y+h/2+s); } else if(chev==='r'){ g.moveTo(x+w+3,y+h/2-s); g.lineTo(x+w+3+s,y+h/2); g.lineTo(x+w+3,y+h/2+s); }
+    else if(chev==='u'){ g.moveTo(x+w/2-s,y-3); g.lineTo(x+w/2,y-3-s); g.lineTo(x+w/2+s,y-3); } else { g.moveTo(x+w/2-s,y+h+3); g.lineTo(x+w/2,y+h+3+s); g.lineTo(x+w/2+s,y+h+3); }
+    g.closePath(); g.fill(); } }
+
+/* ---------- which stages, and when ---------- */
+function v185PlKind(st){ if(st.demo) return 'menu'; const cv=st.cv; if(!cv||!cv.closest) return 'other'; if(cv.id==='lv-canvas') return 'live';
+  if(cv.closest('#anim-lab')) return 'lab'; if((st.T&&st.T.id==='tv')||cv.closest('.tv-screen')||(typeof App!=='undefined'&&App.hl===st)) return 'tv'; return 'other'; }
+function v185PlLiveOf(st){ const L=typeof App!=='undefined'&&App.live; return L&&L.stage===st?L:null; }
+/* '' when plates may show; 'hard' resets and draws nothing; 'soft' fades whatever is up */
+function v185PlGate(st,S){ if(S.kind==null||(S.kind==='other'&&S.clk-S.kindT>1000)){ S.kind=v185PlKind(st); S.kindT=S.clk; }
+  if(!V185PL_KINDS[S.kind]) return 'hard';
+  const L=v185PlLiveOf(st); if(st.skip||st.ft||(L&&(L.skipping||L.done||(L.M&&L.M.phase==='ht')))) return 'hard';
+  if(typeof v18WalkFocus!=='undefined'&&v18WalkFocus&&v18WalkFocus.st===st&&(!v18WalkFocus.crane||performance.now()-v18WalkFocus.crane<2600)) return 'hard';
+  if(PREFS.plates===false) return 'soft';
+  if(st.inNet) return 'soft'; for(const p of st.players.values()) if(p.celeb) return 'soft';
+  return ''; }
+
+/* ---------- the defender: distance, chasing, goal-side, with hysteresis ---------- */
+/* D = {cur, chal, chalT, why}; returns the engaging opponent or null. Pure apart from D. */
+function v185PlPickDef(st,c,D,now){ let closest=null, cd=1e9; D.why='';
+  for(const q of st.players.values()){ if(q.side===c.side||q.off||q.celeb) continue; const d=Math.hypot(q.x-c.x,q.y-c.y); if(d<cd){ cd=d; closest=q; } }
+  const gxOf=q=>q.side===0?0:105;
+  const elig=q=>{ if(!q||q.side===c.side||q.off||q.celeb) return false; if(q.gk){ const gx=gxOf(q.side); const inBox=Math.abs(c.x-gx)<16.5&&c.y>13.85&&c.y<54.15; if(!inBox&&!(q===closest&&cd<12)) return false; } return true; };
+  const gside=q=>{ const gx=gxOf(q.side); return (gx-c.x)*(q.x-c.x)>0&&Math.abs(q.x-c.x)<=Math.abs(gx-c.x)+1; };
+  const score=(q,d)=>d-(q.chase===c?3:0)-(gside(q)?1.2:0);
+  let best=null, bs=1e9;
+  for(const q of st.players.values()){ if(!elig(q)) continue; const d=Math.hypot(q.x-c.x,q.y-c.y); if(!(d<V185PL.enter||(q.chase===c&&d<V185PL.enterChase))) continue; const s=score(q,d); if(s<bs){ bs=s; best=q; } }
+  let cur=D.cur; let dc=0; if(cur){ dc=Math.hypot(cur.x-c.x,cur.y-c.y); if(!elig(cur)||!(dc<V185PL.keep)) cur=null; }
+  if(!cur){ D.cur=best; D.chal=null; D.why=best?'new':''; return best; }
+  if(best&&best!==cur){
+    if(best.chase===c&&cur.chase!==c){ D.cur=best; D.chal=null; D.why='chase'; return best; }
+    if(bs+V185PL.beat<score(cur,dc)){ if(D.chal!==best){ D.chal=best; D.chalT=now; } else if(now-D.chalT>=V185PL.beatT){ D.cur=best; D.chal=null; D.why='beat'; return best; } }
+    else D.chal=null; }
+  else D.chal=null;
+  return cur; }
+
+/* ---------- state ---------- */
+function v185PlNew(){ return {clk:0,last:performance.now(),kind:null,kindT:0,fid:0,slots:new Map(),oc:null,ocT:0,lastOwn:null,car:null,fo:null,foT:0,foFrom:null,foShot:false,foHead:false,incP:null,
+  D:{cur:null,chal:null,chalT:0,why:''},dc:null,dcT:0,def:null,defT:0,defNull:0,carFor:null,want:[],blocks:[],capT:-1e9,cap:null,sr:null,srT:-1e9,srTxt:'',srPend:null,
+  perf:{n:0,sum:0,max:0,ring:new Float32Array(600),i:0},log:{car:[],def:[]},why:''}; }
+function v185PlReset(S){ S.slots.clear(); if(S.spr) S.spr.clear(); S.oc=null; S.lastOwn=null; S.car=null; S.fo=null; S.foFrom=null; S.incP=null; S.D.cur=null; S.D.chal=null; S.dc=null; S.def=null; S.carFor=null; }
+function v185PlLog(S,k,p){ const L=S.log[k]; const id=p?p.pid:null; if(!L.length||L[L.length-1].pid!==id){ L.push({pid:id,t:S.clk}); if(L.length>400) L.splice(0,100); } }
+
+/* who gets a tag this frame: fills S.want with [pid, role, alpha, player] */
+function v185PlSelect(st,S){ const now=S.clk, o=st.own&&st.players.get(st.own.pid)===st.own?st.own:null, f=st.fl; const want=S.want; want.length=0;
+  if(o!==S.oc){ S.oc=o; S.ocT=now; } if(o) S.lastOwn=o;
+  if(f!==S.fo){ const k=S.car&&S.car===S.lastOwn?S.car:null; S.fo=f; S.foT=now; S.foFrom=f?k:null; S.foShot=!!(f&&f.kind==='shot'); S.foHead=!!(k&&k.kickK==='head'); if(f&&!f.phys&&S.def) S.defDrop=true; }
+  let car=null, inc=null, def=null, hold=false;
+  const pen=st.setPiece==='pen'||st.so;
+  if(o&&!f){ const fast=o===S.incP||o===S.car||st.headBall===o; if(fast||now-S.ocT>=V185PL.stable) car=o; if(car) S.incP=null; }
+  else if(f&&!f.phys){ const k=S.foFrom; if(k){ if(S.foShot&&now-S.foT<V185PL.shotHold) car=k; else if(S.foHead&&now-S.foT<V185PL.headHold) car=k; }
+    if(f.home&&!f.hands&&f.dur>0&&(st.now-f.t0)/f.dur>=V185PL.inc&&!f.home.off){ inc=f.home; S.incP=f.home; } }
+  else if(f&&f.phys){ const k=S.foFrom; if(k&&now-S.foT<V185PL.looseHold){ car=k; hold=true; } S.incP=null; }
+  else if(pen&&!o&&!f){ /* a shootout kick placed without a carrier: the nearest outfield player to the ball takes it */ let bd=36; for(const q of st.players.values()){ if(q.gk||q.off) continue; const d=(q.x-st.ball.x)**2+(q.y-st.ball.y)**2; if(d<bd){ bd=d; car=q; } } }
+  /* turnover or a new carrier: the defender is chosen fresh */
+  if(car&&car!==S.carFor){ S.carFor=car; S.D.cur=null; S.D.chal=null; S.dc=null; S.defDrop=false; }
+  const LL=v185PlLiveOf(st), spd=LL&&LL.speed||1;
+  if(car&&!f&&(car===o||pen)){
+    if(pen) def=st.gkOf(1-car.side);
+    else if(!(st.hands||st.placed)){ const pick=v185PlPickDef(st,car,S.D,now);
+      if(pick!==S.dc){ S.dc=pick; S.dcT=S.D.why==='beat'||S.D.why==='chase'||(pick&&pick.chase===car)?now-V185PL.fast8:now; }
+      if(pick){ S.defNull=0; if(pick===S.def||now-S.dcT>=(spd>=8?V185PL.fast8:V185PL.stable)) def=pick; else if(S.def&&S.def.side!==car.side&&!S.def.off) def=S.def; }
+      else { if(!S.defNull) S.defNull=now||1; if(S.def&&now-S.defNull<V185PL.defGrace&&S.def.side!==car.side) def=S.def; } } }
+  else if(hold&&S.def&&!S.defDrop) def=S.def;
+  if(spd>=8&&def&&def!==st.gkOf(1-(car?car.side:0))&&now-S.dcT<V185PL.fast8) def=null;
+  if(pen&&car&&f) def=null; /* the keeper's tag fades at the strike */
+  S.car=car; S.def=def;
+  if(car) want.push([car.pid,'car',1,car]); if(inc&&inc!==car) want.push([inc.pid,'inc',0.6,inc]); if(def&&def!==car&&def!==inc) want.push([def.pid,'def',0.9,def]);
+  v185PlLog(S,'car',car); v185PlLog(S,'def',def); }
+
+/* ---------- anchors ---------- */
+const V185PL_P={v:null};
+function v185Pl3D(st){ const P=st._p3d; return !!(P&&!P.dead&&P.camera&&st.mode!=='tactical'&&typeof THREE!=='undefined'); }
+/* the head top (and the feet) of a player on the HUD, in CSS px; returns false when behind the camera */
+function v185PlAnchor(st,S,sl,p,out){ const hg=(p.hgt||70)/70;
+  if(st.mode==='tactical'){ const T=st.tacGeom(); out.x=T.ox+p.x*T.s; out.y=T.oy+p.y*T.s; out.fy=out.y; out.ph=Math.max(7,T.s*1.25); return true; }
+  if(v185Pl3D(st)){ const P=st._p3d, V=V185PL_P.v||(V185PL_P.v=new THREE.Vector3()); const cam=P.camera;
+    const e=S.hd&&S.hd.get(p.pid); if(e&&e[3]===S.fid) V.set(e[0],e[1],e[2]); else V.set(p.x,1.87*hg+(st.jumpLift?st.jumpLift(p):0),p.y);
+    V.project(cam); if(!(V.z<1)||!isFinite(V.x)||!isFinite(V.y)) return false; out.x=(V.x+1)/2*st.W; out.y=(1-V.y)/2*st.H;
+    V.set(p.x,0,p.y).project(cam); out.fy=V.z<1&&isFinite(V.y)?(1-V.y)/2*st.H:out.y+40; out.ph=Math.max(0,out.fy-out.y); return true; }
+  const ft=st.proj(p.x,p.y,0); out.fy=ft[1]; if(v185Pl2DHead(st,p,ft,out)){ out.ph=Math.max(0,out.fy-out.y); return true; }
+  const lift=st.jumpLift?st.jumpLift(p):0; const a=st.proj(p.x,p.y,2.15*hg+lift); out.x=a[0]; out.y=a[1]; out.ph=Math.max(0,out.fy-out.y); return true; }
+/* 2-D: the top of the head as drawFigure painted it this frame, from the pose blendPose stored on the player (read only):
+   the same body-frame -> screen mapping (lean about the hips, yaw, depth squash, lift, whole-body rotation about the pivot) */
+function v185Pl2DHead(st,p,ft,out){ const Q=p._pose; if(!Q||p._poseT!==st.now||!isFinite(Q.hipU)) return false;
+  const x=ft[0], y=ft[1], k=ft[2], s=k*((p.hgt||70)/70)*1.06; const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw);
+  const DEP=st.depthK!=null?st.depthK:Math.max(0.12,Math.min(0.45,(st.H*0.705/68)/Math.max(1,k)));
+  const lean=Q.lean||0, cl=Math.cos(lean), sl=Math.sin(lean), hipU=Q.hipU, tilt=Q.headTilt||0;
+  let f=0.02+tilt*0.05, u=1.86-Math.abs(tilt)*0.02; if(u>hipU){ const du=u-hipU; const f2=f*cl+du*sl; u=hipU+du*cl-f*sl; f=f2; }
+  const dy=f*sa; let hx=f*ca*s, hy=-u*s+dy*s*DEP; const rot=Q.rot||0;
+  if(rot){ const pv=(Q.pivot||0)*s, c=Math.cos(rot), n=Math.sin(rot); hy+=pv; const rx=hx*c-hy*n, ry=hx*n+hy*c; hx=rx; hy=ry-pv; }
+  const cx=x+hx, cy=y-(Q.lift||0)*s+hy; if(!isFinite(cx)||!isFinite(cy)) return false; out.x=cx; out.y=cy-0.165*s; return true; }
+/* 3-D: the figures module solves every body this frame; keep the head centre of the tagged players */
+if(typeof v18FigDraw==='function'){ const _v185FigDraw=v18FigDraw;
+  v18FigDraw=function(P,st,p,kit,isRef){ const r=_v185FigDraw.apply(this,arguments);
+    if(r&&!isRef&&p&&p.pid!=null&&st&&st._pl){ const S=st._pl, F=P._fig;
+      /* every player's, so a tag that starts this frame (its slot is made after the figures) has it too */
+      if(F&&F.s){ const W=F.s, HD=S.hd||(S.hd=new Map()); let e=HD.get(p.pid); if(!e) HD.set(p.pid,e=new Float64Array(4)); e[0]=W[42]; e[1]=W[43]+0.2*0.92*(p.hgt||70)/70; e[2]=W[44]; e[3]=S.fid; } }
+    return r; }; }
+
+/* ---------- layout ---------- */
+const v185PlHit=(a,b)=>a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h;
+/* fit a w x h rect near (x, y): clamp to the canvas inset, then step around anything it hits (at most 3 passes);
+   returns true and writes r, or false when it cannot be placed */
+let v185PlFitSide=0;
+function v185PlFit(r,x,y,w,h,blocks,nb,W,H,sd){ const pad=V185PL.pad; v185PlFitSide=0; const cx=v=>Math.max(pad,Math.min(W-pad-w,v)), cy=v=>Math.max(pad,Math.min(H-pad-h,v));
+  if(w>W-pad*2||h>H-pad*2) return false;
+  let cands=[[cx(x),cy(y)]]; const x0=x, y0=y;
+  for(let pass=0;pass<3;pass++){ const next=[];
+    for(const c of cands){ const px=c[0], py=c[1]; r.x=px; r.y=py; r.w=w; r.h=h; let hit=null; for(let i=0;i<nb;i++){ if(v185PlHit(r,blocks[i])){ hit=blocks[i]; break; } } if(!hit){ v185PlFitSide=c.s||0; return true; }
+      const U=[px,cy(hit.y-h-3)], D=[px,cy(hit.y+hit.h+3)], L=[cx(hit.x-w-3),py], R=[cx(hit.x+hit.w+3),py]; U.s=D.s=L.s=R.s=c.s||0;
+      /* another tag: beside it on the player's side, then above, the other side, and below last (below would sit on the players);
+         the side used last time is kept until the player is half a tag width past the other tag's centre */
+      if(hit.k==='tag'){ const nat=x0+w/2-(hit.x+hit.w/2); let right=nat>=0; if(sd){ right=sd>0; if(nat*sd<-w*0.5) right=!right; } L.s=-1; R.s=1; U.s=D.s=0; next.push(right?R:L,U,right?L:R,D); }
+      else { const A=[U,D,L,R]; A.sort((a,b)=>Math.hypot(a[0]-x0,a[1]-y0)-Math.hypot(b[0]-x0,b[1]-y0)); next.push(...A); } }
+    cands=next.slice(0,12); }
+  return false; }
+/* obstacles on the HUD: the minimap and the live caption (DOM, read at most every 250 ms) */
+function v185PlBlocks(st,S){ const B=S.blocks; let n=0; const W=st.W;
+  if(st.minimap&&st.mode!=='tactical'){ const w=Math.min(170,W*0.22), h=w*68/105, x0=W-w-10, y0=10; const b=B[n]||(B[n]={}); b.x=x0-3-6; b.y=y0-3-6; b.w=w+6+12; b.h=h+6+12; b.k='mini'; n++; }
+  /* DOM overlays on the stage: the live caption, TouchlineTV's REPLAY bug and lower third */
+  if(S.clk-S.capT>250||S.clk<S.capT){ S.capT=S.clk; const caps=S.caps||(S.caps=[]); caps.length=0;
+    try{ const host=st.cv.parentElement; const els=host?host.querySelectorAll(':scope > .lv-cap .cap, :scope > .tv-bug, :scope > .tv-lower > *'):[]; if(els.length){ const c=st.cv.getBoundingClientRect(), k=c.width>0?st.W/c.width:1;
+      for(const el of els){ if(!el.textContent) continue; const a=el.getBoundingClientRect(); if(a.width>0&&a.height>0&&c.width>0&&caps.length<4) caps.push({x:(a.left-c.left)*k-6,y:(a.top-c.top)*k-6,w:a.width*k+12,h:a.height*k+12}); } } }catch(e){ caps.length=0; } }
+  if(S.caps) for(const q of S.caps){ const b=B[n]||(B[n]={}); b.x=q.x; b.y=q.y; b.w=q.w; b.h=q.h; b.k='cap'; n++; }
+  /* Tactical: the tagged players' dots (the carrier's with its halo) and the ball stay uncovered */
+  if(st.mode==='tactical'&&S.slots.size){ const T=st.tacGeom(), r=Math.max(7,T.s*1.25);
+    for(const sl of S.slots.values()){ const p=sl.p; if(!p||!isFinite(p.x)) continue; const rr=(p===st.own?r+5:r)+2, b=B[n]||(B[n]={}); b.x=T.ox+p.x*T.s-rr; b.y=T.oy+p.y*T.s-rr; b.w=b.h=rr*2; b.k='dot'; n++; }
+    const bl=st.ball; if(bl&&isFinite(bl.x)){ const z=bl.z||0, rr=6+z*0.5, b=B[n]||(B[n]={}); b.x=T.ox+bl.x*T.s-rr; b.y=T.oy+bl.y*T.s-z*2.2-rr; b.w=b.h=rr*2; b.k='ball'; n++; } }
+  S.nb=n; return n; }
+
+/* ---------- per frame ---------- */
+function v185PlFrame(st){ if(st._rp&&st._rp.on) return; const t0=performance.now();
+  const S=st._pl||(st._pl=v185PlNew()); const dtR=Math.max(0,Math.min(100,t0-S.last)); S.last=t0; const dt=st.paused?0:dtR; S.clk+=dt;
+  const pv=PREFS.plates!==false; if(S.pv!=null&&S.pv!==pv&&st.paused) S.snap=true; S.pv=pv;
+  const why=v185PlGate(st,S); S.why=why;
+  if(why==='hard'){ S.snap=false; if(S.slots.size||S.car||S.oc) v185PlReset(S); v185PlSr(st,S,null,null); return; }
+  if(why==='soft'){ S.want.length=0; S.car=null; S.def=null; S.oc=null; S.carFor=null; S.D.cur=null; S.incP=null; S.fo=st.fl; } else { v185PlSelect(st,S);
+    /* plates switched on while paused: the stability delays are skipped so the tags appear at once */
+    if(S.snap) for(let k=0;k<2&&!(S.car&&(S.def||!S.D.cur));k++){ S.ocT=-1e9; S.dcT=-1e9; v185PlSelect(st,S); } }
+  /* slots follow the wanted list; fades in real time (frozen while paused, except a user toggle, which snaps) */
+  const rm=!!st.rm, fin=rm?V185PL.frm:V185PL.fin, fout=rm?V185PL.frm:V185PL.fout;
+  for(const sl of S.slots.values()) sl.tgt=0;
+  for(const [pid,role,a,p] of S.want){ let sl=S.slots.get(pid); if(!sl){ sl={pid,p,role,a:0,tgt:0,r:{x:0,y:0,w:0,h:0},ox:0,oy:0,vx:0,vy:0,init:false,on:false,hf:-1,cmp:false,ptr:null,chev:'',an:{x:0,y:0,fy:0,ph:0}}; S.slots.set(pid,sl); } sl.p=p; sl.role=role; sl.tgt=a; }
+  for(const [pid,sl] of S.slots){ const p=st.players.get(pid); if(!p||p.off&&sl.tgt===0){ S.slots.delete(pid); continue; } sl.p=p;
+    if(S.snap) sl.a=sl.tgt; else if(sl.a<sl.tgt) sl.a=Math.min(sl.tgt,sl.a+dt/fin); else if(sl.a>sl.tgt) sl.a=Math.max(sl.tgt,sl.a-dt/fout);
+    if(sl.a<=0&&sl.tgt<=0) S.slots.delete(pid); }
+  if(S.slots.size){ v185PlLayout(st,S,dtR); v185PlPaint(st,S); }
+  if(v185PlLiveOf(st)){ if(S.snap) S.srT=-1e9; v185PlSr(st,S,S.car,S.def); } S.snap=false;
+  const ms=performance.now()-t0; const pf=S.perf; pf.n++; pf.sum+=ms; if(ms>pf.max) pf.max=ms; pf.ring[pf.i++%600]=ms; }
+
+const V185PL_ORDER={car:0,inc:1,def:2};
+function v185PlLayout(st,S,dtR){ const W=st.W, H=st.H, g=st.ctx, tac=st.mode==='tactical'; const nb0=v185PlBlocks(st,S); const B=S.blocks; let nb=nb0;
+  const list=S.list||(S.list=[]); list.length=0; for(const sl of S.slots.values()) list.push(sl);
+  list.sort((a,b)=>(b.tgt>0)-(a.tgt>0)||V185PL_ORDER[a.role]-V185PL_ORDER[b.role]);
+  const phone=W<520; let carOff=false;
+  for(const sl of list){ sl.on=false; sl.ptr=null; sl.chev=''; const p=sl.p, A=sl.an; if(!v185PlAnchor(st,S,sl,p,A)) continue;
+    const off=A.x<-V185PL.off||A.x>W+V185PL.off||A.y<-V185PL.off||A.y>H+V185PL.off;
+    if(off&&sl.role!=='car') continue; if(sl.role==='car'&&off) carOff=true; if(carOff&&sl.role!=='car') continue;
+    /* size: compact on phones, in Tactical, and for figures under ~28 px (with a 4 px band so it never flickers) */
+    if(tac||phone) sl.cmp=true; else sl.cmp=sl.cmp?A.ph<32:A.ph<28;
+    const big=sl.role==='car'||sl.role==='inc'; const fs=tac?11:phone?(big?12:11):W>=900?(big?14:12.5):(big?13:12);
+    const n=v185PlName(st,p), glyph=p.gk?'gk':(sl.role==='def'?'':'ball'); const m=v185PlMeasure(g,n,fs,glyph,sl.cmp,W*(phone?0.34:0.3)); sl.m=m; sl.n=n; sl.gly=glyph;
+    const w=m.w, h=m.h; let tx, ty, ptrUp=false;
+    if(tac){ tx=A.x+A.ph+4; ty=A.y-A.ph-h*0.35; }
+    else if(off){ const M=V185PL.pad+10; tx=Math.max(M,Math.min(W-M-w,A.x-w/2)); ty=Math.max(M,Math.min(H-M-h,A.y-V185PL.gap-h)); }
+    else { tx=A.x-w/2; ty=A.y-V185PL.gap-h; if(ty<V185PL.pad&&A.fy+V185PL.gap+h<H-V185PL.pad){ ty=A.fy+V185PL.gap; ptrUp=true; } }
+    const r=sl.r; if(!v185PlFit(r,tx,ty,w,h,B,nb,W,H,sl.side||0)) continue; if(v185PlFitSide) sl.side=v185PlFitSide;
+    /* ease the offset from the anchor (critically damped, ~14/s); snap when new, under reduced motion, or if the eased spot collides */
+    const gx=r.x-A.x, gy=r.y-A.y;
+    if(!sl.init||st.rm||sl.a<=0.02){ sl.ox=gx; sl.oy=gy; sl.vx=0; sl.vy=0; sl.init=true; }
+    else { const dt=Math.min(0.05,dtR/1000), om=V185PL.om, e=Math.exp(-om*dt); let c=sl.ox-gx, tmp=(sl.vx+om*c)*dt; sl.ox=gx+(c+tmp)*e; sl.vx=(sl.vx-om*tmp)*e; c=sl.oy-gy; tmp=(sl.vy+om*c)*dt; sl.oy=gy+(c+tmp)*e; sl.vy=(sl.vy-om*tmp)*e; }
+    let fx=A.x+sl.ox, fy=A.y+sl.oy; const rx=r.x, ry=r.y; r.x=fx; r.y=fy; let bad=fx<V185PL.pad-0.5||fy<V185PL.pad-0.5||fx+w>W-V185PL.pad+0.5||fy+h>H-V185PL.pad+0.5; if(!bad) for(let i=0;i<nb;i++) if(v185PlHit(r,B[i])){ bad=true; break; }
+    if(bad){ if(!st.rm&&sl.a>0.3&&Math.hypot(fx-rx,fy-ry)>12) sl.a=0.12; r.x=rx; r.y=ry; sl.ox=gx; sl.oy=gy; sl.vx=0; sl.vy=0; }
+    /* the pointer, when the tag sits right above (or below) the head */
+    if(!tac&&!off){ if(!ptrUp&&A.y-(r.y+h)>=2&&A.y-(r.y+h)<=V185PL.gap+10&&A.x>r.x+5&&A.x<r.x+w-5) sl.ptr=A.x; else if(ptrUp&&r.y-A.fy>=2&&r.y-A.fy<=V185PL.gap+10&&A.x>r.x+5&&A.x<r.x+w-5){ sl.ptr=A.x; sl.ptrUp=true; } }
+    sl.ptrUp=ptrUp&&sl.ptr!=null;
+    if(off) sl.chev=A.x<0?'l':A.x>W?'r':A.y<0?'u':'d';
+    sl.on=true;
+    /* the placed tag (with its pointer zone) is an obstacle for the lower-priority ones */
+    const b=B[nb]||(B[nb]={}); b.x=r.x-2; b.y=r.y-(sl.ptrUp?V185PL.ptr+1:2); b.w=w+4; b.h=h+4+V185PL.ptr+1; b.k='tag'; nb++; }
+  S.nbAll=nb; }
+/* each tag is drawn once into a small bitmap (per player, size, glyph, kit and pixel ratio) and blitted every frame */
+function v185PlSprite(st,S,sl,kit){ const dpr=st.dpr||1, m=sl.m; const C=S.spr||(S.spr=new Map()); let e=C.get(sl.pid);
+  if(e&&e.m===m&&e.kit===kit&&e.dpr===dpr) return e.c;
+  if(!e){ e={c:document.createElement('canvas'),m:null,kit:null,dpr:0}; C.set(sl.pid,e); } const c=e.c, w=m.w+2, h=m.h+2; c.width=Math.ceil(w*dpr); c.height=Math.ceil(h*dpr);
+  const q=c.getContext('2d'); q.setTransform(dpr,0,0,dpr,0,0); q.clearRect(0,0,w,h); v185DrawPlate(q,1,1,sl.n,kit,{fs:m.fs,glyph:sl.gly,m});
+  e.m=m; e.kit=kit; e.dpr=dpr; return c; }
+/* true when the leader from (fx, fy) along (dx, dy) would cross the minimap or a caption (the head there is under it anyway) */
+function v185PlLeadHid(S,fx,fy,dx,dy){ const B=S.blocks; for(let i=0;i<(S.nb||0);i++){ const b=B[i]; if(b.k!=='mini'&&b.k!=='cap') continue;
+    for(let k=1;k<=4;k++){ const x=fx+dx*k/4, y=fy+dy*k/4; if(x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h) return true; } } return false; }
+function v185PlPaint(st,S){ const g=st.ctx; g.save(); const dpr=st.dpr||1; g.setTransform(dpr,0,0,dpr,0,0);
+  /* a tag moved aside (no pointer) keeps a thin leader to its player's head, under the tags */
+  if(st.mode!=='tactical') for(const sl of S.list){ if(!sl.on||sl.a<=0.004||sl.ptr!=null||sl.chev) continue; const r=sl.r, A=sl.an, w=sl.m.w, h=sl.m.h; let fx, fy;
+    if(A.y>=r.y+h){ fx=Math.max(r.x+4,Math.min(r.x+w-4,A.x)); fy=r.y+h; } else if(A.y<=r.y){ fx=Math.max(r.x+4,Math.min(r.x+w-4,A.x)); fy=r.y; }
+    else { fx=A.x<r.x?r.x:r.x+w; fy=Math.max(r.y+3,Math.min(r.y+h-3,A.y)); }
+    const dx=A.x-fx, dy=A.y-fy, d=Math.hypot(dx,dy); if(d<5||d>170||v185PlLeadHid(S,fx,fy,dx,dy)) continue; const ex=A.x-dx/d*2, ey=A.y-dy/d*2;
+    g.globalAlpha=Math.min(1,sl.a)*0.8; g.strokeStyle='rgba(8,12,16,.55)'; g.lineWidth=2.5; g.beginPath(); g.moveTo(fx,fy); g.lineTo(ex,ey); g.stroke();
+    g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=1; g.beginPath(); g.moveTo(fx,fy); g.lineTo(ex,ey); g.stroke(); g.fillStyle='#ffffff'; g.beginPath(); g.arc(ex,ey,1.6,0,7); g.fill(); }
+  for(let i=S.list.length-1;i>=0;i--){ const sl=S.list[i]; if(!sl.on||sl.a<=0.004) continue; const kit=sl.p.gk?st.kits.gk[sl.p.side]:st.kits.team[sl.p.side]; S.drawn++;
+    const m=sl.m, spr=v185PlSprite(st,S,sl,kit), x=Math.round(sl.r.x), y=Math.round(sl.r.y); g.globalAlpha=Math.min(1,sl.a);
+    g.drawImage(spr,x-1,y-1,m.w+2,m.h+2); if(sl.ptr!=null||sl.chev) v185PlDeco(g,x,y,m.w,m.h,sl.ptr,sl.ptrUp,sl.chev); }
+  g.restore(); }
+
+/* ---------- screen readers: a quiet status line (never announced; the commentary already is) ---------- */
+function v185PlSr(st,S,car,def){ const host=st.cv&&st.cv.parentElement; if(!host||host.id!=='lv-stage') return;
+  let el=S.sr; if(!el||!el.isConnected){ el=host.querySelector(':scope > .v185-sr'); if(!el){ el=document.createElement('span'); el.className='v185-sr'; el.setAttribute('role','status'); el.setAttribute('aria-live','off'); host.appendChild(el); } S.sr=el; }
+  const nm=p=>{ const n=v185PlName(st,p); return (n.num?n.num+' ':'')+(n.full||n.short||'').trim(); };
+  const txt=car?('Ball: '+nm(car)+(def?'. Pressed by: '+nm(def):'')):'';
+  if(txt===S.srTxt){ S.srPend=null; return; }
+  if(S.clk-S.srT>=1500||S.clk<S.srT){ S.srTxt=txt; S.srT=S.clk; S.srPend=null; el.textContent=txt; } else S.srPend=txt; }
+
+/* ---------- hooks ---------- */
+const _v185PlDraw=Stage.prototype.draw;
+Stage.prototype.draw=function(){ const S=this._pl; if(S){ S.fid++; S.drawn=0; } const r=_v185PlDraw.apply(this,arguments);
+  try{ v185PlFrame(this); }catch(e){ if(V185PL.err++<3) console.warn('v18.5 plates',e); }
+  return r; };
+/* a new roster (kick-off, substitutions, a highlight clip): names rebuilt, tags start fresh */
+const _v185PlSetSides=Stage.prototype.setSides;
+Stage.prototype.setSides=function(){ const r=_v185PlSetSides.apply(this,arguments); this._plN=null; if(this._pl) v185PlReset(this._pl); return r; };
+if(typeof Stage.prototype.clipStart==='function'){ const _v185PlClip=Stage.prototype.clipStart;
+  Stage.prototype.clipStart=function(){ if(this._pl) v185PlReset(this._pl); return _v185PlClip.apply(this,arguments); }; }
+
+/* the key N toggles the plates during a live match or the goal-replay card */
+function v185PlToggle(){ PREFS.plates=PREFS.plates===false; savePrefs(); if(typeof toast==='function') toast(PREFS.plates?'Name plates on':'Name plates off');
+  for(const st of [App.live&&App.live.stage,App.hl]) if(st&&st.alive&&st.requestDraw) st.requestDraw();
+  document.querySelectorAll('input[data-k="plates"]').forEach(el=>{ el.checked=PREFS.plates!==false; }); }
+document.addEventListener('keydown',e=>{ if(e.key!=='n'&&e.key!=='N') return; if(e.ctrlKey||e.metaKey||e.altKey||e.repeat) return; const t=e.target;
+  if(t&&(t.isContentEditable||(t.matches&&t.matches('input,select,textarea')))) return;
+  const live=App.live&&!App.modal, hl=App.hl&&App.hl.alive&&App.hl.cv&&App.hl.cv.isConnected; if(!live&&!hl) return;
+  e.preventDefault(); v185PlToggle(); });
+
+/* Settings > Match graphics: the plates switch, after the goal-replay switch */
+const _v185PlSettings=VIEWS.settings;
+VIEWS.settings=function(){ const h=_v185PlSettings.apply(this,arguments); if(h.indexOf('data-k="plates"')>=0) return h;
+  const add=`<label class="toggle v185-plset"><input type="checkbox" data-c="pref" data-k="plates" ${PREFS.plates!==false?'checked':''}> Player name plates (ball carrier and defender, N)</label>`;
+  let i=h.indexOf('v18-rpset'), j=i<0?-1:h.indexOf('</label>',i); if(j>=0) return h.slice(0,j+8)+add+h.slice(j+8);
+  i=h.indexOf('class="field v17-rend"'); j=i<0?-1:h.indexOf('</div>',i); if(j>=0) return h.slice(0,j+6)+add+h.slice(j+6);
+  return h; };
 
 </script>
 </body></html>
