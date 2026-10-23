@@ -14826,8 +14826,9 @@ function v18FPatch(th0,th1,y0,y1,flipU,nx,ny,off){ /* a decal patch on the torso
   for(let i=0;i<ny;i++) for(let j=0;j<nx;j++){ const a=i*(nx+1)+j, b=a+1, c=a+nx+1, d=c+1; idx.push(a,b,d,a,d,c); }
   const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2)); g.setIndex(idx); g.computeVertexNormals(); return g; }
 
-/* detail 0..2 = the tier C/B/A sets (v18.3 segment counts plus the ball-joint caps); detail 3 = the tier A near set */
-function v18FBuildGeos(detail){ const d=Math.max(0,Math.min(3,detail|0)); const N=[7,9,12,16][d], Nt=[12,16,22,28][d], hs=[6,8,11,14][d], nc=[2,2,3,4][d];
+/* detail 0..2 = the tier C/B/A sets (v18.3 segment counts plus the ball-joint caps); detail 3 = the tier A near set.
+   limbs=true stops after the limb parts (legUpper, shin, boot, armUpper, longUpper, forearm, longFore): the near set needs no more */
+function v18FBuildGeos(detail,limbs){ const d=Math.max(0,Math.min(3,detail|0)); const N=[7,9,12,16][d], Nt=[12,16,22,28][d], hs=[6,8,11,14][d], nc=[2,2,3,4][d];
   const sk=[0,0,V18F_TU,0,V18F_TV]; /* skin uv for cap rings on kit-mapped limbs */
   const S=(c,u)=>V18F_U(c,u), TU=V18F_TU, TV=V18F_TV; const G={};
   /* thigh with the shorts leg over its top half; the hem ring is doubled so the uv can jump from shorts to skin */
@@ -14848,6 +14849,7 @@ function v18FBuildGeos(detail){ const d=Math.max(0,Math.min(3,detail|0)); const 
   G.forearm=v18FLoft([...v18FCap(0,0.045,-1,nc),[0,0.045,0.045],[0.06,0.049,0.05,0,0.003],[0.14,0.041,0.043],[0.21,0.032,0.034],[0.25,0.029,0.03],[0.27,0.022,0.022],[0.28,0,0]],N);
   const fw=V18F_C.fore[1]/V18F_AW, f0=S('fore',0), fv=y=>Math.max(0,Math.min(1,(0.255-y)/0.285));
   G.longFore=v18FLoft([...v18FCap(0,0.056,-1,nc),[0,0.056,0.056],[0.06,0.055,0.056],[0.14,0.047,0.048],[0.2,0.04,0.041],[0.23,0.038,0.039],[0.255,0.037,0.038],[0.265,0.022,0.022],[0.27,0,0]].map(r=>[r[0],r[1],r[2],0,0,f0,fw,fv(r[0])]),N);
+  if(limbs) return G;
   const hand=v18FLoft([[0.245,0,0],[0.255,0.024,0.03],[0.28,0.021,0.042],[0.32,0.018,0.044],[0.35,0.016,0.036],[0.365,0.012,0.02],[0.372,0,0]],Math.max(8,N-2));
   const thumb=v18FStrand([0,0.27,0.03],[0.012,0.33,0.05],0.012,0.01,6); G.hand=v18FMerge([hand,thumb]);
   const gq0=1792/V18F_AW, gqw=128/V18F_AW, gv=y=>0.02+0.46*Math.max(0,Math.min(1,(y-0.285)/0.12));
@@ -15020,14 +15022,14 @@ function v18FigInit(P){ const T=P.T, tier=P.tier||{detail:2,shadow:0}; const F=P
     pole:part('pole',G.pole,P.toon('#d9d9d9'),{per:0.25,outline:false}), cloth:part('cloth',G.cloth,F.mFlag,{per:0.25,outline:false}),
     blob:part('blob',G.blob,F.mBlob,{outline:false,cast:false,order:-1}) };
   F.hair={}; for(const h of V18F_HAIRS) F.hair[h]=part('hair-'+h,G.hair[h],F.mPlain,{});
-  /* v18.4 near LOD: figures taller than V18F_NEARPX on screen (the sideline camera, close-ups, previews) use a rounder
-     set built one detail level up; everyone else keeps the base set, so wide shots cost what they did. Same instanced
-     design: one InstancedMesh per part kind and set, and an empty mesh is not drawn. */
-  { const GN=F.GN=v18FBuildGeos((tier.detail==null?2:tier.detail)+1); for(const k in GN){ if(k==='hair') for(const h in GN.hair) P.track(GN.hair[h]); else P.track(GN[k]); }
-    const nk=(n,o)=>part(n+'~n',GN[n],o.m,o); F.pn=Object.assign({},F.p,{ legUpper:nk('legUpper',{m:F.mKit,per:2,aux:'aRow'}), shorts:nk('shorts',{m:F.mKit,aux:'aRow'}), shin:nk('shin',{m:F.mKit,per:2,aux:'aRow'}), boot:nk('boot',{m:F.mKit,per:2,aux:'aRow',cast:false}),
-      armUpper:nk('armUpper',{m:F.mKit,per:2,aux:'aRow'}), longUpper:nk('longUpper',{m:F.mKit,per:2,aux:'aRow'}), forearm:nk('forearm',{m:F.mPlain,per:2,cast:false}), longFore:nk('longFore',{m:F.mKit,per:2,aux:'aRow'}),
-      hand:nk('hand',{m:F.mPlain,per:2,cast:false}), glove:nk('glove',{m:F.mKit,per:2,aux:'aRow',cast:false}), torso:nk('torso',{m:F.mKit,aux:'aRow'}), neck:nk('neck',{m:F.mPlain,outline:false,cast:false}), head:nk('head',{m:F.mFace,aux:'aCell'}) });
-    F.hairN={}; for(const h of V18F_HAIRS) F.hairN[h]=part('hair-'+h+'~n',GN.hair[h],F.mPlain,{}); }
+  /* v18.4 near LOD (tier A only): figures taller than about V18F_NEARPX on screen (the sideline camera, close-ups, previews)
+     draw their six limb parts from a rounder set built one detail level up, where the ball joints show; torso, head, hair,
+     hands, boots and neck stay on the base set, so a frame with near and far figures pays 12 extra calls at most and
+     wide shots cost what they did. Same instanced design: one InstancedMesh per part kind and set, an empty mesh is not drawn. */
+  F.pn=null; F.nearOf=new WeakMap();
+  if((tier.detail==null?2:tier.detail)>=2){ const GN=F.GN=v18FBuildGeos(3,true); for(const k in GN) P.track(GN[k]);
+    const nk=(n,o)=>part(n+'~n',GN[n],o.m,o); F.pn=Object.assign({},F.p,{ legUpper:nk('legUpper',{m:F.mKit,per:2,aux:'aRow'}), shin:nk('shin',{m:F.mKit,per:2,aux:'aRow'}),
+      armUpper:nk('armUpper',{m:F.mKit,per:2,aux:'aRow'}), longUpper:nk('longUpper',{m:F.mKit,per:2,aux:'aRow'}), forearm:nk('forearm',{m:F.mPlain,per:2,cast:false}), longFore:nk('longFore',{m:F.mKit,per:2,aux:'aRow'}) }); }
   F.ring=new T.Mesh(G.ring,P.track(new T.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.6,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}))); F.ring.visible=false; F.ring.renderOrder=-1; P.scene.add(F.ring);
   F.frustum=new T.Frustum(); F.pm=new T.Matrix4(); F.sph=new T.Sphere(new T.Vector3(),6);
   F.s=new Float64Array(64*3); /* scratch for world points */ F.v=new Float64Array(96); /* scratch for world dirs */ F.ik=new Float64Array(6); F.tmp=new Float64Array(3);
@@ -15064,7 +15066,7 @@ function v18FIk(R0,R1,R2,T0,T1,T2,a,b,p0,p1,p2,out){ let D0=T0-R0, D1=T1-R1, D2=
 
 /* ---------- one figure ---------- */
 const V18F_B={lean:.9,average:1,stocky:1.14};
-const V18F_NEARPX=150; /* on-screen figure height (CSS px) above which the near LOD set is used */
+const V18F_NEARPX=150; /* on-screen figure height (CSS px) around which the near LOD limbs switch in: enter above +15, leave below -15 */
 function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)||!isFinite(p.y)) return false;
   /* frustum test before solving (the 2-D painter also skips off-screen figures) */
   F.sph.center.set(p.x,0.95,p.y); if(!F.frustum.intersectsSphere(F.sph)) return false;
@@ -15100,7 +15102,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   for(let k=0;k<45;k++) if(!isFinite(W[k])) return false;
   /* level of detail from the on-screen height */
   const dx=W[42]-P.camera.position.x, dy=W[43]-P.camera.position.y, dz=W[44]-P.camera.position.z; const dist=Math.hypot(dx,dy,dz); const px=1.9/Math.max(1e-4,dist*F.U.uPxK.value);
-  const fine=px>34, mid=px>18, near=px>V18F_NEARPX&&!!F.pn;
+  const fine=px>34, mid=px>18; let near=false; if(F.pn&&p&&typeof p==='object'){ const was=F.nearOf.get(p)===true; near=px>(was?V18F_NEARPX-15:V18F_NEARPX+15); if(near!==was) F.nearOf.set(p,near); }
   /* colours */
   const skinH=isRef?'#c68a5c':(LOOK.skin[L.skin]||LOOK.skin[3]), hairH=isRef?'#2b1a10':(LOOK.hairCol[L.hairCol]||'#111111'), bootH=isRef?'#111111':(LOOK.boots[L.boots]||'#111111');
   const skin=v18FCol(F,skinH), hair=v18FCol(F,hairH), boot=v18FCol(F,bootH); const row=v18FKitRow(F,kit,isRef,gk), aRow=V18F_NR-1-row;
@@ -15132,7 +15134,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   const fs={round:[1.05,0.98],square:[1.04,1],long:[0.96,1.05],heart:[1.0,1.0],oval:[1,1]}[L.face]||[1,1];
   const open=!!(Q.mouth&&p.celeb); const cell=v18FFaceCell(F,L,skinH,hairH)+(open?1:0);
   v18FPut(pp.head,W,42,D,24,21,18,S*fs[0],S*fs[1],S,skin,cell);
-  const hs=L.hair, HS=near?F.hairN:F.hair; const hp=HS[hs==='bald'?null:(HS[hs]?hs:'crop')]; if(hp) v18FPut(hp,W,42,D,24,21,18,S*fs[0],S*fs[1],S,hair,0);
+  const hs=L.hair, HS=F.hair; const hp=HS[hs==='bald'?null:(HS[hs]?hs:'crop')]; if(hp) v18FPut(hp,W,42,D,24,21,18,S*fs[0],S*fs[1],S,hair,0);
   if(!isRef&&LOOK.band[L.band]&&mid) v18FPut(pp.band,W,42,D,24,21,18,S*fs[0],S*fs[1],S,v18FCol(F,LOOK.band[L.band]),0);
   /* props: heart between the hands, referee's card, assistant's flag */
   if(Q.prop==='heart'){ W[45]=(W[24]+W[33])/2+D[15]*0.03*S; W[46]=(W[25]+W[34])/2+D[16]*0.03*S; W[47]=(W[26]+W[35])/2+D[17]*0.03*S; v18FPut(pp.heart,W,45,D,9,15,12,S*1.1,S*1.1,S*1.1,v18FCol(F,'#ffffff'),0); }
