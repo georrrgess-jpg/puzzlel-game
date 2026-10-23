@@ -1,0 +1,22 @@
+/* v18 director: fade-through-black cuts, goal replay bug and dissolve, '#perf' overlay, lab renderer toggle */
+.v18-cut{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:3}
+.v18-dslv{position:absolute;left:0;top:0;pointer-events:none;z-index:2}
+.v18-rp{position:absolute;inset:0;z-index:4;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.v18-rp-bug{position:absolute;left:14px;top:12px;display:flex;align-items:stretch;height:30px;font:800 15px/30px "Big Shoulders Display","Arial Narrow",sans-serif;letter-spacing:.18em;color:#fff;
+  background:rgba(8,12,18,.82);border-radius:4px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.35);animation:v18rpIn .42s cubic-bezier(.2,.8,.2,1) both}
+.v18-rp-bug i{width:6px;background:var(--rpc,#d33)}
+.v18-rp-bug b{padding:0 12px 0 10px;font-weight:800}
+.v18-rp-bug b::before{content:"";display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:#ff4b4b;vertical-align:1px;animation:v18rpDot 1s steps(2,end) infinite}
+.v18-rp-hint{position:absolute;left:14px;top:48px;font:600 11px/1 "Instrument Sans",system-ui,sans-serif;color:rgba(255,255,255,.82);text-shadow:0 1px 3px rgba(0,0,0,.7);animation:v18rpIn .42s .15s both}
+.v18-rp.out .v18-rp-bug,.v18-rp.out .v18-rp-hint{animation:v18rpOut .24s ease-in both}
+@keyframes v18rpIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes v18rpOut{to{opacity:0;transform:translateX(-10px)}}
+@keyframes v18rpDot{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.v18-rp-bug,.v18-rp-hint,.v18-rp-bug b::before{animation:none}}
+#v18-perf{position:fixed;left:8px;top:8px;z-index:99999;min-width:196px;padding:8px 10px;border-radius:8px;background:rgba(6,10,16,.86);color:#d8f5df;font:11px/1.45 "JetBrains Mono",ui-monospace,monospace;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+#v18-perf b{display:block;color:#ffd36b;margin-bottom:3px;letter-spacing:.06em}
+#v18-perf div{display:flex;justify-content:space-between;gap:12px}
+#v18-perf span{color:#8fa3b5}
+#v18-perf i{font-style:normal;text-align:right}
+.v18-labr span{opacity:.5}
+.v18-labr span.on{opacity:1;font-weight:800;color:var(--accent,#ffb000)}
