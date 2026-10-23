@@ -45,7 +45,7 @@ node test/<name>.js              # one suite
 | `src/ui_polish.js` | v13: nav regrouping, phone tab bar, scroll-to-top. |
 | `src/ui_v14.js` + `style_v14.css` | v14 design system: team-colour tokens, varsity patch, cuff stripes. |
 | `src/ui_v15.js` + `style_v15.css` | v15: top navigation bar, dashboard Overview, idle-time odds, async sim-ahead. |
-| `src/v17/*` | v17 (appended by `build.py` after everything else, in name order): `00_prefs` renderer pref, `05_stage` stage housekeeping, `10_start` title screen, `20_render` menu rendering and shell reuse, `30_motion`/`40_live` transitions, sim-ahead, live DOM, `50_smooth` interpolation + camera, `55_body` ball/body/celebrations, `58_look` pitch and crowd. One feature per file, wrap globals; see `DEVELOPER_NOTES.md` v17.1/17.2 for hooks and risks. |
+| `src/v17/*` | v17 (appended by `build.py` after everything else, in name order): `60_p3d_core` 3-D painter core, `61_p3d_pitch`, `62_p3d_stadium` (and crowd), `63_p3d_figures`, `64_p3d_ball`, `66_p3d_director`, `67_p3d_tiers` (+ `#perf`), `68_replay`; three.js is `vendor/three.min.js`; `00_prefs` renderer pref, `05_stage` stage housekeeping, `10_start` title screen, `20_render` menu rendering and shell reuse, `30_motion`/`40_live` transitions, sim-ahead, live DOM, `50_smooth` interpolation + camera, `55_body` ball/body/celebrations, `58_look` pitch and crowd. One feature per file, wrap globals; see `DEVELOPER_NOTES.md` v17.1/17.2 for hooks and risks. |
 | `test/*.js` | Regression suites, screenshot sheets (`mascot_sheet*.js`, `portrait_sheet.js`), concept-art renderers (`concepts*.js`), audits (`v13_audit.js`, `calib.js`). |
 | `concepts/` | Concept-art boards 01–41 rendered from the game's own assets. 35–41 are unbuilt ideas (see §6). |
 
@@ -105,7 +105,7 @@ node test/<name>.js              # one suite
 
 ## 6. State of play and open threads
 
-Done through v17.2: UI fluidity and smoother 2-D motion (see `DEVELOPER_NOTES.md`). Next up, deferred for time: Phase 3 of `ANIMATION_PLAN.md`, the WebGL broadcast renderer (three.js bundle size and a working 3-D figure prototype are already measured and in `test/plan/proto_fig3d/`), then cinematics (replays, 3-D walkout) and device tooling (`#perf` overlay). Baseline measurement and capture scripts live in `test/plan/` and `test/perf.js`; output goes to `test/shots/` (not committed).
+Done through v18: UI fluidity (17.1), smoother 2-D motion (17.2) and the WebGL 3-D broadcast renderer with characters, stadium, crowd, camera director, replays and tiers (18; see `DEVELOPER_NOTES.md`). The 3-D modules are `src/v17/60-68_*`; the 2-D painter is the fallback and what headless tests exercise. Not done: 3-D walkout, 3-D trophy fireworks, Courier photos in 3-D, real-device tuning of tiers.
 
 Done through v16: menu overhaul (v14), top-nav dashboard + performance (v15), 16 new mascots and a much wider school-name
 generator (v16). All suites pass as of the v16 build.
