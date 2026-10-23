@@ -53,7 +53,7 @@ MAKERS.lights=function({R,tier,board,api}){
     sol=Array(n*n).fill(0);idx.forEach(i=>sol[i]=1);
     grid=Array(n*n).fill(0);idx.forEach(i=>apply(grid,i));
   }while(grid.every(v=>!v));
-  const par=k,s3=par+2,s2=par*2+4;
+  const par=k,s3=par+3+Math.floor(par*.25),s2=par*2+6;
   let U=Array(n*n).fill(0),moves=0;
   const wrap=el('div','grid glass lo');wrap.style.gridTemplateColumns=`repeat(${n},1fr)`;wrap.style.setProperty('--n',n);
   const cells=grid.map((_,i)=>{
@@ -116,7 +116,7 @@ MAKERS.rotate=function({R,tier,board,api}){
       for(const q of gfx.hits(j,n,offs))ang[q]+=t;
     });
   }while(ang.every(a=>a%4===0));
-  const par=sol.reduce((a,b)=>a+b,0),s3=par+2,s2=par*2+4;
+  const par=sol.reduce((a,b)=>a+b,0),s3=par+3+Math.floor(par*.25),s2=par*2+6;
   let U=Array(n*n).fill(0),moves=0;
   const wrap=el('div','grid glass sl');wrap.style.gridTemplateColumns=`repeat(${n},1fr)`;wrap.style.setProperty('--n',n);
   const P='M12 2.2l8.6 10.6h-5.1v8.9H8.5v-8.9H3.4z';
@@ -176,7 +176,7 @@ MAKERS.slide=function({R,tier,board,api}){
       tiles[blank]=tiles[nb];tiles[nb]=0;blank=nb;stack.push(d);
     }
   }while(tiles.every((t,i)=>t===(i+1)%(w*h)));
-  const par=stack.length,s3=par+2,s2=Math.ceil(par*1.8)+6;
+  const par=stack.length,s3=Math.ceil(par*1.6)+6,s2=par*3+12;
   const box=el('div','slidebox');box.style.aspectRatio=`${w}/${h}`;box.style.setProperty('--w',w);
   box.style.setProperty('--bs',`min(92vw,calc(100dvh - 380px),480px,calc((100dvh - 380px) * ${w/h}))`);
   /* target slots underneath: faint home numbers, the final gap gets a target ring */

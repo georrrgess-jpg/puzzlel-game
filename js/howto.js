@@ -28,7 +28,7 @@ const HOWTO={
   flood:{goal:'Turn the whole board one colour before you run out of moves.',steps:['You own the white-outlined area in the top-left corner.','Tap a colour button to turn your area that colour.','Your area swallows every touching square of that colour. Grow it until it covers the board.'],
     demo:()=>htStage(floodDemo(['r','r','b','y','r','b','b','y','g','g','b','y','g','y','y','y'],[0,1,4])+htCbRow('b'),
       floodDemo(['b','b','b','y','b','b','b','y','g','g','b','y','g','y','y','y'],[0,1,2,4,5,6,10],[0,1,2,4,5,6,10])+htCbRow(''),'Your area is red. Tap blue','Your area grows over the blue')},
-  memory:{goal:'Copy the pattern the pads play.',steps:['Watch the pads light up and play notes.','When it says Your turn, tap the same pads in the same order.','Every round adds one more pad. Three mistakes ends the level.'],
+  memory:{goal:'Copy the pattern the pads play.',steps:['Watch the pads light up and play notes.','When it says Your turn, tap the same pads in the same order.','Every round adds one more pad. You have 4 lives, and one slip still earns 3 stars.'],
     demo:()=>htStage(mini(2,idx(4),i=>`<i class="pd ${['s1','','s2','s3'][i]}" style="background:${COLORS[i]}">${['1','','2','3'][i]}</i>`,40),
       mini(2,idx(4),i=>`<i class="pd ${['t1','','t2','t3'][i]}" style="background:${COLORS[i]}">${['1','','2','3'][i]}</i>`,40),'Watch: pad 1, 2, 3','Tap them in the same order')}
 };

@@ -68,7 +68,7 @@ const INFO={
   rotate:{name:'Spin Lock',icon:'🧭',col:'#4fb35a',tip:'Tap an arrow to turn it and its neighbours. Make every arrow point up.'},
   slide:{name:'Slide Tiles',icon:'🔢',col:'#4d7dff',tip:'Tap or swipe a tile beside the gap to slide it. Put the numbers in order, gap in the bottom-right.'},
   flood:{name:'Colour Flood',icon:'🎨',col:'#e45bc4',tip:'Tap a colour to flood from the top-left corner. Cover the whole board before moves run out.'},
-  memory:{name:'Echo Pads',icon:'🎵',col:'#8b5cf6',tip:'Watch the pads light up, then tap them in the same order. Three mistakes ends the level.'}
+  memory:{name:'Echo Pads',icon:'🎵',col:'#8b5cf6',tip:'Watch the pads light up, then tap them in the same order. You have 4 lives, and one slip still earns 3 stars.'}
 };
 function bagOrder(b){
   if(b===0)return TYPES.slice();

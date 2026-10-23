@@ -27,7 +27,7 @@ MAKERS.flood=function({R,tier,board,api}){
   function best(g){let bs=-1,bc=-1;for(let c=0;c<nc;c++){if(c===g[0])continue;const t=g.slice();fill(t,c);const s=region(t).length;if(s>bs){bs=s;bc=c}}return bc}
   const sim=grid.slice();let gs=0;
   while(region(sim).length<n*n&&gs<300){fill(sim,best(sim));gs++}
-  const limit=gs+Math.ceil(gs*.25)+2,s3=gs,s2=gs+Math.max(1,Math.floor(gs*.15));
+  const s3=gs+1+Math.floor(gs*.12),s2=s3+Math.max(2,Math.ceil(gs*.2)),limit=s2+2+Math.ceil(gs*.1);
   const training=tier<2;
   let moves=0;
   const wrap=el('div','floodwrap');
@@ -123,7 +123,7 @@ MAKERS.tubes=function({R,tier,board,api}){
   }
   const t0sol=solve(tubes);
   const par=t0sol?t0sol.length:nc*3;
-  const s2=Math.ceil(par*1.4)+2;
+  const s3=par+2+Math.floor(par*.2),s2=Math.ceil(par*1.7)+5;
   let moves=0,sel=-1,hintPair=null,lastNew=null,lastFrom=-1,lastGhost=null;
   const wrap=el('div','tubes');if(tubes.length<=6)wrap.style.setProperty('--seg','clamp(30px,min(11vw,8dvh),48px)');board.appendChild(wrap);
   const tEls=tubes.map((_,i)=>{const t=el('div','tube');t.onclick=()=>tapTube(i);wrap.appendChild(t);return t});
@@ -148,7 +148,7 @@ MAKERS.tubes=function({R,tier,board,api}){
     if(hintPair){hintPair.forEach((i,k)=>{tEls[i].classList.add('hint');tEls[i].dataset.h=k+1;tEls[i].appendChild(el('div','hn',k+1))})}
     const done=tubes.filter(t=>t.length===cap&&uniform(t)).length;
     if(!hintPair&&sel<0&&done)api.coach(`🧪 ${done} of ${nc} tubes sorted · tap a tube to pick up its top colour`);
-    api.moves(moves,par,s2);
+    api.moves(moves,s3,s2);
   }
   function tapTube(i){
     if(api.over())return;
@@ -170,7 +170,7 @@ MAKERS.tubes=function({R,tier,board,api}){
     if(finished){const T=tEls[i],cc=COLORS[tubes[i][0]];setTimeout(()=>{sfx.done();if(!T.isConnected)return;const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
       if(!FL_RM)T.animate([{filter:'brightness(1)'},{filter:'brightness(1.7)',offset:.25},{filter:'brightness(1)'}],{duration:700})},FL_RM?0:520)}
     if(stacking||finished)api.good(tEls[i],{silent:true});
-    if(solved(tubes))api.win(starsFor(moves,par,s2));
+    if(solved(tubes))api.win(starsFor(moves,s3,s2));
     else if(!pourMoves(tubes).length){toast('No moves left — try Undo! ↩️');$('#undoBtn').classList.add('glow');setTimeout(()=>$('#undoBtn').classList.remove('glow'),3000)}
   }
   /* the source tube lifts, tilts over the target and pours a stream of liquid into it */
@@ -230,8 +230,8 @@ MAKERS.memory=function({R,tier,board,api}){
   if(reverse)api.setTip('<b>Backwards rounds:</b> watch the pattern, then tap it in reverse. Start with the last pad that lit up.');
   const expected=()=>reverse?seq.slice(0,round).reverse():seq.slice(0,round);
   function info(){
-    api.setInfo(`<div class="meter"><div class="mtx"><span>Round <b>${round}</b> / ${L}</span><span>${'❤️'.repeat(3-mistakes)}${'🖤'.repeat(mistakes)}</span></div></div>`);
-    api.setStars(mistakes===0?3:mistakes===1?2:1);
+    api.setInfo(`<div class="meter"><div class="mtx"><span>Round <b>${round}</b> / ${L}</span><span>${'❤️'.repeat(4-mistakes)}${'🖤'.repeat(mistakes)}</span></div></div>`);
+    api.setStars(mistakes<=1?3:mistakes===2?2:1);
     [...dots.children].forEach((d,i)=>{d.className=i<round-1?'d':i===round-1?'c':''});
   }
   function lit(i,ms){const p=pEls[i];p.classList.remove('lit');void p.offsetWidth;p.classList.add('lit');sfx.pad(i);const[x,y]=centerOf(p);flRing(x,y,COLORS[i],p.offsetWidth*1.6,500);after(()=>p.classList.remove('lit'),ms)}
@@ -252,13 +252,13 @@ MAKERS.memory=function({R,tier,board,api}){
       if(pos<round)setNote(yourTurn(),true);
       if(pos===round){
         phase='idle';sfx.good();
-        if(round===L){after(()=>api.win(mistakes===0?3:mistakes===1?2:1),500);return}
+        if(round===L){after(()=>api.win(mistakes<=1?3:mistakes===2?2:1),500);return}
         round++;setNote(['Nice! ✨','Great memory! 🧠','Perfect! 🎯','Keep going! 🔥'][round%4]);info();after(showRound,900);
       }
     }else{
       mistakes++;phase='idle';sfx.bad();buzz(120);api.shake();api.meh();
       pEls[i].classList.add('wrong');after(()=>pEls[i].classList.remove('wrong'),400);info();
-      if(mistakes>=3){api.fail('Out of lives!','Your memory got scrambled. Give it another go!');return}
+      if(mistakes>=4){api.fail('Out of lives!','Your memory got scrambled. Give it another go!');return}
       setNote('Oops! Watch again…');after(showRound,1100);
     }
   }
