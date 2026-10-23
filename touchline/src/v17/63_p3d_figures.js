@@ -388,7 +388,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   /* legs */
   for(let i=0;i<2;i++){ const o=i*9; limb(o,o+3,pp.legUpper,skin,aRow,SB,S,SB); limb(o+3,o+6,pp.shin,skin,aRow,SB,S,SB);
     /* boot: flat when planted, toe dips as the foot leaves the ground (as the 2-D boot does) */
-    const a=0.5*Math.min(1,Math.max(0,(ankU[i]-0.12)*2)), sd=i?1:-1, spl=sd*0.1; const ca=Math.cos(a), sa=Math.sin(a);
+    const a=Q.bootT&&Q.bootT[i]!=null?Q.bootT[i]:0.5*Math.min(1,Math.max(0,(ankU[i]-0.12)*2)), sd=i?1:-1, spl=sd*0.1; const ca=Math.cos(a), sa=Math.sin(a);
     const fb=27+i*9; bd(ca*Math.cos(spl),-sa,ca*Math.sin(spl),fb); bd(sa,ca,0,fb+3); /* Ff, Uf */
     let x0=D[fb+4]*D[fb+2]-D[fb+5]*D[fb+1], x1=D[fb+5]*D[fb]-D[fb+3]*D[fb+2], x2=D[fb+3]*D[fb+1]-D[fb+4]*D[fb]; const xl=Math.hypot(x0,x1,x2)||1; D[fb+6]=x0/xl; D[fb+7]=x1/xl; D[fb+8]=x2/xl;
     v18FPut(pp.boot,W,o+6,D,fb+6,fb+3,fb,S,S,S,boot,aRow); }

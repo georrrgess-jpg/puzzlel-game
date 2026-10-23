@@ -1218,7 +1218,7 @@ class Stage {
         g.strokeStyle='rgba(0,0,0,.22)'; g.lineWidth=0.022*s; const f0=at(sp==='top'?0.21:0.17); ln([f0[0]-qx*0.07*s,f0[1]-qy*0.07*s],[f0[0]+qx*0.07*s,f0[1]+qy*0.07*s]); }
       else { const b0=at(0.18); g.strokeStyle='rgba(255,255,255,.5)'; g.lineWidth=0.03*s; ln([b0[0]-qx*0.07*s,b0[1]-qy*0.07*s],[b0[0]+qx*0.07*s,b0[1]+qy*0.07*s]); }
       // boot: points the way he faces, foreshortened when he faces the camera
-      const toeX=ca, toeY=sa*DEP; const bl=Math.max(0.35,Math.hypot(toeX,toeY)); const bang=Math.atan2(toeY,toeX)+(lg.raw.t[1]>0.12?(Math.cos(yaw)>=0?1:-1)*0.5*clamp((lg.raw.t[1]-0.12)*2,0,1):0);
+      const toeX=ca, toeY=sa*DEP; const bl=Math.max(0.35,Math.hypot(toeX,toeY)); const bang=Math.atan2(toeY,toeX)+(P.bootT&&P.bootT[lg.i]!=null?(Math.cos(yaw)>=0?1:-1)*P.bootT[lg.i]:lg.raw.t[1]>0.12?(Math.cos(yaw)>=0?1:-1)*0.5*clamp((lg.raw.t[1]-0.12)*2,0,1):0);
       g.save(); g.translate(lg.ank[0],lg.ank[1]+0.03*s); g.rotate(bang); g.fillStyle=near?bootC:mix(bootC,'#000000',0.25); g.beginPath(); g.ellipse(0.055*s*bl,0.01*s,0.13*s*bl,0.058*s,0,0,7); g.fill();
       g.fillStyle='rgba(255,255,255,.22)'; g.fillRect(-0.02*s*bl,-0.015*s,0.12*s*bl,0.016*s);
       if(s>18){ g.fillStyle='rgba(255,255,255,.55)'; g.beginPath(); g.moveTo(0.1*s*bl,-0.035*s); g.quadraticCurveTo(0.03*s*bl,0.0,-0.04*s*bl,0.03*s); g.lineTo(-0.02*s*bl,0.035*s); g.quadraticCurveTo(0.05*s*bl,0.005*s,0.12*s*bl,-0.025*s); g.fill(); /* the swoosh-free side stripe of a boot */ g.fillStyle='rgba(0,0,0,.45)'; for(const sx of [-0.04,0.03,0.1]){ g.beginPath(); g.arc(sx*s*bl,0.06*s,0.011*s,0,7); g.fill(); } }
