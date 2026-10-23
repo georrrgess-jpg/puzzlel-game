@@ -185,12 +185,17 @@ async function rp3dSuite(browser){
   await page.evaluate(()=>{ const _on=v17Vis.on; v17Vis.on=el=>{ const st=App.live&&App.live.stage; if(window.NODRAW&&st&&el===st.cv){ if(st._rp) window.NODRAW=false; else return false; } return _on(el); };
     window.V185_RPDBG=true; window.RF=[]; const _r=Painter3D.prototype.render; Painter3D.prototype.render=function(){ const r=_r.apply(this,arguments);
       try{ const st=this.st, Q=st._rp; if(Q&&Q.on){ const K=st._v186x, p=K&&K.pl; const P=p?st.poseOf(p):null; const cam=this.camera; cam.updateMatrixWorld(); const e=cam.matrixWorld.elements;
-        RF.push({pass:Q.pass,cam:Q.cam,now:st.now,two:!!Q.two,v186x:!!Q.v186x,tc:K&&K.tc,ts:K&&K.ts,th:P?(P.pitchB||0):0,act:P&&P.act,upY:e[5],win:Q.win?JSON.parse(JSON.stringify(Q.win)):null,eye:[cam.position.x,cam.position.y,cam.position.z],px:p&&p.x,py:p&&p.y}); } }catch(err){} return r; }; });
-  const R=await page.evaluate(async()=>{ const L=App.live, st=L.stage; window.NODRAW=true; L.speed=1; st.goalTs=GOAL_TS[1]; st.skip=false; V186X.force='bike';
+        RF.push({pass:Q.pass,cam:Q.cam,now:st.now,two:!!Q.two,v186x:!!Q.v186x,tc:K&&K.tc,ts:K&&K.ts,th:P?(P.pitchB||0):0,act:P&&P.act,upY:e[5],win:Q.win?JSON.parse(JSON.stringify(Q.win)):null,eye:[cam.position.x,cam.position.y,cam.position.z],px:p&&p.x,py:p&&p.y});
+        /* hold two frames for the screenshots: the last of the scorer's view, and the contact from behind the goal */
+        const tTO=K&&K.tc!=null?K.tc-Math.max(55,380*K.ts):null; if(tTO!=null&&!window.RSH1&&Q.cam==='eyes'&&st.now>=tTO-120){ window.RSH1='eyes'; st.paused=true; }
+        if(!window.RSH2&&Q.cam==='goal'&&P&&(P.pitchB||0)<=-1.3){ window.RSH2='goal'; st.paused=true; } } }catch(err){} return r; }; });
+  const RP=page.evaluate(async()=>{ const L=App.live, st=L.stage; window.NODRAW=true; L.speed=1; st.goalTs=GOAL_TS[1]; st.skip=false; V186X.force='bike';
     const pl=[...st.players.values()].filter(q=>q.side===0&&!q.gk&&!q.off); const sc=pl[pl.length-1], mate=pl[Math.max(0,pl.length-4)];
     const n0=App.v18Replays||0; const M0=JSON.stringify([L.M.sc,L.M.min,L.view.min]);
     await st.goalSequence({s:0,pid:sc.pid,t:'goal',ty:'cross',seq:[{pid:mate.pid,x:10,y:85,a:'cross'},{pid:sc.pid,x:47,y:90,a:'shot'}],m:L.M.min,sc:[1,0]}); V186X.force=null;
     return {n:(App.v18Replays||0)-n0,same:M0===JSON.stringify([L.M.sc,L.M.min,L.view.min]),log:V186X.log.slice(-1)[0]||null}; });
+  for(const k of ['RSH1','RSH2']){ const t0=Date.now(); while(Date.now()-t0<240000){ const v=await page.evaluate(k=>window[k]&&App.live.stage.paused?window[k]:null,k); if(v){ await sleep(1500); await page.screenshot({path:`${SH}rp3d_${v}.png`}); await page.evaluate(()=>{ App.live.stage.paused=false; }); break; } await sleep(200); } }
+  const R=await RP;
   const F=await page.evaluate(()=>RF);
   const eyes=F.filter(f=>f.two&&f.cam==='eyes'), goal=F.filter(f=>f.cam==='goal'); const f0=F.find(f=>f.tc!=null)||{}; const T=f0.ts!=null?{to:Math.max(55,380*f0.ts)}:{to:380};
   console.log('rp3d',JSON.stringify({n:R.n,same:R.same,log:R.log,frames:F.length,eyes:eyes.length,goal:goal.length,win:(F[F.length-1]||{}).win,eyesMax:eyes.length?Math.max(...eyes.map(f=>f.now)):null,tTO:f0.tc!=null?f0.tc-T.to:null,goalMinTh:goal.length?Math.min(...goal.map(f=>f.th)):null,minUp:F.length?Math.min(...F.map(f=>f.upY)):null}));
