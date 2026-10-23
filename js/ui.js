@@ -13,7 +13,7 @@ const api={
     $('.mv',info).textContent=m;
     $('.nx',info).textContent=n===3?`★★★ within ${s3}`:n===2?`★★ within ${s2}`:limit?`${limit-m} left`:'★ finish it!';
     $('.mk',info).style.left=pct(m)+'%';
-    if(cur)cur.last={m,s3,s2};
+    if(cur){if(cur.last&&cur.last.m<=s3&&m===s3+1&&!cur.warned&&!cur.over){cur.warned=true;toast('★★★ slipped away! Tap ↩️ Undo or 🔄 Restart to get it back')}cur.last={m,s3,s2}}
     api.setStars(n);
   },
   win(stars){onWin(stars)},
