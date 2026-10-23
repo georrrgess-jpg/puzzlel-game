@@ -10590,7 +10590,7 @@ class Stage {
         g.strokeStyle='rgba(0,0,0,.22)'; g.lineWidth=0.022*s; const f0=at(sp==='top'?0.21:0.17); ln([f0[0]-qx*0.07*s,f0[1]-qy*0.07*s],[f0[0]+qx*0.07*s,f0[1]+qy*0.07*s]); }
       else { const b0=at(0.18); g.strokeStyle='rgba(255,255,255,.5)'; g.lineWidth=0.03*s; ln([b0[0]-qx*0.07*s,b0[1]-qy*0.07*s],[b0[0]+qx*0.07*s,b0[1]+qy*0.07*s]); }
       // boot: points the way he faces, foreshortened when he faces the camera
-      const toeX=ca, toeY=sa*DEP; const bl=Math.max(0.35,Math.hypot(toeX,toeY)); const bang=Math.atan2(toeY,toeX)+(lg.raw.t[1]>0.12?(Math.cos(yaw)>=0?1:-1)*0.5*clamp((lg.raw.t[1]-0.12)*2,0,1):0);
+      const toeX=ca, toeY=sa*DEP; const bl=Math.max(0.35,Math.hypot(toeX,toeY)); const bang=Math.atan2(toeY,toeX)+(P.bootT&&P.bootT[lg.i]!=null?(Math.cos(yaw)>=0?1:-1)*P.bootT[lg.i]:lg.raw.t[1]>0.12?(Math.cos(yaw)>=0?1:-1)*0.5*clamp((lg.raw.t[1]-0.12)*2,0,1):0);
       g.save(); g.translate(lg.ank[0],lg.ank[1]+0.03*s); g.rotate(bang); g.fillStyle=near?bootC:mix(bootC,'#000000',0.25); g.beginPath(); g.ellipse(0.055*s*bl,0.01*s,0.13*s*bl,0.058*s,0,0,7); g.fill();
       g.fillStyle='rgba(255,255,255,.22)'; g.fillRect(-0.02*s*bl,-0.015*s,0.12*s*bl,0.016*s);
       if(s>18){ g.fillStyle='rgba(255,255,255,.55)'; g.beginPath(); g.moveTo(0.1*s*bl,-0.035*s); g.quadraticCurveTo(0.03*s*bl,0.0,-0.04*s*bl,0.03*s); g.lineTo(-0.02*s*bl,0.035*s); g.quadraticCurveTo(0.05*s*bl,0.005*s,0.12*s*bl,-0.025*s); g.fill(); /* the swoosh-free side stripe of a boot */ g.fillStyle='rgba(0,0,0,.45)'; for(const sx of [-0.04,0.03,0.1]){ g.beginPath(); g.arc(sx*s*bl,0.06*s,0.011*s,0,7); g.fill(); } }
@@ -15093,7 +15093,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   /* legs */
   for(let i=0;i<2;i++){ const o=i*9; limb(o,o+3,pp.legUpper,skin,aRow,SB,S,SB); limb(o+3,o+6,pp.shin,skin,aRow,SB,S,SB);
     /* boot: flat when planted, toe dips as the foot leaves the ground (as the 2-D boot does) */
-    const a=0.5*Math.min(1,Math.max(0,(ankU[i]-0.12)*2)), sd=i?1:-1, spl=sd*0.1; const ca=Math.cos(a), sa=Math.sin(a);
+    const a=Q.bootT&&Q.bootT[i]!=null?Q.bootT[i]:0.5*Math.min(1,Math.max(0,(ankU[i]-0.12)*2)), sd=i?1:-1, spl=sd*0.1; const ca=Math.cos(a), sa=Math.sin(a);
     const fb=27+i*9; bd(ca*Math.cos(spl),-sa,ca*Math.sin(spl),fb); bd(sa,ca,0,fb+3); /* Ff, Uf */
     let x0=D[fb+4]*D[fb+2]-D[fb+5]*D[fb+1], x1=D[fb+5]*D[fb]-D[fb+3]*D[fb+2], x2=D[fb+3]*D[fb+1]-D[fb+4]*D[fb]; const xl=Math.hypot(x0,x1,x2)||1; D[fb+6]=x0/xl; D[fb+7]=x1/xl; D[fb+8]=x2/xl;
     v18FPut(pp.boot,W,o+6,D,fb+6,fb+3,fb,S,S,S,boot,aRow); }
@@ -16059,6 +16059,32 @@ Stage.prototype.poseOf=function(p,isRef){ const P=_v18tPose.apply(this,arguments
   if(ic>=0&&ic<ID&&P.act!=='kick'){ const w=Math.sin(Math.PI*clamp(ic/ID,0,1)); P.act='intercept'; P.hipU=0.8-0.16*w; P.lean=0.06*w;
     Fs(1,0.36*w,0.06*w,0.1+0.42*w); Fs(0,-0.06,0,-0.14); Hs(0,0.05,1.0+0.25*w,-0.5*w-0.27); Hs(1,0.1,1.02,0.3); }
   return P; };
+
+/* ===================== v18.3 touch-ups (73) =====================
+   Presentation only: nothing here touches engine.js, results, events or their order.
+   1. punt boot: the keeper's kicking boot used the generic "toe dips as the foot lifts" tilt, so at the top of the
+      follow-through (foot at chest height) the toe pointed down at the grass. A pose may now carry P.bootT=[left,right]
+      (toe pitch in radians, + = toe down, null = the generic tilt); the 2-D boot (ui_stage.js drawFigure) and the 3-D
+      boot (63_p3d_figures.js) both read it. During the punt the kicking boot goes: flat on the steps, toe down and back
+      as the heel comes up to the seat, toe pointed (laces through the ball) at contact, then toe up-forward along the
+      line of the kick at the top of the follow-through, flattening again as the foot comes down. The keeper's yaw is
+      already locked toward the punt target by 70_punt.js (v18pStep), so the boot points the way he kicks. */
+const V18T={punt:true};
+
+/* toe pitch for the kicking (right) boot at punt pose time t; null = leave the generic tilt */
+Stage.prototype.v18tPuntPitch=function(K,t){ const W=K.W, Fd=K.Fd;
+  if(t<=W){ const u=t/W; if(u<0.52) return null;
+    if(u<0.86) return 0.95*smooth((u-0.52)/0.34);
+    return lerp(0.95,0.75,smooth((u-0.86)/0.14)); }
+  const q=(t-W)/Fd; if(q>=1) return null;
+  if(q<0.3) return lerp(0.75,-0.7,smooth(q/0.3));
+  if(q<0.75) return lerp(-0.7,0,smooth((q-0.3)/0.45));
+  return 0; };
+
+const _v18tPose=Stage.prototype.poseOf;
+Stage.prototype.poseOf=function(p,isRef){ const P=_v18tPose.apply(this,arguments);
+  if(!V18T.punt||isRef||!P||P.act!=='punt') return P; const K=this._v18pk; if(!K||K.p!==p) return P;
+  const r=this.v18tPuntPitch(K,this.v18pkt(K)); if(r!=null) P.bootT=[null,r]; return P; };
 
 </script>
 </body></html>
