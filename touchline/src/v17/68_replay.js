@@ -28,7 +28,7 @@ function v18RpSnap(st){ const f=st.fl, nd=st.netD; return {now:st.now, m:v18RpMo
 
 /* recording */
 const _v18rpGoal=Stage.prototype.goalSequence;
-Stage.prototype.goalSequence=async function(e){ this._rb=v18RpLive(this)?{buf:[],h:0,ts:null,tg:null,stop:false,gx:e&&e.s===1?0:105,dir:e&&e.s===1?-1:1}:null;
+Stage.prototype.goalSequence=async function(e){ this._rb=v18RpWant(this)?{buf:[],h:0,ts:null,tg:null,stop:false,gx:e&&e.s===1?0:105,dir:e&&e.s===1?-1:1}:null;
   try{ return await _v18rpGoal.apply(this,arguments); } finally{ this._rb=null; } };
 const _v18rpUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v18rpUpd.apply(this,arguments); const R=this._rb;

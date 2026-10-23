@@ -18,8 +18,16 @@ async function lab(b){ const p=await b.newPage({viewport:{width:1100,height:700}
   for(const sc of (process.env.SCENES||'pens,header,corner').split(',')){ await p.evaluate(s=>{ setTimeout(()=>labRun(s),0); },sc);
     for(let i=0;i<5;i++){ await p.waitForTimeout(+(process.env.GAP||3500)); const cam=await p.evaluate(()=>{ const P=App.labSt&&App.labSt._p3d; return P&&P.dir?P.dir.mode:'-'; }); await p.screenshot({path:OUT+`lab-${sc}-${i}.png`}); console.log(sc,i,cam); } }
   console.log('lab errors',errs); await p.close(); }
-async function live(b,vp,tag){ const p=await b.newPage({viewport:vp,deviceScaleFactor:1}); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
-  await p.goto(DIST); await p.waitForTimeout(600);
-  await p.evaluate(()=>{ PREFS.renderer='3d'; const C=newCareer({sid:SCHOOLS[0].id,coach:'Test',diff:'normal'}); App.C=C; save&&save(); });
-  console.log('started'); await p.close(); }
-(async()=>{ const b=await chromium.launch(); if(on('lab')) await lab(b); await b.close(); })();
+async function live(b,vp,tag,dsf,rend){ const p=await b.newPage({viewport:vp,deviceScaleFactor:dsf||1}); const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+  await p.goto(DIST); await p.waitForTimeout(600); await p.evaluate(STUB); await p.evaluate(r=>{ PREFS.renderer=r||'3d'; PREFS.replays=true; },rend);
+  await p.click('[data-a="newCareerForm"][data-slot="1"]'); await p.fill('#nc-name','Shots Coach'); await p.fill('#nc-seed','shots18');
+  await p.click('[data-a="ncNext"]'); await p.waitForTimeout(200); await p.click('[data-a="createCareer"]'); await p.waitForTimeout(800);
+  await p.click('.cta [data-a="playNext"]'); await p.waitForTimeout(400); await p.click('[data-a="kickoff"]'); await p.waitForTimeout(5000);
+  await p.screenshot({path:OUT+`live-${tag}-0-main.png`});
+  await p.evaluate(()=>{ App.live.paused=true; }); for(let i=0;i<120&&await p.evaluate(()=>App.live.busy);i++) await p.waitForTimeout(500);
+  await p.evaluate(()=>{ const L=App.live, st=L.stage; L.speed=1; st.goalTs=GOAL_TS[1]; st.skip=false; const sc=[...st.players.values()].find(q=>q.side===0&&!q.gk&&!q.off&&q.slot.y>70)||[...st.players.values()].find(q=>q.side===0&&!q.gk);
+    window.__gs=st.goalSequence({s:0,pid:sc.pid,t:'goal',ty:'open',seq:[{pid:sc.pid,x:40,y:80,a:'run'},{pid:sc.pid,x:45,y:88,a:'shot'}],m:L.M.min,sc:[1,0]}).then(()=>{ window.__gsDone=true; }); });
+  let last='', n=0; for(let i=0;i<400&&n<(+process.env.NSHOT||40);i++){ await p.waitForTimeout(400); const s=await p.evaluate(()=>{ const st=App.live.stage, P=st._p3d; return {m:P&&P.dir?P.dir.mode:'2d',rp:!!(st._rp&&st._rp.on),done:!!window.__gsDone}; });
+    const key=s.m+(s.rp?'-rp':''); if(s.done) break; if(key!==last||(s.rp?i%2===0:i%10===0)){ last=key; await p.screenshot({path:OUT+`live-${tag}-${String(++n).padStart(2,'0')}-${key}.png`}); console.log(tag,n,key); } }
+  console.log(tag,'errors',errs); await p.close(); }
+(async()=>{ const b=await chromium.launch(); if(on('lab')) await lab(b); if(on('live')) await live(b,{width:1440,height:900},'desk'); if(on('phone')) await live(b,{width:390,height:844},'phone',2); if(on('live2d')) await live(b,{width:1440,height:900},'d2',1,'2d'); await b.close(); })();

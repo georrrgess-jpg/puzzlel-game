@@ -1,7 +1,10 @@
-/* ===================== v18 3-D renderer: camera director (module order 90, ANIMATION_PLAN 3.7) =====================
+/* ===================== v18 3-D renderer: camera director (module order 25, ANIMATION_PLAN 3.7) =====================
+   Order 25: after the core's camPose (which runs before every module) and before the figures (30), which frustum-cull
+   against P.camera as it stands when they run, and the ball (40), whose streak faces the final camera.
    Runs after the core's camPose (the broadcast gantry pose from st.cam) and turns it into a directed broadcast:
    - main: the core pose, plus a gentle tilt toward play on the far side and a slight rise of the gantry for it;
-   - kick-off: a wide, high establishing shot while the teams line up (st.pendingKick);
+   - kick-off: a wide, high establishing shot while the teams line up (st.pendingKick, or the ball on the centre spot with both
+     teams in their own halves);
    - penalty / shootout: low, behind and to the side of the kicker, looking at the goal (st.so, or a penalty on the spot);
    - corner: a high angle from the near corner looking across the box;
    - celebration close-up: when st.hype > 0.6 after a goal, a pitch-side shot of the scorer (st.focus, or the player with
@@ -29,7 +32,7 @@ function v18GantryPose(P,x,w,elev,fov0,eye,tgt){ const cam=P.camera; const vf=fo
   eye.set(x,cy,cz); tgt.set(x,0,cz-cy/Math.tan(pitch)); }
 
 const V18_DIR={blend:2.4, pose:2.8, fov:2.6};
-P3D_MODULES.push({name:'director',order:90,
+P3D_MODULES.push({name:'director',order:25,
   init(P){ const T=P.T; const V=()=>new T.Vector3();
     P.dir={mode:'main',w:0,wv:0,eye:{p:V(),v:V()},tgt:{p:V(),v:V()},fov:30,fv:0,fresh:true,snap:true,cutAt:0,goalT:-1e9,cel:null,cnrT:-1e9,
       by:34,byv:0,mainEye:V(),mainTgt:V(),sEye:V(),sTgt:V(),fwd:V(),e:V(),t:V(),sx:0}; },
@@ -49,8 +52,11 @@ P3D_MODULES.push({name:'director',order:90,
       const f=st.fl, fromFlag=f&&f.from&&Math.abs(f.from.x-gx)<2.6&&(f.from.y<2.6||f.from.y>65.4);
       if(atFlag||fromFlag) D.cnrT=st.now;
       if(!st.inNet&&Math.abs(b.x-gx)<30&&st.now-D.cnrT<(st.D?st.D(2600):2600)) return 'corner'; }
-    if(st.pendingKick&&!st.fl) return 'kickoff';
+    if(st.pendingKick&&!st.fl||this.kickoff(st)) return 'kickoff';
     return 'main'; },
+  /* the ball resting on the centre spot with both teams in their own halves: a kick-off */
+  kickoff(st){ const b=st.ball; if(st.fl||Math.hypot(b.x-52.5,b.y-34)>1.2||st.so) return false;
+    for(const p of st.players.values()){ if(p.off) continue; if(p.side===0?p.x>53.2:p.x<51.8) return false; } return true; },
   scorer(st){ const f=st.focus; if(f&&f.pid&&f.celeb) return f; for(const p of st.players.values()) if(p.celeb&&p.celebType&&p.celebType!=='mob'&&!p.off) return p; return null; },
   /* the special pose for a preset (eye, target, fov); false for main */
   pose(P,st,mode,eye,tgt){ const b=st.ball, R=typeof V18_BALL_R==='number'?V18_BALL_R:0.18;
@@ -60,7 +66,9 @@ P3D_MODULES.push({name:'director',order:90,
     if(mode==='corner'){ const gx=b.x>52.5?105:0, dir=gx===105?1:-1; eye.set(gx-dir*2.5,12.5,68+3.5); tgt.set(gx-dir*7.5,0.4,34.5); return 37; }
     if(mode==='celeb'){ const sc=P.dir.cel; if(!sc) return false; const gx=sc.side===0?105:0, dir=gx===105?1:-1; const late=sc.celebT!=null&&st.now-sc.celebT>(st.D?st.D(1100):1100);
       const back=late?11.2:8.6; eye.set(sc.x-dir*2.6,late?3.1:2.3,Math.min(sc.y+back,74)); if(eye.z-sc.y<6) eye.z=sc.y+6; tgt.set(sc.x,1.12,sc.y); return late?32:29; }
-    if(mode==='replay'){ const Q=st._rp; const gx=Q.gx, dir=Q.dir; eye.set(gx+dir*6.2,5.4,34+(Q.side||0)*2.5); tgt.set(b.x+(gx-b.x)*0.18,Math.max(0,b.z)+R,b.y+(34-b.y)*0.2); return Q.fov||36; }
+    if(mode==='replay'){ /* high behind the goal with a slow push-in; the lens tightens as the ball comes toward it */
+      const Q=st._rp; const gx=Q.gx, dir=Q.dir; const u=Math.max(0,Math.min(1,(Q.t-Q.t0)/Math.max(1,Q.t1-Q.t0))); const d=Math.abs(b.x-gx);
+      eye.set(gx+dir*(8.2-1.6*u),9.6-0.9*u,34+(Q.side||0)*3); tgt.set(b.x+(gx-b.x)*0.18,Math.max(0,b.z)+R,b.y+(34-b.y)*0.2); return 26+Math.min(10,d*0.3); }
     return false; },
   frame(P,st){ const D=P.dir; if(!D) return; const cam=P.camera, dt=Math.min(0.1,P.dt||0.016);
     /* 1. the core's main pose: eye, and where its view axis meets the grass */

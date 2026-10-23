@@ -21,6 +21,11 @@ const { chromium, DIST } = require('./_pw');
   await p.click('#v18-labr'); ok(await until(()=>!!(App.labSt._p3d&&!App.labSt._p3d.dead),6000), 'lab: toggle back to 3-D');
   await p.evaluate(()=>{ App.v18LabR=null; });
   for(let i=0;i<5;i++){ await p.evaluate(()=>A.labClose()); await p.waitForTimeout(150); await p.evaluate(()=>labOpen()); await until(()=>!!(App.labSt&&App.labSt._p3d),5000); }
+  /* the tier probe under 'auto' (pretend the software rasteriser is a GPU so auto picks 3-D) */
+  await p.evaluate(()=>{ v18GL().software=false; PREFS.renderer='auto'; PREFS.rtier=null; v18Off=false; A.labClose(); labOpen(); });
+  ok(await until(()=>!!PREFS.rtier,90000), 'probe: auto measures the first frames and stores a tier');
+  ok(await until(()=>{ const P=App.labSt&&App.labSt._p3d; return !!(P&&!P.dead&&P.tier.name===PREFS.rtier); },15000), 'probe: the painter runs at the stored tier '+await p.evaluate(()=>PREFS.rtier));
+  await p.evaluate(()=>{ PREFS.renderer='3d'; });
   await p.evaluate(()=>A.labClose()); await p.waitForTimeout(300);
   ok(await p.evaluate(()=>document.querySelectorAll('canvas.v18-gl').length===0&&document.querySelectorAll('canvas').length<=3), 'lab: 5 open/close cycles leave no GL canvases ('+await p.evaluate(()=>document.querySelectorAll('canvas').length)+' canvases)');
   /* ---------- #perf ---------- */
@@ -66,4 +71,7 @@ const { chromium, DIST } = require('./_pw');
   ok(await until(()=>!!document.querySelector('#lv-cont'),60000), 'skip to end: full time');
   const fin=await p.evaluate(()=>{ const L=App.live, f=App.C.fixtures[L.fid]; return {view:L.view.sc,eng:L.M.sc,fx:[f.hg,f.ag],gl:!!(L.stage._p3d&&!L.stage._p3d.dead)}; });
   ok(JSON.stringify(fin.view)===JSON.stringify(fin.eng)&&JSON.stringify(fin.fx)===JSON.stringify(fin.eng), 'skip to end: final score is the engine score '+JSON.stringify(fin));
+  const set=await p.evaluate(()=>{ const h=VIEWS.settings(); return {rp:/data-k="replays"/.test(h),rt:/data-a="v18Retest"/.test(h)}; });
+  ok(set.rp&&set.rt, 'Settings: goal replays switch and Re-test graphics speed '+JSON.stringify(set));
+  await p.evaluate(()=>{ PREFS.rtier='B'; A.v18Retest(); }); ok(await p.evaluate(()=>PREFS.rtier===null), 'Re-test clears PREFS.rtier');
   console.log(errs.length?'ERRORS\n'+errs.join('\n'):'ERRORS none'); console.log((fails?fails+' FAILED':'ALL PASS')+' in '+Math.round((Date.now()-t0)/1000)+' s'); await b.close(); process.exit(fails||errs.length?1:0); })();
