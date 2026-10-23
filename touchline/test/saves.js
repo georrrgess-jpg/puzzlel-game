@@ -59,7 +59,12 @@ const pct=x=>(x*100).toFixed(0)+'%';
       r.bkPoor=bk(0.15); r.bkGood=bk(0.9); r.wide=(()=>{ const c={}; for(let i=0;i<500;i++){ const k=v186kBeatKind(0.6,'miss',{y:34+5.6,z:0.3}); c[k]=(c[k]||0)+1; } return c; })();
       /* reaction: the kind's start (D.t) after the release, for one flight, by rating */
       const reac=q=>{ let s=0; for(let i=0;i<20;i++){ st._v186force={q,k:'dive',out:'catch'}; const f={t0:st.now,dur:st.D(340)+120,home:gk}; const M=st.v186kMake(gk,sh,'dive',{q,ty:31,z:1,out:'catch',set:{x:103.8,y:34}}); const D=st.v186kArm(gk,sh,M,f,null); s+=D.t-f.t0; gk.dive=null; } st._v186force=null; return s/20; };
-      r.reGood=reac(0.92); r.rePoor=reac(0.15); st._v186q=keep; gk.ov=null; gk.yawLockT=0; return r; });
+      r.reGood=reac(0.92); r.rePoor=reac(0.15); st._v186q=keep; gk.ov=null; gk.yawLockT=0;
+      /* the interception lunge (72_tackles): still stamped for an outfield interception, never for a shot into the keeper's hands */
+      const ic=(home,hands)=>{ const fl0=st.fl, lp0=st.lastPass, own0=st.own; const t0=home.v18icT; st.own=null; st.lastPass={from:sh,to:home,h:0,fy:sh.y,t:st.now};
+        st.fl={from:{x:home.x-6,y:home.y,z:0},home,hands,head:false,to:null,t0:st.now-300,dur:400,h:0.3,kind:hands?'shot':'pass',ground:!hands,cont:false,res:()=>{}};
+        st.update(1/120); const got=home.v18icT!==t0&&home.v18icT===st.now; st.fl=fl0; st.lastPass=lp0; st.own=own0; return got; };
+      const opp=[...st.players.values()].find(p=>p.side===1&&!p.gk); r.icOut=ic(opp,false); r.icGk=ic(gk,true); return r; });
     const sh=o=>Object.entries(o.ks).map(([k,v])=>k+' '+v).join(', ');
     ok((A.tapin.ks.smother||0)+(A.tapin.ks.scoop||0)+(A.tapin.ks.lowdive||0)>A.tapin.ks.dive*2&&(A.tapin.ks.smother||0)>0, 'tap-ins from close range are mostly smothered or saved low ('+sh(A.tapin)+')');
     ok(A.long.high>A.open.high&&A.long.low<A.open.low, 'long shots come in higher than open-play shots (high '+pct(A.long.high)+' vs '+pct(A.open.high)+', low '+pct(A.long.low)+' vs '+pct(A.open.low)+')');
@@ -72,6 +77,7 @@ const pct=x=>(x*100).toFixed(0)+'%';
     ok(A.shGood.spread>A.shPoor.spread+0.6, 'better shooters place it nearer the corners (mean |y-34| '+A.shGood.spread.toFixed(2)+' vs '+A.shPoor.spread.toFixed(2)+' m)');
     const wp=A.bkPoor.wrong/2000, wg=A.bkGood.wrong/2000; ok(wp>=0.5&&wg<=0.45, 'goals: a poor keeper is wrong-footed more ('+pct(wp)+' at q .15 vs '+pct(wg)+' at q .9)');
     ok((A.wide.watch||0)>=400, 'a miss well wide is watched, not dived at ('+JSON.stringify(A.wide)+')');
+    ok(A.icOut&&!A.icGk, 'an outfield interception still lunges, a shot into the keeper\'s hands does not (outfield '+A.icOut+', keeper '+A.icGk+')');
     ok(A.rePoor-A.reGood>=40, 'a good keeper starts his movement earlier after the strike ('+A.reGood.toFixed(0)+' ms vs '+A.rePoor.toFixed(0)+' ms at 1x)');
     await page.close(); }
 
