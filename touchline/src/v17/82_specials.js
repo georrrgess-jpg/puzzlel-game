@@ -146,9 +146,9 @@ Stage.prototype.launch=function(p,opt){ const K=this._v186x;
   if(!K||this.skip||!opt||this.rm) return _v186xLaunch.apply(this,arguments);
   try{
     /* the cross to the scorer: aimed at his boot's contact point, a little longer (the strike has no wind-up) */
-    /* only when he can get under it: his spot within a sprint of where he is (else the ordinary finish) */
-    const reach=h=>{ const o=h.ov&&isFinite(h.ov.x)?h.ov:null; return !o||Math.hypot(o.x-h.x,o.y-h.y)<=this.spd()*1.5*(opt.dur+this.D(150))/1000*0.75+1.5; };
-    if(!K.armed&&opt.home&&opt.home.pid===K.pid&&p&&p!==opt.home&&p.side===opt.home.side&&(opt.h||0)>2&&!opt.hands&&!this.hands&&reach(opt.home)){
+    /* only when he can be under it near his spot (within a sprint of it, give or take 6 m), i.e. at the box, not 30 m out (else the ordinary finish; a forced special skips this) */
+    const reach=h=>{ const o=h.ov&&isFinite(h.ov.x)?h.ov:null; return !o||Math.hypot(o.x-h.x,o.y-h.y)<=this.spd()*1.5*(opt.dur+this.D(150))/1000*0.75+6; };
+    if(!K.armed&&opt.home&&opt.home.pid===K.pid&&p&&p!==opt.home&&p.side===opt.home.side&&(opt.h||0)>2&&!opt.hands&&!this.hands&&(K.forced||reach(opt.home))){
       const pl=opt.home, st=this, on0=opt.onRelease; K.armed=true; K.pl=pl;
       const gx=K.s===0?105:0, dir=K.s===0?1:-1; const at=pl.ov&&isFinite(pl.ov.x)?pl.ov:pl; const ca=Math.atan2(p.y-at.y,p.x-at.x); let yaw, gs=1, kf;
       if(K.kind==='bike'){ const away=dir>0?Math.PI:0; yaw=away+v186xCl(v186xAd(ca,away),-0.5,0.5); kf=Math.cos(yaw)>0?1:0; }

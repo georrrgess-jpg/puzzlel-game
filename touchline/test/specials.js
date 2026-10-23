@@ -87,8 +87,8 @@ async function labSuite(browser,three){ const tag=three?'3d':'2d';
   ok(errs.length===0, `${tag} lab: no page errors${errs.length?' '+errs.slice(0,3).join(' | '):''}`);
   await page.close(); }
 
-/* a live 2-D match at 2x (seed spx0: a cross goal in minute 24 and a header from a cross in minute 27): the first is forced
-   as a bicycle kick, the second as a scissor kick; the first half is checked against the engine's own run of the same match */
+/* a live 2-D match at 2x (seed spx0): the first goal from a cross that the scorer can get under is forced as a bicycle kick,
+   the next as a scissor kick; the goals so far are checked against the engine's own run of the same match (half-time talk none) */
 async function liveSuite(browser){
   const page=await browser.newPage({viewport:{width:1280,height:800}}); const errs=[]; page.on('pageerror',e=>errs.push('pageerror: '+e.message+' '+(e.stack||'').split('\n')[1]));
   page.on('console',m=>{ if(m.type()==='error'&&!/ERR_TUNNEL|Failed to load resource/.test(m.text())) errs.push('console: '+m.text()); });
@@ -96,7 +96,7 @@ async function liveSuite(browser){
   await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Spec Coach'); await page.fill('#nc-seed','spx0');
   await page.click('[data-a="ncNext"]'); await page.waitForTimeout(200); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(800);
   const pre=await page.evaluate(()=>{ PREFS.renderer='2d'; PREFS.replays=true; const C=App.C; const f=userFixture(C); const cl=JSON.parse(JSON.stringify(C)); const od=oddsFor(f.id); const v=validateLineup(cl,cl.userSid,'V'); if(!v.ok) repairLineup(cl,cl.userSid,'V');
-    const M=startMatch(cl,f.id,{halftime:false,preP:[od.h,od.a]}); runToEnd(cl,M,true);
+    const M=startMatch(cl,f.id,{halftime:false,preP:[od.h,od.a]}); runToEnd(cl,M);
     return M.ev.filter(e=>e.t==='goal').map(e=>[e.m,e.pid,e.s,e.sc.join('-'),e.ty,(e.seq||[]).map(q=>q.a).join('>')]); });
   await page.evaluate(()=>{ const X=window.__lx={rel:[],goals:[],caps:[],rp:[],clear:[],errs:[]}; V186X.force='bike';
     const R0=Stage.prototype.v186xRelease; Stage.prototype.v186xRelease=function(p,K){ const r=R0.call(this,p,K); try{ const P=this.poseOf(p), kf=p.v186xf===1?1:0, f=v186xFootW(this,p,P,kf), {R}=v186xScale(this,p), b=this.ball;
@@ -110,14 +110,14 @@ async function liveSuite(browser){
   await page.click('.cta [data-a="playNext"]'); await page.waitForTimeout(400);
   await page.click('[data-a="pvSpeed"][data-v="2"]').catch(()=>{}); await page.click('[data-a="kickoff"]');
   const t0=Date.now(); let shot=0;
-  while(Date.now()-t0<540000){ if(await page.$('#lv-ht .htbox')) break; if(await page.$('#lv-cont')) break;
+  while(Date.now()-t0<720000){ if(await page.$('#lv-ht .htbox')){ await page.click('#ht-go').catch(()=>{}); await sleep(300); } if(await page.$('#lv-cont')) break;
     /* both specials struck, he is up, and that goal's sequence (replay included) is over */
     if(await page.evaluate(()=>{ const X=window.__lx, st=App.live&&App.live.stage; return X.rel.length>=2&&X.clear.length>=2&&st&&!st._v186x&&!st._rp; })) break;
     /* the stage pauses itself on the frame the ball leaves the boot: a close-up and a full frame, then it plays on */
     const z=await page.evaluate(()=>window.__lx.pz); if(z){ shot++; await sleep(300); const bb=await page.evaluate(()=>{ const r=document.getElementById('lv-canvas').getBoundingClientRect(); return {x:r.left,y:r.top}; });
       const w=Math.max(160,z.s*5.5), h=Math.max(130,z.s*4.4); await page.screenshot({path:`${SH}live_2d_${z.k}_contact.png`,clip:{x:Math.max(0,bb.x+z.x-w/2),y:Math.max(0,bb.y+z.y-h*0.8),width:w,height:h}}); await page.screenshot({path:`${SH}live_2d_${z.k}_frame.png`});
       await page.evaluate(()=>{ window.__lx.pz=null; App.live.stage.paused=false; }); } await sleep(100); }
-  const R=await page.evaluate(()=>{ const L=App.live; const X=window.__lx; return {X,min:L.M.min,ev:L.M.ev.filter(e=>e.t==='goal'&&e.m<=40).map(e=>[e.m,e.pid,e.s,e.sc.join('-')]),feed:L.feed.map(f=>f.txt).filter(t=>/bicycle|scissor/i.test(t))}; });
+  const R=await page.evaluate(()=>{ const L=App.live; const X=window.__lx; return {X,min:L.M.min,ev:L.M.ev.filter(e=>e.t==='goal').map(e=>[e.m,e.pid,e.s,e.sc.join('-')]),feed:L.feed.map(f=>f.txt).filter(t=>/bicycle|scissor/i.test(t))}; });
   console.log('live',JSON.stringify({rel:R.X.rel.map(r=>({...r,d:+r.d.toFixed(3)})),goals:R.X.goals,clear:R.X.clear,rp:R.X.rp.length,caps:R.X.caps.filter(c=>/KICK/.test(c)),feed:R.feed,errs:R.X.errs}));
   const preN=pre.filter(g=>g[0]<=R.min).map(g=>g.slice(0,4)); ok(R.ev.length>=2&&JSON.stringify(R.ev)===JSON.stringify(preN), `live: goals up to minute ${R.min} (minute, scorer, side, score) identical to the engine's own run of the match (${R.ev.length} goals: ${R.ev.map(g=>g[0]+"' "+g[3]).join(', ')})`);
   const kinds=R.X.rel.map(r=>r.k); ok(kinds.includes('bike')&&kinds.includes('scissor'), `live: a forced bicycle kick and a forced scissor kick were struck (${kinds.join(', ')})`);
