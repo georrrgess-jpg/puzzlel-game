@@ -30,7 +30,7 @@ function openLive(M,fid,speed,resumed){
   App.live={M,fid,speed,paused:resumed&&M.phase!=='ht',done:false,speech:'none',proceeded:false,tab:'feed',feed:[],mom:[],busy:false,loopId:Math.random(),
     view:{sc:[...M.sc], st:cloneSt(M.st), min:M.min, phase:M.phase, so:M.so?[...M.so.sc]:null}, pending:null};
   buildLive(); const L=App.live;
-  L.stage=new Stage($('#lv-canvas'),{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',onCaption:liveCaption,emit:liveEmit,section:C.section,weather:weatherFor(f),relabel:true,sfx:true,board:()=>({h:boardName(Sx(f.h)),a:boardName(Sx(f.a)),sc:L.view.sc,min:L.view.phase==='so'?'PENS':L.view.min?`${L.view.min}'`:'KICKOFF'})});
+  L.stage=new Stage($('#lv-canvas'),{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',uzoom:true,onCaption:liveCaption,emit:liveEmit,section:C.section,weather:weatherFor(f),relabel:true,sfx:true,board:()=>({h:boardName(Sx(f.h)),a:boardName(Sx(f.a)),sc:L.view.sc,min:L.view.phase==='so'?'PENS':L.view.min?`${L.view.min}'`:'KICKOFF'})});
   L.stage.setSides(M.sides); for(let i=0;i<2;i++) L.stage.setKeeper(i,M.sides[i].gk);
   L.stage.kickoffShape(M.min>=40&&M.min<80?1:0); L.stage.snap();
   for(const e of M.ev) feedPush(e,true);
@@ -123,10 +123,10 @@ function updateLive(scoreOnly){
   const view=PREFS.view||'broadcast';
   set(`<button class="btn ico" data-a="livePause" aria-label="${L.paused?'Resume':'Pause'}" title="${L.paused?'Resume':'Pause'} (Space)">${L.paused?'▶':'❚❚'}</button>
    <div class="seg" role="group" aria-label="Speed">${[1,2,4,8].map(s=>`<button class="${L.speed===s?'on':''}" data-a="liveSpeed" data-v="${s}" aria-pressed="${L.speed===s}">${s}×</button>`).join('')}</div>
-   <div class="seg" role="group" aria-label="Camera">${[['broadcast','Broadcast'],['tactical','Tactical']].map(([k,l])=>`<button class="${view===k?'on':''}" data-a="liveView" data-v="${k}" aria-pressed="${view===k}">${l}</button>`).join('')}</div>
+   ${v184ViewSeg('liveView',view)}${v184ZoomCtl('liveZoom',view)}
    <button class="btn sm" data-a="liveTactics">Tactics</button>${typeof soundBtn==='function'?soundBtn():''}
    ${!M.htDone&&M.htOn?'<button class="btn sm ghost" data-a="liveSkip" data-to="ht">Skip to half</button>':''}<button class="btn sm ghost" data-a="liveSkip" data-to="ft">Skip to end</button>
-   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · M sound</span>`);
+   <span class="tiny muted kb">Space pause · 1–4 speed · V camera · + − zoom · M sound</span>`);
 }
 const waitMs=ms=>new Promise(r=>setTimeout(r,ms));
 /* animate one resolved minute; every visible event is announced by the stage itself */

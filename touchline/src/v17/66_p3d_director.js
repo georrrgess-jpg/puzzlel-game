@@ -42,8 +42,9 @@ P3D_MODULES.push({name:'director',order:25,
     if(st.inNet&&st.flash>0.5) D.goalT=st.now;
     const live=st.mode!=='tactical';
     if(!live) return 'main';
-    if(st.so) return 'pen';
-    if(st.setPiece==='pen'&&(st.placed||(st.fl&&st.fl.kind==='shot')||(st.focus&&st.focus.y===34&&!st.focus.pid))) return 'pen';
+    const sl=!!P._slOn; /* sideline view (74): the sideline camera covers kick-offs, corners and penalties itself */
+    if(st.so&&!sl) return 'pen';
+    if(!sl&&st.setPiece==='pen'&&(st.placed||(st.fl&&st.fl.kind==='shot')||(st.focus&&st.focus.y===34&&!st.focus.pid))) return 'pen';
     /* celebration close-up: entered at hype > 0.6 after a goal, held while the scorer has the focus */
     if(!st.rm&&st.now-D.goalT<20000){ const sc=this.scorer(st);
       if(sc&&(D.mode==='celeb'&&D.cel===sc||st.hype>0.6)){ D.cel=sc; return 'celeb'; } }
@@ -51,8 +52,8 @@ P3D_MODULES.push({name:'director',order:25,
     { const gx=b.x>52.5?105:0; const atFlag=Math.abs(b.x-gx)<1.8&&(b.y<1.8||b.y>66.2)&&(b.z||0)<0.4&&!st.fl;
       const f=st.fl, fromFlag=f&&f.from&&Math.abs(f.from.x-gx)<2.6&&(f.from.y<2.6||f.from.y>65.4);
       if(atFlag||fromFlag) D.cnrT=st.now;
-      if(!st.inNet&&Math.abs(b.x-gx)<30&&st.now-D.cnrT<(st.D?st.D(2600):2600)) return 'corner'; }
-    if(st.pendingKick&&!st.fl||this.kickoff(st)) return 'kickoff';
+      if(!sl&&!st.inNet&&Math.abs(b.x-gx)<30&&st.now-D.cnrT<(st.D?st.D(2600):2600)) return 'corner'; }
+    if(!sl&&(st.pendingKick&&!st.fl||this.kickoff(st))) return 'kickoff';
     return 'main'; },
   /* the ball resting on the centre spot with both teams in their own halves: a kick-off */
   kickoff(st){ const b=st.ball; if(st.fl||Math.hypot(b.x-52.5,b.y-34)>1.2||st.so) return false;
@@ -76,7 +77,7 @@ P3D_MODULES.push({name:'director',order:25,
     D.mainTgt.copy(D.mainEye).addScaledVector(D.fwd,L); const fov0=cam.fov;
     /* main adjustments: far-side play tilts the frame toward it and lifts the gantry a little */
     const r0=v18Damp(D.by,D.byv,st.ball.y,1.3,dt); D.by=r0[0]; D.byv=r0[1];
-    if(st.mode!=='tactical'){ const far=Math.max(0,Math.min(1,1-D.by/68)); D.mainEye.y+=far*2.2; D.mainTgt.z+=Math.max(-3,Math.min(3,(D.by-D.mainTgt.z)*0.12)); }
+    if(st.mode!=='tactical'&&!P._slOn){ const far=Math.max(0,Math.min(1,1-D.by/68)); D.mainEye.y+=far*2.2; D.mainTgt.z+=Math.max(-3,Math.min(3,(D.by-D.mainTgt.z)*0.12)); }
     /* 2. preset and its pose */
     const now=performance.now(); let snap=D.snap||D.fresh||!!st.rm; /* reduced motion: cut between framings, never fly */ if(D.cutAt&&now>=D.cutAt){ D.cutAt=0; snap=true; }
     const mode=this.pick(P,st); if(mode==='replay'&&D.mode!=='replay') snap=true; if(mode!=='replay'&&D.mode==='replay') snap=true;

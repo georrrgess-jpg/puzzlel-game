@@ -1,0 +1,9 @@
+/* v18.4 zoom control (74_sideline.js): a - / + pair with the level name between them */
+.v184-zoom{align-items:center;flex-wrap:nowrap}
+.v184-zoom button{min-width:32px;padding:5px 9px;font-size:1rem;line-height:1;color:var(--text)}
+.v184-zoom button[aria-disabled="true"]{opacity:.35;cursor:default}
+.v184-zoom button[aria-disabled="true"]:hover{color:var(--text)}
+.v184-zoom .v184-zl{min-width:4.6em;text-align:center;font-weight:700;font-size:.8rem;color:var(--muted);user-select:none}
+.v184-zoom.v184-off .v184-zl{opacity:.6}
+.v184-hlc{gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:520px){ .v184-zoom button{min-width:30px;padding:4px 7px} .v184-zoom .v184-zl{min-width:3.9em;font-size:.74rem} }
