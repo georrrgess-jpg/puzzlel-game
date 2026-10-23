@@ -258,12 +258,12 @@ const V186R_LINES={
   wide:['{p} drags it wide.','{p} can only find the side netting.','{p} pulls it wide of the post.'],
   post:['{p} hits the post!','Off the post! {p} so close.','{p} rattles the upright.'],
   bar:['{p} smashes it against the bar!','Off the crossbar from {p}!','{p} rattles the bar.'],
-  catch:['Strong hands from {g} to keep out {p}.','{g} gathers {p}\'s effort.','{g} gets down well to deny {p}.','{g} spreads himself and smothers it.'],
+  catch:['Strong hands from {g} to keep out {p}.','{g} gathers {p}\'s effort.','{g} gets down well to deny {p}.'],
   parry:['{g} parries {p}\'s shot away.','Big stop from {g}! He beats it away.','{p} forces a fine save from {g}.'],
   tip:['{g} tips {p}\'s effort round the post.','Fingertip save from {g}! Round the post for a corner.','{g} at full stretch to turn it round the post.'],
   tipover:['{g} tips {p}\'s effort over the bar.','Fingertip save from {g}! Over for a corner.','{g} arches back and turns it over the bar.']};
 V186R_LINES.hover=['{p} heads it over the bar.','{p} gets his head to it but it climbs over.','{p} rises well but nods it over.']; V186R_LINES.hwide=['{p} glances his header wide.','{p} heads it just wide of the post.','{p} can only steer his header wide.'];
-V186R_LINES.smother=V186R_LINES.catch; V186R_LINES.dive=V186R_LINES.catch;
+V186R_LINES.smother=['{g} spreads himself and smothers it.','{g} is out quickly to smother at {p}\'s feet.','{g} dives at {p}\'s feet and gathers.']; V186R_LINES.dive=V186R_LINES.catch;
 if(typeof feedPush==='function'){ const v186rFeedPush=feedPush;
   feedPush=function(e,quiet){ const L=App.live, n0=L&&L.feed?L.feed.length:0; const r=v186rFeedPush.apply(this,arguments);
     try{ /* a save another unit did not tag: read what the stage shows as it is announced (in the gloves, or pushed away) */

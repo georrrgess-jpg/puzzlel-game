@@ -373,6 +373,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   /* whole-body rotation: roll about forward, or pitch about lateral */
   const rot=Q.rot||0, act=Q.act; let ra=0, pa=0;
   if(rot){ const ct=p.celebType; if(act==='fall'||act==='trip'||(act==='celeb'&&(ct==='backflip'||ct==='flag'))) pa=rot*(cY>=0?1:-1); else if(act==='loco') ra=rot*((p.vy||0)>=0?1:-1); else ra=rot; }
+  if(Q.rollB||Q.pitchB){ ra=Q.rollB||0; pa=ra?0:(Q.pitchB||0); }
   const cr=Math.cos(ra), sr=Math.sin(ra), cp=Math.cos(pa), sp=Math.sin(pa), pv=lift+(Q.pivot||0); const X0=p.x, Y0=p.y; const W=F.s, D=F.v;
   /* body (f,u,l) -> world point / direction */
   const bw=(f,u,l,o)=>{ u+=lift; if(ra||pa){ let a=f, b=u-pv, c=l; if(ra){ const c2=c*cr-b*sr; b=c*sr+b*cr; c=c2; } else { const a2=a*cp+b*sp; b=-a*sp+b*cp; a=a2; } f=a; u=b+pv; l=c; }

@@ -239,7 +239,7 @@ Stage.prototype.v186kSave=async function(e){
   const dur=this.D(340)+120;
   await this.launch(p,{home:gk,hands:true,dur,h,hFn:()=>this.shotH(s,{x:gk.x,y:ty,z:zT},h),kind:'shot',head:!!A.head,onRelease:arm});
   const D=gk.dive; const out=plan.out; const corner=out==='corner'; const k=plan.k;
-  e._how=corner?'tip':out==='catch'?'catch':'parry'; e._v186k=k; /* for the commentary (Design A): what the keeper was shown doing */
+  e._how=corner?(k==='tipOver'?'tipover':'tip'):out==='catch'?(k==='smother'?'smother':'catch'):'parry'; e._v186k=k; /* for the commentary (Design A): what the keeper was shown doing */
   if(corner){ this.emit(e); e._done=1; }
   if(out!=='catch'){ if(this.own===gk){ this.own=null; this.hands=false; }
     const sg=Math.sign(ty-34)||1;
