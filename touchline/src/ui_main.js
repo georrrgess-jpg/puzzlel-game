@@ -117,7 +117,8 @@ A.retrySave = ()=> saveNow();
 A.liveSpeed = el => { App.live.speed=+el.dataset.v; App.C.settings.speed=+el.dataset.v; queueSave(); updateLive(); };
 A.livePause = ()=>{ const L=App.live; if(!L||L.done||L.M.phase==='ht'||L.skipping) return; L.paused=!L.paused; if(L.stage) L.stage.paused=L.paused; $('.live')?.classList.toggle('paused',L.paused);
   if(L.paused){ App.C.live={fid:L.fid,M:L.M}; queueSave(); Sound.crowdStop(); } else { Sound.crowdStart(); if(!L.busy){ L.loopId=Math.random(); liveLoop(L.loopId); } } updateLive(); };
-A.liveView = el => { const L=App.live; PREFS.view=el.dataset.v; savePrefs(); if(L&&L.stage){ L.stage.mode=el.dataset.v; L.stage.bgTac=null; } updateLive(); };
+A.liveView = el => { const L=App.live; PREFS.view=el.dataset.v; savePrefs(); if(L&&L.stage) v184SetView(L.stage,el.dataset.v); updateLive(); };
+A.liveZoom = el => { if(el.getAttribute&&el.getAttribute('aria-disabled')==='true') return; v184StepZoom(+el.dataset.v); };
 A.liveTab = el => { const L=App.live; L.tab=el.dataset.v; document.querySelectorAll('.lv-panel .tab').forEach(t=>t.classList.toggle('on',t.dataset.v===L.tab)); renderFeed(); };
 A.liveTactics = ()=>{ const L=App.live; L.tab='tac'; document.querySelectorAll('.lv-panel .tab').forEach(t=>t.classList.remove('on')); const S=L.M.sides[L.M.user]; $('#lv-pbody').innerHTML=`<div style="padding-top:8px"><h3>Tactics</h3>${tacSliders(S.tac,'lt')}<div class="field" style="margin-top:10px"><label for="lt-form">Formation</label><select id="lt-form" data-c="liveForm">${opts(Object.keys(FORMS).map(x=>[x,x]),S.form)}</select></div><p class="tiny muted">Changes apply from the next minute.</p><button class="btn sm" data-a="liveTab" data-v="feed">Back to commentary</button></div>`; };
 A.liveSkip = el => { const L=App.live; if(!L||L.done||L.skipping) return; const M=L.M; const C=App.C; const to=el.dataset.to;
@@ -138,14 +139,15 @@ A.awardsNight = el => { App.modal={type:'awardsNight',yr:+el.dataset.y}; renderM
 A.closeCeremony = el => { const c=el.closest('.ceremony'); if(c){ if(c._fw) c._fw.stop(); c.classList.add('out'); setTimeout(()=>c.remove(),300); } };
 A.replayGoal = el => { const C=App.C; const f=C.fixtures[el.dataset.f]; const lg=C.logs[f.id]; const e=(lg.ev||[]).filter(x=>x.t==='goal')[+el.dataset.i]; if(!e||!e.seq) return; const cv=$('#hl-canvas'); if(!cv) return;
   if(App.hl&&App.hl.cv!==cv){ App.hl.destroy(); App.hl=null; }
-  if(!App.hl){ App.hl=new Stage(cv,{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',section:C.section,sfx:true,onCaption:(t)=>{ const c=$('#hl-cap'); if(c) c.textContent=t; }}); }
+  if(!App.hl){ App.hl=new Stage(cv,{h:Sx(f.h),a:Sx(f.a),id:f.id},{mode:PREFS.view||'broadcast',uzoom:true,section:C.section,sfx:true,onCaption:(t)=>{ const c=$('#hl-cap'); if(c) c.textContent=t; }}); }
   const st=App.hl; st.cancel(); const gen=(st.replayGen=(st.replayGen||0)+1);
   setTimeout(()=>{ if(!st.alive||st.replayGen!==gen) return; st.skip=false; st.setSides(lg.lu.map(L=>({slots:L.slots,off:{}})));
     lg.lu.forEach((L,i)=>{ const g=L.slots.find(s=>s.role==='GK'); if(g) st.setKeeper(i,g.pid); });
     st.clipStart(e); st.goalTs=0.9;
     const cap=$('#hl-cap'); if(cap) cap.textContent=`${e.m}' ${pname(Px(e.pid))} · ${GOAL_TYPE_NAME[e.ty]||''}${e.ast?' · assist '+pname(Px(e.ast)):''}`;
     st.goalSequence(e); },0); };
-A.hlView = el => { PREFS.view=el.dataset.v; savePrefs(); if(App.hl){ App.hl.mode=el.dataset.v; App.hl.bgTac=null; } document.querySelectorAll('[data-a=hlView]').forEach(b=>b.classList.toggle('on',b.dataset.v===el.dataset.v)); };
+A.hlView = el => { PREFS.view=el.dataset.v; savePrefs(); if(App.hl) v184SetView(App.hl,el.dataset.v); document.querySelectorAll('[data-a=hlView]').forEach(b=>{ const on=b.dataset.v===el.dataset.v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); v184PaintZoom(); };
+A.hlZoom = el => { if(el.getAttribute&&el.getAttribute('aria-disabled')==='true') return; v184StepZoom(+el.dataset.v); };
 A.cerAgain = el => { const c=el.closest('.ceremony'); if(c&&c._fw) c._fw.restart(); Sound.goal(); };
 /* ---------- change / input handlers ---------- */
 CH.search = el => { App.q=el.value; const q=el.value.trim().toLowerCase(); const box=$('#sres'); if(!box) return; if(q.length<2){ box.innerHTML=''; return; } const C=App.C; const out=[];
@@ -197,7 +199,7 @@ function onPointerUp(e){ if(benchUp(e)) return; if(!drag) return; const d=drag; 
   App.params.sel=String(d.i); changed(); }
 function onKey(e){
   const typing=e.target&&e.target.matches&&e.target.matches('input,select,textarea');
-  if(App.live&&!typing&&!App.modal){ if(e.key===' '){ e.preventDefault(); A.livePause(); return; } if(['1','2','3','4'].includes(e.key)){ A.liveSpeed({dataset:{v:[1,2,4,8][+e.key-1]}}); return; } if(e.key==='v'||e.key==='V'){ A.liveView({dataset:{v:(PREFS.view||'broadcast')==='broadcast'?'tactical':'broadcast'}}); return; } }
+  if(App.live&&!typing&&!App.modal){ if(e.key===' '){ e.preventDefault(); A.livePause(); return; } if(['1','2','3','4'].includes(e.key)){ A.liveSpeed({dataset:{v:[1,2,4,8][+e.key-1]}}); return; } if(e.key==='v'||e.key==='V'){ A.liveView({dataset:{v:v184NextView(PREFS.view)}}); return; } if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='+'||e.key==='=')){ v184StepZoom(1); return; } if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==='-'||e.key==='_')){ v184StepZoom(-1); return; } }
   if(e.key==='Escape'){ const cer=document.querySelector('.ceremony'); if(cer){ A.closeCeremony(cer.querySelector('button')); return; } if(App.drawer){ A.closeDrawer(); return; } if(App.modal){ A.closeModal(); return; } }
   const tok=e.target.closest&&e.target.closest('#pitch .tok');
   if(tok && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){ const {sid,lu}=curLuCtx(); if(!canEdit(sid)) return; e.preventDefault(); const i=+tok.dataset.slot; const s=lu.slots[i]; const st=App.snap!==false?4:2; const dx={ArrowLeft:-st,ArrowRight:st}[e.key]||0, dy={ArrowUp:st,ArrowDown:-st}[e.key]||0; moveSlot(lu,i,s.x+dx,s.y+dy); App.params.sel=String(i); changed(); setTimeout(()=>$(`#pitch .tok[data-slot="${i}"]`)?.focus({preventScroll:true}),0); }

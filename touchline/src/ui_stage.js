@@ -44,13 +44,13 @@ class Stage {
     this.poss=0; this.cam={x:52.5,w:46,tw:46}; this.trail=[]; this.flash=0; this.hype=0; this.shake=0; this.conf=[]; this.bulge=null; this.bulbs=[];
     this.netD={0:{a:0,va:0,tgt:0,c:null,n:null,touch:-9e9},105:{a:0,va:0,tgt:0,c:null,n:null,touch:-9e9}};
     this.sfx=!!opts.sfx; this.celebFor=opts.celebFor||defaultCelebFor; this.board=opts.board||null; this.grassPat=null;
-    this.waiters=[]; this.timers=[]; this.skip=false; this.ts=1; this.goalTs=1; this.alive=true; this.now=0; this.t0=performance.now(); this.lastReal=0; this.paused=false; this.pendingKick=null; this.focus=null; this.so=false; this.zoom=1;
+    this.waiters=[]; this.timers=[]; this.skip=false; this.ts=1; this.goalTs=1; this.alive=true; this.now=0; this.t0=performance.now(); this.lastReal=0; this.paused=false; this.pendingKick=null; this.focus=null; this.so=false; this.zoom=1; this.v184z=!!opts.uzoom;
     this.crowd=this.genCrowd(); this.resize();
     this.loop=this.loop.bind(this); this.raf=requestAnimationFrame(this.loop);
     this.ro = typeof ResizeObserver!=='undefined' ? new ResizeObserver(()=>this.resize()) : null; if(this.ro) this.ro.observe(canvas.parentElement);
   }
   destroy(){ if(this.sfx&&typeof Sound!=='undefined'&&Sound.crowd&&Sound.crowd.hush) Sound.hush(false); this.alive=false; cancelAnimationFrame(this.raf); this.timers.forEach(clearTimeout); this.waiters.forEach(w=>w.res()); this.waiters=[]; if(this.ro) this.ro.disconnect(); }
-  resize(){ const pe=this.cv.parentElement; const r={width:pe.clientWidth||pe.getBoundingClientRect().width, height:pe.clientHeight||pe.getBoundingClientRect().height}; /* layout size: unaffected by opening animations */ const dpr=Math.min(1.5,window.devicePixelRatio||1)*(this.rs||1); this.dpr=dpr; this._cc=null; this.W=Math.max(200,r.width); this.H=Math.max(150,r.height); this.cv.width=this.W*dpr; this.cv.height=this.H*dpr; this.cv.style.width=this.W+'px'; this.cv.style.height=this.H+'px'; this.ctx.setTransform(dpr,0,0,dpr,0,0); this.bgTac=null; this.bw=clamp(this.W/30,20,38); this.cam.w=this.cam.tw=this.bw*this.zoom; }
+  resize(){ const pe=this.cv.parentElement; const r={width:pe.clientWidth||pe.getBoundingClientRect().width, height:pe.clientHeight||pe.getBoundingClientRect().height}; /* layout size: unaffected by opening animations */ const dpr=Math.min(1.5,window.devicePixelRatio||1)*(this.rs||1); this.dpr=dpr; this._cc=null; this.W=Math.max(200,r.width); this.H=Math.max(150,r.height); this.cv.width=this.W*dpr; this.cv.height=this.H*dpr; this.cv.style.width=this.W+'px'; this.cv.style.height=this.H+'px'; this.ctx.setTransform(dpr,0,0,dpr,0,0); this.bgTac=null; this.bw=clamp(this.W/30,20,38); this.cam.w=this.cam.tw=this.bw*this.zoom*(this.v184K?this.v184K():1); }
   genCrowd(){ const r=rngFrom(hashStr(this.T.id||'crowd')); const out=[]; const pal=[this.h.c1,this.h.c2,this.h.c1,'#d8dde3','#5b6573',this.a.c1,'#2d333b','#c49a6c','#8a5a3c']; for(let row=0;row<13;row++){ const up=row>=7; const R=up?row+1:row; for(let x=-24;x<130;x+=(up?0.95:1.1)+r()*0.55){ const away=x>92&&r()<0.6; const fl=r()<0.035?(away?this.a.c1:(r()<0.5?this.h.c1:this.h.c2)):null; out.push({x, row:R, c:away?this.a.c1:pal[Math.floor(r()*pal.length)], sk:LOOK.skin[Math.floor(r()*12)], ph:r()*6.28, s:0.82+r()*0.4, flag:fl}); } } return out; }
   /* ---------- roster ---------- */
   setSides(sides){
@@ -748,7 +748,7 @@ class Stage {
       else { const k=j++; const [bx,by]=this.base(p); p.ov={x:lerp(p.x,bx,0.35),y:lerp(p.y,by,0.35)}; p.sad=!p.gk; p.slow=true; } }
     this.zoomTo(w===-1?0.9:1.1); this.focus=w===-1?{x:52.5}:{x:hx}; this.hype=w===-1?0.3:1; if(w!==-1) this.burst(w); }
   halftime(){ for(const p of this.players.values()) p.card=null; this.kickoffShape(1); this.snap(); }
-  zoomTo(f){ this.zoom=f; this.cam.tw=this.bw*f; }
+  zoomTo(f){ this.zoom=f; this.cam.tw=this.bw*f*(this.v184K?this.v184K():1); }
   burst(side){ if(this.rm) return; const cols=side===0?[this.h.c1,this.h.c2,'#ffd36b']:[this.a.c1,this.a.c2,'#ffd36b']; for(let i=0;i<150;i++) this.conf.push({x:this.W*(0.1+Math.random()*0.8),y:-10-Math.random()*this.H*0.4,vx:(Math.random()-.5)*60,vy:60+Math.random()*120,r:Math.random()*6.28,vr:(Math.random()-.5)*8,c:cols[i%cols.length],life:3+Math.random()*1.5,w:5+Math.random()*5}); }
   popBulbs(){ if(this.rm) return; for(let i=0;i<40;i++) this.bulbs.push({x:-20+Math.random()*145,row:Math.random()*7,t:this.now+Math.random()*900}); }
   /* the goal is described the way the broadcast showed it */
