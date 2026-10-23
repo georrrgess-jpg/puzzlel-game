@@ -33,7 +33,7 @@ function v18Tier(){ const t=PREFS.rtier; return V18_TIERS[t]||V18_TIERS[v18Defau
 
 const _v18RendererFor=rendererFor;
 rendererFor=function(kind){ const pref=PREFS.renderer||'auto'; if(pref==='2d') return '2d';
-  if(!['live','lab','tv','menu'].includes(kind)) return '2d'; if(typeof THREE==='undefined') return '2d';
+  if(!['live','lab','tv','menu','preview'].includes(kind)) return '2d'; if(typeof THREE==='undefined') return '2d';
   const g=v18GL(); if(!g.ok) return '2d'; if(pref==='3d') return '3d';
   if(g.software||v18Off||reducedMotion()) return '2d'; if(kind==='menu'&&v18Tier().name==='C') return '2d'; return '3d'; };
 if(!V17_RENDERER_OPTIONS.some(o=>o[0]==='3d')) V17_RENDERER_OPTIONS.splice(1,0,['3d','3D broadcast']);
