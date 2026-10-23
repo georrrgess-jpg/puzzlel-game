@@ -19,7 +19,7 @@ Stage.prototype.v18tPuntPitch=function(K,t){ const W=K.W, Fd=K.Fd;
   if(q<0.75) return lerp(-0.7,0,smooth((q-0.3)/0.45));
   return 0; };
 
-const _v18tPose=Stage.prototype.poseOf;
-Stage.prototype.poseOf=function(p,isRef){ const P=_v18tPose.apply(this,arguments);
+const _v18tuPose=Stage.prototype.poseOf;
+Stage.prototype.poseOf=function(p,isRef){ const P=_v18tuPose.apply(this,arguments);
   if(!V18T.punt||isRef||!P||P.act!=='punt') return P; const K=this._v18pk; if(!K||K.p!==p) return P;
   const r=this.v18tPuntPitch(K,this.v18pkt(K)); if(r!=null) P.bootT=[null,r]; return P; };
