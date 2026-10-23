@@ -69,7 +69,7 @@ async function labRatings(b){ const page=await newPage(b); await page.goto(DIST+
     out.duelHi=await duel(95,40,60); out.duelLo=await duel(40,95,60);
     const run=async(ctrl,tkl)=>{ fw.v186r_ctrl=ctrl; df.v186r_tkl=tkl; let past=0, n=0, beat=0; st.demoCalm=false;
       for(let i=0;i<6;i++){ st.fl=null; st.own=fw; st.hands=false; fw.ov={x:58,y:34}; df.ov={x:63.5,y:34}; await st.until(()=>dist2(fw,fw.ov)<0.4&&dist2(df,df.ov)<0.4,3000); fw.v186fT=null; df.ov=null;
-        const k0=V186R.log.feint.length; await st.dribble(fw,70,34,900); const f=V186R.log.feint[k0]; if(!f) continue; n++; if(f.beat) beat++; if(fw.x>df.x+0.3) past++; }
+        const k0=V186R.log.feint.length; let pa=false; const dr=st.dribble(fw,70,34,900); await st.until(()=>{ if(fw.x>df.x+0.3) pa=true; return false; },Math.max(400,st.D(1100))); await dr; const f=V186R.log.feint[k0]; if(!f) continue; n++; if(f.beat) beat++; if(pa) past++; }
       fw.ov=null; st.demoCalm=true; return {n,beat,past}; };
     /* R6 positioning: how close a pressing defender gets to a carrier who stands still */
     const press=async(tkl)=>{ df.v186r_tkl=tkl; st.demoCalm=false; st.fl=null; st.own=fw; st.hands=false; fw.ov={x:60,y:34}; df.ov={x:66,y:36}; await st.until(()=>dist2(fw,fw.ov)<0.4&&dist2(df,df.ov)<0.4,3000); df.ov=null; await st.wait(1600);
@@ -93,10 +93,10 @@ async function labRatings(b){ const page=await newPage(b); await page.goto(DIST+
   await page.close(); return R; }
 
 async function labThrow(b,n){ const page=await newPage(b); await page.goto(DIST+'#anim-lab'); await page.waitForTimeout(800);
-  await page.evaluate(()=>{ PREFS.renderer='2d'; labRun('throwin'); }); await page.waitForFunction(()=>App.labSt&&App.labSt.players.size>0);
+  await page.evaluate(MON); await page.evaluate(()=>{ PREFS.renderer='2d'; labRun('throwin'); }); await page.waitForFunction(()=>App.labSt&&App.labSt.players.size>0);
   await page.click('[data-a="labSpeed"][data-v="2"]');
-  /* every other throw-in, an opponent stands within 3 m of the man who kicks it out (the block case) */
-  await page.evaluate(()=>{ const st=App.labSt; let i=0; const T=st.throwIn; st.throwIn=function(){ const o=this.own; if(o&&(i++%2===0)){ const q=[...this.players.values()].find(p=>p.side!==o.side&&!p.gk); q.x=o.x+1.6; q.y=o.y+1.2; q.ov=null; q._px=null; } return T.apply(this,arguments); }; });
+  /* on three throw-ins in four an opponent stands within 3 m of the man who kicks it out (a block is possible) */
+  await page.evaluate(()=>{ const st=App.labSt; let i=0; const T=st.throwIn; st.throwIn=function(){ const o=this.own; if(o&&(i++%4!==3)){ const q=[...this.players.values()].find(p=>p.side!==o.side&&!p.gk); q.x=o.x+1.6; q.y=o.y+1.2; q.ov=null; q._px=null; } return T.apply(this,arguments); }; });
   const t0=Date.now(); let shot=0;
   while(Date.now()-t0<90000){ const k=await page.evaluate(()=>V186R.log.thr.length); if(k>=n) break;
     if(!shot&&await page.evaluate(()=>V186R.log.thr.some(t=>t.block))){ await page.waitForTimeout(250); await page.screenshot({path:`${SHOTS}lab_throwin_block.png`}); shot=1; }
@@ -135,7 +135,7 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
     ok(M.loOver>M.hiOver+0.4, `over the bar from 20 m: finishing 95 z ${M.hiOver.toFixed(2)}, finishing 30 z ${M.loOver.toFixed(2)}`);
     ok(M.closeWide<=4.7&&M.closeOver<=3.0, `misses from 5 m stay close: widest ${M.closeWide.toFixed(2)} (|y-34|), highest z ${M.closeOver.toFixed(2)}`);
     for(const [sp,mode,n] of [[1,'broadcast',2],[2,'sideline',2],[4,'tactical',2],[8,'broadcast',3]]) await labOffside(b,sp,mode,n);
-    await labThrow(b,4);
+    await labThrow(b,10);
   }
   if(part==='live'||part==='all'){
     const runs=QUICK?[[8,'v186probe',200],[4,'v186probe2',200]]:[[8,'v186probe',260],[8,'realism-b',260],[4,'v186probe2',260],[2,'realism-c',150,'sideline'],[1,'realism-d',120]];

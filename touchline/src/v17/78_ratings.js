@@ -72,6 +72,7 @@ Stage.prototype.eta=function(p,x,y,mult){ const t=v186rEta.apply(this,arguments)
 
 /* per frame, before the steering: who presses the carrier, and did the carrier just cut sharply? */
 function v186rPre(st){ const o=st.own&&!st.hands?st.own:null; st._v186rPres=null;
+  const B=st._v186rBeat; if(B&&B.size){ for(const q of B){ if(st.skip||!V186R.on||st.now-q.v186bT>q.v186bD){ if(q.ov===q.v186bOv) q.ov=null; q.v186bOv=null; B.delete(q); } } }
   if(!o||!v186rLive(st)||st.demoCalm){ st._v186rYH=null; return; }
   st._v186rPres=st.nearest(1-o.side,st.ball.x,st.ball.y);
   const now=st.now, y=st.yawOf(o); let H=st._v186rYH; if(!H||H.p!==o){ H=st._v186rYH={p:o,q:[]}; }
@@ -111,7 +112,9 @@ function v186rTakeOn(st,p,x,y){ if(!V186R.feint||!v186rLive(st)||st.hands||st.ow
   if(!best) return null; const D=v186rDuel(st,p,best); if(Math.random()>=D.pTry) return null;
   const beat=Math.random()<D.pBeat; const side=((hx*(best.y-p.y)-hy*(best.x-p.x))>=0)?-1:1;
   p.v186fT=now; p.v186fS=side; best.v186dT=now; best.v186dS=side; best.v186dBeat=beat;
-  if(beat){ best.v186bT=now+Math.max(60,st.D(160)); best.v186bD=Math.max(200,st.D(500+300*(1-v186rA(st,best,'tkl'))));
+  if(beat){ best.v186bT=now+Math.max(60,st.D(160)); best.v186bD=Math.max(260,st.D(650+400*(1-v186rA(st,best,'tkl'))));
+    /* sold: he dives in toward the ball and is held there, slowed, while the carrier goes round him */
+    best.v186bOv={x:best.x+(p.x-best.x)*0.4,y:best.y+(p.y-best.y)*0.4+side*0.5}; best.ov=best.v186bOv; (st._v186rBeat||(st._v186rBeat=new Set())).add(best);
     best.kickT=now+Math.max(40,st.D(120)); best.kickW=0; best.kickK='pass'; best.kickF=st.D(260); st.look(best,p.x,p.y,st.D(500)); }
   v186rLog('feint',{att:p.pid,def:best.pid,gap:+D.gap.toFixed(1),beat,d:+bd.toFixed(2)});
   return {q:best,beat,side}; }
@@ -120,6 +123,8 @@ const v186rDribble=Stage.prototype.dribble;
 const v186rDribbleW=function(p,x,y,ms){ let T=null; try{ if(this.own===p) T=v186rTakeOn(this,p,x,y); }catch(e){ T=null; }
   if(T&&!T.beat){ /* the defender holds his ground: he checks back and goes again shorter */ const dir=p.side===0?1:-1;
     x=clamp(p.x+(x-p.x)*0.35-dir*0.6,4,101); y=clamp(p.y+(y-p.y)*0.35+T.side*1.2,3,65); }
+  else if(T){ /* beaten: he goes round the defender on the far side */ const q=T.q, hx=x-p.x, hy=y-p.y, hl=Math.hypot(hx,hy)||1; const cr=Math.sign(hx*(q.y-p.y)-hy*(q.x-p.x))||1;
+    y=clamp(y+(hx/hl)*(-cr)*1.4,3,65); x=clamp(x-(hy/hl)*(-cr)*1.4,4,101); }
   return v186rDribble.call(this,p,x,y,ms); };
 Stage.prototype.dribble=v186rDribbleW;
 
