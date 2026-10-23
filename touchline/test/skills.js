@@ -21,6 +21,8 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
     const sits=[]; for(const turn of [0.1,0.3,1.0,1.3,1.8,2.2,2.6,3.0]) for(const d of [1.6,2.4,3.4,5,null]) for(const sp of [2.5,4,5.5]) sits.push({turn,d,sp,n5:1});
     const run=(lvl,fl,n)=>{ const seen={}; let picks=0, tries=0; for(let i=0;i<n;i++){ const S=sits[i%sits.length]; tries++; const k=v186sPick(lvl,fl,S,rnd); if(k){ picks++; seen[k]=(seen[k]||0)+1; } } return {seen,rate:picks/tries}; };
     const o={MOD40:run('MOD',40,6000),JV65:run('JV',65,6000),V95:run('V',95,6000),V70:run('V',70,6000),JV51:run('JV',51,6000),MOD39:run('MOD',39,6000),MOD58:run('MOD',58,6000),V40:run('V',40,6000)};
+    const share=(S,ks)=>{ let n=0,h=0; for(let i=0;i<8000;i++){ const k=v186sPick('V',90,S,rnd); if(k){ n++; if(ks.includes(k)) h++; } } return n?h/n:0; };
+    o.sit={open:share({turn:0.2,d:2.4,sp:3.5,n5:1,vc:-1},['step1','step2']),crowd:share({turn:0.2,d:2.4,sp:3.5,n5:4,vc:-1},['step1','step2']),charge:share({turn:2.8,d:2.2,sp:3,n5:1,vc:3},['cruyff','drag']),calm:share({turn:2.8,d:2.2,sp:3,n5:1,vc:0},['cruyff','drag'])};
     o.rep={MOD40:v186sRepertoire('MOD',40),MOD55:v186sRepertoire('MOD',55),JV65:v186sRepertoire('JV',65),V95:v186sRepertoire('V',95)};
     o.q={MOD:v186sQ(70,'MOD'),JV:v186sQ(70,'JV'),V:v186sQ(70,'V'),lo:v186sQ(40,'V'),hi:v186sQ(90,'V')};
     o.bite={hi:v186sBite(96,48,1),mid:v186sBite(75,72,v186sQ(75,'V')),lo:v186sBite(45,85,v186sQ(45,'V'))}; return o; });
@@ -32,6 +34,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(P.V95.rate>P.V70.rate&&P.V70.rate>P.JV51.rate&&P.JV51.rate>P.MOD39.rate, `moves are tried more often with level and flair: V95 ${P.V95.rate.toFixed(3)} > V70 ${P.V70.rate.toFixed(3)} > JV51 ${P.JV51.rate.toFixed(3)} > MOD39 ${P.MOD39.rate.toFixed(3)}`);
   ok(P.V40.rate<P.V95.rate*0.6, `low flair tries far fewer than high flair at the same level (V40 ${P.V40.rate.toFixed(3)} vs V95 ${P.V95.rate.toFixed(3)})`);
   ok(P.V95.rate<0.4, `moves stay special: even a Varsity star tries one on ${(P.V95.rate*100).toFixed(1)} % of fitting legs (cooldown on top)`);
+  ok(P.sit.crowd<P.sit.open&&P.sit.charge>=P.sit.calm, `the situation shapes the choice: stepovers ${(P.sit.open*100).toFixed(0)} % in space vs ${(P.sit.crowd*100).toFixed(0)} % in a crowd; the Cruyff/drag-back against a charging defender ${(P.sit.charge*100).toFixed(0)} % vs ${(P.sit.calm*100).toFixed(0)} %`);
   ok(P.q.MOD<P.q.JV&&P.q.JV<P.q.V&&P.q.lo<P.q.hi, `execution quality: MOD ${P.q.MOD.toFixed(2)} < JV ${P.q.JV.toFixed(2)} < V ${P.q.V.toFixed(2)}; flair 40 ${P.q.lo.toFixed(2)} < 90 ${P.q.hi.toFixed(2)}`);
   ok(P.bite.hi>=0.9&&P.bite.lo<=0.3&&P.bite.mid>P.bite.lo&&P.bite.mid<P.bite.hi, `defender bite: 96 vs 48 ${P.bite.hi.toFixed(2)}, 75 vs 72 ${P.bite.mid.toFixed(2)}, 45 vs 85 ${P.bite.lo.toFixed(2)}`);
 

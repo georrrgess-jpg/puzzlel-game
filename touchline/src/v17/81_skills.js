@@ -67,7 +67,12 @@ function v186sPick(lvl,flair,S,rnd,force){ rnd=rnd||Math.random; const q=v186sQ(
   const C=v186sRepertoire(lvl,flair).filter(k=>v186sFits(k,S)); if(!C.length) return null;
   if(rnd()>=v186sChance(lvl,q,S.turn>=0.9)) return null;
   /* the fancier the move, the more it is the star's choice */
-  const W=C.map(k=>{ const m=V186S_MV[k], mn=m.min[lvl]||0; return m.w*(0.4+q)*(1+Math.max(0,flair-mn)/40)*(k==='feint'||k==='cut'?1.6-q:1); });
+  /* the situation shapes the choice: a defender charging in is sold (feint, stepover) or turned (Cruyff, drag-back); one backing off is
+     shown the ball (stepovers, roll); a crowd (3+ within 5 m) calls for tight moves (drag-back, roll, chop) rather than stepovers */
+  const vc=S.vc||0, crowd=(S.n5||0)>=3;
+  const W=C.map(k=>{ const m=V186S_MV[k], mn=m.min[lvl]||0; let w=m.w*(0.4+q)*(1+Math.max(0,flair-mn)/40)*(k==='feint'||k==='cut'?1.6-q:1);
+    if(vc>1.5&&(k==='feint'||k==='step1'||k==='cruyff'||k==='drag')) w*=1.6; if(vc<-0.5&&(k==='step1'||k==='step2'||k==='roll')) w*=1.5;
+    if(crowd) w*=(k==='drag'||k==='roll'||k==='chop')?1.6:(k==='step2'||k==='step1')?0.6:1; return w; });
   let s=W.reduce((a,b)=>a+b,0)*rnd(); for(let i=0;i<C.length;i++){ s-=W[i]; if(s<=0) return C[i]; } return C[C.length-1]; }
 
 /* ---------- small helpers ---------- */
@@ -82,7 +87,7 @@ function v186sBR(st){ return v184Is3D(st)?(typeof V18_BALL_R==='number'?V18_BALL
 function v186sDuty(st,p){ const sp=st.spdMul||1, real=(p.spd||0)/Math.max(1,sp); const G=gaitOf(Math.min(9,p.gv!=null?p.gv:real),sp); return clamp(Math.min(0.68,G.L/G.cw),0.22,0.68); }
 function v186sLab(st){ return typeof App!=='undefined'&&App.labSt===st; }
 /* may this carrier start a move at all (gating per the design: speed, skip, reduced motion, shootouts, keepers, demo, lab) */
-function v186sCan(st,p){ if(!V186S.on||!p||st.rm||st.skip||st.so||st.demo||st.ts<V186S.minTs||st.hands||st.placed||st.fl||st.own!==p||p.gk||p.off||p.slow||p.celeb||p.glide) return false;
+function v186sCan(st,p){ if(!V186S.on||!p||st.rm||st.skip||st.so||st.demo||st._v186off||st.ts<V186S.minTs||st.hands||st.placed||st.fl||st.own!==p||p.gk||p.off||p.slow||p.celeb||p.glide) return false;
   if(v186sLab(st)&&!st._v186lab) return false;
   for(const q of st.players.values()) if(q.chase===p) return false;
   return true; }
@@ -111,6 +116,10 @@ function v186sSolo(st,e){ if(!v186sAllowedSolo(st)) return null; const now=st.no
   pl.jumpT=-9e9; beat.slideT=-9e9; pl.v186pend=k; pl.v186pd=beat.pid; return V186S_MV[k].cap; }
 function v186sAllowedSolo(st){ return V186S.on&&!st.rm&&!st.skip&&!st.so&&!st.demo&&st.ts>=V186S.minTs&&!(v186sLab(st)&&!st._v186lab); }
 
+/* no moves while the ball is walked to a dead-ball spot or back to the centre after a goal */
+for(const nm of ['setupDeadBall','restartAfterGoal']){ const prev=Stage.prototype[nm]; if(typeof prev!=='function') continue;
+  Stage.prototype[nm]=function(){ this._v186off=(this._v186off||0)+1; let r; try{ r=prev.apply(this,arguments); } catch(e){ this._v186off--; throw e; }
+    const done=()=>{ this._v186off=Math.max(0,(this._v186off||1)-1); }; Promise.resolve(r).then(done,done); return r; }; }
 /* ---------- the dribble leg: remembered, never awaited differently ---------- */
 const _v186sDrib=Stage.prototype.dribble;
 Stage.prototype.dribble=function(p,x,y,ms){ const T=this._v186mt; let keep=true;
@@ -125,7 +134,9 @@ function v186sLegStart(st,L){ const p=L.p, now=st.now; L.arm=null; const Z=st._v
   const R=v186sRate(st,p); const mv=Math.hypot(p.vx||0,p.vy||0); const h=mv>0.8?Math.atan2(p.vy,p.vx):v186sYaw(p);
   const tg=Math.atan2(L.y-p.y,L.x-p.x), da=v186sAng(tg-h), turn=Math.abs(da); const hx=Math.cos(h), hy=Math.sin(h);
   const A=v186sAhead(st,p,turn<0.9?Math.cos(tg):hx,turn<0.9?Math.sin(tg):hy); const sp=(p.spd||0)/Math.max(1,st.spdMul||1);
-  const S={turn,d:A?A.d:null,sp,n5:v186sN5(st,p)}; if(Z.S.length<60) Z.S.push([+turn.toFixed(2),A?+A.d.toFixed(1):null,+sp.toFixed(1),Math.round(R.flair)]);
+  /* his momentum: closing speed toward the carrier (+ = charging in, - = backing off) */
+  let vc=0; if(A){ const q=A.q, ux=(p.x-q.x)/A.d, uy=(p.y-q.y)/A.d; vc=((q.vx||0)*ux+(q.vy||0)*uy)/Math.max(1,st.spdMul||1); }
+  const S={turn,d:A?A.d:null,sp,n5:v186sN5(st,p),vc}; if(Z.S.length<60) Z.S.push([+turn.toFixed(2),A?+A.d.toFixed(1):null,+sp.toFixed(1),Math.round(R.flair)]);
   let k=null;
   if(pend){ k=pend; }
   else if(force){ const m=V186S_MV[force]; if(m&&(m.turn?turn>=0.9:turn<0.9)) k=force; }
