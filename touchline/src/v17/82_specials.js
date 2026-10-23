@@ -211,12 +211,11 @@ Stage.prototype.v186xStep=function(p){ const now=this.now;
   if(this.skip||!this.alive||p.off||this.rm){ v186xClear(p); return; }
   const T=v186xDur(p.v186xk,p.v186xts), tc=p.v186xc, r=p.v186xr, tTO=tc-T.to, rd=r>=0?now-r:-1;
   if(r<0&&now>tc+4000){ v186xClear(p); return; }
-  /* he turns into position while the ball is in the air (set), then holds that facing */
   /* set: he stops sprinting and eases off into his take-off point (the cross homes in on wherever he is); he turns into
      position while the ball is in the air, never more than ~0.6 rad off his running line while he is still quick */
   if(now<tTO){ const s0=Math.max(p.v186xs,tc-T.set); if(now>=s0){ if(p.v186xy0==null){ p.v186xy0=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw;
         if(p.v186xh){ p.hurry=false; p.v186xh=0; } const v=Math.hypot(p.vx||0,p.vy||0), o=p.ov;
-        if(o&&!p.celeb&&isFinite(o.x)){ const dx=o.x-p.x, dy=o.y-p.y, d=Math.hypot(dx,dy), sd=v*(tTO-now)/1000*0.55; if(d>sd&&d>0.01){ p.ov={x:p.x+dx/d*sd,y:p.y+dy/d*sd}; } } }
+        if(o&&!p.celeb&&isFinite(o.x)){ const dx=o.x-p.x, dy=o.y-p.y, d=Math.hypot(dx,dy), sd=Math.max(v*0.55,this.spd()*0.3)*(tTO-now)/1000; if(d>sd&&d>0.01){ p.ov={x:p.x+dx/d*sd,y:p.y+dy/d*sd}; } } }
       const u=v186xSm((now-s0)/Math.max(1,(tTO-s0)*0.8)); let y=p.v186xy0+v186xAd(p.v186xy,p.v186xy0)*u;
       const v=Math.hypot(p.vx||0,p.vy||0), sm=this.spd(); if(v>0.35*sm){ const vh=Math.atan2(p.vy,p.vx), lim=0.6+2.6*v186xCl((0.5*sm-v)/(0.15*sm),0,1); y=vh+v186xCl(v186xAd(y,vh),-lim,lim); }
       p.yaw=y; p.face=Math.cos(p.yaw)>=0?1:-1; } }
