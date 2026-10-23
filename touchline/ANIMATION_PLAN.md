@@ -23,6 +23,31 @@ comparison sheet this plan asks for.
 
 ---
 
+## v18.6 execution plan: simulation realism, visible ratings, skill moves, special kicks, keeper saves (queued after v18.5)
+
+Full designs with verified evidence in `V18_6_DESIGN.md`. Budget: the user allows up to 6 hours; the design estimates add up to about
+15 agent-hours, so four units run in parallel worktrees (two workflows of two) with these scope cuts, then two reviewers each, fixes,
+and a merged-build integration review. Presentation only: `engine.js` is unchanged; sync, goalcap, postcap, v13_audit keep passing.
+1. **A. Realism and ratings** (`78_ratings.js`, `79_realism.js`, `test/realism.js`): the offside sequence rewritten so every flagged
+   player is visibly beyond the second-last defender and the ball when the pass is played, at every speed (quickFlag only as a
+   no-picture fallback), with a two-line freeze frame (defender line and attacker line) in 2-D, Tactical and 3-D; throw-ins never given
+   to the team that kicked it out without a visible deflection; close-range misses scaled to distance; miss/save commentary matching what
+   was shown; then ratings read per player on the stage so a big gap shows: pace and acceleration, touch quality, duel outcomes,
+   composure and shot technique, defender positioning and reaction. Should-tier if time: headers and free kicks animated as such.
+2. **B1. Skill moves** (`81_skills.js`, `test/skills.js`, lab scenes): stepover (single/double), chop (inside/outside), drag-back and
+   sole roll, Cruyff turn, body feint; chosen by the situation (a defender ahead within ~3 m, angle, space, the dribble's destination),
+   the player's dribbling ratings and the level (Modified knows the fewest and executes them worst, Varsity stars the most); the
+   defender visibly sold or turned; inside existing dribble windows (no event-timing change), no ball teleport, built on v18.4's touches.
+   Cut: la croqueta, elastico.
+3. **B2. Rare special kicks** (`82_specials.js`, `test/specials.js`, lab scene): bicycle kick and scissor volley, only for suitable
+   aerial chances near the box and skilled players, about 1-3 %; full poses (take-off, body horizontal, contact, landing, getting up),
+   contact timing, caption and replay hooks. Cut: rabona, scorpion.
+4. **C. Keeper saves** (`80_saves.js`, `test/saves.js`, lab scene): distinct saves chosen by the shot's height, placement, speed,
+   distance and the keeper's rating: standing catch, crouching scoop, low dive, full-stretch dive, diving catch, fingertip tip round the
+   post, tip over the bar, parry, smother at the feet, plus beaten dives (wrong-footed, late, short); better keepers set earlier, dive
+   cleaner and catch more. Cut: reaction/kick saves and the high claim.
+5. **Name plates**: delivered by v18.5's `77_plates.js`; v18.6 only checks they read well with the new moves and saves.
+
 ## v18.5 execution plan: two-angle goal replays and player plates (queued after v18.4; started 15:42 UTC, 2026-10-23)
 
 The full designs, with verified file references, edge cases, tests and screenshots, are in `V18_5_DESIGN.md`. Presentation only:
