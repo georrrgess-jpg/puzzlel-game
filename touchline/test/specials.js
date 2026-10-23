@@ -17,7 +17,7 @@ const INSTR=()=>{ const st=App.labSt; const X=window.__sx={rows:[],land:[],rel:[
   X.fr=[]; let lf=performance.now(); const fl=()=>{ const t=performance.now(); X.fr.push(Math.min(67,t-lf)); if(X.fr.length>90) X.fr.shift(); lf=t; if(App.labSt===st) requestAnimationFrame(fl); }; requestAnimationFrame(fl);
   st.update=function(dt){ const r=U.call(this,dt); try{ const K=this._v186x, p=K&&K.pl;
     if(p&&p.v186xk&&p.v186xc!=null){ had=p; lastK=K; const P=this.poseOf(p); const T=v186xDur(p.v186xk,p.v186xts); const tau=v186xTau(this,p);
-      const ph=tau<-T.to?'set':tau<-T.st?'to':tau<0?'st':tau<T.fall?'fall':tau<T.fall+T.lie?'lie':'up'; X.rows.push({k:p.v186xk,tau,ph,th:P.pitchB||0,ra:P.rollB||0,lift:P.lift||0,act:P.act,hipU:P.hipU,x:p.x,y:p.y,yaw:p.yaw,celeb:!!p.celeb});
+      const ph=tau<-T.to?'set':tau<-T.st?'to':tau<0?'st':tau<T.fall?'fall':tau<T.fall+T.lie?'lie':'up'; X.rows.push({k:p.v186xk,tau,ph,th:P.pitchB||0,ra:P.rollB||0,lift:P.lift||0,act:P.act,hipU:P.hipU,x:p.x,y:p.y,yaw:p.yaw,celeb:!!p.celeb,v:Math.hypot(p.vx||0,p.vy||0),vh:Math.atan2(p.vy||0,p.vx||0),sm:this.spd(),inSet:tau>=-T.set});
       if(this.headBall===p&&landed!==p.v186xc){ landed=p.v186xc; const c=this.v186xContact(p); const {R}=v186xScale(this,p); X.land.push({k:p.v186xk,dt:this.now-p.v186xc,bz:this.ball.z+R,cz:c.z+R,d:Math.hypot(this.ball.x-c.x,this.ball.y-c.y,this.ball.z-c.z)}); }
       if(X.pause.length&&tau>=X.pause[0].tau&&!X.paused){ X.paused=X.pause.shift().name; this.paused=true; } }
     if(K&&this.fl&&!this.fl.phys&&this.fl.home===K.pl&&this.fl!==X._fl){ X._fl=this.fl; K.crossRel=this.fl.t0; K.crossDur=this.fl.dur; }
@@ -28,7 +28,9 @@ const INSTR=()=>{ const st=App.labSt; const X=window.__sx={rows:[],land:[],rel:[
       let d2=null; if(!d3){ const [x,y,k]=this.proj(p.x,p.y); const s=k*((p.hgt||70)/70)*1.06; const yaw=p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw); const DEP=this.depthK!=null?this.depthK:clamp((this.H*0.705/68)/Math.max(1,k),0.12,0.45);
         const pr=([F,U2,L])=>[(F*ca-L*sa)*s,-U2*s+(F*sa+L*ca)*s*DEP]; const sd=kf?1:-1; const B=({lean:.9,average:1,stocky:1.14})[(p.look&&p.look.build)||'average']||1; const ft=P.feet[kf];
         const J=ik3([0,P.hipU,sd*0.09*B],[ft.f,ft.u+0.06,ft.l],0.43,0.43,[1,0.05,sd*0.12]); const q=pr(J.t); const rel=[q[0],q[1]+P.pivot*s]; const c=Math.cos(P.rot||0), sn=Math.sin(P.rot||0);
-        const ax=x+rel[0]*c-rel[1]*sn, ay=y-P.lift*s-P.pivot*s+rel[0]*sn+rel[1]*c; const kb=this.proj(b.x,b.y,0)[2]; const rr=Math.max(3.2,BALL_R*kb); const bp=this.proj(b.x,b.y,b.z); d2=Math.hypot(ax-bp[0],ay-(bp[1]-rr))/k; }
+        const ax=x+rel[0]*c-rel[1]*sn, ay=y-P.lift*s-P.pivot*s+rel[0]*sn+rel[1]*c; const kb=this.proj(b.x,b.y,0)[2]; const rr=Math.max(3.2,BALL_R*kb); const bp=this.proj(b.x,b.y,b.z); d2=Math.hypot(ax-bp[0],ay-(bp[1]-rr))/k;
+        /* the name plate's anchor (77, as drawn this frame) against the top of the ball */
+        if(typeof v185PlAnchor==='function'){ const sv=[p._pose,p._poseT]; p._pose=P; p._poseT=this.now; const out={}; try{ v185PlAnchor(this,{},null,p,out); } finally{ p._pose=sv[0]; p._poseT=sv[1]; } X.plate=X.plate||[]; X.plate.push({y:out.y,ballTop:bp[1]-2*rr,ank:ay,s:k}); } }
       const {S}=v186xScale(this,p); const hd=v186xFwd(0.02,1.83,0,P.pitchB||0,P.rollB||0,P.lift||0,P.pivot||0), hp=v186xFwd(0,0.8,0,P.pitchB||0,P.rollB||0,P.lift||0,P.pivot||0);
       X.rel.push({k:p.v186xk,d,d2,d3,th:P.pitchB||0,ra:P.rollB||0,fz:f.z,headH:hd[2]*S,hipH:hp[2]*S,bz:b.z+R,ty:this.fl&&this.fl.kind,from:this.fl&&this.fl.from&&this.fl.from.z,now:this.now,tc:p.v186xc,cross:K.crossT,crossDur:K.crossDur}); }catch(e){ X.errs.push(String(e&&e.stack||e)); } return r; };
   /* 3-D: the scorer's figure is drawn through the special, and its solved head sits level with the hips at contact (bike) */
@@ -61,7 +63,9 @@ async function labSuite(browser,three){ const tag=three?'3d':'2d';
     await page.evaluate(()=>{ const st=App.labSt; st.ts=0.85; st.goalTs=0.85; st.focus=null; });
     await page.waitForFunction(()=>window.__sx.clear.length>=1,null,{timeout:three?240000:60000}).catch(()=>{});
     const loops=three?1:2; await page.waitForFunction(n=>window.__sx.emit.length>=n&&window.__sx.clear.length>=n,loops,{timeout:three?300000:90000}).catch(()=>{});
-    const X=await page.evaluate(()=>{ const X=window.__sx; return {rel:X.rel,land:X.land,clear:X.clear,emit:X.emit,errs:X.errs,fig:X.fig,figN:X.figN,fig3:X.fig3,rows:X.rows.filter((r,i)=>i%3===0)}; });
+    const X=await page.evaluate(()=>{ const X=window.__sx; const ad=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b)); const setR=X.rows.filter(r=>r.ph==='set'); const ends=[]; for(let i=0;i<X.rows.length-1;i++) if(X.rows[i].ph==='set'&&X.rows[i+1].ph!=='set') ends.push(X.rows[i].v/X.rows[i].sm);
+      const crab=Math.max(0,...setR.filter(r=>r.inSet&&r.v>0.5*r.sm).map(r=>Math.abs(ad(r.yaw,r.vh))));
+      return {rel:X.rel,land:X.land,clear:X.clear,emit:X.emit,errs:X.errs,fig:X.fig,figN:X.figN,fig3:X.fig3,rows:X.rows.filter((r,i)=>i%3===0),ends,crab,plate:X.plate||[]}; });
     console.log(tag,scen,JSON.stringify({rel:X.rel.map(r=>({d:+r.d.toFixed(3),d2:r.d2==null?null:+r.d2.toFixed(3),th:+r.th.toFixed(2),ra:+r.ra.toFixed(2),fz:+r.fz.toFixed(2)})),land:X.land.map(l=>({dt:+l.dt.toFixed(0),bz:+l.bz.toFixed(2),d:+l.d.toFixed(3)})),clear:X.clear,emit:X.emit.map(e=>({ty:e.ty,inNet:e.inNet,dt:e.crossT!=null?+(e.now-e.crossT).toFixed(0):null,cd:e.crossDur,ts:e.ts}))}));
     if(X.errs.length) console.log(X.errs.slice(0,3).join('\n'));
     const bike=scen==='bike';
@@ -76,6 +80,9 @@ async function labSuite(browser,three){ const tag=three?'3d':'2d';
       ok(X.rel.every(r=>r.fz>=1.55), `${tag} bike: contact above his head (boot ${X.rel.map(r=>r.fz.toFixed(2)).join(', ')} m)`); }
     else { ok(X.rel.every(r=>Math.abs(r.ra)>=0.85), `${tag} scissor: body rolled side-on at contact (roll ${X.rel.map(r=>r.ra.toFixed(2)).join(', ')})`);
       ok(X.rel.every(r=>r.fz>=0.85&&r.fz<=1.5), `${tag} scissor: contact at hip height (boot ${X.rel.map(r=>r.fz.toFixed(2)).join(', ')} m)`); }
+    ok(X.ends.length>=1&&X.ends.every(v=>v<0.6), `${tag} ${scen}: he eases off into the take-off (speed at take-off ${X.ends.map(v=>v.toFixed(2)).join(', ')} x top speed, below 0.6)`);
+    ok(X.crab<1.0, `${tag} ${scen}: no crab-sprint in the set (facing within ${X.crab.toFixed(2)} rad of his run while above half speed, below 1.0)`);
+    if(!three) ok(X.plate.length>=1&&X.plate.every(q=>q.y<q.ballTop&&q.y<q.ank), `2d ${scen}: the name plate rides above the ball and the boot at release (${X.plate.map(q=>((q.ballTop-q.y)/q.s).toFixed(2)+' m').join(', ')} above the ball)`);
     const lies=X.rows.filter(r=>r.ph==='lie'); ok(lies.length>0&&lies.every(r=>r.lift<=-0.6&&(bike?r.th<=-1.4:Math.abs(r.ra)>=1.3)), `${tag} ${scen}: lands on the ${bike?'back':'side'} (hips at the turf, ${lies.length} samples)`);
     ok(X.clear.length>=loops&&X.clear.every(c=>c.act!=='v186x'&&Math.abs(c.th)<1e-6&&Math.abs(c.ra)<1e-6&&Math.abs(c.lift)<0.15), `${tag} ${scen}: up on his feet again after every kick (${X.clear.length})`);
     ok(X.emit.filter(e=>e.t==='goal').every(e=>e.inNet&&e.ty==='cross'), `${tag} ${scen}: the goal is emitted with the ball in the net, type still 'cross'`);

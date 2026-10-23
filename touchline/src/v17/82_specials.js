@@ -7,8 +7,8 @@
      goalTs >= 0.45 (1x, 2x, 4x), not reduced motion, skipping, shootouts or menu stages. The pick hashes (pid, minute, score,
      side), so live, highlight cards and TouchlineTV show the same finish. Ratings: v186xRate (own helper) reads Px:
      technique = 0.25 pace + 0.30 passing + 0.45 shooting + position + traits. When the cross is struck the scorer must be
-     within a sprint (+ 6 m) of his spot, so the kick happens at the box, not 30 m out (else the ordinary finish); he then
-     sprints (hurry) to get under it. Force: st._v186xForce or V186X.force ('bike' | 'scissor', skips the odds and the
+     within a sprint (+ 6 m) of his spot, so the kick happens at the box, not 30 m out (else the ordinary finish; logged); he
+     sprints (hurry) to get under it, then from the set he eases off into the take-off point and carries that run into the leap. Force: st._v186xForce or V186X.force ('bike' | 'scissor', skips the odds and the
      reach check) for the lab and tests. Saves and misses are never specials: their sequences stage no cross.
    - Timing: the cross is launched with head:true and D(150) longer, and the strike is a no-wind 'head' launch (D(430)+90),
      so the goal is emitted exactly when the normal ground finish (wind D(200), D(380)+90, no square-up) would have been.
@@ -19,8 +19,8 @@
      (bike) or rolled (scissor) body; 3-D reads P.pitchB / P.rollB through a one-expression hook in 63_p3d_figures.js, 2-D
      gets the same tilt as a screen rotation (P.rot). All state lives in primitive v186x* fields on the scorer, so the
      replays (68, 76) reproduce the move. Position and facing are scripted from take-off until he is off the turf.
-   - Hooks (wraps only): goalSequence, launch, finish (shownType keeps 'cross'), headOf, jumpLift (the 2-D name plate rides
-     above the top of his body), update, poseOf, feedPush,
+   - Hooks (wraps only): goalSequence, launch, finish (shownType keeps 'cross'), headOf, v185Pl2DHead (the 2-D name plate rides
+     above the raised boot and the ball, never on the kick), update, poseOf, feedPush,
      goalBanner, v18Replay (two-angle replay: the scorer's view ends at take-off, so his camera never goes upside down or
      inside his own body; the behind-the-goal pass starts earlier and slows the kick down), Stage.loop (slow motion), the
      lab (scenes 'bike' and 'scissor'). Globals are prefixed v186x / V186X. */
@@ -71,7 +71,7 @@ Stage.prototype.goalSequence=async function(e){ let K=null;
 function v186xDur(kind,ts){ const M=V186X_MS[kind]||V186X_MS.bike, k=ts||1, d=ms=>Math.max(55,ms*k); return {set:d(M.set),to:d(M.to),st:d(M.st),fall:d(M.fall),lie:d(M.lie),up:d(M.up)}; }
 /* ms from contact: negative before it, 0 while the ball is on the boot (not yet released), then ms since the release */
 function v186xTau(st,p){ const r=p.v186xr; if(r!=null&&r>=0) return st.now-r; return Math.min(0,st.now-p.v186xc); }
-function v186xClear(p){ if(p.v186xh){ p.hurry=false; p.v186xh=0; } p.v186xk=null; p.v186xc=null; p.v186xr=null; p.v186xs=null; p.v186xy0=null; p.v186xpx=null; p.v186xpy=null; p.v186xdx=null; p.v186xdy=null; p.v186xl=null; }
+function v186xClear(p){ if(p.v186xh){ p.hurry=false; p.v186xh=0; } p.v186xk=null; p.v186xc=null; p.v186xr=null; p.v186xs=null; p.v186xy0=null; p.v186xyt=null; p.v186xpx=null; p.v186xpy=null; p.v186xdx=null; p.v186xdy=null; p.v186xl=null; if(p.v186xyl){ p.v186xyl=0; p.yawLockT=0; } }
 
 /* ---------- body frame <-> world (his yaw frame, body units: F forward, L to his left, H height above the turf) ----------
    The same whole-body transform the 3-D figures apply (63: lift, then roll or pitch about the pivot); 2-D draws the same tilt. */
@@ -110,9 +110,9 @@ function v186xFrame(p,tau,T){ const kind=p.v186xk; if(tau<-T.to) return null;
         const k=v186xLp([0.5,0.12*sd,0.02],[0.06,0.1*sd,0],s2); k[2]+=0.12*Math.sin(Math.PI*s2); feet[K]=k;
         hands[0]=v186xLp([-0.2,-0.42,0.04],[0.04,-0.3,1.0],s); hands[1]=v186xLp([-0.2,0.42,0.04],[0.04,0.3,1.0],s); }
       tilt=0.25*(1-u); } }
-  else { const g=p.v186xg||1; const C=[0.55,0.2*g,1.25]; const gi=g>0?1:0, fi=1-gi; /* goal-side and far hand */
-    const kCock=[0.1,-0.15*g,0.55], kFol=[0.4,0.65*g,1.4], kLie=[0.45,0.25*g,0.12], sTuck=[-0.05,-0.05*g,0.3], sLie=[0.3,-0.15*g,0.05];
-    const hS=[[0.2,-0.45,1.2],[0.2,0.45,1.2]], hG=[0.1,0.7*g,1.55], hF=[0.0,-0.7*g,0.7], hGl=[0.25,0.45*g,0.6], hFt=[0.15,-0.55*g,0.03];
+  else { const g=p.v186xg||1; const C=[0.35,0.5*g,1.2]; const gi=g>0?1:0, fi=1-gi; /* goal-side and far hand; the boot meets the ball out beside him, on the goal side */
+    const kCock=[0.1,-0.15*g,0.55], kFol=[0.3,0.8*g,1.3], kLie=[0.2,0.75*g,0.1], sTuck=[-0.05,-0.05*g,0.3], sLie=[0.1,0.55*g,0.05];
+    const hS=[[0.2,-0.45,1.2],[0.2,0.45,1.2]], hG=[-0.25,0.85*g,1.35], hF=[0.0,-0.7*g,0.7], hGl=[0.25,0.45*g,0.6], hFt=[0.15,-0.55*g,0.03];
     if(tau<-T.st){ const u=(tau+T.to)/Math.max(1,T.to-T.st); ra=g*0.5*v186xSm(u); lift=0.1*v186xEo(u);
       feet[N]=u<0.5?[0,-0.1*g,0]:v186xLp([0,-0.1*g,0],sTuck,v186xSm((u-0.5)/0.5));
       feet[K]=v186xBz([0.05,0.1*g,0],[-0.1,-0.05*g,0.35],kCock,v186xSm(u));
@@ -151,7 +151,9 @@ Stage.prototype.launch=function(p,opt){ const K=this._v186x;
     /* the cross to the scorer: aimed at his boot's contact point, a little longer (the strike has no wind-up) */
     /* only when he can be under it near his spot (within a sprint of it, give or take 6 m), i.e. at the box, not 30 m out (else the ordinary finish; a forced special skips this) */
     const reach=h=>{ const o=h.ov&&isFinite(h.ov.x)?h.ov:null; return !o||Math.hypot(o.x-h.x,o.y-h.y)<=this.spd()*1.5*(opt.dur+this.D(150))/1000*0.75+6; };
-    if(!K.armed&&opt.home&&opt.home.pid===K.pid&&p&&p!==opt.home&&p.side===opt.home.side&&(opt.h||0)>2&&!opt.hands&&!this.hands&&(K.forced||reach(opt.home))){
+    const cand=!K.armed&&opt.home&&opt.home.pid===K.pid&&p&&p!==opt.home&&p.side===opt.home.side&&(opt.h||0)>2&&!opt.hands&&!this.hands;
+    if(cand&&!K.forced&&!K.cancel&&!reach(opt.home)){ K.cancel=1; V186X.log.push({kind:K.kind,pid:K.pid,m:K.e&&K.e.m,cancel:'reach'}); if(V186X.log.length>40) V186X.log.shift(); }
+    if(cand&&(K.forced||reach(opt.home))){
       const pl=opt.home, st=this, on0=opt.onRelease; K.armed=true; K.pl=pl;
       const gx=K.s===0?105:0, dir=K.s===0?1:-1; const at=pl.ov&&isFinite(pl.ov.x)?pl.ov:pl; const ca=Math.atan2(p.y-at.y,p.x-at.x); let yaw, gs=1, kf;
       if(K.kind==='bike'){ const away=dir>0?Math.PI:0; yaw=away+v186xCl(v186xAd(ca,away),-0.5,0.5); kf=Math.cos(yaw)>0?1:0; }
@@ -160,7 +162,7 @@ Stage.prototype.launch=function(p,opt){ const K=this._v186x;
       yaw=Math.atan2(Math.sin(yaw),Math.cos(yaw));
       const o2=Object.assign({},opt,{head:true,dur:opt.dur+this.D(150),onRelease:f=>{ if(on0) on0(f); pl.jumpT=-9e9;
         if(!pl.hurry&&pl.ov&&Math.hypot(pl.ov.x-pl.x,pl.ov.y-pl.y)>2){ pl.hurry=true; pl.v186xh=1; } /* he sprints to get under the ball */
-        pl.v186xk=K.kind; pl.v186xs=st.now; pl.v186xc=st.now+f.dur; pl.v186xr=-1; pl.v186xts=st.ts; pl.v186xy=yaw; pl.v186xg=gs; pl.v186xf=kf; pl.v186xy0=null; pl.v186xpx=null; pl.v186xl=0; K.tc=pl.v186xc; K.ts=st.ts; }});
+        pl.v186xk=K.kind; pl.v186xs=st.now; pl.v186xc=st.now+f.dur; pl.v186xr=-1; pl.v186xts=st.ts; pl.v186xy=yaw; pl.v186xg=gs; pl.v186xf=kf; pl.v186xy0=null; pl.v186xyt=null; pl.v186xpx=null; pl.v186xl=0; K.tc=pl.v186xc; K.ts=st.ts; }});
       return _v186xLaunch.call(this,p,o2); }
     /* the strike: off the boot at the contact point (a 'head' launch: no wind-up, no square-up turn), the kick sound, the caption */
     if(K.armed&&!K.struck&&K.pl&&p===K.pl&&opt.kind==='shot'&&p.v186xk&&this.headBall===p){ K.struck=true; const st=this, on0=opt.onRelease;
@@ -171,6 +173,8 @@ Stage.prototype.launch=function(p,opt){ const K=this._v186x;
   }catch(err){ if(typeof console!=='undefined') console.warn('v18.6 specials',err); }
   return _v186xLaunch.apply(this,arguments); };
 Stage.prototype.v186xRelease=function(p,K){ p.v186xr=this.now; K.rel=this.now; p.ov={x:p.x,y:p.y}; this.hype=Math.max(this.hype,0.8);
+  /* the strike's square-up look (toward goal) would spin him while he gets up: he keeps his facing until he is on his feet */
+  const T=v186xDur(p.v186xk,p.v186xts); if(p.v186xy!=null){ p.yawLock=p.v186xy; p.yawLockT=this.now+T.fall+T.lie+T.up; p.v186xyl=1; }
   this.onCaption(K.kind==='bike'?'BICYCLE KICK!':'SCISSOR KICK!','set'); V186X.log.push({kind:K.kind,pid:p.pid,m:K.e&&K.e.m,tc:K.tc,rel:this.now,forced:K.forced}); if(V186X.log.length>40) V186X.log.shift(); };
 
 /* the box score keeps saying what was shown: a cross (never 'header' for a ball met with the boot, never 'tapin') */
@@ -186,10 +190,18 @@ Stage.prototype.finish=function(e,pl){ const K=this._v186x;
 /* the cross homes in on the contact point, and update holds the ball there until the strike */
 const _v186xHead=Stage.prototype.headOf;
 Stage.prototype.headOf=function(p){ if(p&&p.v186xk&&!(p.v186xr>=0)&&p.v186xc!=null){ try{ const c=this.v186xContact(p); if(c) return c; }catch(e){} } return _v186xHead.apply(this,arguments); };
-/* the top of his body through the move (head, or a boot raised above it, with the ball on it): the 2-D name plate sits above that, never on the kick (3-D plates use the solved head) */
-const _v186xJump=Stage.prototype.jumpLift;
-Stage.prototype.jumpLift=function(p){ const r=_v186xJump.apply(this,arguments); if(!p||!p.v186xk||p.v186xc==null) return r;
-  try{ const F=v186xFrame(p,v186xTau(this,p),v186xDur(p.v186xk,p.v186xts)); if(!F) return r; const h=Math.max(v186xFwd(0.02,1.83,0,F.ra?0:F.th,F.ra,F.lift,0.8)[2],F.feet[0][2]+0.3,F.feet[1][2]+0.3); return r+(h-1.83)*v186xScale(this,p).S; }catch(e){ return r; } };
+/* 2-D: the drawn ankle of a pose on screen (drawFigure's mapping: the leg's reach, yaw, depth squash, lift, whole-body rotation) */
+function v186xAnk2D(st,p,P,i){ const [x,y,k]=st.proj(p.x,p.y); const s=k*((p.hgt||70)/70)*1.06; const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw);
+  const DEP=st.depthK!=null?st.depthK:clamp((st.H*0.705/68)/Math.max(1,k),0.12,0.45); const sd=i?1:-1; const B=({lean:.9,average:1,stocky:1.14})[(p.look&&p.look.build)||'average']||1; const ft=P.feet[i];
+  const J=ik3([0,P.hipU,sd*0.09*B],[ft.f,ft.u+0.06,ft.l],0.43,0.43,[1,0.05,sd*0.12]); const t=J.t; const qx=(t[0]*ca-t[2]*sa)*s, qy=-t[1]*s+(t[0]*sa+t[2]*ca)*s*DEP+(P.pivot||0)*s;
+  const c=Math.cos(P.rot||0), n=Math.sin(P.rot||0); return [x+qx*c-qy*n, y-(P.lift||0)*s-(P.pivot||0)*s+qx*n+qy*c, s]; }
+/* the 2-D name plate (77) sits on the drawn head; through the move it rides above both boots and the ball on them instead */
+function v186xPlateTop(st,p,out){ const P=p._pose; if(!P||P.act!=='v186x'||!P.feet) return; let top=out.y, s=0;
+  for(const i of [0,1]){ const a=v186xAnk2D(st,p,P,i); s=a[2]; if(isFinite(a[1])) top=Math.min(top,a[1]-0.12*s); }
+  const b=st.ball; if(b&&Math.hypot(b.x-p.x,b.y-p.y)<2.5){ const kb=st.proj(b.x,b.y,0)[2], rr=Math.max(3.2,BALL_R*kb), bp=st.proj(b.x,b.y,b.z||0); if(isFinite(bp[1])) top=Math.min(top,bp[1]-2*rr); }
+  out.y=Math.min(out.y,top-0.2*s); }
+if(typeof v185Pl2DHead==='function'){ const _v186xPlHead=v185Pl2DHead;
+  v185Pl2DHead=function(st,p,ft,out){ const r=_v186xPlHead.apply(this,arguments); if(r&&p&&p.v186xk&&p.v186xc!=null){ try{ v186xPlateTop(st,p,out); }catch(e){} } return r; }; }
 
 /* ---------- after every step: facing and position scripted through the move ---------- */
 const _v186xUpd=Stage.prototype.update;
@@ -200,15 +212,26 @@ Stage.prototype.v186xStep=function(p){ const now=this.now;
   const T=v186xDur(p.v186xk,p.v186xts), tc=p.v186xc, r=p.v186xr, tTO=tc-T.to, rd=r>=0?now-r:-1;
   if(r<0&&now>tc+4000){ v186xClear(p); return; }
   /* he turns into position while the ball is in the air (set), then holds that facing */
-  if(now<tTO){ const s0=Math.max(p.v186xs,tc-T.set); if(now>=s0){ if(p.v186xy0==null) p.v186xy0=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw;
-      const u=v186xSm((now-s0)/Math.max(1,(tTO-s0)*0.8)); p.yaw=p.v186xy0+v186xAd(p.v186xy,p.v186xy0)*u; p.face=Math.cos(p.yaw)>=0?1:-1; } }
-  else if(rd<0||rd<T.fall+T.lie+T.up*0.5){ p.yaw=p.v186xy; p.face=Math.cos(p.yaw)>=0?1:-1; }
+  /* set: he stops sprinting and eases off into his take-off point (the cross homes in on wherever he is); he turns into
+     position while the ball is in the air, never more than ~0.6 rad off his running line while he is still quick */
+  if(now<tTO){ const s0=Math.max(p.v186xs,tc-T.set); if(now>=s0){ if(p.v186xy0==null){ p.v186xy0=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw;
+        if(p.v186xh){ p.hurry=false; p.v186xh=0; } const v=Math.hypot(p.vx||0,p.vy||0), o=p.ov;
+        if(o&&!p.celeb&&isFinite(o.x)){ const dx=o.x-p.x, dy=o.y-p.y, d=Math.hypot(dx,dy), sd=v*(tTO-now)/1000*0.55; if(d>sd&&d>0.01){ p.ov={x:p.x+dx/d*sd,y:p.y+dy/d*sd}; } } }
+      const u=v186xSm((now-s0)/Math.max(1,(tTO-s0)*0.8)); let y=p.v186xy0+v186xAd(p.v186xy,p.v186xy0)*u;
+      const v=Math.hypot(p.vx||0,p.vy||0), sm=this.spd(); if(v>0.35*sm){ const vh=Math.atan2(p.vy,p.vx), lim=0.6+2.6*v186xCl((0.5*sm-v)/(0.15*sm),0,1); y=vh+v186xCl(v186xAd(y,vh),-lim,lim); }
+      p.yaw=y; p.face=Math.cos(p.yaw)>=0?1:-1; } }
+  else if(rd<0||rd<T.fall+T.lie+(p.celeb?T.up*0.5:T.up)){ /* take-off: the last of the turn, done before the strike phase */
+    if(rd<0&&now<tc-T.st){ if(p.v186xyt==null) p.v186xyt=p.yaw==null?p.v186xy:p.yaw; const u=v186xSm((now-tTO)/Math.max(1,T.to-T.st)); p.yaw=p.v186xyt+v186xAd(p.v186xy,p.v186xyt)*u; }
+    else p.yaw=p.v186xy; p.face=Math.cos(p.yaw)>=0?1:-1; }
   /* from take-off until he is off the turf he stays where he jumped (carried on a little by his run-in) */
   if(now>=tTO&&(r<0||rd<T.fall+T.lie)){
-    if(p.v186xpx==null){ if(p.v186xh){ p.hurry=false; p.v186xh=0; } p.v186xpx=p.x; p.v186xpy=p.y; const v=Math.hypot(p.vx||0,p.vy||0); const dd=Math.min(0.45,v*T.to/1000*0.5); p.v186xdx=v>0.05?p.vx/v*dd:0; p.v186xdy=v>0.05?p.vy/v*dd:0; if(!p.celeb) p.ov={x:p.x,y:p.y}; }
+    if(p.v186xpx==null){ if(p.v186xh){ p.hurry=false; p.v186xh=0; } p.v186xpx=p.x; p.v186xpy=p.y; const v=Math.hypot(p.vx||0,p.vy||0); const dd=Math.min(1.2,v*T.to/1000*0.5); p.v186xdx=v>0.05?p.vx/v*dd:0; p.v186xdy=v>0.05?p.vy/v*dd:0; if(!p.celeb) p.ov={x:p.x,y:p.y}; }
     const u=v186xEo((now-tTO)/Math.max(1,T.to)); p.x=p.v186xpx+p.v186xdx*u; p.y=p.v186xpy+p.v186xdy*u; p.vx=0; p.vy=0; p.spd=0;
     if(p.ov&&!p.celeb){ p.ov.x=p.x; p.ov.y=p.y; } }
-  if(r>=0&&!p.v186xl&&rd>=T.fall*0.85){ p.v186xl=1; this.kickTurf(p.x,p.y,7,1.1); }
+  if(r>=0&&!p.v186xl&&rd>=T.fall*0.85){ p.v186xl=1; const y=p.v186xy!=null?p.v186xy:(p.yaw||0), gs=p.v186xk==='scissor'?(p.v186xg||1):0; this.kickTurf(p.x-Math.sin(y)*gs*0.45,p.y+Math.cos(y)*gs*0.45,7,1.1); }
+  /* nobody (the referee included) walks through him while he is on the turf or getting up */
+  if(r>=0&&rd<T.fall+T.lie+T.up){ const R0=1.25; for(const q of [this.ref,...this.players.values()]){ if(!q||q===p||q.off||q.celeb) continue; const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy);
+      if(d<R0){ const m=Math.min(R0-d,0.06), ux=d>0.01?dx/d:0, uy=d>0.01?dy/d:1; q.x+=ux*m; q.y+=uy*m; } } }
   /* done: up on his feet (a celebration that starts while he is still rising takes over from halfway up) */
   if(r>=0&&(rd>=T.fall+T.lie+T.up||(p.celeb&&rd>=T.fall+T.lie+T.up*0.5))) v186xClear(p); };
 
@@ -222,7 +245,7 @@ Stage.prototype.v186xPose=function(p,P){ const T=v186xDur(p.v186xk,p.v186xts), t
     const s0=Math.max(p.v186xs!=null?p.v186xs:now,p.v186xc-T.set); if(now<s0) return P; const w=v186xSm((now-s0)/Math.max(1,(p.v186xc-T.to-s0)*0.5));
     const bike=p.v186xk==='bike', H=bike?[[0.25,1.25,-0.45],[0.25,1.25,0.45]]:[[0.2,1.2,-0.45],[0.2,1.2,0.45]];
     for(const i of [0,1]){ const h=P.hands[i]; P.hands[i]={f:lerp(h.f,H[i][0],w),u:lerp(h.u,H[i][1],w),l:lerp(h.l,H[i][2],w)}; }
-    P.headTilt=lerp(P.headTilt||0,bike?-0.35:-0.15,w); P.hipU=lerp(P.hipU,0.76,w); return P; }
+    P.headTilt=lerp(P.headTilt||0,bike?-0.35:-0.15,w); P.hipU=lerp(P.hipU,0.76,w); if(P.rot&&typeof v184Is3D==='function'&&v184Is3D(this)) P.rot*=1-w; return P; }
   const piv=0.8; P.act='v186x'; P.hipU=0.8; P.pivot=piv; P.lift=F.lift; P.lean=0; P.headTilt=F.tilt; P.headTurn=0; P.prop=null; P.bootT=null;
   for(const i of [0,1]){ P.feet[i]=v186xInv(F.feet[i],F.th,F.ra,F.lift,piv); P.hands[i]=v186xInv(F.hands[i],F.th,F.ra,F.lift,piv); }
   P.pitchB=F.ra?0:F.th; P.rollB=F.ra;
@@ -276,4 +299,4 @@ labRun=function(scen){ const r=_v186xLabRun.apply(this,arguments); if(scen!=='bi
     st._v186xForce=scen; const A=[...st.players.values()].filter(p=>p.side===0); const fw=A[9], wing=A[8]; let i=0;
     while(alive()){ st.zoomTo(0.5); st.cam.w=st.cam.tw; st.cam.x=92; const top=i++%2===0;
       const e={s:0,pid:fw.pid,t:'goal',ty:'cross',seq:[{pid:wing.pid,x:top?10:90,y:85,a:'cross'},{pid:fw.pid,x:top?47:53,y:90,a:'shot'}],sc:[1,0],m:10};
-      st.clipStart(e); await st.goalSequence(e); if(!alive()) return; await st.wait(st.D(700)); } }); };
+      st.clipStart(e); { const [X,Y]=livePos(0,e.seq[1].x,e.seq[1].y); fw.x=fw.tx=X-6; fw.y=fw.ty=Y+(top?-1.5:1.5); fw.vx=fw.vy=0; fw.yaw=0; fw.face=1; } await st.goalSequence(e); if(!alive()) return; await st.wait(st.D(700)); } }); };
