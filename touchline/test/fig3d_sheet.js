@@ -28,7 +28,7 @@ async function lineup(b){ const p=await b.newPage({viewport:{width:1400,height:7
       X.push({o,kit:i===6?gkk:kits[i%9],isRef:false}); } return X; };
     window.__extras=__mk(0,false);
     P3D_MODULES.push({name:'sheet-extra',order:25,frame(P){ for(const e of window.__extras||[]) P.extra.push(e); }});
-    P3D_MODULES.push({name:'sheet-cam',order:5,frame(P){ const c=window.__cam; if(!c) return; P.camera.fov=c.fov; P.camera.updateProjectionMatrix(); P.camera.position.set(...c.pos); P.camera.lookAt(...c.look); }});
+    P3D_MODULES.push({name:'sheet-cam',order:27,frame(P){ const c=window.__cam; if(!c) return; P.camera.fov=c.fov; P.camera.updateProjectionMatrix(); P.camera.position.set(...c.pos); P.camera.lookAt(...c.look); P.camera.updateMatrixWorld(); }});
     setTimeout(()=>labRun('run'),0); },tier);
   await p.waitForTimeout(2500);
   await p.evaluate(()=>{ const st=App.labSt; st.paused=true; for(const q of st.players.values()){ q.off=true; q.ov=null; q.x=-60; q.y=-20; }
@@ -124,9 +124,9 @@ async function close(b){ const p=await b.newPage({viewport:{width:1000,height:76
 
 /* ---------- perf + wide frames: 27 figures, broadcast and sideline-height ---------- */
 async function perf(b){ const p=await b.newPage({viewport:{width:1280,height:720},deviceScaleFactor:1}); watch(p);
-  await p.goto(DIST); await p.waitForTimeout(500); await p.evaluate(SHEET_JS);
+  await p.goto(process.env.DISTF?'file://'+process.env.DISTF:DIST); await p.waitForTimeout(500); await p.evaluate(SHEET_JS);
   const out={};
-  for(const t of ['A','B','C']){
+  for(const t of (process.env.TIERS||'ABC').split('')){
     await p.evaluate(t=>{ if(window.__st){ window.__st.destroy(); document.getElementById('lv-host').remove(); }
       PREFS.renderer='3d'; PREFS.rtier=t; const d=document.createElement('div'); d.id='lv-host'; d.style.cssText='position:fixed;inset:0;z-index:9999;background:#000'; const c=document.createElement('canvas'); c.id='lv-canvas'; c.style.cssText='width:100%;height:100%;display:block'; d.appendChild(c); document.body.appendChild(d);
       const T=demoTeams(); const looks={}; const mk=(side,form)=>({slots:FORMS[form].map(([role,x,y],i)=>{ const pid=`f${side}${i}`; looks[pid]={num:i+1,look:defaultLook(pid+'k',11),h:66+(i*5)%9}; return {pid,role,x,y}; }),off:{}});

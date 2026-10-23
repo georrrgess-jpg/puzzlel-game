@@ -64,7 +64,7 @@ function v18FHeadGeo(seg){ const T=THREE, nu=seg*2, nv=seg; const pos=[], uv=[],
   { const p=g.attributes.position.array; for(let k=0;k<n.length;k+=3){ const z=p[k+2]/V18F_HEAD.rz, y=p[k+1]/V18F_HEAD.ry; if(z<=0) continue; const w=0.62*Math.min(1,z*1.25)*Math.max(0,1-Math.max(0,y-0.35)*1.6);
     let x0=n[k]*(1-w), x1=n[k+1]*(1-w)+0.08*w, x2=n[k+2]*(1-w)+w; const l=Math.hypot(x0,x1,x2)||1; n[k]=x0/l; n[k+1]=x1/l; n[k+2]=x2/l; } }
   const sk=[0.004,0.004]; const s=seg>=10?1:0;
-  const nose=v18FEll(0.015,0.032,0.017,0,-0.03,0.126,8+s*4,6+s*2,-0.3); const tip=v18FEll(0.017,0.013,0.013,0,-0.057,0.137,8+s*2,6+s);
+  const nose=v18FEll(0.015,0.031,0.017,0,-0.027,0.126,8+s*4,6+s*2,-0.3); const tip=v18FEll(0.017,0.012,0.013,0,-0.051,0.137,8+s*2,6+s);
   const ears=[-1,1].map(e=>{ const g2=v18FEll(0.014,0.036,0.026,e*0.122,-0.012,-0.004,8,6); return g2; });
   return v18FMerge([g,{g:nose,uv:sk},{g:tip,uv:sk},{g:ears[0],uv:sk},{g:ears[1],uv:sk}]); }
 
@@ -120,7 +120,8 @@ function v18FPatch(th0,th1,y0,y1,flipU,nx,ny,off){ /* a decal patch on the torso
   for(let i=0;i<ny;i++) for(let j=0;j<nx;j++){ const a=i*(nx+1)+j, b=a+1, c=a+nx+1, d=c+1; idx.push(a,b,d,a,d,c); }
   const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2)); g.setIndex(idx); g.computeVertexNormals(); return g; }
 
-function v18FBuildGeos(detail){ const N=detail>=2?16:detail>=1?11:7, Nt=detail>=2?28:detail>=1?20:12, hs=detail>=2?14:detail>=1?10:6, nc=detail>=2?4:detail>=1?3:2;
+/* detail 0..2 = the tier C/B/A sets (v18.3 segment counts plus the ball-joint caps); detail 3 = the tier A near set */
+function v18FBuildGeos(detail){ const d=Math.max(0,Math.min(3,detail|0)); const N=[7,9,12,16][d], Nt=[12,16,22,28][d], hs=[6,8,11,14][d], nc=[2,2,3,4][d];
   const sk=[0,0,V18F_TU,0,V18F_TV]; /* skin uv for cap rings on kit-mapped limbs */
   const S=(c,u)=>V18F_U(c,u), TU=V18F_TU, TV=V18F_TV; const G={};
   /* thigh with the shorts leg over its top half; the hem ring is doubled so the uv can jump from shorts to skin */
@@ -313,6 +314,14 @@ function v18FigInit(P){ const T=P.T, tier=P.tier||{detail:2,shadow:0}; const F=P
     pole:part('pole',G.pole,P.toon('#d9d9d9'),{per:0.25,outline:false}), cloth:part('cloth',G.cloth,F.mFlag,{per:0.25,outline:false}),
     blob:part('blob',G.blob,F.mBlob,{outline:false,cast:false,order:-1}) };
   F.hair={}; for(const h of V18F_HAIRS) F.hair[h]=part('hair-'+h,G.hair[h],F.mPlain,{});
+  /* v18.4 near LOD: figures taller than V18F_NEARPX on screen (the sideline camera, close-ups, previews) use a rounder
+     set built one detail level up; everyone else keeps the base set, so wide shots cost what they did. Same instanced
+     design: one InstancedMesh per part kind and set, and an empty mesh is not drawn. */
+  { const GN=F.GN=v18FBuildGeos((tier.detail==null?2:tier.detail)+1); for(const k in GN){ if(k==='hair') for(const h in GN.hair) P.track(GN.hair[h]); else P.track(GN[k]); }
+    const nk=(n,o)=>part(n+'~n',GN[n],o.m,o); F.pn=Object.assign({},F.p,{ legUpper:nk('legUpper',{m:F.mKit,per:2,aux:'aRow'}), shorts:nk('shorts',{m:F.mKit,aux:'aRow'}), shin:nk('shin',{m:F.mKit,per:2,aux:'aRow'}), boot:nk('boot',{m:F.mKit,per:2,aux:'aRow',cast:false}),
+      armUpper:nk('armUpper',{m:F.mKit,per:2,aux:'aRow'}), longUpper:nk('longUpper',{m:F.mKit,per:2,aux:'aRow'}), forearm:nk('forearm',{m:F.mPlain,per:2,cast:false}), longFore:nk('longFore',{m:F.mKit,per:2,aux:'aRow'}),
+      hand:nk('hand',{m:F.mPlain,per:2,cast:false}), glove:nk('glove',{m:F.mKit,per:2,aux:'aRow',cast:false}), torso:nk('torso',{m:F.mKit,aux:'aRow'}), neck:nk('neck',{m:F.mPlain,outline:false,cast:false}), head:nk('head',{m:F.mFace,aux:'aCell'}) });
+    F.hairN={}; for(const h of V18F_HAIRS) F.hairN[h]=part('hair-'+h+'~n',GN.hair[h],F.mPlain,{}); }
   F.ring=new T.Mesh(G.ring,P.track(new T.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.6,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}))); F.ring.visible=false; F.ring.renderOrder=-1; P.scene.add(F.ring);
   F.frustum=new T.Frustum(); F.pm=new T.Matrix4(); F.sph=new T.Sphere(new T.Vector3(),6);
   F.s=new Float64Array(64*3); /* scratch for world points */ F.v=new Float64Array(96); /* scratch for world dirs */ F.ik=new Float64Array(6); F.tmp=new Float64Array(3);
@@ -349,6 +358,7 @@ function v18FIk(R0,R1,R2,T0,T1,T2,a,b,p0,p1,p2,out){ let D0=T0-R0, D1=T1-R1, D2=
 
 /* ---------- one figure ---------- */
 const V18F_B={lean:.9,average:1,stocky:1.14};
+const V18F_NEARPX=150; /* on-screen figure height (CSS px) above which the near LOD set is used */
 function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)||!isFinite(p.y)) return false;
   /* frustum test before solving (the 2-D painter also skips off-screen figures) */
   F.sph.center.set(p.x,0.95,p.y); if(!F.frustum.intersectsSphere(F.sph)) return false;
@@ -384,11 +394,11 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   for(let k=0;k<45;k++) if(!isFinite(W[k])) return false;
   /* level of detail from the on-screen height */
   const dx=W[42]-P.camera.position.x, dy=W[43]-P.camera.position.y, dz=W[44]-P.camera.position.z; const dist=Math.hypot(dx,dy,dz); const px=1.9/Math.max(1e-4,dist*F.U.uPxK.value);
-  const fine=px>34, mid=px>18;
+  const fine=px>34, mid=px>18, near=px>V18F_NEARPX&&!!F.pn;
   /* colours */
   const skinH=isRef?'#c68a5c':(LOOK.skin[L.skin]||LOOK.skin[3]), hairH=isRef?'#2b1a10':(LOOK.hairCol[L.hairCol]||'#111111'), bootH=isRef?'#111111':(LOOK.boots[L.boots]||'#111111');
   const skin=v18FCol(F,skinH), hair=v18FCol(F,hairH), boot=v18FCol(F,bootH); const row=v18FKitRow(F,kit,isRef,gk), aRow=V18F_NR-1-row;
-  const pp=F.p; const SB=S*B; const longSl=L.sleeves==='long'||isRef||gk||kit.sleeve==='long';
+  const pp=near?F.pn:F.p; const SB=S*B; const longSl=L.sleeves==='long'||isRef||gk||kit.sleeve==='long';
   /* limb frame: ey along a->b, ez = L x ey (front), blended toward body forward when the limb points along L */
   const limb=(a,b,pt,col,aux,sx,sy,sz,arm)=>{ let e0=W[b]-W[a], e1=W[b+1]-W[a+1], e2=W[b+2]-W[a+2]; const el=Math.hypot(e0,e1,e2)||1e-6; e0/=el; e1/=el; e2/=el;
     let z0=D[7]*e2-D[8]*e1, z1=D[8]*e0-D[6]*e2, z2=D[6]*e1-D[7]*e0; let zl=Math.hypot(z0,z1,z2); if(zl<0.35){ const w=(0.35-zl)*3; z0+=D[0]*w; z1+=D[1]*w; z2+=D[2]*w; }
@@ -416,7 +426,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   const fs={round:[1.05,0.98],square:[1.04,1],long:[0.96,1.05],heart:[1.0,1.0],oval:[1,1]}[L.face]||[1,1];
   const open=!!(Q.mouth&&p.celeb); const cell=v18FFaceCell(F,L,skinH,hairH)+(open?1:0);
   v18FPut(pp.head,W,42,D,24,21,18,S*fs[0],S*fs[1],S,skin,cell);
-  const hs=L.hair; const hp=F.hair[hs==='bald'?null:(F.hair[hs]?hs:'crop')]; if(hp) v18FPut(hp,W,42,D,24,21,18,S*fs[0],S*fs[1],S,hair,0);
+  const hs=L.hair, HS=near?F.hairN:F.hair; const hp=HS[hs==='bald'?null:(HS[hs]?hs:'crop')]; if(hp) v18FPut(hp,W,42,D,24,21,18,S*fs[0],S*fs[1],S,hair,0);
   if(!isRef&&LOOK.band[L.band]&&mid) v18FPut(pp.band,W,42,D,24,21,18,S*fs[0],S*fs[1],S,v18FCol(F,LOOK.band[L.band]),0);
   /* props: heart between the hands, referee's card, assistant's flag */
   if(Q.prop==='heart'){ W[45]=(W[24]+W[33])/2+D[15]*0.03*S; W[46]=(W[25]+W[34])/2+D[16]*0.03*S; W[47]=(W[26]+W[35])/2+D[17]*0.03*S; v18FPut(pp.heart,W,45,D,9,15,12,S*1.1,S*1.1,S*1.1,v18FCol(F,'#ffffff'),0); }
