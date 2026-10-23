@@ -15030,6 +15030,9 @@ function v18FPut(pt,A,o,B,ex,ey,ez,sx,sy,sz,col,aux){ const i=pt.n; if(i>=pt.max
   m[k]=B[ex]*sx; m[k+1]=B[ex+1]*sx; m[k+2]=B[ex+2]*sx; m[k+3]=0; m[k+4]=B[ey]*sy; m[k+5]=B[ey+1]*sy; m[k+6]=B[ey+2]*sy; m[k+7]=0;
   m[k+8]=B[ez]*sz; m[k+9]=B[ez+1]*sz; m[k+10]=B[ez+2]*sz; m[k+11]=0; m[k+12]=A[o]; m[k+13]=A[o+1]; m[k+14]=A[o+2]; m[k+15]=1;
   const c=pt.ic, j=i*3; c[j]=col[0]; c[j+1]=col[1]; c[j+2]=col[2]; if(pt.ax) pt.ax[i]=aux||0; }
+/* the elbow pole for one arm in body (f,u,l); 71_polish.js replaces it (v18.2). Returns a shared array. */
+const V18_AP=[0,0,0];
+function v18ArmPole(a0,a1,a2,t0,t1,t2,sd,Q,p){ V18_AP[0]=-0.7; V18_AP[1]=-0.5; V18_AP[2]=sd*0.6; return V18_AP; }
 /* allocation-free copy of ik3 (same math): writes joint to out[0..2], clamped target to out[3..5] */
 function v18FIk(R0,R1,R2,T0,T1,T2,a,b,p0,p1,p2,out){ let D0=T0-R0, D1=T1-R1, D2=T2-R2; let d=Math.hypot(D0,D1,D2); const mx=(a+b)*0.999; if(d>mx){ const k=mx/d; T0=R0+D0*k; T1=R1+D1*k; T2=R2+D2*k; D0=T0-R0; D1=T1-R1; D2=T2-R2; d=mx; }
   d=Math.max(d,Math.abs(a-b)+1e-3); const n0=D0/d, n1=D1/d, n2=D2/d; const al=(a*a+d*d-b*b)/(2*d); const h=Math.sqrt(Math.max(0,a*a-al*al));
@@ -15068,7 +15071,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   for(let i=0;i<2;i++){ const sd=i?1:-1; const ft=Q.feet[i]; const hl=sd*0.09*B; v18FIk(0,hipU,hl,ft.f,ft.u+0.06,ft.l,0.43,0.43,1,0.05,sd*0.12,IK); ankU[i]=IK[4];
     bw(0,hipU,hl,i*9); bw(IK[0],IK[1],IK[2],i*9+3); bw(IK[3],IK[4],IK[5],i*9+6); }
   for(let i=0;i<2;i++){ const sd=i?1:-1; const s0=up2(0,1.5,sd*0.21*B); const a0=s0[0], a1=s0[1], a2=s0[2]; const hd=Q.hands[i]; const t=up2(hd.f,hd.u,hd.l); const t1=Math.max(0.06,t[1]);
-    v18FIk(a0,a1,a2,t[0],t1,t[2],0.3,0.29,-0.7,-0.5,sd*0.6,IK); bw(a0,a1,a2,18+i*9); bw(IK[0],IK[1],IK[2],21+i*9); bw(IK[3],IK[4],IK[5],24+i*9); }
+    const ap=v18ArmPole(a0,a1,a2,t[0],t1,t[2],sd,Q,p); v18FIk(a0,a1,a2,t[0],t1,t[2],0.3,0.29,ap[0],ap[1],ap[2],IK); bw(a0,a1,a2,18+i*9); bw(IK[0],IK[1],IK[2],21+i*9); bw(IK[3],IK[4],IK[5],24+i*9); }
   bw(0,hipU,0,36); { const n=up2(0,1.57,0); bw(n[0],n[1],n[2],39); } { const h=up2(0.02+tilt*0.05,1.83-Math.abs(tilt)*0.02,0); bw(h[0],h[1],h[2],42); }
   for(let k=0;k<45;k++) if(!isFinite(W[k])) return false;
   /* level of detail from the on-screen height */
@@ -15732,5 +15735,223 @@ v18Attach=function(st){ let kind='other'; try{ kind=v18KindOf(st); }catch(e){}
         g.drawImage(Q.canvas,0,0,640,400); g.drawImage(this,0,0,640,400); const url=enc.call(out,type,q); v18Photo.last=url; return url; }
       catch(e){ console.warn('v18 photo',e); return enc.call(this,type,q); } }; }
   return P; };
+
+/* ===================== v18.2 goalkeeper punts =====================
+   Presentation only. After a catch or claim the keeper either throws or rolls it short (the old distribute, about 40%)
+   or punts it long (about 60%): two quick steps toward the edge of his area with the ball held out at waist height,
+   the support foot plants beside the dropping ball, the ball falls from his hands onto the laces and a full leg swing
+   volleys it high (14-18 m) and long (45-58 m) to a teammate in midfield through the normal flight system (launch with
+   home: receiver), so landing, possession and the camera are unchanged. The choice uses Math.random like the rest of the
+   stage choreography; nothing here touches the engine, results or the order of events.
+   State: this._v18pk = {p, x0,y0 (start), ax,ay (unit forward), t0 (kickT), W (wind), Fd (follow-through), Td (drop),
+   SE (settle), run (approach length), rel (stage time the ball left the boot, null until then)}.
+   Pose time: the strike holds at contact until the ball has actually left the boot (the release can land a few fixed steps
+   after the wind-up on a slow frame), so the foot always meets the ball. */
+
+const V18P_HOLD={f:0.44,u:1.04};
+const V18P_CON={f:0.3,u:0.26,l:0.07};
+const V18P_BACK={f:-0.42,u:0.64};
+const V18P_TOP={f:0.6,u:1.3};
+
+/* body-unit scale used to put pose points in the world (the 2-D figure is drawn at 1.06, the 3-D one at 0.92) */
+Stage.prototype.v18pS=function(p){ return (p.hgt||70)/70; };
+
+/* pose clock: ms since kickT, frozen at contact (kt=W) until release; then W + time since release */
+Stage.prototype.v18pkt=function(K){ const kt=this.now-K.t0; return K.rel==null? Math.min(kt,K.W) : K.W+(this.now-K.rel); };
+
+/* how far the keeper has travelled along his run (metres) at pose time t */
+Stage.prototype.v18pBody=function(K,t){ const u=t/K.W; if(t<=K.W) return K.run*smooth(Math.min(1,Math.max(0,u)/0.6));
+  const q=(t-K.W)/K.Fd; return K.run+0.45*smooth(clamp((q-0.15)/0.55,0,1)); };
+
+/* the ball while he still has it: held out in front, then dropped (gravity-shaped) onto the kicking foot */
+Stage.prototype.v18pBall=function(K,t){ const p=K.p, S=this.v18pS(p), ca=K.ax, sa=K.ay; const ud=K.W-K.Td;
+  const hold={f:V18P_HOLD.f*S, l:0, z:V18P_HOLD.u*S-BALL_R};
+  const con={f:V18P_CON.f*S+0.14, l:V18P_CON.l*S, z:Math.max(0.12,V18P_CON.u*S-0.07)};
+  let f,l,z; if(t<ud){ const e=smooth(clamp(t/Math.max(1,K.W*0.14),0,1)); f=lerp(0.3*S,hold.f,e); l=0; z=lerp(0.92,hold.z,e); }
+  else { const s=clamp((t-ud)/K.Td,0,1), g=0.25*s+0.75*s*s; f=lerp(hold.f,con.f,s); l=lerp(0,con.l,s); z=lerp(hold.z,con.z,g); }
+  return {x:p.x+f*ca-l*sa, y:p.y+f*sa+l*ca, z}; };
+
+/* the kicking (right) foot in the world from a pose */
+Stage.prototype.v18pFootW=function(p,P){ const S=this.v18pS(p), a=this.yawOf(p), ca=Math.cos(a), sa=Math.sin(a), F=P.feet[1]; const lift=P.lift||0;
+  return {x:p.x+(F.f*ca-F.l*sa)*S, y:p.y+(F.f*sa+F.l*ca)*S, z:(F.u+lift)*S}; };
+
+const _v18pKK=Stage.prototype.kickKind;
+Stage.prototype.kickKind=function(p,opt){ if(p&&opt&&opt.punt&&this.hands&&this.own===p&&!opt.nod) return 'punt'; return _v18pKK.apply(this,arguments); };
+
+const _v18pWind=Stage.prototype.windOf;
+Stage.prototype.windOf=function(kk){ if(kk==='punt') return this.D(480); return _v18pWind.apply(this,arguments); };
+
+const _v18pHands=Stage.prototype.handsOf;
+Stage.prototype.handsOf=function(p){ const K=this._v18pk; if(K&&K.p===p&&K.rel==null&&this.own===p) return this.v18pBall(K,this.v18pkt(K)); return _v18pHands.apply(this,arguments); };
+
+const _v18pLaunch=Stage.prototype.launch;
+Stage.prototype.launch=function(p,opt){ const punt=!!(p&&opt&&opt.punt&&!this.skip&&this.hands&&this.own===p);
+  const r=_v18pLaunch.apply(this,arguments);
+  if(punt&&p.kickK==='punt'&&p.kickT===this.now){ const tg=opt.home||opt.to; const ang=Math.atan2(tg.y-p.y,tg.x-p.x);
+    const W=p.kickW||this.D(480); const Fd=Math.max(140,this.D(560)); p.kickF=Fd; p.plant=false;
+    p.yawLock=ang; p.yawLockT=this.now+W+Fd+Math.max(200,this.D(500)); p.face=Math.cos(ang)>=0?1:-1; p.yaw=ang;
+    this._v18pk={p,x0:p.x,y0:p.y,ax:Math.cos(ang),ay:Math.sin(ang),t0:this.now,W,Fd,Td:Math.min(W*0.4,Math.max(45,this.D(150))),SE:Math.max(90,this.D(300)),run:this.ts<0.3?0.7:1.6,rel:null}; this.v18pStep(); }
+  return r; };
+
+/* after every step: script the keeper along his run and keep the ball in his hands / on its way to his foot */
+Stage.prototype.v18pStep=function(){ const K=this._v18pk; if(!K) return; const p=K.p;
+  if(!this.alive||p.off||(this.now-K.t0)>K.W*4+K.Fd+K.SE+3000){ this._v18pk=null; return; }
+  if(K.rel==null&&this.own!==p){ const fl=this.fl; K.rel=fl&&!fl.phys&&fl.t0>=K.t0? fl.t0 : this.now;
+    if(fl&&!fl.phys&&this.lastPunt&&this.lastPunt.gk===p){ const P=this.v18pPose(p,_v18pPose.call(this,p,false),K,K.W), ft=this.v18pFootW(p,P), b=fl.from; this.lastPunt.fl=fl; this.lastPunt.from={x:b.x,y:b.y,z:b.z}; this.lastPunt.foot=ft; this.lastPunt.contactD=Math.hypot(ft.x-b.x,ft.y-b.y,ft.z-(b.z+BALL_R)); } }
+  const t=this.v18pkt(K); if(t>K.W+K.Fd+K.SE){ this._v18pk=null; return; }
+  const B=this.v18pBody(K,t), nx=K.x0+K.ax*B, ny=K.y0+K.ay*B;
+  p.vx=0; p.vy=0; p.x=nx; p.y=ny; p.yaw=Math.atan2(K.ay,K.ax);
+  if(K.rel==null&&this.own===p&&this.hands){ const b=this.v18pBall(K,t); this.ball.x=b.x; this.ball.y=b.y; this.ball.z=b.z; } };
+
+const _v18pUpd=Stage.prototype.update;
+Stage.prototype.update=function(dt){ const r=_v18pUpd.apply(this,arguments); if(this._v18pk) this.v18pStep(); return r; };
+
+/* the punt pose (P.act='punt'); P.rot stays 0 so the 3-D figure never rolls the whole body */
+Stage.prototype.v18pPose=function(p,P,K,tAt){ const t=tAt!=null?tAt:this.v18pkt(K), W=K.W, Fd=K.Fd, S=this.v18pS(p), run=K.run; const B=this.v18pBody(K,t);
+  const F=P.feet, H=P.hands; P.act='punt'; P.rot=0; P.pivot=0; P.headTurn=0; P.mouth=false;
+  const bf=w=>(w-B)/S; const ud=1-K.Td/W; const kR=0.95*run/1.6, kL=run+0.25;
+  if(t<=W){ const u=t/W;
+    /* kicking (right) foot: a quick step, planted, then the backswing (heel to the seat) and the whip through to contact */
+    let rf,ru,rl=0.1;
+    if(u<0.06){ rf=bf(0); ru=0; }
+    else if(u<0.3){ const s=(u-0.06)/0.24; rf=bf(lerp(0,kR,smooth(s))); ru=0.16*Math.sin(Math.PI*s); }
+    else if(u<0.52){ rf=bf(kR); ru=0; }
+    else if(u<0.86){ const s=smooth((u-0.52)/0.34), f0=bf(kR); rf=lerp(f0,V18P_BACK.f,s); ru=lerp(0,V18P_BACK.u,s); rl=lerp(0.1,0.08,s); }
+    else { const s=(u-0.86)/0.14, e=s*s*(1.6-0.6*s); rf=lerp(V18P_BACK.f,V18P_CON.f,e); ru=lerp(V18P_BACK.u,V18P_CON.u,e)-0.22*Math.sin(Math.PI*e); rl=lerp(0.08,V18P_CON.l,e); }
+    F[1]={f:rf,u:Math.max(0,ru),l:rl};
+    /* support (left) foot: planted, then the long last stride that plants it beside the dropping ball */
+    let lf,lu=0,ll=-0.12;
+    if(u<0.3){ lf=bf(0); }
+    else if(u<0.6){ const s=(u-0.3)/0.3; lf=bf(lerp(0,kL,smooth(s))); lu=0.2*Math.sin(Math.PI*s); ll=lerp(-0.12,-0.17,s); }
+    else { lf=bf(kL); ll=-0.17; }
+    F[0]={f:lf,u:lu,l:ll};
+    /* ball held out in front at waist height in both hands, then they open outward for balance as it drops */
+    const bob=u<0.6?Math.sin(u/0.6*Math.PI*2)*0.025:0;
+    if(u<ud){ H[0]={f:V18P_HOLD.f,u:V18P_HOLD.u+bob,l:-0.13}; H[1]={f:V18P_HOLD.f,u:V18P_HOLD.u+bob,l:0.13}; }
+    else { const s=smooth((u-ud)/(1-ud)); H[0]={f:lerp(V18P_HOLD.f,0.22,s),u:lerp(V18P_HOLD.u,1.3,s),l:lerp(-0.13,-0.66,s)}; H[1]={f:lerp(V18P_HOLD.f,-0.08,s),u:lerp(V18P_HOLD.u,1.26,s),l:lerp(0.13,0.62,s)}; }
+    const lb=smooth(clamp((u-0.55)/0.45,0,1)); P.lean=lerp(0.07,-0.13,lb); P.hipU=0.8-0.05*Math.sin(Math.PI*clamp((u-0.45)/0.55,0,1)); P.lift=u<0.6?0.025*Math.abs(Math.sin(u/0.6*Math.PI*2)):0;
+    P.headTilt=lerp(0.22,0.42,smooth(clamp((u-0.5)/0.5,0,1))); return P; }
+  const q=(t-W)/Fd;
+  if(q<1){ /* follow-through: the leg carries on up to chest height, he rises onto his toes and hops forward, then lands */
+    let rf,ru;
+    if(q<0.35){ const s=q/0.35, e=1-(1-s)*(1-s); rf=lerp(V18P_CON.f,V18P_TOP.f,e); ru=lerp(V18P_CON.u,V18P_TOP.u,e); }
+    else if(q<0.75){ const s=smooth((q-0.35)/0.4); rf=lerp(V18P_TOP.f,0.32,s); ru=lerp(V18P_TOP.u,0,s); }
+    else { const s=smooth((q-0.75)/0.25); rf=lerp(0.32,0.12,s); ru=0; }
+    F[1]={f:rf,u:ru,l:lerp(V18P_CON.l,0.11,smooth(q))};
+    const hop=clamp((q-0.1)/0.5,0,1); P.lift=0.11*Math.sin(Math.PI*hop);
+    const lw=kL+0.42*smooth(hop); F[0]={f:bf(lw),u:0,l:-0.16};
+    const a=smooth(Math.min(1,q/0.3)), z=smooth(clamp((q-0.55)/0.45,0,1));
+    H[0]={f:lerp(lerp(0.22,0.34,a),0.05,z),u:lerp(lerp(1.3,1.42,a),1.05,z),l:lerp(-0.66,-0.36,z)}; H[1]={f:lerp(lerp(-0.08,-0.3,a),0.0,z),u:lerp(lerp(1.26,1.3,a),1.05,z),l:lerp(0.62,0.34,z)};
+    P.lean=lerp(-0.13,-0.2,Math.sin(Math.PI*Math.min(1,q/0.7)))*(1-z)+0.04*z; P.hipU=0.8+0.02*Math.sin(Math.PI*hop)-0.05*z*(1-z)*4*0.5;
+    P.headTilt=lerp(0.42,-0.22,smooth(Math.min(1,q/0.35)))*(1-z)+(-0.1)*z; return P; }
+  /* settle: he lands, the feet square up and the arms come down while the ball is still in the air */
+  const s=smooth(clamp((t-W-Fd)/K.SE,0,1));
+  F[1]={f:lerp(0.12,P.feet[1]?P.feet[1].f:0.06,s),u:0,l:lerp(0.11,P.feet[1]?P.feet[1].l:0.1,s)};
+  F[0]={f:lerp(bf(kL+0.42),P.feet[0]?P.feet[0].f:0.02,s),u:0,l:lerp(-0.16,P.feet[0]?P.feet[0].l:-0.1,s)};
+  H[0]={f:lerp(0.05,H[0].f,s),u:lerp(1.05,H[0].u,s),l:lerp(-0.36,H[0].l,s)}; H[1]={f:lerp(0,H[1].f,s),u:lerp(1.05,H[1].u,s),l:lerp(0.34,H[1].l,s)};
+  P.lean=lerp(0.04,P.lean||0,s); P.headTilt=lerp(-0.1,P.headTilt||0,s); P.lift=0; P.hipU=lerp(0.8,P.hipU||0.8,s); return P; };
+
+const _v18pPose=Stage.prototype.poseOf;
+Stage.prototype.poseOf=function(p,isRef){ const P=_v18pPose.apply(this,arguments); const K=this._v18pk; if(isRef||!K||K.p!==p||this.rm||p.dive||p.celeb) return P;
+  if(this.now<K.t0) return P; return this.v18pPose(p,P,K); };
+
+/* distribute: punt about 60% of the time (this._v18forcePunt makes it always, for the lab and tests) */
+const _v18pDist=Stage.prototype.distribute;
+Stage.prototype.distribute=async function(gk){
+  const want=this._v18forcePunt!=null? !!this._v18forcePunt : Math.random()<0.6;
+  if(!want||this.skip||!gk||this.own!==gk||!this.hands||!this.alive) return _v18pDist.apply(this,arguments);
+  const dir=gk.side===0?1:-1, gl=gk.side===0?0:105; const fast=this.ts<0.3;
+  const sy=clamp(gk.y,34-13,34+13); const sx=gl+dir*(fast?13.4:12.6);
+  await this.carry(gk,sx,sy,fast?220:520); if(this.own!==gk||!this.hands||!this.alive) return;
+  await this.wait(this.D(fast?60:200)); if(this.own!==gk||!this.hands||!this.alive||this.skip) return _v18pDist.apply(this,arguments);
+  const run=fast?0.7:1.6, kx=gk.x+dir*run; const dist=46+Math.random()*12; const lx=clamp(kx+dir*dist,8,97), ly=clamp(sy+(Math.random()-0.5)*26,9,59);
+  const tgt=this.nearest(gk.side,lx,ly,true); if(!tgt) return _v18pDist.apply(this,arguments);
+  if(!tgt.ov) tgt.meet={x:lerp(tgt.x,lx,0.7),y:lerp(tgt.y,ly,0.7)};
+  const h=14+Math.random()*4; const d=Math.hypot(lx-kx,ly-sy);
+  this.lastPunt={t:this.now,gk,to:tgt,h};
+  await this.launch(gk,{home:tgt,dur:this.D(2250+(d-45)*14),h,kind:'loft',punt:true});
+  gk.ov=null;
+};
+
+/* the lab scene: a shot is caught and punted upfield */
+LAB_SCENES.push(['punt','Keeper catch and punt']);
+const _v18pLabRun=labRun;
+labRun=function(scen){ const r=_v18pLabRun.apply(this,arguments); if(scen!=='punt') return r;
+  return Promise.resolve(r).then(async()=>{ const st=App.labSt; if(!st||!st.alive) return; const alive=()=>st.alive&&App.labSt===st;
+    st._v18forcePunt=true; const P=[...st.players.values()]; const A=P.filter(p=>p.side===0); const fw=A[9];
+    while(alive()){ st.zoomTo(0.5); st.focus=null; await st.gain(fw); if(!alive()) return; fw.x=82; fw.y=30+Math.random()*8; await st.shotSeq({s:0,pid:fw.pid,t:'save',x:40,y:84}); if(!alive()) return; await st.wait(st.D(1400)); } }); };
+
+/* ===================== v18.2 animation polish (71) =====================
+   Presentation only: nothing here touches engine.js, results, events or their order. Each fix can be switched off
+   through V18POL (test/polish.js measures before and after in one page).
+   1. celeb: the 3-D celebration close-up leads the running scorer (the director's damped springs lag ~0.7 s behind a
+      sprinting player) and, after the director has posed the camera, a stateless correction (module order 26, before
+      the figures cull) turns the lens toward the scorer and widens it so his body and raised arms stay inside the
+      middle ~68% of the frame. It is a continuous function of the frame, so it never jumps.
+   2. crane: the walkout crane (69) no longer overlaps live play. In 3-D the kick-off tap (tapOff) waits for the crane
+      to land on the wide shot (at most ~2.6 s, presentation timing only), and if anything is in flight while the crane
+      still runs, the crane hands over to the director's normal blend instead of flying through the first pass.
+   3. arms: 3-D elbows. 63_p3d_figures.js used the 2-D ik3 pole (-0.7,-0.5,sd*0.6) for every arm, which flares relaxed
+      elbows outward. Low arms now take a pole that points back and only slightly out, so they hang beside the body;
+      raised arms (celebrations, dives, throw-ins) and hands on hips keep the old pole, with a smooth blend between.
+   4. pen: the penalty / shootout kicker strikes only once he has reached the ball: the strike's launch waits (in the
+      stage's own clock) until he is within ~0.72 m, instead of kicking from ~0.95 m when penStrike's run-up wait ran out. */
+const V18POL={celeb:true,crane:true,arms:true,pen:true,log:[]};
+const V18P_CRANE_MS=2000;
+
+/* ---------- 3. relaxed 3-D elbows ---------- */
+v18ArmPole=function(a0,a1,a2,t0,t1,t2,sd,Q,p){ const o=V18_AP;
+  if(!V18POL.arms||(Q&&(Q.act==='hips'||Q.act==='dive'))||(p&&p.dive)){ o[0]=-0.7; o[1]=-0.5; o[2]=sd*0.6; return o; }
+  /* k = 0 for an arm hanging below the shoulder, 1 once the hand is near or above it */
+  const dh=t1-a1; let k=(dh+0.42)/0.3; k=k<0?0:k>1?1:k*k*(3-2*k);
+  o[0]=-0.95+0.25*k; o[1]=-0.12-0.38*k; o[2]=sd*(0.16+0.44*k); return o; };
+
+/* ---------- 1. celebration close-up framing ---------- */
+(function(){ const D=P3D_MODULES.find(m=>m.name==='director'); if(!D) return; const _pose=D.pose;
+  D.pose=function(P,st,mode,eye,tgt){ const r=_pose.call(this,P,st,mode,eye,tgt);
+    if(mode==='celeb'&&r!==false&&V18POL.celeb&&P.dir&&P.dir.cel){ const sc=P.dir.cel; const vx=sc.vx||0, vy=sc.vy||0; const v=Math.hypot(vx,vy);
+      /* lead the springs by the scorer's velocity (critically damped lag ~ 2/omega), capped at 4.5 m */
+      const ld=Math.min(0.72,4.5/Math.max(1e-3,v)); eye.x+=vx*ld; eye.z+=vy*ld*0.6; tgt.x+=vx*ld; tgt.z+=vy*ld;
+      if(eye.z-tgt.z<6) eye.z=tgt.z+6; if(eye.z>76) eye.z=76; }
+    return r; };
+})();
+function v18PolishScorerBox(P,sc,V){ /* max |NDC| over the scorer's body and raised arms */ let m=0, cx=0, cy=0;
+  const pts=V18P_BOX; for(let i=0;i<pts.length;i+=3){ V.set(sc.x+pts[i],pts[i+1],sc.y+pts[i+2]).project(P.camera); m=Math.max(m,Math.abs(V.x),Math.abs(V.y)); }
+  V.set(sc.x,1.1,sc.y).project(P.camera); cx=V.x; cy=V.y; return [m,cx,cy]; }
+const V18P_BOX=[0,0.02,0, 0,2.3,0, 0.45,2.2,0.45, -0.45,2.2,-0.45, 0.5,1.3,-0.5, -0.5,1.3,0.5, 0.45,0.1,0.45, -0.45,0.1,-0.45];
+P3D_MODULES.push({name:'polish',order:26,
+  init(P){ const T=P.T; P._pol={V:new T.Vector3(),F:new T.Vector3(),L:new T.Vector3(),last:0}; },
+  frame(P,st){ const Q=P._pol, Dd=P.dir; if(!Q||!Dd||!V18POL.celeb) return; if(Dd.mode!=='celeb'||!Dd.cel||Dd.w<0.05){ Q.last=0; return; }
+    const cam=P.camera, sc=Dd.cel; if(!isFinite(sc.x)||!isFinite(sc.y)) return; cam.updateMatrixWorld(); const S=0.68;
+    let b=v18PolishScorerBox(P,sc,Q.V); const wt=Math.min(1,Dd.w*1.5);
+    /* turn toward the scorer's centre by the part of his offset beyond 0.18 of the half-frame */
+    const off=Math.hypot(b[1],b[2]); if(off>0.18){ const k=wt*Math.min(1,(off-0.18)/off*1.15); cam.getWorldDirection(Q.F); const d=Math.hypot(sc.x-cam.position.x,1.1-cam.position.y,sc.y-cam.position.z);
+      Q.L.copy(cam.position).addScaledVector(Q.F,d); Q.L.x+=(sc.x-Q.L.x)*k; Q.L.y+=(1.1-Q.L.y)*k; Q.L.z+=(sc.y-Q.L.z)*k; cam.lookAt(Q.L); cam.updateMatrixWorld(); b=v18PolishScorerBox(P,sc,Q.V); }
+    /* widen the lens until the box fits */
+    if(b[0]>S){ const t=Math.tan(cam.fov*Math.PI/360)*(1+(b[0]/S-1)*wt); cam.fov=Math.min(60,Math.atan(t)*360/Math.PI); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); b=v18PolishScorerBox(P,sc,Q.V); }
+    Q.last=b[0]; },
+  dispose(P){ P._pol=null; } });
+
+/* ---------- 2. the walkout crane finishes before the kick-off pass ---------- */
+function v18PolCraneOn(st){ const F=typeof v18WalkFocus!=='undefined'?v18WalkFocus:null; const P=st&&st._p3d;
+  return !!(F&&F.crane&&F.st===st&&P&&!P.dead&&P.dir&&!st.rm&&performance.now()-F.crane<V18P_CRANE_MS); }
+{ const _tap=Stage.prototype.tapOff;
+  Stage.prototype.tapOff=async function(){ if(V18POL.crane&&this.pendingKick&&v18PolCraneOn(this)){ const t0=performance.now();
+      await this.until(()=>!v18PolCraneOn(this), this.D(V18P_CRANE_MS)+600); V18POL.log.push({k:'craneHold',ms:Math.round(performance.now()-t0)}); }
+    return _tap.apply(this,arguments); }; }
+(function(){ const D=P3D_MODULES.find(m=>m.name==='director'); if(!D) return; const _pick=D.pick;
+  D.pick=function(P,st){ const F=typeof v18WalkFocus!=='undefined'?v18WalkFocus:null;
+    if(V18POL.crane&&F&&F.crane&&F.st===st&&P.kind==='live'&&(st.fl||st.own&&!st.pendingKick&&Math.hypot(st.ball.x-52.5,st.ball.y-34)>1.5)){
+      /* play is live while the crane still flies: hand over to the director's blend (no snap) */
+      v18WalkFocus=null; if(P.dir) P.dir.cutAt=0; V18POL.log.push({k:'craneCut',ms:Math.round(performance.now()-F.crane)}); try{ v18WalkClass(false); }catch(e){} }
+    return _pick.call(this,P,st); };
+})();
+
+/* ---------- 4. the penalty kicker reaches the ball before he strikes it ---------- */
+{ const _launch=Stage.prototype.launch;
+  Stage.prototype.launch=function(p,o){ if(V18POL.pen&&p&&o&&o.kind==='shot'&&this.setPiece==='pen'&&!this.skip&&!p.gk){ const b=this.ball; const d=Math.hypot(p.x-b.x,p.y-b.y);
+      if(d>0.72&&p.ov){ const me=this, a=arguments; V18POL.log.push({k:'penWait',d:+d.toFixed(2)});
+        return this.until(()=>Math.hypot(p.x-b.x,p.y-b.y)<=0.72||Math.hypot(p.x-p.ov.x,p.y-p.ov.y)<0.08, this.eta(p,p.ov.x,p.ov.y)+400).then(()=>_launch.apply(me,a)); } }
+    return _launch.apply(this,arguments); }; }
 
 </script>
