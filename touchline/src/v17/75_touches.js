@@ -89,6 +89,6 @@ Stage.prototype.poseOf=function(p,isRef){
   if(rcv){ const u=(now-tT)/TD; v184Meet(F,bl>=0?1:0,bf,bl,hs,(1-smooth(u))*0.9,0.06,0.05*smooth(u)); }
   /* 2b. dribble touches: the touching foot meets the back of the ball around the touch */
   const S=p.v184; if(S&&now-S.t<160&&P.act==='loco'){ const c=v184Cpos(p);
-    const pre=S.next-c; if(pre>=0&&pre<0.34) v184Meet(F,v184Foot(S.next),bf,bl,hs,smooth(1-pre/0.34),0.06);
-    const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18) v184Meet(F,v184Foot(S.c0),bf,bl,hs,1-smooth(post/0.18),0.07); }
+    const pre=S.next-c; if(pre>=0&&pre<0.34){ const w=smooth(1-pre/0.34); v184Meet(F,v184Foot(S.next),bf,bl,hs,w,0.06); P.headTilt=(P.headTilt||0)+0.1*w; } /* eyes down onto the ball for the touch */
+    const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07); P.headTilt=(P.headTilt||0)+0.1*w; } }
   return P; };
