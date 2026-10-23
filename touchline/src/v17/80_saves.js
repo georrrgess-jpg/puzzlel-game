@@ -313,7 +313,7 @@ Stage.prototype.v186kBeaten=function(gk,sh,C,to,f){ const q=v186kQ(this,gk), R=v
   /* never through the keeper: check the drawn body against the ball's real flight; if it would touch, he goes (further) the other way */
   for(let i=0;i<5;i++){ const M=this.v186kMake(gk,sh,k,{q,ty,z:zz,out:'none',set,low:z<0.45,bx:gk.x}); const D=this.v186kArm(gk,sh,M,f,null);
     if(k==='watch') return; const gap=this.v186kClear(gk,D,f,M.syaw); if(V186K.log) V186K.log.push({pid:gk.pid,beat:k,gap:+gap.toFixed(2),try:i});
-    if(gap>0.05) return;
+    if(gap>0.15) return; /* margin for curl and the real flight vs the predicted one */
     if(k!=='wrong'&&!forced){ k='wrong'; ty=tgt(k); } else ty=clamp(ty-sgn*0.6,GF.y0-1.5,GF.y1+1.5); } };
 
 /* ---------- per-step: intercept fix, sounds, scripted body motion, ball held in the gloves ---------- */
