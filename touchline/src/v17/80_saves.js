@@ -196,7 +196,8 @@ Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const now=this.now, q=M.D.q; con
   const vm=7.2*(this.spdMul||1)/1000, need=Math.hypot(M.x1-gk.x,M.y1-gk.y);
   if(M.D.k!=='late'&&need>0.2) t0=Math.max(tR,Math.min(t0,tC-need/(0.9*vm)));
   if(tC-t0<45) t0=tC-45;
-  const cap=vm*Math.max(1,tC-t0); if(need>cap){ const w=1-cap/need, dx=(M.x1-gk.x)*w, dy=(M.y1-gk.y)*w; M={...M,x1:M.x1-dx,y1:M.y1-dy,c:{x:M.c.x-dx,y:M.c.y-dy,z:M.c.z},clip:+(need-cap).toFixed(2)}; }
+  const cap=vm*Math.max(1,tC-t0); if(need>cap){ const w=1-cap/need, dx=(M.x1-gk.x)*w, dy=(M.y1-gk.y)*w; let ex=dx; const gl=gk.side===0?0:105, pd=gk.side===0?1:-1; if(pd*(M.x1-ex-gl)<0.25) ex=M.x1-(gl+pd*0.25); /* never pulled back behind his line */
+    M={...M,x1:M.x1-ex,y1:M.y1-dy,c:{x:M.c.x-ex,y:M.c.y-dy,z:M.c.z},clip:+(need-cap).toFixed(2)}; }
   const post=Math.max(90,this.D(V186K_POST[M.D.k]||500));
   const fin=M.stand?0:(M.D.n>0?-1:1); /* sign of the final roll */
   const D={...M.D, t:t0, tR, tP0:tC, tA, post, dir:(fin||1)*(gk.x>52.5?1:-1), x0:gk.x, y0:gk.y, x1:M.x1, y1:M.y1, stand:M.stand, cx:M.c.x, cy:M.c.y, cz:M.c.z, catch:M.D.out==='catch', rel:now};
