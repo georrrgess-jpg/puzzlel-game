@@ -14,7 +14,7 @@ const until=async(p,fn,ms,arg)=>{ const end=Date.now()+ms; while(Date.now()<end)
 const watch=(p,errs)=>{ p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{ if(m.type()==='error'&&!/GL Driver/i.test(m.text())) errs.push('console: '+m.text()); }); };
 async function startLive(p,seed,renderer){
   await p.goto(DIST); await p.waitForTimeout(600);
-  await p.evaluate(([r,t])=>{ PREFS.renderer=r; PREFS.rtier=t; PREFS.replays=true; PREFS.view='broadcast'; PREFS.zoom='normal'; savePrefs(); },[renderer,SHOTS?'B':'C']);
+  await p.evaluate(([r,t])=>{ PREFS.renderer=r; PREFS.rtier=t; PREFS.replays=true; PREFS.view='broadcast'; PREFS.zoom='normal'; savePrefs(); },[renderer,process.env.SL_TIER||'C']);
   await p.click('[data-a="newCareerForm"][data-slot="1"]'); await p.fill('#nc-name','Sideline Coach'); await p.fill('#nc-seed',seed);
   await p.click('[data-a="ncNext"]'); await p.waitForTimeout(200); await p.click('[data-a="createCareer"]'); await p.waitForTimeout(800);
   await p.evaluate(()=>{ App.C.settings.walkout='off'; App.C.settings.walk2=1; });
@@ -33,6 +33,12 @@ function judge(S){ const pure=s=>s.sl&&s.dm==='main'&&s.w<0.0005&&!s.rp; const P
   const zs=P.map(s=>s.e[2]), hs=P.map(s=>s.e[1]);
   return {n:S.length,pure:P.length,inFrame:P.length?inF/P.length:0,eyeJump:ej,turn:aj,cuts,zMin:Math.min(...zs),zMax:Math.max(...zs),hMin:Math.min(...hs),hMax:Math.max(...hs),near:Math.min(...P.map(s=>s.near))}; }
 const f2=x=>+(+x).toFixed(2);
+/* screenshots only: headless software GL draws ~1 frame a second, far behind a real camera; before a picture the stage is
+   paused and the camera springs are stepped in camera time only (no rendering, no simulation), then one frame is drawn */
+async function snap(p,file,stage){ await p.evaluate(async hl=>{ const st=hl?App.hl:App.live.stage; const P=st&&st._p3d; const was=st.paused; st.paused=true;
+    if(P&&!P.dead){ const D=P3D_MODULES.find(m=>m.name==='director'), Q=P3D_MODULES.find(m=>m.name==='polish'); for(let i=0;i<70;i++){ P.dt=0.05; P.camPose(st); if(D) D.frame(P,st); if(Q&&P._pol) Q.frame(P,st); } P._t=performance.now(); }
+    st._v184was=was; if(st.requestDraw) st.requestDraw(); },!!stage); await p.waitForTimeout(1600); await p.screenshot({path:OUT+file});
+  await p.evaluate(hl=>{ const st=hl?App.hl:App.live.stage; st.paused=!!st._v184was; },!!stage); }
 
 (async()=>{ const t0=Date.now(); const b=await chromium.launch();
   const p=await b.newPage({viewport:SHOTS?{width:1440,height:900}:{width:960,height:600}}); const errs=[]; watch(p,errs);
@@ -45,17 +51,17 @@ const f2=x=>+(+x).toFixed(2);
   ok(await p.evaluate(()=>App.live.stage.mode==='sideline'&&PREFS.view==='sideline'&&document.querySelector('[data-a="liveView"][data-v="sideline"]').getAttribute('aria-pressed')==='true'),'Sideline button: stage mode, PREFS.view and aria-pressed');
   ok(await until(p,()=>!!App.live.stage._p3d._slOn,8000),'the 3-D sideline camera takes over (after the switch fade)');
   /* ---------- sampled live play ---------- */
-  await p.evaluate(SAMPLER); await p.waitForTimeout(+process.env.SL_MS||26000);
+  await p.evaluate(SAMPLER); await p.waitForTimeout(+process.env.SL_MS||(SHOTS?12000:26000));
   let S=await p.evaluate(()=>{ const s=SLS; window.SLS=null; return s; }); let J=judge(S);
   console.log('  samples',JSON.stringify({n:J.n,pure:J.pure,inFrame:f2(J.inFrame),eyeJump:f2(J.eyeJump),turn:f2(J.turn),cuts:J.cuts,z:[f2(J.zMin),f2(J.zMax)],h:[f2(J.hMin),f2(J.hMax)],near:f2(J.near)}));
-  ok(J.pure>=15,'enough pure sideline frames sampled ('+J.pure+')');
+  ok(J.pure>=(SHOTS?5:15),'enough pure sideline frames sampled ('+J.pure+')');
   ok(J.inFrame>=0.95,'the ball is inside the frame in >= 95 % of frames ('+(J.inFrame*100).toFixed(1)+' %)');
   ok(J.eyeJump<=0.6,'no per-frame eye jump > 0.6 m outside cuts (max '+f2(J.eyeJump)+' m)');
   ok(J.turn<=8,'no per-frame view turn > 8 degrees outside cuts (max '+f2(J.turn)+')');
   ok(J.zMin>68&&J.zMax<71.6,'the eye stays between the near touchline and the near rail (z '+f2(J.zMin)+'..'+f2(J.zMax)+')');
   ok(J.hMin>=1.75&&J.hMax<=2.1&&J.hMax-J.hMin<0.01,'standing height 1.75-2.1 m, never bobbing ('+f2(J.hMin)+'..'+f2(J.hMax)+')');
   ok(J.near>=1,'the eye is never within 1 m of a player (closest '+f2(J.near)+' m)');
-  if(SHOTS) await p.screenshot({path:OUT+'d-sideline-normal.png'});
+  if(SHOTS) await snap(p,'d-sideline-normal.png');
   /* ---------- a throw-in and a corner on the near side ---------- */
   await p.evaluate(()=>{ App.live.paused=true; }); await until(p,()=>!App.live.busy,60000); await p.evaluate(()=>{ App.live.stage.paused=false; });
   await p.evaluate(SAMPLER);
@@ -64,19 +70,17 @@ const f2=x=>+(+x).toFixed(2);
     await st.wait(st.D(300)); o.ov=null; await st.throwIn(); await st.wait(st.D(500)); return true; });
   await until(p,()=>{ const st=App.live.stage; return st.hands&&st.ball.y>67; },90000);
   const thrAt=await p.evaluate(()=>{ const st=App.live.stage, S=st._p3d._sl; return {eye:S.eye.toArray().map(v=>+v.toFixed(2)),ball:[+st.ball.x.toFixed(1),+st.ball.y.toFixed(1)],near:+S.near.toFixed(2)}; });
-  if(SHOTS){ await p.waitForTimeout(1500); await p.screenshot({path:OUT+'d-sideline-throwin.png'}); }
+  if(SHOTS) await snap(p,'d-sideline-throwin.png');
   await thr;
   const cor=p.evaluate(async()=>{ const st=App.live.stage; st.skip=false; await st.cornerKick(0,1); await st.wait(st.D(900)); return true; });
   await until(p,()=>{ const st=App.live.stage; return !!st.fl; },90000);
-  if(SHOTS){ await p.waitForTimeout(900); await p.screenshot({path:OUT+'d-sideline-corner.png'}); }
+  if(SHOTS) await snap(p,'d-sideline-corner.png');
   await cor; const thrW=thrAt;
   S=await p.evaluate(()=>{ const s=SLS; window.SLS=null; return s; }); J=judge(S);
   console.log('  set pieces',JSON.stringify({n:J.n,pure:J.pure,inFrame:f2(J.inFrame),eyeJump:f2(J.eyeJump),turn:f2(J.turn),z:[f2(J.zMin),f2(J.zMax)],near:f2(J.near),throwIn:thrW}));
-  ok(J.pure>=6&&J.eyeJump<=0.6&&J.turn<=8,'throw-in and corner: no jumps (eye '+f2(J.eyeJump)+' m, turn '+f2(J.turn)+')');
+  ok(J.pure>=(SHOTS?2:6)&&J.eyeJump<=0.6&&J.turn<=8,'throw-in and corner: no jumps (eye '+f2(J.eyeJump)+' m, turn '+f2(J.turn)+')');
   ok(J.zMin>68&&J.zMax<71.6&&J.near>=1,'throw-in and corner: the eye stays on the line, nobody within 1 m (closest '+f2(J.near)+' m)');
   ok(J.inFrame>=0.9,'throw-in and corner: the ball in frame ('+(J.inFrame*100).toFixed(1)+' %)');
-  if(SHOTS){ const tp=p.evaluate(async()=>{ const st=App.live.stage; const o=[...st.players.values()].find(q=>q.side===1&&!q.gk&&!q.off); await st.gain(o); o.x=58; o.y=63; o.ov={x:57,y:64}; await st.wait(st.D(400)); o.ov=null; await st.throwIn(); await st.wait(st.D(600)); });
-    await p.waitForTimeout(3400); await p.screenshot({path:OUT+'d-sideline-throwin.png'}); await tp; }
   /* ---------- zoom: buttons ---------- */
   const lvl=()=>p.evaluate(()=>PREFS.zoom);
   const fov=()=>p.evaluate(()=>App.live.stage._p3d.camera.fov);
@@ -89,9 +93,9 @@ const f2=x=>+(+x).toFixed(2);
   await p.evaluate(()=>{ App.live.stage.paused=false; });
   await step('btn',()=>p.click('[data-a="liveZoom"][data-v="-1"]'),'wide');
   ok(await p.evaluate(()=>document.querySelector('[data-a="liveZoom"][data-v="-1"]').getAttribute('aria-disabled')==='true'&&document.querySelector('[data-a="liveZoom"][data-v="1"]').getAttribute('aria-disabled')==='false'),'Wide: zoom out is aria-disabled, zoom in is not');
-  if(SHOTS) await p.screenshot({path:OUT+'d-sideline-wide.png'});
+  if(SHOTS) await snap(p,'d-sideline-wide.png');
   await p.click('[data-a="liveZoom"][data-v="-1"]',{force:true}); ok(await lvl()==='wide','a click on a disabled end does nothing');
-  for(const w of ['normal','close','tight']){ await step('btn',()=>p.click('[data-a="liveZoom"][data-v="1"]'),w); if(SHOTS&&w!=='normal') await p.screenshot({path:OUT+`d-sideline-${w}.png`}); }
+  for(const w of ['normal','close','tight']){ await step('btn',()=>p.click('[data-a="liveZoom"][data-v="1"]'),w); if(SHOTS&&w!=='normal') await snap(p,`d-sideline-${w}.png`); }
   ok(await p.evaluate(()=>document.querySelector('[data-a="liveZoom"][data-v="1"]').getAttribute('aria-disabled')==='true'&&document.querySelector('.v184-zl').textContent==='Tight'),'Tight: zoom in is aria-disabled, the label reads Tight');
   ok(seen.btn.size===4,'buttons reach every level ('+[...seen.btn]+')');
   /* ---------- keys ---------- */
@@ -113,7 +117,7 @@ const f2=x=>+(+x).toFixed(2);
   await p.click('[data-a="liveView"][data-v="broadcast"]'); await p.waitForTimeout(900);
   const bw=async()=>p.evaluate(()=>{ const s=App.live.stage; return {tw:s.cam.tw,w:s.cam.w,base:s.bw*s.zoom,k:s.v184K()}; });
   let wOk=true; const ks={}; for(const [d,w] of [[0,'tight'],[-1,'close'],[-1,'normal'],[-1,'wide']]){ if(d) await p.click(`[data-a="liveZoom"][data-v="${d}"]`); await p.waitForTimeout(1500); const r=await bw(); ks[w]=f2(r.tw/r.base);
-    if(SHOTS) await p.screenshot({path:OUT+`d-broadcast-${w}.png`}); if(await lvl()!==w) wOk=false; }
+    if(SHOTS) await snap(p,`d-broadcast-${w}.png`); if(await lvl()!==w) wOk=false; }
   console.log('  broadcast width factors',JSON.stringify(ks));
   ok(wOk&&ks.wide>ks.normal&&ks.normal>ks.close&&ks.close>ks.tight&&Math.abs(ks.normal-1)<0.01,'broadcast: each level sets the camera width (wide > normal = 1 > close > tight)');
   ok(await p.evaluate(()=>!App.live.stage._p3d._slOn),'broadcast: the gantry camera is back');
@@ -134,10 +138,10 @@ const f2=x=>+(+x).toFixed(2);
   await p.close();
   /* ---------- phone ---------- */
   if(SHOTS){ const q=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true}); const e2=[]; watch(q,e2);
-    await startLive(q,'side84p','3d'); await until(q,()=>!!(App.live.stage._p3d),20000); await q.click('[data-a="liveView"][data-v="sideline"]'); await q.waitForTimeout(9000);
-    await q.screenshot({path:OUT+'p-sideline.png'}); const bar=await q.$('#lv-ctrl'); if(bar) await bar.screenshot({path:OUT+'p-controlbar.png'});
-    await q.click('[data-a="liveZoom"][data-v="1"]'); await q.waitForTimeout(5000); await q.screenshot({path:OUT+'p-sideline-close.png'});
-    await q.click('[data-a="liveView"][data-v="broadcast"]'); await q.waitForTimeout(5000); await q.screenshot({path:OUT+'p-broadcast-close.png'});
+    await startLive(q,'side84p','3d'); await until(q,()=>!!(App.live.stage._p3d),20000); await q.click('[data-a="liveView"][data-v="sideline"]'); await q.waitForTimeout(4000);
+    await snap(q,'p-sideline.png'); const bar=await q.$('#lv-ctrl'); if(bar) await bar.screenshot({path:OUT+'p-controlbar.png'});
+    await q.click('[data-a="liveZoom"][data-v="1"]'); await q.waitForTimeout(1000); await snap(q,'p-sideline-close.png');
+    await q.click('[data-a="liveView"][data-v="broadcast"]'); await q.waitForTimeout(2500); await snap(q,'p-broadcast-close.png');
     const ov=await q.evaluate(()=>{ const c=document.querySelector('#lv-ctrl'); return document.documentElement.scrollWidth>innerWidth+1||(c&&c.scrollWidth>c.clientWidth+1); });
     ok(!ov,'phone 390 px: the control bar wraps without horizontal overflow'); ok(e2.length===0,'phone: no page errors '+JSON.stringify(e2.slice(0,3))); await q.close(); }
   /* ---------- 2-D ---------- */
