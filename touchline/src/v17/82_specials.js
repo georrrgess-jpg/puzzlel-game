@@ -21,6 +21,7 @@
      goalBanner, v18Replay (two-angle replay: the scorer's view ends at take-off, so his camera never goes upside down or
      inside his own body; the behind-the-goal pass starts earlier and slows the kick down), Stage.loop (slow motion), the
      lab (scenes 'bike' and 'scissor'). Globals are prefixed v186x / V186X. */
+/* @v186x-pure-begin: constants, helpers, ratings and the pick (no Stage, no DOM; test/specials.js runs this block in Node) */
 const V186X={on:true,force:null,Kb:0.025,Ks:0.03,minTs:0.45,minD:7,slow:0.55,log:[]};
 const V186X_MS={bike:{set:760,to:380,st:200,fall:320,lie:100,up:420},scissor:{set:620,to:300,st:130,fall:270,lie:90,up:400}};
 
@@ -44,6 +45,7 @@ function v186xProb(tech,lvl){ if(lvl!=='V'&&lvl!=='JV') return {bike:0,scissor:0
 function v186xPick(o){ if(!o||o.ty!=='cross') return null; const q=v186xProb(o.tech,o.lvl); if(q.bike+q.scissor<=0) return null;
   const u=(hashStr(['v186x',o.pid,o.m,Array.isArray(o.sc)?o.sc.join('-'):o.sc,o.s].join('|'))%1000003)/1000003; return u<q.bike?'bike':u<q.bike+q.scissor?'scissor':null; }
 
+/* @v186x-pure-end */
 /* ---------- the decision, at the start of a goal sequence ---------- */
 Stage.prototype.v186xDecide=function(e){
   if(!V186X.on||this.rm||this.skip||this.demo||this.so||!e||e.t!=='goal') return null;
@@ -178,6 +180,10 @@ Stage.prototype.finish=function(e,pl){ const K=this._v186x;
 /* the cross homes in on the contact point, and update holds the ball there until the strike */
 const _v186xHead=Stage.prototype.headOf;
 Stage.prototype.headOf=function(p){ if(p&&p.v186xk&&!(p.v186xr>=0)&&p.v186xc!=null){ try{ const c=this.v186xContact(p); if(c) return c; }catch(e){} } return _v186xHead.apply(this,arguments); };
+/* his head's height change through the move (what the 2-D name plate reads to sit above the head; 3-D plates use the solved head) */
+const _v186xJump=Stage.prototype.jumpLift;
+Stage.prototype.jumpLift=function(p){ const r=_v186xJump.apply(this,arguments); if(!p||!p.v186xk||p.v186xc==null) return r;
+  try{ const F=v186xFrame(p,v186xTau(this,p),v186xDur(p.v186xk,p.v186xts)); if(!F) return r; const h=v186xFwd(0.02,1.83,0,F.ra?0:F.th,F.ra,F.lift,0.8)[2]; return r+(h-1.83)*v186xScale(this,p).S; }catch(e){ return r; } };
 
 /* ---------- after every step: facing and position scripted through the move ---------- */
 const _v186xUpd=Stage.prototype.update;
