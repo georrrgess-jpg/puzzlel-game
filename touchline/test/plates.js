@@ -58,6 +58,10 @@ function layout(S){ let n=0, out=0, over=0, block=0, bad=[];
       for(const b of s.blocks){ if(b[4]==='tag') continue; if(hit(t.r,b)){ block++; if(bad.length<3) bad.push(['block',b[4],t.r.map(Math.round)]); } } }
     for(let i=0;i<T.length;i++) for(let j=i+1;j<T.length;j++) if(hit(T[i].r,T[j].r)){ over++; if(bad.length<3) bad.push(['overlap',T[i].r.map(Math.round),T[j].r.map(Math.round)]); } }
   return {n,out,over,block,bad}; }
+function jumps(S){ let n=0, worst=0; const last=new Map();
+  for(const s of S){ const cur=new Map(); for(const t of s.tags){ if(t.chev) continue; const o=[t.r[0]-t.an[0],t.r[1]-t.an[1]]; cur.set(t.pid,[o,t.a]); const q=last.get(t.pid);
+      if(q&&t.a>0.6&&q[1]>0.6){ const d=Math.hypot(o[0]-q[0][0],o[1]-q[0][1]); worst=Math.max(worst,d); if(d>40) n++; } } last.clear(); for(const [k,v] of cur) last.set(k,v); }
+  return {n,worst}; }
 function carrier(S){ let n=0, m=0, anc=0, ancMax=0; for(const s of S){ if(s.rp||s.inNet||s.celeb||s.why!==''||!s.own||s.fl||s.held<300||s.paused) continue; n++; if(s.car===s.own) m++;
     const t=s.tags.find(q=>q.role==='car'); if(t&&t.ex){ const d=Math.hypot(t.an[0]-t.ex[0],t.an[1]-t.ex[1]); anc++; ancMax=Math.max(ancMax,d); } }
   return {n,match:n?m/n:0,anc,ancMax}; }
@@ -88,6 +92,7 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   ok(Dd.min>0&&Dd.sw/Dd.min<=20,'defender switches with the same carrier: '+Dd.sw+' in '+f2(Dd.min)+' min of possession');
   ok(L.n>100&&!L.out&&!L.over&&!L.block,'broadcast Normal: tags inside the canvas, never over each other, the minimap or the caption '+JSON.stringify(L.bad));
   ok(S.some(s=>s.tags.some(t=>t.ptr!=null)),'tags carry a pointer to the head');
+  { const J=jumps(S); ok(J.n===0,'no tag at full strength jumps against its player in one frame (> 40 px: '+J.n+', largest '+f2(J.worst)+' px)'); }
   const mean=await p.evaluate(()=>{ const f=App.live.stage._pl.perf; const r=[...f.ring.slice(0,Math.min(600,f.n))].sort((a,b)=>a-b); return {mean:f.sum/f.n,max:f.max,n:f.n,med:r[r.length>>1]}; });
   console.log('  cost',JSON.stringify({mean:+mean.mean.toFixed(4),median:+mean.med.toFixed(4),max:f2(mean.max),n:mean.n}));
   ok(mean.mean<0.5,'the plates cost '+mean.mean.toFixed(3)+' ms per frame on average (software, shared machine; budget 0.5 ms)');
@@ -125,14 +130,18 @@ function defender(S){ let sw=0, aba=0, short=0, ms=0, prev=null, prevT=0, hist=[
   /* ---------- hidden states ---------- */
   await p.evaluate(()=>{ App.live.paused=true; }); await until(p,()=>!App.live.busy,90000);
   await p.evaluate(()=>{ const st=App.live.stage; st.paused=false; });
+  { await until(p,()=>{ const S=App.live.stage._pl; return !!(S&&[...S.slots.values()].some(s=>s.role==='car'&&s.a>=0.99)); },20000);
+    const r=await p.evaluate(()=>{ const st=App.live.stage, S=st._pl, o={}; st.paused=true; try{ v185PlFrame(st); v185PlToggle(); v185PlFrame(st); o.off=S.slots.size; o.offSr=(S.sr&&S.sr.textContent)||'';
+        v185PlToggle(); v185PlFrame(st); const c=[...S.slots.values()].find(s=>s.role==='car'); o.on=c?c.a:0; o.own=!!st.own&&!st.fl; } finally{ st.paused=false; } return o; });
+    ok(r.off===0&&r.offSr===''&&(!r.own||r.on>=0.99),'N while paused: the tags go at once, and come straight back '+JSON.stringify(r)); }
   await p.evaluate(()=>{ PREFS.plates=false; savePrefs(); }); await p.waitForTimeout(700); await take(p); await p.waitForTimeout(1200); S=await take(p);
   ok(S.length>10&&S.every(s=>!s.drawn),'PREFS.plates=false: nothing drawn ('+S.length+' frames)');
   await p.evaluate(()=>{ PREFS.plates=true; savePrefs(); });
   const gates=await p.evaluate(()=>{ const st=App.live.stage, S=st._pl, L=App.live, o={}; const g=()=>{ S.kind=null; return v185PlGate(st,S); };
     o.normal=g(); st.ft=true; o.ft=g(); st.ft=false; L.skipping=true; o.skipping=g(); L.skipping=false; st.skip=true; o.skip=g(); st.skip=false;
     const wf=typeof v18WalkFocus!=='undefined'?v18WalkFocus:null; v18WalkFocus={st,L,crane:0}; o.walkout=g(); v18WalkFocus=wf;
-    st.inNet=1; o.inNet=g(); st.inNet=null; const q=[...st.players.values()][3]; q.celeb=true; o.celeb=g(); q.celeb=false; o.after=g(); return o; });
-  ok(gates.normal===''&&gates.ft==='hard'&&gates.skipping==='hard'&&gates.skip==='hard'&&gates.walkout==='hard'&&gates.inNet==='soft'&&gates.celeb==='soft'&&gates.after==='','gates: full time, skipping, walkout hide; goal window fades '+JSON.stringify(gates));
+    const ph=L.M&&L.M.phase; if(L.M){ L.M.phase='ht'; o.ht=g(); L.M.phase=ph; } st.inNet=1; o.inNet=g(); st.inNet=null; const q=[...st.players.values()][3]; q.celeb=true; o.celeb=g(); q.celeb=false; o.after=g(); return o; });
+  ok(gates.normal===''&&gates.ft==='hard'&&gates.skipping==='hard'&&gates.skip==='hard'&&gates.walkout==='hard'&&gates.ht==='hard'&&gates.inNet==='soft'&&gates.celeb==='soft'&&gates.after==='','gates: full time, half time, skipping, walkout hide; goal window fades '+JSON.stringify(gates));
   /* a goal at 1x: the celebration, the replay and the restart; no tags from the goal (after the 260 ms fade) to the restart */
   await take(p);
   const goal=p.evaluate(async()=>{ const L=App.live, st=L.stage; L.speed=1; st.goalTs=GOAL_TS[1]; st.skip=false; const sc=[...st.players.values()].find(q=>q.side===0&&!q.gk&&!q.off);

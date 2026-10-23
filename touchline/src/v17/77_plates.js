@@ -98,7 +98,7 @@ function v185PlLiveOf(st){ const L=typeof App!=='undefined'&&App.live; return L&
 /* '' when plates may show; 'hard' resets and draws nothing; 'soft' fades whatever is up */
 function v185PlGate(st,S){ if(S.kind==null||(S.kind==='other'&&S.clk-S.kindT>1000)){ S.kind=v185PlKind(st); S.kindT=S.clk; }
   if(!V185PL_KINDS[S.kind]) return 'hard';
-  const L=v185PlLiveOf(st); if(st.skip||st.ft||(L&&(L.skipping||L.done))) return 'hard';
+  const L=v185PlLiveOf(st); if(st.skip||st.ft||(L&&(L.skipping||L.done||(L.M&&L.M.phase==='ht')))) return 'hard';
   if(typeof v18WalkFocus!=='undefined'&&v18WalkFocus&&v18WalkFocus.st===st&&(!v18WalkFocus.crane||performance.now()-v18WalkFocus.crane<2600)) return 'hard';
   if(PREFS.plates===false) return 'soft';
   if(st.inNet) return 'soft'; for(const p of st.players.values()) if(p.celeb) return 'soft';
@@ -143,7 +143,7 @@ function v185PlSelect(st,S){ const now=S.clk, o=st.own&&st.players.get(st.own.pi
   else if(pen&&!o&&!f){ /* a shootout kick placed without a carrier: the nearest outfield player to the ball takes it */ let bd=36; for(const q of st.players.values()){ if(q.gk||q.off) continue; const d=(q.x-st.ball.x)**2+(q.y-st.ball.y)**2; if(d<bd){ bd=d; car=q; } } }
   /* turnover or a new carrier: the defender is chosen fresh */
   if(car&&car!==S.carFor){ S.carFor=car; S.D.cur=null; S.D.chal=null; S.dc=null; S.defDrop=false; }
-  const spd=(v185PlLiveOf(st)||{}).speed||1;
+  const LL=v185PlLiveOf(st), spd=LL&&LL.speed||1;
   if(car&&!f&&(car===o||pen)){
     if(pen) def=st.gkOf(1-car.side);
     else if(!(st.hands||st.placed)){ const pick=v185PlPickDef(st,car,S.D,now);
@@ -164,7 +164,7 @@ function v185Pl3D(st){ const P=st._p3d; return !!(P&&!P.dead&&P.camera&&st.mode!
 function v185PlAnchor(st,S,sl,p,out){ const hg=(p.hgt||70)/70;
   if(st.mode==='tactical'){ const T=st.tacGeom(); out.x=T.ox+p.x*T.s; out.y=T.oy+p.y*T.s; out.fy=out.y; out.ph=Math.max(7,T.s*1.25); return true; }
   if(v185Pl3D(st)){ const P=st._p3d, V=V185PL_P.v||(V185PL_P.v=new THREE.Vector3()); const cam=P.camera;
-    if(sl.hf===S.fid) V.set(sl.hx,sl.hy,sl.hz); else V.set(p.x,1.87*hg+(st.jumpLift?st.jumpLift(p):0),p.y);
+    const e=S.hd&&S.hd.get(p.pid); if(e&&e[3]===S.fid) V.set(e[0],e[1],e[2]); else V.set(p.x,1.87*hg+(st.jumpLift?st.jumpLift(p):0),p.y);
     V.project(cam); if(!(V.z<1)||!isFinite(V.x)||!isFinite(V.y)) return false; out.x=(V.x+1)/2*st.W; out.y=(1-V.y)/2*st.H;
     V.set(p.x,0,p.y).project(cam); out.fy=V.z<1&&isFinite(V.y)?(1-V.y)/2*st.H:out.y+40; out.ph=Math.max(0,out.fy-out.y); return true; }
   const ft=st.proj(p.x,p.y,0); out.fy=ft[1]; if(v185Pl2DHead(st,p,ft,out)){ out.ph=Math.max(0,out.fy-out.y); return true; }
@@ -182,22 +182,25 @@ function v185Pl2DHead(st,p,ft,out){ const Q=p._pose; if(!Q||p._poseT!==st.now||!
 /* 3-D: the figures module solves every body this frame; keep the head centre of the tagged players */
 if(typeof v18FigDraw==='function'){ const _v185FigDraw=v18FigDraw;
   v18FigDraw=function(P,st,p,kit,isRef){ const r=_v185FigDraw.apply(this,arguments);
-    if(r&&!isRef&&p&&p.pid!=null&&st&&st._pl){ const S=st._pl, sl=S.slots.get(p.pid); const F=P._fig;
-      if(sl&&F&&F.s){ const W=F.s; sl.hx=W[42]; sl.hy=W[43]+0.2*0.92*(p.hgt||70)/70; sl.hz=W[44]; sl.hf=S.fid; } }
+    if(r&&!isRef&&p&&p.pid!=null&&st&&st._pl){ const S=st._pl, F=P._fig;
+      /* every player's, so a tag that starts this frame (its slot is made after the figures) has it too */
+      if(F&&F.s){ const W=F.s, HD=S.hd||(S.hd=new Map()); let e=HD.get(p.pid); if(!e) HD.set(p.pid,e=new Float64Array(4)); e[0]=W[42]; e[1]=W[43]+0.2*0.92*(p.hgt||70)/70; e[2]=W[44]; e[3]=S.fid; } }
     return r; }; }
 
 /* ---------- layout ---------- */
 const v185PlHit=(a,b)=>a.x<b.x+b.w&&b.x<a.x+a.w&&a.y<b.y+b.h&&b.y<a.y+a.h;
 /* fit a w x h rect near (x, y): clamp to the canvas inset, then step around anything it hits (at most 3 passes);
    returns true and writes r, or false when it cannot be placed */
-function v185PlFit(r,x,y,w,h,blocks,nb,W,H){ const pad=V185PL.pad; const cx=v=>Math.max(pad,Math.min(W-pad-w,v)), cy=v=>Math.max(pad,Math.min(H-pad-h,v));
+let v185PlFitSide=0;
+function v185PlFit(r,x,y,w,h,blocks,nb,W,H,sd){ const pad=V185PL.pad; v185PlFitSide=0; const cx=v=>Math.max(pad,Math.min(W-pad-w,v)), cy=v=>Math.max(pad,Math.min(H-pad-h,v));
   if(w>W-pad*2||h>H-pad*2) return false;
   let cands=[[cx(x),cy(y)]]; const x0=x, y0=y;
   for(let pass=0;pass<3;pass++){ const next=[];
-    for(const [px,py] of cands){ r.x=px; r.y=py; r.w=w; r.h=h; let hit=null; for(let i=0;i<nb;i++){ if(v185PlHit(r,blocks[i])){ hit=blocks[i]; break; } } if(!hit) return true;
-      const U=[px,cy(hit.y-h-3)], D=[px,cy(hit.y+hit.h+3)], L=[cx(hit.x-w-3),py], R=[cx(hit.x+hit.w+3),py];
-      /* another tag: beside it on the player's side, then above, the other side, and below last (below would sit on the players) */
-      if(hit.k==='tag'){ const right=x0+w/2>=hit.x+hit.w/2; next.push(right?R:L,U,right?L:R,D); }
+    for(const c of cands){ const px=c[0], py=c[1]; r.x=px; r.y=py; r.w=w; r.h=h; let hit=null; for(let i=0;i<nb;i++){ if(v185PlHit(r,blocks[i])){ hit=blocks[i]; break; } } if(!hit){ v185PlFitSide=c.s||0; return true; }
+      const U=[px,cy(hit.y-h-3)], D=[px,cy(hit.y+hit.h+3)], L=[cx(hit.x-w-3),py], R=[cx(hit.x+hit.w+3),py]; U.s=D.s=L.s=R.s=c.s||0;
+      /* another tag: beside it on the player's side, then above, the other side, and below last (below would sit on the players);
+         the side used last time is kept until the player is half a tag width past the other tag's centre */
+      if(hit.k==='tag'){ const nat=x0+w/2-(hit.x+hit.w/2); let right=nat>=0; if(sd){ right=sd>0; if(nat*sd<-w*0.5) right=!right; } L.s=-1; R.s=1; U.s=D.s=0; next.push(right?R:L,U,right?L:R,D); }
       else { const A=[U,D,L,R]; A.sort((a,b)=>Math.hypot(a[0]-x0,a[1]-y0)-Math.hypot(b[0]-x0,b[1]-y0)); next.push(...A); } }
     cands=next.slice(0,12); }
   return false; }
@@ -218,18 +221,21 @@ function v185PlBlocks(st,S){ const B=S.blocks; let n=0; const W=st.W;
 /* ---------- per frame ---------- */
 function v185PlFrame(st){ if(st._rp&&st._rp.on) return; const t0=performance.now();
   const S=st._pl||(st._pl=v185PlNew()); const dtR=Math.max(0,Math.min(100,t0-S.last)); S.last=t0; const dt=st.paused?0:dtR; S.clk+=dt;
+  const pv=PREFS.plates!==false; if(S.pv!=null&&S.pv!==pv&&st.paused) S.snap=true; S.pv=pv;
   const why=v185PlGate(st,S); S.why=why;
-  if(why==='hard'){ if(S.slots.size||S.car||S.oc) v185PlReset(S); v185PlSr(st,S,null,null); return; }
-  if(why==='soft'){ S.want.length=0; S.car=null; S.def=null; S.oc=null; S.carFor=null; S.D.cur=null; S.incP=null; S.fo=st.fl; } else v185PlSelect(st,S);
-  /* slots follow the wanted list; fades in real time (frozen while paused) */
+  if(why==='hard'){ S.snap=false; if(S.slots.size||S.car||S.oc) v185PlReset(S); v185PlSr(st,S,null,null); return; }
+  if(why==='soft'){ S.want.length=0; S.car=null; S.def=null; S.oc=null; S.carFor=null; S.D.cur=null; S.incP=null; S.fo=st.fl; } else { v185PlSelect(st,S);
+    /* plates switched on while paused: the stability delays are skipped so the tags appear at once */
+    if(S.snap) for(let k=0;k<2&&!(S.car&&(S.def||!S.D.cur));k++){ S.ocT=-1e9; S.dcT=-1e9; v185PlSelect(st,S); } }
+  /* slots follow the wanted list; fades in real time (frozen while paused, except a user toggle, which snaps) */
   const rm=!!st.rm, fin=rm?V185PL.frm:V185PL.fin, fout=rm?V185PL.frm:V185PL.fout;
   for(const sl of S.slots.values()) sl.tgt=0;
   for(const [pid,role,a,p] of S.want){ let sl=S.slots.get(pid); if(!sl){ sl={pid,p,role,a:0,tgt:0,r:{x:0,y:0,w:0,h:0},ox:0,oy:0,vx:0,vy:0,init:false,on:false,hf:-1,cmp:false,ptr:null,chev:'',an:{x:0,y:0,fy:0,ph:0}}; S.slots.set(pid,sl); } sl.p=p; sl.role=role; sl.tgt=a; }
   for(const [pid,sl] of S.slots){ const p=st.players.get(pid); if(!p||p.off&&sl.tgt===0){ S.slots.delete(pid); continue; } sl.p=p;
-    if(sl.a<sl.tgt) sl.a=Math.min(sl.tgt,sl.a+dt/fin); else if(sl.a>sl.tgt) sl.a=Math.max(sl.tgt,sl.a-dt/fout);
+    if(S.snap) sl.a=sl.tgt; else if(sl.a<sl.tgt) sl.a=Math.min(sl.tgt,sl.a+dt/fin); else if(sl.a>sl.tgt) sl.a=Math.max(sl.tgt,sl.a-dt/fout);
     if(sl.a<=0&&sl.tgt<=0) S.slots.delete(pid); }
   if(S.slots.size){ v185PlLayout(st,S,dtR); v185PlPaint(st,S); }
-  if(v185PlLiveOf(st)) v185PlSr(st,S,S.car,S.def);
+  if(v185PlLiveOf(st)){ if(S.snap) S.srT=-1e9; v185PlSr(st,S,S.car,S.def); } S.snap=false;
   const ms=performance.now()-t0; const pf=S.perf; pf.n++; pf.sum+=ms; if(ms>pf.max) pf.max=ms; pf.ring[pf.i++%600]=ms; }
 
 const V185PL_ORDER={car:0,inc:1,def:2};
@@ -248,13 +254,13 @@ function v185PlLayout(st,S,dtR){ const W=st.W, H=st.H, g=st.ctx, tac=st.mode==='
     if(tac){ tx=A.x+A.ph+4; ty=A.y-A.ph-h*0.35; }
     else if(off){ const M=V185PL.pad+10; tx=Math.max(M,Math.min(W-M-w,A.x-w/2)); ty=Math.max(M,Math.min(H-M-h,A.y-V185PL.gap-h)); }
     else { tx=A.x-w/2; ty=A.y-V185PL.gap-h; if(ty<V185PL.pad&&A.fy+V185PL.gap+h<H-V185PL.pad){ ty=A.fy+V185PL.gap; ptrUp=true; } }
-    const r=sl.r; if(!v185PlFit(r,tx,ty,w,h,B,nb,W,H)) continue;
+    const r=sl.r; if(!v185PlFit(r,tx,ty,w,h,B,nb,W,H,sl.side||0)) continue; if(v185PlFitSide) sl.side=v185PlFitSide;
     /* ease the offset from the anchor (critically damped, ~14/s); snap when new, under reduced motion, or if the eased spot collides */
     const gx=r.x-A.x, gy=r.y-A.y;
     if(!sl.init||st.rm||sl.a<=0.02){ sl.ox=gx; sl.oy=gy; sl.vx=0; sl.vy=0; sl.init=true; }
     else { const dt=Math.min(0.05,dtR/1000), om=V185PL.om, e=Math.exp(-om*dt); let c=sl.ox-gx, tmp=(sl.vx+om*c)*dt; sl.ox=gx+(c+tmp)*e; sl.vx=(sl.vx-om*tmp)*e; c=sl.oy-gy; tmp=(sl.vy+om*c)*dt; sl.oy=gy+(c+tmp)*e; sl.vy=(sl.vy-om*tmp)*e; }
     let fx=A.x+sl.ox, fy=A.y+sl.oy; const rx=r.x, ry=r.y; r.x=fx; r.y=fy; let bad=fx<V185PL.pad-0.5||fy<V185PL.pad-0.5||fx+w>W-V185PL.pad+0.5||fy+h>H-V185PL.pad+0.5; if(!bad) for(let i=0;i<nb;i++) if(v185PlHit(r,B[i])){ bad=true; break; }
-    if(bad){ r.x=rx; r.y=ry; sl.ox=gx; sl.oy=gy; sl.vx=0; sl.vy=0; }
+    if(bad){ if(!st.rm&&sl.a>0.3&&Math.hypot(fx-rx,fy-ry)>12) sl.a=0.12; r.x=rx; r.y=ry; sl.ox=gx; sl.oy=gy; sl.vx=0; sl.vy=0; }
     /* the pointer, when the tag sits right above (or below) the head */
     if(!tac&&!off){ if(!ptrUp&&A.y-(r.y+h)>=2&&A.y-(r.y+h)<=V185PL.gap+10&&A.x>r.x+5&&A.x<r.x+w-5) sl.ptr=A.x; else if(ptrUp&&r.y-A.fy>=2&&r.y-A.fy<=V185PL.gap+10&&A.x>r.x+5&&A.x<r.x+w-5){ sl.ptr=A.x; sl.ptrUp=true; } }
     sl.ptrUp=ptrUp&&sl.ptr!=null;
@@ -269,12 +275,15 @@ function v185PlSprite(st,S,sl,kit){ const dpr=st.dpr||1, m=sl.m; const C=S.spr||
   if(!e){ e={c:document.createElement('canvas'),m:null,kit:null,dpr:0}; C.set(sl.pid,e); } const c=e.c, w=m.w+2, h=m.h+2; c.width=Math.ceil(w*dpr); c.height=Math.ceil(h*dpr);
   const q=c.getContext('2d'); q.setTransform(dpr,0,0,dpr,0,0); q.clearRect(0,0,w,h); v185DrawPlate(q,1,1,sl.n,kit,{fs:m.fs,glyph:sl.gly,m});
   e.m=m; e.kit=kit; e.dpr=dpr; return c; }
+/* true when the leader from (fx, fy) along (dx, dy) would cross the minimap or a caption (the head there is under it anyway) */
+function v185PlLeadHid(S,fx,fy,dx,dy){ const B=S.blocks; for(let i=0;i<(S.nb||0);i++){ const b=B[i]; if(b.k!=='mini'&&b.k!=='cap') continue;
+    for(let k=1;k<=4;k++){ const x=fx+dx*k/4, y=fy+dy*k/4; if(x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h) return true; } } return false; }
 function v185PlPaint(st,S){ const g=st.ctx; g.save(); const dpr=st.dpr||1; g.setTransform(dpr,0,0,dpr,0,0);
   /* a tag moved aside (no pointer) keeps a thin leader to its player's head, under the tags */
   if(st.mode!=='tactical') for(const sl of S.list){ if(!sl.on||sl.a<=0.004||sl.ptr!=null||sl.chev) continue; const r=sl.r, A=sl.an, w=sl.m.w, h=sl.m.h; let fx, fy;
     if(A.y>=r.y+h){ fx=Math.max(r.x+4,Math.min(r.x+w-4,A.x)); fy=r.y+h; } else if(A.y<=r.y){ fx=Math.max(r.x+4,Math.min(r.x+w-4,A.x)); fy=r.y; }
     else { fx=A.x<r.x?r.x:r.x+w; fy=Math.max(r.y+3,Math.min(r.y+h-3,A.y)); }
-    const dx=A.x-fx, dy=A.y-fy, d=Math.hypot(dx,dy); if(d<5||d>170) continue; const ex=A.x-dx/d*2, ey=A.y-dy/d*2;
+    const dx=A.x-fx, dy=A.y-fy, d=Math.hypot(dx,dy); if(d<5||d>170||v185PlLeadHid(S,fx,fy,dx,dy)) continue; const ex=A.x-dx/d*2, ey=A.y-dy/d*2;
     g.globalAlpha=Math.min(1,sl.a)*0.8; g.strokeStyle='rgba(8,12,16,.55)'; g.lineWidth=2.5; g.beginPath(); g.moveTo(fx,fy); g.lineTo(ex,ey); g.stroke();
     g.strokeStyle='rgba(255,255,255,.85)'; g.lineWidth=1; g.beginPath(); g.moveTo(fx,fy); g.lineTo(ex,ey); g.stroke(); g.fillStyle='#ffffff'; g.beginPath(); g.arc(ex,ey,1.6,0,7); g.fill(); }
   for(let i=S.list.length-1;i>=0;i--){ const sl=S.list[i]; if(!sl.on||sl.a<=0.004) continue; const kit=sl.p.gk?st.kits.gk[sl.p.side]:st.kits.team[sl.p.side]; S.drawn++;
