@@ -56,12 +56,17 @@ Stage.prototype.dribLead=function(o,sp,dt,now){
   return S.out; };
 
 /* body frame of a player: forward f and lateral l (body units, as poseOf's feet) of a world point */
-function v184Body(p,x,y){ const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw; const ca=Math.cos(yaw), sa=Math.sin(yaw); const hs=1.06*(p.hgt||70)/70;
+/* the 3-D figures read the same foot targets at S=0.92*hgt/70 (2-D: 1.06*hgt/70) and draw a bigger ball (V18_BALL_R), with the
+   boot's toe 0.225*S ahead of the foot point; contacts use whichever painter is drawing this stage */
+const v184Is3D=st=>!!(st&&st._p3d&&!st._p3d.dead);
+function v184Body(p,x,y,st){ const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw; const ca=Math.cos(yaw), sa=Math.sin(yaw); const hs=(v184Is3D(st)?0.92:1.06)*(p.hgt||70)/70;
   const dx=x-p.x, dy=y-p.y; return [(dx*ca+dy*sa)/hs,(-dx*sa+dy*ca)/hs,hs]; }
-const V184_BR=0.11; /* ball radius, m */
+const V184_BR=0.11; /* ball radius, m (2-D) */
+/* how far behind the ball's centre the foot point sits at contact, metres */
+function v184Off(st,p){ if(!v184Is3D(st)) return V184_BR+0.07; const R=typeof V18_BALL_R==='number'?V18_BALL_R:0.176; return R+0.225*0.92*(p.hgt||70)/70-0.03; }
 /* pull a foot target onto the back of the ball (world contact a little behind the ball's centre), weight w */
-function v184Meet(F,i,bf,bl,hs,w,up,give){ if(!(w>0)) return; const o=F[i]; if(!o) return; const sd=i?1:-1;
-  let tf=bf-(V184_BR+0.07+(give||0))/hs, tl=bl-sd*0.02/hs; tf=Math.max(-0.2,Math.min(0.62,tf)); tl=Math.max(-0.42,Math.min(0.42,tl)); if(tl*sd<0.02) tl=sd*0.02;
+function v184Meet(F,i,bf,bl,hs,w,up,give,off){ if(!(w>0)) return; const o=F[i]; if(!o) return; const sd=i?1:-1;
+  let tf=bf-((off==null?V184_BR+0.07:off)+(give||0))/hs, tl=bl-sd*0.02/hs; tf=Math.max(-0.2,Math.min(0.62,tf)); tl=Math.max(-0.42,Math.min(0.42,tl)); if(tl*sd<0.02) tl=sd*0.02;
   F[i]={f:o.f+(tf-o.f)*w,u:o.u+((up==null?0.07:up)-o.u)*w,l:o.l+(tl-o.l)*w}; }
 /* which foot takes a pass: chosen once per reception (p.v184R) - the ball side when it is clearly to one side, else the foot that is
    swinging (never a planted one), else the right */
@@ -98,13 +103,13 @@ Stage.prototype.poseOf=function(p,isRef){
   const F=P.feet;
   /* 3. strikes: the contact is latched on the first frames of the wind-up (never mid-swing); the kicking foot then follows the
      ball until it leaves, and the standing foot is planted at a fixed spot on the turf beside it */
-  if(kicking&&P.act==='kick'){ p.v184L=null; const big=kk==='shot'||kk==='loft'; const [bf,bl,hs]=v184Body(p,b.x,b.y);
+  if(kicking&&P.act==='kick'){ p.v184L=null; const big=kk==='shot'||kk==='loft'; const [bf,bl,hs]=v184Body(p,b.x,b.y,this);
     let K=p.v184K&&p.v184K.k===p.kickT?p.v184K:null;
     if(!K&&kt<W&&kt<=Math.max(30,W*0.25)&&this.own===p&&!this.hands&&(b.z||0)<0.5&&bf>0.1&&bf<1.9&&Math.abs(bl)<0.6){
       const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw);
-      K=p.v184K={k:p.kickT,t0:kt,f:0,l:0,px:b.x-ca*0.12+sa*0.25,py:b.y-sa*0.12-ca*0.25}; }
+      const pl3=v184Is3D(this)?0.32:0.25; K=p.v184K={k:p.kickT,t0:kt,f:0,l:0,px:b.x-ca*0.12+sa*pl3,py:b.y-sa*0.12-ca*pl3}; }
     const near=!!K;
-    if(near&&kt<W&&this.own===p){ K.f=Math.max(0.12,Math.min(0.62,bf-(V184_BR+0.06)/hs)); K.l=Math.max(-0.1,Math.min(0.3,bl)); }
+    if(near&&kt<W&&this.own===p){ K.f=Math.max(0.12,Math.min(0.62,bf-(v184Off(this,p)-0.01)/hs)); K.l=Math.max(-0.1,Math.min(0.3,bl)); }
     const ramp=near?smooth(Math.min(1,Math.max(0,kt-K.t0)/Math.max(1,W*0.5))):0;
     const con=near?{f:K.f,u:0.09,l:lerp(0.06,K.l,ramp)}:{f:0.3,u:0.1,l:0.06};
     const back={f:-0.46,u:big?0.5:0.3}, top={f:big?0.62:0.48,u:big?0.9:0.42,l:con.l}, rest={f:0.06,u:0,l:0.06};
@@ -114,7 +119,7 @@ Stage.prototype.poseOf=function(p,isRef){
     else { const u=(kt-W)/Fd; if(u<0.4){ const q=smooth(u/0.4); ff=lerp(con.f,top.f,q); fu=lerp(con.u,top.u,q); fl=con.l; } else { const q=smooth((u-0.4)/0.6); ff=lerp(top.f,rest.f,q); fu=lerp(top.u,rest.u,q); fl=lerp(top.l,rest.l,q); } }
     F[1]={f:ff,u:fu,l:fl};
     if(near){ /* the standing foot: a fixed spot on the turf beside the ball, reached over the backswing, held through contact */
-      const [pf0,pl0]=v184Body(p,K.px,K.py); const pf=Math.max(-0.3,Math.min(0.7,pf0)), pl=Math.max(-0.5,Math.min(-0.12,pl0));
+      const [pf0,pl0]=v184Body(p,K.px,K.py,this); const pf=Math.max(-0.3,Math.min(0.7,pf0)), pl=Math.max(-0.5,Math.min(-0.12,pl0));
       const pw=kt<W?ramp:1-smooth(Math.min(1,(kt-W)/(Fd*0.5)));
       F[0]={f:lerp(F[0].f,pf,pw),u:F[0].u*(1-pw),l:lerp(F[0].l,pl,pw)}; }
     return P; }
@@ -125,15 +130,15 @@ Stage.prototype.poseOf=function(p,isRef){
   const B0=F[0], B1=F[1]; let met=false;
   if(home&&!kicking&&!tackling&&(P.act==='loco'||P.act==='idle')){ /* 2a. receiving: one foot (chosen once) reaches for the arriving ball */
     const rem=f.t0+f.dur-now, A=Math.max(140,this.D(220));
-    if(rem>=0&&rem<A&&(b.z||0)<0.9){ const [bf,bl,hs]=v184Body(p,b.x,b.y); if(bf>0.1){ const i=v184RcvFoot(this,p,f.t0,bl); p.v184Rt=now;
-      v184Meet(F,i,Math.min(bf,0.6),bl,hs,smooth(1-rem/A)*0.9,0.06+Math.min(0.25,b.z||0)); met=true; } } }
-  else if(own){ const [bf,bl,hs]=v184Body(p,b.x,b.y);
+    if(rem>=0&&rem<A&&(b.z||0)<0.9){ const [bf,bl,hs]=v184Body(p,b.x,b.y,this); if(bf>0.1){ const i=v184RcvFoot(this,p,f.t0,bl); p.v184Rt=now;
+      v184Meet(F,i,Math.min(bf,0.6),bl,hs,smooth(1-rem/A)*0.9,0.06+Math.min(0.25,b.z||0),0,v184Off(this,p)); met=true; } } }
+  else if(own){ const [bf,bl,hs]=v184Body(p,b.x,b.y,this);
     if(bf>0.1){
       if(rcv){ const u=(now-tT)/TD; const R=p.v184R, reached=R&&v184Ago(tT,p.v184Rt)<60; const i=reached?R.foot:v184RcvFoot(this,p,'t'+tT,bl);
-        const w=(1-smooth(u))*0.9*(reached?1:smooth(Math.min(1,u/0.25))); v184Meet(F,i,bf,bl,hs,w,0.06,0.05*smooth(u)); met=true; }
+        const w=(1-smooth(u))*0.9*(reached?1:smooth(Math.min(1,u/0.25))); v184Meet(F,i,bf,bl,hs,w,0.06,0.05*smooth(u),v184Off(this,p)); met=true; }
       /* 2b. dribble touches: the touching foot meets the back of the ball around the touch (held until the touch registers) */
       const S=p.v184; if(S&&now-S.t<160&&P.act==='loco'){ const c=v184Cpos(p);
-        const pre=S.next-c; if(pre>-0.5&&pre<0.34){ const w=pre<=0?1:smooth(1-pre/0.34); v184Meet(F,v184Foot(S.next),bf,bl,hs,w,0.06); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } /* eyes down onto the ball for the touch */
-        else { const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } } } } }
+        const pre=S.next-c; if(pre>-0.5&&pre<0.34){ const w=pre<=0?1:smooth(1-pre/0.34); v184Meet(F,v184Foot(S.next),bf,bl,hs,w,0.06,0,v184Off(this,p)); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } /* eyes down onto the ball for the touch */
+        else { const post=c-S.c0; if(Math.abs(S.c0-Math.round(S.c0))<1e-6&&post>=0&&post<0.18){ const w=1-smooth(post/0.18); v184Meet(F,v184Foot(S.c0),bf,bl,hs,w,0.07,0,v184Off(this,p)); P.headTilt=(P.headTilt||0)+0.1*w; met=true; } } } } }
   v184Limit(p,F,B0,B1,now,met);
   return P; };

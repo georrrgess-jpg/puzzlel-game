@@ -140,3 +140,12 @@ function v184SidelinePose(P,st,S,now){ const T=P.T, cam=P.camera, C=V184_SL, b=s
 
 { const _tac=Stage.prototype.drawTac; Stage.prototype.drawTac=function(){ const P=this._p3d; if(P&&P._sl) P._sl.tac=true; return _tac.apply(this,arguments); }; }
 /* the director: in sideline view the kick-off, corner and penalty presets give way to the sideline camera (66 checks P._slOn) */
+
+/* sideline view and the walkout: the crane flies to the high broadcast shot, so in sideline view it is skipped and the walkout
+   fades straight to the touchline camera (71's kick-off hold then has no crane to wait for) */
+(function(){ const D=P3D_MODULES.find(m=>m.name==='director'); if(!D) return; const _pk=D.pick;
+  D.pick=function(P,st){ if(P._slOn&&P.kind==='live'&&typeof v18WalkFocus!=='undefined'&&v18WalkFocus&&v18WalkFocus.st===st&&v18WalkFocus.crane){ v18WalkFocus=null; if(typeof v18Cut==='function') v18Cut(st); }
+    return _pk.call(this,P,st); }; })();
+/* a new clip in the goal-replay card starts somewhere else on the pitch: cut to it instead of walking the touchline camera over */
+if(typeof Stage.prototype.clipStart==='function'){ const _v184ClipStart=Stage.prototype.clipStart;
+  Stage.prototype.clipStart=function(){ const r=_v184ClipStart.apply(this,arguments); const P=this._p3d; if(P&&!P.dead&&P.dir){ if(P._sl) P._sl.init=false; P.dir.snap=true; } return r; }; }
