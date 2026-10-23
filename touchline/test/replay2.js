@@ -35,8 +35,11 @@ const SHOTDIR='test/shots/v185/replay2/'; if(SHOTS) fs.mkdirSync(SHOTDIR,{recurs
       const fw=L.fwd, bx=st.ball.x, by=Math.max(0,st.ball.z||0)+V18_BALL_R, bz=st.ball.y; const front=(bx-L.eye[0])*fw[0]+(by-L.eye[1])*fw[1]+(bz-L.eye[2])*fw[2];
       RS.push({cam:L.cam,pass:L.pass,i:Q.i,now:L.now,eye:L.eye,fwd:L.fwd,near:L.near,fov:L.fov,ndc:L.ballNdc,front,head:L.head,hid:L.hid,md,lt:lt?lt.textContent:'',nx:!!(nx&&!nx.hidden),ts:Q.ts,tg:Q.tg,two:!!Q.two,win:Q.win||null,gx:Q.gx,dir:Q.dir,crossT:Q.crossT==null?null:Q.crossT,rate:Q.rate||0.5});
       if(window.RSHOT) window.RSHOT(L,Q,st); } }catch(e){ console.warn('sampler',e); } return r; }; });
+  /* the build-up before the replay is not drawn (software GL is slow; the replay is what is measured): the stage keeps
+     stepping in real time, and drawing resumes for good the moment the replay starts */
+  await p.evaluate(()=>{ const _on=v17Vis.on; v17Vis.on=el=>{ const st=App.live&&App.live.stage; if(window.NODRAW&&st&&el===st.cv){ if(st._rp) window.NODRAW=false; else return false; } return _on(el); }; });
   /* play one goal on the live stage; opts: speed, side, ty, seq builder; returns the result and the frames */
-  const goal=async(o)=>p.evaluate(async o=>{ const L=App.live, st=L.stage; L.speed=o.speed||1; st.goalTs=GOAL_TS[L.speed]; st.skip=false; RS.length=0;
+  const goal=async(o)=>p.evaluate(async o=>{ const L=App.live, st=L.stage; window.NODRAW=o.draw!==true; L.speed=o.speed||1; st.goalTs=GOAL_TS[L.speed]; st.skip=false; RS.length=0;
     const s=o.side||0; const pl=[...st.players.values()].filter(q=>q.side===s&&!q.gk&&!q.off); const sc=pl[pl.length-1], mate=pl[Math.max(0,pl.length-4)];
     const n0=App.v18Replays||0; let bug=false; const ob=new MutationObserver(()=>{ if(document.querySelector('.v18-rp-bug')) bug=true; }); ob.observe(document.getElementById('lv-stage'),{childList:true,subtree:true});
     const M0=JSON.stringify([L.M.sc,L.M.min,L.view.min]); const seq=o.ty==='header'?[{pid:mate.pid,x:10,y:84,a:'cross'},{pid:sc.pid,x:48,y:93,a:'shot'}]:o.ty==='pen'?[{pid:sc.pid,x:50,y:89,a:'setup'}]:o.ty==='long'?[{pid:sc.pid,x:40,y:70,a:'shot'}]:[{pid:sc.pid,x:50,y:84,a:'shot'}];
