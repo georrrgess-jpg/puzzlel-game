@@ -143,10 +143,10 @@ function v185Setup(st,Q,R){ Q.two=false; Q.pass=1; Q.cam='goal'; Q.rate=V18_RP.r
   Q.two=true; Q.cam='eyes'; Q.head=head; Q.crossT=crossT; Q.win=[[a0,a1],[c0,c1]]; Q.trk=trk; Q.t=Q.t0=a0; Q.t1=a1; Q.i=v185Idx(B,a0); Q.rate=sp>=2?V185_RP.rate2x:V18_RP.rate; Q.cams=['eyes'];
   if(gl&&P.dir) P.dir.snap=true; v185Caption(st,Q); }
 
-/* the behind-goal eye: an offset along the line (once per replay) that keeps the lens-to-ball line clearest of bodies
+/* the behind-goal eye: an offset along the line (once per replay, at most 1.2 m) that keeps the lens-to-ball line clearest of bodies
    from just before the strike to just after it */
 function v185GoalZ(Q,B,sc){ const C=V185_RP, gx=Q.gx, dir=Q.dir, X=gx+dir*C.gEye; let best=0, bs=1e9;
-  for(const dz of [0,-0.4,0.4,-0.8,0.8,-1.2,1.2,-1.6,1.6,-2,2,-2.4,2.4]){ let blk=0;
+  for(const dz of [0,-0.4,0.4,-0.8,0.8,-1.2,1.2]){ let blk=0;
     for(const S of B){ if(S.now<Q.ts-350||S.now>Q.ts+300) continue; const b=S.s.ball, Z=v185Cl(34+v185Cl((b.y-34)*0.25,-1.4,1.4)+dz,31,37); const bdx=b.x-X, bdz=b.y-Z, bl=Math.hypot(bdx,bdz); if(bl<1) continue;
       for(const [o,f] of S.m){ if(o===sc||f.off||!isFinite(f.x)) continue; const ox=f.x-X, oz=f.y-Z, t=(ox*bdx+oz*bdz)/bl; if(t<0.4||t>bl-0.3) continue; const pd=Math.abs(ox*bdz-oz*bdx)/bl; if(pd<0.45){ blk+=1+(0.45-pd); } } }
     const sc2=blk+Math.abs(dz)*0.15; if(sc2<bs-1e-6){ bs=sc2; best=dz; } }
@@ -204,8 +204,10 @@ function v185GoalPose(P,st,Q,eye,tgt){ const b=st.ball, R=typeof V18_BALL_R==='n
   const by=isFinite(b.y)?b.y:34; eye.set(gx+dir*C.gEye,C.gH,v185Cl(34+v185Cl((by-34)*0.25,-1.4,1.4)+(Q.gz||0),31,37));
   if(st.now<Q.ts&&sc&&isFinite(sc.x)){ tgt.set(sc.x+(b.x-sc.x)*0.3,1.1+(Math.max(0,b.z||0)+R-1.1)*0.3,sc.y+(by-sc.y)*0.3); }
   else { const th=Math.max(0,b.z||0)+R; let ty=th;
-    /* after the goal the aim lifts a little so the posts and the net stay in the picture (the ball sits low, still in frame) */
-    if(st.now>Q.tg){ const k=v185Cl((st.now-Q.tg)/200,0,1), dh=Math.hypot(b.x-eye.x,by-eye.z); if(th<0.9) ty=th+k*dh*0.25; }
+    /* after the goal the aim lifts toward a -18 degree pitch so the posts and the net stay in the picture, but never more than
+       0.4 of the half lens above the ball, which stays in frame */
+    if(st.now>Q.tg&&th<0.9){ const k=v185Cl((st.now-Q.tg)/200,0,1), dh=Math.max(0.3,Math.hypot(b.x-eye.x,by-eye.z)), hv=0.5*(P.camera.fov||C.gFov)*V185_D2R;
+      const ab=Math.atan2(th-C.gH,dh), aa=ab+k*Math.min(0.4*hv,Math.max(0,-18*V185_D2R-ab)); ty=C.gH+Math.tan(aa)*dh; }
     tgt.set(b.x,ty,by); }
   /* the lens: opened up on tall frames so the goal mouth still reads */
   const asp=Math.max(0.4,P.camera.aspect||1.6); let f=C.gFov; if(asp<1.3) f=Math.min(64,2*Math.atan(Math.tan(C.gFov*V185_D2R/2)*1.3/asp)/V185_D2R); else f=Math.min(f,2*Math.atan(Math.tan(C.gHMax*V185_D2R/2)/asp)/V185_D2R); return f; }
