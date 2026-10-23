@@ -170,14 +170,12 @@ Stage.prototype.throwIn=async function(){ const o=this.own; if(!o||this.hands||o
 
 /* ---------- D3 + R5: misses scaled by distance and finishing; D5: what was shown is recorded on the event ---------- */
 const v186rShotSeq=Stage.prototype.shotSeq;
-Stage.prototype.shotSeq=async function(e){ const miss=e&&e.t==='miss'&&e.ty!=='pen', save=e&&e.t==='save'&&e.ty!=='pen';
-  if(!miss&&!save) return v186rShotSeq.apply(this,arguments);
-  const st=this, em=this.emit; const gk=()=>this.gkOf(1-e.s);
+Stage.prototype.shotSeq=async function(e){ const miss=e&&e.t==='miss'&&e.ty!=='pen';
+  if(!miss) return v186rShotSeq.apply(this,arguments);
   if(miss&&V186R.on&&V186R.setMiss&&!this.skip&&!this.clip&&(e.ty==='header'||e.ty==='corner'||e.ty==='fk')){ const p=this.pl(e.pid);
     if(p&&!p.off&&!p.gk){ let done=false; try{ done=await v186rSetMiss(this,e,p); } finally{ if(this._v186miss===e) this._v186miss=null; if(this.setPiece==='fk'&&e.ty==='fk') this.setPiece=null; } if(done) return; } }
-  if(miss) this._v186miss=e;
-  if(save) this.emit=function(x){ if(x===e&&!x._how){ const k=gk(); x._how=(k&&x.cor)?'tip':(k&&st.own===k&&st.hands)?'catch':'parry'; } return em.apply(this,arguments); };
-  try{ return await v186rShotSeq.apply(this,arguments); } finally{ if(this._v186miss===e) this._v186miss=null; if(save&&this.emit!==em) this.emit=em; } };
+  this._v186miss=e;
+  try{ return await v186rShotSeq.apply(this,arguments); } finally{ if(this._v186miss===e) this._v186miss=null; } };
 
 /* D4 (misses only; the save branch belongs to the keeper-saves unit): a missed header comes from a cross met with the head,
    a missed free kick from a dead ball with a wall. Returns false (nothing shown yet) when the picture cannot be built. */
@@ -207,7 +205,15 @@ async function v186rSetMiss(st,e,p){ const s=e.s, dir=s===0?1:-1, gx=s===0?105:0
 const v186rLaunch=Stage.prototype.launch;
 Stage.prototype.launch=function(p,opt){ const e=this._v186miss;
   if(e&&p&&opt&&opt.kind==='shot'&&!opt.home&&opt.to&&!this.skip){ this._v186miss=null; try{ v186rMiss(this,p,opt.to,e); }catch(err){} }
+  /* D6: in a goal move, a forward pass is never played to a teammate beyond the line: he checks his run on the line first */
+  if(this._v186goal&&V186R.on&&p&&opt&&opt.home&&opt.home.side===p.side&&!opt.hands&&!this.so&&!this.skip&&this.setPiece!=='corner'&&!(this.hands&&this.own===p)){
+    const q=opt.home, s=p.side, dir=s===0?1:-1;
+    if(dir*(q.x-p.x)>0.5&&dir*(q.x-this.offLine(s))>-0.3){ const keep=q.ov, me=this, a=arguments; const hold={x:clamp(this.offLine(s)-dir*0.6,3,102),y:q.y}; q.ov=hold;
+      v186rLog('off',{goalHold:q.pid,m:+(dir*(q.x-this.offLine(s))).toFixed(2)});
+      return this.until(()=>{ hold.x=clamp(me.offLine(s)-dir*0.6,3,102); return me.skip||dir*(q.x-me.offLine(s))<=-0.3; }, Math.max(150,this.D(600))).then(()=>{ if(q.ov===hold) q.ov=keep; return v186rLaunch.apply(me,a); }); } }
   return v186rLaunch.apply(this,arguments); };
+const v186rGoalSeq=Stage.prototype.goalSequence;
+Stage.prototype.goalSequence=async function(){ this._v186goal=(this._v186goal||0)+1; try{ return await v186rGoalSeq.apply(this,arguments); } finally{ this._v186goal--; } };
 
 function v186rMiss(st,p,to,e){ const gx=p.side===0?105:0, b=st.ball; const d=Math.hypot(gx-b.x,34-b.y);
   const how=to.z>=2.6?'over':Math.abs(to.y-34)>=4.1?'wide':to.z>2.2?'bar':'post'; e._how=how; if(!V186R.on) return;
@@ -230,6 +236,8 @@ V186R_LINES.hover=['{p} heads it over the bar.','{p} gets his head to it but it 
 V186R_LINES.smother=V186R_LINES.catch; V186R_LINES.dive=V186R_LINES.catch;
 if(typeof feedPush==='function'){ const v186rFeedPush=feedPush;
   feedPush=function(e,quiet){ const L=App.live, n0=L&&L.feed?L.feed.length:0; const r=v186rFeedPush.apply(this,arguments);
-    try{ if(V186R.on&&e&&e._how&&(e.t==='miss'||e.t==='save')&&L&&L.feed&&L.feed.length>n0&&V186R_LINES[e._how]){ const f=L.feed[0]; const key=e._head&&(e._how==='over'||e._how==='wide')?'h'+e._how:e._how;
+    try{ /* a save another unit did not tag: read what the stage shows as it is announced (in the gloves, or pushed away) */
+      const st=L&&L.stage; if(V186R.on&&e&&e.t==='save'&&!e._how&&st&&e.ty!=='pen'){ const k=st.gkOf(1-e.s); e._how=(k&&e.cor)?'tip':(k&&st.own===k&&st.hands)?'catch':'parry'; }
+      if(V186R.on&&e&&e._how&&(e.t==='miss'||e.t==='save')&&L&&L.feed&&L.feed.length>n0&&V186R_LINES[e._how]){ const f=L.feed[0]; const key=e._head&&(e._how==='over'||e._how==='wide')?'h'+e._how:e._how;
         const P=id=>esc(pname(Px(id))); f.txt=pickLine(V186R_LINES[key],e.m+e.pid+(e.xg||0)+n0).replace('{p}',P(e.pid)).replace('{g}',e.gk?P(e.gk):'the keeper'); f.how=e._how; } }catch(err){}
     return r; }; }

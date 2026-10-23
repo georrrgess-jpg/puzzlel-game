@@ -4,7 +4,7 @@
    setSides and lets the gap show on the stage:
    - R1 pace: an urgent run (chase, set target, the carrier, the presser) is up to 12 % faster or slower than the median of
      the 22 on the pitch; eta() is scaled the same way so every timeout still fits the run;
-   - R2 take-ons (minimal fallback feint, switchable: V186R.feint): a carrier facing a goal-side defender within 6 m drops a
+   - R2 take-ons (minimal fallback feint; V186R.feint: true = on unless a later module wraps dribble, 'force', false): a carrier facing a goal-side defender within 6 m drops a
      shoulder; a better dribbler (ball control minus the defender's tackling) beats him more often: a beaten defender bites
      (a stab of the leg, hips turned) and is slowed for a moment; a defender who holds makes the carrier check back. The
      carrier always keeps the ball (the engine's touch list says so);
@@ -99,7 +99,8 @@ Stage.prototype.land=function(){ const f=this.fl; const r=v186rLand.apply(this,a
 
 /* R2: the fallback take-on (switchable). Nothing happens when a skill-move module has claimed the dribble. */
 function v186rTakeOn(st,p,x,y){ if(!V186R.feint||!v186rLive(st)||st.hands||st.own!==p||p.gk||!v186rHas(p)||st.rm) return null;
-  if(typeof st.v186Move==='function'||st._v186skill) return null;
+  /* a later module (the skill-move unit) wrapping dribble owns the take-on: this fallback stands aside unless forced */
+  if(V186R.feint!=='force'&&(typeof st.v186Move==='function'||st._v186skill||Stage.prototype.dribble!==v186rDribbleW)) return null;
   const now=st.now; if(p.v186fT!=null&&now-p.v186fT<Math.max(400,st.D(1400))) return null;
   const dir=p.side===0?1:-1, hx=x-p.x, hy=y-p.y, hl=Math.hypot(hx,hy); if(hl<1.5) return null; let best=null, bd=6;
   for(const q of st.players.values()){ if(q.side===p.side||q.off||q.gk||q.ov||q.chase||!v186rHas(q)) continue; const dx=q.x-p.x, dy=q.y-p.y, d=Math.hypot(dx,dy);
@@ -113,10 +114,11 @@ function v186rTakeOn(st,p,x,y){ if(!V186R.feint||!v186rLive(st)||st.hands||st.ow
   return {q:best,beat,side}; }
 
 const v186rDribble=Stage.prototype.dribble;
-Stage.prototype.dribble=function(p,x,y,ms){ let T=null; try{ if(this.own===p) T=v186rTakeOn(this,p,x,y); }catch(e){ T=null; }
+const v186rDribbleW=function(p,x,y,ms){ let T=null; try{ if(this.own===p) T=v186rTakeOn(this,p,x,y); }catch(e){ T=null; }
   if(T&&!T.beat){ /* the defender holds his ground: he checks back and goes again shorter */ const dir=p.side===0?1:-1;
     x=clamp(p.x+(x-p.x)*0.35-dir*0.6,4,101); y=clamp(p.y+(y-p.y)*0.35+T.side*1.2,3,65); }
   return v186rDribble.call(this,p,x,y,ms); };
+Stage.prototype.dribble=v186rDribbleW;
 
 /* the feint and the bite as poses: a dropped shoulder for the carrier, a lunge with the hips turned for a beaten defender */
 const v186rPose=Stage.prototype.poseOf;

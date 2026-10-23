@@ -20,13 +20,20 @@ const MON=()=>{ /* runs in the page: monitors freeze lines, holds and captions *
   const A=window.__rz={dev:{},leak:0,leakD:[],cap:[],capMis:0};
   const O=Stage.prototype.offsideSeq; Stage.prototype.offsideSeq=async function(e){ const r=await O.call(this,e); const s=e.s;
     const left=[...this.players.values()].filter(q=>q.side!==s&&q.ov&&!q.off&&!q.gk); if(left.length){ A.leak++; A.leakD.push(left.map(q=>q.pid)); } return r; };
+  /* D6: forward passes to a teammate inside a goal sequence: is the receiver onside when it is played? */
+  A.gp=[]; let inGoal=0; const GS=Stage.prototype.goalSequence; Stage.prototype.goalSequence=async function(){ inGoal++; try{ return await GS.apply(this,arguments); } finally{ inGoal--; } };
+  const LA=Stage.prototype.launch; Stage.prototype.launch=function(p,o){ const st=this; if(inGoal&&p&&o&&o.home&&o.home.side===p.side&&!o.hands&&!st.so&&st.setPiece!=='corner'){ const q=o.home, dir=p.side===0?1:-1, R=o.onRelease;
+      o=Object.assign({},o,{onRelease:f=>{ if(dir*(q.x-p.x)>0.5) A.gp.push(+(dir*(q.x-st.offLine(p.side))).toFixed(2)); if(R) return R(f); }}); return LA.call(this,p,o); }
+    return LA.apply(this,arguments); };
   let lastShot=null; const SH=Stage.prototype.shotSeq; Stage.prototype.shotSeq=async function(e){ lastShot=e; try{ return await SH.apply(this,arguments); } finally{ lastShot=null; } };
   const capHow={'HEADED OVER':'over','HEADED WIDE':'wide','OVER THE BAR':'over','WIDE':'wide','OFF THE POST!':'post','OFF THE BAR!':'bar','SAVED':'catch','PARRIED!':'parry','TIPPED AROUND THE POST':'tip'};
   const tick=()=>{ const st=(App.live&&App.live.stage)||App.labSt||window.__lab; if(st&&st.alive){
       if(!st.__capW){ st.__capW=1; const oc=st.onCaption; st.onCaption=function(t,k){ if(lastShot&&k==='shot'&&capHow[t]){ A.cap.push({t,how:lastShot._how}); if(lastShot._how&&lastShot._how!==capHow[t]) A.capMis++; } return oc.apply(this,arguments); }; }
       const m=st.offMark; if(m&&m.v186&&st.now-m.t>=0&&st.now-m.t<Math.max(700,st.D(1500))-40){ const d=Math.abs(v186rDefLine(st,m.s)-m.x); const k=m.t.toFixed(0); A.dev[k]=Math.max(A.dev[k]||0,d); } }
     requestAnimationFrame(tick); }; requestAnimationFrame(tick); };
+const goalPass=[];
 async function collect(page){ const r=await page.evaluate(()=>({off:V186R.log.off,thr:V186R.log.thr,miss:V186R.log.miss,A:window.__rz}));
+  goalPass.push(...(r.A.gp||[]));
   allOff.push(...r.off); allThr.push(...r.thr); allMiss.push(...r.miss); allDev.push(...Object.values(r.A.dev)); leaks+=r.A.leak; capMis+=r.A.capMis; capN+=r.A.cap.length;
   if(r.A.leak) console.log('  holds left after a call:',JSON.stringify(r.A.leakD)); return r; }
 
@@ -34,7 +41,7 @@ async function labOffside(b,speed,mode,n){ const page=await newPage(b); await pa
   await page.evaluate(MON);
   await page.evaluate(m=>{ PREFS.renderer='2d'; labRun('offside'); },mode); await page.waitForFunction(()=>App.labSt&&App.labSt.players.size>0);
   await page.click(`[data-a="labSpeed"][data-v="${speed}"]`);
-  await page.evaluate(m=>{ const st=App.labSt; if(m==='tactical') st.mode='tactical'; if(m==='sideline'){ PREFS.view='sideline'; } },mode);
+  await page.evaluate(m=>{ const st=App.labSt; if(m==='tactical') st.mode='tactical'; if(m==='sideline'){ st.mode='sideline'; } },mode);
   const t0=Date.now(); let shot=0;
   while(Date.now()-t0<90000){ const k=await page.evaluate(()=>V186R.log.off.length); if(k>=n) break;
     const m=await page.evaluate(()=>{ const st=App.labSt; return st&&st.offMark&&st.offMark.v186?st.now-st.offMark.t:null; });
@@ -54,7 +61,7 @@ async function labRatings(b){ const page=await newPage(b); await page.goto(DIST+
       return {ta,tc,a5,c5}; };
     out.gap=await race(99,50); out.eq=await race(70,70); a.ov=c.ov=null; a.v186r_pace=c.v186r_pace=null;
     /* R2 take-ons: the decision, 40 tries each way, and two dribbles each way */
-    const fw=P.find(p=>p.pid==='L09'), df=P.find(p=>p.pid==='L12');
+    const fw=P.find(p=>p.pid==='L09'), df=P.find(p=>p.pid==='L12'); const feint0=V186R.feint; V186R.feint='force'; /* the fallback feint is measured even when a skill-move module owns the dribble */
     const duel=async(ctrl,tkl,n)=>{ fw.v186r_pace=df.v186r_pace=60; fw.v186r_ctrl=ctrl; df.v186r_tkl=tkl; let tries=0, beats=0;
       for(let i=0;i<n;i++){ fw.x=60; fw.y=34; df.x=64; df.y=34; df.ov=df.chase=null; fw.v186fT=null; st.own=fw; st.hands=false; st.fl=null; st.placed=false;
         const T=v186rTakeOn(st,fw,72,34); if(T){ tries++; if(T.beat) beats++; } df.v186bT=null; df.v186dT=null; df.kickT=-9e9; }
@@ -64,7 +71,7 @@ async function labRatings(b){ const page=await newPage(b); await page.goto(DIST+
       for(let i=0;i<6;i++){ st.fl=null; st.own=fw; st.hands=false; fw.ov={x:58,y:34}; df.ov={x:63.5,y:34}; await st.until(()=>dist2(fw,fw.ov)<0.4&&dist2(df,df.ov)<0.4,3000); fw.v186fT=null; df.ov=null;
         const k0=V186R.log.feint.length; await st.dribble(fw,70,34,900); const f=V186R.log.feint[k0]; if(!f) continue; n++; if(f.beat) beat++; if(fw.x>df.x+0.3) past++; }
       fw.ov=null; st.demoCalm=true; return {n,beat,past}; };
-    out.runHi=await run(99,30); out.runLo=await run(30,99); fw.v186r_ctrl=df.v186r_tkl=null;
+    out.runHi=await run(99,30); out.runLo=await run(30,99); fw.v186r_ctrl=df.v186r_tkl=null; V186R.feint=feint0;
     /* R4 first touch: the same pass received by a poor and a clean controller */
     const mid=P.find(p=>p.pid==='L07'); const touch=async(ctrl)=>{ mid.v186r_pace=60; mid.v186r_ctrl=ctrl; const pk=[];
       for(let i=0;i<4;i++){ st.fl=null; st.own=fw; st.hands=false; fw.ov={x:48,y:30}; mid.ov={x:62,y:40}; await st.until(()=>dist2(fw,fw.ov)<0.5&&dist2(mid,mid.ov)<0.5,4000); await st.wait(300);
@@ -129,7 +136,7 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
     const runs=QUICK?[[8,'v186probe',200],[4,'v186probe2',200]]:[[8,'v186probe',260],[8,'realism-b',260],[4,'v186probe2',260],[2,'realism-c',150,'sideline'],[1,'realism-d',120]];
     for(const [sp,seed,secs,view] of runs) await live(b,sp,seed,secs,view);
   }
-  const lines=allOff.filter(o=>o.mL!=null), fbs=allOff.filter(o=>o.fb);
+  const lines=allOff.filter(o=>o.mL!=null), fbs=allOff.filter(o=>o.fb), nCalls=lines.length+fbs.length;
   const mins=k=>lines.length?Math.min(...lines.map(o=>o[k])):NaN;
   console.log(`  offside calls with a freeze line: ${lines.length}; margins at release (min / mean): defender ${mins('mD').toFixed(2)} / ${(lines.reduce((s,o)=>s+o.mD,0)/Math.max(1,lines.length)).toFixed(2)} m, ball ${mins('mB').toFixed(2)} m, halfway ${mins('half').toFixed(1)} m; by speed ${JSON.stringify(lines.reduce((m,o)=>{ const k=o.ts>=0.7?'1x':o.ts>=0.35?'2x':o.ts>=0.18?'4x':'8x'; m[k]=(m[k]||0)+1; return m; },{}))}`);
   console.log(`  fallbacks (no line): ${fbs.length} ${JSON.stringify(fbs.map(o=>o.fb))}`);
@@ -137,11 +144,13 @@ async function live(b,speed,seed,secs,view){ const page=await newPage(b,1280,800
   ok(lines.every(o=>o.mD>=0.5&&o.mB>=0.5&&o.half>0), `every flagged runner is beyond the second-last defender and the ball at release (worst ${mins('mD').toFixed(2)} / ${mins('mB').toFixed(2)} m)`);
   ok(lines.every(o=>Math.abs(o.markX-o.lineX)<0.05&&o.ax===o.px), 'the defender line is drawn at the line at release and the attacker line at the runner');
   ok(allDev.length>0&&Math.max(...allDev)<=0.3, `the second-last defender stays on the drawn line while it shows (worst ${allDev.length?Math.max(...allDev).toFixed(3):'-'} m over ${allDev.length} lines)`);
-  ok(fbs.filter(o=>!o.skip).length<=Math.max(1,Math.floor(allOff.length*0.1)), `calls without a picture stay rare (${fbs.length} of ${allOff.length})`);
+  ok(fbs.filter(o=>!o.skip).length<=Math.max(1,Math.floor(nCalls*0.1)), `calls without a picture stay rare (${fbs.length} of ${nCalls})`);
   ok(leaks===0, `no hold is left on a defender after a call (${leaks})`);
   const thrBad=allThr.filter(t=>t.side===t.kicker&&!t.block);
   ok(allThr.length>0&&thrBad.length===0&&(part!=='lab'||allThr.some(t=>t.block)), `throw-ins: the team that put it out never takes it unblocked (${allThr.length} throw-ins, ${allThr.filter(t=>t.block).length} blocked, ${thrBad.length} wrong)`);
   const close=allMiss.filter(m=>m.d<9); ok(close.every(m=>m.how==='post'||m.how==='bar'||Math.abs(m.y-34)<=4.7||m.z<=3.0), `close-range misses stay close (${close.length}: ${close.map(m=>m.how+' '+(m.how==='over'?m.z:m.y)).join(', ')})`);
   ok(capMis===0, `miss and save captions match the commentary category (${capN} checked, ${capMis} mismatched)`);
+  const gpOff=goalPass.filter(m=>m>0.2); console.log(`  goal-sequence forward passes: ${goalPass.length}, receiver beyond the line at release: ${gpOff.length} ${JSON.stringify(gpOff)}`);
+  if(part!=='lab') ok(gpOff.length===0, `goal sequences: no forward pass to an offside receiver (${gpOff.length} of ${goalPass.length})`);
   ok(errs.length===0, 'no page errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
   await b.close(); console.log(fails?`${fails} FAILED`:'ALL PASS'); process.exit(fails?1:0); })();
