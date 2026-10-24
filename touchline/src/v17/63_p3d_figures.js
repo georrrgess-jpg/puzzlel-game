@@ -200,7 +200,8 @@ function v18FBuildGeos(detail,limbs){ const d=Math.max(0,Math.min(3,detail|0)); 
   /* thigh with the shorts leg over its top half; the hem ring is doubled so the uv can jump from shorts to skin */
   const sw=V18F_C.shorts[1]/V18F_AW, s0=S('shorts',0);
   G.legUpper=v18FLoft([[-0.11,0,0,0,0,s0,sw,0.62],[-0.085,0.085,0.085,0,0,s0,sw,0.6],[-0.03,0.108,0.108,0,0,s0,sw,0.45],[0.05,0.112,0.112,0,0,s0,sw,0.3],[0.14,0.11,0.112,0,0.004,s0,sw,0.14],[0.193,0.107,0.109,0,0.004,s0,sw,0.03],[0.2,0.102,0.104,0,0.004,s0,sw,0.0],
-    [0.2,0.102,0.104,0,0.004,TU,0,TV],[0.205,0.09,0.092,0,0.004,TU,0,TV],[0.25,0.087,0.09,0,0.008,TU,0,TV],[0.32,0.078,0.08,0,0.005,TU,0,TV],[0.385,0.067,0.067,0,0,TU,0,TV],[0.43,0.062,0.062,0,0,TU,0,TV],...v18FCap(0.43,0.062,1,nc,sk)],N);
+    /* v18.7: an inner lip in the shorts colour that does not flare (v > 0.3), so the flared hem's underside never samples other columns */
+    [0.2,0.099,0.101,0,0.004,s0,sw,0.32],[0.2,0.099,0.101,0,0.004,TU,0,TV],[0.205,0.09,0.092,0,0.004,TU,0,TV],[0.25,0.087,0.09,0,0.008,TU,0,TV],[0.32,0.078,0.08,0,0.005,TU,0,TV],[0.385,0.067,0.067,0,0,TU,0,TV],[0.43,0.062,0.062,0,0,TU,0,TV],...v18FCap(0.43,0.062,1,nc,sk)],N);
   const kw=V18F_C.sock[1]/V18F_AW, k0=S('sock',0), sv=y=>Math.max(0,Math.min(1,1-(y+0.065)/0.535));
   G.shin=v18FLoft([...v18FCap(0,0.062,-1,nc),[0.0,0.062,0.062,0,0],[0.05,0.063,0.064,0,0.002],[0.07,0.066,0.067,0,0],[0.085,0.068,0.07,0,-0.002],[0.13,0.069,0.078,0,-0.005],[0.2,0.063,0.073,0,0.002],[0.27,0.055,0.063,0,0.006],[0.31,0.049,0.054,0,0.005],[0.34,0.045,0.048,0,0.002],[0.4,0.04,0.041,0,0],[0.43,0.038,0.038,0,0],...v18FCap(0.43,0.038,1,nc)].map(r=>[r[0],r[1],r[2],r[3],r[4],k0,kw,sv(r[0])]),N);
   /* boot: lofted heel -> toe along +y (bottom = +z), turned so the toe points along +z and the sole faces down */
@@ -379,7 +380,7 @@ gl_Position=projectionMatrix*mvPosition; if(dz>uFar) gl_Position=vec4(2.0,2.0,2.
    flares, more on one side as he strides; thigh shorts (shorts column): the leg hem flares and lags fore/aft. Same code in the outline. */
 const V187C_KSW=`{ float kR=floor(aRow+0.002), kF=aRow-kR; if(kF>0.004){ float s=(kF-0.5)*2.04, a=abs(s);
   if(uv.x<0.376){ float w=clamp(1.0-uv.y/0.14,0.0,1.0); w*=w; transformed.x*=1.0+w*a*(0.05+0.045*sign(transformed.x)*sign(s)); transformed.z*=1.0+w*a*0.06; }
-  else if(uv.x>0.499&&uv.x<0.626){ float w=clamp(1.0-uv.y/0.3,0.0,1.0); w*=w; transformed.xz*=1.0+w*a*0.16; transformed.z+=s*w*0.014; } } }`;
+  else if(uv.x>0.499&&uv.x<0.626){ float w=clamp(1.0-uv.y/0.3,0.0,1.0); w*=w; transformed.xz*=1.0+w*a*0.13; transformed.z+=s*w*0.012; } } }`;
 /* v18.7 hair swing: uv.x is the vertex's sway weight, aSw the instance's swing (head frame x, z) */
 const V187C_HSW='transformed+=vec3(aSw.x,0.35*length(aSw),aSw.y)*uv.x;';
 function v187cHairMat(P){ const m=P.track(new P.T.MeshToonMaterial({color:'#ffffff',gradientMap:P.gradientMap}));
