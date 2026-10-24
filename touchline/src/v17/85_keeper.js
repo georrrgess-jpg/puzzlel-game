@@ -170,7 +170,8 @@ Stage.prototype.cornerKick=async function(s,sg){ if(!V187K.on||!V187K.cross) ret
   const ch=gk?this.v187kCrossChoice(gk,mx,my):'head';
   if(gk&&(ch==='claim'||ch==='punch')){ const punch=ch==='punch', F=this._v187kforce||{}; const fists=punch?(F.fists||(Math.random()<0.55?2:1)):0;
     gk.dive=null; gk.ov={x:mx,y:my}; gk.hurry=true; const z=(punch?2.2:2.3)+Math.random()*0.25;
-    /* an attacker goes up with him (beside him, not into him) */
+    /* the box makes room where he comes for it (nobody stands in his take-off spot); an attacker goes up with him, beside him */
+    for(const q of this.players.values()){ if(q===gk||q===taker||q.off) continue; const t=q.ov||q; const ex=t.x-mx, ey=t.y-my, el=Math.hypot(ex,ey); if(el<1.6){ const ux=el>0.05?ex/el:-dir, uy=el>0.05?ey/el:0; q.ov={x:clamp(mx+ux*1.7,1,104),y:clamp(my+uy*1.7,1,67)}; } }
     let rival=null, rd=9; for(const q of this.players.values()){ if(q.side!==s||q===taker||q.off||q.gk) continue; const dd=Math.hypot(q.x-mx,q.y-my); if(dd>1.4&&dd<3.6&&dd<rd){ rd=dd; rival=q; } }
     v187kLog({k:ch,fists,q:+v186kQ(this,gk).toFixed(2),t:this.now});
     await this.launch(taker,{home:gk,hands:true,dur:this.D(760),h:4,onRelease:f=>{ const ul=Math.hypot(taker.x-mx,taker.y-my)||1; f.aim={x:mx+(taker.x-mx)/ul*0.25,y:my+(taker.y-my)/ul*0.25}; /* aimed at the meeting point from the start (no late change of aim) */ this.v187kAir(gk,taker,ch,f,{z,fists}); if(rival) rival.jumpT=this.now+f.dur-JD*0.5; }});
@@ -279,7 +280,10 @@ labRun=function(scen){ const r=_v187kLabRun.apply(this,arguments); if(scen!=='ke
       if(typeof labLog==='function') labLog(`${k} · q ${q}`);
       const g=st.gkOf(1); if(g){ g.dive=null; g.v187st=null; g.v187kd=null; g.x=103.5; g.y=34; g.ov=null; }
       if(k==='claim'||k==='punch'||k==='punch1'){ st._v187kforce={ck:k==='claim'?'claim':'punch',fists:k==='punch1'?1:2}; st._v187kDist='throw'; await st.cornerKick(0,Math.random()<0.5?1:-1); st._v187kforce=null; st._v187kDist=null; }
-      else if(k==='throw'||k==='roll'){ st._v187kDist=k; st._v186kforce={q,k:'stand',out:'catch'}; await st.gain(fw); if(!alive()) return; fw.x=84; fw.y=30+Math.random()*8; await st.shotSeq({s:0,pid:fw.pid,t:'save',ty:'open',x:40,y:84}); st._v186kforce=null; st._v187kDist=null; }
+      else if(k==='throw'||k==='roll'){ st._v187kDist=k; st._v186kforce={q,k:'stand',out:'catch'}; await st.gain(fw); if(!alive()) return; fw.x=84; fw.y=30+Math.random()*8; /* the lab keeps the box clear so the throw is seen, and puts a free full-back out wide (throw) or a centre-back on the edge of the box (roll) */
+        for(const q of A) if(q!==fw&&q.x>78){ q.x=74+Math.random()*4; q.ov=null; } const Bk=P.filter(p=>p.side===1&&!p.gk); const rc=Bk[1]||Bk[0];
+        for(const q of Bk) if(q!==rc&&q.x>86){ q.x=80+Math.random()*4; q.ov=null; } if(rc){ rc.x=k==='throw'?76:88.5; rc.y=k==='throw'?(Math.random()<0.5?11:57):34+(Math.random()<0.5?-7:7); rc.ov={x:rc.x,y:rc.y}; }
+        await st.shotSeq({s:0,pid:fw.pid,t:'save',ty:'open',x:40,y:84}); st._v186kforce=null; st._v187kDist=null; if(rc) rc.ov=null; }
       else if(k==='starGoal'){ await st.gain(fw); if(!alive()) return; fw.x=88; fw.y=31+Math.random()*6; if(g){ g.x=99.5; g.y=34; } fw.hurry=true; st._v186kforce={q,beaten:Math.random()<0.5?'late':'short'};
         await st.finish({s:0,pid:fw.pid,t:'goal',ty:'break',m:10,sc:[1,0]},fw); st._v186kforce=null; if(!alive()) return; await st.wait(st.D(900)); if(g) g.dive=null; st.inNet=null; st.ball.ing=null; await st.wait(st.D(300)); }
       else { await st.gain(fw); if(!alive()) return; const close=k==='star'; fw.x=close?92:95.5; fw.y=31+Math.random()*6;
