@@ -9423,6 +9423,8 @@ const GF={y0:30.34,y1:37.66,H:2.44,DB:2.0,DT:1.2,ZB:1.9};
 const NET_N={back:Math.hypot(GF.ZB,GF.DB-GF.DT), roof:Math.hypot(GF.H-GF.ZB,GF.DT)};
 /* two-bone inverse kinematics: joint position for a limb from a to target t (bend = +1 / -1 picks the side) */
 /* three-dimensional two-bone IK: root R, target T (arrays), segment lengths a,b, pole = the way the joint should point */
+/* the knee's aim: forward, turning upward as the foot rises well in front of the hip (a punt or a high follow-through), so the knee never folds backwards */
+function v186LegPole(f,u,sd){ const up=2.2*clamp((u-0.35)/0.35,0,1)*clamp(f/0.3,0,1); return [1,0.05+up,sd*0.12]; }
 function ik3(R,T,a,b,pole){ let D=[T[0]-R[0],T[1]-R[1],T[2]-R[2]]; let d=Math.hypot(D[0],D[1],D[2]); const mx=(a+b)*0.999; if(d>mx){ const k=mx/d; T=[R[0]+D[0]*k,R[1]+D[1]*k,R[2]+D[2]*k]; D=[T[0]-R[0],T[1]-R[1],T[2]-R[2]]; d=mx; }
   d=Math.max(d,Math.abs(a-b)+1e-3); const n=[D[0]/d,D[1]/d,D[2]/d]; const along=(a*a+d*d-b*b)/(2*d); const h=Math.sqrt(Math.max(0,a*a-along*along));
   const pd=pole[0]*n[0]+pole[1]*n[1]+pole[2]*n[2]; let q=[pole[0]-n[0]*pd,pole[1]-n[1]*pd,pole[2]-n[2]*pd]; let ql=Math.hypot(q[0],q[1],q[2]); if(ql<1e-4){ q=[n[1],-n[0],0]; ql=Math.hypot(q[0],q[1])||1; }
@@ -10609,7 +10611,7 @@ class Stage {
     const ol=Math.max(0.7,s*0.028);
     // skeleton
     const legs=[0,1].map(i=>{ const sd=i?1:-1; const hip=[0,hipU,sd*0.09*B]; const ft=P.feet[i]; const tgt=[ft.f,ft.u+0.06,ft.l];
-      const J=ik3(hip,tgt,0.43,0.43,[1,0.05,sd*0.12]); return {i,hip:pr(hip),knee:pr(J.j),ank:pr(J.t),raw:J}; });
+      const J=ik3(hip,tgt,0.43,0.43,v186LegPole(tgt[0],tgt[1],sd)); return {i,hip:pr(hip),knee:pr(J.j),ank:pr(J.t),raw:J}; });
     const arms=[0,1].map(i=>{ const sd=i?1:-1; const sh0=up(0,1.5,sd*0.21*B); const hd=P.hands[i]; const tgt=up(hd.f,hd.u,hd.l);
       const J=ik3(sh0,tgt,0.3,0.29,[-0.7,-0.5,sd*0.6]); return {i,sh:pr(sh0),el:pr(J.j),hand:pr(J.t)}; });
     const legD=l=>(l.hip[2]+l.knee[2]+l.ank[2])/3, armD=a=>(a.sh[2]+a.el[2]+a.hand[2])/3+0.02;
@@ -11757,6 +11759,7 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['🩹','Two glitches fixed','No more small patch on the lower back of the 3-D players (the top of the shorts was poking through the shirt when they leaned into a run), and the keeper\'s knee no longer bends backwards when he punts.'],
   ['🚩','Fair offside calls','A flag now only goes up when the runner is really off: the pass waits until he is beyond the second-last defender and the ball, at every speed, and the freeze frame shows both lines, the defenders\' and his. Throw-ins go to the right team, close-range misses stay close, and the commentary matches what you saw.'],
   ['⭐','Ratings you can see','A 99-rated star now looks it: quicker off the mark, cleaner first touch, beating weaker defenders and finishing nearer the corners, while poor tacklers stand off and get caught flat-footed.'],
   ['🕺','Skill moves','Dribblers now use real moves when a defender closes in: stepovers, double stepovers, the body feint, chops and outside cuts, drag-backs, sole rolls and the Cruyff turn. Varsity stars know them all and do them crisply; Modified players know a few and do them slower. Beaten defenders get sold, frozen or turned.'],
@@ -14907,7 +14910,7 @@ function v18FBuildGeos(detail,limbs){ const d=Math.max(0,Math.min(3,detail|0)); 
   const tw=V18F_C.torso[1]/V18F_AW, tv=y=>Math.max(0,Math.min(1,(y-0.12)/0.715));
   G.torso=v18FLoft(V18F_TORSO.map(r=>[r[0],r[1],r[2],0,r[3],0,tw,tv(r[0])]),Nt,2.5);
   const shv=y=>Math.max(0,Math.min(1,(y+0.1)/0.355));
-  G.shorts=v18FLoft([[-0.1,0,0],[-0.085,0.16,0.115],[-0.05,0.212,0.145],[0.02,0.228,0.152],[0.12,0.22,0.148],[0.16,0.21,0.143],[0.2,0.204,0.14],[0.255,0.198,0.136],[0.26,0,0]].map(r=>[r[0],r[1],r[2],0,0,s0,sw,shv(r[0])]),Nt,2.4);
+  G.shorts=v18FLoft([[-0.1,0,0],[-0.085,0.16,0.115],[-0.05,0.212,0.145],[0.02,0.228,0.152],[0.12,0.22,0.148],[0.15,0.212,0.126],[0.19,0.2,0.11],[0.23,0.19,0.1],[0.235,0,0]].map(r=>[r[0],r[1],r[2],0,0,s0,sw,shv(r[0])]),Nt,2.4);
   G.neck=v18FLoft([[-0.03,0,0],[-0.01,0.064,0.062],[0.05,0.058,0.056,0,0.004],[0.15,0.054,0.054,0,0.008],[0.21,0.05,0.05,0,0.008],[0.23,0,0]],Math.max(8,N-2));
   G.head=v18FHeadGeo(hs);
   G.band=v18FLoft([[0.03,0.126,0.142],[0.072,0.122,0.138]],Nt);
@@ -15144,7 +15147,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
     bd(f0,f1,f2,18); bd(u0,u1,u2,21); const rx=D[22]*D[20]-D[23]*D[19], ry=D[23]*D[18]-D[21]*D[20], rz=D[21]*D[19]-D[22]*D[18]; const rl=Math.hypot(rx,ry,rz)||1; D[24]=rx/rl; D[25]=ry/rl; D[26]=rz/rl; }
   /* skeleton -> world. W slots: 0 hip0 3 knee0 6 ank0 9 hip1 12 knee1 15 ank1 18 sh0 21 el0 24 hand0 27 sh1 30 el1 33 hand1 36 pelvis 39 neck 42 headC 45 tmp */
   const IK=F.ik; const ankU=[0,0];
-  for(let i=0;i<2;i++){ const sd=i?1:-1; const ft=Q.feet[i]; const hl=sd*0.09*B; v18FIk(0,hipU,hl,ft.f,ft.u+0.06,ft.l,0.43,0.43,1,0.05,sd*0.12,IK); ankU[i]=IK[4];
+  for(let i=0;i<2;i++){ const sd=i?1:-1; const ft=Q.feet[i]; const hl=sd*0.09*B; const lp=v186LegPole(ft.f,ft.u+0.06,sd); v18FIk(0,hipU,hl,ft.f,ft.u+0.06,ft.l,0.43,0.43,lp[0],lp[1],lp[2],IK); ankU[i]=IK[4];
     bw(0,hipU,hl,i*9); bw(IK[0],IK[1],IK[2],i*9+3); bw(IK[3],IK[4],IK[5],i*9+6); }
   for(let i=0;i<2;i++){ const sd=i?1:-1; const s0=up2(0,1.5,sd*0.21*B); const a0=s0[0], a1=s0[1], a2=s0[2]; const hd=Q.hands[i]; const t=up2(hd.f,hd.u,hd.l); const t1=Math.max(0.06,t[1]);
     const ap=v18ArmPole(a0,a1,a2,t[0],t1,t[2],sd,Q,p); v18FIk(a0,a1,a2,t[0],t1,t[2],0.3,0.29,ap[0],ap[1],ap[2],IK); bw(a0,a1,a2,18+i*9); bw(IK[0],IK[1],IK[2],21+i*9); bw(IK[3],IK[4],IK[5],24+i*9); }

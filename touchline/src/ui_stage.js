@@ -15,6 +15,8 @@ const GF={y0:30.34,y1:37.66,H:2.44,DB:2.0,DT:1.2,ZB:1.9};
 const NET_N={back:Math.hypot(GF.ZB,GF.DB-GF.DT), roof:Math.hypot(GF.H-GF.ZB,GF.DT)};
 /* two-bone inverse kinematics: joint position for a limb from a to target t (bend = +1 / -1 picks the side) */
 /* three-dimensional two-bone IK: root R, target T (arrays), segment lengths a,b, pole = the way the joint should point */
+/* the knee's aim: forward, turning upward as the foot rises well in front of the hip (a punt or a high follow-through), so the knee never folds backwards */
+function v186LegPole(f,u,sd){ const up=2.2*clamp((u-0.35)/0.35,0,1)*clamp(f/0.3,0,1); return [1,0.05+up,sd*0.12]; }
 function ik3(R,T,a,b,pole){ let D=[T[0]-R[0],T[1]-R[1],T[2]-R[2]]; let d=Math.hypot(D[0],D[1],D[2]); const mx=(a+b)*0.999; if(d>mx){ const k=mx/d; T=[R[0]+D[0]*k,R[1]+D[1]*k,R[2]+D[2]*k]; D=[T[0]-R[0],T[1]-R[1],T[2]-R[2]]; d=mx; }
   d=Math.max(d,Math.abs(a-b)+1e-3); const n=[D[0]/d,D[1]/d,D[2]/d]; const along=(a*a+d*d-b*b)/(2*d); const h=Math.sqrt(Math.max(0,a*a-along*along));
   const pd=pole[0]*n[0]+pole[1]*n[1]+pole[2]*n[2]; let q=[pole[0]-n[0]*pd,pole[1]-n[1]*pd,pole[2]-n[2]*pd]; let ql=Math.hypot(q[0],q[1],q[2]); if(ql<1e-4){ q=[n[1],-n[0],0]; ql=Math.hypot(q[0],q[1])||1; }
@@ -1201,7 +1203,7 @@ class Stage {
     const ol=Math.max(0.7,s*0.028);
     // skeleton
     const legs=[0,1].map(i=>{ const sd=i?1:-1; const hip=[0,hipU,sd*0.09*B]; const ft=P.feet[i]; const tgt=[ft.f,ft.u+0.06,ft.l];
-      const J=ik3(hip,tgt,0.43,0.43,[1,0.05,sd*0.12]); return {i,hip:pr(hip),knee:pr(J.j),ank:pr(J.t),raw:J}; });
+      const J=ik3(hip,tgt,0.43,0.43,v186LegPole(tgt[0],tgt[1],sd)); return {i,hip:pr(hip),knee:pr(J.j),ank:pr(J.t),raw:J}; });
     const arms=[0,1].map(i=>{ const sd=i?1:-1; const sh0=up(0,1.5,sd*0.21*B); const hd=P.hands[i]; const tgt=up(hd.f,hd.u,hd.l);
       const J=ik3(sh0,tgt,0.3,0.29,[-0.7,-0.5,sd*0.6]); return {i,sh:pr(sh0),el:pr(J.j),hand:pr(J.t)}; });
     const legD=l=>(l.hip[2]+l.knee[2]+l.ank[2])/3, armD=a=>(a.sh[2]+a.el[2]+a.hand[2])/3+0.02;

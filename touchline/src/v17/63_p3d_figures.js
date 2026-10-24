@@ -152,7 +152,7 @@ function v18FBuildGeos(detail,limbs){ const d=Math.max(0,Math.min(3,detail|0)); 
   const tw=V18F_C.torso[1]/V18F_AW, tv=y=>Math.max(0,Math.min(1,(y-0.12)/0.715));
   G.torso=v18FLoft(V18F_TORSO.map(r=>[r[0],r[1],r[2],0,r[3],0,tw,tv(r[0])]),Nt,2.5);
   const shv=y=>Math.max(0,Math.min(1,(y+0.1)/0.355));
-  G.shorts=v18FLoft([[-0.1,0,0],[-0.085,0.16,0.115],[-0.05,0.212,0.145],[0.02,0.228,0.152],[0.12,0.22,0.148],[0.16,0.21,0.143],[0.2,0.204,0.14],[0.255,0.198,0.136],[0.26,0,0]].map(r=>[r[0],r[1],r[2],0,0,s0,sw,shv(r[0])]),Nt,2.4);
+  G.shorts=v18FLoft([[-0.1,0,0],[-0.085,0.16,0.115],[-0.05,0.212,0.145],[0.02,0.228,0.152],[0.12,0.22,0.148],[0.15,0.212,0.126],[0.19,0.2,0.11],[0.23,0.19,0.1],[0.235,0,0]].map(r=>[r[0],r[1],r[2],0,0,s0,sw,shv(r[0])]),Nt,2.4);
   G.neck=v18FLoft([[-0.03,0,0],[-0.01,0.064,0.062],[0.05,0.058,0.056,0,0.004],[0.15,0.054,0.054,0,0.008],[0.21,0.05,0.05,0,0.008],[0.23,0,0]],Math.max(8,N-2));
   G.head=v18FHeadGeo(hs);
   G.band=v18FLoft([[0.03,0.126,0.142],[0.072,0.122,0.138]],Nt);
@@ -389,7 +389,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
     bd(f0,f1,f2,18); bd(u0,u1,u2,21); const rx=D[22]*D[20]-D[23]*D[19], ry=D[23]*D[18]-D[21]*D[20], rz=D[21]*D[19]-D[22]*D[18]; const rl=Math.hypot(rx,ry,rz)||1; D[24]=rx/rl; D[25]=ry/rl; D[26]=rz/rl; }
   /* skeleton -> world. W slots: 0 hip0 3 knee0 6 ank0 9 hip1 12 knee1 15 ank1 18 sh0 21 el0 24 hand0 27 sh1 30 el1 33 hand1 36 pelvis 39 neck 42 headC 45 tmp */
   const IK=F.ik; const ankU=[0,0];
-  for(let i=0;i<2;i++){ const sd=i?1:-1; const ft=Q.feet[i]; const hl=sd*0.09*B; v18FIk(0,hipU,hl,ft.f,ft.u+0.06,ft.l,0.43,0.43,1,0.05,sd*0.12,IK); ankU[i]=IK[4];
+  for(let i=0;i<2;i++){ const sd=i?1:-1; const ft=Q.feet[i]; const hl=sd*0.09*B; const lp=v186LegPole(ft.f,ft.u+0.06,sd); v18FIk(0,hipU,hl,ft.f,ft.u+0.06,ft.l,0.43,0.43,lp[0],lp[1],lp[2],IK); ankU[i]=IK[4];
     bw(0,hipU,hl,i*9); bw(IK[0],IK[1],IK[2],i*9+3); bw(IK[3],IK[4],IK[5],i*9+6); }
   for(let i=0;i<2;i++){ const sd=i?1:-1; const s0=up2(0,1.5,sd*0.21*B); const a0=s0[0], a1=s0[1], a2=s0[2]; const hd=Q.hands[i]; const t=up2(hd.f,hd.u,hd.l); const t1=Math.max(0.06,t[1]);
     const ap=v18ArmPole(a0,a1,a2,t[0],t1,t[2],sd,Q,p); v18FIk(a0,a1,a2,t[0],t1,t[2],0.3,0.29,ap[0],ap[1],ap[2],IK); bw(a0,a1,a2,18+i*9); bw(IK[0],IK[1],IK[2],21+i*9); bw(IK[3],IK[4],IK[5],24+i*9); }
