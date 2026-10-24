@@ -86,6 +86,7 @@ const V187S_K={
   chip:{sb:0.62,b:{f:-0.36,u:0.34,l:0.08},t:{f:0.36,u:0.48,l:0.06},ut:0.2,r:{f:0.08,u:0,l:0.06},bt:[0.25,0.6,0.35],ln:[-0.03,-0.14,-0.1],dip:0.08,arm:[{f:0.16,u:1.62,l:-0.66},{f:0.12,u:1.52,l:0.62}],tilt:0.14,cu:0.04,low:0.08},
   toe:{sb:0.74,b:{f:-0.07,u:0.12,l:0.06},t:{f:0.62,u:0.2,l:0.06},ut:0.22,r:{f:0.1,u:0,l:0.06},bt:[0.1,-0.3,-0.2],ln:[0.1,0.26,0.16],dip:0.09,arm:[{f:0.34,u:1.2,l:-0.46},{f:0.16,u:1.04,l:0.4}],tilt:0.26,cu:0.1,jab:1},
   outside:{sb:0.6,b:{f:-0.42,u:0.44,l:-0.07},t:{f:0.5,u:0.62,l:0.38},ut:0.4,r:{f:0.14,u:0,l:0.14},bt:[0.35,0.85,0.6],ln:[-0.05,0.15,0.08],dip:0.05,arm:[{f:0.2,u:1.42,l:-0.64},{f:-0.26,u:1.14,l:0.38}],tilt:0.16,pole:[0.75,0.05,-0.6],cu:0.09,dl:0.03}};
+const V187S_HOLD=0.08;
 /* the flight's horizontal pace profile (flC) per technique: a driven ball keeps its pace, a side-foot one dies a little */
 const V187S_C={drive:0.1,place:0.8,chip:0.45,toe:0.3,outside:0.25,volley:0.15};
 
@@ -110,7 +111,7 @@ Stage.prototype.v187sKickPose=function(p,P){ const T=V187S_K[p.v187t]; if(!T) re
     else { const q=(s-T.sb)/(1-T.sb), e=T.jab?q*q*q:q*q; ft=v187sLP(T.b,con,e); ft.u+=(T.low?-T.low:0.05)*Math.sin(Math.PI*q); if(ft.u<0.02) ft.u=0.02;
       bt=v187sLp(T.bt[0],T.bt[1],e); ln=v187sLp(T.ln[0],T.ln[1],e); env=e; P.v187b=1; } }
   else { const u=(kt-W)/Fd; lb=1-v187sSm(u); eyes=1-v187sSm(u/0.6);
-    if(u<T.ut){ const q=v187sSm(u/T.ut); ft=v187sLP(con,T.t,q); bt=v187sLp(T.bt[1],T.bt[2],q); ln=v187sLp(T.ln[1],T.ln[2],q); env=1-q; if(u<0.5) P.v187b=1; }
+    if(u<T.ut){ const q=v187sSm(Math.max(0,u-V187S_HOLD)/(T.ut-V187S_HOLD)); ft=v187sLP(con,T.t,q); /* the boot stays with the ball for an instant (the release lands on the first step after the wind-up) */ bt=v187sLp(T.bt[1],T.bt[2],q); ln=v187sLp(T.ln[1],T.ln[2],q); env=1-q; if(u<0.5) P.v187b=1; }
     else { const q=v187sSm((u-T.ut)/(1-T.ut)); ft=v187sLP(T.t,T.r,q); bt=v187sLp(T.bt[2],0,q); ln=v187sLp(T.ln[2],0,q); env=0; } }
   F[1]=ft; P.bootT=[null,bt]; P.lean=ln; P.hipU=0.8-T.dip*env; P.headTilt=(P.headTilt||0)*0.4+T.tilt*eyes;
   for(const i of [0,1]){ const A=T.arm[i], h=H[i]; H[i]={f:v187sLp(h.f,A.f,lb),u:v187sLp(h.u,A.u,lb),l:v187sLp(h.l,A.l,lb)}; }
@@ -125,7 +126,7 @@ const V187S_V={
   side:{C:{f:0.3,u:0.38,l:0.42},B:{f:-0.36,u:0.5,l:0.5},T:{f:0.55,u:0.72,l:0.04},S:{f:0.02,u:0,l:-0.16},ra:0.42,ln:[0,0,0.04],bt:[0.4,0.85,0.6],arm:[{f:0.1,u:1.62,l:-0.8},{f:0.25,u:1.25,l:0.55}],dir:[0.75,-0.66]}};
 /* where the ball sits at contact (its underside, metres): just beyond the boot along the swing */
 Stage.prototype.v187sVolBall=function(p){ const V=V187S_V[p.v187vk]; if(!V) return null; const S=v187sS(this,p), R=v187sBR(this);
-  const yaw=v187sYaw(p), c=Math.cos(yaw), s=Math.sin(yaw); const w=v187sFwd(V.C.f,V.C.u+0.06,V.C.l,0,V.ra,0,0.8);
+  const yaw=p.v187vc!=null&&this.now>=p.v187vc&&p.v187vy!=null?p.v187vy:v187sYaw(p), c=Math.cos(yaw), s=Math.sin(yaw); const w={f:V.C.f,u:V.C.u+0.06,l:V.C.l}; /* C is already in his yaw frame */
   const off=typeof v184Off==='function'?v184Off(this,p):R+0.07; const dx=V.dir[0]*c-V.dir[1]*s, dy=V.dir[0]*s+V.dir[1]*c;
   const fx=p.x+(w.f*c-w.l*s)*S, fy=p.y+(w.f*s+w.l*c)*S; return {x:fx+dx*off,y:fy+dy*off,z:Math.max(0,Math.min(0.46,w.u*S-R))}; };
 /* ms from contact: negative before it, 0 while the ball is on the boot, then ms since the release */
@@ -138,7 +139,7 @@ Stage.prototype.v187sVolPose=function(p,P){ const V=V187S_V[p.v187vk]; if(!V) re
     else { const q=(s-0.6)/0.4, e=q*q; ft=v187sLP(V.B,V.C,e); ft.u+=0.06*Math.sin(Math.PI*q); bt=v187sLp(V.bt[0],V.bt[1],e); ln=v187sLp(V.ln[0],V.ln[1],e); P.v187b=1; } }
   else if(p.v187vr==null){ ft={...V.C}; bt=V.bt[1]; ln=V.ln[1]; lb=1; ra=V.ra; P.v187b=1; }
   else { const u=tau/Fd; lb=1-v187sSm(u); ra=V.ra*(1-v187sSm(u));
-    if(u<0.4){ const q=v187sSm(u/0.4); ft=v187sLP(V.C,V.T,q); bt=v187sLp(V.bt[1],V.bt[2],q); ln=v187sLp(V.ln[1],V.ln[2],q); P.v187b=1; }
+    if(u<0.4){ const q=v187sSm(Math.max(0,u-V187S_HOLD)/(0.4-V187S_HOLD)); ft=v187sLP(V.C,V.T,q); bt=v187sLp(V.bt[1],V.bt[2],q); ln=v187sLp(V.ln[1],V.ln[2],q); P.v187b=1; }
     else { const q=v187sSm((u-0.4)/0.6); ft=v187sLP(V.T,{f:0.08,u:0,l:0.08},q); bt=v187sLp(V.bt[2],0,q); ln=V.ln[2]*(1-q); } }
   P.act='kick'; P.lean=ln; P.hipU=0.8-0.05*lb; P.headTilt=0.22*lb; P.headTurn=0; P.bootT=[null,bt];
   const sf=v187sLP({f:0.02,u:0,l:-0.1},V.S,lb);
@@ -156,7 +157,7 @@ Stage.prototype.v187sVolCross=function(p,H,opt){ const G=this._v187g; if(!G||G.v
   const W=this.windOf('shot'); G.vol=H; this._v187v={pl:H,e:G.e,shot:false};
   H.v187vk=kind; H.v187vw=W; H.v187vc=null; H.v187vr=null; H.v187vy=gd; const st=this; const o0=opt.onRelease;
   v187sLog({k:'volcross',kind,pid:H.pid,W});
-  return {...opt,dur:opt.dur+W,onRelease(f){ if(o0) o0.apply(this,arguments); H.v187vc=f.t0+f.dur; }}; };
+  return {...opt,dur:opt.dur+W,onRelease(f){ if(o0) o0.apply(this,arguments); H.v187vc=f.t0+f.dur; /* he shapes up toward the goal as it comes */ H.yawLock=Math.atan2(34-Y,gx-X); H.yawLockT=H.v187vc+st.D(900); }}; };
 
 /* ---------- 2. headers ---------- */
 const V187S_HD={dive:{to:300,fa:260,li:120,up:460}};
@@ -223,7 +224,9 @@ Stage.prototype.launch=function(p,opt){
   try{ const H=opt.home;
     if(H&&opt.head&&!opt.hands&&H!==p&&!H.gk&&!opt.nod) opt=this.v187sHeadCross(p,H,opt);
     else if(H&&!opt.head&&!opt.hands&&!opt.nod&&H.side===p.side&&(opt.h||0)>2) opt=this.v187sVolCross(p,H,opt);
-    else if(opt.kind==='shot'&&!opt.home&&!opt.nod){ const V=this._v187v; if(V&&V.pl===p&&!V.shot){ V.shot=true; opt={...opt,wind:0}; if(p.v187vk&&p.v187vc!=null&&this.own===p) p.v187vy=v187sYaw(p); } }
+    else if(opt.kind==='shot'&&!opt.home&&!opt.nod){ const V=this._v187v; if(V&&V.pl===p&&!V.shot){ V.shot=true; opt={...opt,wind:0};
+      /* facing well away from the target he would have to turn first: no volley then, the ball drops to his feet */
+      if(p.v187vk&&p.v187vr==null&&opt.to&&Math.abs(v187sAd(Math.atan2(opt.to.y-p.y,opt.to.x-p.x),v187sYaw(p)))>0.55){ p.v187vk=null; p.v187vc=null; v187sLog({k:'volcancel',pid:p.pid,turn:1}); } } }
     if(opt.nod&&p.v187hk==='glance'&&p.v187hc!=null&&opt.to) gl=opt.to; }catch(e){}
   const r=_v187sLaunch.call(this,p,opt);
   if(gl){ try{ /* the glance: he keeps facing between the cross and where he steers it, the head turned toward the target */
@@ -248,7 +251,7 @@ const _v187sDrib=Stage.prototype.dribble;
 Stage.prototype.dribble=function(p){ const V=this._v187v; if(V&&p&&V.pl===p&&p.v187vk&&p.v187vr==null){ p.v187vk=null; p.v187vc=null; v187sLog({k:'volcancel',pid:p.pid}); } return _v187sDrib.apply(this,arguments); };
 const _v187sLand=Stage.prototype.land;
 Stage.prototype.land=function(){ const f=this.fl; const r=_v187sLand.apply(this,arguments);
-  try{ if(f&&!f.phys&&f.home&&!f.hands&&!f.head){ f.home.v187rc=this.now; const V=this._v187v; if(V&&V.pl===f.home&&f.home.v187vk){ if(this.cush&&this.cush.p===f.home) this.cush=null; } } }catch(e){}
+  try{ if(f&&!f.phys&&f.home&&!f.hands&&!f.head){ f.home.v187rc=this.now; const V=this._v187v; if(V&&V.pl===f.home&&f.home.v187vk){ if(this.cush&&this.cush.p===f.home) this.cush=null; f.home.v187vy=v187sYaw(f.home); } } }catch(e){}
   return r; };
 
 /* the dive: the header's head is the cross's target; his body travels forward and his facing holds until he is up */
@@ -260,6 +263,8 @@ const _v187sJump=Stage.prototype.jumpLift;
 Stage.prototype.jumpLift=function(p){ const v=_v187sJump.apply(this,arguments); if(!v||!V187S.on||!p) return v; return v*v187sLeap(p)*v187sJK(v187sHK(this,p))*((p.hgt||70)/70); };
 const _v187sUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v187sUpd.apply(this,arguments);
+  { /* the volley: from the landing to the strike the ball sits exactly on the contact point (no steering lag) */ const V=this._v187v, q=V&&V.pl;
+    if(q&&V187S.on&&this.own===q&&!this.fl&&!this.hands&&q.v187vk&&q.v187vc!=null&&q.v187vr==null&&this.now>=q.v187vc){ if(q.v187vy!=null){ q.yaw=q.v187vy; q.face=Math.cos(q.yaw)>=0?1:-1; } const c=this.v187sVolBall(q); if(c){ this.ball.x=c.x; this.ball.y=c.y; this.ball.z=c.z; } } }
   if(V187S.on&&!this.rm) for(const p of this.players.values()){ if(p.v187hk!=='dive'||p.v187hc==null||p.v187hy==null) continue; const T=v187sHDur(this), tau=v187sHTau(this,p);
     if(tau<-T.to*0.45||tau>T.fa+T.li+T.up||p.celeb) continue; const S=v187sS(this,p); if(!p.v187hl){ p.v187hl=1; p.v187hx=p.x; p.v187hz=p.y; p.v187hy=v187sDiveYaw(this,p); }
     const q=tau<0?v187sSm((tau+T.to*0.45)/(T.to*0.45))*V187S_DT:V187S_DT+(V187S_DL-V187S_DT)*v187sSm(Math.min(1,tau/T.fa));
@@ -284,13 +289,13 @@ Stage.prototype.blendPose=function(p,P){ const Q=_v187sBlend.apply(this,argument
 /* the drawn curl (55): the outside of the boot bends it toward his kicking side, the side-foot gently the other way; a chip
    and a toe-poke fly straight */
 if(typeof Stage.prototype.v17curl==='function'){ const _v187sCurl=Stage.prototype.v17curl;
-  Stage.prototype.v17curl=function(){ const f=this.fl; if(f&&!f.phys&&f.v187s&&this._v17cf!==f&&V187S.on&&!this.rm){ const t=f.v187s; const tg=f.aim||this.flightTarget(f);
+  Stage.prototype.v17curl=function(){ const f=this.fl; if(f&&!f.phys&&f.v187s&&!f.home&&this._v17cf!==f&&V187S.on&&!this.rm){ /* goals and misses only: a shot into the keeper's hands keeps the old flight */ const t=f.v187s; const tg=f.aim||this.flightTarget(f);
       if(tg){ const dx=tg.x-f.from.x, dy=tg.y-f.from.y, d=Math.hypot(dx,dy)||1; let amt=0, sg=1;
         if(t==='outside'){ amt=Math.min(1.6,d*0.075); sg=1; } else if(t==='place'){ amt=Math.min(0.7,d*0.035); sg=-1; } else if(t==='drive'||t==='volley'){ amt=Math.min(0.5,d*0.02); sg=v17h01(Math.round(f.t0)+'d')<0.5?-1:1; }
         this._v17cf=f; this._v17c=amt>0.05?{nx:-dy/d*sg*amt,ny:dx/d*sg*amt}:null; } }
     return _v187sCurl.apply(this,arguments); }; }
 const _v187sFlC=Stage.prototype.flC;
-Stage.prototype.flC=function(f){ if(f&&f.v187s&&V187S_C[f.v187s]!=null&&V187S.on&&!this._v187nf) return V187S_C[f.v187s]; return _v187sFlC.apply(this,arguments); };
+Stage.prototype.flC=function(f){ if(f&&f.v187s&&!f.home&&V187S_C[f.v187s]!=null&&V187S.on&&!this._v187nf) return V187S_C[f.v187s]; return _v187sFlC.apply(this,arguments); };
 /* the ball goes on from the target (into the net, off the frame, bouncing on) exactly as before: the old pace and arc */
 const _v187sFlVel=Stage.prototype.flVel;
 Stage.prototype.flVel=function(f){ if(!f||(f.v187s==null&&f.v187h0==null)) return _v187sFlVel.apply(this,arguments); const h=f.h; this._v187nf=1; if(f.v187h0!=null) f.h=f.v187h0;
