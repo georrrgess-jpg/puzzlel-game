@@ -1,7 +1,7 @@
 // Shot techniques and header variety (v18.7 A2, src/v17/84_shots.js). Lab (2-D, each kind forced in the 'shots' and
 // 'headers' scenes): every technique (driven, placed side-foot, chip, toe-poke, outside of the boot, first-time volley) and
-// every header (diving, glancing, power, defensive clearing) happens; the kicking boot (ankle point) / the head centre is within 0.3 m of the
-// ball's surface when it leaves; the wind-up is the stage's (the volley's cross is longer by exactly the wind-up it no longer has);
+// every header (diving, glancing, power, defensive clearing) happens; the kicking boot's ankle point is within 0.3 m of the ball's
+// centre, the head's centre within 0.3 m of its surface, when it leaves; the wind-up is the stage's (the volley's cross is longer by exactly the wind-up it no longer has);
 // the chip's arc is higher, the clearance climbs; the dive is flat at contact, lands on the chest and is up before the
 // celebration; the jump apex scales with height (tall > short). Live: a full match with the feature on shows several
 // techniques and the same events (type, minute, player, side, kind) as the same match with it off. No page errors.
@@ -22,7 +22,7 @@ const INSTR=()=>{ const st=App.labSt; const R=window.__R={rel:[],cross:[],dive:[
     if(f&&f!==lastFl&&!f.phys){ lastFl=f; const k=[...this.players.values()].find(q=>q.kickT>-1e8&&f.t0-(q.kickT+(q.kickW||0))>=0&&f.t0-(q.kickT+(q.kickW||0))<90); /* the striker: his wind-up ended as this flight began */ const c={x:f.from.x,y:f.from.y,z:f.from.z+BALL_R};
       if(f.home&&!f.hands){ R.cross.push({to:f.home.pid,head:f.head,dur:Math.round(f.dur),h:+f.h.toFixed(2),W:this.windOf('shot'),vol:f.home.v187vk||null,hk:f.home.v187hk||null}); }
       if(k&&(f.kind==='shot'||f.kind==='clear')){ const n0=this.now; let Q; this.now=f.t0; try{ Q=this.poseOf(k); } finally{ this.now=n0; } /* the pose at the release itself */ const head=k.kickK==='head';
-        const pt=head?headW(k,Q):footW(k,Q,1); const d=Math.max(0,Math.hypot(pt.x-c.x,pt.y-c.y,pt.z-c.z)-BALL_R); /* to the ball's surface (the 2-D ball is drawn 0.24 m in radius) */
+        const pt=head?headW(k,Q):footW(k,Q,1); const dc=Math.hypot(pt.x-c.x,pt.y-c.y,pt.z-c.z); const d=head?Math.max(0,dc-BALL_R):dc; /* the boot's ankle point to the ball's centre; the head's centre to the ball's surface (the 2-D ball is drawn 0.24 m in radius) */
         R.rel.push({pid:k.pid,t:f.v187s||null,hd:f.v187hd||null,kind:f.kind,d:+d.toFixed(3),W:k.kickW,W0:this.windOf('shot'),h:+f.h.toFixed(2),dur:Math.round(f.dur),th:+(Q.pitchB||0).toFixed(2),head}); } }
     for(const q of this.players.values()){
       if(q.v187hk==='dive'&&q.v187hc!=null&&q.v187hl){ const T=v187sHDur(this), tau=v187sHTau(this,q); if(tau>=T.fa&&tau<T.fa+T.li){ const Q=this.poseOf(q); R.dive.push({lie:1,lift:+(Q.lift||0).toFixed(2),th:+(Q.pitchB||0).toFixed(2),hz:+headW(q,Q).z.toFixed(2)}); } }
@@ -45,25 +45,25 @@ async function labScene(page,scen,k,until,ms){ await page.evaluate(([s,k])=>{ PR
       const r=R.rel.find(x=>x.t===k); if(R.err) console.log('  instr error',R.err);
       ok(!!r, `${k}: the technique happens (${log.filter(l=>l.k==='shot').map(l=>l.t).join(',')||'none'})`);
       if(!r) continue;
-      ok(r.d<=0.3, `${k}: the boot is ${r.d.toFixed(2)} m from the ball's surface as it leaves (<= 0.3)`);
+      ok(r.d<=0.3, `${k}: the boot (ankle point) is ${r.d.toFixed(2)} m from the ball's centre as it leaves (<= 0.3)`);
       if(k==='volley'){ const c=R.cross.find(x=>x.vol); ok(r.W===0&&c&&c.dur>0, `volley: no wind-up on the strike (W ${r.W}), the cross carries it (${c?c.vol:'-'}, cross ${c?c.dur:'-'} ms incl. +${c?c.W:'-'} ms)`); }
       else ok(r.W===r.W0, `${k}: the wind-up is the stage's own (${r.W} ms)`);
       if(k==='chip') ok(r.h>=1.5, `chip: the arc rises to ${r.h} (ordinary shot 0.25)`); }
     /* headers */
     if(pick('dive')){ const {R,log}=await labScene(page,'headers','dive',R=>R.celeb.length>0&&R.rel.some(r=>r.hd==='dive'),45000); const r=R.rel.find(x=>x.hd==='dive');
       ok(!!r, `dive: a diving header happens (${log.filter(l=>l.k==='head').map(l=>l.kind).join(',')||'none'})`);
-      if(r){ ok(r.d<=0.3, `dive: the head is ${r.d.toFixed(2)} m from the ball at contact`); ok(r.th>=1.1, `dive: the body is flat at contact (pitch ${r.th} rad)`); }
+      if(r){ ok(r.d<=0.3, `dive: the head is ${r.d.toFixed(2)} m from the ball's surface at contact`); ok(r.th>=1.1, `dive: the body is flat at contact (pitch ${r.th} rad)`); }
       const lie=R.dive.filter(x=>x.lie); ok(lie.length>0&&lie.every(x=>x.lift<=-0.6&&x.hz<0.4), `dive: he lands on his chest (${lie.length} steps, head ${lie.length?Math.max(...lie.map(x=>x.hz)):'-'} m, lift ${lie.length?Math.max(...lie.map(x=>x.lift)):'-'})`);
       const c=R.celeb.find(x=>x.dive!=null); ok(!c||c.dive>=c.end, `dive: he is up before the celebration (${c?c.dive+' / '+c.end+' ms':'no celebration seen'})`); }
     if(pick('glance')){ const {R,log}=await labScene(page,'headers','glance',R=>R.rel.some(r=>r.hd==='glance')&&R.nod.length>2,40000); const r=R.rel.find(x=>x.hd==='glance');
       ok(!!r, `glance: a glancing header happens (${log.filter(l=>l.k==='head').map(l=>l.kind).join(',')||'none'})`);
-      if(r){ ok(r.d<=0.3, `glance: the head is ${r.d.toFixed(2)} m from the ball`); ok(r.h<=0.06, `glance: a skimming flight (h ${r.h})`); }
+      if(r){ ok(r.d<=0.3, `glance: the head is ${r.d.toFixed(2)} m from the ball's surface`); ok(r.h<=0.06, `glance: a skimming flight (h ${r.h})`); }
       const n=R.nod.filter(x=>x.k==='glance'); ok(n.some(x=>Math.abs(x.turn)>0.25), `glance: the head turns to steer it (max ${n.length?Math.max(...n.map(x=>Math.abs(x.turn))).toFixed(2):'-'} rad)`); }
     if(pick('power')){ const {R,log}=await labScene(page,'headers','power',R=>R.rel.some(r=>r.hd==='power'),40000); const r=R.rel.find(x=>x.hd==='power');
       ok(!!r&&r.d<=0.3, `power: a power header happens, head ${r?r.d.toFixed(2):'-'} m from the ball`); }
     if(pick('clear')){ const {R,log}=await labScene(page,'headers','clear',R=>R.rel.some(r=>r.hd==='clear')&&R.nod.length>2,100000); const r=R.rel.find(x=>x.hd==='clear');
       ok(!!r, `clear: a defensive clearing header happens (${log.filter(l=>l.k==='head').map(l=>l.kind).join(',')||'none'})`);
-      if(r){ ok(r.d<=0.3, `clear: the head is ${r.d.toFixed(2)} m from the ball`); ok(r.h>=4.9, `clear: it climbs (h ${r.h}, before 3.2)`); }
+      if(r){ ok(r.d<=0.3, `clear: the head is ${r.d.toFixed(2)} m from the ball's surface`); ok(r.h>=4.9, `clear: it climbs (h ${r.h}, before 3.2)`); }
       const n=R.nod.filter(x=>x.k==='clear'); ok(n.some(x=>x.tilt>0.75), `clear: the neck snaps forward (max tilt ${n.length?Math.max(...n.map(x=>x.tilt)).toFixed(2):'-'})`); }
     /* jump apex by height */
     { const J=await page.evaluate(()=>{ const st=App.labSt; const fw=[...st.players.values()].filter(q=>q.side===0)[9]; const JD=Math.max(260,st.D(560)); const out={};
