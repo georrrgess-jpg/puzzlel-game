@@ -320,7 +320,7 @@ labRun=function(scen){ const r=_v187sLabRun.apply(this,arguments); if(!V187S_LAB
     if(scen==='shots') for(const q of st.players.values()) if(q!==fw&&q!==wing&&!q.gk) q.off=true; /* a clear view of the striker */
     while(alive()){ const k=only||L[i%L.length]; const top=(i++>>1)%2===0; st.zoomTo(0.5); st.cam.w=st.cam.tw; st.cam.x=90;
       if(scen==='shots'){ st._v187sForce=k; st._v187hForce=null;
-        if(k==='volley'){ V187S.vkind=(i>>1)%2?'front':'side'; const e={s:0,pid:fw.pid,t:'goal',ty:'cross',seq:[{pid:wing.pid,x:top?10:90,y:84,a:'cross'},{pid:fw.pid,x:top?44:56,y:88,a:'shot'}],sc:[1,0],m:10+i};
+        if(k==='volley'){ V187S.vkind=window.__v187vk||((i>>1)%2?'front':'side'); const e={s:0,pid:fw.pid,t:'goal',ty:'cross',seq:[{pid:wing.pid,x:top?10:90,y:84,a:'cross'},{pid:fw.pid,x:top?44:56,y:88,a:'shot'}],sc:[1,0],m:10+i};
           st.clipStart(e); { const [X,Y]=livePos(0,e.seq[1].x,e.seq[1].y); fw.x=fw.tx=X-5; fw.y=fw.ty=Y; fw.vx=fw.vy=0; fw.yaw=0; fw.face=1; } await st.goalSequence(e); }
         else { const [x,y]=SP[k]; const e={s:0,pid:fw.pid,t:'goal',ty:'open',seq:[{pid:fw.pid,x,y,a:'shot'}],sc:[1,0],m:10+i}; await st.gain(fw); if(!alive()) return; const [X,Y]=livePos(0,x,y); fw.x=X-6; fw.y=Y; await st.goalSequence(e); } }
       else { st._v187hForce=k; st._v187sForce=null;
