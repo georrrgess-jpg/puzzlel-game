@@ -96,7 +96,7 @@ Stage.prototype.v186kMake=function(gk,sh,k,o){ if(V187K.on){ const W=this._v187k
     if(V187K_MINE[k]) return this.v187kMake(gk,sh,k,o); } return _v187kMake0.apply(this,arguments); };
 /* a kind armed while he is spread in the star starts from it */
 const _v187kArm0=Stage.prototype.v186kArm;
-Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const S=gk&&gk.v187st; if(V187K.on&&S&&this.now-S.t0<S.max&&M&&M.D&&!M.D.v187s) M={...M,D:{...M.D,v187s:1}};
+Stage.prototype.v186kArm=function(gk,sh,M,f,o){ const S=gk&&gk.v187sT0!=null; if(V187K.on&&S&&this.now-gk.v187sT0<gk.v187sMax&&M&&M.D&&!M.D.v187s) M={...M,D:{...M.D,v187s:1}};
   const D=_v187kArm0.call(this,gk,sh,M,f,o); if(D&&V187K_MINE[D.k]) v187kLog({arm:D.k,out:D.out,lim:D.lim,q:+D.q.toFixed(2),tC:D.tP0,t:D.t,star:!!D.v187s,is3:v186kIs3D(this)}); return D; };
 
 /* ---------- choosing kick / react / star on saves (after 80's plan; the event and its timing are 80's) ---------- */
@@ -105,9 +105,9 @@ Stage.prototype.v186kPlan=function(e,gk,sh,sx,sy){ const P=_v187kPlan0.apply(thi
   const F=this._v186kforce||{}; const q=P.q, set=P.set; let k=null;
   if(F.k){ if(!V187K_MINE[F.k]) return P; k=F.k; }
   else if(P.k!=='tipOver'){ const r=Math.random(), dy=Math.abs(P.ty-set.y);
-    if(P.k==='smother'){ if(V187K.star&&r<0.42) k='star'; }
-    else if(V187K.kick&&P.band===0&&P.dist<=14&&dy>=0.3&&dy<=1.6&&r<0.6) k='kick';
-    else if(V187K.react&&P.dist<=10.5&&P.z>=0.7&&dy<=1.5&&r<0.62) k='react'; }
+    /* better keepers stay big more often, read the close-range ones and use their feet more */ if(P.k==='smother'){ if(V187K.star&&r<0.28+0.25*q) k='star'; }
+    else if(V187K.kick&&P.band===0&&P.dist<=14&&dy>=0.3&&dy<=1.6&&r<0.48+0.2*q) k='kick';
+    else if(V187K.react&&P.dist<=10.5&&P.z>=0.7&&dy<=1.5&&r<0.45+0.3*q) k='react'; }
   if(!k) return P;
   const R={...P}, sg=Math.sign(P.ty-set.y)||(Math.random()<0.5?1:-1);
   if(k==='kick'){ R.band=0; R.z=F.z!=null?F.z:0.03+Math.random()*0.26; R.ty=set.y+sg*(0.45+Math.random()*0.8); R.out=P.cor?'corner':'parry'; }
@@ -137,7 +137,7 @@ Stage.prototype.v187kStarPre=function(p,opt){ const gk=this.gkOf(1-p.side); if(!
   const ds=Math.hypot(p.x-gl,p.y-34); if(ds>17||ds<4.5) return; const off=pd*(gk.x-gl); if(off<1.8) return;
   const ux=(p.x-gl)/ds, uy=(p.y-34)/ds; const along=(gk.x-gl)*ux+(gk.y-34)*uy, side=Math.abs(-(gk.x-gl)*uy+(gk.y-34)*ux); if(along<1.2||along>ds-1.5||side>2.4) return;
   for(const q of this.players.values()){ if(q.side!==gk.side||q.gk||q.off) continue; const a=(q.x-gl)*ux+(q.y-34)*uy, sd=Math.abs(-(q.x-gl)*uy+(q.y-34)*ux); if(a>0&&a<ds-0.5&&sd<2.6) return; }
-  const W=this.windOf('shot'); gk.v187st={t0:this.now,tS:this.now+Math.max(80,W*0.9),max:Math.max(900,this.D(1700))}; gk.ov={x:gk.x,y:gk.y}; gk.hurry=false; this.look(gk,p.x,p.y,Math.max(700,this.D(1500)));
+  const W=this.windOf('shot'); /* primitives on the mover, so a goal replay copies them */ gk.v187sT0=this.now; gk.v187sTS=this.now+Math.max(80,W*0.9); gk.v187sMax=Math.max(900,this.D(1700)); gk.ov={x:gk.x,y:gk.y}; gk.hurry=false; this.look(gk,p.x,p.y,Math.max(700,this.D(1500)));
   v187kLog({k:'starPre',ds:+ds.toFixed(1),off:+off.toFixed(1),t:this.now}); };
 const _v187kLaunch0=Stage.prototype.launch;
 Stage.prototype.launch=function(p,opt){ if(V187K.on&&V187K.star&&p&&opt&&opt.kind==='shot'&&!opt.nod&&!opt.head&&this.setPiece!=='pen'&&!this.skip&&!this.so){ try{ this.v187kStarPre(p,opt); }catch(err){ v187kLog({err:String(err)}); } }
@@ -155,7 +155,7 @@ Stage.prototype.v187kAir=function(gk,sh,k,f,o){ const self=this, q=v186kQ(this,g
     self.v186kArm(gk,sh,M,f,null); };
   const tw=tA-Ld-react; if(this.now>=tw) go(); else this.until(()=>this.now>=tw||!this.alive||this.fl!==f,tw-this.now+400).then(go); };
 const _v187kCK0=Stage.prototype.cornerKick;
-Stage.prototype.cornerKick=async function(s,sg){ if(!V187K.on||!V187K.cross) return _v187kCK0.apply(this,arguments);
+Stage.prototype.cornerKick=async function(s,sg){ if(!V187K.on||!V187K.cross||this._v187kOff) return _v187kCK0.apply(this,arguments);
   /* the set-up mirrors ui_stage.js cornerKick :488-495 (keep the two in step); the delivery adds the keeper's high claim and punch */
   const dir=s===0?1:-1, gx=s===0?105:0; const cy=sg<0?0.6:67.4, cx=gx-dir*0.6;
   this.onCaption('CORNER','set'); const taker=this.nearest(s,cx-dir*6,cy,true); if(!taker) return; const gk=this.gkOf(1-s);
@@ -246,7 +246,7 @@ const _v187kWind0=Stage.prototype.windOf;
 Stage.prototype.windOf=function(kk){ if(kk==='throw'&&this._v187kW) return this._v187kW; return _v187kWind0.apply(this,arguments); };
 const _v187kDist0=Stage.prototype.distribute;
 Stage.prototype.distribute=async function(gk){
-  if(!V187K.on||!V187K.dist||this.skip||!gk||this.own!==gk||!this.hands||!this.alive) return _v187kDist0.apply(this,arguments);
+  if(!V187K.on||!V187K.dist||this._v187kOff||this.skip||!gk||this.own!==gk||!this.hands||!this.alive) return _v187kDist0.apply(this,arguments);
   const C=this.v187kDistChoice(gk);
   if(C.k==='punt'){ const fp=this._v18forcePunt; this._v18forcePunt=true; try{ return await _v187kDist0.apply(this,arguments); } finally{ this._v18forcePunt=fp; } }
   if(C.k==='base'||!C.to) return _v187kDist0.apply(this,arguments);
@@ -258,7 +258,7 @@ Stage.prototype.handsOf=function(p){ const K=p&&p.v187kd; if(V187K.on&&K&&K.rel=
 const _v187kPose0=Stage.prototype.poseOf;
 Stage.prototype.poseOf=function(p,isRef){ const P=_v187kPose0.apply(this,arguments); if(isRef||!p||!p.gk||!V187K.on) return P; const now=this.now;
   const K=p.v187kd; if(K){ const c=v187kClock(K,now); if(c>=K.W+K.Fd+K.SE||p.dive||now-K.t0>K.W+K.Fd+K.SE+3000) p.v187kd=null; else if(now>=K.t0) return this.v187kThrowPose(p,K,c>K.W+K.Fd?now-(c-K.W-K.Fd):now); }
-  const S=p.v187st; if(S){ if(now-S.t0>S.max){ p.v187st=null; return P; }
+  if(p.v187sT0!=null){ const S={t0:p.v187sT0,tS:p.v187sTS,max:p.v187sMax}; if(now-S.t0>S.max||now<S.t0){ if(now-S.t0>S.max) p.v187sT0=null; return P; }
     if(!p.dive||!p.dive.k||now<p.dive.t){ const w=smooth(clamp((now-S.t0)/Math.max(60,S.tS-S.t0),0,1)); const v=V186K_SET.map((x,j)=>x+(V187K_STAR[j]-x)*w); const Q=v186kP(v,1,'gkstar'); Q.v187=S.t0; return Q; } }
   return P; };
 const _v187kBlend0=Stage.prototype.blendPose;
@@ -269,6 +269,9 @@ Stage.prototype.update=function(dt){ const r=_v187kUpd0.apply(this,arguments); i
   return r; };
 
 /* ---------- the lab: every new action, a poor and a good keeper ---------- */
+/* v18.6's own 'saves' scene keeps its corners and distribution as they were (its suite counts every keeper contact as a save) */
+const _v187kLabRun0=labRun;
+labRun=function(scen){ const r=_v187kLabRun0.apply(this,arguments); if(scen==='saves'&&App.labSt) App.labSt._v187kOff=1; return r; };
 LAB_SCENES.push(['keeper2','Keeper: claims, punches, kick and reflex saves, star, throw and roll']);
 const V187K_LAB=['kick','react','star','claim','punch','punch1','throw','roll','starGoal'];
 const _v187kLabRun=labRun;
@@ -278,7 +281,7 @@ labRun=function(scen){ const r=_v187kLabRun.apply(this,arguments); if(scen!=='ke
     while(alive()){ if(window.__v187labIdle){ await st.wait(200); continue; } const L=window.__v187lab||V187K_LAB; const k=L[i%L.length]; const qs=window.__v187labQ||[0.3,0.85]; const q=qs[Math.floor(i/L.length)%qs.length]; i++;
       st.zoomTo(0.42); st.cam.w=st.cam.tw; st.focus={x:96}; st.cam.x=96; st._v186kq=q; st._v187kAct=k;
       if(typeof labLog==='function') labLog(`${k} · q ${q}`);
-      const g=st.gkOf(1); if(g){ g.dive=null; g.v187st=null; g.v187kd=null; g.x=103.5; g.y=34; g.ov=null; }
+      const g=st.gkOf(1); if(g){ g.dive=null; g.v187sT0=null; g.v187kd=null; g.x=103.5; g.y=34; g.ov=null; }
       if(k==='claim'||k==='punch'||k==='punch1'){ st._v187kforce={ck:k==='claim'?'claim':'punch',fists:k==='punch1'?1:2}; st._v187kDist='throw'; await st.cornerKick(0,Math.random()<0.5?1:-1); st._v187kforce=null; st._v187kDist=null; }
       else if(k==='throw'||k==='roll'){ st._v187kDist=k; st._v186kforce={q,k:'stand',out:'catch'}; await st.gain(fw); if(!alive()) return; fw.x=84; fw.y=30+Math.random()*8; /* the lab keeps the box clear so the throw is seen, and puts a free full-back out wide (throw) or a centre-back on the edge of the box (roll) */
         for(const q of A) if(q!==fw&&q.x>78){ q.x=74+Math.random()*4; q.ov=null; } const Bk=P.filter(p=>p.side===1&&!p.gk); const rc=Bk[1]||Bk[0];
