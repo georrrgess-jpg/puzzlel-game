@@ -20,6 +20,7 @@ let fails=0; const ok=(c,msg)=>{ console.log((c?'PASS ':'FAIL ')+msg); if(!c) fa
   /* the lab scene with hooks: pause at each keeper contact (and at each throw/roll release), measure, resume */
   const start=async(page,list,qs,ts)=>{ await page.evaluate(([list,qs,ts])=>{ window.__v187lab=list; window.__v187labQ=qs; App.labTs=ts; V187K.log=[]; window.__C=[]; window.__T=[]; window.__E=[]; window.__pend=0; labRun('keeper2'); },[list,qs,ts]);
     await page.waitForFunction(()=>App.labSt&&App.labSt.players&&App.labSt.players.size>0&&App.labSt._v187kLab,null,{timeout:60000});
+    await page.evaluate(()=>{ const c=document.querySelector('#anim-lab .lab-cv'); if(c) c.scrollIntoView({block:'center'}); });
     await page.evaluate(()=>{ const st=App.labSt; st.ts=App.labTs; st.goalTs=App.labTs;
       const E0=st.emit; st.emit=function(e){ const g=this.gkOf(1); window.__E.push({t:e.t,now:this.now,how:e._how,k7:e._v187k||null,inHands:!!(this.own&&this.own.gk&&this.hands),rel:window.__rel}); return E0.apply(this,arguments); };
       const mine=D=>D&&D.k&&V187K_MINE[D.k];

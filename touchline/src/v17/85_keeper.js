@@ -272,7 +272,7 @@ Stage.prototype.update=function(dt){ const r=_v187kUpd0.apply(this,arguments); i
 /* v18.6's own 'saves' scene keeps its corners and distribution as they were (its suite counts every keeper contact as a save) */
 const _v187kLabRun0=labRun;
 labRun=function(scen){ const r=_v187kLabRun0.apply(this,arguments); if(scen==='saves'&&App.labSt) App.labSt._v187kOff=1; return r; };
-LAB_SCENES.push(['keeper2','Keeper: claims, punches, kick and reflex saves, star, throw and roll']);
+LAB_SCENES.push(['keeper2','Keeper: more actions']);
 const V187K_LAB=['kick','react','star','claim','punch','punch1','throw','roll','starGoal'];
 const _v187kLabRun=labRun;
 labRun=function(scen){ const r=_v187kLabRun.apply(this,arguments); if(scen!=='keeper2') return r;
