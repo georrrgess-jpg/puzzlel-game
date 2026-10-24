@@ -24,7 +24,7 @@ async function lineup(b){ const p=await b.newPage({viewport:{width:1400,height:7
     const gkk=kitFinish({shirt:'#22c3e6',pc:'#22c3e6',trim:'#111',shorts:'#1b1b1b',num:'#111',socks:'#22c3e6',pat:'plain',sleeve:'long',collar:'crew',sockPat:'plain',shortsPat:'plain',numStyle:'solid'});
     const facial=['none','stubble','goatee','mustache','chinstrap','none','stubble','none','none','none'], mouths=['smile','grin','neutral','smirk','serious','smile','grin','neutral','smile','serious'];
     window.__mk=(set,back)=>{ const X=[]; for(let i=0;i<10;i++){ const L=defaultLook('lu'+i+set,12); L.hair=hairs[(i+set*10)%15]; L.skin=[1,9,4,11,2,6,0,8,3,10][i]; L.facial=facial[i]; L.mouth=mouths[i]; L.band=i===3?3:i===7?1:0; L.tape=i%3===0; L.boots=i%8; L.build=['lean','average','stocky'][i%3]; L.sleeves=i===5?'long':'short';
-      const o={x:47+i*1.05,y:62.5+(i%2)*0.35,yaw:back?-Math.PI/2+(i-5)*0.06:Math.PI/2-0.35+(i-5)*0.05,look:L,hgt:66+(i*3)%10,num:[7,10,23,4,9,11,1,18,5,99][i],face:1,ph:0,spd:0,seed:i,kickT:-9e9,trip:-9e9,jumpT:-9e9,gk:i===6};
+      const o={x:47+i*1.05,y:62.5+(i%2)*0.35,yaw:back?-Math.PI/2+(i-5)*0.06:Math.PI/2-0.35+(i-5)*0.05,look:L,hgt:66+(i*3)%10,num:[7,10,23,4,9,11,1,18,5,99][i],face:1,ph:0,spd:0,seed:i,kickT:-9e9,trip:-9e9,jumpT:-9e9,gk:i===6,v187cNm:['TURNER','NIELSEN','OKAFOR','GARCIA-LOPEZ','KIM','D. SANTOS','MBAPPA','O\'BRIEN','LI','VAN DER BERG'][i],v187cCap:i===3};
       X.push({o,kit:i===6?gkk:kits[i%9],isRef:false}); } return X; };
     window.__extras=__mk(0,false);
     P3D_MODULES.push({name:'sheet-extra',order:25,frame(P){ for(const e of window.__extras||[]) P.extra.push(e); }});
@@ -104,12 +104,12 @@ async function close(b){ const p=await b.newPage({viewport:{width:1000,height:76
       const LG=defaultLook('closegk',12); LG.hair='buzz'; LG.skin=9;
       const set={idle:{},run:{spd:6.5,ph:1.1,gv:6.5},kick:{kickT:n-205,kickW:200,kickF:340,kickK:'shot'},slide:{v18slT:n-230,v18slD:520,spd:4,seed:1},dive:{gk:true,dive:{t:n-260,dir:1}}};
       const yaw=0.3; const ang=[['front',0],['3/4',Math.PI/4],['side',Math.PI/2],['back',Math.PI]];
-      poses.forEach((ps,r)=>{ const gk=ps==='dive'; const o=Object.assign({x:52.5,y:34,yaw,look:gk?LG:L,hgt:70,num:gk?1:7,face:1,ph:0,spd:0,seed:2,kickT:-9e9,trip:-9e9,jumpT:-9e9,gk,_pose:null},set[ps]);
+      poses.forEach((ps,r)=>{ const gk=ps==='dive'; const o=Object.assign({x:52.5,y:34,yaw,look:gk?LG:L,hgt:70,num:gk?1:7,face:1,ph:0,spd:0,seed:2,kickT:-9e9,trip:-9e9,jumpT:-9e9,gk,_pose:null,v187cNm:gk?'OKAFOR':'MORALES',v187cCap:!gk},set[ps]);
         window.__extras=[{o,kit:gk?gkk:kitA,isRef:false}];
         ang.forEach(([nm,a],c)=>{ const hy=ps==='slide'||ps==='dive'?0.5:0.95; __eye(52.5,34,yaw+a,d,hy,40); o._pose=null; __shot(c,r,`${ps} ${nm} ${d}m`); }); });
       /* native-resolution detail cells at 3 m (no downscale) */
       if(d===3){ window.__D=[]; const det=[['idle',0],['idle',Math.PI/4],['run',Math.PI/2],['kick',Math.PI/4],['idle',Math.PI],['slide',Math.PI/4]];
-        const G0=window.__G; __grid(3,2,500,760); det.forEach(([ps,a],i)=>{ const gk=false; const o=Object.assign({x:52.5,y:34,yaw,look:L,hgt:70,num:7,face:1,ph:0,spd:0,seed:2,kickT:-9e9,trip:-9e9,jumpT:-9e9,gk,_pose:null},set[ps]);
+        const G0=window.__G; __grid(3,2,500,760); det.forEach(([ps,a],i)=>{ const gk=false; const o=Object.assign({x:52.5,y:34,yaw,look:L,hgt:70,num:7,face:1,ph:0,spd:0,seed:2,kickT:-9e9,trip:-9e9,jumpT:-9e9,gk,_pose:null,v187cNm:'MORALES',v187cCap:true},set[ps]);
           window.__extras=[{o,kit:kitA,isRef:false}]; __eye(52.5,34,yaw+a,3,ps==='slide'?0.5:0.95,40); __shot(i%3,Math.floor(i/3),`${ps} ${a.toFixed(2)} 3m native`); }); window.__D=window.__G; window.__G=G0; } },[d,poses]);
     const url=await p.evaluate(()=>window.__G.c.toDataURL('image/png')); fs.writeFileSync(OUT2+`close-${d}m.png`,Buffer.from(url.split(',')[1],'base64')); console.log('close',d,'m saved', JSON.stringify(await info(p)));
     if(d===3){ const u2=await p.evaluate(()=>window.__D.c.toDataURL('image/png')); fs.writeFileSync(OUT2+'close-3m-native.png',Buffer.from(u2.split(',')[1],'base64')); } }
