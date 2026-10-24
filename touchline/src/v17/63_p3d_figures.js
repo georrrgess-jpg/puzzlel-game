@@ -116,6 +116,8 @@ function v18FHairGeo(style,seg){ const nu=seg*2+6, nv=seg+3; const pos=[], idx=[
       case 'locs': t=0.026+0.01*Math.abs(Math.sin(lam*10)); break;
       case 'long': case 'mullet': t=0.022+0.01*Math.max(0,Math.sin(phi)); break;
       case 'bun': t=0.016; break; }
+    /* v18.7: combed clumps on the smooth cuts at tier A (the shell no longer reads as one helmet) */
+    if(seg>=11&&(style==='crop'||style==='sideswept'||style==='long'||style==='mullet')) t+=0.005*Math.max(0,Math.sin(lam*9+phi*2.5+(style==='sideswept'?phi*4:0)))*sm(hl+0.05,hl+0.45,phi);
     if(phi<hl) return Math.abs(lam)>1.25&&phi>hl-0.24?-0.009:-1; return t*(0.3+0.7*sm(hl,hl+0.28,phi)); };
   for(let i=0;i<=nv;i++){ const phi=-Math.PI/2+Math.PI*i/nv; for(let j=0;j<=nu;j++){ const lam=2*Math.PI*j/nu-Math.PI; v18FHeadPt(lam,phi,q);
     const nx=q[0]/(H.rx*H.rx), ny=q[1]/(H.ry*H.ry), nz=q[2]/(H.rz*H.rz), nl=Math.hypot(nx,ny,nz)||1; const t=th(lam,phi);
@@ -392,7 +394,7 @@ function v187cPaintName(g,i,txt,kit){ const cw=256, ch=64, x0=(i%4)*cw, y0=Math.
   const st=kit.numStyle; if(st==='shadow'){ g.fillStyle='rgba(0,0,0,.5)'; g.fillText(txt,3,3); }
   if(st==='outline'||(KIT_COVER[kit.pat]||0)>=0.3){ g.strokeStyle=st==='outline'&&kit.trim&&colorDist(kit.trim,kit.num)>60?kit.trim:contrastOn(kit.num); g.lineWidth=6; g.lineJoin='round'; g.strokeText(txt,0,0); }
   g.fillStyle=kit.num||'#fff'; g.fillText(txt,0,0); g.restore(); }
-function v187cNameCell(F,row,txt,kit){ const k=row+'|'+txt; let c=F.nm.get(k); if(c!=null&&F.nmKey[c]===k){ F.nmUse[c]=F.frame; return c; }
+function v187cNameCell(F,row,txt,kit,p){ let k; if(p&&p._v187cNt===txt&&p._v187cNr===row) k=p._v187cNk; else { k=row+'|'+txt; if(p){ p._v187cNt=txt; p._v187cNr=row; p._v187cNk=k; } } let c=F.nm.get(k); if(c!=null&&F.nmKey[c]===k){ F.nmUse[c]=F.frame; return c; }
   let best=0; for(let i=0;i<64;i++){ if(F.nmUse[i]<0){ best=i; break; } if(F.nmUse[i]<F.nmUse[best]) best=i; }
   v187cPaintName(F.nmG,best,txt,kit); F.dirty.nm=true; F.nmUse[best]=F.frame; F.nmKey[best]=k; F.nm.set(k,best); return best; }
 /* per kit: the shorts number's colour (stands off the shorts) and the captain's armband colour (stands off the sleeve) */
@@ -573,7 +575,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
   v18FPut(pp.shorts,W,36,D,9,3,0,SB,S,SB,skin,aRow);
   if(dec&&fine&&!isRef&&p.num!=null&&p.num!=='') v18FPut(pp.v187cSNum,W,36,D,9,3,0,SB,S,SB,skin,v18FNumCell(F,row+100,p.num,KX.sn));
   v18FPut(pp.torso,W,36,D,9,15,12,SB,S,SB,skin,aRow+(sv>0.05?kF(sv*Math.sin(sph)):0));
-  if(!isRef&&dec&&fine){ const nm=v187cNameOf(st,p); if(nm) v18FPut(pp.v187cName,W,36,D,9,15,12,SB,S,SB,skin,v187cNameCell(F,row,nm,kit)); }
+  if(!isRef&&dec&&fine){ const nm=v187cNameOf(st,p); if(nm) v18FPut(pp.v187cName,W,36,D,9,15,12,SB,S,SB,skin,v187cNameCell(F,row,nm,kit,p)); }
   if(!isRef&&p.num!=null&&p.num!==''&&mid) v18FPut(pp.num,W,36,D,9,15,12,SB,S,SB,skin,v18FNumCell(F,row,p.num,kit));
   /* arms */
   for(let i=0;i<2;i++){ const o=18+i*9; if(longSl){ limb(o,o+3,pp.longUpper,skin,aRow,SB,S,SB); limb(o+3,o+6,pp.longFore,skin,aRow,SB,S,SB); } else { limb(o,o+3,pp.armUpper,skin,aRow,SB,S,SB); limb(o+3,o+6,pp.forearm,skin,0,SB,S,SB); }
