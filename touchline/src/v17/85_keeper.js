@@ -179,8 +179,8 @@ Stage.prototype.cornerKick=async function(s,sg){ if(!V187K.on||!V187K.cross||thi
     if(punch){ if(this.own===gk){ this.own=null; this.hands=false; } const b=this.ball;
       const tx=clamp(gx-dir*(16+Math.random()*13),8,97), ty=clamp(34+sg*(Math.random()<0.7?1:-1)*(7+Math.random()*12),5,63);
       v187kLog({k:'punchOut',from:{x:+b.x.toFixed(2),y:+b.y.toFixed(2),z:+b.z.toFixed(2)},to:{x:+tx.toFixed(1),y:+ty.toFixed(1)}});
-      await this.launch(null,{to:{x:tx,y:ty,z:0},dur:this.D(820)+120,h:3+Math.random()*2.5,kind:'clear',cont:true});
-      this.onCaption('PUNCHED CLEAR','set'); this.clearStaged(); }
+      const pr=this.launch(null,{to:{x:tx,y:ty,z:0},dur:this.D(820)+120,h:3+Math.random()*2.5,kind:'clear',cont:true});
+      this.onCaption('PUNCHED CLEAR','set'); await pr; this.clearStaged(); }
     else { gk.gatherT=this.now; this.onCaption(this.own===gk?'CLAIMED':'CORNER','set'); this.clearStaged(); }
     if(D&&D.k&&gk.dive===D){ const end=D.tP0+D.post; await this.until(()=>this.now>=end||gk.dive!==D,Math.max(60,end-this.now)+300); if(gk.dive===D) gk.dive=null; }
     gk.ov=null; if(!punch&&this.own===gk&&this.hands) await this.distribute(gk); return; }
