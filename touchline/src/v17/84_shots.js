@@ -36,6 +36,9 @@ const v187sA=p=>Math.max(0,Math.min(1,((p&&p.v186r_fin!=null?p.v186r_fin:60)-25)
 function v187sLeap(p){ const h=p&&p.hgt||70; return Math.max(0.74,Math.min(1.3,1+(h-70)*0.035)); }
 const v187sYaw=p=>p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw;
 const v187sAd=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
+/* the header kind in play for this player now (a stale one from an earlier header is ignored) */
+function v187sHK(st,p){ return p&&p.v187hk&&p.v187hc!=null&&Math.abs(st.now-p.v187hc)<st.D(900)+300?p.v187hk:null; }
+const v187sJK=k=>k==='glance'?0.85:k==='clear'?1.06:1;
 
 /* @v187s-pure-begin: the pick (pure; o = {force,a,u,u2,d,gkOff,over,save,first,fk}) */
 function v187sPick(o){ if(o.force&&o.force!=='volley'&&V187S_TECH.includes(o.force)) return o.force;
@@ -254,7 +257,7 @@ Stage.prototype.headOf=function(p){ const r=_v187sHead.apply(this,arguments); if
   if(p.v187hk==='dive'&&p.v187hc!=null&&!(p.v187hr!=null&&p.v187hr>=p.v187hc-5)&&this.now>=p.v187hc-this.D(2000)){ try{ return this.v187sDiveBall(p); }catch(e){} }
   r.z+=1.66*((p.hgt||70)/70-1); return r; };
 const _v187sJump=Stage.prototype.jumpLift;
-Stage.prototype.jumpLift=function(p){ const v=_v187sJump.apply(this,arguments); if(!v||!V187S.on||!p) return v; return v*v187sLeap(p)*(p.v187hk==='glance'?0.85:p.v187hk==='clear'?1.06:1)*((p.hgt||70)/70); };
+Stage.prototype.jumpLift=function(p){ const v=_v187sJump.apply(this,arguments); if(!v||!V187S.on||!p) return v; return v*v187sLeap(p)*v187sJK(v187sHK(this,p))*((p.hgt||70)/70); };
 const _v187sUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v187sUpd.apply(this,arguments);
   if(V187S.on&&!this.rm) for(const p of this.players.values()){ if(p.v187hk!=='dive'||p.v187hc==null||p.v187hy==null) continue; const T=v187sHDur(this), tau=v187sHTau(this,p);
@@ -270,8 +273,8 @@ Stage.prototype.poseOf=function(p,isRef){ const P=_v187sPose.apply(this,argument
     if(p.v187vk&&p.v187vc!=null&&this.v187sVolPose(p,P)) return P;
     if(p.v187hk==='dive'&&p.v187hc!=null&&p.v187hy!=null&&this.v187sDivePose(p,P)) return P;
     if(P.act==='kick'&&p.kickK==='shot'&&p.v187t&&V187S_K[p.v187t]&&p.kickT>=p.v187tT&&p.kickT-p.v187tT<4000) this.v187sKickPose(p,P);
-    if(P.act==='head'){ const jt=this.now-(p.jumpT||-9e9), JD=Math.max(260,this.D(560)); if(jt>=0&&jt<JD){ const k=v187sLeap(p)*(p.v187hk==='glance'?0.85:p.v187hk==='clear'?1.06:1); P.lift=(P.lift||0)*k; } }
-    if((p.v187hk==='glance'||p.v187hk==='clear')&&p.v187hc!=null&&Math.abs(this.now-p.v187hc)<this.D(900)+300) this.v187sNodPose(p,P);
+    if(P.act==='head'){ const jt=this.now-(p.jumpT||-9e9), JD=Math.max(260,this.D(560)); if(jt>=0&&jt<JD){ const k=v187sLeap(p)*v187sJK(v187sHK(this,p)); P.lift=(P.lift||0)*k; } }
+    const hk=v187sHK(this,p); if(hk==='glance'||hk==='clear') this.v187sNodPose(p,P);
   }catch(e){ if(!this._v187err){ this._v187err=1; if(typeof console!=='undefined') console.warn('v18.7 shots pose',e); } }
   return P; };
 /* the strike's downswing, contact and early follow-through are drawn crisp (no easing toward the pose), so foot meets ball */
