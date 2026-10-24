@@ -287,7 +287,7 @@ labRun=function(scen){ const r=_v187kLabRun.apply(this,arguments); if(scen!=='ke
         for(const q of A) if(q!==fw&&q.x>78){ q.x=74+Math.random()*4; q.ov=null; } const Bk=P.filter(p=>p.side===1&&!p.gk); const rc=Bk[1]||Bk[0];
         for(const q of Bk) if(q!==rc&&q.x>86){ q.x=80+Math.random()*4; q.ov=null; } if(rc){ rc.x=k==='throw'?76:88.5; rc.y=k==='throw'?(Math.random()<0.5?11:57):34+(Math.random()<0.5?-7:7); rc.ov={x:rc.x,y:rc.y}; }
         await st.shotSeq({s:0,pid:fw.pid,t:'save',ty:'open',x:40,y:84}); st._v186kforce=null; st._v187kDist=null; if(rc) rc.ov=null; }
-      else if(k==='starGoal'){ await st.gain(fw); if(!alive()) return; fw.x=88; fw.y=31+Math.random()*6; if(g){ g.x=99.5; g.y=34; } fw.hurry=true; st._v186kforce={q,beaten:Math.random()<0.5?'late':'short'};
+      else if(k==='starGoal'){ await st.gain(fw); if(!alive()) return; fw.x=92; fw.y=31+Math.random()*6; if(g){ g.x=99.5; g.y=34; } for(const q of P) if(q.side===1&&!q.gk&&q.x>84){ q.x=78+Math.random()*4; q.ov=null; } /* clean through: the back line is beaten */ fw.hurry=true; st._v186kforce={q,beaten:Math.random()<0.5?'late':'short'};
         await st.finish({s:0,pid:fw.pid,t:'goal',ty:'break',m:10,sc:[1,0]},fw); st._v186kforce=null; if(!alive()) return; await st.wait(st.D(900)); if(g) g.dive=null; st.inNet=null; st.ball.ing=null; await st.wait(st.D(300)); }
       else { await st.gain(fw); if(!alive()) return; const close=k==='star'; fw.x=close?92:95.5; fw.y=31+Math.random()*6;
         const z=k==='kick'?0.05+Math.random()*0.2:k==='react'?1.0+Math.random()*0.7:(Math.random()<0.5?0.12:1.0);
