@@ -202,7 +202,9 @@ const V187K_TH={
 /* the arm accelerates into the release and decelerates after it */
 function v187kTVec(K,ph){ if(ph<=K[0][0]) return K[0][1]; for(let i=1;i<K.length;i++){ if(ph<=K[i][0]){ const a=K[i-1], b=K[i]; const s=clamp((ph-a[0])/Math.max(1e-6,b[0]-a[0]),0,1);
   const w=b[0]===1?s*s:a[0]===1?1-(1-s)*(1-s):smooth(s); return a[1].map((x,j)=>x+(b[1][j]-x)*w); } } return K[K.length-1][1]; }
-Stage.prototype.v187kThrowPose=function(p,K,now){ const t=now-K.t0; const ph=t<=K.W?Math.max(0,t)/K.W:t<=K.W+K.Fd?1+(t-K.W)/K.Fd:2;
+/* the throw clock: held at the release until the ball has actually left his hand (the release can land a step or two after the wind-up) */
+function v187kClock(K,now){ return K.rel==null?Math.min(now-K.t0,K.W):K.W+(now-K.rel); }
+Stage.prototype.v187kThrowPose=function(p,K,now){ const t=v187kClock(K,now); const ph=t<=K.W?Math.max(0,t)/K.W:t<=K.W+K.Fd?1+(t-K.W)/K.Fd:2;
   const v=v187kTVec(V187K_TH[K.k],ph).slice();
   /* the front foot steps (lifted, not slid) into the throw, the back foot comes through after it */
   if(ph<0.5){ const w=clamp((ph-0.04)/0.42,0,1); v[7]+=(K.k==='roll'?0.12:0.16)*Math.sin(Math.PI*w); }
@@ -212,7 +214,7 @@ Stage.prototype.v187kThrowPose=function(p,K,now){ const t=now-K.t0; const ph=t<=
 Stage.prototype.v187kBall=function(p,K){ const is3=v186kIs3D(this), R=v186kBR(this), P=this.v187kThrowPose(p,K,this.now), yaw=this.yawOf(p); const H=v186kHand(p,P,1,is3,yaw); let c;
   if(K.k==='roll') c={x:H.x+Math.cos(yaw)*R*0.75,y:H.y+Math.sin(yaw)*R*0.75,z:Math.max(R,H.z)};
   else { const u=v187kUp(P,is3,0,1.5,0.21*(V186K_B[(p.look&&p.look.build)]||1)), S=v186kW(p,P,u[0],u[1],u[2],is3,yaw); const ex=H.x-S.x, ey=H.y-S.y, ez=H.z-S.z, el=Math.hypot(ex,ey,ez)||1; c={x:H.x+ex/el*R*0.7,y:H.y+ey/el*R*0.7,z:H.z+ez/el*R*0.7}; }
-  const t=(this.now-K.t0)/K.W; if(t<0.18){ const b={x:p.x+Math.cos(yaw)*0.3,y:p.y+Math.sin(yaw)*0.3+0.03,z:0.92+R}, w=smooth(Math.max(0,t)/0.18); c={x:lerp(b.x,c.x,w),y:lerp(b.y,c.y,w),z:lerp(b.z,c.z,w)}; }
+  const t=v187kClock(K,this.now)/K.W; if(t<0.18){ const b={x:p.x+Math.cos(yaw)*0.3,y:p.y+Math.sin(yaw)*0.3+0.03,z:0.92+R}, w=smooth(Math.max(0,t)/0.18); c={x:lerp(b.x,c.x,w),y:lerp(b.y,c.y,w),z:lerp(b.z,c.z,w)}; }
   return {x:c.x,y:c.y,z:Math.max(0,c.z-R)}; };
 /* who is free: a defender close by on a clear lane (roll), or a full-back out wide (throw); punt otherwise, or by choice */
 Stage.prototype.v187kDistChoice=function(gk){ const F=this._v187kDist, fp=this._v18forcePunt; const dir=gk.side===0?1:-1; const q=v186kQ(this,gk);
@@ -234,7 +236,7 @@ Stage.prototype.v187kThrow=async function(gk,k,R){ const dir=gk.side===0?1:-1, g
   this.look(gk,R.x,R.y,this.D(1500)); await this.wait(this.D(fast?60:170)); if(this.own!==gk||!this.hands||!this.alive||this.skip) return false;
   const d=Math.hypot(R.x-gk.x,R.y-gk.y), roll=k==='roll';
   const W=Math.max(110,this.D(roll?560:540)), Fd=Math.max(150,this.D(roll?520:480));
-  gk.v187kd={k,t0:this.now,W,Fd,SE:Math.max(90,this.D(260))};
+  gk.v187kd={k,t0:this.now,W,Fd,SE:Math.max(90,this.D(260)),rel:null};
   const dur=roll?this.D(560)*clamp(d/13,0.8,1.9):this.D(640)*clamp(d/18,0.8,1.7), h=roll?0:clamp(0.6+d*0.03,0.8,1.7);
   this.lastDist={k,gk,to:R,t:this.now,d}; v187kLog({k,to:R.pid,d:+d.toFixed(1),q:+v186kQ(this,gk).toFixed(2)});
   this._v187kW=W; let pr; try{ pr=this.launch(gk,{home:R,dur,h,kind:'pass'}); } finally{ this._v187kW=null; }
@@ -251,10 +253,10 @@ Stage.prototype.distribute=async function(gk){
 
 /* ---------- per frame: hands, pose, blend, the ball in the throwing hand ---------- */
 const _v187kHands0=Stage.prototype.handsOf;
-Stage.prototype.handsOf=function(p){ const K=p&&p.v187kd; if(V187K.on&&K&&this.own===p&&this.hands&&!p.dive&&this.now>=K.t0&&this.now<=K.t0+K.W+1) return this.v187kBall(p,K); return _v187kHands0.apply(this,arguments); };
+Stage.prototype.handsOf=function(p){ const K=p&&p.v187kd; if(V187K.on&&K&&K.rel==null&&this.own===p&&this.hands&&!p.dive&&this.now>=K.t0) return this.v187kBall(p,K); return _v187kHands0.apply(this,arguments); };
 const _v187kPose0=Stage.prototype.poseOf;
 Stage.prototype.poseOf=function(p,isRef){ const P=_v187kPose0.apply(this,arguments); if(isRef||!p||!p.gk||!V187K.on) return P; const now=this.now;
-  const K=p.v187kd; if(K){ if(now>=K.t0+K.W+K.Fd+K.SE||p.dive) p.v187kd=null; else if(now>=K.t0) return this.v187kThrowPose(p,K,Math.min(now,K.t0+K.W+K.Fd)); }
+  const K=p.v187kd; if(K){ const c=v187kClock(K,now); if(c>=K.W+K.Fd+K.SE||p.dive||now-K.t0>K.W+K.Fd+K.SE+3000) p.v187kd=null; else if(now>=K.t0) return this.v187kThrowPose(p,K,c>K.W+K.Fd?now-(c-K.W-K.Fd):now); }
   const S=p.v187st; if(S){ if(now-S.t0>S.max){ p.v187st=null; return P; }
     if(!p.dive||!p.dive.k||now<p.dive.t){ const w=smooth(clamp((now-S.t0)/Math.max(60,S.tS-S.t0),0,1)); const v=V186K_SET.map((x,j)=>x+(V187K_STAR[j]-x)*w); const Q=v186kP(v,1,'gkstar'); Q.v187=S.t0; return Q; } }
   return P; };
@@ -262,7 +264,7 @@ const _v187kBlend0=Stage.prototype.blendPose;
 Stage.prototype.blendPose=function(p,P){ const Q=_v187kBlend0.apply(this,arguments); if(!P||P.v187==null||P.v186!=null) return Q; if(this.now-P.v187<Math.max(40,this.D(60))) return Q; p._pose=P; return P; };
 const _v187kUpd0=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v187kUpd0.apply(this,arguments); if(!V187K.on) return r; const o=this.own;
-  if(o&&o.gk&&this.hands&&!this.fl&&o.v187kd&&!o.dive){ const K=o.v187kd; if(this.now>=K.t0&&this.now<=K.t0+K.W+1){ const b=this.handsOf(o); this.ball.x=b.x; this.ball.y=b.y; this.ball.z=b.z; } }
+  for(const p of this.players.values()){ const K=p.gk&&p.v187kd; if(!K||K.rel!=null) continue; if(this.own===p&&this.hands){ if(!this.fl&&!p.dive&&this.now>=K.t0){ const b=this.handsOf(p); this.ball.x=b.x; this.ball.y=b.y; this.ball.z=b.z; } } else K.rel=this.fl&&!this.fl.phys&&this.fl.t0>=K.t0?this.fl.t0:this.now; }
   return r; };
 
 /* ---------- the lab: every new action, a poor and a good keeper ---------- */

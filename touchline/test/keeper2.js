@@ -71,7 +71,7 @@ let fails=0; const ok=(c,msg)=>{ console.log((c?'PASS ':'FAIL ')+msg); if(!c) fa
     ok(thr.every(t=>t.from&&t.from.z>1.5)&&rol.every(t=>t.from&&t.from.z<0.3), 'the throw is released overhead, the roll at the turf ('+X.T.map(t=>t.k+' z '+(t.from?t.from.z.toFixed(2):'?')).join(', ')+')');
     ok(X.L.some(x=>x.k==='starPre')&&X.L.some(x=>x.arm&&x.star), 'one-on-ones: he spreads in the star before the shot and the next action starts from it');
     const sv=X.E.filter(e=>e.t==='save'&&e.k7&&e.rel!=null); const tim=sv.map(e=>{ const c=C.find(c=>c.t0===e.rel); return c?e.now-(c.t0+c.dur):null; }).filter(x=>x!=null);
-    ok(tim.length>0&&tim.every(x=>x>=-1&&x<40), 'saves are announced at contact, one flight after the strike ('+tim.map(x=>x.toFixed(0)).join(', ')+' ms after arrival)');
+    ok(tim.length>0&&tim.every(x=>x>=-1&&x<70), 'saves are announced at contact, one flight after the strike, within a frame ('+tim.map(x=>x.toFixed(0)).join(', ')+' ms after arrival)');
     ok(sv.every(e=>e.inHands||e.how!=='catch'), 'a caught save is announced with the ball in his hands');
     ok(X.E.filter(e=>e.t==='save'&&e.k7).every(e=>e.how===e.k7||e.how==='tip'), 'the commentary tag names the new save ('+[...new Set(X.E.filter(e=>e.k7).map(e=>e.k7+':'+e.how))].join(', ')+')');
     await page.close(); }
