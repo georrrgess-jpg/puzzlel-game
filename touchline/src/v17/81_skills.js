@@ -20,13 +20,13 @@
    defender reads it (barely reacts) and his tackle follows as before.
    State is primitive fields on the movers (v186*), so the goal replays (68, 76) show the moves.
    Switch: V186S.on. Tuning: V186S.rate (chance multiplier), V186S.bite (defender steps). Lab: 'skills' and 'skillsmod'. */
-const V186S={on:true, rate:1.5, solo:0.7, bite:true, cool:3500, minTs:0.45};
+const V186S={on:true, rate:1.6, solo:0.7, bite:true, cool:3500, minTs:0.25, cap:true}; /* minTs 0.25: 1x, 2x and 4x (ts 1, 0.52, 0.27), not 8x */
 const V186S_LV={V:1,JV:0.85,MOD:0.7};
 const V186S_MV={
   feint:{nc:1.75,trig:2.7,turn:0,min:{V:0,JV:0,MOD:0},w:1.0,go:0.5,cap:'BODY FEINT!'},
   step1:{nc:1.75,trig:3.0,turn:0,min:{V:55,JV:55,MOD:52},w:1.25,go:0.5,cap:'STEPOVER!'},
-  step2:{nc:2.25,trig:3.4,turn:0,min:{V:70,JV:68,MOD:null},w:0.9,go:1.0,cap:'DOUBLE STEPOVER!'},
-  roll:{nc:1.75,trig:2.6,turn:0,min:{V:72,JV:70,MOD:null},w:0.8,go:0.5,cap:'SOLE ROLL!'},
+  step2:{nc:2.25,trig:3.4,turn:0,min:{V:70,JV:68,MOD:null},w:1.25,go:1.0,cap:'DOUBLE STEPOVER!'},
+  roll:{nc:1.75,trig:2.6,turn:0,min:{V:60,JV:66,MOD:null},w:1.6,go:0.5,cap:'SOLE ROLL!'},
   cut:{T:340,turn:1,min:{V:0,JV:0,MOD:30},w:1.0,cap:'OUTSIDE CUT!'},
   chop:{T:440,turn:1,min:{V:45,JV:45,MOD:null},w:1.0,cap:'INSIDE CHOP!'},
   drag:{T:500,turn:1,min:{V:40,JV:40,MOD:40},w:0.9,cap:'DRAG-BACK!'},
@@ -486,3 +486,12 @@ labRun=function(scen){ const r=_v186sLabRun.apply(this,arguments); if(scen!=='sk
       else { const ty=k==='cut'?{x:58,y:36}:k==='chop'?{x:47,y:38}:{x:44,y:44.3}; await st.dribble(fw,54,44,900); if(!alive()) return; await st.dribble(fw,ty.x,ty.y,1600); }
       if(!alive()) return; fw.ov={x:fw.x,y:fw.y}; await st.wait(st.D(900)); }
     st._v186sforce=null; }); };
+
+/* v18.6.3: every move is announced on the broadcast caption with its name and the player's (only solo goals named it before), so the
+   moves are noticed; not inside goal sequences (the solo goal names its own move) or replays */
+const _v186sBeginRaw=v186sBegin;
+v186sBegin=function(st,p,k,o){ const r=_v186sBeginRaw.apply(this,arguments);
+  try{ const M=V186S_MV[k]; if(V186S.cap&&M&&M.cap&&st&&st.onCaption&&!st.skip&&!(st._rp&&st._rp.on)&&!(st._v186gs>0)){
+    const n=typeof v185PlName==='function'?v185PlName(st,p):null; const who=n&&n.short?n.short:(p.num!=null&&p.num!==''?'#'+p.num:'');
+    st.onCaption(M.cap+(who?' '+who:''),'set'); } }catch(e){}
+  return r; };

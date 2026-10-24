@@ -6,7 +6,7 @@
 //    ball at the move's touch; the defender reacts (sold: the lunge foot goes the wrong way; frozen; turned, and a big rating gap
 //    makes him stumble); the carrier's path and the leg's end are identical with the moves on and off (no event timing change);
 //    a Modified player performs the same move slower.
-// 3. live (2x, same seed, moves on and off): identical engine event lists; moves happen; none at 4x; no page errors.
+// 3. live (2x, same seed, moves on and off): identical engine event lists; moves happen; none at 8x; no page errors.
 const { chromium } = require('./_pw'); const DIST=process.env.V186DIST||require('./_pw').DIST;
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{
@@ -121,7 +121,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
       const t0=Date.now(); let mm=0;
       while(Date.now()-t0<150000){ mm=await pg.evaluate(()=>{ const L=App.live; return L&&L.M?L.M.min:(window.__ev.length?+window.__ev[window.__ev.length-1].split('|')[1]:0); }); if(mm>=mins) break; if(await pg.$('#lv-ht .htbox')) break; await pg.waitForTimeout(500); }
       const r=await pg.evaluate(()=>{ const st=App.live&&App.live.stage; return {ev:window.__ev.slice(),n:st?st._v186n||0:0,log:st?(st._v186log||[]).slice():[],min:App.live&&App.live.M?App.live.M.min:null}; });
-      let fast=null; if(on){ await pg.click('[data-a="liveSpeed"][data-v="4"]').catch(()=>{}); await pg.waitForTimeout(800); const n0=await pg.evaluate(()=>App.live.stage._v186n||0); await pg.waitForTimeout(12000); const n1=await pg.evaluate(()=>App.live.stage._v186n||0); fast={n0,n1}; }
+      let fast=null; if(on){ await pg.click('[data-a="liveSpeed"][data-v="8"]').catch(()=>{}); await pg.waitForTimeout(800); const n0=await pg.evaluate(()=>App.live.stage._v186n||0); await pg.waitForTimeout(12000); const n1=await pg.evaluate(()=>App.live.stage._v186n||0); fast={n0,n1}; }
       await pg.close(); return {...r,fast,mm}; };
     const a=await live(true,22), b=await live(false,22);
     const upto=Math.min(a.mm,b.mm)-1; const cut=x=>x.ev.filter(s=>+s.split('|')[1]<=upto);
@@ -135,11 +135,11 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
     ok(a.log.length>0&&withDef.length>=0.6*a.log.length, `live 2x: most moves are made against a defender (${withDef.length} of ${a.log.length} within 3.6 m at the start)`);
     ok(upto>=8&&cut(a).join('\n')===cut(b).join('\n')&&cut(a).length>0, `live 2x: the engine's events (type, minute, player, side, score) are identical with the moves on and off up to minute ${upto} (${cut(a).length} events)`);
     ok(a.n>0, `live 2x: moves happen in a real match (${a.n} in ${a.mm} minutes)`);
-    ok(a.fast&&a.fast.n1===a.fast.n0, `live 4x: no moves start (${a.fast?a.fast.n1-a.fast.n0:'-'})`);
+    ok(a.fast&&a.fast.n1===a.fast.n0, `live 8x: no moves start (${a.fast?a.fast.n1-a.fast.n0:'-'})`);
   }
   const gate=await page.evaluate(()=>{ const st=App.labSt; const p=[...st.players.values()].find(q=>q===st.own)||[...st.players.values()][9]; st.own=p; st.hands=false; st.fl=null; st.placed=false; const o={};
-    st.rm=true; o.rm=v186sCan(st,p); st.rm=false; st.skip=true; o.skip=v186sCan(st,p); st.skip=false; st.ts=0.27; o.fast=v186sCan(st,p); st.ts=0.85; st.so=true; o.so=v186sCan(st,p); st.so=false; o.ok=v186sCan(st,p); return o; });
-  ok(!gate.rm&&!gate.skip&&!gate.fast&&!gate.so&&gate.ok, `gating: no moves under reduced motion, skipping, 4x/8x or shootouts (${JSON.stringify(gate)})`);
+    st.rm=true; o.rm=v186sCan(st,p); st.rm=false; st.skip=true; o.skip=v186sCan(st,p); st.skip=false; st.ts=0.13; o.fast=v186sCan(st,p); st.ts=0.27; o.at4=v186sCan(st,p); st.ts=0.85; st.so=true; o.so=v186sCan(st,p); st.so=false; o.ok=v186sCan(st,p); return o; });
+  ok(!gate.rm&&!gate.skip&&!gate.fast&&!gate.so&&gate.ok&&gate.at4, `gating: moves at 4x but not under reduced motion, skipping, 8x or shootouts (${JSON.stringify(gate)})`);
   ok(errs.length===0, 'no page errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
   await browser.close(); console.log(fails?`${fails} FAILED`:'ALL PASS'); process.exit(fails?1:0);
 })();
