@@ -50,7 +50,7 @@ A.sbAuto=()=>{ const C=App.C; if(!sbEditable(C)) return; const pool=sbPool(C); c
 A.sbLock=()=>{ const C=App.C; if(!sbEditable(C)) return; C.pre.locked=true; queueSave(); addNews(C,'program',`${Sx(C.userSid).town} finalize their Preseason Cup schedule`,C.userSid); Sound.ui&&Sound.ui('success'); toast('Preseason schedule locked. Good luck!'); App.route='office'; App.params={}; render(); };
 A.sbScrim=()=>{ const C=App.C; if(!sbEditable(C)||C.pre.scrim) return; const r=rngFrom(hashStr(C.seed+':scrim:'+C.year)); const u=C.userSid;
   const lu=getLu(C,u,'V'); const xi=new Set((lu&&lu.slots||[]).map(s=>s.pid)); const bench=squad(C,u,'V').filter(p=>!xi.has(p.id)); const jv=squad(C,u,'JV').sort((a,b)=>ovr(b)-ovr(a)).slice(0,7);
-  let bumped=0; for(const p of [...bench,...jv]){ const gap=p.pot-ovr(p); if(gap>0){ shiftOvr(p,Math.min(gap,0.4+r()*0.5),'balanced'); bumped++; } }
+  let bumped=0; for(const p of [...bench,...jv]){ const gap=p.pot-ovr(p); if(gap>0){ shiftOvr(p,Math.min(gap,(0.4+r()*0.5)*DEV_RATE),'balanced'); bumped++; } }
   const top=[...jv].sort((a,b)=>(ovr(b)+(b.pot-ovr(b))*0.25)-(ovr(a)+(a.pot-ovr(a))*0.25)).slice(0,3).map(p=>p.id);
   const vR=xiRating(C,u,'V'), jR=jv.reduce((t,p)=>t+ovr(p),0)/Math.max(1,jv.length); const gv=Math.max(0,Math.round(1+(vR-jR)/6+r()*2)), gj=Math.max(0,Math.round(r()*2-(vR-jR)/10));
   C.pre.scrim={sc:[gv,gj],top,bumped}; queueSave(); App.keepScroll=true; render(); Sound.ui&&Sound.ui('success'); toast(`Scrimmage done: Varsity ${gv}–${gj} JV.`); };

@@ -2,6 +2,10 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.6.2 (rating growth halved)
+- `src/engine.js`: new constant `DEV_RATE = 0.5` scales every source of rating growth: the development plan's gain (`planDev`, which feeds the in-season `devTick` and the off-season jump in `roundFixtures`), a breakout's extra gain and instant jump, and the preseason-minutes bonus (0.35 -> 0.175); `src/ui_schedule.js` scales the scrimmage bump the same way. Potentials, generation and the number of random draws are unchanged, so other random streams are unaffected. Measured (seed 777, one season, 562 players): mean OVR change +2.35 -> +1.17.
+- Checked: season, schedule, squad, traits, legacy pass. `test/concepts2.js` fails with `this.poseOf is not a function` on the build before this change too (stale, not in run_all).
+
 ## Version 18.6.1 (two glitch fixes)
 - **Patch on the players' backs** (3-D): the top of the shorts (`G.shorts` loft in `63_p3d_figures.js`) sat only 6-9 mm inside the shirt, so when the torso leaned into a run its back hem lifted and the shorts' waistband showed as a flat rectangle at the bottom of the back. The shorts' hidden upper rings now taper well inside the shirt (top at 0.235 instead of 0.26, depth 0.126 -> 0.10 instead of 0.143 -> 0.136); the visible part below the hem is unchanged.
 - **Keeper's punt knee bending backwards** (2-D and 3-D): the leg IK aimed the knee straight forward, so with the foot high in front of the hip (the punt follow-through, foot up to 1.24 body units) the knee folded the wrong way. `v186LegPole(f,u,sd)` (`ui_stage.js`) turns the knee's aim upward as the foot rises above 0.35 and in front of the hip; both the 2-D `drawFigure` and the 3-D `v18FigDraw` use it. Running and ordinary kicks are unchanged (feet stay below that height).

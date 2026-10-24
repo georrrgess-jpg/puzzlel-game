@@ -732,13 +732,15 @@ function seasonStart(C){
   // plans for development, breakouts, season start ratings
   const r=genR(C);
   for(const id in C.players){ const p=C.players[id]; planDev(C,p,r); p.ovr0[C.year]=r1(ovr(p)); }
-  for(const sid of C.league){ const user=sid===C.userSid; for(const lvl of ['JV','MOD']){ const n=user?2:1; const cands=squad(C,sid,lvl).filter(p=>p.pot-ovr(p)>=12); shuffle(r,cands); cands.sort((a,b)=>(b.pot-ovr(b))-(a.pot-ovr(a))); const top=cands.slice(0,Math.max(n*3,n)); shuffle(r,top); top.slice(0,n).forEach(p=>{ p.plan.breakout=true; p.plan.gain+=13+r()*7; p.pot=Math.min(99,Math.round(p.pot+5+r()*5)); shiftOvr(p,2.5+r()*2,'balanced'); p.bo=(p.bo||0)+1; /* breakouts: an instant jump, a higher ceiling and faster growth */ }); } }
+  for(const sid of C.league){ const user=sid===C.userSid; for(const lvl of ['JV','MOD']){ const n=user?2:1; const cands=squad(C,sid,lvl).filter(p=>p.pot-ovr(p)>=12); shuffle(r,cands); cands.sort((a,b)=>(b.pot-ovr(b))-(a.pot-ovr(a))); const top=cands.slice(0,Math.max(n*3,n)); shuffle(r,top); top.slice(0,n).forEach(p=>{ p.plan.breakout=true; p.plan.gain+=(13+r()*7)*DEV_RATE; p.pot=Math.min(99,Math.round(p.pot+5+r()*5)); shiftOvr(p,(2.5+r()*2)*DEV_RATE,'balanced'); p.bo=(p.bo||0)+1; /* breakouts: an instant jump, a higher ceiling and faster growth */ }); } }
   buildSchedule(C);
   // preseason cup opponents (Varsity only)
   C.pre={rd:0,fx:[],skipped:false};
   for(let i=0;i<3;i++){ const o=genExt(C, 68+i*3+Math.round(r()*4), 'pre'); const id=`${C.year}-P${i+1}`; addFixture(C,{id,comp:'pre',rd:i,lvl:'V',h:i%2?o.id:C.userSid,a:i%2?C.userSid:o.id}); C.pre.fx.push(id); }
   C.phase='preseason'; C.md=0; C.post=null;
 }
+/* rating growth rate for every player (1 = the original pace); applies to development plans, breakouts, preseason minutes and scrimmages */
+const DEV_RATE = 0.5;
 function planDev(C,p,r){
   const base={steady:4,rapid:7,streaky:1+r()*9}[p.dev]||4;
   const ageF = p.grade<=9?1.25:p.grade<=11?1:0.7;
@@ -747,7 +749,7 @@ function planDev(C,p,r){
   let gain=base*ageF*coachF*cpuF*(0.85+r()*0.3);
   const stall = r()<0.11; if(stall) gain*=0.25;
   if(p.mat==='late' && p.grade>=10 && p.grade<=11) gain*=1.2;
-  p.plan={gain, stall, breakout:false};
+  p.plan={gain:gain*DEV_RATE, stall, breakout:false};
 }
 function devTick(C, frac, starters){
   const focus=C.training;
@@ -779,7 +781,7 @@ function advance(C){
   const ev={};
   if(C.phase==='preseason'){
     const f=C.fixtures[C.pre.fx[C.pre.rd]];
-    for(const row of (C.logs[f.id]?C.logs[f.id].box.flat():[])){ const p=C.players[row.pid]; if(p&&p.sid===C.userSid&&p.pot>ovr(p)) shiftOvr(p,Math.min(0.35,p.pot-ovr(p)),'balanced'); }
+    for(const row of (C.logs[f.id]?C.logs[f.id].box.flat():[])){ const p=C.players[row.pid]; if(p&&p.sid===C.userSid&&p.pot>ovr(p)) shiftOvr(p,Math.min(0.35*DEV_RATE,p.pot-ovr(p)),'balanced'); }
     C.pre.rd++; if(C.pre.rd>=3){ C.phase='regular'; C.md=0; ev.phase='regular'; addNews(C,'program',`${C.schools[C.userSid].town} wrap up the Preseason Cup`,C.userSid); }
     return ev;
   }
