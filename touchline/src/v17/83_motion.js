@@ -40,7 +40,7 @@ function v187mMinute(st){ if(V187M.minF!=null) return V187M.minF; if(st.v187mMin
   return st.v187mMin||0; }
 
 /* fatigue 0..1 */
-function v187mTired(st,p){ if(!V187M.tired||!p||p.ar||st.demo) return 0; const m=v187mMinute(st); if(!(m>60)) return 0;
+function v187mTired(st,p){ if(!V187M.tired||!p||!p.slot||p.ar||st.demo) return 0; /* players only (not the coaches or the bench in 3-D) */ const m=v187mMinute(st); if(!(m>60)) return 0;
   const s=p.v187m_sta, a=s==null?0.5:clamp((s-25)/70,0,1); return smooth((m-60)/18)*(1-0.6*a)*(p.gk?0.35:1); }
 /* running style -1 (slow, upright, short) .. 1 (fast, low, long); 0 without ratings */
 function v187mStyle(st,p){ if(!V187M.style||!p||p.v186r_pace==null||p.gk) return 0; let z=(clamp((p.v186r_pace-25)/70,0,1)-0.5)*2;
@@ -109,8 +109,8 @@ function v187mKnees(st,p,P,tf){ const now=st.now;
   const idle=P.act==='idle', loco=P.act==='loco';
   if(idle){ if(p.v187mKi==null) p.v187mKi=now; } else p.v187mKi=null;
   let want=false; const key=st.v187mD0;
-  if(key!=null&&tf>0.2&&!p.gk&&!p.off&&!p.celeb&&!p.sad&&!p.hipsHands&&p!==st.own&&p.v187mKi!=null){
-    if(p.v187mKs!==key){ p.v187mKs=key; p.v187mKy=(hashStr(p.pid+':'+Math.round(key))%1000)/1000<0.42*tf?1:0; }
+  if(key!=null&&tf>0.3&&!p.gk&&!p.off&&!p.celeb&&!p.sad&&!p.hipsHands&&p!==st.own&&p.v187mKi!=null){
+    if(p.v187mKs!==key){ p.v187mKs=key; p.v187mKy=(hashStr(p.pid+':'+Math.round(key))%1000)/1000<0.32*tf?1:0; }
     want=!!p.v187mKy&&now-key>st.D(500)&&now-p.v187mKi>st.D(450); }
   const dt=p.v187mKt==null?0:clamp(now-p.v187mKt,0,100); p.v187mKt=now; let w=p.v187mKw||0;
   w=want?Math.min(1,w+dt/Math.max(220,st.D(800))):Math.max(0,w-dt/Math.max(120,st.D(260))); p.v187mKw=w;
