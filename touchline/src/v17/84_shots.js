@@ -45,8 +45,8 @@ function v187sPick(o){ if(o.force&&o.force!=='volley'&&V187S_TECH.includes(o.for
   const a=o.a, u=o.u, u2=o.u2;
   if(o.fk) return 'drive';
   if(o.d<7) return u<0.5-0.3*a?'toe':'place';
-  if(!o.save&&o.d>=9&&o.d<=26&&a>0.25){ const pc=o.gkOff>2.5?0.45+0.35*a:o.over?0.3:0.05+0.08*a; if(u<pc) return 'chip'; }
-  if(o.d>=10&&u2<0.08+0.14*a) return 'outside';
+  if(!o.save&&o.d>=9&&o.d<=26&&a>0.25){ const pc=o.gkOff>3.2?0.45+0.35*a:o.over?0.3:0.04+0.06*a; if(u<pc) return 'chip'; }
+  if(o.d>=10&&u2<0.1+0.16*a) return 'outside';
   if(o.d>=18) return 'drive';
   return u2<(o.first?0.5:0.3)+0.35*a?'place':'drive'; }
 /* @v187s-pure-end */
@@ -160,7 +160,6 @@ Stage.prototype.v187sVolCross=function(p,H,opt){ const G=this._v187g; if(!G||G.v
   return {...opt,dur:opt.dur+W,onRelease(f){ if(o0) o0.apply(this,arguments); H.v187vc=f.t0+f.dur; /* he shapes up toward the goal as it comes */ H.yawLock=Math.atan2(34-Y,gx-X); H.yawLockT=H.v187vc+st.D(900); }}; };
 
 /* ---------- 2. headers ---------- */
-const V187S_HD={dive:{to:300,fa:260,li:120,up:460}};
 function v187sHDur(st){ const d=ms=>st.D(ms); return {to:d(300),fa:d(260),li:d(120),up:d(460)}; }
 /* ms from the header's contact (the cross arriving): negative before, 0 until the ball leaves his head, then ms since */
 function v187sHTau(st,p){ if(p.v187hr!=null&&p.v187hr>=p.v187hc-5) return st.now-p.v187hr; return Math.min(0,st.now-p.v187hc); }
@@ -321,7 +320,7 @@ labRun=function(scen){ const r=_v187sLabRun.apply(this,arguments); if(!V187S_LAB
     if(scen==='shots') for(const q of st.players.values()) if(q!==fw&&q!==wing&&!q.gk) q.off=true; /* a clear view of the striker */
     while(alive()){ const k=only||L[i%L.length]; const top=(i++>>1)%2===0; st.zoomTo(0.5); st.cam.w=st.cam.tw; st.cam.x=90;
       if(scen==='shots'){ st._v187sForce=k; st._v187hForce=null;
-        if(k==='volley'){ const e={s:0,pid:fw.pid,t:'goal',ty:'cross',seq:[{pid:wing.pid,x:top?10:90,y:84,a:'cross'},{pid:fw.pid,x:top?44:56,y:88,a:'shot'}],sc:[1,0],m:10+i};
+        if(k==='volley'){ V187S.vkind=(i>>1)%2?'front':'side'; const e={s:0,pid:fw.pid,t:'goal',ty:'cross',seq:[{pid:wing.pid,x:top?10:90,y:84,a:'cross'},{pid:fw.pid,x:top?44:56,y:88,a:'shot'}],sc:[1,0],m:10+i};
           st.clipStart(e); { const [X,Y]=livePos(0,e.seq[1].x,e.seq[1].y); fw.x=fw.tx=X-5; fw.y=fw.ty=Y; fw.vx=fw.vy=0; fw.yaw=0; fw.face=1; } await st.goalSequence(e); }
         else { const [x,y]=SP[k]; const e={s:0,pid:fw.pid,t:'goal',ty:'open',seq:[{pid:fw.pid,x,y,a:'shot'}],sc:[1,0],m:10+i}; await st.gain(fw); if(!alive()) return; const [X,Y]=livePos(0,x,y); fw.x=X-6; fw.y=Y; await st.goalSequence(e); } }
       else { st._v187hForce=k; st._v187sForce=null;
