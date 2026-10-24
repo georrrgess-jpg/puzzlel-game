@@ -416,7 +416,7 @@ const V187C_SWING={long:1,mullet:1,locs:1,braids:1,bun:1};
 /* hair swing for one figure (head frame, body units): trails back with speed, sways with the stride, lags head turns; a damped spring in game time */
 function v187cSwing(p,st,yaw,hturn,out){ let S=p._v187cS; if(!S) S=p._v187cS=new Float64Array(6); const now=st&&st.now||0; let dt=(now-S[4])/1000; S[4]=now;
   const hy=yaw+hturn; let dy=hy-S[5]; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); S[5]=hy; const v=Math.min(1,Math.max(0,(p.gv!=null?p.gv:(p.spd||0))/7)), ph=p.ph||0;
-  const yr=dt>0.001&&dt<0.25?dy/dt:0; const tx=0.04*v*Math.sin(ph)-Math.max(-0.07,Math.min(0.07,yr*0.03)), tz=-0.05*v-0.012*v*Math.abs(Math.sin(ph));
+  const yr=dt>0.001&&dt<0.25?dy/dt:0; const tx=0.055*v*Math.sin(ph)-Math.max(-0.07,Math.min(0.07,yr*0.03)), tz=-0.065*v-0.015*v*Math.abs(Math.sin(ph));
   if(!(dt>0.001&&dt<0.25)){ S[0]=tx; S[1]=tz; S[2]=0; S[3]=0; } else { dt=Math.min(dt,0.05); S[2]+=(80*(tx-S[0])-9*S[2])*dt; S[3]+=(80*(tz-S[1])-9*S[3])*dt; S[0]+=S[2]*dt; S[1]+=S[3]*dt; }
   S[0]=Math.max(-0.09,Math.min(0.09,S[0])); S[1]=Math.max(-0.1,Math.min(0.012,S[1])); out[0]=S[0]; out[1]=S[1]; return out; }
 
@@ -563,7 +563,7 @@ function v18FigDraw(P,st,p,kit,isRef){ const F=P._fig; if(!F||!p||!isFinite(p.x)
     v18FPut(pt,W,a,D,45,k,k+3,sx,sy,sz,col,aux); };
   /* legs */
   for(let i=0;i<2;i++){ const o=i*9; limb(o,o+3,pp.legUpper,skin,aRow+(sv>0.05?kF(sv*Math.sin(sph+(i?Math.PI:0)+0.6)):0),SB,S,SB);
-    limb(o+3,o+6,pp.shin,skin,aRow,SB,S,SB); if(dec&&LX&&LX.tape) limb(o+3,o+6,pp.v187cSock,LX.tape===1?v18FCol(F,'#f2f2f2'):KX.socks,0,SB,S,SB);
+    limb(o+3,o+6,pp.shin,skin,aRow,SB,S,SB); if(dec&&LX&&LX.tape&&p.num!=null&&p.num!=='') limb(o+3,o+6,pp.v187cSock,LX.tape===1?v18FCol(F,'#f2f2f2'):KX.socks,0,SB,S,SB);
     /* boot: flat when planted, toe dips as the foot leaves the ground (as the 2-D boot does) */
     const a=Q.bootT&&Q.bootT[i]!=null?Q.bootT[i]:0.5*Math.min(1,Math.max(0,(ankU[i]-0.12)*2)), sd=i?1:-1, spl=sd*0.1; const ca=Math.cos(a), sa=Math.sin(a);
     const fb=27+i*9; bd(ca*Math.cos(spl),-sa,ca*Math.sin(spl),fb); bd(sa,ca,0,fb+3); /* Ff, Uf */
