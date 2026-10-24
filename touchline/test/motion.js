@@ -79,9 +79,9 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   const S=await page.evaluate(()=>{ const st=App.labSt; st.paused=true; const H=1000/120; const R0=Math.random; const Pl=[...st.players.values()];
     const A=Pl.filter(p=>p.side===0), B=Pl.filter(p=>p.side===1); const fw=A[9], def=B[3];
     const clear=q=>{ for(const k of Object.keys(q)) if((k.startsWith('v186')||k.startsWith('v187m'))&&k!=='v186fl'&&k!=='v186lv'&&k!=='v186ds') q[k]=null; };
-    const ankle=(p,P,i)=>{ const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw), hs=1.06*(p.hgt||70)/70; const sd=i?1:-1; const Bb=V187M_B[(p.look||{}).build]||1; const F=P.feet[i];
+    const ankle=(p,P,i)=>{ const yaw=p.yaw==null?((p.face||1)>0?0:Math.PI):p.yaw, ca=Math.cos(yaw), sa=Math.sin(yaw), hs=(window.__three?0.92:1.06)*(p.hgt||70)/70; const sd=i?1:-1; const Bb=V187M_B[(p.look||{}).build]||1; const F=P.feet[i];
       const J=ik3([0,P.hipU,sd*0.09*Bb],[F.f,F.u+0.06,F.l],0.43,0.43,v186LegPole(F.f,F.u+0.06,sd)); return {x:p.x+(J.t[0]*ca-J.t[2]*sa)*hs,y:p.y+(J.t[0]*sa+J.t[2]*ca)*hs,u:F.u}; };
-    function legRun(kind,pin){ let s=777; Math.random=()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; V187M.pin=pin;
+    function legRun(kind,pin,three){ let s=777; const p3=st._p3d; if(three){ st._p3d={dead:false}; window.__three=1; } Math.random=()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; V187M.pin=pin;
       try{ V186S.on=true; st._v186lab=true; st.demoCalm=false; st._v186R=null; st._v186leg=null; st._v186mt=null; st._v186sforce=kind; st.v187mMinF=10;
         for(const q of Pl){ clear(q); q.chase=null; q.meet=null; q.trail=null; q.glide=null; q.trip=-9e9; q.slideT=-9e9; q.jumpT=-9e9; q.kickT=-9e9; q.v184=null; q.v184L=null; q.yawLock=null; q._pose=null;
           if(q!==fw&&q!==def){ q.ov={x:q.gk?(q.side===0?2:103):(q.side===0?20+q.slot.y*0.1:88+q.slot.y*0.1),y:q.gk?34:q.slot.y*0.68}; q.x=q.ov.x; q.y=q.ov.y; q.vx=q.vy=0; } }
@@ -99,13 +99,14 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
         for(let i=0;i<30;i++) step(); leg(70,44.5,2400,900); for(let i=0;i<60;i++) step();
         const long=segs.map(L=>L.filter(g=>g.n>=4)); const worst=Math.max(0,...long.flat().map(g=>g.d));
         return {kind:kind0,segs:long.map(L=>L.map(g=>[g.n,+(g.d*100).toFixed(1)])),worst:+(worst*100).toFixed(2),frames,maxV:+maxV.toFixed(2)}; }
-      finally{ Math.random=R0; V187M.pin=true; st._v186sforce=null; st.v187mMinF=null; } }
-    window.__tr=[]; const on=legRun('step1',true); const tr=window.__tr; window.__tr=null; return {on,off:legRun('step1',false),feint:legRun('feint',true),tr}; });
+      finally{ Math.random=R0; V187M.pin=true; st._v186sforce=null; st.v187mMinF=null; st._p3d=p3; window.__three=0; } }
+    window.__tr=[]; const on=legRun('step1',true); const tr=window.__tr; window.__tr=null; const on3=legRun('step1',true,true), off3=legRun('step1',false,true); return {on,off:legRun('step1',false),feint:legRun('feint',true),on3,off3,tr}; });
   if(process.env.TRACE) console.log(S.tr.join(' | '));
-  console.log('  planted feet: '+JSON.stringify(S));
+  console.log('  planted feet: '+JSON.stringify({...S,tr:undefined}));
   ok(S.on.kind==='sold'&&S.on.segs.flat().length>0, `the stepover sells the defender (${S.on.kind}); planted intervals of 4+ frames: ${S.on.segs.flat().length}`);
   ok(S.on.worst<2, `sold defender: a planted foot moves at most ${S.on.worst} cm on the turf while planted (pin off: ${S.off.worst} cm)`);
   ok(S.off.worst>S.on.worst, `the pin is what holds it (${S.off.worst} cm without it)`);
+  ok(S.on3.kind==='sold'&&S.on3.segs.flat().length>0&&S.on3.worst<2, `3-D scale (0.92): the sold defender's planted foot moves at most ${S.on3.worst} cm (pin off: ${S.off3.worst} cm; ${S.on3.segs.flat().length} plants)`);
   ok(S.feint.kind!=='freeze'||S.feint.worst<2, `frozen defender (feint, ${S.feint.kind}): planted feet move at most ${S.feint.worst} cm`);
 
   /* ---------- 5: the kick's balance arm ---------- */
@@ -123,12 +124,19 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
         if(at==null&&kt>=W){ at=bend(P,false); at3=bend(P,true); }
         if(P.v187mA>=0.95||(!on&&kt>=W*0.8&&kt<=W+F*0.3)){ const b=bend(P,false).deg; lo=Math.min(lo,b); hi=Math.max(hi,b); n++; } }
       V187M.arm=true; p.kickT=-9e9; return {deg:+at.deg.toFixed(1),deg3:+at3.deg.toFixed(1),hand:Object.fromEntries(Object.entries(at.hand).map(([k,v])=>[k,+v.toFixed(2)])),elbowBelowShoulder:+at.el.toFixed(2),lo:+lo.toFixed(1),hi:+hi.toFixed(1),n}; };
-    return {shot:kick('shot',st.D(220),st.D(340),true),pass:kick('pass',st.D(140),st.D(260),true),loft:kick('loft',st.D(200),st.D(300),true),before:kick('shot',st.D(220),st.D(340),false)}; });
+    /* the public step for later layers (84's technique strikes set their own arm, straight out: {f:0.2,u:1.52,l:-0.74}) */
+    const pub=(()=>{ Object.assign(p,{kickT:st.now-st.D(220),kickW:st.D(220),kickF:st.D(340),kickK:'shot',_pose:null}); const P=st.poseOf(p); P.hands[0]={f:0.2,u:1.52,l:-0.74};
+      const P1=v187mKickArm(st,p,P); const a=JSON.stringify(P1.hands[0]); v187mKickArm(st,p,P1); const b=JSON.stringify(P1.hands[0]); const d=bend(P1,false).deg, d3=bend(P1,true).deg;
+      /* a volley-style pose whose own clock is not the kick clock: the extension alone triggers it */
+      p.kickT=-9e9; const Q=st.poseOf(p); Q.act='kick'; Q.hands[0]={f:0.12,u:1.46,l:-0.72}; v187mKickArm(st,p,Q); const dv=bend(Q,false).deg; p.kickT=-9e9;
+      return {same:a===b&&P1===P,deg:+d.toFixed(1),deg3:+d3.toFixed(1),vol:+dv.toFixed(1)}; })();
+    return {shot:kick('shot',st.D(220),st.D(340),true),pass:kick('pass',st.D(140),st.D(260),true),loft:kick('loft',st.D(200),st.D(300),true),before:kick('shot',st.D(220),st.D(340),false),pub}; });
   console.log('  arm: '+JSON.stringify(Ar));
   for(const k of ['shot','pass','loft']){ const a=Ar[k]; ok(a.deg>=30&&a.deg<=45&&a.deg3>=30&&a.deg3<=45, `${k}: balance-arm elbow bend at contact ${a.deg} deg (3-D solve ${a.deg3} deg; before: ${Ar.before.deg} deg)`); }
   ok(Ar.shot.n>3&&Ar.shot.lo>=30&&Ar.shot.hi<=45, `shot: the bend stays ${Ar.shot.lo}-${Ar.shot.hi} deg while the arm is out (${Ar.shot.n} frames)`);
   ok(Ar.shot.hand.f>Ar.before.hand.f+0.08&&Ar.shot.hand.u<-0.12&&-Ar.shot.hand.l<-Ar.before.hand.l, `the hand comes forward and down instead of out to the side (forward ${Ar.shot.hand.f}, down ${-Ar.shot.hand.u}, out ${-Ar.shot.hand.l} body units from the shoulder; before forward ${Ar.before.hand.f}, down ${-Ar.before.hand.u}, out ${-Ar.before.hand.l}, bend ${Ar.before.lo}-${Ar.before.hi} deg)`);
 
+  ok(Ar.pub.same&&Ar.pub.deg>=30&&Ar.pub.deg<=45&&Ar.pub.deg3>=30&&Ar.pub.deg3<=45&&Ar.pub.vol>=30&&Ar.pub.vol<=45, `v187mKickArm(st,p,P) corrects a later layer's straight arm ({f:0.2,u:1.52,l:-0.74} -> ${Ar.pub.deg} deg, 3-D ${Ar.pub.deg3}; a volley arm on its own clock -> ${Ar.pub.vol} deg) and a second call changes nothing (${Ar.pub.same})`);
   /* ---------- 6: live ---------- */
   if(!process.env.SKIP_LIVE){
     const pg=await browser.newPage({viewport:{width:1280,height:800}}); pg.on('pageerror',e=>errs.push('live pageerror: '+e.message+' '+(e.stack||'').split('\n')[1]));

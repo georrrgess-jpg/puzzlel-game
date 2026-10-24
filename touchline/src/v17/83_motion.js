@@ -17,7 +17,7 @@
    4. Planted feet. A defender sold, frozen or turned by a skill move (81) no longer slides: a foot on the turf is pinned to its
       world spot (stored when it plants, turned back into body coordinates every frame); it steps (lifted, D(150)) when the pose
       lifts it, when the body has moved too far from it, or when it would cross under the other leg.
-   5. Kick balance arm. The arm opposite the kicking leg no longer shoots out straight sideways: its hand is held 0.556 body units
+   5. Kick balance arm (public: v187mKickArm(st,p,P), see below). The arm opposite the kicking leg no longer shoots out straight sideways: its hand is held 0.556 body units
       from the shoulder (the elbow bent about 38 degrees; the bend depends only on that distance, so it is the same in 2-D and 3-D),
       out to the side, forward and a little below the shoulder.
    Switches: V187M.style / tired / knees / pin / arm. Globals are prefixed v187m / V187M. */
@@ -66,7 +66,7 @@ Stage.prototype.poseOf=function(p,isRef){
   const o=V187M_G; V187M_G=v187mStrideK(this,p,sty,tf); let P;
   try{ P=_v187mPose.apply(this,arguments); } finally{ V187M_G=o; }
   if(!P||!P.feet||!P.hands||!P.feet[0]||!P.feet[1]||!P.hands[0]||!P.hands[1]) return P;
-  try{ v187mBody(this,p,P,sty,tf); if(V187M.pin) v187mPin(this,p,P); if(V187M.knees) v187mKnees(this,p,P,tf); if(V187M.arm) v187mArm(this,p,P); }catch(e){ v187mErr(e); }
+  try{ v187mBody(this,p,P,sty,tf); if(V187M.pin) v187mPin(this,p,P); if(V187M.knees) v187mKnees(this,p,P,tf); v187mKickArm(this,p,P); }catch(e){ v187mErr(e); }
   return P; };
 
 /* 1 + 2: lean, hips, bounce, arms and head of a running (or standing) player */
@@ -105,7 +105,7 @@ function v187mDead(st){ if(st.so||st.clip||st.demo) return false; const now=st.n
 /* the knee of leg sd for hip height hu and foot F (the painters' leg solve) */
 function v187mKneeOf(hu,F,sd,B){ const t=[F.f,F.u+0.06,F.l]; return ik3([0,hu,sd*0.09*B],t,0.43,0.43,v186LegPole(t[0],t[1],sd)).j; }
 function v187mKnees(st,p,P,tf){ const now=st.now;
-  if(st.v187mDt!==now){ st.v187mDt=now; if(v187mDead(st)){ if(st.v187mD0==null) st.v187mD0=now; st.v187mDl=now; } else if(st.v187mD0!=null&&now-st.v187mDl>Math.max(150,st.D(400))) st.v187mD0=null; }
+  if(st.v187mDt!==now&&!(st._rp&&st._rp.on)){ st.v187mDt=now; if(v187mDead(st)){ /* the stage's dead-ball clock (not advanced by replay frames) */ if(st.v187mD0==null) st.v187mD0=now; st.v187mDl=now; } else if(st.v187mD0!=null&&now-st.v187mDl>Math.max(150,st.D(400))) st.v187mD0=null; }
   const idle=P.act==='idle', loco=P.act==='loco';
   if(idle){ if(p.v187mKi==null) p.v187mKi=now; } else p.v187mKi=null;
   let want=false; const key=st.v187mD0;
@@ -134,13 +134,23 @@ function v187mKnees(st,p,P,tf){ const now=st.now;
   for(let i=0;i<2;i++){ const h=P.hands[i]; P.hands[i]={f:lerp(h.f,H[i][0],bh),u:lerp(h.u,H[i][1]-du,bh),l:lerp(h.l,H[i][2],bh)}; }
   P.v187mK=w; }
 
-/* 5: the kick's balance arm: bent at the elbow, forward and down instead of straight out to the side */
-function v187mArm(st,p,P){ if(P.act!=='kick') return; const kk=p.kickK; if(!kk||kk==='head'||kk==='throw'||kk==='punt'||p.v186xk) return;
-  const kt=st.now-(p.kickT||-9e9), W=p.kickW||0, Fd=p.kickF||260; if(kt<0||kt>=W+Fd) return;
-  /* on the stage clock, a little ahead of the base pose's balance weight so that blendPose's smoothing has caught up by contact */
-  const h=P.hands[0]; const w=kt<W?smooth(kt/Math.max(1,0.62*W)):1-smooth(((kt-W)/Fd-0.25)/0.75); if(!(w>0)) return;
+/* 5: the kick's balance arm: bent at the elbow, forward and down instead of straight out to the side.
+   Public, for layers loaded after this one that set their own kick arms (84's technique strikes and volleys):
+   v187mKickArm(st, p, P) mutates and returns the pose P (from poseOf): P.hands[0], the arm opposite the kicking leg, is pulled
+   toward a target 0.556 body units from the shoulder (elbow bend ~38 degrees). Weight: on the stage's kick clock (p.kickT/kickW/kickF,
+   a little ahead of the base pose so blendPose has caught up by contact), or by how far the hand is already thrown out sideways
+   (|l| 0.3 -> 0.6), whichever is more, so a strike that times its own arms is caught too. Idempotent: a second call on the same
+   P does nothing unless the hand target was replaced in between (then it is corrected again). Only for P.act 'kick'; never headers,
+   throws, punts or 82's bicycle / scissor kicks; off with V187M.arm=false or V187M.on=false. P.v187mA carries the weight for the
+   blendPose step below. */
+function v187mKickArm(st,p,P){ if(!V187M.on||!V187M.arm||!st||!p||!P||st.rm||P.act!=='kick'||!P.hands||!P.hands[0]) return P;
+  const kk=p.kickK; if(kk==='head'||kk==='throw'||kk==='punt'||p.v186xk) return P;
+  const h=P.hands[0]; if(P.v187mAh===h) return P; /* already applied to this very target */
+  const kt=st.now-(p.kickT||-9e9), W=p.kickW||0, Fd=p.kickF||260; let w=0;
+  if(kk&&kt>=0&&kt<W+Fd) w=kt<W?smooth(kt/Math.max(1,0.62*W)):1-smooth(((kt-W)/Fd-0.25)/0.75);
+  w=Math.max(w,smooth((-h.l-0.3)/0.3)); if(!(w>0)) return P;
   const B=V187M_B[(p.look||{}).build]||1; const df=0.35, du=-0.2, dl=-0.4, n=0.556/Math.hypot(df,du,dl);
-  P.hands[0]={f:lerp(h.f,df*n,w),u:lerp(h.u,1.5+du*n,w),l:lerp(h.l,-0.21*B+dl*n,w)}; P.v187mA=w; }
+  P.hands=[{f:lerp(h.f,df*n,w),u:lerp(h.u,1.5+du*n,w),l:lerp(h.l,-0.21*B+dl*n,w)},P.hands[1]]; P.v187mAh=P.hands[0]; P.v187mA=Math.max(P.v187mA||0,w); return P; }
 /* blendPose eases every joint toward a new act over ~70 ms, which would leave the balance hand short of its target at contact: the
    blended hand is pulled onto the pose's by the same weight (continuous: none at the start of the kick, all of it while the arm is out) */
 const _v187mBlend=Stage.prototype.blendPose;
