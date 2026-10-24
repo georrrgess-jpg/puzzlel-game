@@ -173,10 +173,12 @@ function v187sDiveFrame(tau,T){ if(tau<-T.to) return null; let th, lift, f0, f1,
     if(u<0.5){ const s=v187sSm(u/0.5); th=v187sLp(1.5,0.7,s); lift=v187sLp(-0.66,-0.45,s); f0={f:v187sLp(-0.8,-0.3,s),u:0.05,l:-0.12}; f1={f:v187sLp(-0.85,0.15,s),u:v187sLp(0.1,0.05,s),l:0.12}; h0={f:v187sLp(0.6,0.5,s),u:0.04,l:-0.32}; h1={f:v187sLp(0.6,0.5,s),u:0.04,l:0.32}; tilt=-0.2*(1-s); }
     else { const s=v187sSm((u-0.5)/0.5); th=0.7*(1-s); lift=-0.45*(1-s); f0={f:v187sLp(-0.3,0.02,s),u:0,l:-0.1}; f1={f:v187sLp(0.15,0.04,s),u:0.08*Math.sin(Math.PI*s),l:0.1}; h0={f:v187sLp(0.5,0.03,s),u:v187sLp(0.04,1.0,s),l:-0.3}; h1={f:v187sLp(0.5,0.03,s),u:v187sLp(0.04,1.0,s),l:0.3}; } }
   return {th,lift,feet:[f0,f1],hands:[h0,h1],tilt}; }
+/* which way he dives: at the goal mouth in 3-D; in 2-D straight along the pitch (a screen rotation can only show a dive across the screen) */
+function v187sDiveYaw(st,p){ const gx=p.side===0?105:0; if(!v187s3D(st)) return gx>52?0:Math.PI; return Math.atan2(34-p.y,gx-p.x); }
 /* the head's contact point (ball underside, metres) in the dive at contact */
 Stage.prototype.v187sDiveBall=function(p){ const T=v187sHDur(this), F=v187sDiveFrame(0,T); const S=v187sS(this,p), R=v187sBR(this);
   const hd=v187sFwd(0.02,1.83,0,F.th,0,F.lift,0.8); const ax={f:Math.sin(F.th),u:Math.cos(F.th)}; const k=0.12+R/S;
-  const yaw=p.v187hy!=null?p.v187hy:v187sYaw(p); const c=Math.cos(yaw), s=Math.sin(yaw); const x0=p.v187hl?p.v187hx:p.x, y0=p.v187hl?p.v187hz:p.y;
+  const yaw=p.v187hl&&p.v187hy!=null?p.v187hy:v187sDiveYaw(this,p); const c=Math.cos(yaw), s=Math.sin(yaw); const x0=p.v187hl?p.v187hx:p.x, y0=p.v187hl?p.v187hz:p.y;
   const o={x:x0+c*V187S_DT*S,y:y0+s*V187S_DT*S}; const w=v187sW(o,{f:hd.f+ax.f*k,l:0,u:hd.u+ax.u*k},S,yaw); w.z=Math.max(0,w.z-R); return w; };
 /* how far the body travels (body units) from the take-off spot to contact, and on to the landing */
 const V187S_DT=0.75, V187S_DL=1.1;
@@ -198,7 +200,7 @@ Stage.prototype.v187sHeadCross=function(p,H,opt){ const gx=p.side===0?105:0; let
   if(forced==='clear'&&H.side!==p.side) kind='clear';
   H.v187hk=kind; H.v187hc=null; H.v187hr=null; H.v187hs=1; H.v187hy=null; const st=this, o0=opt.onRelease; let o={...opt};
   if(kind==='dive'){ o.h=Math.min(o.h||0,1.3); }
-  o.onRelease=function(f){ if(o0) o0.apply(this,arguments); H.v187hc=f.t0+f.dur; if(kind==='dive'){ H.jumpT=-9e9; H.v187hl=0; H.v187hy=Math.atan2(34-H.y,gx-H.x); H.yawLock=H.v187hy; H.yawLockT=H.v187hc+st.D(1600); } };
+  o.onRelease=function(f){ if(o0) o0.apply(this,arguments); H.v187hc=f.t0+f.dur; if(kind==='dive'){ H.jumpT=-9e9; H.v187hl=0; H.v187hy=v187sDiveYaw(st,H); H.yawLock=H.v187hy; H.yawLockT=H.v187hc+st.D(1600); } };
   v187sLog({k:'head',kind,pid:H.pid,clear:H.side!==p.side}); return o; };
 
 /* ---------- hooks ---------- */
@@ -256,7 +258,7 @@ Stage.prototype.jumpLift=function(p){ const v=_v187sJump.apply(this,arguments); 
 const _v187sUpd=Stage.prototype.update;
 Stage.prototype.update=function(dt){ const r=_v187sUpd.apply(this,arguments);
   if(V187S.on&&!this.rm) for(const p of this.players.values()){ if(p.v187hk!=='dive'||p.v187hc==null||p.v187hy==null) continue; const T=v187sHDur(this), tau=v187sHTau(this,p);
-    if(tau<-T.to*0.45||tau>T.fa+T.li+T.up||p.celeb) continue; const S=v187sS(this,p); if(!p.v187hl){ p.v187hl=1; p.v187hx=p.x; p.v187hz=p.y; }
+    if(tau<-T.to*0.45||tau>T.fa+T.li+T.up||p.celeb) continue; const S=v187sS(this,p); if(!p.v187hl){ p.v187hl=1; p.v187hx=p.x; p.v187hz=p.y; p.v187hy=v187sDiveYaw(this,p); }
     const q=tau<0?v187sSm((tau+T.to*0.45)/(T.to*0.45))*V187S_DT:V187S_DT+(V187S_DL-V187S_DT)*v187sSm(Math.min(1,tau/T.fa));
     const c=Math.cos(p.v187hy), s=Math.sin(p.v187hy); p.x=p.v187hx+c*q*S; p.y=p.v187hz+s*q*S; p.vx=0; p.vy=0; p.yaw=p.v187hy; p.face=c>=0?1:-1; if(p.ov&&!p.celeb) p.ov={x:p.x,y:p.y}; }
   return r; };
@@ -308,6 +310,7 @@ labRun=function(scen){ const r=_v187sLabRun.apply(this,arguments); if(!V187S_LAB
   return Promise.resolve(r).then(async()=>{ const st=App.labSt; if(!st||!st.alive) return; const alive=()=>st.alive&&App.labSt===st;
     const A=[...st.players.values()].filter(p=>p.side===0); const fw=A[9], wing=A[8], mid=A[7]; const L=V187S_LAB[scen]; let i=0;
     const only=window.__v187only; const SP={drive:[50,72],place:[40,86],chip:[56,80],toe:[50,95],outside:[30,82]};
+    if(scen==='shots') for(const q of st.players.values()) if(q!==fw&&q!==wing&&!q.gk) q.off=true; /* a clear view of the striker */
     while(alive()){ const k=only||L[i%L.length]; const top=(i++>>1)%2===0; st.zoomTo(0.5); st.cam.w=st.cam.tw; st.cam.x=90;
       if(scen==='shots'){ st._v187sForce=k; st._v187hForce=null;
         if(k==='volley'){ const e={s:0,pid:fw.pid,t:'goal',ty:'cross',seq:[{pid:wing.pid,x:top?10:90,y:84,a:'cross'},{pid:fw.pid,x:top?44:56,y:88,a:'shot'}],sc:[1,0],m:10+i};
