@@ -13,7 +13,13 @@
    atlas (paintKitPattern on the shirt, sleeves, shorts, socks), faces from a per-look face atlas (eyes, brows, mouth,
    facial hair), shirt numbers from a number atlas on curved decals. Body units are the solver's; 1 unit = 0.92*hgt/70 m.
    Public helpers: v18FigDraw(P, st, o, kit, isRef) draws one extra figure this frame (same as pushing to P.extra);
-   V18_REFKIT is the officials' kit. Globals are prefixed v18F / V18F. */
+   V18_REFKIT is the officials' kit. Globals are prefixed v18F / V18F.
+   v18.7 models (globals v187c / V187C): V-taper torso; names on the backs (v187cName part, name atlas from the plates' short
+   names or p.v187cNm), a small number on the front left of the shorts, the captain's armband on his left upper arm (each side's
+   first listed lineup captain on the pitch, or p.v187cCap), sock tape and shin guards, keeper glove cuffs; boots with studs, a
+   per-player accent flash (v187cSw) and a sole that clears the turf with its own short outline push; hair tufts, sideburns, a
+   soft ragged nape and a swing for long styles (aSw); cloth sway of the shirt hem and the shorts legs from the fraction of aRow
+   (V187C_KSW, in the kit material and its outline); painted creases. Detail decals are off at tier C. */
 
 const V18_REFKIT={shirt:'#141414',shorts:'#141414',num:'#f5c518',socks:'#141414',trim:'#f5c518',dark:'#000',light:'#2a2a2a',pat:'plain',sleeve:'long',collar:'v',sockPat:'plain',shortsPat:'plain',numStyle:'solid',_ref:true};
 const V18F_NR=16, V18F_AW=2048, V18F_RH=128;
