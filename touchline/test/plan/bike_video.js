@@ -44,7 +44,8 @@ const FPS=30, VW=1280, VH=720;
     await page.evaluate(m=>{ window.__tm=m; V186X.force=null; },tgt.m);
     let k=0; while(k++<20000){ await page.clock.runFor(250); if(await page.$('#lv-ht .htbox')) await page.click('#ht-go').catch(()=>{});
       const s=await page.evaluate(()=>{ const L=App.live; return L&&L.M?{min:L.M.min,cont:!!document.querySelector('#lv-cont')}:null; }); if(!s||s.cont) break; if(s.min>=tgt.m-1) break; }
-    await page.evaluate(f=>{ const L=App.live; V186X.force=f; const b=document.querySelector('[data-a="liveSpeed"][data-v="1"]'); if(b) b.click(); else if(L) L.speed=1; window.__ff=false; },process.env.NOFORCE?null:'bike');
+    /* BOOST: the odds raised so the goal is a bicycle kick by the game's own decision (its reach check still applies), else forced */
+    await page.evaluate(([f,boost])=>{ const L=App.live; V186X.force=boost?null:f; if(boost) V186X.Kb=50; const b=document.querySelector('[data-a="liveSpeed"][data-v="1"]'); if(b) b.click(); else if(L) L.speed=1; window.__ff=false; },[process.env.NOFORCE?null:'bike',!!process.env.BOOST]);
     /* step until the target goal's sequence starts, then record it all: build-up, the kick, the celebration and the replay */
     await page.evaluate(()=>{ window.__ff=true; });
     k=0; while(k++<20000){ await page.clock.runFor(100); const s=await page.evaluate(m=>{ const L=App.live, st=L&&L.stage; return {seq:!!(st&&st._v186x), min:L&&L.M&&L.M.min}; },tgt.m); if(s.seq) break; if(s.min>tgt.m+1) { console.log('missed the goal'); break; } }
@@ -55,4 +56,5 @@ const FPS=30, VW=1280, VH=720;
     const box=await page.evaluate(()=>{ const r=document.getElementById('lv-canvas').getBoundingClientRect(); return {x:Math.max(0,r.x),y:Math.max(0,r.y),width:Math.min(r.width,innerWidth),height:Math.min(r.height,innerHeight)}; });
     let endAt=null; for(let i=0;i<FPS*45;i++){ await step(); await shot(box); const s=await page.evaluate(()=>{ const L=App.live, st=L&&L.stage; return {rp:!!(st&&st._rp), sx:!!(st&&st._v186x), min:L&&L.M&&L.M.min}; });
       if(endAt==null&&i>FPS*6&&!s.rp&&!s.sx) endAt=i; if(endAt!=null&&i-endAt>FPS*1.2) break; } }
-  console.log(JSON.stringify({mode,rend,frames:n,errors:errs.slice(0,3)})); await b.close(); })();
+  const log=await page.evaluate(()=>typeof V186X==='object'?V186X.log.slice(-3):null).catch(()=>null);
+  console.log(JSON.stringify({mode,rend,frames:n,log,errors:errs.slice(0,3)})); await b.close(); })();
