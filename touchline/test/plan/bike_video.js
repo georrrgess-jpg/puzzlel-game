@@ -18,7 +18,7 @@ const FPS=30, VW=1280, VH=720;
     await page.evaluate(([r,v,z])=>{ const side=v==='side'; PREFS.renderer=r; PREFS.view=side?'broadcast':v; PREFS.zoom=z; PREFS.plates=!side; labRun('bike');
       /* 'side': a camera beside the scorer, square to his facing, 7 m away at hip height (fixed once he is in his set) */
       if(side&&r==='3d'){ const C={}; P3D_MODULES.push({name:'bike-side',order:28,frame(P,st){ const K=st._v186x, p=K&&K.pl; if(!p) return; const fresh=p.v186xc!=null&&C.tc!==p.v186xc;
-          if(fresh){ C.tc=p.v186xc; C.x=p.x; C.y=p.y; C.yaw=p.v186xy!=null?p.v186xy:(p.yaw||0); } if(C.x==null) return; const y=C.yaw, sx=-Math.sin(y), sy=Math.cos(y), d=7.5;
+          if(fresh){ C.tc=p.v186xc; C.x=p.x; C.y=p.y; C.yaw=p.v186xy!=null?p.v186xy:(p.yaw||0); } if(C.x==null) return; C.x+=(p.x-C.x)*0.12; C.y+=(p.y-C.y)*0.12; const y=C.yaw, sx=-Math.sin(y), sy=Math.cos(y), d=6.2;
           P.camera.fov=30; P.camera.updateProjectionMatrix(); P.camera.position.set(C.x+sx*d,1.25,C.y+sy*d); P.camera.lookAt(C.x,0.95,C.y); P.camera.updateMatrixWorld(); }}); }
       if(side&&r==='2d'){ const st=App.labSt; } },[rend,view,zoom]); await page.clock.runFor(3000);
     const box=await page.evaluate(()=>{ const c=document.querySelector('#anim-lab .lab-cv'); c.scrollIntoView({block:'center'}); const r=c.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; });
@@ -46,7 +46,12 @@ const FPS=30, VW=1280, VH=720;
       const s=await page.evaluate(()=>{ const L=App.live; return L&&L.M?{min:L.M.min,cont:!!document.querySelector('#lv-cont')}:null; }); if(!s||s.cont) break; if(s.min>=tgt.m-1) break; }
     await page.evaluate(f=>{ const L=App.live; V186X.force=f; const b=document.querySelector('[data-a="liveSpeed"][data-v="1"]'); if(b) b.click(); else if(L) L.speed=1; window.__ff=false; },process.env.NOFORCE?null:'bike');
     /* step until the target goal's sequence starts, then record it all: build-up, the kick, the celebration and the replay */
+    await page.evaluate(()=>{ window.__ff=true; });
     k=0; while(k++<20000){ await page.clock.runFor(100); const s=await page.evaluate(m=>{ const L=App.live, st=L&&L.stage; return {seq:!!(st&&st._v186x), min:L&&L.M&&L.M.min}; },tgt.m); if(s.seq) break; if(s.min>tgt.m+1) { console.log('missed the goal'); break; } }
+    /* the build-up without drawing until the attack reaches the final third (a few seconds before the kick) */
+    const third=+(process.env.THIRD||30); k=0; while(k++<3000){ await step(); if(await page.evaluate(third=>{ const st=App.live&&App.live.stage, K=st&&st._v186x; if(!K) return true; const gx=K.s===0?105:0; return !!(K.armed||(st.own&&st.own.side===K.s&&Math.abs(st.ball.x-gx)<third)); },third)) break; }
+    for(let i=0;i<Math.round(FPS*(+process.env.LEAD||1.0));i++){ if(await page.evaluate(()=>{ const st=App.live&&App.live.stage, K=st&&st._v186x; return !K||K.armed; })) break; await step(); }
+    await page.evaluate(()=>{ window.__ff=false; });
     const box=await page.evaluate(()=>{ const r=document.getElementById('lv-canvas').getBoundingClientRect(); return {x:Math.max(0,r.x),y:Math.max(0,r.y),width:Math.min(r.width,innerWidth),height:Math.min(r.height,innerHeight)}; });
     let endAt=null; for(let i=0;i<FPS*45;i++){ await step(); await shot(box); const s=await page.evaluate(()=>{ const L=App.live, st=L&&L.stage; return {rp:!!(st&&st._rp), sx:!!(st&&st._v186x), min:L&&L.M&&L.M.min}; });
       if(endAt==null&&i>FPS*6&&!s.rp&&!s.sx) endAt=i; if(endAt!=null&&i-endAt>FPS*1.2) break; } }

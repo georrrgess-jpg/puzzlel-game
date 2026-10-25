@@ -112,7 +112,7 @@ async function liveSuite(browser){
         if(K&&K.pl&&K.pl.v186xk){ had=K.pl; hadK=K; } else if(had&&!had.v186xk){ X.clear.push({pid:had.pid,celeb:!!had.celeb,rd:hadK&&hadK.rel!=null?this.now-hadK.rel:null,kind:hadK&&hadK.kind}); had=null; } }catch(e){} return r; };
     const D0=Stage.prototype.draw; Stage.prototype.draw=function(){ const Q=this._rp; if(Q&&Q.on&&Q.v186x){ try{ const K=this._v186x, p=K&&K.pl; if(p&&p.v186xk){ const P=this.poseOf(p); X.rp.push({k:Q.v186x.kind,t:this.now,th:P.pitchB||0,ra:P.rollB||0,act:P.act}); } }catch(e){} } return D0.apply(this,arguments); };
     const E0=window.liveEmit; window.liveEmit=function(e){ const st=App.live&&App.live.stage, K=st&&st._v186x; const r=E0.apply(this,arguments);
-      if(e.t==='goal'){ const sub=document.querySelector('#lv-banner .gb-sub'); X.goals.push({m:e.m,pid:e.pid,s:e.s,sc:e.sc.join('-'),ty:e.ty,inNet:!!(st&&st.inNet),sp:K&&K.struck?K.kind:null,banner:sub?sub.textContent:''}); } return r; };
+      if(e.t==='goal'){ const sub=document.querySelector('#lv-banner .gb-sub'); X.goals.push({m:e.m,pid:e.pid,s:e.s,sc:e.sc.join('-'),ty:e.ty,inNet:!!(st&&st.inNet),sp:K&&K.struck?K.kind:null,sty:e.sty,banner:sub?sub.textContent:''}); } return r; };
     const C0=window.liveCaption; window.liveCaption=function(t,k){ X.caps.push(t); return C0.apply(this,arguments); }; });
   await page.click('.cta [data-a="playNext"]'); await page.waitForTimeout(400);
   await page.click('[data-a="pvSpeed"][data-v="2"]').catch(()=>{}); await page.click('[data-a="kickoff"]');
@@ -132,6 +132,7 @@ async function liveSuite(browser){
   ok(R.X.rel.length>0&&R.X.rel.every(r=>r.k==='bike'?r.th<=-1.3:Math.abs(r.ra)>=0.85), `live: body horizontal / side-on at contact`);
   const sg=R.X.goals.filter(g=>g.sp); ok(sg.length>0&&sg.length===R.X.rel.length&&sg.every(g=>g.inNet&&g.ty==='cross'), `live: special goals emitted with the ball in the net and labelled 'cross' (${sg.map(g=>g.ty).join(', ')})`);
   ok(sg.length>0&&sg.every(g=>/Bicycle kick|Scissor kick/.test(g.banner)), `live: the goal banner names the finish (${sg.map(g=>g.banner).join(' | ')})`);
+  ok(sg.length>0&&sg.every(g=>g.sty===g.sp), `live (v18.8): the goal is stored as the finish shown (e.sty ${sg.map(g=>g.sty).join(', ')})`);
   ok(sg.length>0&&R.feed.length===sg.length, `live: a commentary line for each special (${R.feed.length})`);
   const cap=R.X.caps.filter(c=>c==='BICYCLE KICK!'||c==='SCISSOR KICK!'); ok(sg.length>0&&cap.length===sg.length, `live: caption at contact (${cap.join(', ')})`);
   ok(R.X.clear.length>=sg.length&&sg.length>0&&R.X.clear.every(c=>c.rd!=null), `live: he lands and gets up after each special (${R.X.clear.map(c=>c.kind+' '+Math.round(c.rd)+' ms after the strike'+(c.celeb?', the celebration already on':'')).join('; ')})`);
