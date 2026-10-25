@@ -19729,10 +19729,10 @@ Stage.prototype.v188gShown=function(e){ const K=this._v186x; if(K&&K.struck&&K.e
   if(p.v187hk&&p.v187hr!=null&&now-p.v187hr<3000&&(p.v187hk==='dive'||p.v187hk==='glance')) return p.v187hk;
   if(p.v187t&&now-(p.v187tT||-9e9)<4000&&e.ty!=='pen'&&e.ty!=='fk'&&e.ty!=='header'&&e.ty!=='corner') return p.v187t;
   return ''; };
-const _v188gEmit=Stage.prototype.emit;
-Stage.prototype.emit=function(e){ try{ if(this.relabel&&!this.skip&&e&&e.t==='goal'&&e.sty==null) e.sty=this.v188gShown(e); }catch(err){} return _v188gEmit.apply(this,arguments); };
+/* the live stage's emit is liveEmit itself (an instance property set from the stage's options), so the tag goes on there */
 if(typeof liveEmit==='function'){ const _v188gLive=liveEmit;
-  liveEmit=function(e){ const r=_v188gLive.apply(this,arguments);
+  liveEmit=function(e){ try{ const st=App.live&&App.live.stage; if(st&&st.relabel&&!st.skip&&e&&e.t==='goal'&&e.sty==null) e.sty=st.v188gShown(e); }catch(err){}
+    const r=_v188gLive.apply(this,arguments);
     try{ const L=App.live; if(e&&e.t==='goal'&&e.sty&&L&&L.M){ const sh=(L.M.shots||[]).find(x=>x.m===e.m&&x.pid===e.pid&&x.res==='goal'); if(sh) sh.sty=e.sty; } }catch(err){}
     return r; }; }
 
