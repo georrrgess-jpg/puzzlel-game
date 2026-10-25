@@ -114,7 +114,7 @@ Stage.prototype.celebrate=async function(sc,s){
   if(type==='kneeslide'&&!this.rm){ const ux=dir*-0.35, uy=1, ul=Math.hypot(ux,uy); sc.ov=null; sc.glide={vx:ux/ul*7.5, vy:uy/ul*7.5}; }
   sc.hurry=false; sc.celebT=this.now; if(type!=='kneeslide') sc.ov={x:sc.x,y:sc.y};
   this.onCaption(String(def.n||'').toUpperCase(),'celeb'); this.hype=Math.max(this.hype,0.9);
-  const hold=this.rm?300:this.D(type==='backflip'?1250:type==='kneeslide'?1150:1000);
+  const hold=this.rm?300:this.D(typeof v1810Hold==='function'?v1810Hold(type,1000):type==='backflip'?1250:type==='kneeslide'?1150:1000);
   await this.wait(hold);
   /* teammates arrive and mob him, one by one: each sets off after a small seeded delay (inside the same 1.5 s window) */
   const fx=sc.x, fy=Math.min(sc.y,65.5); let i=0; const mates=[...this.players.values()].filter(q=>q!==sc&&!q.off&&q.side===s&&!q.gk).sort((a,b)=>dist2(a,sc)-dist2(b,sc));

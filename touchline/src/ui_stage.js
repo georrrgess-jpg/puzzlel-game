@@ -149,7 +149,7 @@ class Stage {
     else if(p.yawLock!=null&&now<p.yawLockT) t=p.yawLock;
     else if(p.glide) t=Math.atan2(p.glide.vy,p.glide.vx);
     else if(p.dive) t=p.side===0?1.15:Math.PI-1.15; // a keeper's dive is shown three-quarters on, so it reads as a dive
-    else if(p.celeb&&!mv&&p.celebType==='backflip') t=Math.cos(p.yaw)>=0?0.25:Math.PI-0.25;
+    else if(p.celeb&&!mv&&(p.celebType==='backflip'||p.celebType==='archer')) t=Math.cos(p.yaw)>=0?0.25:Math.PI-0.25;
     else if(p.celeb&&!mv) t=Math.PI/2+Math.sin(now/1600+(p.seed||0))*0.35; // celebrations are performed for the cameras
     else if(incoming) t=Math.atan2(bdy,bdx);
     else if(jockey) t=Math.atan2(bdy,bdx);
