@@ -74,3 +74,21 @@ Stage.prototype.v186xPose=function(p,P){ if(!V188B.on||p.v186xk!=='bike'||this.r
   if(tau<-T.to+bl&&R.act==='v186x'){ const w=v186xSm((tau+T.to)/bl);
     for(const i of [0,1]){ const a=bf[i], b=R.feet[i]; R.feet[i]={f:lerp(a.f,b.f,w),u:lerp(a.u,b.u,w),l:lerp(a.l,b.l,w)}; } }
   return R; };
+
+/* the run into the box: once a goal is to be a special finish (82's K), the scorer makes his run to his spot during the
+   build-up (unless he is on the ball earlier in the move), so 82's reach check - can he get under the cross near his spot -
+   no longer turns most specials back into ordinary finishes (a scorer starting in midfield was too far away). Positions
+   only: the event timing is the build-up's own. Bicycle and scissor kicks alike. */
+const _v188bUpd=Stage.prototype.update;
+Stage.prototype.update=function(dt){ const r=_v188bUpd.apply(this,arguments); const K=this._v186x;
+  if(K&&!K.armed&&!K.cancel&&V188B.on&&V188B.run&&!this.skip&&!this.rm&&K.v188run!==0){ try{ this.v188bRun(K); }catch(e){ K.v188run=0; } }
+  else if(K&&K.v188h&&(K.armed||K.cancel||this.skip)){ K.v188h=0; const p=this.pl(K.pid); if(p) p.hurry=false; } /* 82 decides his sprint once the cross is on */
+  return r; };
+V188B.run=true;
+Stage.prototype.v188bRun=function(K){ const e=K.e, seq=e&&e.seq; if(!seq||seq.length<2){ K.v188run=0; return; }
+  if(seq.slice(0,-1).some(q=>q.pid===K.pid)){ K.v188run=0; return; }
+  const p=this.pl(K.pid); if(!p||p.off||this.own===p) return;
+  const last=seq[seq.length-1], [X,Y]=livePos(e.s,last.x,last.y), d=Math.hypot(p.x-X,p.y-Y);
+  if(K.v188run==null){ if(d<6){ K.v188run=0; return; } K.v188run=1; }
+  if(!p.ov) p.ov={x:X,y:Y,v188b:1};
+  if(p.ov.v188b){ const h=d>16; if(h!==!!p.hurry){ p.hurry=h; K.v188h=h?1:0; } } };
