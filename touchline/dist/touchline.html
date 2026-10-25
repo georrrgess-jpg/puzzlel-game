@@ -19260,14 +19260,18 @@ Stage.prototype.update=function(dt){ const r=_v187sUpd.apply(this,arguments);
 const _v187sPose=Stage.prototype.poseOf;
 Stage.prototype.poseOf=function(p,isRef){ const P=_v187sPose.apply(this,arguments); v187sLeg=null;
   if(isRef||!p||!P||!P.feet||!P.feet[0]||!P.feet[1]||!P.hands||!P.hands[0]||!P.hands[1]||this.rm||!V187S.on||p.celeb) return P;
+  /* the scorer's-eye replay (76) sits its camera on a head placed with the old body lean: keep that lean for him there */
+  const Q=this._rp, L0=P.lean; if(Q&&Q.two&&Q.cam==='eyes'&&Q.sc===p) try{ return v187sPoseIn(this,p,P); } finally{ P.lean=L0; }
+  return v187sPoseIn(this,p,P); };
+function v187sPoseIn(st,p,P){ const self=st;
   try{
-    if(p.v187vk&&p.v187vc!=null&&this.v187sVolPose(p,P)) return P;
-    if(p.v187hk==='dive'&&p.v187hc!=null&&p.v187hy!=null&&this.v187sDivePose(p,P)) return P;
-    if(P.act==='kick'&&p.kickK==='shot'&&p.v187t&&V187S_K[p.v187t]&&p.kickT>=p.v187tT&&p.kickT-p.v187tT<4000) this.v187sKickPose(p,P);
-    if(P.act==='head'){ const jt=this.now-(p.jumpT||-9e9), JD=Math.max(260,this.D(560)); if(jt>=0&&jt<JD){ const k=v187sLeap(p)*v187sJK(v187sHK(this,p)); P.lift=(P.lift||0)*k; } }
-    const hk=v187sHK(this,p); if(hk==='glance'||hk==='clear') this.v187sNodPose(p,P);
-  }catch(e){ if(!this._v187err){ this._v187err=1; if(typeof console!=='undefined') console.warn('v18.7 shots pose',e); } }
-  return P; };
+    if(p.v187vk&&p.v187vc!=null&&self.v187sVolPose(p,P)) return P;
+    if(p.v187hk==='dive'&&p.v187hc!=null&&p.v187hy!=null&&self.v187sDivePose(p,P)) return P;
+    if(P.act==='kick'&&p.kickK==='shot'&&p.v187t&&V187S_K[p.v187t]&&p.kickT>=p.v187tT&&p.kickT-p.v187tT<4000) self.v187sKickPose(p,P);
+    if(P.act==='head'){ const jt=self.now-(p.jumpT||-9e9), JD=Math.max(260,self.D(560)); if(jt>=0&&jt<JD){ const k=v187sLeap(p)*v187sJK(v187sHK(self,p)); P.lift=(P.lift||0)*k; } }
+    const hk=v187sHK(self,p); if(hk==='glance'||hk==='clear') self.v187sNodPose(p,P);
+  }catch(e){ if(!self._v187err){ self._v187err=1; if(typeof console!=='undefined') console.warn('v18.7 shots pose',e); } }
+  return P; }
 /* the strike's downswing, contact and early follow-through are drawn crisp (no easing toward the pose), so foot meets ball */
 const _v187sBlend=Stage.prototype.blendPose;
 Stage.prototype.blendPose=function(p,P){ const Q=_v187sBlend.apply(this,arguments); if(!P||!P.v187b||this.rm) return Q; p._pose=P; return P; };
