@@ -1344,7 +1344,7 @@ kbd{font-family:var(--f-mono);font-size:.78rem;background:var(--surface2);border
 /* developer-only animation lab (#anim-lab) */
 #anim-lab{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;background:#05080c;color:#e9eef4}
 #anim-lab .lab-top,#anim-lab .lab-scenes{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
-#anim-lab .lab-cv{flex:1;position:relative;min-height:0}#anim-lab .lab-cv canvas{position:absolute;inset:0;width:100%;height:100%}
+#anim-lab .lab-scenes{flex:0 0 auto;max-height:28vh;overflow-y:auto}#anim-lab .lab-cv{flex:1;position:relative;min-height:0}#anim-lab .lab-cv canvas{position:absolute;inset:0;width:100%;height:100%}
 #anim-lab .lab-log{padding:6px 12px;font-family:var(--f-mono);font-size:.78rem;color:#9fb0c3;border-top:1px solid rgba(255,255,255,.1)}
 .walk-skipbar{position:absolute;left:50%;bottom:3%;transform:translateX(-50%);display:flex;gap:8px;z-index:3;white-space:nowrap}
 .walk-skipbar .btn{backdrop-filter:blur(6px);background:rgba(10,16,26,.72);border-color:rgba(255,255,255,.25);color:#fff}
