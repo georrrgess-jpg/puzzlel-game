@@ -171,7 +171,7 @@ async function liveLoop(id){
   }
 }
 function goalBanner(e){ const L=App.live; const C=App.C; const f=C.fixtures[L.fid]; const s=Sx(e.s===0?f.h:f.a); const b=$('#lv-banner'); if(!b) return; const p=Px(e.pid);
-  b.innerHTML=`<div class="goalbanner" style="--c1:${s.c1};--c2:${s.c2}"><div class="gb-logo">${logo(s,88)}</div>${p?`<div class="gb-face">${portraitSVG(p,78)}</div>`:''}<div class="gb-txt"><div class="gb-word">${'GOAL'.split('').map((ch,i)=>`<span style="animation-delay:${i*70}ms">${ch}</span>`).join('')}</div><div class="gb-sub">${e.m}' ${esc(pname(p))} · ${esc(GOAL_TYPE_NAME[e.ty]||'')}${e.ast?` · assist ${esc(pname(Px(e.ast)))}`:''}</div></div></div>`; }
+  b.innerHTML=`<div class="goalbanner" style="--c1:${s.c1};--c2:${s.c2}"><div class="gb-logo">${logo(s,88)}</div>${p?`<div class="gb-face">${portraitSVG(p,78)}</div>`:''}<div class="gb-txt"><div class="gb-word">${'GOAL'.split('').map((ch,i)=>`<span style="animation-delay:${i*70}ms">${ch}</span>`).join('')}</div><div class="gb-sub">${e.m}' ${esc(pname(p))} · ${esc(v188GoalName(e))}${e.ast?` · assist ${esc(pname(Px(e.ast)))}`:''}</div></div></div>`; }
 function clearBanner(){ const b=$('#lv-banner'); const g=b&&b.firstElementChild; if(!g) return; g.classList.add('out'); setTimeout(()=>{ if(b.firstElementChild===g) b.innerHTML=''; },380); }
 function renderHalftime(){
   const L=App.live; const M=L.M; const C=App.C; const f=C.fixtures[L.fid]; const u=M.user; const st=M.ht.st; const pt=st[0].pos+st[1].pos||1; const k=kitsFor(f);

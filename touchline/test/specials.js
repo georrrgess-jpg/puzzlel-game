@@ -1,7 +1,7 @@
 // Rare special kicks (v18.6 B2, src/v17/82_specials.js): forced bicycle and scissor kicks in the lab (2-D and 3-D) and in a
 // live match; the kicking foot meets the ball when it leaves the boot (2-D screen and 3-D world), the cross arrives at the
 // contact height, the body is horizontal (bike) / rolled (scissor) at contact, he lands and gets up before the celebration;
-// event timing and results unchanged; the unforced rate over many seeds is rare (1-3 % of V/JV cross goals), never at
+// event timing and results unchanged; the unforced rate over many seeds (v18.8: about 10-28 % of V/JV cross goals), never at
 // Modified, deterministic; gating (reduced motion, skipping, 8x); the 2-D replay shows the move; no page errors.
 // Usage: node test/specials.js [lab|lab3d|live|rate|all]   (default all). Screenshots: test/shots/v186/specials/
 const { chromium, DIST } = require('./_pw');
@@ -156,9 +156,9 @@ async function rateSuite(browser){
   await page.goto(DIST+'#anim-lab'); await page.waitForTimeout(900);
   const vj=R.n.V+R.n.JV, rate=(R.k.V+R.k.JV)/vj;
   console.log('rate',JSON.stringify({...R,rate:+(rate*100).toFixed(2),exp:+(R.exp/vj*100).toFixed(2),expV:+(R.expV/R.n.V*100).toFixed(2)}));
-  ok(R.exp/vj>=0.015&&R.exp/vj<=0.025, `rate: the expected share (mean chance per V/JV cross goal) is ${(R.exp/vj*100).toFixed(2)} % (V ${(R.expV/R.n.V*100).toFixed(2)} %)`);
+  ok(R.exp/vj>=0.12&&R.exp/vj<=0.26, `rate: the expected share (mean chance per V/JV cross goal) is ${(R.exp/vj*100).toFixed(2)} % (V ${(R.expV/R.n.V*100).toFixed(2)} %)`);
   ok(vj>=1000, `rate: ${vj} Varsity/JV cross goals from ${R.matches} engine matches over ${R.seeds} seeds`);
-  ok(rate>=0.01&&rate<=0.03, `rate: specials on ${(rate*100).toFixed(2)} % of V/JV cross goals (expected ${(R.exp/vj*100).toFixed(2)} %; bike ${R.bike}, scissor ${R.scissor})`);
+  ok(rate>=0.1&&rate<=0.28, `rate: specials on ${(rate*100).toFixed(2)} % of V/JV cross goals (expected ${(R.exp/vj*100).toFixed(2)} %; bike ${R.bike}, scissor ${R.scissor})`);
   ok(R.k.MOD===0&&R.n.MOD>0, `rate: never at Modified (${R.n.MOD} cross goals)`);
   ok(R.k.V/Math.max(1,R.n.V)>R.k.JV/Math.max(1,R.n.JV), `rate: Varsity scorers more often than JV (${R.k.V}/${R.n.V} vs ${R.k.JV}/${R.n.JV})`);
   ok(R.same, 'rate: the pick is deterministic (same goal, same finish)');

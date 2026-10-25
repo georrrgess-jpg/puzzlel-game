@@ -95,7 +95,7 @@ function storyOf(C,f){ const lg=C.logs[f.id]||{ev:[],box:[[],[]]}; const goals=(
   const paras=[`${U.town.toUpperCase()} — ${U.town} ${verb} ${T.town} ${ug}-${tg}${ven} on a ${WX[w.k].n.toLowerCase()}, ${w.t}-degree ${when}${rec}.`];
   if(goals.length){ const sc=[0,0]; const lines=goals.map(e=>{ const before=[...sc]; sc[e.s]++; const me=sc[e.s], th=sc[1-e.s]; const team=e.s===uI?U.town:T.town;
       const ctx= me===1&&th===0?'open the scoring' : me===th?'level it at '+me+'-'+th : me===th+1&&before[e.s]===before[1-e.s]?`put ${team} in front`: me<th?'pull one back':`make it ${me}-${th}`;
-      const a=e.ast?Px(e.ast):null; let v=GOAL_VERB[e.ty]||'scored'; if(e.ty==='cross'&&a) v=`met ${pname(a)}'s cross`;
+      const a=e.ast?Px(e.ast):null; let v=GOAL_VERB[e.ty]||'scored'; if(e.ty==='cross'&&a) v=`met ${pname(a)}'s cross`; v=v188GoalVerb(e,a)||v;
       return `${pname(Px(e.pid))} ${v} in the ${ordinal(e.m)} minute to ${ctx}${a&&e.ty!=='cross'?`, set up by ${pname(a)}`:''}.`; });
     paras.push(lines.join(' ')); }
   else paras.push(`Neither side could find a way through. ${gkRow&&gkRow.sv?`${pname(Px(gkRow.pid))} was equal to everything that came his way.`:'Chances were few and far between.'}`);
@@ -138,7 +138,7 @@ function tvView(C,is,ix){ needLogs(is.yr); const T=topPlays(C,is,5); if(!T.lengt
   return `<div class="tv"><div class="tv-head"><span class="tv-logo">Touchline<b>TV</b></span><div class="grow"><h2>Top ${T.length} plays · ${esc(issueLabel(is))}</h2><div class="small muted">Ranked by difficulty, timing and what was at stake. Every clip is the recorded build-up of a real goal.</div></div><button class="btn pri" data-a="tvOpen" data-ix="${ix}" data-k="all">▶ Play the countdown</button></div>
     <div class="tv-list">${rows.map((t,j)=>{ const rank=T.length-j; const f=C.fixtures[t.fid]; const p=Px(t.pid); const s=Sx(t.s===0?f.h:f.a);
       return `<article class="tv-card ${rank===1?'tv-top':''}" style="--c1:${s.c1};--c2:${s.c2}"><button class="tv-thumb" data-a="tvOpen" data-ix="${ix}" data-k="${T.indexOf(t)}" aria-label="Watch play number ${rank}"><span class="tv-img" data-photo="${t.fid}:${t.i}"></span><span class="tv-rank">${rank}</span><span class="tv-play">▶</span></button>
-        <div class="tv-info"><div class="row">${teamBadge(s,18)}<b>${pLink(t.pid)}</b></div><div class="small">${esc(GOAL_TYPE_NAME[t.ty]||t.ty)} · ${t.m}'${t.ast?` · assist ${esc(pname(Px(t.ast)))}`:''}</div><div class="tiny muted">${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)} · ${esc(fixtureLabel(f))}</div></div></article>`; }).join('')}</div></div>`; }
+        <div class="tv-info"><div class="row">${teamBadge(s,18)}<b>${pLink(t.pid)}</b></div><div class="small">${esc(v188GoalName(t)||t.ty)} · ${t.m}'${t.ast?` · assist ${esc(pname(Px(t.ast)))}`:''}</div><div class="tiny muted">${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)} · ${esc(fixtureLabel(f))}</div></div></article>`; }).join('')}</div></div>`; }
 A.tvOpen = el => { const C=App.C; const is=courierIssues(C)[+el.dataset.ix]; if(!is) return; const T=topPlays(C,is,5); App.modal={type:'tv',ix:+el.dataset.ix,plays:T,all:el.dataset.k==='all',start:el.dataset.k==='all'?T.length-1:+el.dataset.k}; renderModal(); };
 MODALS.tv = m => { const C=App.C; const T=m.plays||[];
   return modalShell(`<h2><span class="tv-logo sm">Touchline<b>TV</b></span></h2>`, `<div class="tv-screen"><canvas data-tv="1" aria-label="Highlight replay"></canvas><div class="tv-bug"><i></i>REPLAY</div><div class="tv-lower" id="tv-lower"></div></div>
@@ -148,7 +148,7 @@ A.tvJump = el => { const cv=document.querySelector('#modal-root canvas[data-tv]'
 function tvStart(cv){ if(cv._tv) return; const m=App.modal; if(!m||m.type!=='tv') return; const C=App.C; const T=m.plays||[]; let cur=m.start, gen=0;
   const st=new Stage(cv,{h:Sx(C.userSid),a:Sx(C.userSid),id:'tv'},{mode:'broadcast',minimap:false,section:C.section,sfx:true,onCaption:()=>{}}); st.restartAfterGoal=async()=>{};
   const lower=()=>{ const el=$('#tv-lower'); const t=T[cur]; if(!el||!t) return; const f=C.fixtures[t.fid]; const s=Sx(t.s===0?f.h:f.a);
-    el.innerHTML=`<div class="tvl" style="--c1:${s.c1};--c2:${s.c2}"><span class="tvl-rank">#${cur+1}</span>${teamBadge(s,22)}<div><b>${esc(pname(Px(t.pid)))}</b><span>${esc(GOAL_TYPE_NAME[t.ty]||t.ty)} · ${t.m}' · ${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)}</span></div></div>`;
+    el.innerHTML=`<div class="tvl" style="--c1:${s.c1};--c2:${s.c2}"><span class="tvl-rank">#${cur+1}</span>${teamBadge(s,22)}<div><b>${esc(pname(Px(t.pid)))}</b><span>${esc(v188GoalName(t)||t.ty)} · ${t.m}' · ${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)}</span></div></div>`;
     document.querySelectorAll('.tv-q').forEach(b=>b.classList.toggle('on',+b.id.slice(4)===cur)); };
   const play=async i=>{ const my=++gen; cur=i; const t=T[i]; if(!t) return; const f=C.fixtures[t.fid]; const lg=C.logs[t.fid]; const e=lg&&lg.ev?lg.ev.filter(x=>x.t==='goal')[t.i]:null; if(!e) return;
     st.cancel(); await new Promise(r=>setTimeout(r,30)); if(my!==gen||!cv.isConnected) return;
@@ -335,7 +335,7 @@ function pressBox(){ const C=App.C; const issues=courierIssues(C); if(!issues.le
   const S=storyOf(C,f); const top=topPlays(C,is,1)[0];
   return `<div class="card pressbox"><div class="hd"><h3>Press box</h3><span class="tiny muted">${esc(issueLabel(is))}</span></div>
     <button class="pb-paper" data-a="go" data-r="news" data-p='{"nv":"courier"}'><span class="pb-mast">The ${esc(Sx(C.userSid).town)} Courier</span><b>${esc(S.head)}</b><span class="small">${esc(S.deck)}</span></button>
-    ${top?`<button class="pb-tv" data-a="go" data-r="news" data-p='{"nv":"tv"}'><span class="tv-img" data-photo="${top.fid}:${top.i}"></span><span class="pb-tvt"><span class="tv-logo sm">Touchline<b>TV</b></span><span>#1 play: ${esc(pname(Px(top.pid)))}, ${esc(GOAL_TYPE_NAME[top.ty]||top.ty)} (${top.m}')</span></span><span class="tv-play">▶</span></button>`:''}</div>`; }
+    ${top?`<button class="pb-tv" data-a="go" data-r="news" data-p='{"nv":"tv"}'><span class="tv-img" data-photo="${top.fid}:${top.i}"></span><span class="pb-tvt"><span class="tv-logo sm">Touchline<b>TV</b></span><span>#1 play: ${esc(pname(Px(top.pid)))}, ${esc(v188GoalName(top)||top.ty)} (${top.m}')</span></span><span class="tv-play">▶</span></button>`:''}</div>`; }
 
 /* ---------- sound in the interface: clicks, navigation, windows, toasts; quick mute (M) ---------- */
 function soundBtn(big){ const on=PREFS.sound.on; return `<button class="btn sm ghost sndbtn ${on?'on':''} ${big?'big':''}" data-a="toggleSound" aria-pressed="${on}" aria-label="${on?'Mute sound (M)':'Turn sound on (M)'}" title="${on?'Sound on · press M to mute':'Sound off · press M to turn on'}"><span class="snd-ic" aria-hidden="true">${on?'<i></i><i></i><i></i>':'✕'}</span>${big?`<span>${on?'Sound on':'Sound off'}</span>`:''}</button>`; }

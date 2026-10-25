@@ -9259,7 +9259,7 @@ function reportModal(f,m){
   const cols=teamColors(f);
   if(tab==='summary'){
     const goals=(lg.ev||[]).filter(e=>e.t==='goal'); const cards=(lg.ev||[]).filter(e=>e.t==='red'||e.t==='yellow');
-    const evRow=e=>`<div class="li small"><span class="mono muted" style="width:34px">${e.m}'</span>${e.t==='goal'?ballSVG(15):e.t==='red'?'<span style="display:inline-block;width:10px;height:14px;background:#e33;border-radius:2px"></span>':'<span style="display:inline-block;width:10px;height:14px;background:#f5c518;border-radius:2px"></span>'}<div class="grow">${pLink(e.pid)}${e.t==='goal'?` <span class="muted">${esc(GOAL_TYPE_NAME[e.ty]||'')}${e.ast?` · assist ${pLink(e.ast)}`:''}</span>`:e.t==='red'?` <span class="muted">${e.k==='2y'?'second yellow':'straight red'}</span>`:''}</div></div>`;
+    const evRow=e=>`<div class="li small"><span class="mono muted" style="width:34px">${e.m}'</span>${e.t==='goal'?ballSVG(15):e.t==='red'?'<span style="display:inline-block;width:10px;height:14px;background:#e33;border-radius:2px"></span>':'<span style="display:inline-block;width:10px;height:14px;background:#f5c518;border-radius:2px"></span>'}<div class="grow">${pLink(e.pid)}${e.t==='goal'?` <span class="muted">${esc(v188GoalName(e))}${e.ast?` · assist ${pLink(e.ast)}`:''}</span>`:e.t==='red'?` <span class="muted">${e.k==='2y'?'second yellow':'straight red'}</span>`:''}</div></div>`;
     const side=i=>[...goals,...cards].filter(e=>e.s===i).sort((x,y)=>x.m-y.m).map(evRow).join('')||'<div class="muted small">—</div>';
     const st=lg.st; const pt=st[0].pos+st[1].pos||1;
     const s0=st[O[0]], s1=st[O[1]]; const cl=[cols[O[0]],cols[O[1]]];
@@ -9272,9 +9272,9 @@ function reportModal(f,m){
       return `<div class="card"><h3>${esc(sch.name)}</h3><div class="tw"><table><thead><tr><th>Player</th><th>Role</th><th class="n">G</th><th class="n">A</th><th class="n">SH</th><th class="n">SOT</th><th class="n">SV</th><th class="n">TK</th><th class="n">INT</th><th class="n">CL</th><th class="n">YC</th><th class="n">RC</th><th class="n">RTG</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${pLink(r.pid)}${(lg.lu&&lg.lu[i].caps||[]).includes(r.pid)?' <span class="pill">C</span>':''}${r.rt===best?' <span class="pill" style="border-color:var(--accent)">Player of the match</span>':''}</td><td>${r.role}</td>${['g','a','sh','sot','sv','tk','int','cl','y','r'].map(k=>`<td class="n">${r[k]||''}</td>`).join('')}<td class="n"><b>${fmt1(r.rt)}</b></td></tr>`).join('')}</tbody></table></div></div>`; }).join('');
   } else if(tab==='shots'){
     if(!lg.shots) body='<div class="empty">Shot locations were not tracked for this game.</div>';
-    else { const pts=lg.shots.map(s=>{ const X=s.s===0?s.y/100*105:105-s.y/100*105, Y=s.s===0?s.x/100*68:68-s.x/100*68; const nm=pname(Px(s.pid)); return `<circle cx="${X.toFixed(1)}" cy="${Y.toFixed(1)}" r="${(0.9+s.xg*4).toFixed(2)}" fill="${s.res==='goal'?cols[s.s]:'none'}" stroke="${cols[s.s]}" stroke-width="${s.res==='save'?0.7:0.45}" ${s.res==='miss'?'stroke-dasharray="1 .6"':''}><title>${s.m}' ${esc(nm)} (${esc([h,a][s.s].town)}) · ${esc(GOAL_TYPE_NAME[s.ty]||s.ty)} · xG ${s.xg.toFixed(2)} · ${s.res==='goal'?'GOAL':s.res==='save'?'saved':'off target'}</title></circle>`; }).join('');
+    else { const pts=lg.shots.map(s=>{ const X=s.s===0?s.y/100*105:105-s.y/100*105, Y=s.s===0?s.x/100*68:68-s.x/100*68; const nm=pname(Px(s.pid)); return `<circle cx="${X.toFixed(1)}" cy="${Y.toFixed(1)}" r="${(0.9+s.xg*4).toFixed(2)}" fill="${s.res==='goal'?cols[s.s]:'none'}" stroke="${cols[s.s]}" stroke-width="${s.res==='save'?0.7:0.45}" ${s.res==='miss'?'stroke-dasharray="1 .6"':''}><title>${s.m}' ${esc(nm)} (${esc([h,a][s.s].town)}) · ${esc(v188GoalName(s)||s.ty)} · xG ${s.xg.toFixed(2)} · ${s.res==='goal'?'GOAL':s.res==='save'?'saved':'off target'}</title></circle>`; }).join('');
       body=`<div class="card"><div class="tw" style="border:0">${pitchSVGh(pts)}</div><p class="tiny muted">${esc(h.town)} attack left to right. Filled circles are goals; solid outlines were saved; dashed went wide or were blocked. Size shows expected-goal value. Hover or focus a shot for details.</p></div>
-       <div class="tw"><table><thead><tr><th class="n">Min</th><th>Team</th><th>Shooter</th><th>Type</th><th class="n">xG</th><th>Outcome</th></tr></thead><tbody>${lg.shots.map(s=>`<tr><td class="n">${s.m}'</td><td>${esc([h,a][s.s].town)}</td><td>${pLink(s.pid)}</td><td>${esc(GOAL_TYPE_NAME[s.ty]||s.ty)}</td><td class="n">${s.xg.toFixed(2)}</td><td>${s.res==='goal'?'<b class="good">Goal</b>':s.res==='save'?'Saved':'Off target / blocked'}</td></tr>`).join('')}</tbody></table></div>`; }
+       <div class="tw"><table><thead><tr><th class="n">Min</th><th>Team</th><th>Shooter</th><th>Type</th><th class="n">xG</th><th>Outcome</th></tr></thead><tbody>${lg.shots.map(s=>`<tr><td class="n">${s.m}'</td><td>${esc([h,a][s.s].town)}</td><td>${pLink(s.pid)}</td><td>${esc(v188GoalName(s)||s.ty)}</td><td class="n">${s.xg.toFixed(2)}</td><td>${s.res==='goal'?'<b class="good">Goal</b>':s.res==='save'?'Saved':'Off target / blocked'}</td></tr>`).join('')}</tbody></table></div>`; }
   } else if(tab==='heat'){
     if(!lg.heat) body='<div class="empty">Zone activity was not tracked for this game.</div>';
     else body=`<div class="grid g2">${[0,1].map(i=>{ const g=lg.heat[i]; const mx=Math.max(1,...g); let cells=''; for(let r=0;r<4;r++) for(let c=0;c<3;c++){ const v=g[r*3+c]; const X=i===0? r*26.25 : 105-(r+1)*26.25; const Y=i===0? c*22.67 : 68-(c+1)*22.67; cells+=`<rect x="${X}" y="${Y}" width="26.25" height="22.67" fill="${cols[i]}" fill-opacity="${(0.08+0.72*v/mx).toFixed(2)}"><title>${v} recorded actions</title></rect>`; }
@@ -9282,7 +9282,7 @@ function reportModal(f,m){
   } else if(tab==='high'){
     const goals=(lg.ev||[]).filter(e=>e.t==='goal');
     const v=PREFS.view||'broadcast'; body=`<div class="card"><div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="lab">Goal replays</span><div class="row v184-hlc">${v184ViewSeg('hlView',v)}${v184ZoomCtl('hlZoom',v)}</div></div><div class="hl-stage"><canvas id="hl-canvas" aria-label="Goal replay"></canvas></div><div id="hl-cap" class="small muted" style="text-align:center;min-height:1.4em;margin-top:6px">Choose a goal to replay its recorded build-up.</div></div>
-     <div class="list">${goals.map((e,i)=>`<div class="li"><span class="mono muted">${e.m}'</span>${crest([h,a][e.s],18)}<div class="grow">${pLink(e.pid)} <span class="muted small">${esc(GOAL_TYPE_NAME[e.ty]||'')}${e.ast?' · assist '+esc(pname(Px(e.ast))):''}</span></div>${e.seq?`<button class="btn sm" data-a="replayGoal" data-f="${f.id}" data-i="${i}">Replay</button>`:'<span class="tiny muted">No build-up recorded</span>'}</div>`).join('')||'<div class="muted">No goals in this game.</div>'}</div><p class="tiny muted">Replays draw only what was recorded when the match was played. Watching them never changes the result.</p>`;
+     <div class="list">${goals.map((e,i)=>`<div class="li"><span class="mono muted">${e.m}'</span>${crest([h,a][e.s],18)}<div class="grow">${pLink(e.pid)} <span class="muted small">${esc(v188GoalName(e))}${e.ast?' · assist '+esc(pname(Px(e.ast))):''}</span></div>${e.seq?`<button class="btn sm" data-a="replayGoal" data-f="${f.id}" data-i="${i}">Replay</button>`:'<span class="tiny muted">No build-up recorded</span>'}</div>`).join('')||'<div class="muted">No goals in this game.</div>'}</div><p class="tiny muted">Replays draw only what was recorded when the match was played. Watching them never changes the result.</p>`;
   } else {
     body=`<div class="grid g2">${[0,1].map(i=>{ const L=lg.lu&&lg.lu[i]; if(!L) return ''; const sch=[h,a][i]; return `<div class="card"><h3>${esc(sch.town)} · ${esc(L.form)}${L.strat&&L.strat!=='balanced'?` · ${esc(STRATS[L.strat]?.n||'')}`:''}${L.speech&&L.speech!=='none'?` · Talk: ${esc(SPEECHES[L.speech]?.n||'')}`:''}</h3><div class="pitchwrap" style="max-width:300px">${pitchLines()}${L.slots.map(s=>{ const p=Px(s.pid); return `<div class="tok" style="left:${s.x}%;top:${100-s.y}%;cursor:default">${L.caps.includes(s.pid)?'<span class="cap">C</span>':''}<span class="dot" style="background:${sch.c1};color:${sch.c2};width:30px;height:30px">${p?p.num:''}</span><span class="nm">${esc(p?p.ln:'')}</span></div>`; }).join('')}</div></div>`; }).join('')}</div>`;
   }
@@ -11004,7 +11004,7 @@ async function liveLoop(id){
   }
 }
 function goalBanner(e){ const L=App.live; const C=App.C; const f=C.fixtures[L.fid]; const s=Sx(e.s===0?f.h:f.a); const b=$('#lv-banner'); if(!b) return; const p=Px(e.pid);
-  b.innerHTML=`<div class="goalbanner" style="--c1:${s.c1};--c2:${s.c2}"><div class="gb-logo">${logo(s,88)}</div>${p?`<div class="gb-face">${portraitSVG(p,78)}</div>`:''}<div class="gb-txt"><div class="gb-word">${'GOAL'.split('').map((ch,i)=>`<span style="animation-delay:${i*70}ms">${ch}</span>`).join('')}</div><div class="gb-sub">${e.m}' ${esc(pname(p))} · ${esc(GOAL_TYPE_NAME[e.ty]||'')}${e.ast?` · assist ${esc(pname(Px(e.ast)))}`:''}</div></div></div>`; }
+  b.innerHTML=`<div class="goalbanner" style="--c1:${s.c1};--c2:${s.c2}"><div class="gb-logo">${logo(s,88)}</div>${p?`<div class="gb-face">${portraitSVG(p,78)}</div>`:''}<div class="gb-txt"><div class="gb-word">${'GOAL'.split('').map((ch,i)=>`<span style="animation-delay:${i*70}ms">${ch}</span>`).join('')}</div><div class="gb-sub">${e.m}' ${esc(pname(p))} · ${esc(v188GoalName(e))}${e.ast?` · assist ${esc(pname(Px(e.ast)))}`:''}</div></div></div>`; }
 function clearBanner(){ const b=$('#lv-banner'); const g=b&&b.firstElementChild; if(!g) return; g.classList.add('out'); setTimeout(()=>{ if(b.firstElementChild===g) b.innerHTML=''; },380); }
 function renderHalftime(){
   const L=App.live; const M=L.M; const C=App.C; const f=C.fixtures[L.fid]; const u=M.user; const st=M.ht.st; const pt=st[0].pos+st[1].pos||1; const k=kitsFor(f);
@@ -11402,7 +11402,7 @@ A.replayGoal = el => { const C=App.C; const f=C.fixtures[el.dataset.f]; const lg
   setTimeout(()=>{ if(!st.alive||st.replayGen!==gen) return; st.skip=false; st.setSides(lg.lu.map(L=>({slots:L.slots,off:{}})));
     lg.lu.forEach((L,i)=>{ const g=L.slots.find(s=>s.role==='GK'); if(g) st.setKeeper(i,g.pid); });
     st.clipStart(e); st.goalTs=0.9;
-    const cap=$('#hl-cap'); if(cap) cap.textContent=`${e.m}' ${pname(Px(e.pid))} · ${GOAL_TYPE_NAME[e.ty]||''}${e.ast?' · assist '+pname(Px(e.ast)):''}`;
+    const cap=$('#hl-cap'); if(cap) cap.textContent=`${e.m}' ${pname(Px(e.pid))} · ${v188GoalName(e)}${e.ast?' · assist '+pname(Px(e.ast)):''}`;
     st.goalSequence(e); },0); };
 A.hlView = el => { PREFS.view=el.dataset.v; savePrefs(); if(App.hl) v184SetView(App.hl,el.dataset.v); document.querySelectorAll('[data-a=hlView]').forEach(b=>{ const on=b.dataset.v===el.dataset.v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); v184PaintZoom(); };
 A.hlZoom = el => { if(el.getAttribute&&el.getAttribute('aria-disabled')==='true') return; v184StepZoom(+el.dataset.v); };
@@ -11591,7 +11591,7 @@ function storyOf(C,f){ const lg=C.logs[f.id]||{ev:[],box:[[],[]]}; const goals=(
   const paras=[`${U.town.toUpperCase()} — ${U.town} ${verb} ${T.town} ${ug}-${tg}${ven} on a ${WX[w.k].n.toLowerCase()}, ${w.t}-degree ${when}${rec}.`];
   if(goals.length){ const sc=[0,0]; const lines=goals.map(e=>{ const before=[...sc]; sc[e.s]++; const me=sc[e.s], th=sc[1-e.s]; const team=e.s===uI?U.town:T.town;
       const ctx= me===1&&th===0?'open the scoring' : me===th?'level it at '+me+'-'+th : me===th+1&&before[e.s]===before[1-e.s]?`put ${team} in front`: me<th?'pull one back':`make it ${me}-${th}`;
-      const a=e.ast?Px(e.ast):null; let v=GOAL_VERB[e.ty]||'scored'; if(e.ty==='cross'&&a) v=`met ${pname(a)}'s cross`;
+      const a=e.ast?Px(e.ast):null; let v=GOAL_VERB[e.ty]||'scored'; if(e.ty==='cross'&&a) v=`met ${pname(a)}'s cross`; v=v188GoalVerb(e,a)||v;
       return `${pname(Px(e.pid))} ${v} in the ${ordinal(e.m)} minute to ${ctx}${a&&e.ty!=='cross'?`, set up by ${pname(a)}`:''}.`; });
     paras.push(lines.join(' ')); }
   else paras.push(`Neither side could find a way through. ${gkRow&&gkRow.sv?`${pname(Px(gkRow.pid))} was equal to everything that came his way.`:'Chances were few and far between.'}`);
@@ -11634,7 +11634,7 @@ function tvView(C,is,ix){ needLogs(is.yr); const T=topPlays(C,is,5); if(!T.lengt
   return `<div class="tv"><div class="tv-head"><span class="tv-logo">Touchline<b>TV</b></span><div class="grow"><h2>Top ${T.length} plays · ${esc(issueLabel(is))}</h2><div class="small muted">Ranked by difficulty, timing and what was at stake. Every clip is the recorded build-up of a real goal.</div></div><button class="btn pri" data-a="tvOpen" data-ix="${ix}" data-k="all">▶ Play the countdown</button></div>
     <div class="tv-list">${rows.map((t,j)=>{ const rank=T.length-j; const f=C.fixtures[t.fid]; const p=Px(t.pid); const s=Sx(t.s===0?f.h:f.a);
       return `<article class="tv-card ${rank===1?'tv-top':''}" style="--c1:${s.c1};--c2:${s.c2}"><button class="tv-thumb" data-a="tvOpen" data-ix="${ix}" data-k="${T.indexOf(t)}" aria-label="Watch play number ${rank}"><span class="tv-img" data-photo="${t.fid}:${t.i}"></span><span class="tv-rank">${rank}</span><span class="tv-play">▶</span></button>
-        <div class="tv-info"><div class="row">${teamBadge(s,18)}<b>${pLink(t.pid)}</b></div><div class="small">${esc(GOAL_TYPE_NAME[t.ty]||t.ty)} · ${t.m}'${t.ast?` · assist ${esc(pname(Px(t.ast)))}`:''}</div><div class="tiny muted">${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)} · ${esc(fixtureLabel(f))}</div></div></article>`; }).join('')}</div></div>`; }
+        <div class="tv-info"><div class="row">${teamBadge(s,18)}<b>${pLink(t.pid)}</b></div><div class="small">${esc(v188GoalName(t)||t.ty)} · ${t.m}'${t.ast?` · assist ${esc(pname(Px(t.ast)))}`:''}</div><div class="tiny muted">${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)} · ${esc(fixtureLabel(f))}</div></div></article>`; }).join('')}</div></div>`; }
 A.tvOpen = el => { const C=App.C; const is=courierIssues(C)[+el.dataset.ix]; if(!is) return; const T=topPlays(C,is,5); App.modal={type:'tv',ix:+el.dataset.ix,plays:T,all:el.dataset.k==='all',start:el.dataset.k==='all'?T.length-1:+el.dataset.k}; renderModal(); };
 MODALS.tv = m => { const C=App.C; const T=m.plays||[];
   return modalShell(`<h2><span class="tv-logo sm">Touchline<b>TV</b></span></h2>`, `<div class="tv-screen"><canvas data-tv="1" aria-label="Highlight replay"></canvas><div class="tv-bug"><i></i>REPLAY</div><div class="tv-lower" id="tv-lower"></div></div>
@@ -11644,7 +11644,7 @@ A.tvJump = el => { const cv=document.querySelector('#modal-root canvas[data-tv]'
 function tvStart(cv){ if(cv._tv) return; const m=App.modal; if(!m||m.type!=='tv') return; const C=App.C; const T=m.plays||[]; let cur=m.start, gen=0;
   const st=new Stage(cv,{h:Sx(C.userSid),a:Sx(C.userSid),id:'tv'},{mode:'broadcast',minimap:false,section:C.section,sfx:true,onCaption:()=>{}}); st.restartAfterGoal=async()=>{};
   const lower=()=>{ const el=$('#tv-lower'); const t=T[cur]; if(!el||!t) return; const f=C.fixtures[t.fid]; const s=Sx(t.s===0?f.h:f.a);
-    el.innerHTML=`<div class="tvl" style="--c1:${s.c1};--c2:${s.c2}"><span class="tvl-rank">#${cur+1}</span>${teamBadge(s,22)}<div><b>${esc(pname(Px(t.pid)))}</b><span>${esc(GOAL_TYPE_NAME[t.ty]||t.ty)} · ${t.m}' · ${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)}</span></div></div>`;
+    el.innerHTML=`<div class="tvl" style="--c1:${s.c1};--c2:${s.c2}"><span class="tvl-rank">#${cur+1}</span>${teamBadge(s,22)}<div><b>${esc(pname(Px(t.pid)))}</b><span>${esc(v188GoalName(t)||t.ty)} · ${t.m}' · ${esc(Sx(f.h).town)} ${f.hg}-${f.ag} ${esc(Sx(f.a).town)}</span></div></div>`;
     document.querySelectorAll('.tv-q').forEach(b=>b.classList.toggle('on',+b.id.slice(4)===cur)); };
   const play=async i=>{ const my=++gen; cur=i; const t=T[i]; if(!t) return; const f=C.fixtures[t.fid]; const lg=C.logs[t.fid]; const e=lg&&lg.ev?lg.ev.filter(x=>x.t==='goal')[t.i]:null; if(!e) return;
     st.cancel(); await new Promise(r=>setTimeout(r,30)); if(my!==gen||!cv.isConnected) return;
@@ -11831,7 +11831,7 @@ function pressBox(){ const C=App.C; const issues=courierIssues(C); if(!issues.le
   const S=storyOf(C,f); const top=topPlays(C,is,1)[0];
   return `<div class="card pressbox"><div class="hd"><h3>Press box</h3><span class="tiny muted">${esc(issueLabel(is))}</span></div>
     <button class="pb-paper" data-a="go" data-r="news" data-p='{"nv":"courier"}'><span class="pb-mast">The ${esc(Sx(C.userSid).town)} Courier</span><b>${esc(S.head)}</b><span class="small">${esc(S.deck)}</span></button>
-    ${top?`<button class="pb-tv" data-a="go" data-r="news" data-p='{"nv":"tv"}'><span class="tv-img" data-photo="${top.fid}:${top.i}"></span><span class="pb-tvt"><span class="tv-logo sm">Touchline<b>TV</b></span><span>#1 play: ${esc(pname(Px(top.pid)))}, ${esc(GOAL_TYPE_NAME[top.ty]||top.ty)} (${top.m}')</span></span><span class="tv-play">▶</span></button>`:''}</div>`; }
+    ${top?`<button class="pb-tv" data-a="go" data-r="news" data-p='{"nv":"tv"}'><span class="tv-img" data-photo="${top.fid}:${top.i}"></span><span class="pb-tvt"><span class="tv-logo sm">Touchline<b>TV</b></span><span>#1 play: ${esc(pname(Px(top.pid)))}, ${esc(v188GoalName(top)||top.ty)} (${top.m}')</span></span><span class="tv-play">▶</span></button>`:''}</div>`; }
 
 /* ---------- sound in the interface: clicks, navigation, windows, toasts; quick mute (M) ---------- */
 function soundBtn(big){ const on=PREFS.sound.on; return `<button class="btn sm ghost sndbtn ${on?'on':''} ${big?'big':''}" data-a="toggleSound" aria-pressed="${on}" aria-label="${on?'Mute sound (M)':'Turn sound on (M)'}" title="${on?'Sound on · press M to mute':'Sound off · press M to turn on'}"><span class="snd-ic" aria-hidden="true">${on?'<i></i><i></i><i></i>':'✕'}</span>${big?`<span>${on?'Sound on':'Sound off'}</span>`:''}</button>`; }
@@ -18504,7 +18504,7 @@ v186sBegin=function(st,p,k,o){ const r=_v186sBeginRaw.apply(this,arguments);
 
 /* ===================== v18.6 B2: rare special kicks (82) =====================
    Presentation only: engine.js, results, the order of events and their timing are untouched. A goal finished from a cross
-   is now and then (about 2 % of Varsity/JV cross goals, more for technically gifted scorers, never at Modified) shown as a
+   is now and then (v18.8: about a quarter of Varsity cross goals, fewer at JV, more for technically gifted scorers, never at Modified) shown as a
    BICYCLE KICK (back to goal, body horizontal, the ball struck over his head) or a SCISSOR KICK (side-on, body rolled away
    from goal, a hip-height side volley), with take-off, contact, landing on the back / side and getting up.
    - Choice (v186xDecide, pure part v186xPick): e.ty 'cross' with a cross delivered to the scorer at least 7 m from goal,
@@ -18529,7 +18529,7 @@ v186sBegin=function(st,p,k,o){ const r=_v186sBeginRaw.apply(this,arguments);
      inside his own body; the behind-the-goal pass starts earlier and slows the kick down), Stage.loop (slow motion), the
      lab (scenes 'bike' and 'scissor'). Globals are prefixed v186x / V186X. */
 /* @v186x-pure-begin: constants, helpers, ratings and the pick (no Stage, no DOM; test/specials.js runs this block in Node) */
-const V186X={on:true,force:null,Kb:0.025,Ks:0.03,minTs:0.45,minD:7,slow:0.55,log:[]};
+const V186X={on:true,force:null,Kb:0.4,Ks:0.03,minTs:0.45,minD:7,slow:0.55,log:[]};
 const V186X_MS={bike:{set:760,to:380,st:200,fall:320,lie:100,up:420},scissor:{set:620,to:300,st:130,fall:270,lie:90,up:400}};
 
 const v186xCl=(v,a,b)=>v<a?a:v>b?b:v;
@@ -18547,7 +18547,7 @@ function v186xRate(st,p){ if(!p) return null; if(p.v186xfl!=null) return {tech:p
   let lvl=null; try{ const f=App.C.fixtures&&st&&st.T&&App.C.fixtures[st.T.id]; lvl=f&&f.lvl; }catch(e){} return {tech:v186xTech(P),lvl:lvl||P.lvl||'V'}; }
 /* the chance of each finish: g rises from 0.25 at the threshold to 1 at the top of the range */
 function v186xG(t,a,b){ return t<a?0:0.25+0.75*v186xCl((t-a)/(b-a),0,1); }
-function v186xProb(tech,lvl){ if(lvl!=='V'&&lvl!=='JV') return {bike:0,scissor:0}; return {bike:V186X.Kb*v186xG(tech,74,96),scissor:V186X.Ks*v186xG(tech,62,92)}; }
+function v186xProb(tech,lvl){ if(lvl!=='V'&&lvl!=='JV') return {bike:0,scissor:0}; return {bike:V186X.Kb*v186xG(tech,60,95),scissor:V186X.Ks*v186xG(tech,62,92)}; }
 /* pure pick for a cross goal: o = {tech, lvl, ty, pid, m, sc, s}; deterministic */
 function v186xPick(o){ if(!o||o.ty!=='cross') return null; const q=v186xProb(o.tech,o.lvl); if(q.bike+q.scissor<=0) return null;
   const u=(hashStr(['v186x',o.pid,o.m,Array.isArray(o.sc)?o.sc.join('-'):o.sc,o.s].join('|'))%1000003)/1000003; return u<q.bike?'bike':u<q.bike+q.scissor?'scissor':null; }
@@ -19624,5 +19624,143 @@ Stage.prototype.poseOf=function(p,isRef){ const P=_v187fPose.apply(this,argument
   if(isRef||!p||!P||typeof v187mKickArm!=='function') return P;
   try{ v187mKickArm(this,p,P); }catch(e){}
   return P; };
+
+/* ===================== v18.8: the bicycle kick, reworked (87) =====================
+   Presentation only (event timing, contact and results are 82's, unchanged). 82 built the bike from separate eased segments,
+   each easing to a stop at its ends, so the body rotation paused at take-off and again at contact, the lift had no arc, the
+   legs snapped from the running stride into the keyframes and he stood up leaning backwards. Here the bike is one continuous
+   motion (82's scissor kick is untouched):
+   - every channel (pitch, feet, hands, head) is a keyframed track through cubic Hermite curves (Catmull-Rom tangents), so
+     velocities carry through the keys: the body keeps rotating through contact and the kicking boot is still accelerating
+     when it meets the ball;
+   - the hips fly one ballistic arc (solved from take-off, contact height and the landing), apex just before contact;
+   - anticipation: in the last moments of the set he dips and swings his arms back, then drives them up at take-off;
+   - take-off: the stride blends into the push-off over ~100 ms, the take-off foot stays pinned on the turf while his run-in
+     carries the body on (no slide); the lead leg swings up first, then the kicking leg whips up past it (the "bicycle");
+   - in the air the arms spread for balance, then reach back so the hands meet the turf first; chin tucked on landing;
+   - getting up: he sits up on his hands, rolls forward over his feet and rises (leaning forward, never backwards).
+   Durations (V186X_MS.bike) are longer after contact (fall 430 ms, lie 140, up 820; take-off 420) - none of them moves the
+   contact or the goal. 82's set, contact, release and replay code read the same durations. Globals: v188b* / V188B. */
+const V188B={on:true,pre:170,bl:100};
+V186X_MS.bike={set:760,to:420,st:220,fall:430,lie:140,up:820};
+
+/* cubic Hermite through keys [t, value(, 'h' = zero tangent: a hold)]; value a number or [f,l,h] */
+function v188bTk(K,t){ const n=K.length; if(t<=K[0][0]) return K[0][1]; if(t>=K[n-1][0]) return K[n-1][1];
+  let i=0; while(i<n-2&&t>K[i+1][0]) i++;
+  const a=K[i], b=K[i+1], h=b[0]-a[0], s=(t-a[0])/h, s2=s*s, s3=s2*s;
+  const h00=2*s3-3*s2+1, h10=s3-2*s2+s, h01=-2*s3+3*s2, h11=s3-s2;
+  const tan=(j,c)=>{ const k=K[j]; if(j===0||j===n-1||k[2]==='h') return 0; const p=K[j-1], q=K[j+1]; return ((c<0?q[1]:q[1][c])-(c<0?p[1]:p[1][c]))/(q[0]-p[0]); };
+  if(typeof a[1]==='number') return h00*a[1]+h10*h*tan(i,-1)+h01*b[1]+h11*h*tan(i+1,-1);
+  return [0,1,2].map(c=>h00*a[1][c]+h10*h*tan(i,c)+h01*b[1][c]+h11*h*tan(i+1,c)); }
+
+/* the hips' flight: one arc through take-off (crouched), contact and the landing */
+function v188bArc(T){ const y0=-0.06, Lc=0.36, yL=-0.62, sC=T.to/1000, sL=(T.to+T.fall)/1000, a1=Lc-y0, a2=yL-y0;
+  const det=0.5*sC*sL*(sC-sL); return {y0,v0:(a1*(-0.5*sL*sL)+0.5*sC*sC*a2)/det,g:(sC*a2-sL*a1)/det}; }
+
+/* the bike's keyframes at tau (ms from contact), world terms in his yaw frame (body units: F forward, L left, H up) */
+function v188bFrame(p,tau,T){ if(tau<-T.to) return null;
+  const K=p.v186xf===1?1:0, N=1-K, sd=K===1?1:-1;
+  const A=-T.to, X=x=>A*(1-x), Y=y=>T.fall*y, L1=T.fall+T.lie, U=u=>L1+T.up*u;
+  const C=[-0.1,0.06*sd,1.95];
+  const th=v188bTk([[X(0),-0.10],[X(0.3),-0.36],[X(0.6),-0.82],[X(0.85),-1.18],[X(1),-1.38],[Y(0.5),-1.52],[Y(1),-1.56,'h'],[L1,-1.53,'h'],[U(0.3),-0.9],[U(0.58),0.36],[U(0.82),0.2],[U(1),0,'h']],tau);
+  let lift; if(tau<=Y(1)){ const R=v188bArc(T), s=(tau-A)/1000; lift=Math.max(-0.64,R.y0+R.v0*s-0.5*R.g*s*s); }
+  else if(tau<=L1) lift=-0.62-0.02*v186xSm((tau-Y(1))/Math.max(1,Math.min(60,T.lie)));
+  else lift=v188bTk([[L1,-0.64,'h'],[U(0.3),-0.6],[U(0.58),-0.42],[U(0.82),-0.13],[U(1),0,'h']],tau);
+  const kL=[0.62,0.12*sd,0.04], nL=[0.55,-0.12*sd,0.04];
+  const fK=v188bTk([[X(0),[0,0.1*sd,0]],[X(0.15),[-0.03,0.1*sd,0]],[X(0.35),[-0.12,0.11*sd,0.2]],[X(0.6),[-0.26,0.12*sd,0.42]],[X(0.82),[0.4,0.11*sd,1.2]],[X(0.94),[0.18,0.08*sd,1.8]],[X(1),C],
+    [Y(0.12),[-0.3,0.1*sd,1.85]],[Y(0.45),[0.15,0.12*sd,1.25]],[Y(0.8),[0.5,0.12*sd,0.4]],[Y(1),[0.62,0.12*sd,0.06]],[L1,kL,'h'],
+    [U(0.3),[0.42,0.14*sd,0.02]],[U(0.58),[0.14,0.13*sd,0]],[U(0.82),[0.06,0.11*sd,0]],[U(1),[0.04,0.1*sd,0],'h']],tau);
+  const fN=v188bTk([[X(0),[0.1,-0.1*sd,0]],[X(0.3),[0.42,-0.12*sd,0.7]],[X(0.55),[0.55,-0.12*sd,1.18]],[X(0.8),[0.5,-0.12*sd,1.02]],[X(1),[0.42,-0.12*sd,0.72]],
+    [Y(0.5),[0.5,-0.12*sd,0.32]],[Y(1),[0.55,-0.12*sd,0.05]],[L1,nL,'h'],
+    [U(0.3),[0.4,-0.14*sd,0.02]],[U(0.58),[0.12,-0.13*sd,0]],[U(0.82),[0.05,-0.11*sd,0]],[U(1),[0.04,-0.1*sd,0],'h']],tau);
+  const hand=g=>v188bTk([[X(0),[-0.22,0.38*g,0.95]],[X(0.3),[0.22,0.5*g,1.45]],[X(0.65),[-0.05,0.78*g,1.3]],[X(1),[-0.45,0.72*g,0.98]],
+    [Y(0.45),[-0.55,0.66*g,0.55]],[Y(0.85),[-0.4,0.56*g,0.06]],[Y(1),[-0.32,0.52*g,0.03]],[L1,[-0.3,0.5*g,0.03],'h'],
+    [U(0.3),[-0.6,0.4*g,0.03]],[U(0.58),[0.3,0.3*g,0.45]],[U(0.82),[0.12,0.35*g,0.72]],[U(1),[0.04,0.3*g,1.0],'h']],tau);
+  const tilt=v188bTk([[X(0),-0.35],[X(0.5),-0.5],[X(1),-0.55],[Y(0.4),-0.25],[Y(1),0.28],[L1,0.25,'h'],[U(0.3),0.15],[U(0.58),0.25],[U(1),0,'h']],tau);
+  const feet=[null,null]; feet[K]=fK; feet[N]=fN; for(const f of feet) if(f[2]<0) f[2]=0;
+  const hands=[hand(-1),hand(1)]; for(const h of hands) if(h[2]<0.02) h[2]=0.02;
+  /* the take-off foot stays where it pushed off while the run-in carries his body on (82 moves p.x/p.y from take-off) */
+  if(tau<X(0.35)&&p.v186xpx!=null){ const S=0.92*(p.hgt||70)/70, y=p.v186xy!=null?p.v186xy:(p.yaw||0), c=Math.cos(y), s=Math.sin(y), dx=(p.x-p.v186xpx)/S, dy=(p.y-p.v186xpy)/S;
+    const w=tau<=X(0.15)?1:1-v186xSm((tau-X(0.15))/Math.max(1,X(0.35)-X(0.15))); fK[0]-=(dx*c+dy*s)*w; fK[1]-=(-dx*s+dy*c)*w; }
+  return {th,ra:0,lift,feet,hands,tilt}; }
+
+const _v188bFrame0=v186xFrame;
+v186xFrame=function(p,tau,T){ if(V188B.on&&p&&p.v186xk==='bike') return v188bFrame(p,tau,T); return _v188bFrame0.apply(this,arguments); };
+
+/* the set's last moments (anticipation) and the blend from the running stride into the take-off */
+const _v188bPose0=Stage.prototype.v186xPose;
+Stage.prototype.v186xPose=function(p,P){ if(!V188B.on||p.v186xk!=='bike'||this.rm) return _v188bPose0.apply(this,arguments);
+  const T=v186xDur('bike',p.v186xts), tau=v186xTau(this,p), k=p.v186xts||1, pre=V188B.pre*k, bl=Math.max(40,V188B.bl*k);
+  const bf=[{...P.feet[0]},{...P.feet[1]}], bh=[{...P.hands[0]},{...P.hands[1]}];
+  const R=_v188bPose0.apply(this,arguments);
+  if(tau<-T.to){ const w=v186xSm((tau+T.to+pre)/pre); if(!(w>0)) return R;
+    /* dip and arms back (the keyframes at take-off start from here) */
+    const F0=v188bFrame(p,-T.to,T); R.hipU=lerp(R.hipU,0.74,w); R.headTilt=lerp(R.headTilt||0,F0.tilt,w);
+    for(const i of [0,1]){ const t=v186xInv(F0.hands[i],F0.th,0,F0.lift,0.8), h=R.hands[i]; R.hands[i]={f:lerp(h.f,t.f,w),u:lerp(h.u,t.u-0.06,w),l:lerp(h.l,t.l,w)}; }
+    return R; }
+  if(tau<-T.to+bl&&R.act==='v186x'){ const w=v186xSm((tau+T.to)/bl);
+    for(const i of [0,1]){ const a=bf[i], b=R.feet[i]; R.feet[i]={f:lerp(a.f,b.f,w),u:lerp(a.u,b.u,w),l:lerp(a.l,b.l,w)}; } }
+  return R; };
+
+/* ===================== v18.8: goals are named for how they were scored (88) =====================
+   A goal's box-score type (e.ty) says where it came from ('cross', 'header', ...), so a bicycle kick was listed everywhere as
+   "Finish from a cross". Each goal now also carries e.sty, the finish the broadcast showed:
+   - live (the stage that relabels the match's own events): 'bike' / 'scissor' (82), else 84's technique or header kind
+     ('volley', 'chip', 'toe', 'outside', 'drive', 'place', 'dive', 'glance'), else '' (shown, nothing special); the
+     match's shot list gets the same tag;
+   - simulated or skipped goals (finishMatch): a Varsity/JV goal from a cross gets 82's own deterministic pick, so a bicycle
+     kick a TouchlineTV clip would show is also named one (and 82's decision honours a stored 'bike' / 'scissor' / '').
+   v188GoalName(e) is the display name (TouchlineTV top plays and its ticker, match reports, highlight cards, the shot table);
+   v188GoalVerb(e, assist) words it for The Courier. Bicycle and scissor kicks also make the Newswire ('highlight' items) and
+   rank higher among the week's top plays. Globals: v188g* / V188G. */
+const V188G={name:{bike:'Bicycle kick',scissor:'Scissor kick',volley:'First-time volley',chip:'Chip',toe:'Toe-poke',outside:'Outside-of-the-boot finish',dive:'Diving header',glance:'Glancing header'},
+  verb:{bike:'scored with a spectacular bicycle kick',scissor:'hooked home a scissor kick',volley:'volleyed home first time',chip:'chipped the keeper',toe:'toe-poked home',outside:'bent one in with the outside of the boot',dive:'scored with a diving header',glance:'glanced home a header'},
+  pts:{bike:7,scissor:5,volley:2.5,chip:2.5,outside:2,dive:2,glance:1,toe:0.5}};
+function v188GoalName(e){ if(!e) return ''; const s=e.sty&&V188G.name[e.sty]; return s||(typeof GOAL_TYPE_NAME!=='undefined'&&GOAL_TYPE_NAME[e.ty])||''; }
+function v188GoalVerb(e,a){ const v=e&&e.sty&&V188G.verb[e.sty]; if(!v) return null; return v+(a&&e.ty==='cross'?` from ${pname(a)}'s cross`:''); }
+
+/* the finish the stage showed for this goal (called as the goal is emitted) */
+Stage.prototype.v188gShown=function(e){ const K=this._v186x; if(K&&K.struck&&K.e===e) return K.kind;
+  const p=this.pl(e.pid); if(!p) return ''; const now=this.now;
+  if(p.v187hk&&p.v187hr!=null&&now-p.v187hr<3000&&(p.v187hk==='dive'||p.v187hk==='glance')) return p.v187hk;
+  if(p.v187t&&now-(p.v187tT||-9e9)<4000&&e.ty!=='pen'&&e.ty!=='fk'&&e.ty!=='header'&&e.ty!=='corner') return p.v187t;
+  return ''; };
+const _v188gEmit=Stage.prototype.emit;
+Stage.prototype.emit=function(e){ try{ if(this.relabel&&!this.skip&&e&&e.t==='goal'&&e.sty==null) e.sty=this.v188gShown(e); }catch(err){} return _v188gEmit.apply(this,arguments); };
+if(typeof liveEmit==='function'){ const _v188gLive=liveEmit;
+  liveEmit=function(e){ const r=_v188gLive.apply(this,arguments);
+    try{ const L=App.live; if(e&&e.t==='goal'&&e.sty&&L&&L.M){ const sh=(L.M.shots||[]).find(x=>x.m===e.m&&x.pid===e.pid&&x.res==='goal'); if(sh) sh.sty=e.sty; } }catch(err){}
+    return r; }; }
+
+/* 82 decides a goal's special finish again whenever a stage plays it: a stored tag wins (same finish in clips as named) */
+const _v188gDecide=Stage.prototype.v186xDecide;
+Stage.prototype.v186xDecide=function(e){ if(e&&e.sty!=null&&!this._v186xForce&&!V186X.force){ if(!V186X.on||this.rm||this.skip||this.demo||this.so||e.t!=='goal') return null;
+    const pl=this.pl(e.pid); if(!pl||pl.off||pl.gk) return null;
+    const d=_v188gDecide.call(this,Object.assign({},e,{sty:undefined}));
+    if(e.sty==='bike'||e.sty==='scissor'){ if(d) return {kind:e.sty}; return this.goalTs>=V186X.minTs&&v188gEligible(e)?{kind:e.sty}:null; }
+    return null; }
+  return _v188gDecide.apply(this,arguments); };
+/* the shape 82 needs for a special: a goal finished after a cross, the shot at least minD from the goal line */
+function v188gEligible(e){ const seq=e.seq; if(!seq||seq.length<2) return false; const last=seq[seq.length-1], prev=seq[seq.length-2];
+  if(last.a!=='shot'||prev.a!=='cross'||last.pid!==e.pid) return false; const X=livePos(e.s,last.x,last.y)[0], gx=e.s===0?105:0; return Math.abs(X-gx)>=V186X.minD; }
+
+/* simulated goals: 82's pure pick, then the Newswire */
+if(typeof finishMatch==='function'){ const _v188gFinish=finishMatch;
+  finishMatch=function(C,M){ const f=C&&M&&C.fixtures[M.fid]; const done=f&&f.st==='d';
+    try{ if(!done&&M.ev) for(const e of M.ev){ if(e.t!=='goal'||e.sty!=null||e.ty!=='cross'||!v188gEligible(e)) continue; const P=C.players[e.pid]; if(!P||P.pos==='GK') continue;
+        const k=v186xPick({tech:v186xTech(P),lvl:f.lvl,ty:'cross',pid:e.pid,m:e.m,sc:e.sc,s:e.s}); if(k) e.sty=k; } }catch(err){}
+    const r=_v188gFinish.apply(this,arguments);
+    try{ if(!done&&f&&f.st==='d'&&(f.lvl==='V'||f.lvl==='JV')) for(const e of M.ev){ if(e.t!=='goal'||(e.sty!=='bike'&&e.sty!=='scissor')) continue; const P=C.players[e.pid]; if(!P) continue;
+        const sid=e.s===0?f.h:f.a, opp=e.s===0?f.a:f.h, us=e.s===0?f.hg:f.ag, th=e.s===0?f.ag:f.hg, T=C.schools[sid].town+(f.lvl==='JV'?' JV':''), O=C.schools[opp].town;
+        const res=us>th?`${us}-${th} win`:us<th?`${us}-${th} loss`:`${us}-${th} draw`, where=us<th?'to':us===th?'with':(e.s===0?'over':'at');
+        addNews(C,'highlight',`${pname(P)} (${T}) scores with ${e.sty==='bike'?'a bicycle kick':'a scissor kick'} in the ${ordinal(e.m)} minute of a ${res} ${where} ${O}`,sid,{pid:P.id,fid:f.id}); } }catch(err){}
+    return r; }; }
+
+/* TouchlineTV: top plays carry the finish and a bicycle kick ranks near the top of the week */
+if(typeof playScore==='function'){ const _v188gScore=playScore; playScore=function(C,f,e){ return _v188gScore.apply(this,arguments)+((e&&e.sty&&V188G.pts[e.sty])||0); }; }
+if(typeof topPlays==='function'){ const _v188gTop=topPlays;
+  topPlays=function(C,issue){ const out=_v188gTop.apply(this,arguments);
+    try{ for(const t of out){ const lg=C.logs[t.fid]; const g=lg&&lg.ev?lg.ev.filter(x=>x.t==='goal')[t.i]:null; if(g&&g.sty) t.sty=g.sty; } }catch(err){}
+    return out; }; }
 
 </script>

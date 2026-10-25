@@ -1,6 +1,6 @@
 /* ===================== v18.6 B2: rare special kicks (82) =====================
    Presentation only: engine.js, results, the order of events and their timing are untouched. A goal finished from a cross
-   is now and then (about 2 % of Varsity/JV cross goals, more for technically gifted scorers, never at Modified) shown as a
+   is now and then (v18.8: about a quarter of Varsity cross goals, fewer at JV, more for technically gifted scorers, never at Modified) shown as a
    BICYCLE KICK (back to goal, body horizontal, the ball struck over his head) or a SCISSOR KICK (side-on, body rolled away
    from goal, a hip-height side volley), with take-off, contact, landing on the back / side and getting up.
    - Choice (v186xDecide, pure part v186xPick): e.ty 'cross' with a cross delivered to the scorer at least 7 m from goal,
@@ -25,7 +25,7 @@
      inside his own body; the behind-the-goal pass starts earlier and slows the kick down), Stage.loop (slow motion), the
      lab (scenes 'bike' and 'scissor'). Globals are prefixed v186x / V186X. */
 /* @v186x-pure-begin: constants, helpers, ratings and the pick (no Stage, no DOM; test/specials.js runs this block in Node) */
-const V186X={on:true,force:null,Kb:0.025,Ks:0.03,minTs:0.45,minD:7,slow:0.55,log:[]};
+const V186X={on:true,force:null,Kb:0.4,Ks:0.03,minTs:0.45,minD:7,slow:0.55,log:[]};
 const V186X_MS={bike:{set:760,to:380,st:200,fall:320,lie:100,up:420},scissor:{set:620,to:300,st:130,fall:270,lie:90,up:400}};
 
 const v186xCl=(v,a,b)=>v<a?a:v>b?b:v;
@@ -43,7 +43,7 @@ function v186xRate(st,p){ if(!p) return null; if(p.v186xfl!=null) return {tech:p
   let lvl=null; try{ const f=App.C.fixtures&&st&&st.T&&App.C.fixtures[st.T.id]; lvl=f&&f.lvl; }catch(e){} return {tech:v186xTech(P),lvl:lvl||P.lvl||'V'}; }
 /* the chance of each finish: g rises from 0.25 at the threshold to 1 at the top of the range */
 function v186xG(t,a,b){ return t<a?0:0.25+0.75*v186xCl((t-a)/(b-a),0,1); }
-function v186xProb(tech,lvl){ if(lvl!=='V'&&lvl!=='JV') return {bike:0,scissor:0}; return {bike:V186X.Kb*v186xG(tech,74,96),scissor:V186X.Ks*v186xG(tech,62,92)}; }
+function v186xProb(tech,lvl){ if(lvl!=='V'&&lvl!=='JV') return {bike:0,scissor:0}; return {bike:V186X.Kb*v186xG(tech,60,95),scissor:V186X.Ks*v186xG(tech,62,92)}; }
 /* pure pick for a cross goal: o = {tech, lvl, ty, pid, m, sc, s}; deterministic */
 function v186xPick(o){ if(!o||o.ty!=='cross') return null; const q=v186xProb(o.tech,o.lvl); if(q.bike+q.scissor<=0) return null;
   const u=(hashStr(['v186x',o.pid,o.m,Array.isArray(o.sc)?o.sc.join('-'):o.sc,o.s].join('|'))%1000003)/1000003; return u<q.bike?'bike':u<q.bike+q.scissor?'scissor':null; }

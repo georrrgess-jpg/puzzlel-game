@@ -144,7 +144,7 @@ A.replayGoal = el => { const C=App.C; const f=C.fixtures[el.dataset.f]; const lg
   setTimeout(()=>{ if(!st.alive||st.replayGen!==gen) return; st.skip=false; st.setSides(lg.lu.map(L=>({slots:L.slots,off:{}})));
     lg.lu.forEach((L,i)=>{ const g=L.slots.find(s=>s.role==='GK'); if(g) st.setKeeper(i,g.pid); });
     st.clipStart(e); st.goalTs=0.9;
-    const cap=$('#hl-cap'); if(cap) cap.textContent=`${e.m}' ${pname(Px(e.pid))} · ${GOAL_TYPE_NAME[e.ty]||''}${e.ast?' · assist '+pname(Px(e.ast)):''}`;
+    const cap=$('#hl-cap'); if(cap) cap.textContent=`${e.m}' ${pname(Px(e.pid))} · ${v188GoalName(e)}${e.ast?' · assist '+pname(Px(e.ast)):''}`;
     st.goalSequence(e); },0); };
 A.hlView = el => { PREFS.view=el.dataset.v; savePrefs(); if(App.hl) v184SetView(App.hl,el.dataset.v); document.querySelectorAll('[data-a=hlView]').forEach(b=>{ const on=b.dataset.v===el.dataset.v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); v184PaintZoom(); };
 A.hlZoom = el => { if(el.getAttribute&&el.getAttribute('aria-disabled')==='true') return; v184StepZoom(+el.dataset.v); };
