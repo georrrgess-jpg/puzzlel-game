@@ -23,7 +23,9 @@ const FPS=30, VW=1280, VH=720;
       if(side&&r==='2d'){ const st=App.labSt; } },[rend,view,zoom]); await page.clock.runFor(3000);
     const box=await page.evaluate(()=>{ const c=document.querySelector('#anim-lab .lab-cv'); c.scrollIntoView({block:'center'}); const r=c.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; });
     /* wait (stepping) until the cross is struck toward the scorer, record through the kick and his getting up */
+    await page.evaluate(()=>{ window.__ff=true; const D0=Stage.prototype.drawLerp; Stage.prototype.drawLerp=function(){ if(window.__ff) return; return D0.apply(this,arguments); }; });
     let t=0; while(t++<2000){ await step(); if(await page.evaluate(()=>{ const st=App.labSt, K=st&&st._v186x; return !!(K&&K.armed&&!K.struck&&K.pl&&K.pl.v186xc==null); })) break; }
+    await page.evaluate(()=>{ window.__ff=false; });
     let after=null, seen=false; for(let i=0;i<FPS*8;i++){ await step(); await shot(box); const s=await page.evaluate(()=>{ const st=App.labSt, K=st&&st._v186x; return {on:!!(K&&K.pl&&K.pl.v186xk)}; }); if(s.on) seen=true; if(seen&&!s.on&&after==null) after=i; if(after!=null&&i-after>FPS*0.8) break; } }
   else {
     await page.goto(DIST); await pause(); await page.clock.runFor(800);
@@ -33,14 +35,16 @@ const FPS=30, VW=1280, VH=720;
     const tgt=await page.evaluate(()=>{ const C=App.C; const f=userFixture(C); const cl=JSON.parse(JSON.stringify(C)); const od=oddsFor(f.id); const v=validateLineup(cl,cl.userSid,'V'); if(!v.ok) repairLineup(cl,cl.userSid,'V');
       const M=startMatch(cl,f.id,{halftime:false,preP:[od.h,od.a]}); runToEnd(cl,M); const g=M.ev.filter(e=>e.t==='goal'&&e.ty==='cross'); return g.length?{m:g[0].m,pid:g[0].pid,all:g.map(e=>e.m)}:null; });
     console.log('target',JSON.stringify(tgt)); if(!tgt){ console.log('no cross goal in this match; try another SEED'); await b.close(); return; }
-    await page.evaluate(([r,v,z])=>{ PREFS.renderer=r; PREFS.view=v; PREFS.zoom=z; PREFS.replays=true; PREFS.plates=true; },[rend,view,zoom]);
+    await page.evaluate(([r,v,z])=>{ PREFS.renderer=r; PREFS.view=v; PREFS.zoom=z; PREFS.replays=true; PREFS.plates=true;
+      /* fast-forward without drawing (software WebGL would take minutes per match minute) */
+      window.__ff=true; const D0=Stage.prototype.drawLerp; Stage.prototype.drawLerp=function(){ if(window.__ff) return; return D0.apply(this,arguments); }; },[rend,view,zoom]);
     await page.click('.cta [data-a="playNext"]'); await page.clock.runFor(600);
     await page.click('[data-a="pvSpeed"][data-v="8"]').catch(()=>{}); await page.click('[data-a="kickoff"]'); await page.clock.runFor(500);
     /* fast-forward at 8x to just before the target minute (half-time talk skipped), then 1x */
     await page.evaluate(m=>{ window.__tm=m; V186X.force=null; },tgt.m);
     let k=0; while(k++<20000){ await page.clock.runFor(250); if(await page.$('#lv-ht .htbox')) await page.click('#ht-go').catch(()=>{});
       const s=await page.evaluate(()=>{ const L=App.live; return L&&L.M?{min:L.M.min,cont:!!document.querySelector('#lv-cont')}:null; }); if(!s||s.cont) break; if(s.min>=tgt.m-1) break; }
-    await page.evaluate(()=>{ const L=App.live; V186X.force='bike'; const b=document.querySelector('[data-a="liveSpeed"][data-v="1"]'); if(b) b.click(); else if(L) L.speed=1; });
+    await page.evaluate(f=>{ const L=App.live; V186X.force=f; const b=document.querySelector('[data-a="liveSpeed"][data-v="1"]'); if(b) b.click(); else if(L) L.speed=1; window.__ff=false; },process.env.NOFORCE?null:'bike');
     /* step until the target goal's sequence starts, then record it all: build-up, the kick, the celebration and the replay */
     k=0; while(k++<20000){ await page.clock.runFor(100); const s=await page.evaluate(m=>{ const L=App.live, st=L&&L.stage; return {seq:!!(st&&st._v186x), min:L&&L.M&&L.M.min}; },tgt.m); if(s.seq) break; if(s.min>tgt.m+1) { console.log('missed the goal'); break; } }
     const box=await page.evaluate(()=>{ const r=document.getElementById('lv-canvas').getBoundingClientRect(); return {x:Math.max(0,r.x),y:Math.max(0,r.y),width:Math.min(r.width,innerWidth),height:Math.min(r.height,innerHeight)}; });
