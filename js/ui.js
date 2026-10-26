@@ -90,7 +90,7 @@ function undo(){
   if(cur.history.length<2){sfx.bad();return}
   cur.history.pop();cur.puz.restore(cur.history[cur.history.length-1]);sfx.swish();cur.combo=0;
 }
-const HINT_COST=15,SKIP_COST=60;
+const HINT_COST=ECON.hint.cost,SKIP_COST=ECON.skip.cost;
 function useHint(){
   if(!cur||cur.over)return;
   if(S.hints>0)S.hints--;
@@ -112,20 +112,21 @@ function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);
   const me=cur,n=cur.level,daily=cur.daily;
   let coins,prev=0,streakBonus=0,chest=0,dstreak=0;
+  if(stars===3)S.streak++;else S.streak=0;
   if(daily){
     const d=today();dstreak=S.dchal.last===d-1?S.dchal.streak+1:1;S.dchal.last=d;S.dchal.streak=dstreak;
-    coins=60+stars*10+Math.min(7,dstreak)*10;
+    coins=dailyReward(stars,dstreak);
+    if(stars===3&&S.streak>=2){streakBonus=levelReward(3,3,false,S.streak).streakBonus}
   }else{
-    prev=S.stars[n]||0;coins=prev?3:10;if(stars>prev)coins+=(stars-prev)*10;
+    prev=S.stars[n]||0;
+    const r=levelReward(prev,stars,cur.bonus,S.streak);coins=r.coins-r.streakBonus;streakBonus=r.streakBonus;
     if(stars>prev)S.stars[n]=stars;
     if(S.unlocked<=n)S.unlocked=n+1;
-    if(cur.bonus)coins*=2;
   }
-  if(stars===3){S.streak++;if(S.streak>=2)streakBonus=Math.min(20,S.streak*2)}else S.streak=0;
   coins+=streakBonus;S.coins+=coins;
-  while(totalStars()>=msThreshold(S.milestone)){chest+=msReward(S.milestone);S.milestone++}
+  while(totalStars()>=msThreshold(S.milestone)){chest+=chestReward(S.milestone);S.milestone++}
   S.coins+=chest;
-  const xpGain=10+stars*5+(daily?30:0)+(cur.bonus?10:0),xr=addXP(xpGain);
+  const xpGain=xpForWin(stars,daily,cur.bonus),xr=addXP(xpGain);
   save();
   emit('win',{stars,type:cur.type,hinted:cur.hinted,daily});
   if(daily)emit('daily',1);

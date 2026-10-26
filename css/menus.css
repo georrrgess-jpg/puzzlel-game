@@ -231,3 +231,10 @@
   .homemain{gap:8px}
   .logo .word{font-size:44px}
 }
+
+/* garden decorations you have bought: a small row under the logo (takes no space until you own one) */
+.garden{display:flex;flex-wrap:wrap;gap:2px 6px;justify-content:center;max-width:300px;min-height:0}
+.garden:empty{display:none}
+.garden i{font-style:normal;font-size:22px;line-height:1.1;text-shadow:0 2px 3px #0006;animation:gardenSway 3.4s ease-in-out infinite alternate;animation-delay:calc(var(--k,0) * -3s);transform-origin:50% 90%}
+@keyframes gardenSway{from{transform:rotate(-5deg)}to{transform:rotate(5deg) translateY(-1px)}}
+@media (max-height:700px){.garden i{font-size:18px}}

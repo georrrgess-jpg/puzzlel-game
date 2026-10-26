@@ -6,6 +6,7 @@ function buildLogo(){
 }
 function renderHome(){
   const stars=totalStars(),m=S.milestone,prevT=m?msThreshold(m-1):0,t=msThreshold(m),pct=clamp((stars-prevT)/(t-prevT)*100,4,100);
+  $('#garden').innerHTML=S.deco.map(id=>{const d=ECON.deco.find(x=>x.id===id);return d?`<i title="${d.name}" style="--k:${(hashSeed(id.length*7+id.charCodeAt(0),3)%100)/100}">${d.ic}</i>`:''}).join('');
   $('#homeStars').textContent=stars;
   $('#homeBar').style.width=pct+'%';
   $('#homeNext').textContent=`🎁 chest at ${t} ⭐`;
@@ -72,7 +73,7 @@ function drawPaths(){
     grid.insertAdjacentHTML('afterbegin',`<svg class="path" width="${W}" height="${grid.offsetHeight}"><path class="road" d="${dim}${lit}"/><path class="dim" d="${dim}"/><path class="glow" d="${lit}"/><path class="lit" d="${lit}"/><path class="spark" d="${lit}"/></svg>`);
   });
 }
-const DEALS=[{ic:'💡',name:'Hint ×5',give:()=>S.hints+=5,was:75},{ic:'⏭️',name:'Skip ×2',give:()=>S.skips+=2,was:140},{ic:'💡',name:'Hint ×10',give:()=>S.hints+=10,was:130},{ic:'🎁',name:'Hint ×3 + Skip',give:()=>{S.hints+=3;S.skips+=1},was:115}];
+const DEALS=[{ic:'💡',name:'Hint ×5',give:()=>S.hints+=5,was:ECON.hint.cost*5},{ic:'⏭️',name:'Skip ×2',give:()=>S.skips+=2,was:ECON.skip.token*2},{ic:'💡',name:'Hint ×10',give:()=>S.hints+=10,was:ECON.hint.p10},{ic:'🎁',name:'Hint ×3 + Skip',give:()=>{S.hints+=3;S.skips+=1},was:ECON.hint.p3+ECON.skip.token}];
 const RARITY=c=>c>=500?['legend','Legendary']:c>=350?['epic','Epic']:c>=200?['rare','Rare']:['common','Classic'];
 function themePreview(t){
   const v=t.v,on=[1,0,1,0,1,1,0,1,0];
@@ -97,10 +98,10 @@ function renderShop(){
   if(S.deal.bought){const x=el('div','item claimed','<div class="ic">✅</div><div class="tx"><b>Deal claimed!</b><small>A new deal arrives tomorrow.</small></div>');x.style.setProperty('--tc','#2ecc8f');l.appendChild(x)}
   else addItem(deal.ic,deal.name,`<s><i class="coin"></i>${deal.was}</s> 50% off today only!`,dc,b=>buy(dc,()=>{deal.give();S.deal.bought=true},'Deal claimed! 🎉',b),'deal','#ff9f43');
   head('🚀','Boosts');
-  addItem('💡','Hint ×3','Highlights a helpful move.',45,b=>buy(45,()=>S.hints+=3,'+3 hints',b),'','#f5b82e');
-  addItem('💡','Hint ×10','<span class="tag">Best value</span>',130,b=>buy(130,()=>S.hints+=10,'+10 hints',b),'best','#f5b82e');
-  addItem('⏭️','Skip token','Skip any level without paying later.',70,b=>buy(70,()=>S.skips+=1,'+1 skip token',b),'','#4d8dff');
-  addItem('🎟️','Skip ×3','Save 30 coins.',180,b=>buy(180,()=>S.skips+=3,'+3 skip tokens',b),'','#9b6bff');
+  addItem('💡','Hint ×3','Highlights a helpful move.',ECON.hint.p3,b=>buy(ECON.hint.p3,()=>S.hints+=3,'+3 hints',b),'','#f5b82e');
+  addItem('💡','Hint ×10','<span class="tag">Best value</span>',ECON.hint.p10,b=>buy(ECON.hint.p10,()=>S.hints+=10,'+10 hints',b),'best','#f5b82e');
+  addItem('⏭️','Skip token','Skip any level without paying later.',ECON.skip.token,b=>buy(ECON.skip.token,()=>S.skips+=1,'+1 skip token',b),'','#4d8dff');
+  addItem('🎟️','Skip ×3',`Save ${ECON.skip.token*3-ECON.skip.p3} coins.`,ECON.skip.p3,b=>buy(ECON.skip.p3,()=>S.skips+=3,'+3 skip tokens',b),'','#9b6bff');
   head('🎨','Themes','<em>recolour everything</em>');
   for(const k in THEMES){
     const t=THEMES[k],owned=S.owned.includes(k),eq=S.theme===k,[rc,rn]=RARITY(t.cost);
@@ -113,5 +114,11 @@ function renderShop(){
       S.theme=k;save();applyTheme();renderShop();refreshCoins();checkAch();
     };
     d.appendChild(b);l.appendChild(d);
+  }
+  head('🌿','Garden decorations','<em>shown on your home screen</em>');
+  for(const dc of ECON.deco){
+    const owned=S.deco.includes(dc.id);
+    if(owned){const x=el('div','item claimed',`<div class="ic">${dc.ic}</div><div class="tx"><b>${dc.name}</b><small>In your garden ✓</small></div>`);x.style.setProperty('--tc','#2ecc8f');x.style.animationDelay=l.children.length*40+'ms';l.appendChild(x);continue}
+    addItem(dc.ic,dc.name,'A little something for your garden.',dc.cost,b=>buy(dc.cost,()=>{S.deco.push(dc.id);checkAch()},`${dc.name} planted! ${dc.ic}`,b),'','#4fb35a');
   }
 }

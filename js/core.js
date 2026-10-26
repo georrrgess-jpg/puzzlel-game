@@ -19,9 +19,45 @@ const today=()=>dayNum();
 function untilMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);return m-n}
 function fmtTime(ms){ms=Math.max(0,ms);const h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}:${String(s).padStart(2,'0')}`}
 
+/* ====================== economy ======================
+   Every price and reward lives here (the game code and tools/economy-sim.cjs both read this table), so balancing is
+   a one-file change. Targets: about 20-30 coins per level on average from all sources; a hint costs about 1.5 levels
+   of earnings, a skip about 4; the first colour theme lands around level 15-25 and the whole shop takes 250+ levels. */
+const ECON={
+  clear:{base:6,perStar:4,improve:2,bonusMult:2,streakStep:1,streakCap:5},   // first clear = base + perStar per star; replays only pay for new stars
+  daily:{base:20,perStar:4,streakStep:4,streakMax:7},
+  hint:{cost:40,p3:100,p10:300},
+  skip:{cost:150,token:120,p3:330},
+  spin:{cd:4*3600e3,cost:40},
+  quest:{rewards:[8,12,16],bonus:20,bonusHints:1,xp:15},
+  lvlup:{base:10,per:2,cap:60,skipEvery:5},
+  chest:{base:12,per:5},
+  xp:{need:L=>60+L*30,clear:10,perStar:5,daily:30,bonus:10},
+  login:[{c:15,ic:'🪙'},{c:20,ic:'🪙'},{c:20,h:1,ic:'💡'},{c:30,ic:'💰'},{c:25,h:2,ic:'💡'},{c:40,ic:'💰'},{c:60,h:2,s:1,ic:'🎁'}],
+  wheel:[{t:'5',c:5,w:22,col:'#22b07d'},{t:'10',c:10,w:22,col:'#ff5d73'},{t:'20',c:20,w:16,col:'#4d7dff'},{t:'💡',h:1,w:14,col:'#f5a524'},
+    {t:'40',c:40,w:7,col:'#e04fc2'},{t:'💡×2',h:2,w:8,col:'#15b5c4'},{t:'⏭️',s:1,w:5,col:'#8b5cf6'},{t:'100',c:100,w:2,col:'#ff7a1a'}],
+  themes:{midnight:0,ocean:400,forest:400,sunset:700,aurora:700,candy:1000,sakura:1000,lava:1400,mono:1400,galaxy:2000},
+  /* garden decorations: a long-term coin sink that decorates the home screen once the themes are bought */
+  deco:[{id:'sprout',ic:'🌱',name:'Sprout patch',cost:300},{id:'sunflower',ic:'🌻',name:'Sunflower',cost:600},{id:'lantern',ic:'🏮',name:'Paper lantern',cost:800},
+    {id:'butterfly',ic:'🦋',name:'Butterflies',cost:1000},{id:'kite',ic:'🪁',name:'Kite',cost:1200},{id:'fountain',ic:'⛲',name:'Fountain',cost:1600},
+    {id:'bunny',ic:'🐇',name:'Garden bunny',cost:1800},{id:'rainbow',ic:'🌈',name:'Rainbow',cost:2200},{id:'cottage',ic:'🏡',name:'Cottage',cost:2800}]
+};
+function levelReward(prev,stars,bonus,streak){   // streak counts consecutive 3-star clears including this one
+  const c=ECON.clear;let coins=prev?0:c.base;
+  if(stars>prev){coins+=(stars-prev)*c.perStar;if(prev)coins+=c.improve}
+  if(bonus)coins*=c.bonusMult;
+  const streakBonus=stars===3&&streak>=2?Math.min(c.streakCap,streak*c.streakStep):0;
+  return{coins:coins+streakBonus,streakBonus};
+}
+const dailyReward=(stars,dstreak)=>ECON.daily.base+stars*ECON.daily.perStar+Math.min(ECON.daily.streakMax,dstreak)*ECON.daily.streakStep;
+const levelUpReward=L=>Math.min(ECON.lvlup.cap,ECON.lvlup.base+L*ECON.lvlup.per);
+const chestReward=m=>ECON.chest.base+ECON.chest.per*m;
+const xpNeed=L=>ECON.xp.need(L);
+const xpForWin=(stars,daily,bonus)=>ECON.xp.clear+stars*ECON.xp.perStar+(daily?ECON.xp.daily:0)+(bonus?ECON.xp.bonus:0);
+
 /* ====================== save data ====================== */
 const KEY='endless-puzzle-pop-v1';
-const DEFAULTS={ver:3,unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},
+const DEFAULTS={ver:3,deco:[],unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},
   // big update
   xp:0,plv:1,music:true,sfx:true,musVol:.55,sfxVol:.85,haptics:true,symbols:false,gfx:'auto',
   login:{last:-1,streak:0},spinAt:0,quests:{day:-1,list:[],bonus:false},ach:{},
@@ -53,20 +89,20 @@ function load(){
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const totalStars=()=>Object.values(S.stars).reduce((a,b)=>a+b,0);
 const msThreshold=m=>12*(m+1)+3*m*m;
-const msReward=m=>30+15*m;
+const msReward=m=>chestReward(m);
 
 /* ====================== themes ====================== */
 const THEMES={
-  midnight:{name:'Midnight',cost:0,v:{'--bg1':'#141432','--bg2':'#2d1b4e','--acc':'#ffd166','--acc2':'#ef476f'}},
-  ocean:{name:'Ocean',cost:150,v:{'--bg1':'#06223a','--bg2':'#0b4a6b','--acc':'#7df9ff','--acc2':'#3a86ff'}},
-  forest:{name:'Forest',cost:150,v:{'--bg1':'#0d2a1c','--bg2':'#1d4d2f','--acc':'#c6ff6b','--acc2':'#2ecc8f'}},
-  sunset:{name:'Sunset',cost:250,v:{'--bg1':'#2b0f2e','--bg2':'#6b2142','--acc':'#ffb86b','--acc2':'#ff4d6d'}},
-  aurora:{name:'Aurora',cost:300,v:{'--bg1':'#071a24','--bg2':'#123d4a','--acc':'#7dffb2','--acc2':'#b06bff'}},
-  candy:{name:'Candy',cost:350,v:{'--bg1':'#3a1a4f','--bg2':'#7a2f7a','--acc':'#ff9ee5','--acc2':'#7df9ff'}},
-  sakura:{name:'Sakura',cost:400,v:{'--bg1':'#2a1424','--bg2':'#5a2a48','--acc':'#ffc2d9','--acc2':'#ff6b9d'}},
-  lava:{name:'Lava',cost:450,v:{'--bg1':'#1a0805','--bg2':'#4a1608','--acc':'#ffb020','--acc2':'#ff3d1f'}},
-  galaxy:{name:'Galaxy',cost:600,v:{'--bg1':'#05030f','--bg2':'#1b1040','--acc':'#a8b4ff','--acc2':'#ff5ce1'}},
-  mono:{name:'Noir',cost:500,v:{'--bg1':'#0a0a0a','--bg2':'#2a2a2a','--acc':'#ffffff','--acc2':'#9aa0a6'}}
+  midnight:{name:'Midnight',cost:ECON.themes.midnight,v:{'--bg1':'#141432','--bg2':'#2d1b4e','--acc':'#ffd166','--acc2':'#ef476f'}},
+  ocean:{name:'Ocean',cost:ECON.themes.ocean,v:{'--bg1':'#06223a','--bg2':'#0b4a6b','--acc':'#7df9ff','--acc2':'#3a86ff'}},
+  forest:{name:'Forest',cost:ECON.themes.forest,v:{'--bg1':'#0d2a1c','--bg2':'#1d4d2f','--acc':'#c6ff6b','--acc2':'#2ecc8f'}},
+  sunset:{name:'Sunset',cost:ECON.themes.sunset,v:{'--bg1':'#2b0f2e','--bg2':'#6b2142','--acc':'#ffb86b','--acc2':'#ff4d6d'}},
+  aurora:{name:'Aurora',cost:ECON.themes.aurora,v:{'--bg1':'#071a24','--bg2':'#123d4a','--acc':'#7dffb2','--acc2':'#b06bff'}},
+  candy:{name:'Candy',cost:ECON.themes.candy,v:{'--bg1':'#3a1a4f','--bg2':'#7a2f7a','--acc':'#ff9ee5','--acc2':'#7df9ff'}},
+  sakura:{name:'Sakura',cost:ECON.themes.sakura,v:{'--bg1':'#2a1424','--bg2':'#5a2a48','--acc':'#ffc2d9','--acc2':'#ff6b9d'}},
+  lava:{name:'Lava',cost:ECON.themes.lava,v:{'--bg1':'#1a0805','--bg2':'#4a1608','--acc':'#ffb020','--acc2':'#ff3d1f'}},
+  galaxy:{name:'Galaxy',cost:ECON.themes.galaxy,v:{'--bg1':'#05030f','--bg2':'#1b1040','--acc':'#a8b4ff','--acc2':'#ff5ce1'}},
+  mono:{name:'Noir',cost:ECON.themes.mono,v:{'--bg1':'#0a0a0a','--bg2':'#2a2a2a','--acc':'#ffffff','--acc2':'#9aa0a6'}}
 };
 function applyTheme(){const t=THEMES[S.theme]||THEMES.midnight;for(const k in t.v)document.documentElement.style.setProperty(k,t.v[k]);$('meta[name=theme-color]').content=t.v['--bg1'];if(typeof BG!=='undefined')BG.retheme()}
 

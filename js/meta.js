@@ -1,11 +1,10 @@
 'use strict';
 /* ====================== player level / XP ====================== */
-const xpNeed=L=>60+L*30;
 const RANKS=['Novice','Apprentice','Puzzler','Thinker','Solver','Strategist','Tactician','Mastermind','Sage','Grandmaster','Legend','Mythic','Cosmic'];
 const rankOf=L=>RANKS[Math.min(RANKS.length-1,Math.floor((L-1)/3))];
 function addXP(n){
   const from={lv:S.plv,xp:S.xp},ups=[];S.xp+=n;
-  while(S.xp>=xpNeed(S.plv)){S.xp-=xpNeed(S.plv);S.plv++;const r={lv:S.plv,coins:20+S.plv*5,skip:S.plv%5===0};S.coins+=r.coins;if(r.skip)S.skips++;ups.push(r)}
+  while(S.xp>=xpNeed(S.plv)){S.xp-=xpNeed(S.plv);S.plv++;const r={lv:S.plv,coins:levelUpReward(S.plv),skip:S.plv%ECON.lvlup.skipEvery===0};S.coins+=r.coins;if(r.skip)S.skips++;ups.push(r)}
   return{from,ups};
 }
 function xpBanner(res){for(const u of res.ups){banner('🆙','LEVEL UP!',`Player level ${u.lv} · ${rankOf(u.lv)}`,`+${u.coins} coins${u.skip?' · +1 skip':''}`);sfx.levelup()}}
@@ -35,7 +34,7 @@ const QT={
 function ensureQuests(){
   const d=today();if(S.quests.day===d&&S.quests.list.length)return;
   const R=rngOf(hashSeed(d,4242)),keys=shuffle(Object.keys(QT),R).slice(0,3);
-  S.quests={day:d,bonus:false,list:keys.map((k,i)=>{const q=QT[k];return{k,n:R.pick(q.ns),p:q.param?R.pick(TYPES):null,v:0,claimed:false,r:35+i*15}})};
+  S.quests={day:d,bonus:false,list:keys.map((k,i)=>{const q=QT[k];return{k,n:R.pick(q.ns),p:q.param?R.pick(TYPES):null,v:0,claimed:false,r:ECON.quest.rewards[i]}})};
   save();
 }
 function questEvent(ev,d){
@@ -52,13 +51,13 @@ function showQuests(still){
   ensureQuests();const L=S.quests.list,allC=allQuestsClaimed();
   const nDone=L.filter(q=>q.v>=q.n).length;
   openModal(`<h2>Daily Quests</h2><p class="qtimer">⏱ Fresh quests in <b>${fmtTime(untilMidnight())}</b></p><div class="qlist">${L.map((q,i)=>{const T=QT[q.k],done=q.v>=q.n;
-    return`<div class="quest ${q.claimed?'claimed':done?'ready':''}" style="--i:${i}"><div class="qi">${T.ic}</div><div class="qt"><b>${T.txt(q.n,q.p)}</b><div class="qbar"><div class="bar"><div style="width:${q.v/q.n*100}%"></div></div><em>${q.v}/${q.n}</em></div><div class="rchips"><span class="rc"><i class="coin"></i>${q.r}</span><span class="rc xp">+15 XP</span></div></div>${q.claimed?'<div class="qdone">✓</div>':done?`<button class="btn sm" data-q="${i}">Claim</button>`:''}</div>`}).join('')}
-    <div class="quest bonusq ${allC?(S.quests.bonus?'claimed':'ready'):''}" style="--i:3"><div class="qi">🎁</div><div class="qt"><b>Finish all 3 quests</b><div class="qpips">${L.map((q,i)=>`<i class="${i<nDone?'on':''}"></i>`).join('')}</div><div class="rchips"><span class="rc"><i class="coin"></i>100</span><span class="rc">💡 1</span></div></div>${allC&&!S.quests.bonus?'<button class="btn sm pink" data-q="bonus">Open!</button>':S.quests.bonus?'<div class="qdone">✓</div>':'<div class="qlock">🔒</div>'}</div></div>`,
+    return`<div class="quest ${q.claimed?'claimed':done?'ready':''}" style="--i:${i}"><div class="qi">${T.ic}</div><div class="qt"><b>${T.txt(q.n,q.p)}</b><div class="qbar"><div class="bar"><div style="width:${q.v/q.n*100}%"></div></div><em>${q.v}/${q.n}</em></div><div class="rchips"><span class="rc"><i class="coin"></i>${q.r}</span><span class="rc xp">+${ECON.quest.xp} XP</span></div></div>${q.claimed?'<div class="qdone">✓</div>':done?`<button class="btn sm" data-q="${i}">Claim</button>`:''}</div>`}).join('')}
+    <div class="quest bonusq ${allC?(S.quests.bonus?'claimed':'ready'):''}" style="--i:3"><div class="qi">🎁</div><div class="qt"><b>Finish all 3 quests</b><div class="qpips">${L.map((q,i)=>`<i class="${i<nDone?'on':''}"></i>`).join('')}</div><div class="rchips"><span class="rc"><i class="coin"></i>${ECON.quest.bonus}</span><span class="rc">💡 ${ECON.quest.bonusHints}</span></div></div>${allC&&!S.quests.bonus?'<button class="btn sm pink" data-q="bonus">Open!</button>':S.quests.bonus?'<div class="qdone">✓</div>':'<div class="qlock">🔒</div>'}</div></div>`,
     [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,still,icon:'📜',cls:'quests'});
   $$('#modal [data-q]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.q;let coins;
-    if(k==='bonus'){S.quests.bonus=true;coins=100;S.hints++}
-    else{const q=L[+k];if(q.claimed)return;q.claimed=true;coins=q.r;S.stats.quests++;xpBanner(addXP(15))}
+    if(k==='bonus'){S.quests.bonus=true;coins=ECON.quest.bonus;S.hints+=ECON.quest.bonusHints}
+    else{const q=L[+k];if(q.claimed)return;q.claimed=true;coins=q.r;S.stats.quests++;xpBanner(addXP(ECON.quest.xp))}
     S.coins+=coins;sfx.chest();const[x,y]=centerOf(b);burst(x,y,'#ffd166',30,1.2);flyCoins(b,8);save();checkAch();showQuests(true);
   });
 }
@@ -66,31 +65,31 @@ function showQuests(still){
 /* ---------- trophies ---------- */
 const st=()=>S.stats;
 const ACH=[
-  {id:'w1',ic:'🎉',name:'First Steps',desc:'Clear your first level',t:()=>st().wins>=1,r:20},
-  {id:'w10',ic:'🧩',name:'Warming Up',desc:'Clear 10 levels',t:()=>st().wins>=10,r:40},
-  {id:'w50',ic:'🧠',name:'Puzzle Pro',desc:'Clear 50 levels',t:()=>st().wins>=50,r:100},
-  {id:'w100',ic:'💯',name:'Centurion',desc:'Clear 100 levels',t:()=>st().wins>=100,r:200},
-  {id:'w250',ic:'👑',name:'Puzzle Royalty',desc:'Clear 250 levels',t:()=>st().wins>=250,r:500},
-  {id:'s25',ic:'⭐',name:'Star Struck',desc:'Collect 25 stars',t:()=>totalStars()>=25,r:30},
-  {id:'s100',ic:'🌟',name:'Constellation',desc:'Collect 100 stars',t:()=>totalStars()>=100,r:100},
-  {id:'s300',ic:'🌌',name:'Galaxy Brain',desc:'Collect 300 stars',t:()=>totalStars()>=300,r:300},
-  {id:'p10',ic:'✨',name:'Perfectionist',desc:'Get 3 stars 10 times',t:()=>st().perfect>=10,r:50},
-  {id:'p50',ic:'💎',name:'Flawless',desc:'Get 3 stars 50 times',t:()=>st().perfect>=50,r:150},
-  {id:'k5',ic:'🔥',name:'On Fire',desc:'Reach a 3-star streak of 5',t:()=>st().bestStreak>=5,r:60},
-  {id:'k12',ic:'☄️',name:'Unstoppable',desc:'Reach a 3-star streak of 12',t:()=>st().bestStreak>=12,r:200},
-  {id:'all',ic:'🎲',name:'Jack of All Trades',desc:'Solve every puzzle type',t:()=>TYPES.every(x=>st().types[x]),r:50},
-  {id:'spec',ic:'🎓',name:'Specialist',desc:'Solve 15 puzzles of one type',t:()=>Object.values(st().types).some(v=>v>=15),r:80},
-  {id:'c6',ic:'⚡',name:'Combo Starter',desc:'Reach a ×6 combo',t:()=>st().maxCombo>=6,r:40},
-  {id:'c12',ic:'🌀',name:'Combo King',desc:'Reach a ×12 combo',t:()=>st().maxCombo>=12,r:120},
-  {id:'d1',ic:'📅',name:'Daily Habit',desc:'Beat a Daily Challenge',t:()=>st().daily>=1,r:30},
-  {id:'d7',ic:'🗓️',name:'Devoted',desc:'Beat 7 Daily Challenges',t:()=>st().daily>=7,r:150},
-  {id:'l7',ic:'🎁',name:'Regular',desc:'Log in 7 days in a row',t:()=>st().bestLogin>=7,r:100},
-  {id:'sp5',ic:'🎡',name:'Lucky Duck',desc:'Spin the wheel 5 times',t:()=>st().spins>=5,r:40},
-  {id:'nh20',ic:'🦉',name:'Wise Owl',desc:'Clear 20 levels without hints',t:()=>st().nohint>=20,r:80},
-  {id:'q10',ic:'📜',name:'Quest Hunter',desc:'Claim 10 quest rewards',t:()=>st().quests>=10,r:80},
-  {id:'th',ic:'🎨',name:'Stylish',desc:'Buy a colour theme',t:()=>S.owned.length>=2,r:30},
-  {id:'th4',ic:'🖼️',name:'Collector',desc:'Own 4 colour themes',t:()=>S.owned.length>=4,r:100},
-  {id:'pl10',ic:'🏅',name:'Rising Star',desc:'Reach player level 10',t:()=>S.plv>=10,r:150}
+  {id:'w1',ic:'🎉',name:'First Steps',desc:'Clear your first level',t:()=>st().wins>=1,r:10},
+  {id:'w10',ic:'🧩',name:'Warming Up',desc:'Clear 10 levels',t:()=>st().wins>=10,r:25},
+  {id:'w50',ic:'🧠',name:'Puzzle Pro',desc:'Clear 50 levels',t:()=>st().wins>=50,r:60},
+  {id:'w100',ic:'💯',name:'Centurion',desc:'Clear 100 levels',t:()=>st().wins>=100,r:120},
+  {id:'w250',ic:'👑',name:'Puzzle Royalty',desc:'Clear 250 levels',t:()=>st().wins>=250,r:300},
+  {id:'s25',ic:'⭐',name:'Star Struck',desc:'Collect 25 stars',t:()=>totalStars()>=25,r:20},
+  {id:'s100',ic:'🌟',name:'Constellation',desc:'Collect 100 stars',t:()=>totalStars()>=100,r:60},
+  {id:'s300',ic:'🌌',name:'Galaxy Brain',desc:'Collect 300 stars',t:()=>totalStars()>=300,r:180},
+  {id:'p10',ic:'✨',name:'Perfectionist',desc:'Get 3 stars 10 times',t:()=>st().perfect>=10,r:30},
+  {id:'p50',ic:'💎',name:'Flawless',desc:'Get 3 stars 50 times',t:()=>st().perfect>=50,r:90},
+  {id:'k5',ic:'🔥',name:'On Fire',desc:'Reach a 3-star streak of 5',t:()=>st().bestStreak>=5,r:35},
+  {id:'k12',ic:'☄️',name:'Unstoppable',desc:'Reach a 3-star streak of 12',t:()=>st().bestStreak>=12,r:120},
+  {id:'all',ic:'🎲',name:'Jack of All Trades',desc:'Solve every puzzle type',t:()=>TYPES.every(x=>st().types[x]),r:30},
+  {id:'spec',ic:'🎓',name:'Specialist',desc:'Solve 15 puzzles of one type',t:()=>Object.values(st().types).some(v=>v>=15),r:50},
+  {id:'c6',ic:'⚡',name:'Combo Starter',desc:'Reach a ×6 combo',t:()=>st().maxCombo>=6,r:25},
+  {id:'c12',ic:'🌀',name:'Combo King',desc:'Reach a ×12 combo',t:()=>st().maxCombo>=12,r:70},
+  {id:'d1',ic:'📅',name:'Daily Habit',desc:'Beat a Daily Challenge',t:()=>st().daily>=1,r:20},
+  {id:'d7',ic:'🗓️',name:'Devoted',desc:'Beat 7 Daily Challenges',t:()=>st().daily>=7,r:90},
+  {id:'l7',ic:'🎁',name:'Regular',desc:'Log in 7 days in a row',t:()=>st().bestLogin>=7,r:60},
+  {id:'sp5',ic:'🎡',name:'Lucky Duck',desc:'Spin the wheel 5 times',t:()=>st().spins>=5,r:25},
+  {id:'nh20',ic:'🦉',name:'Wise Owl',desc:'Clear 20 levels without hints',t:()=>st().nohint>=20,r:50},
+  {id:'q10',ic:'📜',name:'Quest Hunter',desc:'Claim 10 quest rewards',t:()=>st().quests>=10,r:50},
+  {id:'th',ic:'🎨',name:'Stylish',desc:'Buy a colour theme',t:()=>S.owned.length>=2,r:20},
+  {id:'th4',ic:'🖼️',name:'Collector',desc:'Own 4 colour themes',t:()=>S.owned.length>=4,r:60},
+  {id:'pl10',ic:'🏅',name:'Rising Star',desc:'Reach player level 10',t:()=>S.plv>=10,r:90}
 ];
 function checkAch(){
   let n=0;
@@ -116,7 +115,7 @@ function showProfile(){
 }
 
 /* ---------- daily login calendar ---------- */
-const LOGIN=[{c:25,ic:'🪙'},{c:40,ic:'🪙'},{c:30,h:1,ic:'💡'},{c:60,ic:'💰'},{c:50,h:2,ic:'💡'},{c:100,ic:'💰'},{c:150,h:2,s:1,ic:'🎁'}];
+const LOGIN=ECON.login;
 const loginDue=()=>S.login.last!==today();
 function showLogin(){
   const d=today(),streak=S.login.last===d-1?S.login.streak:0,idx=streak%7;
@@ -141,9 +140,7 @@ function dailyCfg(){
 function startDaily(){if(dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}startLevel(0,{daily:true})}
 
 /* ---------- lucky spin ---------- */
-const WHEEL=[{t:'25',c:25,w:20,col:'#ff5d73'},{t:'💡',h:1,w:14,col:'#f5a524'},{t:'50',c:50,w:14,col:'#4d7dff'},{t:'10',c:10,w:20,col:'#22b07d'},
-  {t:'150',c:150,w:5,col:'#e04fc2'},{t:'💡×2',h:2,w:9,col:'#15b5c4'},{t:'⏭️',s:1,w:8,col:'#8b5cf6'},{t:'500',c:500,w:1,col:'#ff7a1a'}];
-const SPIN_CD=4*3600e3,SPIN_COST=40;
+const WHEEL=ECON.wheel,SPIN_CD=ECON.spin.cd,SPIN_COST=ECON.spin.cost;
 const spinReady=()=>Date.now()>=S.spinAt;
 let wheelAng=0,spinning=false;
 function showSpin(){
