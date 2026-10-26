@@ -65,7 +65,7 @@ html.q-low .medal::after,
 html.q-low .tube.ok,
 html.q-low .cell.light.on u,
 html.q-low .cell.light.on b::before,
-html.q-low .seg.top::before{animation:none !important}
+html.q-low .seg.new.top::before{animation:none !important}
 /* in low, drop the costliest box-shadow glow layers on repeated board pieces */
 html.q-low .cell.light.on u{opacity:.85}
 html.q-low .card{box-shadow:0 18px 40px #000a}

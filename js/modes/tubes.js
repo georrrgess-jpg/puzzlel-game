@@ -1,6 +1,13 @@
 'use strict';
+/* one shared grain tile for every sand layer (random specks, so it tiles seamlessly) */
+(function(){
+  if(document.documentElement.style.getPropertyValue('--sand'))return;
+  const c=document.createElement('canvas');c.width=c.height=60;const g=c.getContext('2d'),d=g.createImageData(60,60);
+  for(let i=0;i<d.data.length;i+=4){const r=Math.random();if(r<.36){const light=r<.18;d.data[i]=d.data[i+1]=d.data[i+2]=light?255:0;d.data[i+3]=light?58:64}}
+  g.putImageData(d,0,0);document.documentElement.style.setProperty('--sand',`url(${c.toDataURL()})`);
+})();
 /* ---------- Sort Tubes ---------- */
-registerMode('tubes',{name:'Sand Tubes',icon:'⏳',col:'#22b8c9',tip:'Tap a tube to pick up its top colour, then tap another tube to pour. Make every tube one colour.'},{goal:'Make every tube hold a single colour.',steps:['Tap a tube to pick up its top colour.','Tap another tube to pour. It must be empty, or already have the same colour on top. Tubes you can pour into glow.','Fill each tube with 4 of one colour. The empty tubes are spare space.'],
+registerMode('tubes',{name:'Sand Tubes',icon:'⏳',col:'#22b8c9',tip:'Tap a tube to scoop up its top sand, then tap another tube to pour it. Make every tube hold one colour.'},{goal:'Make every tube hold a single colour of sand.',steps:['Tap a tube to scoop up its top sand.','Tap another tube to pour. It must be empty, or already have the same colour on top. Tubes you can pour into glow.','Fill each tube with 4 of one colour. The empty tubes are spare space.'],
     demo:()=>htStage(`<div class="mtrow">${tube([0,6],'tap',HT_F)+tube([6],'tap2',HT_F2)+tube([])}</div>`,`<div class="mtrow">${tube([0])+tube([6,6],'grow')+tube([])}</div>`,
       'Tap the tube with blue on top, then the blue tube','The blue pours across')});
 MAKERS.tubes=function({R,tier,board,api}){
@@ -52,28 +59,33 @@ MAKERS.tubes=function({R,tier,board,api}){
   const wrap=el('div','tubes');if(tubes.length<=6)wrap.style.setProperty('--seg','clamp(28px,min(11vw,calc((var(--bh0,500px) - 52px) / 4.7)),48px)');board.appendChild(wrap);
   const tEls=tubes.map((_,i)=>{const t=el('div','tube');t.onclick=()=>tapTube(i);wrap.appendChild(t);return t});
   api.stagger(tEls,50);
+  /* static decoration is created once per tube; only the sand layers are rebuilt, and only when a tube's contents changed */
+  tEls.forEach(e=>{e.appendChild(el('i','gf-tk'));e.appendChild(el('i','gf-sh'));e.appendChild(el('i','gf-gl'))});
+  function buildSand(e,t,i){
+    e.querySelectorAll('.seg').forEach(x=>x.remove());
+    const isNew=j=>lastNew&&lastNew.i===i&&j>=lastNew.from,ghost=lastGhost&&lastGhost.i===i?lastGhost.segs:[];
+    t.forEach((c,j)=>{
+      const s=el('div','seg'+(isNew(j)?' new':'')+(j===t.length-1&&!ghost.length?' top':'')+(j&&t[j-1]===c?' same':''),S.symbols?SYMS[c]:'');
+      s.style.setProperty('--c',COLORS[c]);if(isNew(j))s.style.animationDelay=(FL_RM?0:230)+(j-lastNew.from)*90+'ms';e.appendChild(s)});
+    /* sand that just left this tube drains away from the top */
+    ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',COLORS[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
+  }
   function render(){
+    tEls.forEach(e=>{e.querySelectorAll('.hn').forEach(x=>x.remove())});
     tubes.forEach((t,i)=>{
-      const e=tEls[i];e.innerHTML='';
-      const isNew=j=>lastNew&&lastNew.i===i&&j>=lastNew.from,ghost=lastGhost&&lastGhost.i===i?lastGhost.segs:[];
-      t.forEach((c,j)=>{
-        const s=el('div','seg'+(isNew(j)?' new':'')+(j===t.length-1&&!ghost.length?' top':'')+(j&&t[j-1]===c?' same':''),S.symbols?SYMS[c]:'');
-        s.style.setProperty('--c',COLORS[c]);if(isNew(j))s.style.animationDelay=(FL_RM?0:230)+(j-lastNew.from)*90+'ms';e.appendChild(s)});
-      /* liquid that just left this tube drains away from the top */
-      ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',COLORS[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
-      if(t.length&&!FL_RM)for(let b=0;b<2;b++){const u=el('i','bub');u.style.setProperty('--n',t.length);u.style.left=(28+Math.random()*40)+'%';u.style.animationDelay=-(Math.random()*3+b*1.5).toFixed(2)+'s';e.appendChild(u)}
-      e.appendChild(el('i','gf-tk'));e.appendChild(el('i','gf-sh'));
-      if(t.length===cap&&uniform(t))e.appendChild(el('i','gf-gl'));
+      const e=tEls[i];
+      const key=t.join('')+'|'+(lastNew&&lastNew.i===i?'n'+lastNew.from:'')+'|'+(lastGhost&&lastGhost.i===i?'g'+lastGhost.segs.join(''):'')+(S.symbols?'s':'');
+      if(e._k!==key){e._k=key;buildSand(e,t,i)}
       e.classList.toggle('sel',i===sel);
       e.classList.toggle('done',t.length===cap&&uniform(t));
       e.classList.remove('hint');e.removeAttribute('data-h');
       const can=sel>=0&&i!==sel&&canPour(tubes,sel,i)>0;
       e.classList.toggle('ok',can);e.classList.toggle('no',sel>=0&&i!==sel&&!can);
     });
-    api.coach(hintPair?'💡 Tap tube 1, then tube 2':sel<0?'👆 Tap a tube to pick up its top colour':tubes.some((_,i)=>i!==sel&&canPour(tubes,sel,i)>0)?'✨ Now tap a glowing tube to pour into':'🚫 Nowhere to pour that colour. Tap it again to put it down');
+    api.coach(hintPair?'💡 Tap tube 1, then tube 2':sel<0?'👆 Tap a tube to scoop up its top sand':tubes.some((_,i)=>i!==sel&&canPour(tubes,sel,i)>0)?'✨ Now tap a glowing tube to pour into':'🚫 Nowhere to pour that sand. Tap it again to put it down');
     if(hintPair){hintPair.forEach((i,k)=>{tEls[i].classList.add('hint');tEls[i].dataset.h=k+1;tEls[i].appendChild(el('div','hn',k+1))})}
     const done=tubes.filter(t=>t.length===cap&&uniform(t)).length;
-    if(!hintPair&&sel<0&&done)api.coach(`🧪 ${done} of ${nc} tubes sorted · tap a tube to pick up its top colour`);
+    if(!hintPair&&sel<0&&done)api.coach(`🧪 ${done} of ${nc} tubes sorted · tap a tube to scoop up its top sand`);
     api.moves(moves,s3,s2);
   }
   function tapTube(i){
@@ -89,7 +101,7 @@ MAKERS.tubes=function({R,tier,board,api}){
     const from=sel,col=tubes[from][tubes[from].length-1],stacking=tubes[i].length>0;
     const mv=tubes[from].splice(tubes[from].length-cnt,cnt),oldLen=tubes[i].length;
     lastNew={i,from:oldLen};tubes[i].push(...mv);lastFrom=from;lastGhost={i:from,segs:mv};
-    sel=-1;moves++;sfx.pour(cnt);buzz(10);
+    sel=-1;moves++;sfx.sand(cnt);buzz(10);
     render();api.commit();lastFrom=-1;lastNew=null;lastGhost=null;
     pourAnim(from,i,COLORS[col],cnt,oldLen);
     const finished=tubes[i].length===cap&&uniform(tubes[i]);
@@ -116,12 +128,16 @@ MAKERS.tubes=function({R,tier,board,api}){
       {transform:`translate(${tx}px,${ty+3}px) rotate(${deg+side*8}deg)`,offset:.72,easing:'ease-in-out'},
       {transform:'translate(0,0) rotate(0deg)'}],{duration:820,easing:'cubic-bezier(.4,0,.3,1)'});
     A._pa=an;an.onfinish=an.oncancel=()=>{if(A._pa===an){A._pa=null;A.style.zIndex=''}};
-    /* stream from the lip down to where the new liquid lands */
+    /* grains fall from the lip to where the sand lands */
     const b=B.getBoundingClientRect(),land=B.querySelectorAll('.seg')[oldLen];
-    const sx=b.left+b.width/2+mx,sy=b.top-lip+4,ey=land?land.getBoundingClientRect().bottom:b.bottom-6;
-    const st=el('div','pourst');st.style.cssText=`left:${sx-(3+cnt)}px;top:${sy}px;width:${6+cnt*2}px;height:${Math.max(10,ey-sy)}px;--c:${color}`;document.body.appendChild(st);
-    st.animate([{transform:'translateY(0) scaleY(0)'},{transform:'translateY(0) scaleY(1)',offset:.3},{transform:'translateY(0) scaleY(1)',offset:.7},{transform:`translateY(${Math.max(10,ey-sy)}px) scaleY(0)`}],{duration:460,delay:230,easing:'ease-in-out',fill:'both'}).onfinish=()=>st.remove();
-    setTimeout(()=>{if(B.isConnected)flBurst(sx,Math.min(ey,b.bottom)-4,color,5,.35)},420);
+    const sx=b.left+b.width/2+mx,sy=b.top-lip+4,ey=land?land.getBoundingClientRect().bottom:b.bottom-6,fall=Math.max(12,ey-sy);
+    const n=10+cnt*5;
+    for(let g=0;g<n;g++){
+      const d=el('i','sgr'),sz=2.6+Math.random()*2.6;
+      d.style.cssText=`left:${sx+(Math.random()-.5)*(5+cnt*2)-sz/2}px;top:${sy}px;width:${sz}px;height:${sz}px;--c:${color}`;document.body.appendChild(d);
+      d.animate([{transform:'translateY(0)',opacity:0},{transform:`translateY(${fall*.15}px)`,opacity:1,offset:.12},{transform:`translateY(${fall}px)`,opacity:.9}],{duration:300+Math.random()*120,delay:230+g*(180/n)+Math.random()*30,easing:'cubic-bezier(.4,0,.9,.6)',fill:'both'}).onfinish=()=>d.remove();
+    }
+    setTimeout(()=>{if(B.isConnected)flBurst(sx,Math.min(ey,b.bottom)-4,color,4,.3)},460);
   }
   render();
   return{

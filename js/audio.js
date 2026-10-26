@@ -150,3 +150,9 @@ sfx.bloom=i=>{if(!ok())return;marimba(pent(i*2+4,60),.26);bell(pent(i*2+9,60),.1
 sfx.pluck=i=>{if(!ok())return;const f=pent((i||0)%10+7,60);voice({f,dur:.9,type:'triangle',vol:.16,verb:.45});voice({f:f*2,dur:.25,vol:.05,verb:.3})};
 sfx.sparkle=()=>{if(!ok())return;[88,91,95,100].forEach((n,i)=>bell(mtof(n),.05,.5,i*.045))};
 sfx.clear=n=>{if(!ok())return;for(let k=0;k<Math.min(4,n+1);k++)marimba(pent(k*2+5,60),.2,k*.07);noise({dur:.18,vol:.05,type:'highpass',f:6000,verb:.3})};
+
+/* sand pouring: a soft hiss that falls in pitch, plus a few quiet grain ticks */
+sfx.sand=n=>{if(!ok())return;const t=now();
+  noise({t,dur:.3+n*.1,vol:.1,type:'bandpass',f:3400,f2:1700,q:.8,verb:.08});
+  noise({t:t+.06,dur:.22+n*.08,vol:.045,type:'highpass',f:6800});
+  for(let k=0;k<2+n;k++)noise({t:t+.28+k*.05,dur:.025,vol:.06,type:'bandpass',f:900+Math.random()*800,q:3})};
