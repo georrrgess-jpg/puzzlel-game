@@ -116,8 +116,8 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   const O = await page.evaluate(() => { const c = document.querySelector('.v1812p-odds'); return c ? c.textContent.trim() : null; });
   ok(O && /[+\-−]\d+/.test(O) || O === null, 'moneyline odds fill in on the card' + (O ? ' (' + O + ')' : ' (odds off or no card)'));
   const SB = await page.evaluate(() => { const C = App.C; const g = v1812pGotw(C); App.route = 'schedule'; App.params = { rall: '1', lvl: 'V' }; render(); const rows = [...document.querySelectorAll('.v1812p-sb')]; const row = g && document.querySelector(`.li[data-id="${g.fid}"] .v1812p-sb`);
-    const past = v1812pRankedGames(C, C.year, 1).concat(v1812pRankedGames(C, C.year, 2)); return { n: rows.length, gotw: !!(g && g.kind === 'showdown' ? row && row.classList.contains('gotw') : true), txt: row ? row.textContent : '', past: past.length }; });
-  ok(SB.n > 0 && SB.gotw, `the schedule marks ranked games with a badge, the Game of the Week with GOTW (${SB.n} badges${SB.txt ? ', "' + SB.txt + '"' : ''})`);
+    const past = v1812pRankedGames(C, C.year, 1).concat(v1812pRankedGames(C, C.year, 2)); return { n: rows.length, clean: rows.every(r => !/null|undefined|NaN/.test(r.textContent + r.title)), gotw: !!(g && g.kind === 'showdown' ? row && row.classList.contains('gotw') : true), txt: row ? row.textContent : '', past: past.length }; });
+  ok(SB.n > 0 && SB.gotw && SB.clean, `the schedule marks ranked games with a badge, the Game of the Week with GOTW (${SB.n} badges${SB.txt ? ', "' + SB.txt + '"' : ''})`);
   const OV = await page.evaluate(() => { App.route = 'office'; App.params = {}; render(); const c = document.querySelector('.v1812p-ovcard'); return { has: !!c, rows: c ? c.querySelectorAll('.v1812p-ovt li').length : 0, head: c ? c.querySelector('.v1812p-ovh').textContent : '', btn: !!(c && c.querySelector('[data-r="statepoll"]')), show: !!(c && c.querySelector('.v1812p-show')) || !!(c && c.querySelector('.v1812p-ovq')) }; });
   ok(OV.has && OV.rows >= 5 && OV.btn && OV.show && OV.head.length > 3, `the Overview teaser card: headline "${OV.head}", top 5, a showdown or a voter, and a link in`);
 

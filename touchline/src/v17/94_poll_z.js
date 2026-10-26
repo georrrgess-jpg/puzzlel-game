@@ -30,7 +30,7 @@ function v1812pOverviewCard(C){
 
 /* ---------- schedule rows ---------- */
 { const _v1812pGR=v17GameRow; v17GameRow=function(C,f){ let h=_v1812pGR.apply(this,arguments); try{ const x=v1812pFixInfo(C,f); if(!x) return h;
-    const tag=x.gotw?`<span class="v1812p-sb gotw" title="Game of the week: No. ${x.rh} vs No. ${x.ra}"><span class="v1812p-sbg">GOTW · </span>#${x.rh} v #${x.ra}</span>`:x.both?`<span class="v1812p-sb" title="Ranked matchup: No. ${x.rh} vs No. ${x.ra}">#${x.rh} v #${x.ra}</span>`:`<span class="v1812p-sb one" title="${x.rh?'Home':'Away'} team ranked No. ${x.rh||x.ra}">#${x.rh||x.ra}</span>`;
+    const tag=x.gotw?`<span class="v1812p-sb gotw" title="${x.both?'Game of the week: No. '+x.rh+' vs No. '+x.ra:'Spotlight game: a ranked team (No. '+(x.rh||x.ra)+') plays'}"><span class="v1812p-sbg">${x.both?'GOTW':'SPOTLIGHT'} · </span>${x.both?'#'+x.rh+' v #'+x.ra:'#'+(x.rh||x.ra)}</span>`:x.both?`<span class="v1812p-sb" title="Ranked matchup: No. ${x.rh} vs No. ${x.ra}">#${x.rh} v #${x.ra}</span>`:`<span class="v1812p-sb one" title="${x.rh?'Home':'Away'} team ranked No. ${x.rh||x.ra}">#${x.rh||x.ra}</span>`;
     return h.replace('</div><b class="mono">','</div>'+tag+'<b class="mono">'); }catch(e){} return h; }; }
 
 /* ---------- the live broadcast intro ---------- */
