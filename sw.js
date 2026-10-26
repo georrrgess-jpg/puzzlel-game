@@ -1,6 +1,6 @@
 // Offline support: game files are cached on install and served cache-first, refreshed in the background.
 // Bump VERSION whenever any file below changes so phones pick up the update.
-const VERSION='pop-v7';
+const VERSION='pop-v8';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
   'css/font.css', 'fonts/fredoka-latin.woff2', 'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/lights.css', 'css/modes/tubes.css', 'css/modes/threads.css', 'css/modes/merge.css', 'css/modes/blocks.css', 'css/perf.css', 'css/mobile.css',

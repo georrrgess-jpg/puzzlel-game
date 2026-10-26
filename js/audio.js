@@ -149,6 +149,15 @@ sfx.bonk=()=>{if(!ok())return;voice({f:160,dur:.14,type:'triangle',vol:.16,slide
 sfx.bloom=i=>{if(!ok())return;marimba(pent(i*2+4,60),.26);bell(pent(i*2+9,60),.1,.7,.05)};
 sfx.pluck=i=>{if(!ok())return;const f=pent((i||0)%10+7,60);voice({f,dur:.9,type:'triangle',vol:.16,verb:.45});voice({f:f*2,dur:.25,vol:.05,verb:.3})};
 sfx.sparkle=()=>{if(!ok())return;[88,91,95,100].forEach((n,i)=>bell(mtof(n),.05,.5,i*.045))};
+/* a line of Block Garden blooms: a bright upward arpeggio per line, a shimmer on top, a soft whoosh under it */
+sfx.lineBloom=(n,combo=0)=>{if(!ok())return;const t0=now(),b=Math.min(4,combo)*2;
+  for(let k=0;k<5+Math.min(3,n)*2;k++)marimba(pent(k+3+b,60),.18,k*.045);
+  [0,1,2].forEach(k=>bell(pent(10+b+k*2,60),.06,.9,.22+k*.06));
+  noise({t:t0,dur:.45,vol:.06,type:'bandpass',f:1800,f2:5200,q:.7,verb:.35})};
+/* two plants merge: a rising chime, brighter the higher the stage */
+sfx.grow=v=>{if(!ok())return;const t0=now();voice({f:pent(v*2+2,60),t:t0,dur:.16,type:'triangle',vol:.12,slide:1.5,slideT:.12});
+  marimba(pent(v*2+5,60),.24,.07);bell(pent(v*2+10,60),.08+v*.01,.8,.12);if(v>=4)bell(pent(v*2+12,60),.06,1,.2);
+  noise({t:t0+.02,dur:.16,vol:.035,type:'highpass',f:5000,verb:.3})};
 sfx.clear=n=>{if(!ok())return;for(let k=0;k<Math.min(4,n+1);k++)marimba(pent(k*2+5,60),.2,k*.07);noise({dur:.18,vol:.05,type:'highpass',f:6000,verb:.3})};
 
 /* sand pouring: a soft hiss that falls in pitch, plus a few quiet grain ticks */

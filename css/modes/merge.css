@@ -4,8 +4,9 @@
 .mgt{font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);font-weight:700;margin-right:6px}
 .mgs{width:clamp(22px,6.6vw,30px);aspect-ratio:1;opacity:.3;filter:grayscale(.7);transition:opacity .35s,transform .35s cubic-bezier(.3,1.6,.5,1)}
 .mgs.on{opacity:1;filter:none;transform:scale(1.08)}
-.mgs.goal{width:clamp(28px,8vw,38px);margin-left:2px}
-.mgs.goal.on{animation:mgGoal 1.4s ease-in-out infinite alternate}
+/* the goal stage sits in a dashed target ring and stays readable before it is reached */
+.mgs.mgoal{width:clamp(30px,8.4vw,40px);margin-left:3px;padding:2px;border-radius:50%;opacity:.6;filter:grayscale(.35);box-shadow:0 0 0 1.5px #ffffff40;outline:1.5px dashed #ffffff66;outline-offset:2px}
+.mgs.mgoal.on{opacity:1;filter:none;outline-color:var(--acc);box-shadow:0 0 14px var(--acc);animation:mgGoal 1.4s ease-in-out infinite alternate}
 @keyframes mgGoal{to{transform:scale(1.22)}}
 .mga{color:var(--dim);font-style:normal;font-size:15px;opacity:.7}
 .mgx{font-weight:700;color:var(--acc);margin-left:6px}
@@ -24,6 +25,14 @@
 .mg[data-s="7"]::before{content:'';position:absolute;inset:-4%;border-radius:inherit;background:radial-gradient(circle,#ffd16680,transparent 68%);pointer-events:none}
 .mgg{position:fixed;left:0;top:0;z-index:72;pointer-events:none;will-change:transform}
 .mgg::after{content:'';position:absolute;left:12%;right:12%;bottom:-8%;height:14%;border-radius:50%;background:#0006;z-index:-1}
+/* merge effects (js/modes/merge.js merge()) */
+.mg.mgup{z-index:3}
+.mgtw{z-index:73}
+.mgflash{position:absolute;will-change:transform,opacity;inset:-14%;border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(circle,#fff 0,#fffbe0c0 28%,#ffffff00 66%)}
+.mgrays{position:absolute;will-change:transform,opacity;inset:-38%;border-radius:50%;pointer-events:none;z-index:0;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c) 55%,#fff) 0 9deg,#ffffff00 9deg 30deg);
+  -webkit-mask:radial-gradient(circle,#000 18%,#0000 66%);mask:radial-gradient(circle,#000 18%,#0000 66%)}
+.mg .mgi{z-index:1;transform-origin:50% 85%}
 /* how-to demo */
 .mgd{display:flex;gap:8px;padding:6px 0}
 .mgdc{position:relative;display:block;width:46px;height:46px;border-radius:12px;background:radial-gradient(circle at 50% 30%,#80593a,#4b2f1c 80%);box-shadow:inset 0 2px 6px #0008}

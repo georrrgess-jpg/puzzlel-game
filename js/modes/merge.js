@@ -77,7 +77,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
   const grid=el('div','mgb glass');grid.style.gridTemplateColumns=`repeat(${n},1fr)`;
   const cells=[...Array(CELLS)].map((_,i)=>{const c=el('div','mg');c.dataset.i=i;grid.appendChild(c);return c});
   wrap.append(ladder,grid);board.appendChild(wrap);api.stagger(cells,22);
-  const stageEls=$$('.mgs',ladder);stageEls[stageEls.length-1].classList.add('goal');
+  const stageEls=$$('.mgs',ladder);stageEls[stageEls.length-1].classList.add('mgoal');
 
   function render(){
     cells.forEach((c,i)=>{
@@ -95,26 +95,62 @@ MAKERS.merge=function({R,tier,level,board,api}){
 
   /* ---- merging ---- */
   function cellPos(i){const c=cells[i].getBoundingClientRect();return[c.left+c.width/2,c.top+c.height/2,c.width]}
-  function merge(a,b,fromGhost){
+  /* a merge plays out in beats: the twin flies in, both squeeze together with a flash, the next stage sprouts with a
+     squash-and-stretch (light rays from the bud stage on), the neighbours ripple, then the new seed drops in */
+  const STAGE_COL=['#9be564','#c8a46a','#9be564','#7fd35a','#ff8fba','#ff8fba','#b99bff','#ffd166'];
+  let fgen=0;
+  function twin(x0,y0,x1,y1,v,w,dur){
+    const t=el('div','mgg mgtw',mbIcon(v));t.style.width=t.style.height=w+'px';document.body.appendChild(t);
+    const a=wa(t,[{transform:`translate3d(${x0-w/2}px,${y0-w/2}px,0) scale(1.05)`},{transform:`translate3d(${x1-w/2}px,${y1-w/2}px,0) scale(.8,.7)`,opacity:1,offset:.8},{transform:`translate3d(${x1-w/2}px,${y1-w/2}px,0) scale(.4)`,opacity:0}],{duration:dur,easing:'cubic-bezier(.5,0,.8,.6)',fill:'both'});
+    if(a)a.onfinish=()=>t.remove();else t.remove();
+  }
+  function merge(a,b,from){
     if(api.over()||a===b||!G[a]||G[a]!==G[b]||G[a]>=MB_MAX)return false;
     const v=G[a],[ax,ay]=cellPos(a),[bx,by,cw]=cellPos(b),won=(()=>{const t=G.slice();t[b]=v+1;t[a]=0;return done(t)})();
+    const bestBefore=Math.max(0,...G);
     G[b]=v+1;G[a]=0;moves++;sel=-1;
     if(!won)spawnOn(G,moves);
     const before=shown.slice();render();api.commit();
-    // the new item pops where the two met; a new seed grows in
+    const my=++fgen,FLY=FL_RM?0:200,nv=v+1,col=STAGE_COL[nv];
+    sfx.grow(v);buzz(v>=4?[10,20,10]:8);
+    // beat 1: both twins meet on the target cell (from where the finger let go, or from the tapped cell)
+    if(FLY){const[fx,fy]=from||[ax,ay];twin(fx,fy,bx,by,v,cw*.9,FLY+60);twin(bx,by,bx,by,v,cw*.9,FLY+60)}
+    // beat 2: the new stage sprouts out of the soil line
     const tgt=cells[b].firstElementChild;
-    if(tgt)wa(tgt,[{transform:'scale(.5)'},{transform:'scale(1.28)',offset:.55},{transform:'scale(1)'}],{duration:420,easing:'cubic-bezier(.3,1.5,.5,1)'});
-    cells.forEach((c,i)=>{if(i!==b&&G[i]&&before[i]===0&&c.firstElementChild)wa(c.firstElementChild,[{transform:'scale(0)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:380,delay:160,easing:'cubic-bezier(.3,1.6,.5,1)',fill:'backwards'})});
-    ring(bx,by,'#ffd166',cw*1.5);burst(bx,by,['#9be564','#9be564','#9be564','#ff8fba','#ff8fba','#b99bff','#ffd166'][Math.min(6,v)],7+v*2,.6+v*.08);
-    sfx.bloom(v);buzz(v>=4?[10,20,10]:8);api.good(cells[b]);
-    if(won){finish(b)}
+    if(tgt)wa(tgt,[{transform:'scale(.2,.08)',opacity:0},{transform:'scale(1.12,1.32)',opacity:1,offset:.42},{transform:'scale(1.06,.9)',offset:.66},{transform:'scale(.98,1.03)',offset:.84},{transform:'none'}],{duration:640,delay:FLY,easing:'cubic-bezier(.3,1.3,.5,1)',fill:'backwards'});
+    cells[b].classList.add('mgup');
+    if(!FL_RM){
+      const fl=el('i','mgflash');cells[b].appendChild(fl);wa(fl,[{transform:'scale(.3)',opacity:0},{transform:'scale(1)',opacity:1,offset:.3},{transform:'scale(1.5)',opacity:0}],{duration:560,delay:FLY-40,easing:'ease-out',fill:'both'}).onfinish=()=>fl.remove();
+      if(nv>=4&&Q.tier!=='low'){const r=el('i','mgrays');r.style.setProperty('--c',col);cells[b].insertBefore(r,cells[b].firstChild);
+        wa(r,[{transform:'rotate(0) scale(.4)',opacity:0},{transform:'rotate(50deg) scale(1)',opacity:1,offset:.3},{transform:'rotate(140deg) scale(1.15)',opacity:0}],{duration:1100,delay:FLY,easing:'ease-out',fill:'both'}).onfinish=()=>r.remove()}
+    }
+    setTimeout(()=>{
+      if(my!==fgen||!grid.isConnected)return;
+      cells[b].classList.remove('mgup');
+      ring(bx,by,col,cw*(1.4+nv*.12),600);burst(bx,by,col,7+v*2,.6+v*.08);if(nv>=5)burst(bx,by,'#ffffff',6,.5);
+      // the neighbours ripple outward from the merge
+      const n0=b%n,m0=(b/n)|0;
+      cells.forEach((c,i)=>{if(i===b)return;const dx=i%n-n0,dy=((i/n)|0)-m0,d=Math.hypot(dx,dy);if(d>2.3)return;
+        const k=(2.6-d)*2.2;wa(c,[{transform:'none'},{transform:`translate(${dx/d*k}px,${dy/d*k}px) scale(.97)`,offset:.4},{transform:'none'}],{duration:340,delay:d*55,easing:'ease-out'})});
+      // name the stage that just grew; a brand-new best stage gets a big callout and its ladder icon pops
+      if(nv>bestBefore){
+        floatText(bx,by-cw*.55,`${MB_NAMES[nv]}! ${nv>=5?'🌸':'🌱'}`,true);
+        const s=stageEls[nv-1];if(s){wa(s,[{transform:'scale(1)'},{transform:'scale(1.7) rotate(-10deg)',offset:.35},{transform:'scale(1.08)'}],{duration:620,easing:'cubic-bezier(.3,1.6,.5,1)'});const[lx,ly]=centerOf(s);burst(lx,ly,col,6,.45)}
+      }else if(!FL_RM)floatText(bx,by-cw*.5,MB_NAMES[nv]);
+    },FLY);
+    // beat 3: the new seed drops into its soil with a little puff
+    cells.forEach((c,i)=>{if(i!==b&&G[i]&&before[i]===0&&c.firstElementChild){
+      wa(c.firstElementChild,[{transform:'translateY(-70%) scale(.5)',opacity:0},{transform:'translateY(6%) scale(1.12,.82)',opacity:1,offset:.62},{transform:'scale(.96,1.05)',offset:.82},{transform:'none'}],{duration:460,delay:FLY+260,easing:'cubic-bezier(.5,0,.6,1)',fill:'backwards'});
+      if(!FL_RM)setTimeout(()=>{if(my===fgen&&grid.isConnected){const[x,y,w]=cellPos(i);burst(x,y+w*.3,'#c8a46a',4,.35)}},FLY+540);
+    }});
+    api.good(null,{silent:true});
+    if(won){api.win(starsFor(moves,s3,s2));setTimeout(()=>finish(b),FLY)}
     else if(!pick(G)&&!hasPair(G)){toast('The garden is full: Undo ↩️ and try another order')}
     return true;
   }
   function finish(b){
     const[x,y,cw]=cellPos(b);sfx.sparkle();fountain(x,y,36);ring(x,y,'#fff',cw*3,800);
     cells[b].classList.add('glow');
-    api.win(starsFor(moves,s3,s2));
   }
 
   /* ---- dragging ---- */
@@ -147,7 +183,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
       const t=tgt;if(t>=0)cells[t].classList.remove('tg');tgt=-1;
       const g=ghost;ghost=null;from=-1;cells[i].classList.remove('lifted');
       const drop=()=>g.remove();
-      if(moved&&t>=0){drop();merge(i,t);return}
+      if(moved&&t>=0){drop();merge(i,t,[x,y-LIFT(e)]);return}
       if(!moved){ // tap: pick up / merge with the picked-up twin
         drop();
         if(sel>=0&&sel!==i&&G[sel]===G[i]&&merge(sel,i))return;
@@ -164,7 +200,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
 
   return{
     snap:()=>JSON.stringify({G,moves}),
-    restore(s){({G,moves}=JSON.parse(s));sel=-1;shown.fill(-1);cells.forEach(c=>c.classList.remove('glow','hint','lifted','tg'));render()},
+    restore(s){({G,moves}=JSON.parse(s));sel=-1;fgen++;shown.fill(-1);cells.forEach(c=>c.classList.remove('glow','hint','lifted','tg','mgup'));render()},
     hint(){
       const p=pick(G);if(!p){toast('No pairs left: try Undo ↩️');return}
       cells.forEach(c=>{c.removeAttribute('data-h');c.classList.remove('hint')});

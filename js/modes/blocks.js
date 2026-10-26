@@ -42,7 +42,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
     const{r,c}=fullLines(g2);let weeds=0;const clr=new Set();
     r.forEach(y=>{for(let x=0;x<N;x++)clr.add(y*N+x)});c.forEach(x=>{for(let y=0;y<N;y++)clr.add(y*N+x)});
     clr.forEach(i=>{if(g2[i]===-1)weeds++;g2[i]=0});
-    return{g2,lines:r.length+c.length,weeds,clr};
+    return{g2,lines:r.length+c.length,weeds,clr,r,c};
   }
   const placements=(g,s)=>{const o=[];for(let y=0;y+s.h<=N;y++)for(let x=0;x+s.w<=N;x++)if(fits(g,s,x,y))o.push([x,y]);return o};
   /* greedy score: clear lines first, then snug placement (contact) and nearly-full lines */
@@ -82,7 +82,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   const s3=par+4+Math.floor(par*.3),s2=Math.ceil(par*1.8)+6;
 
   /* ---------- state ---------- */
-  let G=G0.slice(),tray=trayAt(0),nextK=3,lines=0,moves=0,finished=false,gen=0,vis=G.slice();
+  let G=G0.slice(),tray=trayAt(0),nextK=3,lines=0,moves=0,finished=false,gen=0,vis=G.slice(),vlines=0,combo=0;
   let weedsLeft=G.filter(v=>v===-1).length;
 
   /* ---------- DOM ---------- */
@@ -90,6 +90,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   const prog=el('div','bgp','<span class="bgpt"></span><div class="bgpb"><i></i></div>');
   const grid=el('div','bgb glass');grid.style.gridTemplateColumns=`repeat(${N},1fr)`;
   const cells=[...Array(N*N)].map(()=>{const c=el('div','bz');grid.appendChild(c);return c});
+  const fxL=el('div','bgfx');grid.appendChild(fxL);   // overlay for line beams and flowers (absolute, outside the grid flow)
   const trayEl=el('div','bgt');
   const slots=[0,1,2].map(i=>{const s=el('div','bgs');s.dataset.slot=i;trayEl.appendChild(s);return s});
   wrap.append(prog,grid,trayEl);board.appendChild(wrap);api.stagger(cells,10);
@@ -120,8 +121,8 @@ MAKERS.blocks=function({R,tier,level,board,api}){
       else if(v===-1){c.className='bz w';c.style.removeProperty('--c')}
       else{c.className='bz';c.style.removeProperty('--c')}
     });
-    if(weedLevel){const left=G.filter(v=>v===-1).length;progT.textContent=left?`🌿 Pull out the weeds · ${weedsN-left}/${weedsN}`:'🌸 Garden weeded!';progB.style.width=(weedsN-left)/weedsN*100+'%'}
-    else{progT.textContent=`🌸 Bloom ${goalLines} lines · ${Math.min(lines,goalLines)}/${goalLines}`;progB.style.width=Math.min(1,lines/goalLines)*100+'%'}
+    if(weedLevel){const left=vis.filter(v=>v===-1).length;progT.textContent=left?`🌿 Pull out the weeds · ${weedsN-left}/${weedsN}`:'🌸 Garden weeded!';progB.style.width=(weedsN-left)/weedsN*100+'%'}
+    else{progT.textContent=`🌸 Bloom ${goalLines} lines · ${Math.min(vlines,goalLines)}/${goalLines}`;progB.style.width=Math.min(1,vlines/goalLines)*100+'%'}
     api.coach(finished?'🌸 Beautiful garden!':'🌱 Drag a block onto the bed');
     api.moves(moves,s3,s2);
   }
@@ -141,34 +142,87 @@ MAKERS.blocks=function({R,tier,level,board,api}){
     if(tray.every(v=>v==null)){tray=trayAt(nextK);nextK+=3}
     const my=++gen;
     render();renderTray();
-    mine.forEach(i=>{const c=cells[i];c.classList.remove('drop');void c.offsetWidth;c.classList.add('drop')});
+    mine.forEach(i=>{const c=cells[i];c.classList.remove('land');void c.offsetWidth;c.classList.add('land')});
     sfx.tok();buzz(10);
     api.commit();
     const won=goalMet(lines,G);
     if(a.lines){
       // step 2: full lines bloom away (after the block has landed)
-      setTimeout(()=>{
-        if(my!==gen||!grid.isConnected)return;
-        const cx=bx+s.w/2,cy=by+s.h/2;
-        a.clr.forEach(i=>{const c=cells[i],d=Math.hypot((i%N)-cx,((i/N)|0)-cy)*38;c.style.setProperty('--d',d+'ms');c.classList.add('vanish')});
-        sfx.clear(a.lines);buzz([12,30,18]);
-        const[x,y]=[ox+(N/2)*cp-(cp-cs)/2,oy+(N/2)*cp-(cp-cs)/2];
-        const rowsHit=[...new Set([...a.clr].map(i=>(i/N)|0))].slice(0,3);
-        rowsHit.forEach(r=>burst(ox+(N/2)*cp,oy+(r+.5)*cp,'#ff8fba',6,.7));
-        if(a.lines>=2){floatText(x,y-30,a.lines>=3?`Triple bloom! ×${a.lines}`:'Double bloom!',true);fx_big()}
-        api.good(grid,{silent:true});
-        setTimeout(()=>{if(my!==gen)return;vis=G.slice();a.clr.forEach(i=>{cells[i].classList.remove('vanish')});render()},420+Math.min(300,a.clr.size*8));
-      },170);
-    }else{api.meh();vis=G.slice()}
+      setTimeout(()=>{if(my===gen&&grid.isConnected)bloom(a,bx+(s.w-1)/2,by+(s.h-1)/2,my)},150);
+    }else{combo=0;api.meh();vis=G.slice();vlines=lines}
     if(won){
       finished=true;
-      setTimeout(()=>{if(my!==gen)return;sfx.sparkle();fountain(ox+N*cp/2,oy+N*cp/2,40);vis=G.slice();render();api.win(starsFor(moves,s3,s2))},a.lines?700:350);
+      setTimeout(()=>{if(my!==gen)return;sfx.sparkle();fountain(ox+N*cp/2,oy+N*cp/2,40);vis=G.slice();vlines=lines;render();api.win(starsFor(moves,s3,s2))},a.lines?1250:350);
     }else{
-      setTimeout(()=>{if(my===gen)checkStuck()},a.lines?800:150);
+      setTimeout(()=>{if(my===gen)checkStuck()},a.lines?1150:150);
     }
     return true;
   }
-  const fx_big=()=>{const[x,y]=[ox+N*cp/2,oy+N*cp/2];ring(x,y,'#ff8fba',N*cp*.9,700)};
+  /* ---------- the bloom: a light beam sweeps each full line from where the block landed, every block flashes and
+     turns into a flower of its own colour that floats away, petals fly into the progress bar, then the bar ticks up ---------- */
+  const BLOOM_LABEL=['','Bloom!','Double bloom!','Triple bloom!'];
+  /* one flower template (petal colour from --fc), cloned per block: far cheaper than parsing SVG markup each time */
+  const FLOWER=el('i','bgfl',`<svg viewBox="0 0 40 40">${[0,72,144,216,288].map(r=>`<g transform="rotate(${r} 20 20)"><ellipse class="pt" cx="20" cy="10.5" rx="7.2" ry="10"/><ellipse cx="20" cy="9" rx="3" ry="5.4" fill="#ffffff70"/></g>`).join('')}<circle cx="20" cy="20" r="6.6" fill="#ffd23d" stroke="#e09a00" stroke-width="1.2"/><circle cx="18" cy="18" r="2.1" fill="#fffc"/></svg>`);
+  const FLOWER_EVERY={high:1,med:1,low:2};
+  const cellXY=(x,y)=>[ox+x*cp+cs/2,oy+y*cp+cs/2];   // client centre of a cell
+  function bloom(a,cx,cy,my){
+    // every layout read happens up front; after this point the function only writes (no forced re-layouts)
+    measure();combo++;
+    const st=getComputedStyle(grid),n=a.lines,gap=cp-cs,pad=[parseFloat(st.paddingLeft)||0,parseFloat(st.paddingTop)||0],len=N*cp-gap;
+    const bar=$('.bgpb',prog).getBoundingClientRect();
+    const L=[...a.r.map(k=>({row:1,k})),...a.c.map(k=>({row:0,k}))],frag=document.createDocumentFragment(),anims=[],every=FLOWER_EVERY[Q.tier]||1;
+    a.clr.forEach(i=>{
+      const x=i%N,y=(i/N)|0,d=Math.round(Math.hypot(x-cx,y-cy)*40),c=cells[i];
+      c.style.setProperty('--d',d+'ms');c.classList.add('bloom');
+      if(FL_RM||(x+y)%every)return;
+      const f=FLOWER.cloneNode(true);f.style.cssText=`left:${pad[0]+x*cp}px;top:${pad[1]+y*cp}px;width:${cs}px;height:${cs}px;--fc:${vis[i]>0?colOf(vis[i]):'#ffffff'}`;frag.appendChild(f);
+      const sp=(Math.random()<.5?-1:1)*(25+Math.random()*30);
+      anims.push([f,[{transform:'scale(0) rotate(-120deg)',opacity:0},{transform:'scale(1.3) rotate(12deg)',opacity:1,offset:.28},{transform:'scale(1) rotate(0)',opacity:1,offset:.5},
+        {transform:`translate(${(Math.random()-.5)*cs*.6}px,${-cp*1.3}px) scale(.55) rotate(${sp}deg)`,opacity:0}],{duration:1050,delay:120+d,easing:'cubic-bezier(.3,.9,.4,1)',fill:'both'}]);
+    });
+    if(!FL_RM)L.forEach(l=>{
+      const b=el('i','bgbeam'+(l.row?'':' v')),o=(l.row?cx:cy)*cp+cs/2+3;
+      b.style.cssText=l.row?`left:${pad[0]-3}px;top:${pad[1]+l.k*cp-3}px;width:${len+6}px;height:${cs+6}px;transform-origin:${o}px 50%`
+        :`left:${pad[0]+l.k*cp-3}px;top:${pad[1]-3}px;width:${cs+6}px;height:${len+6}px;transform-origin:50% ${o}px`;
+      frag.appendChild(b);
+      const sc=l.row?'scaleX':'scaleY',th=l.row?'scaleY':'scaleX';
+      anims.push([b,[{transform:`${sc}(0)`,opacity:1},{transform:`${sc}(1)`,opacity:1,offset:.35},{transform:`${sc}(1) ${th}(1.15)`,opacity:.9,offset:.55},{transform:`${sc}(1.04) ${th}(.15)`,opacity:0}],{duration:720,easing:'cubic-bezier(.2,.8,.3,1)',fill:'both'}]);
+    });
+    fxL.appendChild(frag);
+    anims.forEach(([e,k,o])=>{e.animate(k,o).onfinish=()=>e.remove()});
+    sfx.lineBloom(n,combo);buzz(n>=2?[14,30,14,30,22]:[12,30,18]);
+    const[px,py]=cellXY(cx,cy),[mx,my_]=cellXY((N-1)/2,(N-1)/2);
+    ring(px,py,'#ffd6e8',len*(n>=2?1.5:1.05),760);
+    /* sparkles along each line, and petals flying to the progress bar */
+    const goal=weedLevel?weedsN:goalLines,after=weedLevel?weedsN-G.filter(v=>v===-1).length:lines;
+    const tx=bar.left+bar.width*Math.min(1,after/goal),ty=bar.top+bar.height/2;
+    L.forEach((l,li)=>{
+      for(let k=0;k<2;k++){const[x,y]=l.row?cellXY((N-1)*(k*2+1)/4,l.k):cellXY(l.k,(N-1)*(k*2+1)/4);setTimeout(()=>{if(my===gen)burst(x,y,k?'#ffd166':'#ff8fba',4,.6)},120+k*120)}
+      if(FL_RM)return;
+      const[sx,sy]=l.row?cellXY(cx,l.k):cellXY(l.k,cy);
+      for(let k=0,m=Math.max(2,Math.round(4*Q.pscale));k<m;k++){
+        const p=el('i','bgpet');p.style.cssText=`--c:${k%2?'#ff8fba':'#ffd6e8'};left:${sx-6}px;top:${sy-6}px`;document.body.appendChild(p);
+        const hx=(sx+tx)/2+(Math.random()-.5)*120,hy=Math.min(sy,ty)-40-Math.random()*60;
+        p.animate([{transform:'translate(0,0) scale(.3) rotate(0)',opacity:0},{transform:`translate(${hx-sx}px,${hy-sy}px) scale(1.2) rotate(${200+k*40}deg)`,opacity:1,offset:.45},{transform:`translate(${tx-sx}px,${ty-sy}px) scale(.5) rotate(${420+k*60}deg)`,opacity:.9}],
+          {duration:620,delay:260+li*70+k*45,easing:'cubic-bezier(.45,0,.55,1)',fill:'both'}).onfinish=()=>p.remove();
+      }
+    });
+    const label=n>=4?`Mega bloom! ×${n}`:BLOOM_LABEL[n];
+    const tt=el('div','bgtxt'+(n>=2?' big':''),`🌸 ${label}${combo>=2?`<small>Combo ×${combo} 🔥</small>`:''}`);tt.style.left=mx+'px';tt.style.top=my_-cp*.3+'px';document.body.appendChild(tt);setTimeout(()=>tt.remove(),1300);
+    if(n>=2||combo>=3)setTimeout(()=>{if(my===gen)fountain(mx,my_,16+n*8)},200);
+    wa(grid,[{transform:'scale(1)'},{transform:`scale(${n>=2?1.035:1.02})`,offset:.25},{transform:'scale(.995)',offset:.6},{transform:'scale(1)'}],{duration:480,delay:80,easing:'ease-out'});
+    gfx.pulse(fxL,'bglow');
+    api.good(null,{silent:true});
+    /* the bed resets, the empty soil fades back in, and the progress bar ticks up as the petals arrive */
+    setTimeout(()=>{
+      if(my!==gen)return;vis=G.slice();vlines=lines;
+      a.clr.forEach(i=>{const c=cells[i];c.classList.remove('bloom');c.style.removeProperty('--d');wa(c,[{transform:'scale(.4)',opacity:0},{transform:'none',opacity:1}],{duration:280,delay:((i%N)+((i/N)|0))*12,easing:'cubic-bezier(.3,1.5,.5,1)',fill:'backwards'})});
+      render();
+      wa($('.bgpb',prog),[{transform:'scaleY(1)'},{transform:'scaleY(1.7)',offset:.3},{transform:'scaleY(1)'}],{duration:520,easing:'ease-out'});
+      wa(progT,[{transform:'scale(1)'},{transform:'scale(1.18)',offset:.35},{transform:'scale(1)'}],{duration:420,easing:'cubic-bezier(.3,1.6,.5,1)'});
+      burst(tx,ty,'#b4f06a',6,.5);
+    },880);
+  }
   function checkStuck(){
     if(finished||api.over())return;
     const any=tray.some(si=>si!=null&&placements(G,BG_SHAPES[si]).length);
@@ -226,8 +280,8 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   let hintT=0;
   function clearHint(){clearTimeout(hintT);cells.forEach(c=>c.classList.remove('ht'));slots.forEach(s=>{s.classList.remove('hint');s.removeAttribute('data-h')})}
   function restoreState(s){
-    ({G,tray,nextK,lines,moves}=JSON.parse(s));gen++;finished=false;vis=G.slice();clearHint();clearPv();
-    cells.forEach(c=>{c.classList.remove('drop','vanish');c._v=null});measure();render();renderTray();requestAnimationFrame(checkStuck);
+    ({G,tray,nextK,lines,moves}=JSON.parse(s));gen++;finished=false;vis=G.slice();vlines=lines;combo=0;clearHint();clearPv();
+    fxL.innerHTML='';cells.forEach(c=>{c.classList.remove('land','bloom');c.style.removeProperty('--d');c._v=null});measure();render();renderTray();requestAnimationFrame(checkStuck);
   }
   return{
     snap:()=>JSON.stringify({G,tray,nextK,lines,moves}),
