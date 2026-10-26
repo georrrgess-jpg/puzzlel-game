@@ -3211,6 +3211,256 @@ body.rm .v1812g-cvbox,body.rm .v1812g-thc,body.rm .v1812g-tpl,body.rm .v1812g-sw
  .v1812g-auto small{display:none}
 }
 
+/* ===================== v18.12 Tryouts & Cut Day (v1812t) =====================
+   Team colours (--c1/--c2 on .v1812t, plus the global --team* tokens) carry identity and the selected level; amber --accent
+   stays on actions (Run Day, Post the roster). The roster sheet, brick wall and doors are illustrations with their own
+   fixed palette. Motion is transform/opacity only and is switched off for reduced motion (OS setting and body.rm). */
+.v1812t{--paper:#f4eedc;--ink:#2a2620;--top:var(--v1812t-top,70px);display:flex;flex-direction:column;gap:14px;min-width:0}
+.v1812t .grow{flex:1 1 auto}
+/* ---------- week header ---------- */
+.v1812t-week{position:relative;display:flex;gap:18px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;padding:20px 22px 18px;border-radius:var(--r);border:1px solid var(--line);overflow:hidden;
+  background:radial-gradient(520px 200px at 0% 0%,color-mix(in srgb,var(--c1) 34%,transparent),transparent 70%),linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface) 92%,#000))}
+.v1812t-week::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--c1) 0 38%,var(--c2) 38% 44%,var(--c1) 44%)}
+.v1812t-week-l{min-width:0;flex:1 1 420px}
+.v1812t-kick{display:inline-block;color:var(--team2-hi);letter-spacing:.2em}
+.v1812t-wk-t{font-size:clamp(1.35rem,2.6vw,2rem);margin:4px 0 6px;line-height:1.02}
+.v1812t-wk-s{margin:0 0 12px;max-width:62ch}
+.v1812t-week-r{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:200px}
+.v1812t-run{min-height:46px;font-size:1.12rem}
+.v1812t-alldone{display:inline-flex;align-items:center;gap:8px;justify-content:center;font-weight:800;color:var(--good);min-height:46px}
+.v1812t-steps{list-style:none;margin:0;padding:0;display:flex;gap:0;flex-wrap:wrap}
+.v1812t-steps li{display:flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700;color:var(--muted);padding-right:14px;position:relative}
+.v1812t-steps li i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;border:1.5px solid var(--line);background:var(--surface2);font-family:var(--f-mono)}
+.v1812t-steps li::after{content:"";width:18px;height:2px;background:var(--line);margin-left:6px;border-radius:2px}
+.v1812t-steps li:last-child::after{display:none}
+.v1812t-steps li.done{color:var(--text)} .v1812t-steps li.done i{background:var(--team);border-color:var(--team);color:var(--team-ink)} .v1812t-steps li.done::after{background:var(--team)}
+.v1812t-steps li.now{color:var(--text)} .v1812t-steps li.now i{border-color:var(--team2-hi);background:color-mix(in srgb,var(--team) 40%,var(--surface2));color:var(--text);box-shadow:0 0 0 3px color-mix(in srgb,var(--team2-hi) 25%,transparent)}
+.v1812t-standouts{display:flex;gap:8px 14px;flex-wrap:wrap;margin-top:12px;font-size:.82rem}
+.v1812t-standouts span{display:inline-flex;gap:6px;align-items:baseline;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--team) 16%,var(--surface2));border:1px solid color-mix(in srgb,var(--team-hi) 28%,var(--line))}
+.v1812t-standouts em{font-style:normal;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em} .v1812t-standouts i{font-style:normal;color:var(--team2-hi)}
+/* ---------- the drill stage ---------- */
+.v1812t-stage[hidden]{display:none}
+.v1812t-stage{border-radius:var(--r);border:1px solid color-mix(in srgb,var(--team-hi) 30%,var(--line));background:linear-gradient(180deg,#0e1a14,#0a120e);overflow:hidden;color:#eaf2ee;animation:v1812tRise .35s ease-out both}
+.v1812t-stage-in{padding:14px 18px 12px;display:grid;gap:8px}
+.st-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap} .st-top .eyebrow{color:#9fc3ae} .st-title{font-family:var(--f-display);font-size:1.5rem;text-transform:uppercase;letter-spacing:.04em;flex:1}
+.st-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(220px,1fr);gap:16px;align-items:stretch}
+.st-art{position:relative;border-radius:10px;overflow:hidden;background:#143b24;width:100%;align-self:start}
+.st-lead{display:flex;flex-direction:column;gap:8px;padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)} .st-lead .eyebrow{color:#9fc3ae}
+.st-lead ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px} .st-lead li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.22);opacity:0;animation:v1812tRise .4s ease-out forwards;animation-delay:calc(var(--i)*.28s + .5s)}
+.st-lead .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-family:var(--f-mono);background:rgba(255,255,255,.12)} .st-lead li:first-child .n{background:var(--team2-hi);color:#111}
+.st-lead .w{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.15} .st-lead .w b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .st-lead .w small{color:#9fc3ae;font-size:.7rem} .st-lead i{font-style:normal;font-weight:800;color:#fff} .v1812t-scene-svg{display:block;width:100%;height:auto}
+.st-clock{position:absolute;left:50%;transform:translateX(-50%);top:8px;font-size:1.9rem;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6);background:rgba(0,0,0,.35);padding:2px 12px;border-radius:8px;min-width:4.4em;text-align:center}
+.st-foot{margin:0;min-height:1.4em;font-weight:700;color:#d7efe0} .st-dots{display:flex;gap:6px} .st-dots i{width:22px;height:4px;border-radius:3px;background:rgba(255,255,255,.18)} .st-dots i.on{background:var(--team2-hi)}
+.v1812t-rn .rn-l,.v1812t-rn .rn-a{transform-box:fill-box;transform-origin:50% 8%}
+.v1812t-rn.run .rn-l1,.v1812t-rn.run .rn-a2{animation:v1812tSwing .24s ease-in-out infinite alternate}
+.v1812t-rn.run .rn-l2,.v1812t-rn.run .rn-a1{animation:v1812tSwing .24s ease-in-out infinite alternate-reverse}
+.v1812t-rn.still .rn-l1{animation:v1812tKick .55s ease-in-out infinite alternate}
+.v1812t-dash{animation:v1812tDash calc(var(--d,2.4s)*var(--k,1)) cubic-bezier(.45,0,.4,1) infinite}
+.v1812t-shut{animation:v1812tShut calc(var(--d,2.8s)/3) linear infinite alternate}
+.v1812t-ball{animation:v1812tBall .55s cubic-bezier(.3,.7,.4,1) infinite alternate}
+.v1812t-bsh{transform-box:fill-box;transform-origin:center;animation:v1812tBsh .55s ease-in-out infinite alternate}
+.v1812t-beepdot{transform-box:fill-box;transform-origin:center;animation:v1812tBeep 1.4s ease-in-out infinite}
+@keyframes v1812tSwing{from{transform:rotate(-38deg)}to{transform:rotate(38deg)}}
+@keyframes v1812tKick{from{transform:rotate(-8deg)}to{transform:rotate(30deg)}}
+@keyframes v1812tDash{0%{transform:translateX(0)}78%,100%{transform:translateX(332px)}}
+@keyframes v1812tShut{from{transform:translateX(0)}to{transform:translateX(288px)}}
+@keyframes v1812tBall{from{transform:translateY(0)}to{transform:translateY(-54px)}}
+@keyframes v1812tBsh{from{transform:scaleX(1);opacity:.3}to{transform:scaleX(.5);opacity:.12}}
+@keyframes v1812tBeep{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.35);opacity:1}}
+@keyframes v1812tRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ---------- counters bar ---------- */
+.v1812t-bar{position:sticky;top:var(--top);z-index:14;margin:0 -2px;padding:8px 2px 8px;background:var(--bg);box-shadow:0 12px 14px -12px rgba(0,0,0,.5)}
+.v1812t-bar-in{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 94%,transparent);box-shadow:0 8px 20px rgba(0,0,0,.22)}
+.v1812t-cts{display:flex;gap:8px;flex-wrap:wrap} .v1812t-ct{position:relative;min-width:84px;padding:6px 10px 9px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);display:flex;flex-direction:column;gap:0;overflow:hidden}
+.v1812t-ct .lab{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700} .v1812t-ct b{font-size:1.15rem;line-height:1.1} .v1812t-ct b small{font-size:.7rem;color:var(--muted);font-weight:600}
+.v1812t-ct i{position:absolute;left:0;bottom:0;height:3px;width:calc(var(--f,0)*100%);background:var(--team2-hi);transition:width .35s ease,background .2s}
+.v1812t-ct.full i{background:var(--good)} .v1812t-ct.over{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--surface2))} .v1812t-ct.over i{background:var(--bad)} .v1812t-ct.over b{color:var(--bad)}
+.v1812t-ct.under{border-color:color-mix(in srgb,var(--warn) 60%,var(--line))} .v1812t-ct.under i{background:var(--warn)} .v1812t-ct.cutc b{color:var(--muted)}
+.v1812t-bar-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .v1812t-bar .btn.pri.dim{opacity:.72;filter:saturate(.7)}
+.v1812t-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;padding:0 2px}
+.v1812t-chip{font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface2)}
+.v1812t-chip.bad{border-color:color-mix(in srgb,var(--bad) 60%,transparent);background:color-mix(in srgb,var(--bad) 16%,var(--surface2));color:color-mix(in srgb,var(--bad) 30%,var(--text))}
+.v1812t-chip.warn{border-color:color-mix(in srgb,var(--warn) 55%,transparent);background:color-mix(in srgb,var(--warn) 12%,var(--surface2))}
+.v1812t-bar.shake .v1812t-bar-in{animation:v1812tShake .4s}
+@keyframes v1812tShake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+/* ---------- body: door column + cards ---------- */
+.v1812t-body{display:grid;grid-template-columns:minmax(300px,350px) minmax(0,1fr);gap:16px;align-items:start}
+.v1812t-aside{position:sticky;top:calc(var(--top) + 86px);min-width:0}
+.v1812t-doord>summary{list-style:none;cursor:pointer;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-weight:800;padding:2px 2px 8px;display:none}
+.v1812t-doord>summary::-webkit-details-marker{display:none}
+.v1812t-doorbox{display:flex;flex-direction:column;gap:8px}
+.v1812t-doortabs{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.v1812t-doortabs button{flex:1;border:0;background:none;padding:5px 8px;border-radius:7px;cursor:pointer;font-weight:700;font-size:.82rem;color:var(--muted)} .v1812t-doortabs button.on{background:var(--team);color:var(--team-ink)}
+.v1812t-minidoor{border-radius:12px;padding:14px 14px 0;overflow:hidden;border:1px solid var(--line);background:
+  repeating-linear-gradient(90deg,transparent 0 33px,rgba(0,0,0,.28) 33px 35px),repeating-linear-gradient(0deg,#8a3f2e 0 17px,#5f4a41 17px 19px)}
+.v1812t-minileaf{position:relative;padding:16px 12px 14px;border:4px solid #4d1215;border-bottom:0;border-radius:4px 4px 0 0;background:linear-gradient(90deg,#8f2024,#b52a30 16%,#a4262c 62%,#861c20);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 10px 24px rgba(0,0,0,.4)}
+.v1812t-doorcap{margin:0;text-align:center}
+/* the typed roster sheet */
+.v1812t-sheet{--paper:#f4eedc;--ink:#2a2620;position:relative;background:var(--paper);color:var(--ink);font-family:var(--f-mono);font-size:11px;line-height:1.5;padding:14px 14px 12px;border-radius:2px;transform:rotate(-.5deg);
+  box-shadow:0 8px 18px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.1);background-image:linear-gradient(transparent 0 calc(100% - 1px),rgba(70,60,40,.07) 0)}
+.v1812t-sheet::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 100% 0%,rgba(0,0,0,0),rgba(110,90,50,.1))}
+.v1812t-sheet .sh-head{border-bottom:1.5px solid rgba(40,34,28,.55);padding-bottom:6px;margin-bottom:6px} .v1812t-sheet .sh-head b{display:block;font-family:var(--f-display);font-weight:800;font-size:1.55em;line-height:1;text-transform:uppercase;letter-spacing:.04em}
+.v1812t-sheet .sh-head small{font-size:.9em;color:rgba(42,38,32,.78)}
+.v1812t-sheet .sh-list{list-style:none;margin:0;padding:0} .v1812t-sheet .sh-list li{position:relative;display:grid;grid-template-columns:2.3em minmax(0,1fr) 2.2em;height:1.55em;align-items:center;white-space:nowrap}
+.v1812t-sheet .sh-list .n{text-align:right;padding-right:.5em;color:rgba(42,38,32,.6)} .v1812t-sheet .sh-list .w{overflow:visible} .v1812t-sheet .sh-list .g{text-align:right;color:rgba(42,38,32,.7)}
+.v1812t-sheet .sh-list li.empty{opacity:.5}
+.v1812t-sheet .nm{position:relative;display:inline-block;padding:0 2px}
+.v1812t-circle{position:absolute;left:-7px;right:-7px;top:-3px;bottom:-3px;width:calc(100% + 14px);height:calc(100% + 6px);overflow:visible;pointer-events:none}
+.v1812t-circle path{fill:none;stroke:#c3262d;stroke-width:2.2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0;vector-effect:non-scaling-stroke}
+.v1812t-sheet .note{margin:9px 0 0;padding-top:7px;border-top:1px dashed rgba(40,34,28,.4);font-family:'Crimson Pro',Georgia,serif;font-style:italic;font-size:1.18em;line-height:1.25;color:#1f3f7e;transform:rotate(-1deg);transform-origin:0 50%}
+.v1812t-sheet .note em{display:block;text-align:right;font-size:1.05em}
+.v1812t-sheet .tape{position:absolute;top:-9px;width:56px;height:17px;background:rgba(238,228,168,.78);box-shadow:0 1px 2px rgba(0,0,0,.25);z-index:2}
+.v1812t-sheet .tape.t1{left:12px;transform:rotate(-5deg)} .v1812t-sheet .tape.t2{right:12px;transform:rotate(6deg)}
+.v1812t-sheet .stamp{position:absolute;right:14px;top:34%;transform:rotate(-16deg);border:3px solid rgba(180,34,40,.5);color:rgba(180,34,40,.5);font-family:var(--f-display);font-weight:800;font-size:1.9em;letter-spacing:.12em;padding:0 8px;border-radius:5px;pointer-events:none;z-index:3}
+/* ---------- filters ---------- */
+.v1812t-filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.v1812t-fc{display:inline-flex;gap:6px;align-items:center;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;font-weight:700;font-size:.8rem;color:var(--muted)}
+.v1812t-fc em{font-style:normal;font-family:var(--f-mono);font-size:.72rem;padding:0 6px;border-radius:999px;background:rgba(0,0,0,.25);color:var(--text)}
+.v1812t-fc:hover{color:var(--text)} .v1812t-fc.on{background:var(--team);border-color:var(--team2-hi);color:var(--team-ink)} .v1812t-fc.on em{background:rgba(0,0,0,.28);color:inherit}
+.v1812t-sort{display:inline-flex;gap:8px;align-items:center} .v1812t-sort select{padding:4px 8px;border-radius:8px;background:var(--surface2);border:1px solid var(--line)}
+/* ---------- cards ---------- */
+.v1812t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:12px}
+.v1812t-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:13px 14px 12px;border-radius:14px;border:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 100%,#fff 2%),var(--surface));box-shadow:var(--shadow);min-width:0;transition:border-color .2s,opacity .25s,box-shadow .2s}
+.v1812t-card{content-visibility:auto;contain-intrinsic-size:auto 270px}
+.v1812t-card.newc{border-left:4px solid var(--team2-hi)} .v1812t-card.tagged{box-shadow:0 0 0 1px var(--team2-hi),var(--shadow)}
+.v1812t-card.undec{border-color:color-mix(in srgb,var(--warn) 55%,var(--line));border-style:dashed}
+.v1812t-card.is-cut{opacity:.62} .v1812t-card.is-cut .v1812t-face{filter:grayscale(.85)} .v1812t-card.is-cut .v1812t-name{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:color-mix(in srgb,var(--bad) 70%,transparent)}
+.v1812t-card:hover{border-color:color-mix(in srgb,var(--team-hi) 50%,var(--line))}
+.v1812t-pulse{animation:v1812tPulse .35s ease-out}
+@keyframes v1812tPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--team2-hi) 55%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
+.v1812t-top{display:flex;gap:11px;align-items:flex-start}
+.v1812t-face{flex:none;width:64px;height:74px;border-radius:12px;overflow:hidden;background:radial-gradient(90% 70% at 50% 28%,color-mix(in srgb,var(--c1) 55%,#222),color-mix(in srgb,var(--c1) 20%,#0a0e13));border:1px solid color-mix(in srgb,var(--c2) 30%,var(--line));display:grid;place-items:end center}
+.v1812t-face svg{width:64px;height:auto;display:block}
+.v1812t-id{min-width:0;flex:1} .v1812t-name{font-size:1.14rem;line-height:1.05;margin:0 0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1812t-sub{display:flex;gap:7px;align-items:center;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+.v1812t-sub .pos{color:var(--text);background:color-mix(in srgb,var(--team) 24%,var(--surface2));border:1px solid var(--line)}
+.v1812t-kind{font-size:.66rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:1px 7px;border-radius:999px;border:1px solid color-mix(in srgb,var(--team2-hi) 55%,transparent);color:var(--team2-hi);background:color-mix(in srgb,var(--team) 20%,transparent)}
+.v1812t-kind.k-bk{border-color:color-mix(in srgb,var(--good) 60%,transparent);color:var(--good)} .v1812t-kind.k-rem{border-color:var(--bad);color:#ff9a9a;background:color-mix(in srgb,var(--bad) 18%,transparent)}
+.v1812t-story{margin:5px 0 0;font-size:.85rem;font-style:italic;font-family:'Crimson Pro',Georgia,serif;font-size:1rem;color:color-mix(in srgb,var(--text) 86%,var(--muted));line-height:1.15}
+.v1812t-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.v1812t-stars{font-size:.95rem;letter-spacing:1px;color:var(--team2-hi);white-space:nowrap} .v1812t-stars i{font-style:normal} .v1812t-stars .u{opacity:.38} .v1812t-stars .e{color:var(--line)}
+.v1812t-tagbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface2);color:var(--muted);cursor:pointer;display:grid;place-items:center;padding:0}
+.v1812t-tagbtn:hover{color:var(--text)} .v1812t-tagbtn.on{background:var(--team);color:var(--team-ink);border-color:var(--team2-hi)}
+.v1812t-ovr{display:flex;align-items:center;gap:9px;flex-wrap:wrap} .v1812t-ovr .lab{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1812t-rng{font-size:1.25rem;min-width:3.6em}
+.v1812t-track{position:relative;flex:1 1 90px;height:7px;border-radius:5px;background:var(--surface2);box-shadow:inset 0 0 0 1px var(--line);min-width:80px}
+.v1812t-track i{position:absolute;top:0;bottom:0;border-radius:5px;opacity:.9;transition:left .6s cubic-bezier(.2,.8,.2,1),width .6s cubic-bezier(.2,.8,.2,1)}
+.v1812t-ovr small{font-size:.7rem;color:var(--muted)} .v1812t-now,.v1812t-sug{font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);color:var(--muted)} .v1812t-sug{border-color:color-mix(in srgb,var(--team-hi) 50%,var(--line));color:var(--text)}
+.v1812t-drills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.v1812t-dt{position:relative;padding:6px 7px 7px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);display:flex;flex-direction:column;gap:1px;min-width:0;perspective:300px}
+.v1812t-dt .l{font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .v1812t-dt b{font-size:1.02rem;line-height:1.2;white-space:nowrap}
+.v1812t-dt .bar{display:block;height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px} .v1812t-dt .bar u{display:block;height:100%;border-radius:3px;background:var(--bc,var(--good));transform-origin:0 50%}
+.v1812t-dt.pend{opacity:.55;background:repeating-linear-gradient(135deg,var(--surface2) 0 6px,color-mix(in srgb,var(--surface2) 80%,var(--line)) 6px 12px)} .v1812t-dt.pend b{color:var(--muted)} .v1812t-dt.pend .bar u{width:0}
+.v1812t-dt.new{animation:v1812tFlip .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)} .v1812t-dt.new .bar u{animation:v1812tFill .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--d,0ms) + 150ms)}
+@keyframes v1812tFlip{0%{transform:rotateX(90deg);opacity:0}100%{transform:none;opacity:1}}
+@keyframes v1812tFill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.v1812t-pd{display:flex;align-items:center;gap:9px;font-size:.74rem;color:var(--muted)} .v1812t-pd .bar{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden} .v1812t-pd .bar u{display:block;height:100%} .v1812t-pd b{color:var(--text)}
+.v1812t-pd.new .bar u{animation:v1812tFill .8s cubic-bezier(.2,.8,.2,1) both;transform-origin:0 50%}
+.v1812t-seg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:3px;border-radius:11px;background:var(--surface2);border:1px solid var(--line)}
+.v1812t-seg button{border:0;background:none;padding:7px 4px;border-radius:8px;cursor:pointer;font-weight:800;font-size:.82rem;color:var(--muted);transition:background .15s,color .15s,transform .1s}
+.v1812t-seg button:hover:not([disabled]){color:var(--text);background:color-mix(in srgb,var(--text) 7%,transparent)} .v1812t-seg button:active:not([disabled]){transform:scale(.96)}
+.v1812t-seg button[disabled]{opacity:.32;cursor:not-allowed}
+.v1812t-seg .c-V.on{background:var(--team);color:var(--team-ink);box-shadow:inset 0 -2px 0 var(--team2)}
+.v1812t-seg .c-JV.on{background:color-mix(in srgb,var(--team) 62%,var(--surface2));color:var(--text);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--team2) 70%,transparent)}
+.v1812t-seg .c-MOD.on{background:color-mix(in srgb,var(--team) 32%,var(--surface2));color:var(--text);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--team2) 40%,transparent)}
+.v1812t-seg .c-X.on{background:color-mix(in srgb,var(--bad) 70%,#2a0f12);color:#fff;box-shadow:inset 0 -2px 0 rgba(0,0,0,.35)}
+.v1812t-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* ---------- explainers ---------- */
+.v1812t-expl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:4px}
+.v1812t-expl>div{padding:14px 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);position:relative}
+.v1812t-expl .ic{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,var(--team) 34%,var(--surface2));color:var(--team2-hi);margin-bottom:8px;font-style:normal}
+.v1812t-expl b{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.05em;font-size:1.05rem} .v1812t-expl p{margin:4px 0 0;font-size:.86rem;color:var(--muted)}
+/* ---------- posted state, memories ---------- */
+.v1812t-fin-tiles{display:flex;gap:8px;flex-wrap:wrap} .v1812t-fin-tiles span{display:flex;flex-direction:column;min-width:78px;padding:8px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.v1812t-fin-tiles span b{font-family:var(--f-mono);font-size:1.5rem;color:var(--text);letter-spacing:0;line-height:1.1} .v1812t-fin-tiles span small{display:inline;font-size:.7rem;opacity:.7} .v1812t-fin-tiles span.cut b{color:var(--bad)}
+.v1812t-mems{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:8px}
+.v1812t-mem{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);border-left:4px solid var(--line)}
+.v1812t-mem .f{flex:none;width:44px;height:50px;border-radius:9px;overflow:hidden;display:grid;place-items:end center;background:color-mix(in srgb,var(--c1) 35%,#10161d)} .v1812t-mem .f svg{width:44px;height:auto}
+.v1812t-mem b{display:block;line-height:1.1} .v1812t-mem small{display:block;color:var(--muted);font-size:.74rem} .v1812t-mem small em{color:#ff9a9a;font-style:normal;font-weight:700} .v1812t-mem .s{font-size:.8rem;font-weight:700;color:var(--text)}
+.v1812t-mem.st-back{border-left-color:var(--good)} .v1812t-mem.st-made{border-left-color:var(--team2-hi)} .v1812t-mem.st-rival{border-left-color:var(--bad)} .v1812t-mem.st-quit,.v1812t-mem.st-away,.v1812t-mem.st-grad{opacity:.78}
+.v1812t-gr{display:inline-flex;gap:2px} .v1812t-gr i{width:6px;height:14px;border-radius:2px;background:var(--line)} .v1812t-gr i.on{background:var(--bad)}
+.v1812t-made{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:8px}
+.v1812t-confirm .v1812t-fin-tiles{margin:10px 0} .v1812t-cutlist{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--surface2)} .v1812t-cutlist summary{cursor:pointer;font-weight:800}
+.v1812t-cutlist ul{list-style:none;margin:8px 0 0;padding:0;max-height:220px;overflow:auto;columns:2;column-gap:18px} .v1812t-cutlist li{display:flex;flex-direction:column;padding:3px 0;break-inside:avoid;font-size:.88rem} .v1812t-cutlist small{color:var(--muted);font-size:.72rem}
+.v1812t-modal .modal{max-width:620px}
+.v1812t-cutp{display:flex;gap:16px;align-items:center;margin-bottom:12px} .v1812t-cutp .f{flex:none;width:96px;height:110px;border-radius:14px;overflow:hidden;background:color-mix(in srgb,var(--team) 30%,#10161d);display:grid;place-items:end center} .v1812t-cutp .f svg{width:96px;height:auto}
+/* story blocks in the player profile and the match preview */
+.v1812t-rem{border-left:4px solid var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--surface2));padding:8px 12px;border-radius:0 10px 10px 0;margin-bottom:12px} .v1812t-rem p{margin:2px 0 0}
+.v1812t-rv{border:1px solid color-mix(in srgb,var(--bad) 55%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,var(--bad) 16%,var(--surface2)),var(--surface2));border-radius:12px;padding:10px 14px;margin-bottom:12px} .v1812t-rv .eyebrow{color:#ff9a9a}
+.v1812t-rvline{display:flex;gap:10px;align-items:center;margin-top:6px;font-size:.9rem} .v1812t-rvline .f{flex:none;width:38px;height:44px;border-radius:8px;overflow:hidden;background:#1a232d;display:grid;place-items:end center} .v1812t-rvline .f svg{width:38px;height:auto}
+.v1812t-rvchip{white-space:nowrap}
+/* ---------- the overview card ---------- */
+.v1812t-hero{position:relative;display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:16px 20px;margin-bottom:16px;border-radius:var(--r);border:1px solid color-mix(in srgb,var(--team-hi) 38%,var(--line));overflow:hidden;
+  background:radial-gradient(600px 160px at 0% 0%,color-mix(in srgb,var(--c1) 40%,transparent),transparent 70%),linear-gradient(180deg,var(--surface),color-mix(in srgb,var(--surface) 90%,#000))}
+.v1812t-hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,var(--c1) 0 40%,var(--c2) 40% 50%,var(--c1) 50%)}
+.v1812t-hero h2{font-size:1.5rem;margin:2px 0 4px} .v1812t-hero p{margin:0;max-width:64ch;color:var(--muted)} .v1812t-hero .eyebrow{color:var(--team2-hi)}
+.v1812t-hero-art{flex:none;width:62px;height:62px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--team) 36%,var(--surface2));color:var(--team2-hi);border:1px solid color-mix(in srgb,var(--team-hi) 30%,var(--line))}
+.v1812t-hero-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .v1812t-hero.done{padding:11px 18px}
+.v1812t-note{margin-bottom:12px} .v1812t-note .btn{margin-left:8px}
+/* ---------- the gym door scene ---------- */
+.v1812t-scene{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;color:#fff;opacity:0;transition:opacity .45s ease;background:#2a1713}
+.v1812t-scene.on,.v1812t-scene.final{opacity:1}
+.v1812t-wallsvg{position:absolute;inset:0;width:100%;height:100%} .v1812t-vig{position:absolute;inset:0;background:radial-gradient(90% 80% at 50% 45%,transparent 40%,rgba(0,0,0,.62) 100%),linear-gradient(180deg,rgba(0,0,0,.35),transparent 24%)}
+.v1812t-cap{position:absolute;top:max(16px,env(safe-area-inset-top));left:0;right:0;text-align:center;z-index:3;text-shadow:0 2px 10px rgba(0,0,0,.8);pointer-events:none;padding:0 70px}
+.v1812t-cap .eyebrow{color:#ffd9a6;display:block} .v1812t-cap b{font-family:var(--f-display);font-size:clamp(1.1rem,2.6vw,1.7rem);text-transform:uppercase;letter-spacing:.05em}
+.v1812t-ctl{position:absolute;top:max(14px,env(safe-area-inset-top));right:16px;z-index:5}
+.v1812t-slides{position:absolute;inset:0;overflow:hidden}
+.v1812t-slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:104px 16px 18px;transition:transform .8s cubic-bezier(.6,0,.2,1)}
+.v1812t-slide.s-trainer{transform:translateX(110%)} .v1812t-scene.s2 .s-gym{transform:translateX(-110%)} .v1812t-scene.s2 .s-trainer{transform:none}
+.v1812t-sign{font-family:var(--f-display);font-weight:800;letter-spacing:.3em;font-size:clamp(.9rem,1.8vw,1.25rem);color:#e8ddc0;background:linear-gradient(#1c1f24,#101215);border:3px solid #55595f;padding:5px 26px 5px 34px;border-radius:4px;box-shadow:0 6px 14px rgba(0,0,0,.5)} .v1812t-sign.sm{letter-spacing:.2em}
+.v1812t-doorwrap{display:flex;gap:6px;align-items:flex-end;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))}
+.v1812t-leaf{position:relative;width:min(92vw,460px);height:min(76vh,660px);border:7px solid #4a1115;border-radius:5px 5px 0 0;background:linear-gradient(90deg,#8d1f23,#b72b31 14%,#a6262c 60%,#841b1f);box-shadow:inset 0 0 0 2px rgba(255,255,255,.1),inset 0 -40px 60px rgba(0,0,0,.25)}
+.v1812t-leaf .win{position:absolute;top:3.5%;left:50%;transform:translateX(-50%);width:26%;height:12%;background:linear-gradient(160deg,#33414d,#0e151c);border:6px solid #2d2f33;border-radius:3px;overflow:hidden}
+.v1812t-leaf .win::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0 1px,transparent 1px 8px),repeating-linear-gradient(-45deg,rgba(255,255,255,.12) 0 1px,transparent 1px 8px)}
+.v1812t-leaf .bar{position:absolute;left:12%;right:12%;top:60%;height:14px;border-radius:7px;background:linear-gradient(#e9edf1,#9ba3ad 55%,#6c737c);box-shadow:0 3px 5px rgba(0,0,0,.5)}
+.v1812t-leaf .plate{position:absolute;left:0;right:0;bottom:0;height:9%;background:linear-gradient(90deg,#8a9199,#d3d8de 30%,#9aa1aa 60%,#c8cdd4);border-top:3px solid #5b6068}
+.v1812t-leaf.r{display:none} .v1812t-leaf.t{width:min(94vw,820px);background:linear-gradient(90deg,#c9ced4,#e5e9ed 18%,#d3d8dd 60%,#bcc2c9);border-color:#6a7078;display:flex;gap:16px;justify-content:center;align-items:flex-start;padding:22px 14px;flex-wrap:wrap;overflow:auto;height:min(64vh,560px)}
+.v1812t-leaf.t .v1812t-sheet{position:relative;flex:1 1 300px;max-width:360px;left:auto;right:auto;top:auto}
+.v1812t-leaf.l .v1812t-sheet{position:absolute;left:6%;right:6%;top:3.5%;font-size:clamp(9.5px,1.45vh,12.5px)}
+.v1812t-leaf.t .v1812t-sheet{font-size:clamp(9px,1.35vh,12px)}
+@media (min-width:880px){ .v1812t-leaf.r{display:block;width:min(40vw,400px)} .v1812t-leaf.l{width:min(40vw,400px)}
+  .v1812t-flyer,.v1812t-leaf .flyer{position:absolute;background:#f6f1de;color:#2a2620;padding:8px 10px;font-size:11px;box-shadow:0 4px 10px rgba(0,0,0,.4);width:46%}
+  .v1812t-leaf .flyer b{display:block;font-family:var(--f-display);font-size:1.5em;text-transform:uppercase;line-height:1} .v1812t-leaf .flyer small{color:#555}
+  .v1812t-leaf .flyer.f1{left:10%;top:22%;transform:rotate(3deg)} .v1812t-leaf .flyer.f2{right:8%;top:46%;transform:rotate(-4deg);background:#e3eefb} }
+/* scene choreography */
+.v1812t-scene .s-gym .v1812t-sheet{opacity:0;transform:translate(60vw,-46vh) rotate(26deg) scale(1.35)}
+.v1812t-scene.on-paper .s-gym .v1812t-sheet{opacity:1;transform:rotate(-.6deg);transition:transform .75s cubic-bezier(.2,.9,.25,1.12),opacity .25s}
+.v1812t-scene .tape{transform:scaleX(0);transform-origin:50% 50%} .v1812t-scene.on-tape .tape,.v1812t-scene.s2 .s-trainer .tape{transform:scaleX(1);transition:transform .25s ease-out}
+.v1812t-scene .s-trainer .v1812t-sheet{opacity:0;transform:translateY(-30px) rotate(-3deg)} .v1812t-scene.s2 .s-trainer .v1812t-sheet{opacity:1;transform:rotate(-.4deg);transition:transform .7s cubic-bezier(.2,.9,.25,1.1) .5s,opacity .3s .5s}
+.v1812t-scene .sh-list li{opacity:0;transform:translateX(-8px)} .v1812t-scene .sh-list li.in{opacity:1;transform:none;transition:opacity .25s,transform .25s}
+.v1812t-scene .v1812t-circle path{stroke-dashoffset:1} .v1812t-scene.on-circ .s-gym li.circ.in .v1812t-circle path{stroke-dashoffset:0;transition:stroke-dashoffset .55s ease-out calc(var(--i)*18ms)}
+.v1812t-scene .s-gym .note{opacity:0} .v1812t-scene.on-note .s-gym .note{opacity:1;transition:opacity .8s}
+.v1812t-final{position:absolute;left:0;right:0;bottom:0;z-index:6;display:flex;justify-content:center;padding:0 12px max(14px,env(safe-area-inset-bottom));pointer-events:none;opacity:0;transform:translateY(24px);transition:opacity .5s .1s,transform .6s .1s cubic-bezier(.2,.8,.2,1)}
+.v1812t-scene.final .v1812t-final{opacity:1;transform:none;pointer-events:auto}
+.v1812t-fin-in{width:min(100%,640px);padding:14px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.22);background:rgba(14,10,10,.86);box-shadow:0 18px 40px rgba(0,0,0,.6)}
+.v1812t-fin-in p{margin:10px 0 12px;color:#e7ddd2} .v1812t-fin-in .row{display:flex;gap:8px;flex-wrap:wrap}
+.v1812t-scene .v1812t-fin-tiles span{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);color:#cdbfb1} .v1812t-scene .v1812t-fin-tiles span b{color:#fff}
+.v1812t-scene.final .s-gym,.v1812t-scene.final .s-trainer{padding-bottom:210px}
+.v1812t-scene.inst *{transition:none!important;animation:none!important}
+.v1812t-scene.inst.final .s-gym .v1812t-sheet,.v1812t-scene.inst .s-gym .v1812t-sheet{opacity:1;transform:rotate(-.6deg)}
+@media (max-width:899px){
+  .st-grid{grid-template-columns:minmax(0,1fr)} .st-clock{font-size:1.25rem;padding:1px 8px;top:6px} .st-title{font-size:1.2rem}
+  .v1812t-body{grid-template-columns:minmax(0,1fr)} .v1812t-aside{position:static;order:-1}
+  .v1812t-doord>summary{display:block;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:8px} .v1812t-doord[open]>summary{margin-bottom:10px}
+  .v1812t-week{padding:16px 14px 14px} .v1812t-week-r{flex-direction:row;flex-wrap:wrap;width:100%;min-width:0} .v1812t-week-r .v1812t-run{flex:1 1 100%}
+  .v1812t-bar{--top:var(--v1812t-top,0px)} .v1812t-cts{gap:4px;flex:1 1 100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))} .v1812t-ct{min-width:0;padding:5px 6px 8px} .v1812t-ct .lab{font-size:.55rem;letter-spacing:.03em} .v1812t-ct b{font-size:1.05rem} .v1812t-bar-acts{width:100%} .v1812t-bar-acts .btn{flex:1}
+  .v1812t-grid{grid-template-columns:minmax(0,1fr)} .v1812t-expl{grid-template-columns:minmax(0,1fr)}
+  .v1812t-scene .s-gym,.v1812t-scene .s-trainer{padding-top:118px} .v1812t-leaf{height:min(68vh,620px)} .v1812t-leaf.l{overflow:auto} .v1812t-leaf.l .v1812t-sheet{position:relative;left:auto;right:auto;top:auto;margin:3% 4% 4%}
+  .v1812t-scene.final .s-gym,.v1812t-scene.final .s-trainer{padding-bottom:196px} .v1812t-scene.final .v1812t-leaf{height:max(230px,calc(100vh - 330px))}
+  .v1812t-fin-in{padding:12px 12px 12px} .v1812t-fin-in .v1812t-fin-tiles{flex-wrap:nowrap;gap:6px} .v1812t-fin-in .v1812t-fin-tiles span{flex:1 1 0;min-width:0;padding:6px 8px} .v1812t-fin-in .v1812t-fin-tiles span b{font-size:1.2rem} .v1812t-fin-in p{margin:8px 0 10px;font-size:.88rem}
+  .v1812t-hero{padding:14px} .v1812t-hero-acts{width:100%} .v1812t-hero-acts .btn.pri{flex:1}
+  .v1812t-fin-tiles{gap:6px} .v1812t-fin-tiles span{min-width:0;flex:1 1 70px;padding:6px 8px}
+}
+@media (max-width:420px){ .v1812t-drills{grid-template-columns:repeat(2,minmax(0,1fr))} .v1812t-cutlist ul{columns:1} }
+@media (prefers-reduced-motion:reduce){
+  .v1812t *,.v1812t-scene *{animation:none!important;transition:none!important}
+  .v1812t-scene{transition:none}
+}
+body.rm .v1812t *,body.rm .v1812t-scene *{animation:none!important;transition:none!important}
+/* the Courier's Cut Day box */
+.v1812t-np{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:10px 20px 0;padding:7px 12px;border-top:2px solid currentColor;border-bottom:1px solid currentColor;font-size:.86rem;line-height:1.3}
+.v1812t-np b{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-size:1rem}
+
 </style>
 <div id="app"></div>
 <script>
@@ -12792,6 +13042,10 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['🚪','Tryouts & Cut Day','Every preseason the whole program tries out: three days of drills (sprint, juggling, beep test, position drills and a graded scrimmage) narrow each player\'s hidden rating from a wide range to a close read. Then you set every level, or cut, and post the roster on the gym door. Cut players remember it: some come back stronger (a few as stars), some transfer to a rival, and you can face them in a revenge game. Move-ins and walk-ons show up every summer. Skip it any time with auto-sort.'],
+  ['📊','The State Poll','A weekly statewide top 25 voted on by seven named voters with biases and opinions about your team. A ranked-vs-ranked fixture becomes the game of the week in the Matchday Center. Plus advanced metrics (xG, shot share, strength of schedule, power rating) for every school in the state, state leaderboards, and season-by-season stats for any player.'],
+  ['🗺️','The County Map','Your league as real towns joined by roads, a river and a lake. Winning spreads your colours from town to town (away wins count double); towns you hold send Scouting Camp prospects, neighbouring schools become derby rivals, and winning at every ground earns Road Warrior.'],
+  ['🖼️','Gameday Graphics','The program makes its own posters: Gameday, Final score, Milestones (career goals, wins, clean sheets), Player of the Week, Senior Night and Hall of Fame, in three styles with your players posed in 3-D. Save them as images, copy them, or pin them to the Office.'],
   ['🃏','Player of the Match cards','After every match your best-rated player earns a collectible card: Bronze, Silver, Gold or Legendary (hat tricks, bicycle kicks, final heroes). Cards are revealed with a flip, a foil sheen and stats counting up, and live in the new Card Binder under Squad, with filters by season, level, rarity and player.'],
   ['🔁','The one-two','Players now play give-and-goes: a pass into a teammate, a sprint past the marker, and the ball returned first time into his path. Look for them in the build-up and in goals (ONE-TWO! on the broadcast, "One-two finish" in the highlights).'],
   ['🏠','A cleaner main menu','The main menu is rebuilt: one big Continue (or Start a new program), your careers in a tidy list, and How to play, What\'s new, Appearance, Import and Sound in one row, over a dimmed live match.'],
@@ -23643,5 +23897,680 @@ if(MODALS.fixture){ const _v1812gFxm=MODALS.fixture; MODALS.fixture=m=>{ let h=_
 
 /* mount hook */
 { const _v1812gRender=render; render=function(){ const r=_v1812gRender.apply(this,arguments); try{ if(App.C&&(App.route==='gameday'||App.route==='office')) v1812gMount(); }catch(e){ console.error(e); } return r; }; }
+
+/* ===================== v18.12 TRYOUTS & CUT DAY (v1812t): rules, pure logic, no DOM =====================
+   Each preseason (before the first Preseason Cup game) the whole program tries out. This file holds the state, the pool,
+   the hidden ratings and the drills, the roster rules, posting the list, and what happens to the players who are cut.
+   The screen, the door scene and the animations are in 97_tryouts_ui.js; the styles in 97_tryouts.css.
+
+   State lives on the career as C.tryout (saved, exported and imported with it; a career without one gets defaults):
+     yr, st ('open' | 'posted' | 'auto' | 'none'), day (0-3 drill days run), seen, a {id: 'V'|'JV'|'MOD'|'X'} (the choices),
+     tags {id:1}, cands {id: player} (newcomers not yet on the roster), pool [newcomer ids], info {id: {kind, story, ...}},
+     posted {summary of the list that went up}, mem {pid: memory}, cut {pid: player} (cut players still out there),
+     hist {yr: summary} (Courier-friendly summaries of every posted list).
+   Cut memory: mem[pid] = {pid, name, fromLvl, cutYr, grudge, status 'cut'|'back'|'made'|'rival'|'quit'|'grad', cuts, ...}.
+
+   Rules (no change to match simulation):
+   - Pool = every player of the program (returning, the new seventh graders and camp commits) plus move-ins, walk-ons and the
+     cut players who came back. Newcomers are generated from the career seed and the year only (rngFrom(hashStr(seed+...))).
+   - Each candidate has a true OVR; the coach sees a range that narrows with each day (nested ranges that always contain the
+     true value): day 1 sprint + juggling, day 2 beep test + position drill, day 3 the final scrimmage. Players the coach
+     already knows start with narrow ranges; unknown kids with wide ones; a better coach narrows faster.
+   - Drill numbers come from the true skills plus seeded noise, so a reload shows the same results.
+   - Roster limits V 22 / JV 20 / Modified 20, minimums 16 / 14 / 14, at least one keeper per level; level eligibility is the
+     engine's (`eligible`). Posting is final; lineups are rebuilt and validated; numbers stay unique per level.
+   - Cut players remember: over the next summers they may break out, come back for the next tryout, quit, or transfer to a
+     school in the league (the heated rival most often). Transfers appear on that roster with a news item. */
+const V1812T={
+  caps:{V:22,JV:20,MOD:20}, mins:{V:16,JV:14,MOD:14}, wid:[18,12,7,3.6], wmul:{ret:.5,fresh:.85,move:1,walk:1.05,back:.8},
+  swid:{ret:[1.1,.6,0,0],fresh:[2.2,1.4,.6,0],move:[3.2,2.2,1.2,0],walk:[3.2,2.2,1.2,0],back:[2.2,1.4,.6,0]},
+  dayName:['Sign-ups','Sprint and juggling','Beep test and position drills','Final scrimmage'],
+  posMin:{V:{DEF:5,MID:4,FWD:3},JV:{DEF:4,MID:4,FWD:3},MOD:{DEF:4,MID:4,FWD:3}},
+  memo:null
+};
+const v1812tLvlOrd={V:0,JV:1,MOD:2};
+const v1812tOK=C=>!!(C&&C.schools&&C.userSid&&C.schools[C.userSid]);
+
+function v1812tBox(C){ let T=C.tryout; if(!T||typeof T!=='object'||Array.isArray(T)) T=C.tryout={};
+  if(T.v==null) T.v=1; if(T.yr==null) T.yr=0; if(!T.st) T.st='none'; if(T.day==null) T.day=0;
+  for(const k of ['a','tags','cands','info','mem','cut','hist']) if(!T[k]||typeof T[k]!=='object'||Array.isArray(T[k])) T[k]={};
+  if(!Array.isArray(T.pool)) T.pool=[]; return T; }
+function v1812tRng(C,key){ return rngFrom(hashStr(C.seed+':t18:'+key)); }
+/* a state the screen can read: this year's, or 'none' */
+function v1812tSt(C){ const T=C&&C.tryout; if(!T||T.yr!==C.year) return 'none'; return T.st||'none'; }
+function v1812tIsOpen(C){ return v1812tSt(C)==='open'; }
+function v1812tFind(C,id){ const T=C.tryout; return C.players[id]||(T&&T.cands&&T.cands[id])||(T&&T.cut&&T.cut[id])||null; }
+function v1812tCoach(C){ const co=C.coaches[C.userCoachId]; return co?co.ab:70; }
+
+/* ---------- eligibility, kinds and stories ---------- */
+function v1812tElig(p){ return {V:eligible(p,'V'),JV:eligible(p,'JV'),MOD:eligible(p,'MOD')}; }
+function v1812tFeeder(C,id){ return FEEDERS[hashStr(C.seed+':feed:'+id)%FEEDERS.length]; }
+function v1812tLastStats(C,p){ const yr=C.year-1; const y=p.st&&p.st[yr]; if(!y) return null; let best=null;
+  for(const lvl of ['V','JV','MOD']){ const b=y[lvl]&&y[lvl].reg; if(b&&b.gp>0&&(!best||lvl==='V'||best.lvl!=='V')) best={lvl,gp:b.gp,g:b.g||0,a:b.a||0,sv:b.sv||0,tk:(b.tk||0)+(b.int||0)}; }
+  return best; }
+function v1812tRetKind(C,p){ if(p.camp&&p.joined===C.year&&C.seasonNo>1) return 'fresh'; if(p.joined===C.year&&p.grade===7&&C.seasonNo>1) return 'fresh'; return 'ret'; }
+/* the one-line story of a player already in the program */
+function v1812tRetStory(C,p,kind){ const r=rngFrom(hashStr(C.seed+':story:'+p.id+':'+C.year)); const G=p.grade;
+  if(kind==='fresh') return p.camp?`Scouting camp commit, ${p.pos==='GK'?'keeper':p.pos.toLowerCase()}`:`New seventh grader from ${v1812tFeeder(C,p.id)}`;
+  const cm=p.cutMem; if(cm&&cm.back===C.year) return cm.brk?'Cut once. Came back different.':'Cut once. Made it back.';
+  const st=v1812tLastStats(C,p); const L=LVL_NAME;
+  if(p.awards&&p.awards.length){ const a=p.awards.find(x=>x&&(x.yr===C.year-1||x.yr==null)); if(a) return 'All-League last fall'; }
+  if(st){ if(p.pos==='GK'&&st.sv>=14) return `${st.sv} saves for ${L[st.lvl]} last fall`; if((p.pos==='FWD'||p.pos==='MID')&&st.g>=5) return `Scored ${st.g} for ${L[st.lvl]} last fall`; if(st.a>=5) return `${st.a} assists last fall`; if(p.pos==='DEF'&&st.tk>=18) return `${st.tk} tackles and interceptions last fall`; }
+  if(G>=12) return pick(r,['Senior. Last tryout.','Senior, wants one more year to remember','Senior captain material']);
+  if(p.bo&&p.lvl!=='V') return 'Breakout kid, wants the next level';
+  if(p.lvl==='JV'&&G>=10) return pick(r,['JV captain, going for Varsity','JV regular, eyeing Varsity','Stayed after practice all summer']);
+  if(p.lvl==='JV') return pick(r,['Freshman on the JV bubble','JV regular, eyeing Varsity']);
+  if(p.lvl==='MOD') return pick(r,['Modified regular, moving up?','Grew two inches over the summer','Eager to show what he did all summer']);
+  return pick(r,['Varsity regular, defending his spot','Returning Varsity player','Wants a bigger role this fall']); }
+function v1812tRetInfo(C,p){ const kind=v1812tRetKind(C,p); return {kind,story:v1812tRetStory(C,p,kind)}; }
+function v1812tInfo(C,id){ const T=C.tryout; if(T&&T.info&&T.info[id]) return T.info[id]; const p=C.players[id]; return p?v1812tRetInfo(C,p):{kind:'ret',story:''}; }
+
+/* ---------- newcomers: move-ins, walk-ons, comebacks ---------- */
+function v1812tNewcomer(C,r,i,kind,opt){ opt=opt||{}; const sch=C.schools[C.userSid];
+  const gw=opt.walk?{7:3,8:3,9:3.5,10:1.5}:{7:1.5,8:2,9:3,10:2.5,11:1.5,12:.8};
+  const g=opt.grade||+wpick(r,Object.keys(gw),k=>gw[k]);
+  const pw={GK:.1,DEF:.32,MID:.3,FWD:.28}; const pos=opt.pos||wpick(r,GROUPS,k=>pw[k]);
+  const L=g>=11?'V':g>=9?'JV':'MOD'; const gem=r()<(opt.walk?.1:.14);
+  const target=levelTarget(L,g,sch.strength,true)+gauss(r)*6.5+(opt.walk?-4.5:0)+(gem?9+r()*6:0);
+  const save=C.nextId; const p=genPlayer(C,r,{sid:C.userSid,lvl:L,grade:g,pos,target,user:true}); C.nextId=save;
+  p.id='t'+C.year+'_'+i.toString(36); p.num=0; p.joined=C.year; p.tryKind=kind; planDev(C,p,r); p.ovr0[C.year]=r1(ovr(p));
+  const st=pick(r,US_STATES.filter(x=>x!==C.stateName)); const town=pick(r,TOWNS);
+  let story;
+  if(kind==='move'){ story=pick(r,[`Moved here from ${st} in August`,`Family moved over the summer, from ${st}`,`Transferred in from ${town}`,`New in town, played club ball in ${st}`]); }
+  else { const gl=g===9?'Freshman':g===7?'Seventh-grade':g===8?'Eighth-grade':g===10?'Sophomore':g===11?'Junior':'Senior';
+    story=pos==='GK'&&g<=10?`${gl} walk-on, keeper`:pick(r,[`${gl} walk-on`,`${gl} walk-on, rec-league regular`,`Came out with a friend from class`,`Never played organized soccer`,`${gl} walk-on, plays pickup every night`]); }
+  return {p,info:{kind,story,from:kind==='move'?st:null,gem}}; }
+function v1812tBuild(C){
+  const T=v1812tBox(C); if(T.yr===C.year) return T;
+  T.yr=C.year; T.day=0; T.a={}; T.tags={}; T.cands={}; T.pool=[]; T.info={}; T.posted=null; T.seen=false; T.auto=false; T.st='open';
+  const u=C.userSid; const r=v1812tRng(C,'pool:'+C.year); let i=1;
+  /* cut players who came back */
+  const backs=Object.values(T.mem).filter(m=>m.status==='back'&&T.cut[m.pid]).sort((a,b)=>a.pid<b.pid?-1:1);
+  for(const m of backs){ const p=T.cut[m.pid]; delete T.cut[m.pid]; p.sid=u; p.num=0; p.tryKind='back'; T.cands[p.id]=p; T.pool.push(p.id);
+    T.info[p.id]={kind:'back',story:m.brk?'Cut last fall. Came back.':(m.cutYr===C.year-1?'Cut last fall. Came back.':`Cut in ${m.cutYr}. Back for another go.`),mem:m.pid,brk:!!m.brk}; }
+  /* move-ins every summer (not just freshmen) */
+  const nMove=3+(r()<.5?1:0)+(C.schools[u].prestige>=60&&r()<.5?1:0);
+  for(let k=0;k<nMove;k++){ const o=v1812tNewcomer(C,r,i++,'move'); T.cands[o.p.id]=o.p; T.pool.push(o.p.id); T.info[o.p.id]=o.info; }
+  /* walk-ons; at least one keeper somewhere in the pool of newcomers */
+  const nWalk=5+(r()<.5?1:0); let gk=T.pool.some(id=>T.cands[id].pos==='GK');
+  for(let k=0;k<nWalk;k++){ const o=v1812tNewcomer(C,r,i++,'walk',{walk:true,pos:(!gk&&k===nWalk-1)?'GK':null}); if(o.p.pos==='GK') gk=true; T.cands[o.p.id]=o.p; T.pool.push(o.p.id); T.info[o.p.id]=o.info; }
+  /* every level must be able to field a keeper: Modified needs a grade 7-8 keeper, JV a grade 7-10 one */
+  for(let guard=0;guard<4;guard++){ const gks=[...schoolPlayers(C,u),...T.pool.map(id=>T.cands[id])].filter(p=>p&&p.pos==='GK');
+    const a=gks.filter(p=>p.grade<=8).length, b=gks.filter(p=>p.grade<=10).length; const need=a<1?7+(r()<.5?1:0):b<2?9+(r()<.5?1:0):gks.length<3?11:0; if(!need) break;
+    const o=v1812tNewcomer(C,r,i++,'walk',{walk:true,pos:'GK',grade:need}); T.cands[o.p.id]=o.p; T.pool.push(o.p.id); T.info[o.p.id]=o.info; }
+  /* the returning players start where they are */
+  for(const p of schoolPlayers(C,u)) T.a[p.id]=p.lvl;
+  const nm=T.pool.filter(id=>T.info[id].kind==='move').length, nw=T.pool.filter(id=>T.info[id].kind==='walk').length, nb=T.pool.filter(id=>T.info[id].kind==='back').length;
+  if(Array.isArray(C.news)) addNews(C,'tryouts',`Tryout week at ${C.schools[u].town}: ${nm} move-in${nm===1?'':'s'}, ${nw} walk-on${nw===1?'':'s'}${nb?` and ${nb} player${nb===1?'':'s'} cut last time`:''} join ${schoolPlayers(C,u).length} returning players`,u);
+  return T; }
+/* the one entry point: make this preseason's tryouts exist (idempotent). Years in which the Preseason Cup has begun get none. */
+function v1812tEnsure(C){
+  if(!v1812tOK(C)) return null; const T=v1812tBox(C);
+  if(T.yr===C.year) return T;
+  if(C.phase==='preseason'&&C.pre&&C.pre.rd===0&&!C.pre.skipped&&(C.pre.fx||[]).every(id=>C.fixtures[id]&&C.fixtures[id].st==='s')) return v1812tBuild(C);
+  T.yr=C.year; T.st='none'; T.day=0; T.a={}; T.tags={}; T.cands={}; T.pool=[]; T.info={}; T.posted=null; return T; }
+
+/* ---------- the pool, in a stable order ---------- */
+function v1812tPoolIds(C){ const T=v1812tBox(C); const ret=schoolPlayers(C,C.userSid).sort((a,b)=>(v1812tLvlOrd[a.lvl]-v1812tLvlOrd[b.lvl])||(ovr(b)-ovr(a))||(a.id<b.id?-1:1)).map(p=>p.id);
+  return [...ret,...T.pool.filter(id=>T.cands[id])]; }
+function v1812tAsg(C,id){ const T=C.tryout; const a=T&&T.a?T.a[id]:undefined; if(a) return a; const p=C.players[id]; return p&&p.sid===C.userSid?p.lvl:null; }
+
+/* ---------- hidden ratings: nested ranges that always contain the truth ---------- */
+function v1812tNest(r,t,widths){ const out=[]; const w0=widths[0]; const lo0=t-w0*(.12+.76*r()); out.push([lo0,lo0+w0]);
+  for(let k=1;k<widths.length;k++){ const [plo,phi]=out[k-1]; const w=Math.min(widths[k],phi-plo); const a=Math.max(plo,t-w), b=Math.min(t,phi-w); const lo=a+(b-a)*(.1+.8*r()); out.push([lo,lo+w]); }
+  return out; }
+function v1812tRanges(C,id){ const p=v1812tFind(C,id); if(!p) return null; const info=v1812tInfo(C,id); const kind=info.kind||'ret';
+  const cm=clamp(1.65-v1812tCoach(C)/100,.75,1.25); const mu=(V1812T.wmul[kind]||1)*cm;
+  const r=v1812tRng(C,'range:'+C.year+':'+id); const t=ovr(p);
+  const ow=V1812T.wid.map((w,k)=>k===3?Math.max(2.4,w*mu):w*mu);
+  const o=v1812tNest(r,t,ow).map(([lo,hi])=>[clamp(Math.floor(lo+1e-9),20,99),clamp(Math.ceil(hi-1e-9),20,99)]);
+  const ts=clamp(Math.round((p.pot-55)/8),1,5);
+  const sw=(V1812T.swid[kind]||V1812T.swid.move);
+  const s=v1812tNest(r,ts,sw).map(([lo,hi])=>[clamp(Math.floor(lo+1e-9),1,5),clamp(Math.ceil(hi-1e-9),1,5)]);
+  return {t,o,s,ts}; }
+
+/* ---------- drills: deterministic from the true skills plus seeded noise ---------- */
+function v1812tGaussFor(C,id,drill){ const r=v1812tRng(C,'drill:'+C.year+':'+id+':'+drill); return gauss(r); }
+function v1812tDrillRaw(C,p,id){ const sk=p.sk, g=v1812tGaussFor;
+  const spr=clamp(6.12-.0128*sk.spd+g(C,id,'spr')*.075,4.55,6.4);
+  const tech=.5*sk.pas+.35*sk.sho+.15*sk.spd; const jj=6+(tech-30)*1.35; const jug=clamp(Math.round(jj+g(C,id,'jug')*(5+Math.max(0,jj)*.08)),3,150);
+  const beep=clamp(3.2+(sk.sta-25)*.115+(sk.spd-50)*.01+g(C,id,'beep')*.45,3,15);
+  const ps=p.pos==='GK'?sk.gk:p.pos==='DEF'?sk.def:p.pos==='MID'?.55*sk.pas+.25*sk.def+.2*sk.sta:sk.sho;
+  const pos=clamp(Math.round(ps+g(C,id,'pos')*5),5,99);
+  const scr=ovrAt(p,p.pos)+g(C,id,'scr')*4.2;
+  return {spr,jug,beep,pos,scr}; }
+/* the whole pool's raw drill numbers, memoised per year and pool (letter grades are relative to the pool) */
+function v1812tAllRaw(C){ const ids=v1812tPoolIds(C); const key=C.seed+':'+C.year+':'+ids.join(',')+':'+ids.map(id=>{ const p=v1812tFind(C,id); return p?Math.round(ovr(p)*10):0; }).join('');
+  if(V1812T.memo&&V1812T.memo.key===key) return V1812T.memo.val;
+  const raw={}; for(const id of ids){ const p=v1812tFind(C,id); if(p) raw[id]=v1812tDrillRaw(C,p,id); }
+  const scr=ids.filter(id=>raw[id]).map(id=>raw[id].scr).sort((a,b)=>a-b);
+  const pct=v=>{ if(scr.length<2) return .5; let lo=0; while(lo<scr.length&&scr[lo]<v) lo++; return lo/(scr.length-1); };
+  for(const id in raw) raw[id].pct=clamp(pct(raw[id].scr),0,1);
+  V1812T.memo={key,val:raw}; return raw; }
+function v1812tLetter(pct){ const G=[[.95,'A+'],[.86,'A'],[.74,'A-'],[.62,'B+'],[.48,'B'],[.36,'B-'],[.24,'C+'],[.13,'C'],[.05,'C-']]; for(const [t,l] of G) if(pct>=t) return l; return 'D'; }
+const v1812tPosDrill={GK:'Reaction saves',DEF:'1v1 defending',MID:'Passing squares',FWD:'Finishing circuit'};
+/* the numbers a card shows after `day` days: [{k, lab, txt, bar, day}] */
+function v1812tDrills(C,id,day,rawAll){ const raw=(rawAll||v1812tAllRaw(C))[id]; const p=v1812tFind(C,id); if(!raw||!p) return [];
+  const d=[{k:'spr',lab:'40-yd sprint',val:raw.spr,txt:raw.spr.toFixed(2)+' s',bar:clamp((6.15-raw.spr)/(6.15-4.7),.04,1),day:1},
+    {k:'jug',lab:'Juggling',val:raw.jug,txt:String(raw.jug),bar:clamp(raw.jug/90,.04,1),day:1},
+    {k:'beep',lab:'Beep test',val:raw.beep,txt:raw.beep.toFixed(1),bar:clamp((raw.beep-4)/9,.04,1),day:2},
+    {k:'pos',lab:v1812tPosDrill[p.pos]||'Position drill',val:raw.pos,txt:String(raw.pos),bar:clamp(raw.pos/100,.04,1),day:2},
+    {k:'scr',lab:'Scrimmage',val:raw.pct,txt:v1812tLetter(raw.pct),bar:clamp(.08+raw.pct*.92,.04,1),day:3}];
+  return d.filter(x=>x.day<=day); }
+
+/* ---------- the view model of one candidate at the current day ---------- */
+function v1812tView(C,id,rawAll){ const T=v1812tBox(C); const RA=rawAll||v1812tAllRaw(C); const p=v1812tFind(C,id); if(!p) return null; const info=v1812tInfo(C,id); const rg=v1812tRanges(C,id); const day=Math.min(3,Math.max(0,(V1812T.dayO!=null?V1812T.dayO:T.day)|0));
+  const o=rg.o[day], s=rg.s[day]; const dr=v1812tDrills(C,id,day,RA);
+  const ret=!!C.players[id]; const code=v1812tAsg(C,id);
+  return {id,p,kind:info.kind||'ret',story:info.story||'',info,lo:o[0],hi:o[1],mid:(o[0]+o[1])/2,slo:s[0],shi:s[1],smid:(s[0]+s[1])/2,t:rg.t,ts:rg.ts,drills:dr,
+    scr:(raw=>raw&&day>=3?raw.pct:null)(RA[id]),elig:v1812tElig(p),code,ret,tag:!!T.tags[id],mem:info.mem?T.mem[info.mem]:(p.cutMem||null)}; }
+
+/* ---------- the roster the choices make, and the rules it must meet ---------- */
+function v1812tCounts(C){ const ids=v1812tPoolIds(C); const out={V:0,JV:0,MOD:0,X:0,U:0,N:ids.length}; const pos={V:{GK:0,DEF:0,MID:0,FWD:0},JV:{GK:0,DEF:0,MID:0,FWD:0},MOD:{GK:0,DEF:0,MID:0,FWD:0}};
+  for(const id of ids){ const c=v1812tAsg(C,id); const p=v1812tFind(C,id); if(!c){ out.U++; continue; } if(c==='X'){ out.X++; continue; } out[c]++; if(p) pos[c][p.pos]++; }
+  out.pos=pos; return out; }
+function v1812tCheck(C){ const n=v1812tCounts(C); const errors=[], warns=[]; const nm={V:'Varsity',JV:'JV',MOD:'Modified'};
+  for(const l of LVLS){ const cap=V1812T.caps[l], mn=V1812T.mins[l], c=n[l], pc=n.pos[l];
+    if(c>cap) errors.push({k:'over',l,msg:`${nm[l]} holds ${cap}: cut or move ${c-cap}.`});
+    if(c<mn) errors.push({k:'under',l,msg:`${nm[l]} needs at least ${mn} players (has ${c}).`});
+    if(c>0&&pc.GK===0) errors.push({k:'gk0',l,msg:`${nm[l]} has no goalkeeper.`});
+    else if(c>0&&pc.GK===1) warns.push({k:'gk1',l,msg:`Only 1 goalkeeper on ${nm[l]}: one card or injury and a field player is in goal.`});
+    for(const g of ['DEF','MID','FWD']) if(c>=mn&&pc[g]<V1812T.posMin[l][g]) warns.push({k:'pos',l,g,msg:`${nm[l]} has only ${pc[g]} ${g==='DEF'?'defender':g==='MID'?'midfielder':'forward'}${pc[g]===1?'':'s'}.`}); }
+  if(n.U>0) errors.push({k:'undecided',msg:`${n.U} player${n.U===1?' is':'s are'} still undecided.`});
+  for(const id of v1812tPoolIds(C)){ const c=v1812tAsg(C,id); const p=v1812tFind(C,id); if(c&&c!=='X'&&p&&!eligible(p,c)) errors.push({k:'elig',id,msg:`${pname(p)} (grade ${p.grade}) is not eligible for ${nm[c]}.`}); }
+  return {ok:errors.length===0,errors,warns,n}; }
+/* set one player's level (or 'X' to cut) */
+function v1812tSet(C,id,code){ const T=v1812tBox(C); if(v1812tSt(C)!=='open') return {ok:false,msg:'The roster is already posted.'};
+  const p=v1812tFind(C,id); if(!p||!v1812tPoolIds(C).includes(id)) return {ok:false,msg:'He is not in the tryout pool.'};
+  if(code!=='X'&&!LVLS.includes(code)) return {ok:false,msg:'Unknown squad.'};
+  if(code!=='X'&&!eligible(p,code)) return {ok:false,msg:`${pname(p)} (grade ${p.grade}) is not eligible for ${LVL_NAME[code]}.`};
+  T.a[id]=code; return {ok:true}; }
+
+/* ---------- auto-sort: a sensible roster from what the coach can see ---------- */
+function v1812tScore(v,lvl,day){ let s=v.mid; const g=v.p.grade;
+  const gb={V:{12:2.5,11:1.5,10:.3,9:-1.2,8:-4,7:-6},JV:{10:1,9:.3,8:-2,7:-3.5},MOD:{}}[lvl]||{}; s+=gb[g]||0;
+  if(v.kind==='ret'||v.kind==='fresh') s+=3+(g===12?1.5:0)+(v.p.lvl===lvl?1.2:0)+(g>=11&&v.p.lvl==='V'&&lvl==='V'?12:0);
+  if(g<=9&&lvl!=='V') s+=(v.smid-3)*.8;
+  if(day>=3&&v.scr!=null) s+=(v.scr-.5)*3;
+  return s; }
+function v1812tAutoPlan(C){ const T=v1812tBox(C); const day=Math.min(3,T.day|0); const ids=v1812tPoolIds(C); const RA=v1812tAllRaw(C); const views=ids.map(id=>v1812tView(C,id,RA)).filter(Boolean);
+  const out={}; const left=new Set(views.map(v=>v.id)); const byId=Object.fromEntries(views.map(v=>[v.id,v]));
+  for(const l of LVLS){ const cap=V1812T.caps[l]; const el=views.filter(v=>left.has(v.id)&&v.elig[l]); const sc=v=>v1812tScore(v,l,day);
+    const sorted=el.slice().sort((a,b)=>(sc(b)-sc(a))||(a.id<b.id?-1:1)); const chosen=[]; const have=new Set();
+    const need=Object.assign({GK:2},V1812T.posMin[l]);
+    for(const g of ['GK','DEF','MID','FWD']){ let n=need[g]; for(const v of sorted){ if(n<=0||chosen.length>=cap) break; if(v.p.pos===g&&!have.has(v.id)){ chosen.push(v); have.add(v.id); n--; } } }
+    let gkn=chosen.filter(v=>v.p.pos==='GK').length;
+    for(const v of sorted){ if(chosen.length>=cap) break; if(v.p.pos==='GK'&&gkn>=3) continue; if(!have.has(v.id)){ chosen.push(v); have.add(v.id); if(v.p.pos==='GK') gkn++; } }
+    for(const v of chosen){ out[v.id]=l; left.delete(v.id); } }
+  for(const id of left) out[id]='X';
+  v1812tFixKeepers(C,views,out,day);
+  return out; }
+/* every level gets two keepers where the pool allows it (Modified first: only grade 7-8 players qualify) */
+function v1812tFixKeepers(C,views,out,day){
+  for(const l of ['MOD','JV','V']){ const cap=V1812T.caps[l]; const sc=v=>v1812tScore(v,l,day);
+    const at=lv=>views.filter(v=>out[v.id]===lv); const gkAt=lv=>at(lv).filter(v=>v.p.pos==='GK').length;
+    for(let guard=0;guard<4&&gkAt(l)<2;guard++){
+      let cand=views.filter(v=>v.p.pos==='GK'&&out[v.id]==='X'&&v.elig[l]).sort((a,b)=>sc(b)-sc(a)||(a.id<b.id?-1:1))[0];
+      if(!cand) cand=views.filter(v=>v.p.pos==='GK'&&out[v.id]!=='X'&&out[v.id]!==l&&v.elig[l]&&gkAt(out[v.id])>2).sort((a,b)=>sc(b)-sc(a)||(a.id<b.id?-1:1))[0];
+      if(!cand&&gkAt(l)>=1) break; if(!cand) cand=views.filter(v=>v.p.pos==='GK'&&out[v.id]!=='X'&&out[v.id]!==l&&v.elig[l]&&gkAt(out[v.id])>1).sort((a,b)=>sc(b)-sc(a)||(a.id<b.id?-1:1))[0];
+      if(!cand) break;
+      if(at(l).length>=cap){ const ev=at(l).filter(v=>v.p.pos!=='GK').sort((a,b)=>sc(a)-sc(b)||(a.id<b.id?-1:1))[0]; if(ev) out[ev.id]='X'; }
+      out[cand.id]=l; } } }
+function v1812tApplyAuto(C){ const T=v1812tBox(C); const plan=v1812tAutoPlan(C); for(const id in plan) T.a[id]=plan[id]; return plan; }
+
+/* ---------- running a day ---------- */
+function v1812tRunDay(C){ const T=v1812tBox(C); if(v1812tSt(C)!=='open'||T.day>=3) return T.day; T.seen=true; T.day++; return T.day; }
+
+/* ---------- posting the list ---------- */
+function v1812tFixNums(C,lvls){ const u=C.userSid; const used0=retiredSet(C,u);
+  for(const l of lvls){ const used=new Set(used0); const r=rngFrom(hashStr(C.seed+':nums:'+C.year+':'+l)); const sq=squad(C,u,l).sort((a,b)=>(a.num||999)-(b.num||999)||(a.id<b.id?-1:1));
+    for(const p of sq){ if(!p.num||used.has(p.num)) p.num=assignNum(r,used,p.pos); else used.add(p.num); } } }
+function v1812tRelineup(C,sid,lvls){ const s=C.schools[sid]; const user=sid===C.userSid;
+  for(const l of lvls){ const lu=getLu(C,sid,l)||{}; const form=user?(FORMS[lu.custom?(lu.base||'4-4-2'):lu.form]?(lu.custom?(lu.base||'4-4-2'):lu.form):'4-4-2'):C.coaches[s.coachId].form;
+    const keepTac=lu.tac, keepStrat=lu.strat; const caps=(lu.caps||[]).filter(id=>C.players[id]&&C.players[id].lvl===l&&C.players[id].sid===sid);
+    s.lu[l]={...autoLineup(C,sid,l,form),tac:keepTac||{...C.coaches[s.coachId].tac},strat:keepStrat||'balanced',caps};
+    if(caps.length<2) s.lu[l].caps=[...caps,...defaultCaptains(C,sid,l).filter(x=>!caps.includes(x))].slice(0,2); } }
+function v1812tGrudge(C,p,fromLvl,prev){ const r=rngFrom(hashStr(C.seed+':grudge:'+p.id+':'+C.year));
+  let g=({V:42,JV:26,MOD:14}[fromLvl]||8)+Math.min(20,Math.max(0,p.pot-ovr(p))*.6)+gauss(r)*8+((prev&&prev.cuts)||0)*12+(p.aggr-50)*.3;
+  return clamp(Math.round(g),0,100); }
+function v1812tPost(C,mode){
+  const T=v1812tBox(C); if(v1812tSt(C)!=='open') return {ok:false,errors:[{msg:'The roster is already posted.'}]};
+  if(mode==='auto'){ T.day=3; v1812tApplyAuto(C); T.auto=true; }
+  if(mode==='auto'){ /* the staff always produce a legal list: a keeper signs up late if a level has none */
+    for(const l of LVLS){ const gk=v1812tPoolIds(C).filter(id=>T.a[id]===l&&(v1812tFind(C,id)||{}).pos==='GK').length;
+      if(!gk){ const rr=v1812tRng(C,'late:'+C.year+':'+l); const o=v1812tNewcomer(C,rr,90+LVLS.indexOf(l),'walk',{walk:true,pos:'GK',grade:l==='MOD'?8:l==='JV'?10:11}); o.info.story='Signed up late, keeper'; T.cands[o.p.id]=o.p; T.pool.push(o.p.id); T.info[o.p.id]=o.info; T.a[o.p.id]=l;
+        const ev=v1812tPoolIds(C).filter(id=>T.a[id]===l&&(v1812tFind(C,id)||{}).pos!=='GK').sort((a,b)=>ovr(v1812tFind(C,a))-ovr(v1812tFind(C,b)))[0]; if(ev&&v1812tCounts(C)[l]>V1812T.caps[l]) T.a[ev]='X'; } } }
+  const chk=v1812tCheck(C); if(!chk.ok&&mode!=='auto') return {ok:false,errors:chk.errors};
+  const u=C.userSid; const yr=C.year; const r=rngFrom(hashStr(C.seed+':post:'+yr)); const ids=v1812tPoolIds(C);
+  const before={V:new Set(),JV:new Set(),MOD:new Set()}; for(const l of LVLS) for(const p of squad(C,u,l)) before[l].add(p.id);
+  const sum={yr,auto:mode==='auto',n:{V:0,JV:0,MOD:0,X:0},v:[],jv:[],mod:[],cut:[],newV:[],up:[],down:[],newcomers:[],backs:[],prevV:[...before.V]};
+  const touched=new Set();
+  for(const id of ids){ const code=T.a[id]||'X'; const p=v1812tFind(C,id); if(!p) continue; const inProg=!!C.players[id];
+    const prevLvl=inProg?p.lvl:null;
+    if(code==='X'){ const prev=T.mem[id]; const m={pid:id,name:pname(p),fromLvl:prevLvl,cutYr:yr,grudge:v1812tGrudge(C,p,prevLvl,prev),kind:(v1812tInfo(C,id).kind||'ret'),status:'cut',cuts:(prev?prev.cuts:0)+1,from:u,ovr:r1(ovr(p)),pot:p.pot,grade:p.grade,pos:p.pos,brk:false};
+      T.mem[id]=m; if(inProg){ delete C.players[id]; if(prevLvl) touched.add(prevLvl); } p.cutYr=yr; T.cut[id]=p; delete T.cands[id];
+      sum.n.X++; sum.cut.push({id,name:pname(p),pos:p.pos,grade:p.grade,from:prevLvl,ovr:r1(ovr(p)),pot:p.pot,kind:m.kind}); continue; }
+    if(!inProg){ p.sid=u; p.lvl=code; p.joined=yr; p.num=0; delete p.tryKind; delete p.cutYr; if(!p.plan) planDev(C,p,r); p.ovr0[yr]=r1(ovr(p)); C.players[id]=p; delete T.cands[id];
+      const inf=T.info[id]||{}; const m=T.mem[id]; if(m){ m.status='made'; m.madeYr=yr; m.madeLvl=code; p.cutMem={yr:m.cutYr,lvl:m.fromLvl,g:m.grudge,from:u,back:yr,brk:!!m.brk}; sum.backs.push(id); }
+      sum.newcomers.push({id,kind:inf.kind||'walk',lvl:code}); touched.add(code); }
+    else if(p.lvl!==code){ touched.add(p.lvl); touched.add(code); p.lvl=code; }
+    sum.n[code]++;
+    if(code==='V'&&!before.V.has(id)) sum.newV.push(id);
+    if(inProg&&v1812tLvlOrd[code]<v1812tLvlOrd[prevLvl]) sum.up.push(id); if(inProg&&v1812tLvlOrd[code]>v1812tLvlOrd[prevLvl]) sum.down.push(id); }
+  for(const l of LVLS){ for(const p of squad(C,u,l).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1))) sum[l==='V'?'v':l==='JV'?'jv':'mod'].push(p.id); }
+  v1812tFixNums(C,LVLS);
+  /* lineups: rebuilt where the group changed, repaired elsewhere, then validated */
+  for(const l of LVLS){ if(touched.has(l)) v1812tRelineup(C,u,[l]); else repairLineup(C,u,l);
+    let v=validateLineup(C,u,l); if(!v.ok){ v1812tRelineup(C,u,[l]); v=validateLineup(C,u,l); } }
+  /* the story, in the Newswire */
+  const town=C.schools[u].town; const N=(t,x,sid,e)=>addNews(C,t,x,sid||u,e);
+  N('tryouts',`${town} post the ${yr} roster: ${sum.n.V} on Varsity, ${sum.n.JV} on JV, ${sum.n.MOD} on Modified, ${sum.n.X} cut`,u);
+  for(const id of sum.backs.slice(0,3)){ const p=C.players[id]; N('comeback',`He remembers: ${pname(p)}, cut in ${p.cutMem.yr}, ${p.cutMem.brk?'came back a different player and ':''}makes the ${LVL_NAME[p.lvl]} roster`,u,{pid:id}); }
+  for(const c of sum.cut.filter(c=>c.from==='V').slice(0,2)) N('tryouts',`${c.name}, a Varsity player last fall, is cut`,u);
+  const nv=sum.newV.map(id=>C.players[id]).filter(p=>p&&p.tryKind===undefined).sort((a,b)=>ovr(b)-ovr(a));
+  for(const x of sum.newcomers.filter(x=>x.lvl==='V'&&x.kind!=='back').slice(0,2)){ const p=C.players[x.id]; const inf=T.info[x.id]||{}; N('tryouts',`${x.kind==='move'?'Move-in':'Walk-on'} ${pname(p)} makes Varsity${inf.from?` (from ${inf.from})`:''}`,u,{pid:x.id}); }
+  T.posted=sum; T.st=mode==='auto'?'auto':'posted'; T.postedAt=mode==='auto'?'staff':'user'; T.hist[yr]={yr,auto:sum.auto,n:sum.n,newV:sum.newV,cut:sum.cut.map(c=>({id:c.id,name:c.name,from:c.from,ovr:c.ovr})),newcomers:sum.newcomers.length,backs:sum.backs};
+  T.cands={}; T.pool=[]; V1812T.memo=null;
+  return {ok:true,sum}; }
+/* a roster posted by the staff (skip tryouts, or the preseason moving on without them) */
+function v1812tAutoResolve(C){ if(!v1812tOK(C)) return false; v1812tEnsure(C); if(!v1812tIsOpen(C)) return false; const res=v1812tPost(C,'auto'); return !!(res&&res.ok); }
+
+/* ---------- the summer: what happens to the players who were cut ---------- */
+function v1812tPlaceAtRival(C,p,dest,rr){ const sch=C.schools[dest]; const prefer=['V','JV','MOD'].filter(l=>eligible(p,l));
+  let lvl=prefer[prefer.length-1];
+  for(const l of prefer){ const sq=squad(C,dest,l).sort((a,b)=>ovr(b)-ovr(a)); const ref=sq.length?ovr(sq[Math.min(sq.length-1,Math.floor(sq.length/2))]):0; if(ovr(p)>=ref-1){ lvl=l; break; } }
+  p.sid=dest; p.lvl=lvl; p.joined=C.year; C.players[p.id]=p; p.num=freeNum(C,dest,lvl,p);
+  const touched=new Set([lvl]);
+  const sq=squad(C,dest,lvl); if(sq.length>V1812T.caps[lvl]){ const weakest=sq.filter(x=>x.id!==p.id&&!(x.pos==='GK'&&sq.filter(y=>y.pos==='GK').length<=2)).sort((a,b)=>ovr(a)-ovr(b))[0];
+    if(weakest){ const down=['JV','MOD'].find(l=>v1812tLvlOrd[l]>v1812tLvlOrd[lvl]&&eligible(weakest,l)&&squad(C,dest,l).length<V1812T.caps[l]);
+      if(down){ weakest.lvl=down; weakest.num=freeNum(C,dest,down,weakest); touched.add(down); } else { C.alumni[weakest.id]=compactAlum(weakest,C.year-1,'Left the program before his final season'); delete C.players[weakest.id]; } } }
+  v1812tRelineup(C,dest,[...touched]); return lvl; }
+function v1812tAfterRollover(C){
+  const T=v1812tBox(C); const u=C.userSid; if(!u) return; const newYr=C.year;
+  const left=Object.values(T.mem).filter(m=>m.status==='cut'&&T.cut[m.pid]).sort((a,b)=>a.pid<b.pid?-1:1);
+  const others=C.league.filter(s=>s!==u);
+  for(const m of left){ const p=T.cut[m.pid]; const rr=rngFrom(hashStr(C.seed+':fate:'+m.pid+':'+newYr)); m.log=m.log||[];
+    p.grade++; p.age++; p.susp=0;
+    if(p.grade>12){ m.status='grad'; m.endYr=newYr; delete T.cut[m.pid]; continue; }
+    p.h=Math.max(p.h,p.ah-growthLeft(p.age,p.mat));
+    const gap0=p.pot-ovr(p); if(p.plan&&gap0>0) shiftOvr(p,Math.min(gap0,p.plan.gain*clamp(gap0/12,.2,1)*.8),'balanced');
+    const bonus=(.6+2.2*m.grudge/100)*(.6+rr()*.8); const g1=p.pot-ovr(p); if(bonus>g1) p.pot=Math.min(99,Math.round(ovr(p)+bonus)); shiftOvr(p,bonus,'balanced');
+    const pB=clamp(.035+m.grudge*.0011+Math.max(0,m.pot-m.ovr-15)*.003,.03,.2); const brk=rr()<pB;
+    if(brk){ shiftOvr(p,7+rr()*9,'balanced'); p.pot=Math.min(99,Math.max(p.pot,Math.round(ovr(p)+3+rr()*5))); p.bo=(p.bo||0)+1; m.brk=true; }
+    const o=ovr(p); const cn=m.cuts||1;
+    const pQ=clamp(.07+(58-o)*.004-m.grudge*.0004+(cn-1)*.06,.03,.3), pM=clamp(.3+(cn-1)*.18-m.grudge*.002,.12,.62), pT=clamp(.03+m.grudge*.0009+Math.max(0,o-60)*.0035+(m.brk?.05:0),.02,.22); const x=rr();
+    planDev(C,p,rr); p.ovr0[newYr]=r1(ovr(p)); m.ovrNow=r1(o); m.gradeNow=p.grade;
+    const town=C.schools[u].town;
+    if(x<pQ){ m.status='quit'; m.endYr=newYr; delete T.cut[m.pid]; if(m.fromLvl==='V') addNews(C,'tryouts',`${m.name}, cut from the Varsity last fall, has quit the sport`,u); }
+    else if(x<pQ+pM){ m.status='away'; m.endYr=newYr; delete T.cut[m.pid]; }
+    else if(x<pQ+pM+pT&&others.length){ const w=rr(); const heated=C.rivals.heated, seasonal=C.rivals.seasonal;
+      const dest=w<.6&&others.includes(heated)?heated:w<.8&&others.includes(seasonal)?seasonal:others[Math.floor(rr()*others.length)];
+      delete T.cut[m.pid]; p.sid=dest; p.cutMem={yr:m.cutYr,lvl:m.fromLvl,g:m.grudge,from:u,rv:dest===heated,brk:!!m.brk,to:dest}; delete p.cutYr; delete p.tryKind;
+      const lvl=v1812tPlaceAtRival(C,p,dest,rr); m.status='rival'; m.sid=dest; m.endYr=newYr; m.toLvl=lvl;
+      addNews(C,'transfer',`He remembers: ${m.name}, cut by ${town} in ${m.cutYr}, transfers to ${C.schools[dest].town}${dest===heated?' (your heated rival)':''}${m.brk?' and has grown into a player':''}`,dest,{pid:m.pid}); }
+    else { m.status='back'; m.backYr=newYr; if(m.brk) addNews(C,'comeback',`He remembers: ${m.name}, cut in ${m.cutYr}, is back for tryouts and looks like a different player`,u); } }
+  /* anyone who would have graduated while waiting is dropped the same way; nothing else is touched */
+  V1812T.memo=null; }
+
+/* ---------- revenge games: players cut by this program who now play against it ---------- */
+function v1812tRevenge(C,f){ if(!f||!C||!C.userSid) return []; const u=C.userSid; if(f.h!==u&&f.a!==u) return []; const opp=f.h===u?f.a:f.h; const lvl=f.lvl||'V';
+  const lu=C.schools[opp]&&C.schools[opp].lu[lvl]; const inXI=new Set(lu?lu.slots.map(s=>s.pid):[]);
+  return squad(C,opp,lvl).filter(p=>p.cutMem&&p.cutMem.from===u).map(p=>({p,xi:inXI.has(p.id),cm:p.cutMem})).sort((a,b)=>(b.xi-a.xi)||(ovr(b.p)-ovr(a.p))); }
+
+/* ---------- hooks: wrap the engine globals (browser and Node alike) ---------- */
+const _v1812tRollover=rollover;
+rollover=function(C){ const res=_v1812tRollover.apply(this,arguments); if(res&&res.ok){ try{ v1812tAfterRollover(C); }catch(e){ if(typeof console!=='undefined') console.error('tryouts rollover',e); } } return res; };
+const _v1812tMigrate=migrate;
+migrate=function(C){ const out=_v1812tMigrate.apply(this,arguments); if(C&&C.userSid) try{ v1812tBox(C); }catch(e){} return out; };
+const _v1812tEveryone=everyone;
+everyone=function(C){ const all=_v1812tEveryone.apply(this,arguments); const T=C&&C.tryout; if(T&&T.cut){ for(const id in T.cut) if(!C.players[id]&&!C.alumni[id]) all.push(T.cut[id]); } return all; };
+const _v1812tFindPerson=findPerson;
+findPerson=function(C,id){ const p=_v1812tFindPerson.apply(this,arguments); if(p) return p; const T=C&&C.tryout; return (T&&T.cut&&T.cut[id])||null; };
+/* a preseason fixture is about to be played: the tryouts end here, on the coaching staff's list if nobody posted one */
+const _v1812tStartMatch=startMatch;
+startMatch=function(C,fid,opts){ try{ const f=C&&C.fixtures[fid]; if(!(opts&&(opts.fast||opts.seedSalt))&&f&&f.comp==='pre'&&C.phase==='preseason'&&C.userSid&&(!C.tryout||C.tryout.yr!==C.year||C.tryout.st==='open')){ v1812tEnsure(C); if(v1812tIsOpen(C)){ v1812tAutoResolve(C); if(typeof v1812tAfterAuto==='function') v1812tAfterAuto(C); } } }catch(e){ if(typeof console!=='undefined') console.error('tryouts auto',e); }
+  return _v1812tStartMatch.apply(this,arguments); };
+/* a cut player who scores against the program that cut him: it makes the Newswire */
+const _v1812tFinish=finishMatch;
+finishMatch=function(C,M){ const out=_v1812tFinish.apply(this,arguments);
+  try{ const f=C.fixtures[M.fid]; if(f&&f.st==='d'&&C.userSid&&(f.h===C.userSid||f.a===C.userSid)){ const rv=v1812tRevenge(C,f); const lg=C.logs&&C.logs[f.id];
+      if(rv.length&&lg&&lg.box){ const opp=f.h===C.userSid?f.a:f.h; const rows=lg.box[f.h===opp?0:1]||[];
+        for(const x of rv){ const row=rows.find(r=>r.pid===x.p.id); const k='rv'+f.id+x.p.id; C.flags=C.flags||{}; if(!row||!row.g||C.flags[k]) continue; C.flags[k]=1;
+          addNews(C,'transfer',`He remembers: ${pname(x.p)} scores ${row.g>1?row.g+' goals ':''}against the program that cut him in ${x.cm.yr}`,opp,{fid:f.id}); } } } }catch(e){}
+  return out; };
+
+/* ===================== v18.12 TRYOUTS: the drills on screen and the gym door (v1812t) =====================
+   Pure presentation: inline SVG and CSS animations, no random streams, nothing here changes the game.
+   - v1812tScene(kind, o): a short looping SVG animation per drill (sprint, juggling, beep test, position drill, scrimmage)
+   - v1812tSheet(C, lvl, o): the typed roster sheet (HTML), used on the screen, in the door scene and in the recap
+   - v1812tDoorOpen(C, sum): the full-screen scene where the list is taped to the gym door, then the trainer's door */
+
+/* a small runner, side view: head, body, two swinging arms and legs (CSS keyframes in 97_tryouts.css) */
+function v1812tRunner(x,y,col,o){ o=o||{}; const sk=o.skin||'#e5ae86', s=o.s||1, cls=o.cls||'run';
+  return `<g class="v1812t-rn ${cls}" transform="translate(${x} ${y}) scale(${s})"><rect class="rn-l rn-l2" x="-2.6" y="-11" width="5" height="12" rx="2.4" fill="${o.legs||'#1b2430'}"/><rect class="rn-a rn-a2" x="-2" y="-27" width="4" height="12" rx="2" fill="${sk}"/><rect x="-5.2" y="-28" width="10.4" height="18" rx="4.6" fill="${col}"/><circle cx="1" cy="-34" r="5.2" fill="${sk}"/><path d="M-3.6 -37.4 a5.6 5.6 0 0 1 9 -1" fill="none" stroke="${o.hair||'#2b1a10'}" stroke-width="3.2" stroke-linecap="round"/><rect class="rn-l rn-l1" x="-2.6" y="-11" width="5" height="12" rx="2.4" fill="${o.legs||'#1b2430'}"/><rect class="rn-a rn-a1" x="-2" y="-27" width="4" height="12" rx="2" fill="${sk}"/></g>`; }
+function v1812tCone(x,y,c){ return `<path d="M${x-4.5} ${y} L${x} ${y-12} L${x+4.5} ${y}Z" fill="${c||'#f97316'}"/><path d="M${x-3} ${y-5} h6" stroke="#fff" stroke-width="1.6"/>`; }
+/* kind: spr | jug | beep | pos | scr. o: {c1, c2, dur (s)} */
+function v1812tScene(kind,o){ o=o||{}; const c1=o.c1||'#2f5fb3', c2=o.c2||'#f2c230', d=o.dur||2.6;
+  const crowd=Array.from({length:44},(_,i)=>`<rect x="${i*9.2}" y="${78+(i*7%5)}" width="7" height="${20-(i*7%5)}" rx="3" fill="${['#2a4a5c','#34596b','#244152','#3b6074'][i%4]}"/>`).join('');
+  const sky=`<defs><linearGradient id="v1812t-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1f2d"/><stop offset="1" stop-color="#1d5560"/></linearGradient><linearGradient id="v1812t-grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#23844a"/><stop offset="1" stop-color="#16622f"/></linearGradient></defs><rect width="400" height="140" fill="url(#v1812t-sky)"/><g opacity=".9">${crowd}</g><rect x="0" y="96" width="400" height="4" fill="#d8dde5" opacity=".5"/><g><rect x="30" y="20" width="3" height="76" fill="#33414d"/><rect x="367" y="20" width="3" height="76" fill="#33414d"/><circle cx="31.5" cy="20" r="13" fill="#fff6d8" opacity=".16"/><circle cx="368.5" cy="20" r="13" fill="#fff6d8" opacity=".16"/><rect x="22" y="14" width="19" height="7" rx="2" fill="#f4efd2"/><rect x="359" y="14" width="19" height="7" rx="2" fill="#f4efd2"/></g><rect x="0" y="100" width="400" height="40" fill="url(#v1812t-grass)"/><g stroke="#fff" stroke-opacity=".16" stroke-width="10">${[0,1,2,3,4,5].map(i=>`<path d="M${i*80+20} 100v40"/>`).join('')}</g>`;
+  const wrap=b=>`<svg class="v1812t-scene-svg" viewBox="0 0 400 140" role="img" aria-label="${esc(o.label||'Drill animation')}" preserveAspectRatio="xMidYMid meet" style="--d:${d}s">${sky}${b}</svg>`;
+  if(kind==='spr'){ const lanes=[[c1,110,.74,1],['#e8ecf1',122,.88,1.1],[c2,135,1.02,1.2]].map(([c,y,sc,k])=>`<g class="v1812t-dash" style="--k:${k}">${v1812tRunner(26,y,c,{s:sc,cls:'run'})}</g>`).join('');
+    return wrap(`<g stroke="#fff" stroke-opacity=".4" stroke-width="1.2"><path d="M0 116H400M0 128.5H400"/>${[26,114,202,290,376].map(x=>`<path d="M${x} 100v38"/>`).join('')}</g><g fill="#fff" fill-opacity=".8" font-size="7.5" font-family="JetBrains Mono,monospace" text-anchor="middle">${['0','10','20','30','40 yd'].map((t,i)=>`<text x="${26+i*87.5}" y="98">${t}</text>`).join('')}</g>${lanes}`); }
+  if(kind==='jug'){ return wrap(`${v1812tRunner(200,132,c1,{cls:'still',s:1.55})}<g class="v1812t-ball"><circle cx="207" cy="112" r="6.6" fill="#f5f5f5" stroke="#1b1b1b" stroke-width="1.4"/><path d="M204 109l3-2 3 2-1 3.4h-4z" fill="#1b1b1b"/></g><ellipse class="v1812t-bsh" cx="207" cy="134" rx="7" ry="1.8" fill="#000" opacity=".28"/>`); }
+  if(kind==='beep'){ const R=[0,1,2].map(i=>`<g class="v1812t-shut" style="animation-delay:${i*0.09}s">${v1812tRunner(60,110+i*12.5,[c1,'#e8ecf1',c2][i],{s:.74+i*.14,cls:'run'})}</g>`).join('');
+    return wrap(`<g stroke="#fff" stroke-width="2.6" opacity=".9"><path d="M52 100v38"/><path d="M348 100v38"/></g><g fill="#fff" font-size="7.5" font-family="JetBrains Mono,monospace" text-anchor="middle" opacity=".85"><text x="52" y="96">20 m</text><text x="348" y="96">20 m</text></g><circle class="v1812t-beepdot" cx="200" cy="62" r="9" fill="${c2}"/><text x="200" y="65.2" text-anchor="middle" font-size="7.5" font-weight="800" fill="#111" font-family="JetBrains Mono,monospace">BEEP</text>${R}`); }
+  if(kind==='pos'){ const path='M40 122 C80 100 100 138 140 118 S200 100 240 120 S300 138 360 116'; const cones=[90,170,250,320].map((x,i)=>v1812tCone(x,i%2?136:104)).join('');
+    return wrap(`${cones}<g><animateMotion dur="${d}s" repeatCount="indefinite" path="${path}" rotate="0" calcMode="linear"/>${v1812tRunner(0,0,c1,{s:.95,cls:'run'})}</g><circle r="4.8" fill="#f5f5f5" stroke="#1b1b1b" stroke-width="1.2"><animateMotion dur="${d}s" repeatCount="indefinite" path="${path}" rotate="0" calcMode="linear" begin="0.08s"/></circle>`); }
+  /* scrimmage: a mini pitch seen from above */
+  const dots=(col,pts)=>pts.map(([x,y],i)=>`<circle r="5.2" fill="${col}" stroke="#0b0f14" stroke-width="1"><animate attributeName="cx" dur="${(2.2+i*0.35).toFixed(2)}s" repeatCount="indefinite" values="${x};${x+14};${x-8};${x}"/><animate attributeName="cy" dur="${(2.6+i*0.3).toFixed(2)}s" repeatCount="indefinite" values="${y};${y-9};${y+8};${y}"/></circle>`).join('');
+  return `<svg class="v1812t-scene-svg" viewBox="0 0 400 140" role="img" aria-label="${esc(o.label||'Final scrimmage')}" style="--d:${d}s"><rect width="400" height="140" fill="#1f7a3f"/><g stroke="#fff" stroke-opacity=".08" stroke-width="20">${[0,1,2,3,4].map(i=>`<path d="M${i*80+40} 0v140"/>`).join('')}</g><g fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.4"><rect x="8" y="8" width="384" height="124"/><path d="M200 8v124"/><circle cx="200" cy="70" r="20"/><rect x="8" y="38" width="48" height="64"/><rect x="344" y="38" width="48" height="64"/><rect x="8" y="55" width="16" height="30"/><rect x="376" y="55" width="16" height="30"/></g>${dots('#f4f6f8',[[80,40],[110,70],[80,100],[150,55],[150,88]])}${dots(c1,[[320,40],[290,70],[320,100],[250,55],[250,88]])}<circle r="4" fill="#fff" stroke="#111" stroke-width="1"><animate attributeName="cx" dur="${d}s" repeatCount="indefinite" values="120;280;190;300;120"/><animate attributeName="cy" dur="${d}s" repeatCount="indefinite" values="70;50;90;70;70"/></circle></svg>`; }
+
+/* ---------- the typed roster sheet ---------- */
+/* o: {circ:Set of ids to circle, num:bool, draft:bool, title:string} */
+function v1812tSheet(C,lvl,o){ o=o||{}; const s=C.schools[C.userSid]; const ids=o.ids||[];
+  const list=ids.map(id=>v1812tFind(C,id)).filter(Boolean).sort((a,b)=>a.ln.localeCompare(b.ln)||a.fn.localeCompare(b.fn));
+  const circ=o.circ||new Set(); const nm={V:'Varsity',JV:'JV',MOD:'Modified'}[lvl];
+  const rows=list.map((p,i)=>`<li class="${circ.has(p.id)?'circ':''}" style="--i:${i}"><span class="n">${i+1}.</span><span class="w"><span class="nm">${esc(p.fn)} ${esc(p.ln)}${circ.has(p.id)?`<svg class="v1812t-circle" viewBox="0 0 200 30" preserveAspectRatio="none" aria-hidden="true"><path d="M8 15C5 6 60 2 120 3 176 4 197 8 196 16 195 25 150 28 90 27 36 26 3 24 5 12 6 7 14 5 26 5" pathLength="1"/></svg>`:''}</span></span><span class="g">${p.grade}</span></li>`).join('');
+  const note=lvl==='V'?`<p class="note">Not on this list? JV and Modified are posted on the trainer's door. See me Monday.<br><em>— Coach</em></p>`:`<p class="note">Cuts were told individually. See me Monday if you have questions.<br><em>— Coach</em></p>`;
+  return `<div class="v1812t-sheet ${o.draft?'draft':''}" data-lvl="${lvl}"><span class="tape t1"></span><span class="tape t2"></span><div class="sh-head"><b>${esc(o.title||s.town+' '+nm+' Soccer')}</b><small>${C.year} roster · posted Friday 3:15 pm</small></div><ol class="sh-list">${rows||'<li class="empty"><span class="w">No one yet</span></li>'}</ol>${o.noNote?'':note}${o.draft?'<span class="stamp">DRAFT</span>':''}</div>`; }
+
+/* ---------- the scene: the list goes up on the gym door ---------- */
+function v1812tSnd(k){ try{ if(typeof Sound!=='undefined'&&Sound.ui) Sound.ui(k); }catch(e){} }
+const V1812T_SC={t:[],on:false};
+function v1812tBricks(){ const col=['#8a3f2e','#7d3727','#944634','#86402f','#703225','#923f2c','#7a3a2b']; let b='';
+  for(let r=0;r<2;r++) for(let c=-1;c<3;c++){ const x=c*40+(r?-20:0); b+=`<rect x="${x+1.2}" y="${r*20+1.2}" width="37.6" height="17.6" rx="1.4" fill="${col[(r*3+c+8)%col.length]}"/>`; }
+  return `<svg class="v1812t-wallsvg" aria-hidden="true" focusable="false"><defs><pattern id="v1812t-brick" width="80" height="40" patternUnits="userSpaceOnUse" patternTransform="scale(1.7)"><rect width="80" height="40" fill="#5b4a40"/>${b}</pattern></defs><rect width="100%" height="100%" fill="url(#v1812t-brick)"/></svg>`; }
+function v1812tDoorOpen(C,sum){ v1812tDoorClose(true);
+  const s=C.schools[C.userSid]; const T=C.tryout; const rm=typeof reducedMotion==='function'&&reducedMotion();
+  const circ=new Set(sum.newV); const sh=(l,ids,ex)=>v1812tSheet(C,l,{ids,circ:l==='V'?circ:new Set(),...ex});
+  const nCut=sum.n.X, nNew=sum.newcomers.length;
+  const root=document.createElement('div'); root.id='v1812t-scene'; root.className='v1812t-scene'+(rm?' inst final':''); root.setAttribute('role','dialog'); root.setAttribute('aria-modal','true'); root.setAttribute('aria-label','The roster goes up on the gym door');
+  root.style.setProperty('--c1',s.c1); root.style.setProperty('--c2',s.c2);
+  root.innerHTML=`${v1812tBricks()}<div class="v1812t-vig" aria-hidden="true"></div>
+   <div class="v1812t-cap" aria-live="polite"><span class="eyebrow" id="v1812t-capk">Friday · 3:15 pm</span><b id="v1812t-capt">The coach walks to the gym door with the list.</b></div>
+   <div class="v1812t-slides">
+    <section class="v1812t-slide s-gym" aria-label="The gym door"><div class="v1812t-sign">GYMNASIUM</div>
+      <div class="v1812t-doorwrap"><div class="v1812t-leaf l"><span class="win" aria-hidden="true"></span><span class="bar" aria-hidden="true"></span><span class="plate" aria-hidden="true"></span>${sh('V',sum.v)}</div>
+      <div class="v1812t-leaf r" aria-hidden="true"><span class="win"></span><span class="bar"></span><span class="plate"></span><div class="flyer f1"><b>Fall Concert</b><small>Thursday, 7 pm</small></div><div class="flyer f2"><b>Lost &amp; found</b><small>Ask the front office</small></div></div></div></section>
+    <section class="v1812t-slide s-trainer" aria-label="The trainer's door"><div class="v1812t-sign sm">ATHLETIC TRAINER</div>
+      <div class="v1812t-doorwrap tr"><div class="v1812t-leaf t">${sh('JV',sum.jv,{noNote:true})}${sh('MOD',sum.mod,{noNote:true})}</div></div></section>
+   </div>
+   <div class="v1812t-final"><div class="v1812t-fin-in"><div class="v1812t-fin-tiles"><span><b>${sum.n.V}</b>Varsity</span><span><b>${sum.n.JV}</b>JV</span><span><b>${sum.n.MOD}</b>Modified</span><span class="cut"><b>${nCut}</b>cut</span></div>
+     <p>${sum.newV.length?`${sum.newV.length} new face${sum.newV.length===1?'':'s'} on the Varsity list. `:''}${nNew?`${nNew} newcomer${nNew===1?'':'s'} made a roster. `:''}${nCut?`${nCut} player${nCut===1?' was':'s were'} told Monday. They will remember it.`:'Nobody was cut.'}</p>
+     <div class="row"><button class="btn pri" data-a="v1812tDoorDone" data-autofocus>Continue</button><button class="btn" data-a="v1812tDoorAgain">Watch again</button><button class="btn ghost" data-a="v1812tDoorSquads">Open the squads</button></div></div></div>
+   <div class="v1812t-ctl"><button class="btn sm ghost" data-a="v1812tDoorSkip" id="v1812t-skip">Skip</button></div>`;
+  document.body.appendChild(root); document.body.classList.add('locked'); V1812T_SC.on=true; V1812T_SC.sum=sum;
+  const later=(ms,fn)=>{ V1812T_SC.t.push(setTimeout(()=>{ if(V1812T_SC.on) fn(); },ms)); };
+  const cap=(k,t)=>{ const a=document.getElementById('v1812t-capk'), b=document.getElementById('v1812t-capt'); if(a) a.textContent=k; if(b) b.textContent=t; };
+  const finish=()=>{ root.classList.add('inst','final','s2'); root.querySelectorAll('.sh-list li').forEach(li=>li.classList.add('in')); root.classList.add('on-paper','on-names','on-circ','on-note'); cap('Posted','The lists are up. Everyone on them is in.'); const sk=document.getElementById('v1812t-skip'); if(sk) sk.style.display='none'; const b=root.querySelector('[data-a="v1812tDoorDone"]'); if(b) b.focus({preventScroll:true}); };
+  V1812T_SC.finish=finish;
+  if(rm){ finish(); return root; }
+  requestAnimationFrame(()=>root.classList.add('on'));
+  later(500,()=>{ v1812tSnd('swoosh'); root.classList.add('on-paper'); cap('3:15 pm','The Varsity list goes up.'); });
+  later(1250,()=>{ v1812tSnd('pop'); root.classList.add('on-tape'); });
+  const nRows=sum.v.length; later(1500,()=>{ root.classList.add('on-names'); const lis=root.querySelectorAll('.s-gym .sh-list li'); lis.forEach((li,i)=>setTimeout(()=>{ if(V1812T_SC.on){ li.classList.add('in'); if(i%5===0) v1812tSnd('tick'); } },i*58)); });
+  const tNames=1500+nRows*58+500;
+  later(tNames,()=>{ root.classList.add('on-circ'); const n=root.querySelectorAll('.s-gym li.circ').length; for(let i=0;i<Math.min(n,4);i++) setTimeout(()=>v1812tSnd('pop'),i*260); cap('New to Varsity',sum.newV.length?`${sum.newV.length} circled: new on the list this year.`:'The same core returns.'); });
+  later(tNames+1100,()=>{ root.classList.add('on-note'); });
+  later(tNames+3000,()=>{ v1812tSnd('swoosh'); root.classList.add('s2'); cap('Next door down','JV and Modified are posted on the trainer\'s door.'); const lis=root.querySelectorAll('.s-trainer .sh-list li'); lis.forEach((li,i)=>setTimeout(()=>{ if(V1812T_SC.on) li.classList.add('in'); },500+i*30)); });
+  later(tNames+3000+700+Math.max(sum.jv.length,sum.mod.length)*30+900,()=>{ v1812tSnd('success'); root.classList.add('final'); cap('Posted','The lists are up. Everyone on them is in.'); const sk=document.getElementById('v1812t-skip'); if(sk) sk.style.display='none'; const b=root.querySelector('[data-a="v1812tDoorDone"]'); if(b) b.focus({preventScroll:true}); });
+  return root; }
+function v1812tDoorClose(quiet){ for(const t of V1812T_SC.t) clearTimeout(t); V1812T_SC.t=[]; V1812T_SC.on=false; const el=document.getElementById('v1812t-scene'); if(el) el.remove(); if(!App.modal&&!App.drawer&&!App.live) document.body.classList.remove('locked'); }
+document.addEventListener('keydown',e=>{ if(!V1812T_SC.on) return; if(e.key==='Tab'){ const root=document.getElementById('v1812t-scene'); if(root){ const f=[...root.querySelectorAll('button:not([disabled])')].filter(b=>b.offsetParent!==null); if(f.length){ const i=f.indexOf(document.activeElement); const n=e.shiftKey?(i<=0?f[f.length-1]:f[i-1]):(i<0||i===f.length-1?f[0]:f[i+1]); e.preventDefault(); n.focus(); } } return; } if(e.key==='Escape'||e.key===' '){ const root=document.getElementById('v1812t-scene'); if(root&&!root.classList.contains('final')){ e.preventDefault(); V1812T_SC.finish&&V1812T_SC.finish(); } else if(e.key==='Escape'){ A.v1812tDoorDone(); } } });
+
+/* ===================== v18.12 TRYOUTS & CUT DAY: the screen (v1812t) =====================
+   Route 'tryouts' (Squad menu): week header with the day stepper, a sticky counters bar (Varsity / JV / Modified / Cut /
+   Undecided with roster-limit warnings), the player cards (portrait, OVR range, stars, four drill tiles, a Varsity | JV |
+   Modified | Cut control), the roster sheet on the gym door, and the explainers. Posting opens the door scene
+   (97_tryouts_scene.js). The Overview gets a "Tryout week" card; playing the Preseason Cup without finishing the tryouts
+   asks first when the coach has started them, and quietly lets the staff post the list when he never opened them. */
+const V1812T_UI={freshDay:0,freshUntil:0,running:null,undo:null,then:null};
+const V1812T_LVL={V:'Varsity',JV:'JV',MOD:'Modified',X:'Cut'};
+const V1812T_KIND={move:['Move-in','mv'],walk:['Walk-on','wk'],back:['Comeback','bk'],fresh:['New this year','fr']};
+const V1812T_DAYTAG=['SIGN-UPS','SPRINT & JUGGLING','BEEP TEST & POSITION DRILLS','FINAL SCRIMMAGE'];
+ICON.tryouts='<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 12h7M9 15.5h7M9 19h4"/><circle cx="11.5" cy="11.6" r="3.2" stroke-width="1.5"/>';
+ICON.flag=ICON.flag||'<path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/>';
+NAV_ICON.tryouts='tryouts'; TITLES.tryouts='Tryouts & Cut Day';
+if(typeof NAV_DESC!=='undefined') NAV_DESC.tryouts='Preseason drills and the roster on the gym door';
+if(typeof TOPNAV!=='undefined'){ const g=TOPNAV.find(t=>t[0]==='squads'); if(g&&!g[3].includes('tryouts')) g[3].splice(1,0,'tryouts'); }
+{ const i=NAV.findIndex(x=>x[0]==='squads'); if(i>=0&&!NAV.some(x=>x[0]==='tryouts')) NAV.splice(i+1,0,['tryouts','Tryouts & Cut Day']); }
+const _v1812tBadges=navBadges; navBadges=function(C){ const b=_v1812tBadges.apply(this,arguments); try{ if(v1812tIsOpen(C)) b.tryouts='NEW'; }catch(e){} return b; };
+
+const v1812tSave=()=>{ try{ queueSave(); }catch(e){} };
+const v1812tIc=k=>icon(k,16);
+function v1812tPos(p){ return `<span class="pos ${p.pos}">${p.pos}</span>`; }
+function v1812tStars(v){ const a=v.slo, b=v.shi; return `<span class="v1812t-stars" role="img" aria-label="${a===b?a:a+' to '+b} of 5 stars of potential">${'★'.repeat(a)}<i class="u">${'★'.repeat(b-a)}</i><i class="e">${'★'.repeat(5-b)}</i></span>`; }
+function v1812tCountUp(root){ if(typeof reducedMotion==='function'&&reducedMotion()) return; (root||document).querySelectorAll('[data-count]').forEach(el=>{ const to=+el.dataset.count, dec=+el.dataset.dec||0, suf=el.dataset.suf||''; const t0=performance.now()+(+el.dataset.delay||0), dur=620;
+  const step=t=>{ if(!el.isConnected) return; const k=Math.max(0,Math.min(1,(t-t0)/dur)); const e=1-Math.pow(1-k,3); el.textContent=(to*e).toFixed(dec)+suf; if(k<1) requestAnimationFrame(step); else el.textContent=to.toFixed(dec)+suf; };
+  el.textContent=(0).toFixed(dec)+suf; requestAnimationFrame(step); }); }
+
+/* ---------- one candidate's card ---------- */
+function v1812tCard(C,v,plan){
+  const p=v.p, id=v.id, code=v.code, T=C.tryout, day=Math.min(3,T.day|0);
+  const km=V1812T_KIND[v.kind]; const sug=plan?plan[id]:null; const hot=V1812T_UI.freshDay&&performance.now()<V1812T_UI.freshUntil;
+  const gaps=Math.round((v.hi-v.lo)); const pctL=clamp((v.lo-20)/79*100,0,100), pctW=Math.max(2.5,(v.hi-v.lo)/79*100);
+  const rng=day>=3&&v.hi-v.lo<=0?`${v.lo}`:`${v.lo}–${v.hi}`;
+  const tile=(k,lab,i)=>{ const d=v.drills.find(x=>x.k===k); if(!d) return `<div class="v1812t-dt pend" title="${esc(lab)}: not run yet"><span class="l">${lab}</span><b class="mono">—</b><i class="bar"><u></u></i></div>`;
+    const fresh=hot&&V1812T_UI.freshDay===d.day; const num=k!=='scr'; const dec=k==='spr'?2:k==='beep'?1:0; const raw=k==='spr'?d.val:k==='beep'?d.val:d.val;
+    return `<div class="v1812t-dt ${fresh?'new':''}" style="--d:${i*80}ms;--bc:${badgeColor(35+d.bar*60)}" title="${esc(lab)}"><span class="l">${lab}</span><b class="mono" ${fresh&&num?`data-count="${(+raw).toFixed(dec)}" data-dec="${dec}" data-suf="${k==='spr'?' s':''}" data-delay="${i*80}"`:''}>${d.txt}</b><i class="bar"><u style="width:${(d.bar*100).toFixed(0)}%"></u></i></div>`; };
+  const pd=v.drills.find(x=>x.k==='pos');
+  const seg=['V','JV','MOD','X'].map(c=>{ const dis=c!=='X'&&!v.elig[c]; const on=code===c; return `<button type="button" class="c-${c} ${on?'on':''}" data-a="v1812tSeg" data-id="${id}" data-code="${c}" aria-pressed="${on}" ${dis?`disabled title="Grade ${p.grade} players are not eligible for ${V1812T_LVL[c]}"`:''}>${V1812T_LVL[c]}</button>`; }).join('');
+  const now=v.ret?`<span class="v1812t-now" title="Where he played last season">Now: ${V1812T_LVL[p.lvl]}</span>`:(v.kind==='back'&&v.mem?`<span class="v1812t-now" title="His rating on the day he was cut">Was ${Math.round(v.mem.ovr)} when cut</span>`:'');
+  const sugg=day>=1&&sug&&code&&sug!==code?`<span class="v1812t-sug" title="Auto-sort would put him here">Auto: ${V1812T_LVL[sug]}</span>`:'';
+  return `<article class="v1812t-card ${v.kind==='ret'?'':'newc'} ${code==='X'?'is-cut':''} ${code?'':'undec'} ${v.tag?'tagged':''}" data-id="${id}" data-code="${code||''}" data-kind="${v.kind}" aria-label="${esc(pname(p))}">
+   <header class="v1812t-top"><span class="v1812t-face">${portraitSVG(p,64)}</span>
+    <div class="v1812t-id"><h4 class="v1812t-name">${esc(p.fn)} ${esc(p.ln)}</h4><div class="v1812t-sub">${v1812tPos(p)}<span>Grade ${p.grade}</span>${p.num?`<span class="mono">#${p.num}</span>`:''}${km?`<span class="v1812t-kind k-${km[1]}">${km[0]}</span>`:''}${v.kind==='back'&&v.info.brk?'<span class="v1812t-kind k-rem">He remembers</span>':''}</div><p class="v1812t-story">${esc(v.story)}</p></div>
+    <div class="v1812t-side">${v1812tStars(v)}<button type="button" class="v1812t-tagbtn ${v.tag?'on':''}" data-a="v1812tTag" data-id="${id}" aria-pressed="${v.tag}" aria-label="${v.tag?'Remove tag from':'Tag'} ${esc(pname(p))}" title="Tag to watch">${icon('flag',15)}</button></div></header>
+   <div class="v1812t-ovr"><span class="lab">OVR</span><b class="mono v1812t-rng" style="color:${badgeColor(v.mid)}" aria-label="Overall rating ${v.hi>v.lo?'between '+v.lo+' and '+v.hi:v.lo}">${rng}</b><span class="v1812t-track" aria-hidden="true"><i style="left:${pctL.toFixed(1)}%;width:${pctW.toFixed(1)}%;background:${badgeColor(v.mid)}"></i></span><small>${day>=3?'final read':day===0?'wide open':`narrowing (${gaps})`}</small>${now}${sugg}</div>
+   <div class="v1812t-drills">${tile('spr','40-yd sprint',0)}${tile('jug','Juggling',1)}${tile('beep','Beep test',2)}${tile('scr','Scrimmage',3)}</div>
+   ${pd?`<div class="v1812t-pd ${hot&&V1812T_UI.freshDay===2?'new':''}"><span>${esc(pd.lab)}</span><i class="bar"><u style="width:${(pd.bar*100).toFixed(0)}%;background:${badgeColor(35+pd.bar*60)}"></u></i><b class="mono">${pd.txt}</b></div>`:''}
+   <div class="v1812t-seg" role="group" aria-label="Place ${esc(pname(p))}">${seg}</div></article>`; }
+
+/* ---------- counters bar ---------- */
+function v1812tBar(C){ const chk=v1812tCheck(C); const n=chk.n; const T=C.tryout;
+  const cell=(l,lab)=>{ const cap=V1812T.caps[l], c=n[l], mn=V1812T.mins[l]; const cls=c>cap?'over':c<mn?'under':c===cap?'full':'ok'; return `<div class="v1812t-ct ${cls}" title="${lab}: ${c} of ${cap} (at least ${mn})"><span class="lab">${lab}</span><b class="mono">${c}<small>/${cap}</small></b><i style="--f:${Math.min(1,c/cap).toFixed(3)}"></i></div>`; };
+  const chips=[...chk.errors.map(e=>`<span class="v1812t-chip bad">${esc(e.msg)}</span>`),...chk.warns.map(e=>`<span class="v1812t-chip warn">${esc(e.msg)}</span>`)].join('');
+  return `<div class="v1812t-bar" id="v1812t-bar" role="region" aria-label="Roster counters" aria-live="polite"><div class="v1812t-bar-in">
+    <div class="v1812t-cts">${cell('V','Varsity')}${cell('JV','JV')}${cell('MOD','Modified')}<div class="v1812t-ct cutc"><span class="lab">Cut</span><b class="mono">${n.X}</b></div><div class="v1812t-ct ${n.U?'under':'ok'}"><span class="lab">Undecided</span><b class="mono">${n.U}</b></div></div>
+    <div class="v1812t-bar-acts"><button class="btn sm" data-a="v1812tAuto" title="Suggest a roster from what the drills have shown so far">Auto-sort</button>${V1812T_UI.undo&&V1812T_UI.undo.k===C.seed+':'+C.year?`<button class="btn sm ghost" data-a="v1812tUndo">Undo auto-sort</button>`:''}<button class="btn pri ${chk.ok?'':'dim'}" data-a="v1812tPostAsk" ${chk.ok?'':'aria-disabled="true"'}>${chk.ok?'Post the roster':'Post the roster…'}</button></div></div>
+    ${chips?`<div class="v1812t-chips">${chips}</div>`:''}</div>`; }
+
+/* ---------- the day header and the stepper ---------- */
+function v1812tStandouts(C,day){ if(day<1) return []; const raw=v1812tAllRaw(C); const ids=Object.keys(raw); if(!ids.length) return [];
+  const best=(f,cmp)=>ids.reduce((a,id)=>(a==null||cmp(f(raw[id]),f(raw[a])))?id:a,null); const nm=id=>{ const p=v1812tFind(C,id); return p?p.fn[0]+'. '+p.ln:'?'; };
+  const out=[]; if(day===1){ const a=best(r=>r.spr,(x,y)=>x<y), b=best(r=>r.jug,(x,y)=>x>y); out.push(['Fastest 40',nm(a),raw[a].spr.toFixed(2)+' s'],['Most juggles',nm(b),String(raw[b].jug)]); }
+  if(day===2){ const a=best(r=>r.beep,(x,y)=>x>y), b=best(r=>r.pos,(x,y)=>x>y); out.push(['Beep test leader',nm(a),raw[a].beep.toFixed(1)],['Top position drill',nm(b),String(raw[b].pos)]); }
+  if(day>=3){ const a=best(r=>r.pct,(x,y)=>x>y); out.push(['Best in the scrimmage',nm(a),v1812tLetter(raw[a].pct)]); } return out; }
+function v1812tWeek(C){ const T=C.tryout; const day=Math.min(3,T.day|0); const run=V1812T_UI.running; const shown=run?day-1:day; const steps=['Sign-ups','Day 1','Day 2','Day 3','Post'];
+  const title=shown===0?'Tryout week — sign-ups are in':`Tryout week — DAY ${shown} OF 3 · ${V1812T_DAYTAG[shown]}`;
+  const next=day<3?`Run Day ${day+1}`:'';
+  const so=v1812tStandouts(C,shown);
+  const sub=shown===0?`${v1812tPoolIds(C).length} players are trying out for ${V1812T.caps.V+V1812T.caps.JV+V1812T.caps.MOD} spots. Each day tightens the range on every rating; the final scrimmage is graded.`:shown<3?`${V1812T_DAYTAG[shown+1]} is next. You can place and cut players at any point; nothing is posted until you say so.`:'All the drills are done. Set every level, then post the roster on the gym door.';
+  return `<section class="v1812t-week" aria-label="Tryout week"><div class="v1812t-week-l"><span class="eyebrow v1812t-kick">Preseason · ${C.year}</span><h2 class="v1812t-wk-t" id="v1812t-wk-t">${title}</h2><p class="small muted v1812t-wk-s">${sub}</p>
+    <ol class="v1812t-steps" aria-label="Tryout progress">${steps.map((s,i)=>{ const st=i<=shown?(i===shown&&i<4?'now':'done'):'next'; return `<li class="${i<shown?'done':i===shown?'now':'next'}" ${i===shown?'aria-current="step"':''}><i>${i<shown?'✓':i+1}</i><span>${s}</span></li>`; }).join('')}</ol>
+    ${so.length?`<div class="v1812t-standouts" aria-label="Standouts">${so.map(([l,n,v])=>`<span><em>${l}</em> <b>${esc(n)}</b> <i class="mono">${v}</i></span>`).join('')}</div>`:''}</div>
+   <div class="v1812t-week-r">${day<3?`<button class="btn pri play v1812t-run" data-a="v1812tRun" ${run?'disabled aria-busy="true"':''}>${run?'Running the drills…':next}</button>`:`<span class="v1812t-alldone">${icon('office',18)} Drills complete</span>`}<button class="btn ghost sm" data-a="v1812tSkipAsk">Skip tryouts (auto-sort the program)</button></div></section>
+   <section class="v1812t-stage" id="v1812t-stage" hidden aria-live="polite"></section>`; }
+
+/* ---------- the gym-door preview (left column) ---------- */
+function v1812tDoorBox(C){ const T=C.tryout; const lv=App.params.td||'V'; const ids=v1812tPoolIds(C).filter(id=>v1812tAsg(C,id)===lv);
+  const newV=new Set(lv==='V'?ids.filter(id=>{ const p=C.players[id]; return !p||p.lvl!=='V'; }):[]);
+  const n=ids.length; const cap=V1812T.caps[lv];
+  return `<div class="v1812t-doorbox" id="v1812t-doorbox"><div class="v1812t-doortabs" role="tablist" aria-label="Roster sheet">${['V','JV','MOD'].map(l=>`<button role="tab" class="${lv===l?'on':''}" aria-selected="${lv===l}" data-a="v1812tDoorTab" data-v="${l}">${V1812T_LVL[l]}</button>`).join('')}</div>
+   <div class="v1812t-minidoor"><div class="v1812t-minileaf">${v1812tSheet(C,lv,{ids,circ:newV,draft:true,noNote:false}).replace('class="v1812t-sheet','class="v1812t-sheet static')}</div></div>
+   <p class="tiny muted v1812t-doorcap">${n} of ${cap} on the ${V1812T_LVL[lv]} list so far.${lv==='V'&&newV.size?` ${newV.size} circled: new to Varsity.`:''}</p></div>`; }
+function v1812tTiles(){ return `<div class="v1812t-expl" aria-label="How tryouts work"><div><i class="ic">${icon('binoc',20)}</i><b>Drills narrow the range</b><p>Each drill tightens a hidden rating like scouting at camp. Players you already coach start with a narrow range; unknown kids start wide open.</p></div><div><i class="ic">${icon('flag',20)}</i><b>Cut players remember it</b><p>Most come back stronger. Some transfer to a rival. A few quit. You will see them again.</p></div><div><i class="ic">${icon('users',20)}</i><b>Move-ins and walk-ons</b><p>New kids arrive every summer, not just freshmen. The best might be hiding in a wide range.</p></div></div>`; }
+
+/* ---------- the open screen ---------- */
+function v1812tOpenView(C){
+  const T=C.tryout; T.seen=true; const s=Sx(C.userSid); const day=Math.min(3,T.day|0);
+  const ids=v1812tPoolIds(C); const RA=v1812tAllRaw(C); const views=ids.map(id=>v1812tView(C,id,RA)).filter(Boolean); const plan=day>=1?v1812tAutoPlan(C):null;
+  const P=App.params||{}; let f=P.tf||(views.some(v=>v.kind!=='ret')?'new':'all'); const sort=P.ts||'level';
+  const bubble=v=>!!(plan&&v.code&&plan[v.id]!==v.code&&v.ret);
+  const F={new:{l:'Newcomers',f:v=>v.kind!=='ret'},bubble:{l:'On the bubble',f:bubble},all:{l:'Everyone',f:()=>true},V:{l:'Varsity',f:v=>v.code==='V'},JV:{l:'JV',f:v=>v.code==='JV'},MOD:{l:'Modified',f:v=>v.code==='MOD'},X:{l:'Cut',f:v=>v.code==='X'},U:{l:'Undecided',f:v=>!v.code},tag:{l:'Tagged',f:v=>v.tag},gk:{l:'Keepers',f:v=>v.p.pos==='GK'}};
+  if(!F[f]) f='all'; if(f==='bubble'&&!plan) f='new';
+  let list=views.filter(F[f].f); if(sort==="level") list=list.slice().sort((a,b)=>(a.code?1:0)-(b.code?1:0));
+  if(sort==='rating') list=list.slice().sort((a,b)=>(b.mid-a.mid)||(a.id<b.id?-1:1)); else if(sort==='name') list=list.slice().sort((a,b)=>a.p.ln.localeCompare(b.p.ln)||a.p.fn.localeCompare(b.p.fn)); else if(sort==='pos') list=list.slice().sort((a,b)=>GROUPS.indexOf(a.p.pos)-GROUPS.indexOf(b.p.pos)||(b.mid-a.mid));
+  const chip=k=>{ if(k==='bubble'&&!plan) return ''; const n=views.filter(F[k].f).length; if(k==='tag'&&!n&&f!=='tag') return ''; return `<button class="v1812t-fc ${f===k?'on':''}" data-a="v1812tFilter" data-v="${k}" aria-pressed="${f===k}">${F[k].l}<em>${n}</em></button>`; };
+  const mobileClosed=window.innerWidth<900;
+  const html=`<div class="v1812t" style="--c1:${s.c1};--c2:${s.c2}" data-day="${day}">
+    ${v1812tWeek(C)}
+    ${v1812tBar(C)}
+    <div class="v1812t-body"><aside class="v1812t-aside"><details class="v1812t-doord" ${mobileClosed?'':'open'}><summary>The gym door</summary>${v1812tDoorBox(C)}</details></aside>
+     <div class="v1812t-main"><div class="v1812t-filters" role="group" aria-label="Filter players">${['new','bubble','all','V','JV','MOD','X','U','gk','tag'].map(chip).join('')}<span class="grow"></span><label class="v1812t-sort"><span class="lab">Sort</span><select data-c="v1812tSort" aria-label="Sort players">${opts([['level','By squad'],['rating','Rating'],['pos','Position'],['name','Name']],sort)}</select></label></div>
+      <div class="v1812t-grid">${list.map(v=>v1812tCard(C,v,plan)).join('')||`<div class="empty card">No players match this filter.</div>`}</div></div></div>
+    ${v1812tTiles()}</div>`;
+  return html; }
+CH.v1812tSort=el=>{ App.params={...(App.params||{}),ts:el.value}; App.keepScroll=true; render(); };
+
+/* ---------- the posted screen ---------- */
+const V1812T_ST={cut:'Waiting out the year',back:'Coming back for tryouts',made:null,rival:null,quit:'Quit the sport',away:'Playing club ball elsewhere',grad:'Graduated'};
+function v1812tMemLine(C,m){ if(m.status==='made') return `Made ${V1812T_LVL[m.madeLvl]||'the roster'} in ${m.madeYr}`; if(m.status==='rival'){ const s=C.schools[m.sid]; return `Plays for ${s?s.town:'a rival'}${s&&m.sid===C.rivals.heated?' (your heated rival)':''}${m.toLvl?' · '+V1812T_LVL[m.toLvl]:''}`; } return V1812T_ST[m.status]||''; }
+function v1812tGrudgeMeter(g){ const n=Math.round(g/20); return `<span class="v1812t-gr" title="How much it stung: ${g}/100" aria-label="Grudge ${g} of 100">${'<i class="on"></i>'.repeat(n)}${'<i></i>'.repeat(5-n)}</span>`; }
+function v1812tMemCard(C,m){ const p=(C.tryout.cut&&C.tryout.cut[m.pid])||C.players[m.pid]; const alive=p&&portraitSVG? portraitSVG(p,44):''; return `<div class="v1812t-mem st-${m.status}"><span class="f">${alive}</span><div class="grow"><b>${esc(m.name)}</b><small>${m.pos||''} · Gr ${m.gradeNow||m.grade} · cut ${m.fromLvl?'from '+V1812T_LVL[m.fromLvl]:'at tryouts'} in ${m.cutYr}${m.brk?' · <em>He remembers</em>':''}</small><span class="s">${esc(v1812tMemLine(C,m))}</span></div>${v1812tGrudgeMeter(m.grudge)}</div>`; }
+function v1812tPostedView(C){ const T=C.tryout; const sum=T.posted; const s=Sx(C.userSid);
+  if(!sum) return v1812tEmptyView(C);
+  const old=Object.values(T.mem).filter(m=>m.cutYr<C.year).sort((a,b)=>b.cutYr-a.cutYr||(a.pid<b.pid?-1:1));
+  const mine=Object.values(T.mem).filter(m=>m.cutYr===C.year).sort((a,b)=>(a.pid<b.pid?-1:1));
+  const nm=id=>{ const p=C.players[id]; return p?`<button class="link" data-a="openPlayer" data-id="${id}">${esc(pname(p))}</button>`:esc(id); };
+  return `<div class="v1812t posted" style="--c1:${s.c1};--c2:${s.c2}">
+   <section class="v1812t-week posted"><div class="v1812t-week-l"><span class="eyebrow v1812t-kick">Preseason · ${C.year}</span><h2 class="v1812t-wk-t">${sum.auto?'The staff posted the roster':'The roster is posted'}</h2><p class="small muted">${sum.auto?'You skipped the tryouts, so the coaching staff ran the drills and sorted the program.':'Posted Friday at 3:15 pm.'} Lineups were rebuilt and checked for every level.</p>
+     <div class="v1812t-fin-tiles"><span><b>${sum.n.V}</b>Varsity</span><span><b>${sum.n.JV}</b>JV</span><span><b>${sum.n.MOD}</b>Modified</span><span class="cut"><b>${sum.n.X}</b>cut</span></div></div>
+    <div class="v1812t-week-r"><button class="btn pri" data-a="v1812tDoorAgain">Watch the door scene</button><button class="btn" data-a="go" data-r="squads">Open Squads &amp; Lineups</button>${C.phase==='preseason'&&C.pre.rd===0?`<button class="btn" data-a="playNext">${esc(playLabel(C))}</button>`:''}</div></section>
+   <div class="v1812t-body posted"><aside class="v1812t-aside"><div class="v1812t-doorbox"><div class="v1812t-minidoor"><div class="v1812t-minileaf">${v1812tSheet(C,'V',{ids:sum.v,circ:new Set(sum.newV)}).replace('class="v1812t-sheet','class="v1812t-sheet static')}</div></div><p class="tiny muted v1812t-doorcap">The Varsity list, as posted. ${sum.newV.length} circled: new to Varsity.</p></div></aside>
+    <div class="v1812t-main">
+     <div class="card"><div class="hd"><h3>Cut list</h3><span class="tiny muted">${mine.length} player${mine.length===1?'':'s'} · they remember it</span></div>${mine.length?`<div class="v1812t-mems">${mine.map(m=>v1812tMemCard(C,m)).join('')}</div>`:'<p class="muted small">Nobody was cut.</p>'}</div>
+     ${sum.newV.length||sum.newcomers.length?`<div class="card"><div class="hd"><h3>Who made it</h3></div><div class="v1812t-made">${sum.newcomers.map(x=>{ const p=C.players[x.id]; if(!p) return ''; const inf=T.info[x.id]||{}; return `<div class="v1812t-mem"><span class="f">${portraitSVG(p,44)}</span><div class="grow">${nm(x.id)}<small>${p.pos} · Gr ${p.grade} · ${V1812T_KIND[x.kind]?V1812T_KIND[x.kind][0]:'Newcomer'}${inf.story?' · '+esc(inf.story):''}</small><span class="s">Made ${V1812T_LVL[x.lvl]}</span></div></div>`; }).join('')||'<p class="muted small">No newcomers made a roster.</p>'}</div></div>`:''}
+     ${old.length?`<div class="card"><div class="hd"><h3>Where are they now?</h3><span class="tiny muted">Players you cut in earlier years</span></div><div class="v1812t-mems">${old.slice(0,24).map(m=>v1812tMemCard(C,m)).join('')}</div></div>`:''}
+    </div></div>${v1812tTiles()}</div>`; }
+function v1812tEmptyView(C){ const T=C.tryout||{}; const old=Object.values(T.mem||{}).sort((a,b)=>b.cutYr-a.cutYr);
+  return `<div class="v1812t"><section class="v1812t-week posted"><div class="v1812t-week-l"><span class="eyebrow v1812t-kick">Every preseason</span><h2 class="v1812t-wk-t">${C.phase==='preseason'?'Tryouts are not running this year':'Tryouts open at the start of each preseason'}</h2><p class="small muted">Three days of drills (sprint and juggling, beep test and position drills, a graded scrimmage), then you post the roster on the gym door. Players you cut remember it.</p></div></section>
+   ${old.length?`<div class="card"><div class="hd"><h3>Where are they now?</h3></div><div class="v1812t-mems">${old.slice(0,24).map(m=>v1812tMemCard(C,m)).join('')}</div></div>`:''}${v1812tTiles()}</div>`; }
+VIEWS.tryouts=()=>{ const C=App.C; try{ v1812tEnsure(C); }catch(e){ console.error(e); } const st=v1812tSt(C);
+  if(st==='open') return v1812tOpenView(C); if(st==='posted'||st==='auto') return v1812tPostedView(C); return v1812tEmptyView(C); };
+/* after drawing: the count-ups, and focus-safe things */
+const _v1812tRender=render; render=function(){ const out=_v1812tRender.apply(this,arguments); try{ if(App.route==='tryouts'&&V1812T_UI.freshDay&&performance.now()<V1812T_UI.freshUntil) v1812tCountUp(document.querySelector('.v1812t')); }catch(e){} return out; };
+
+/* ---------- Overview: the tryout week card ---------- */
+function v1812tHero(C){ const st=v1812tSt(C); const T=C.tryout; const s=Sx(C.userSid);
+  if(st==='open'){ const n=v1812tPoolIds(C).length; const nn=T.pool.length; const day=Math.min(3,T.day|0); const u=v1812tCounts(C).U;
+    return `<section class="v1812t-hero" style="--c1:${s.c1};--c2:${s.c2}"><div class="v1812t-hero-art" aria-hidden="true">${icon('tryouts',46)}</div><div class="grow"><span class="eyebrow">Preseason · ${day===0?'new':'Day '+day+' of 3 done'}</span><h2>Tryouts &amp; Cut Day</h2><p class="small">${day===0?`${n} players are trying out for ${V1812T.caps.V+V1812T.caps.JV+V1812T.caps.MOD} spots, including ${nn} newcomers${T.pool.filter(id=>(T.info[id]||{}).kind==='back').length?` (${T.pool.filter(id=>(T.info[id]||{}).kind==='back').length} you cut before, back for another go)`:''}. Three days of drills, then you post the roster on the gym door.`:day<3?`${V1812T_DAYTAG[day+1]} is next. ${u} undecided.`:`The drills are done. ${u?u+' undecided. ':''}Post the roster when you are ready.`}</p></div>
+      <div class="v1812t-hero-acts"><button class="btn pri play" data-a="v1812tOpen">${day===0?'Open tryouts':'Continue tryouts'}</button><button class="btn ghost sm" data-a="v1812tSkipAsk">Skip (auto-sort)</button></div></section>`; }
+  if((st==='posted'||st==='auto')&&C.phase==='preseason'&&C.pre.rd===0&&T.posted){ const sm=T.posted;
+    return `<section class="v1812t-hero done" style="--c1:${s.c1};--c2:${s.c2}"><div class="v1812t-hero-art" aria-hidden="true">${icon('tryouts',38)}</div><div class="grow"><span class="eyebrow">Roster posted</span><h2>${sm.n.V} Varsity · ${sm.n.JV} JV · ${sm.n.MOD} Modified</h2><p class="small">${sm.n.X} cut${sm.newV.length?` · ${sm.newV.length} new on Varsity`:''}. They will remember it.</p></div><div class="v1812t-hero-acts"><button class="btn" data-a="v1812tOpen">View the list</button></div></section>`; }
+  return ''; }
+{ const _ov=VIEWS.office; VIEWS.office=function(){ let h=''; try{ v1812tEnsure(App.C); h=v1812tHero(App.C); }catch(e){ console.error(e); } return h+_ov.apply(this,arguments); }; }
+{ const _ps=VIEWS.presched; if(_ps) VIEWS.presched=function(){ const h=_ps.apply(this,arguments); try{ const C=App.C; if(v1812tIsOpen(C)) return `<div class="notice warn small v1812t-note"><b>Tryouts are still open.</b> Your Varsity XI changes when the roster is posted, so hold tryouts before you lock the schedule. <button class="btn sm" data-a="v1812tOpen">Open tryouts</button></div>`+h; }catch(e){} return h; }; }
+
+/* ---------- actions ---------- */
+A.v1812tOpen=()=>{ App.modal=null; renderModal(); App.route='tryouts'; App.params={}; render(); window.scrollTo(0,0); };
+A.v1812tFilter=el=>{ App.params={...(App.params||{}),tf:el.dataset.v}; App.keepScroll=true; render(); };
+A.v1812tDoorTab=el=>{ App.params={...(App.params||{}),td:el.dataset.v}; const b=document.getElementById('v1812t-doorbox'); if(b){ b.outerHTML=v1812tDoorBox(App.C); } };
+function v1812tPaint(){ const C=App.C; if(App.route!=='tryouts'||!v1812tIsOpen(C)) return; const bar=document.getElementById('v1812t-bar'); if(bar) bar.outerHTML=v1812tBar(C); const b=document.getElementById('v1812t-doorbox'); if(b) b.outerHTML=v1812tDoorBox(C);
+}
+A.v1812tSeg=el=>{ const C=App.C; if(!v1812tIsOpen(C)) return; const id=el.dataset.id, code=el.dataset.code; const res=v1812tSet(C,id,code); if(!res.ok){ toast(res.msg); return; }
+  const card=el.closest('.v1812t-card'); if(card){ card.dataset.code=code; card.classList.toggle('is-cut',code==='X'); card.classList.remove('undec'); card.querySelectorAll('.v1812t-seg button').forEach(b=>{ const on=b.dataset.code===code; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); card.classList.remove('v1812t-pulse'); void card.offsetWidth; card.classList.add('v1812t-pulse'); }
+  v1812tPaint(); v1812tSave(); try{ Sound.ui(code==='X'?'close':'tick'); }catch(e){} };
+A.v1812tTag=el=>{ const T=App.C.tryout; const id=el.dataset.id; if(T.tags[id]) delete T.tags[id]; else T.tags[id]=1; el.classList.toggle('on',!!T.tags[id]); el.setAttribute('aria-pressed',!!T.tags[id]); const card=el.closest('.v1812t-card'); if(card) card.classList.toggle('tagged',!!T.tags[id]); v1812tSave(); };
+A.v1812tAuto=()=>{ const C=App.C; if(!v1812tIsOpen(C)) return; const T=C.tryout; V1812T_UI.undo={k:C.seed+':'+C.year,a:JSON.stringify(T.a)}; const plan=v1812tApplyAuto(C); v1812tSave(); App.keepScroll=true; render(); toast('Auto-sort placed everyone from what the drills have shown. Review the cards, then post.'); };
+A.v1812tUndo=()=>{ const C=App.C; if(!V1812T_UI.undo||V1812T_UI.undo.k!==C.seed+':'+C.year||!v1812tIsOpen(C)) return; try{ C.tryout.a=JSON.parse(V1812T_UI.undo.a); }catch(e){} V1812T_UI.undo=null; v1812tSave(); App.keepScroll=true; render(); };
+/* running a day: the drill animations, then the numbers fill in */
+function v1812tHeadline(C,kind){ const raw=v1812tAllRaw(C); const ids=Object.keys(raw); const best=(f,cmp)=>ids.reduce((a,id)=>(a==null||cmp(f(raw[id]),f(raw[a])))?id:a,null); const nm=id=>{ const p=v1812tFind(C,id); return p?pname(p):''; };
+  if(kind==='spr'){ const a=best(r=>r.spr,(x,y)=>x<y); return {to:raw[a].spr,dec:2,suf:' s',who:nm(a),txt:`Fastest 40 so far: ${nm(a)}, ${raw[a].spr.toFixed(2)} s`}; }
+  if(kind==='jug'){ const a=best(r=>r.jug,(x,y)=>x>y); return {to:raw[a].jug,dec:0,suf:'',who:nm(a),txt:`Most juggles: ${nm(a)}, ${raw[a].jug}`}; }
+  if(kind==='beep'){ const a=best(r=>r.beep,(x,y)=>x>y); return {to:raw[a].beep,dec:1,suf:'',who:nm(a),txt:`Beep test leader: ${nm(a)}, level ${raw[a].beep.toFixed(1)}`}; }
+  if(kind==='pos'){ const a=best(r=>r.pos,(x,y)=>x>y); return {to:raw[a].pos,dec:0,suf:'',who:nm(a),txt:`Best position-drill score: ${nm(a)}, ${raw[a].pos}`}; }
+  const a=best(r=>r.pct,(x,y)=>x>y); const h=hashStr(C.seed+':scr:'+C.year); const w=1+(h%3), b=(h>>>3)%3; return {to:0,dec:0,suf:'',who:nm(a),txt:`Scrimmage: Whites ${w+1} – ${b} Blues. Best on the day: ${nm(a)}`,sc:[w+1,b]}; }
+/* the five best of a drill, for the stage's leaderboard */
+function v1812tLeaders(C,k,n){ const raw=v1812tAllRaw(C); const ids=Object.keys(raw).filter(id=>v1812tFind(C,id)); const key={spr:r=>-r.spr,jug:r=>r.jug,beep:r=>r.beep,pos:r=>r.pos,scr:r=>r.pct}[k];
+  const fmt={spr:r=>r.spr.toFixed(2)+' s',jug:r=>String(r.jug),beep:r=>r.beep.toFixed(1),pos:r=>String(r.pos),scr:r=>v1812tLetter(r.pct)}[k];
+  return ids.sort((a,b)=>key(raw[b])-key(raw[a])||(a<b?-1:1)).slice(0,n||5).map(id=>{ const p=v1812tFind(C,id); return {nm:pname(p),pos:p.pos,txt:fmt(raw[id]),isNew:!C.players[id]||v1812tInfo(C,id).kind!=='ret'}; }); }
+const V1812T_SCN={1:[['spr','40-yard sprint'],['jug','Juggling']],2:[['beep','Beep test'],['pos','Position drills']],3:[['scr','Final scrimmage']]};
+function v1812tStageShow(C,day,i){ const el=document.getElementById('v1812t-stage'); if(!el) return; const list=V1812T_SCN[day]; const [k,lab]=list[i]; const s=Sx(C.userSid); const h=v1812tHeadline(C,k); const dur=k==='spr'?2.2:k==='beep'?2.8:2.6;
+  el.hidden=false; el.classList.add('on');
+  el.innerHTML=`<div class="v1812t-stage-in"><div class="st-top"><span class="eyebrow">Day ${day} · drill ${i+1} of ${list.length}</span><b class="st-title">${lab}</b><button class="btn sm ghost" data-a="v1812tStageSkip">Skip</button></div><div class="st-grid"><div class="st-art">${v1812tScene(k,{c1:s.c1,c2:s.c2,dur,label:lab})}<div class="st-clock mono" id="v1812t-clock" aria-hidden="true">${k==='scr'?'':'0'}</div></div><div class="st-lead"><span class="eyebrow">${k==='scr'?'Best in the scrimmage':'Leaders so far'}</span><ol>${v1812tLeaders(C,k,5).map((x,j)=>`<li style="--i:${j}"><span class="n">${j+1}</span><span class="w"><b>${esc(x.nm)}</b><small>${x.pos}${x.isNew?' · newcomer':''}</small></span><i class="mono">${x.txt}</i></li>`).join('')}</ol></div></div><p class="st-foot" id="v1812t-hl">${esc(k==='spr'?'On your marks…':k==='jug'?'Counting touches…':k==='beep'?'Level by level, until the beep wins…':k==='pos'?'Weaving through the cones…':'Whites against Blues…')}</p><div class="st-dots">${list.map((_,j)=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div></div>`;
+  try{ if(k==='scr'||k==='spr') (Sound.whistle&&Sound.whistle('start')); else Sound.ui('swoosh'); }catch(e){}
+  const clock=document.getElementById('v1812t-clock'); const t0=performance.now(); const ms=dur*1000*0.92; let ticks=0;
+  const step=t=>{ if(!V1812T_UI.running||V1812T_UI.running.gen!==V1812T_UI.gen||!clock.isConnected) return; const kk=Math.min(1,(t-t0)/ms); const e=1-Math.pow(1-kk,2);
+    if(k==='scr') clock.textContent=`${Math.round(h.sc[0]*e)} – ${Math.round(h.sc[1]*e)}`; else clock.textContent=(h.to*e).toFixed(h.dec)+h.suf;
+    if(k==='jug'&&Math.floor(kk*6)>ticks){ ticks=Math.floor(kk*6); try{ Sound.ui('tick'); }catch(e2){} }
+    if(kk<1) requestAnimationFrame(step); else { const hl=document.getElementById('v1812t-hl'); if(hl) hl.textContent=h.txt; try{ Sound.ui('pop'); }catch(e3){} } };
+  requestAnimationFrame(step);
+  if(k==='beep'){ let n=0; const iv=setInterval(()=>{ if(!V1812T_UI.running||V1812T_UI.running.gen!==V1812T_UI.gen||n++>5){ clearInterval(iv); return; } try{ Sound.ui('tick'); }catch(e){} },dur*1000/6); }
+  return dur*1000+900; }
+function v1812tStageEnd(gen){ if(!V1812T_UI.running||V1812T_UI.running.gen!==gen) return; const day=V1812T_UI.running.day; V1812T_UI.running=null; V1812T.dayO=null; V1812T_UI.freshDay=day; V1812T_UI.freshUntil=performance.now()+2600;
+  const el=document.getElementById('v1812t-stage'); if(el){ el.hidden=true; el.classList.remove('on'); el.innerHTML=''; }
+  if(App.route==='tryouts'&&v1812tIsOpen(App.C)){ App.keepScroll=true; render(); try{ const f=document.querySelector('[data-a="v1812tRun"]')||document.querySelector('[data-a="v1812tPostAsk"]'); if(f) f.focus({preventScroll:true}); Sound.ui('success'); }catch(e){} if(day===3) toast('The final scrimmage is graded. Set the levels, then post the roster.'); } }
+function v1812tStageRun(day,i,gen){ if(!V1812T_UI.running||V1812T_UI.running.gen!==gen) return; const C=App.C; const list=V1812T_SCN[day]; if(i>=list.length||App.route!=='tryouts'){ v1812tStageEnd(gen); return; } const ms=v1812tStageShow(C,day,i); V1812T_UI.running.timer=setTimeout(()=>v1812tStageRun(day,i+1,gen),ms||2800); }
+A.v1812tRun=()=>{ const C=App.C; if(!v1812tIsOpen(C)||C.tryout.day>=3||V1812T_UI.running) return; const day=v1812tRunDay(C); v1812tSave(); const rm=reducedMotion();
+  if(rm){ V1812T_UI.freshDay=day; V1812T_UI.freshUntil=performance.now()+10; App.keepScroll=true; render(); toast(`Day ${day} is in the books: ${V1812T_DAYTAG[day].toLowerCase()}.`); return; }
+  V1812T_UI.gen=(V1812T_UI.gen||0)+1; V1812T_UI.running={day,gen:V1812T_UI.gen}; V1812T.dayO=day-1; App.keepScroll=true; render();
+  const st=document.getElementById('v1812t-stage'); if(st) st.scrollIntoView({block:'nearest',behavior:'smooth'});
+  v1812tStageRun(day,0,V1812T_UI.gen); };
+A.v1812tStageSkip=()=>{ const r=V1812T_UI.running; if(!r) return; clearTimeout(r.timer); v1812tStageEnd(r.gen); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&V1812T_UI.running&&!App.modal){ A.v1812tStageSkip(); } });
+/* arrow keys move along a card's Varsity | JV | Modified | Cut control */
+document.addEventListener('keydown',e=>{ if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return; const b=e.target.closest&&e.target.closest('.v1812t-seg button'); if(!b) return; const all=[...b.parentElement.querySelectorAll('button:not([disabled])')]; const i=all.indexOf(b); const n=all[(i+(e.key==='ArrowRight'?1:-1)+all.length)%all.length]; if(n){ e.preventDefault(); n.focus(); } });
+
+/* ---------- posting, skipping, the confirmation ---------- */
+A.v1812tPostAsk=()=>{ const C=App.C; if(!v1812tIsOpen(C)) return; const chk=v1812tCheck(C); if(!chk.ok){ toast(chk.errors[0].msg+' Auto-sort can fix the rest.'); const b=document.getElementById('v1812t-bar'); if(b){ b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); } try{ Sound.ui('error'); }catch(e){} return; }
+  App.modal={type:'v1812tConfirm'}; renderModal(); };
+MODALS.v1812tConfirm=m=>{ const C=App.C; if(!v1812tIsOpen(C)) return ''; const chk=v1812tCheck(C); const n=chk.n; const ids=v1812tPoolIds(C); const views=ids.map(id=>({id,p:v1812tFind(C,id),code:v1812tAsg(C,id)}));
+  const cuts=views.filter(x=>x.code==='X').sort((a,b)=>ovr(b.p)-ovr(a.p)); const newV=views.filter(x=>x.code==='V'&&!(C.players[x.id]&&C.players[x.id].lvl==='V')).length;
+  const body=`<div class="v1812t-confirm"><p style="margin-top:0">Once the list is on the door it is final. There is no undo: cut players are told on Monday, and they will remember it.</p>
+    <div class="v1812t-fin-tiles"><span><b>${n.V}</b>Varsity<small>/${V1812T.caps.V}</small></span><span><b>${n.JV}</b>JV<small>/${V1812T.caps.JV}</small></span><span><b>${n.MOD}</b>Modified<small>/${V1812T.caps.MOD}</small></span><span class="cut"><b>${n.X}</b>cut</span></div>
+    ${newV?`<p class="small">${newV} player${newV===1?'':'s'} new to Varsity will be circled on the list.</p>`:''}
+    ${chk.warns.length?`<div class="v1812t-chips">${chk.warns.map(w=>`<span class="v1812t-chip warn">${esc(w.msg)}</span>`).join('')}</div>`:''}
+    ${cuts.length?`<details class="v1812t-cutlist" open><summary>${cuts.length} cut</summary><ul>${cuts.map(x=>`<li><span>${esc(pname(x.p))}</span><small>${x.p.pos} · Gr ${x.p.grade}${C.players[x.id]?' · was '+V1812T_LVL[C.players[x.id].lvl]:' · '+({move:'move-in',walk:'walk-on',back:'comeback',fresh:'new this year'}[(v1812tInfo(C,x.id).kind)]||'newcomer')}</small></li>`).join('')}</ul></details>`:''}</div>`;
+  return modalShell('<h2>Post the roster?</h2>',body,`<button class="btn" data-a="closeModal" data-autofocus>Keep editing</button><button class="btn pri" data-a="v1812tPost">Post it on the gym door</button>`,'v1812t-modal'); };
+A.v1812tPost=()=>{ const C=App.C; const res=v1812tPost(C,'user'); if(!res.ok){ App.modal=null; renderModal(); toast(res.errors&&res.errors[0]?res.errors[0].msg:'The roster is already posted.'); App.keepScroll=true; render(); return; }
+  App.modal=null; renderModal(); App.odds.clear(); V1812T_UI.undo=null; v1812tSave(); saveNow(); App.route='tryouts'; App.params={}; render(); window.scrollTo(0,0); v1812tDoorOpen(C,res.sum); };
+A.v1812tSkipAsk=()=>{ const C=App.C; if(!v1812tIsOpen(C)) return; App.modal={type:'v1812tSkip'}; renderModal(); };
+MODALS.v1812tSkip=m=>{ const C=App.C; const n=v1812tPoolIds(C).length; return modalShell('<h2>Skip the tryouts?</h2>',`<p style="margin-top:0">The coaching staff will run all three days and post a sensible roster for you: ${V1812T.caps.V} on Varsity, ${V1812T.caps.JV} on JV, ${V1812T.caps.MOD} on Modified, a keeper or two on each. The ${Math.max(0,n-V1812T.caps.V-V1812T.caps.JV-V1812T.caps.MOD)} or so who do not fit are cut, and they will remember it.</p><p class="small muted">It is final once posted. Your lineups are rebuilt and checked.</p>`,`<button class="btn" data-a="closeModal" data-autofocus>Back to tryouts</button><button class="btn pri" data-a="v1812tSkip">Skip and auto-sort the program</button>`,'v1812t-modal'); };
+A.v1812tSkip=()=>{ const C=App.C; App.modal=null; renderModal(); const ok=v1812tAutoResolve(C); App.odds.clear(); v1812tSave(); saveNow(); App.route='tryouts'; App.params={}; render(); if(ok) toast(`The staff posted the roster: ${C.tryout.posted.n.X} cut.`); window.scrollTo(0,0); };
+/* called by the engine hook when a preseason game starts with the tryouts still open */
+function v1812tAfterAuto(C){ try{ v1812tSave(); if(App.odds) App.odds.clear(); const sm=C.tryout&&C.tryout.posted; if(typeof toast==='function'&&sm) toast(`Tryouts were skipped: the staff posted the roster (${sm.n.X} cut).`); }catch(e){} }
+
+/* ---------- the door scene's buttons ---------- */
+A.v1812tDoorDone=()=>{ v1812tDoorClose(); if(App.route==='tryouts'){ App.keepScroll=true; render(); } };
+A.v1812tDoorAgain=()=>{ const sm=App.C.tryout&&App.C.tryout.posted; if(sm) v1812tDoorOpen(App.C,sm); };
+A.v1812tDoorSkip=()=>{ V1812T_SC.finish&&V1812T_SC.finish(); };
+A.v1812tDoorSquads=()=>{ v1812tDoorClose(); App.route='squads'; App.params={lvl:'V',tab:'lineup'}; render(); window.scrollTo(0,0); };
+
+/* ---------- gate: leaving tryouts half-done by playing the Preseason Cup ---------- */
+function v1812tNeedGate(C){ if(!C||C.phase!=='preseason'||App.live) return false; const T=C.tryout; return !!(T&&v1812tIsOpen(C)&&(T.seen||T.day>0)); }
+function v1812tQuiet(C){ if(C&&C.phase==='preseason'&&C.userSid&&(!C.tryout||C.tryout.yr!==C.year||C.tryout.st==='open')){ v1812tEnsure(C); if(v1812tIsOpen(C)&&!v1812tNeedGate(C)){ if(v1812tAutoResolve(C)) v1812tAfterAuto(C); } } }
+function v1812tGuard(name,quiet){ const orig=A[name]; if(!orig) return; A[name]=function(el,ev){ const C=App.C; if(C&&C.phase==='preseason'){ try{ v1812tEnsure(C); }catch(e){}
+      if(v1812tNeedGate(C)){ V1812T_UI.then=()=>orig.call(this,el,ev); App.modal={type:'v1812tGate'}; renderModal(); return; }
+      if(quiet) v1812tQuiet(C); }
+    return orig.apply(this,arguments); }; }
+/* Play and skip settle the tryouts first (so the match preview shows the final lineups); simulating and kicking off settle them when the match starts (the engine hook); merely looking at a preview never does */
+v1812tGuard('playNext',true); v1812tGuard('skipPre',true); for(const n of ['simAhead','quickSim','kickoff']) v1812tGuard(n,false);
+MODALS.v1812tGate=m=>{ const C=App.C; const T=C.tryout; const n=T?v1812tCounts(C).U:0;
+  return modalShell('<h2>Tryouts are still open</h2>',`<p style="margin-top:0">You have started the tryouts but have not posted the roster${n?` (${n} undecided)`:''}. If you go on, the coaching staff finish the drills and post a sensible list for you. It is final.</p>`,`<button class="btn pri" data-a="v1812tGateBack" data-autofocus>Back to tryouts</button><button class="btn" data-a="v1812tGateGo">Auto-sort and continue</button>`,'v1812t-modal'); };
+A.v1812tGateBack=()=>{ V1812T_UI.then=null; A.v1812tOpen(); };
+A.v1812tGateGo=()=>{ const C=App.C; const fn=V1812T_UI.then; V1812T_UI.then=null; App.modal=null; renderModal(); const ok=v1812tAutoResolve(C); App.odds.clear(); v1812tSave(); if(ok) toast(`The staff posted the roster: ${C.tryout.posted.n.X} cut.`); if(fn) fn(); else render(); };
+
+/* ---------- stories elsewhere: player profile, a cut player's profile, revenge games ---------- */
+{ const _mp=MODALS.player; MODALS.player=function(m){ const C=App.C; const T=C&&C.tryout;
+    if(T&&T.cut&&T.cut[m.id]&&!C.players[m.id]){ const p=T.cut[m.id]; const mem=T.mem[m.id]||{}; const s=Sx(p.sid); const o=ovr(p);
+      return modalShell(`<h2>${esc(pname(p))}</h2>`,`<div class="v1812t-cutp"><span class="f">${portraitSVG(p,96)}</span><div><div class="eyebrow">Cut at tryouts · ${mem.cutYr||''}</div><h3>${esc(pname(p))}</h3><div class="row small">${posTag(p.pos)}<span class="muted">Grade ${p.grade}${mem.fromLvl?' · was on '+V1812T_LVL[mem.fromLvl]:''}</span></div><div class="ratingbox"><div><span class="lab">OVR</span><b style="color:${badgeColor(R(o))}">${R(o)}</b></div><div><span class="lab">POT</span><b>${p.pot}</b></div></div></div></div>
+        <p>${esc(v1812tMemLine(C,mem)||'Out there somewhere.')}. ${mem.grudge!=null?`It stung: ${v1812tGrudgeMeter(mem.grudge)}`:''}</p><p class="small muted">Cut players keep developing without the program. Some come back stronger, some transfer to a rival, some quit.</p>`,`<button class="btn" data-a="closeModal">Close</button>`); }
+    let h=_mp.apply(this,arguments); const p=C&&C.players[m.id]; const cm=p&&p.cutMem;
+    if(cm){ const where=p.sid===C.userSid?`He made the ${V1812T_LVL[p.lvl]} roster in ${cm.back||C.year}.`:`He now plays for ${esc(Sx(p.sid).town)}${cm.rv?', your heated rival':''}.`;
+      h=h.replace('<div class="mbody">',`<div class="mbody"><div class="v1812t-rem"><span class="eyebrow">${cm.brk?'He remembers':'Cut once'}</span><p>Cut${cm.lvl?' from '+V1812T_LVL[cm.lvl]:' at tryouts'} in ${cm.yr}. ${where}</p></div>`); }
+    return h; }; }
+{ const _rc=rivalChip; rivalChip=function(f){ let h=_rc.apply(this,arguments); try{ const C=App.C; const rv=C&&v1812tRevenge(C,f); if(rv&&rv.length&&f.st!=='d'){ const x=rv.find(y=>y.xi)||rv[0]; h+=` <span class="chip riv v1812t-rvchip" title="${esc(pname(x.p))} was cut by your program in ${x.cm.yr}">Revenge game: ${esc(pname(x.p))}</span>`; } }catch(e){} return h; }; }
+{ const _fm=MODALS.fixture; MODALS.fixture=function(m){ let h=_fm.apply(this,arguments); try{ const C=App.C; const f=C.fixtures[m.id]; const rv=f&&v1812tRevenge(C,f); if(rv&&rv.length){ const done=f.st==='d'; const lg=C.logs&&C.logs[f.id];
+        const lines=rv.slice(0,3).map(x=>{ let extra=''; if(done&&lg&&lg.box){ const opp=f.h===C.userSid?f.a:f.h; const rows=lg.box[f.h===opp?0:1]||[]; const r=rows.find(q=>q.pid===x.p.id); extra=r&&r.gp!==0?` He ${r.g?'scored '+r.g:'played'}${r.a?' and set up '+r.a:''}.`:''; }
+          return `<div class="v1812t-rvline"><span class="f">${portraitSVG(x.p,38)}</span><div><b>${esc(pname(x.p))}</b> was cut by ${esc(Sx(C.userSid).town)} in ${x.cm.yr}${x.cm.lvl?' from '+V1812T_LVL[x.cm.lvl]:''}. ${x.xi?'He starts for':'He is on the roster at'} ${esc(Sx(x.p.sid).town)}.${extra}</div></div>`; }).join('');
+        h=h.replace('<div class="mbody">',`<div class="mbody"><div class="v1812t-rv"><span class="eyebrow">Revenge game</span>${lines}</div>`); } }catch(e){ console.error(e); } return h; }; }
+/* ---------- the Courier: the first edition of a season carries Cut Day ---------- */
+{ const _cf=courierFront; courierFront=function(C,is,ix,issues){ let h=_cf.apply(this,arguments);
+    try{ const H=C.tryout&&C.tryout.hist&&C.tryout.hist[is.yr]; if(H&&is.comp==='pre'&&is.rd===0&&typeof h==='string'&&h.includes('<div class="np-body">')){
+        const names=(H.newV||[]).map(id=>Px(id)).filter(Boolean).slice(0,2).map(pname); const top=(H.cut||[]).slice().sort((a,b)=>b.ovr-a.ovr)[0];
+        const box=`<aside class="v1812t-np"><b>Cut Day at the gym door</b><span>${H.n.V} make Varsity, ${H.n.JV} JV and ${H.n.MOD} Modified; ${H.n.X} are cut.${names.length?` New on the Varsity list: ${esc(names.join(' and '))}.`:''}${top?` The toughest cut: ${esc(top.name)}.`:''} ${H.auto?'The coaching staff posted the list.':'The coach posted it Friday at 3:15 pm.'}</span></aside>`;
+        h=h.replace('<div class="np-body">',box+'<div class="np-body">'); } }catch(e){ console.error(e); }
+    return h; }; }
 
 </script>
