@@ -355,6 +355,7 @@ function v1812gPlace(g,cut,cx,feetY,P,o){ o=o||{}; if(!cut||!cut.cv) return {x:c
 const V1812G_TPL={};
 const v1812gUp=s=>String(s==null?'':s).toUpperCase();
 function v1812gHead(g,W,M,P,right,o){ o=o||{}; const y=o.y||82; const rf={px:27,w:700,fam:V1812G_FONT.body,ls:5}; const rt=right?v1812gUp(right):''; const rw=rt?Math.min(420,v1812gW(g,rt,rf,27)):0;
+  if(P.style==='news'&&!o.noRule){ g.save(); g.fillStyle='#14110d'; g.fillRect(70,y+16,W-140,4); g.fillRect(70,y+25,W-140,1.5); g.restore(); }
   v1812gT(g,v1812gUp(`${M.town} ${M.mascot}`)+(rw>330?'':' · VARSITY SOCCER'),70,y,{...rf,fill:P.fg,alpha:0.92,maxW:W-140-rw-(rw?36:0),min:16}); if(rt) v1812gT(g,rt,W-70,y,{...rf,fill:P.fg,alpha:0.92,align:'right',maxW:420,min:16}); }
 function v1812gFoot(g,W,H,M,P){ v1812gT(g,'TOUCHLINE · VARSITY SOCCER MANAGER',W/2,H-26,{px:19,w:700,fam:V1812G_FONT.mono,ls:4,fill:P.fg,alpha:0.4,align:'center'}); }
 /* rim-light and halo colours per style for a cutout */
@@ -379,9 +380,9 @@ V1812G_TPL.gameday={ async load(M,W,H,P,o){ const sq=H<1300; const th=sq?600:800
     S.panel(g,0,by,W,bh+2,P,{r:0,bar:9});
     const cw=sq?150:176, cy=by+(bh-cw*1.15)/2+4; v1812gShield(g,M.sch,A.cU,52,cy,cw,P); if(M.opp) v1812gShield(g,M.opp,A.cO,W-52-cw,cy,cw,P);
     const mx=W/2, mw=W-2*(52+cw+30);
-    v1812gT(g,M.home?'VS':'AT',mx,by+(sq?64:78),{px:sq?30:36,w:800,ls:10,fill:P.dk?P.pop:P.pop,align:'center'});
-    v1812gT(g,v1812gUp(M.opp?M.opp.town:'TBA'),mx,by+(sq?138:166),{px:sq?96:112,w:900,fill:P.fg,align:'center',maxW:mw,min:44});
-    v1812gT(g,`${M.day} · ${M.time}${M.ven?' · '+v1812gUp(M.ven):''}`,mx,by+(sq?190:228),{px:sq?25:30,w:700,fam:V1812G_FONT.body,ls:3,fill:P.mut,align:'center',maxW:mw,min:16});
+    v1812gT(g,M.home?'VS':'AT',mx,by+(sq?48:78),{px:sq?28:36,w:800,ls:10,fill:P.pop,align:'center'});
+    v1812gT(g,v1812gUp(M.opp?M.opp.town:'TBA'),mx,by+(sq?146:166),{px:sq?88:112,w:900,fill:P.fg,align:'center',maxW:mw,min:44});
+    v1812gT(g,`${M.day} · ${M.time}${M.ven?' · '+v1812gUp(M.ven):''}`,mx,by+(sq?198:228),{px:sq?25:30,w:700,fam:V1812G_FONT.body,ls:3,fill:P.mut,align:'center',maxW:mw,min:16});
     let tx=58; const ty=by-(sq?20:26); for(const t of (M.tags||[])){ tx+=S.chip(g,t,tx,ty,P,{px:sq?30:36})+14; if(tx>W-200) break; }
     v1812gFoot(g,W,H,M,P); } };
 
