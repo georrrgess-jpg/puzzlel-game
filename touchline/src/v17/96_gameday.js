@@ -261,6 +261,8 @@ async function v1812gCutout(star,poseName,th,opt){ opt=opt||{}; const V=V1812G; 
   if(c){ c.bb=v1812gBBox(c.cv); const k=is3?k3:k2; if(V.cuts.size>16) V.cuts.delete(V.cuts.keys().next().value); V.cuts.set(k,c); }
   return c; }
 function v1812gBBox(cv){ try{ const w=cv.width, h=cv.height; const d=cv.getContext('2d').getImageData(0,0,w,h).data; let x0=w,y0=h,x1=-1,y1=-1; for(let y=0;y<h;y+=2){ for(let x=0;x<w;x+=2){ if(d[(y*w+x)*4+3]>24){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } } } if(x1<0) return null; return {x0,y0,x1,y1}; }catch(e){ return null; } }
+/* distinct (4-bit) colours and the luminance spread of a canvas: a blank poster has neither (the tests use it) */
+function v1812gStats(cv){ try{ const w=cv.width, h=cv.height; const d=cv.getContext('2d').getImageData(0,0,w,h).data; const seen=new Set(); let n=0, s=0, s2=0; for(let i=0;i<d.length;i+=4*7){ seen.add((d[i]>>4)<<8|(d[i+1]>>4)<<4|(d[i+2]>>4)); const L=0.3*d[i]+0.59*d[i+1]+0.11*d[i+2]; n++; s+=L; s2+=L*L; } const m=s/n; return {colors:seen.size,sd:Math.sqrt(Math.max(0,s2/n-m*m))}; }catch(e){ return {colors:0,sd:0}; } }
 /* how many pixels of a canvas are not transparent (the tests use it) */
 function v1812gOpaque(cv){ try{ const w=cv.width, h=cv.height; const d=cv.getContext('2d').getImageData(0,0,w,h).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]>16) n++; return n; }catch(e){ return -1; } }
 
