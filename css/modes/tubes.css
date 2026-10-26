@@ -4,14 +4,12 @@
 .tube::before{content:'';position:absolute;top:-7px;left:-7px;right:-7px;height:8px;border-radius:6px;background:linear-gradient(180deg,#ffffff70,#ffffff28);box-shadow:0 2px 4px #0004}
 .tube::after{content:'';position:absolute;top:10px;bottom:16px;left:16%;width:13%;border-radius:99px;background:linear-gradient(180deg,#ffffff70,#ffffff10);pointer-events:none;z-index:2}
 .tube.sel{transform:translateY(-22px);box-shadow:inset 0 0 14px #ffffff18,0 0 0 2px var(--acc),0 18px 26px #0006}
-.tube.sel .seg:last-child{animation:segbob .5s ease-in-out infinite alternate}
+.tube.sel .seg.top{animation:segbob .5s ease-in-out infinite alternate}
 @keyframes segbob{to{transform:translateY(-4px);filter:brightness(1.25)}}
 .tube.done{border-color:var(--good);box-shadow:0 0 22px #6be58599,inset 0 0 14px #ffffff18}
 .tube.done::before{top:-14px;left:8%;right:8%;height:15px;border-radius:5px 5px 3px 3px;background:linear-gradient(90deg,#8a5a2b,#d49a5c 40%,#a86d36);animation:cork .5s cubic-bezier(.3,1.8,.5,1) both;box-shadow:0 3px 0 #0005}
 @keyframes cork{from{transform:translateY(-40px) rotate(-30deg);opacity:0}}
 .seg{height:var(--seg);border-radius:6px;box-shadow:inset 6px 0 8px #ffffff30,inset -6px 0 10px #0003,inset 0 -3px 0 #0002;flex:none;position:relative;display:grid;place-items:center;font-size:calc(var(--seg)*.45);color:#0009;font-weight:700}
-.seg:first-child{border-radius:6px 6px calc(var(--seg)*.55) calc(var(--seg)*.55)}
-.seg:last-child::before{content:'';position:absolute;top:-1px;left:4%;right:4%;height:5px;border-radius:50%;background:#ffffff60}
 .seg.new{animation:drop .42s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes drop{from{transform:scaleY(0);transform-origin:bottom;opacity:.2}}
 .tube.tilt{animation:tilt .45s ease}
@@ -39,7 +37,8 @@
   background:var(--sand,none) 0 0/120px 120px,linear-gradient(90deg,color-mix(in srgb,var(--c) 66%,#fff) 0,var(--c) 26%,var(--c) 52%,color-mix(in srgb,var(--c) 68%,#000) 100%);
   box-shadow:inset 0 -1px 0 #0000002e}
 .seg.same{box-shadow:none}
-.seg:first-child{border-radius:0 0 calc(var(--seg)*.56) calc(var(--seg)*.56)}
+/* the bottom layer follows the round tube bottom (first-of-type: the tube's first children are its <i> decorations) */
+.seg:first-of-type{border-radius:0 0 calc(var(--seg)*.56) calc(var(--seg)*.56)}
 .seg::before{content:none}
 /* the top layer is a soft mound, a little lighter in the middle */
 .seg.top::before{content:'';position:absolute;left:0;right:0;top:calc(var(--seg)*-.15);height:calc(var(--seg)*.32);border-radius:50%;
@@ -49,6 +48,10 @@
 @keyframes tfill{from{transform:scaleY(0)}}
 .seg.gone{transform-origin:bottom;animation:tdrain .3s ease-in both}
 @keyframes tdrain{to{transform:scaleY(0);opacity:.3}}
+/* the pour: a continuous grainy stream from the lip into the tube, plus a few loose grains */
+.pourst{position:fixed;z-index:63;pointer-events:none;border-radius:99px;transform-origin:top;will-change:transform;
+  background:var(--sand,none) 0 0/60px 60px,linear-gradient(90deg,color-mix(in srgb,var(--c) 62%,#fff),var(--c) 45%,color-mix(in srgb,var(--c) 70%,#000));
+  box-shadow:0 0 6px color-mix(in srgb,var(--c) 55%,transparent)}
 /* falling grains (fixed elements created by pourAnim) */
 .sgr{position:fixed;z-index:63;pointer-events:none;border-radius:50%;will-change:transform;
   background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c) 40%,#fff),var(--c) 70%,color-mix(in srgb,var(--c) 70%,#000))}

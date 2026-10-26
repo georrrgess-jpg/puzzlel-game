@@ -70,12 +70,19 @@ MAKERS.tubes=function({R,tier,board,api}){
     /* sand that just left this tube drains away from the top */
     ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',COLORS[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
   }
+  /* once the pour animations have played, turn the tube back into plain resting layers */
+  function settle(e){
+    e.querySelectorAll('.seg.gone').forEach(x=>x.remove());
+    e.querySelectorAll('.seg.new').forEach(x=>{x.classList.remove('new');x.style.animationDelay=''});
+    const segs=e.querySelectorAll('.seg');segs.forEach((x,j)=>x.classList.toggle('top',j===segs.length-1));
+  }
   function render(){
     tEls.forEach(e=>{e.querySelectorAll('.hn').forEach(x=>x.remove())});
     tubes.forEach((t,i)=>{
       const e=tEls[i];
-      const key=t.join('')+'|'+(lastNew&&lastNew.i===i?'n'+lastNew.from:'')+'|'+(lastGhost&&lastGhost.i===i?'g'+lastGhost.segs.join(''):'')+(S.symbols?'s':'');
-      if(e._k!==key){e._k=key;buildSand(e,t,i)}
+      /* rebuild only when the contents change (or a pour just touched this tube), so selecting another tube never cuts a fill/drain short */
+      const key=t.join('')+(S.symbols?'s':''),fresh=lastNew&&lastNew.i===i?1400:lastGhost&&lastGhost.i===i?820:0;
+      if(e._k!==key||fresh){e._k=key;buildSand(e,t,i);clearTimeout(e._st);if(fresh)e._st=setTimeout(()=>settle(e),FL_RM?0:fresh)}
       e.classList.toggle('sel',i===sel);
       e.classList.toggle('done',t.length===cap&&uniform(t));
       e.classList.remove('hint');e.removeAttribute('data-h');
@@ -131,7 +138,10 @@ MAKERS.tubes=function({R,tier,board,api}){
     /* grains fall from the lip to where the sand lands */
     const b=B.getBoundingClientRect(),land=B.querySelectorAll('.seg')[oldLen];
     const sx=b.left+b.width/2+mx,sy=b.top-lip+4,ey=land?land.getBoundingClientRect().bottom:b.bottom-6,fall=Math.max(12,ey-sy);
-    const n=10+cnt*5;
+    const sw=4+cnt*1.5,st=el('div','pourst');
+    st.style.cssText=`left:${sx-sw/2}px;top:${sy}px;width:${sw}px;height:${fall}px;--c:${color}`;document.body.appendChild(st);
+    st.animate([{transform:'translateY(0) scaleY(0)'},{transform:'translateY(0) scaleY(1)',offset:.3},{transform:'translateY(0) scaleY(1)',offset:.7},{transform:`translateY(${fall}px) scaleY(0)`}],{duration:460,delay:230,easing:'ease-in-out',fill:'both'}).onfinish=()=>st.remove();
+    const n=4+cnt*2;
     for(let g=0;g<n;g++){
       const d=el('i','sgr'),sz=2.6+Math.random()*2.6;
       d.style.cssText=`left:${sx+(Math.random()-.5)*(5+cnt*2)-sz/2}px;top:${sy}px;width:${sz}px;height:${sz}px;--c:${color}`;document.body.appendChild(d);
