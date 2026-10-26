@@ -41,6 +41,7 @@ const SHOTS=process.argv[2]||null;
   await page.click('#lv-ctrl .mixbtn'); await page.waitForTimeout(300);
   ok(await page.$('#mix-pop .mx-row'), 'it opens the mixer over the match');
   if(SHOTS) await page.screenshot({path:SHOTS+'/mixer-live.png'});
+  await page.waitForFunction(()=>Sound.crowd||V189.failed,null,{timeout:60000}).catch(()=>{});
   ok(await page.evaluate(()=>!!Sound.crowd), 'crowd atmosphere is running');
   await page.click('#mix-pop .mx-row[data-k="crowd"]'); await page.waitForTimeout(300);
   ok(await page.evaluate(()=>!Sound.crowd), 'switching the crowd off silences it immediately');
