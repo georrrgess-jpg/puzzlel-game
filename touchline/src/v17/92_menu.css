@@ -71,8 +71,8 @@
 .v1811m-slot-del:hover{color:var(--bad,#ff6b6b);background:rgba(255,255,255,.06)}
 
 /* secondary actions */
-.v1811m-links{display:flex;flex-wrap:wrap;gap:4px 2px;margin-left:-7px}
-.start.v1811m .v1811m-links .v1811m-link,.start.v1811m .v1811m-links .sndbtn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 7px;border:0;border-radius:10px;background:none;box-shadow:none;color:color-mix(in srgb,var(--text) 80%,transparent);font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.v1811m-links{display:flex;flex-wrap:wrap;gap:4px 0;margin-left:-6px}
+.start.v1811m .v1811m-links .v1811m-link,.start.v1811m .v1811m-links .sndbtn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 6px;border:0;border-radius:10px;background:none;box-shadow:none;color:color-mix(in srgb,var(--text) 80%,transparent);font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
 .start.v1811m .v1811m-links .v1811m-link:hover,.start.v1811m .v1811m-links .sndbtn:hover{background:rgba(255,255,255,.07);color:var(--text)}
 .v1811m-ic{flex:none}
 
@@ -81,9 +81,9 @@
 .start.v1811m .v1811m-slot-open:focus-visible,.start.v1811m .v1811m-slot-new:focus-visible{outline-offset:-2px}
 
 /* mascot parade: one faint strip along the bottom edge, right of the column */
-.v1811m-parade{position:fixed;left:48%;right:0;bottom:8px;z-index:0;opacity:.3;pointer-events:none;
+.v1811m-parade{position:fixed;left:50%;right:0;bottom:14px;height:58px;z-index:0;opacity:.5;pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 86%,transparent)}
-.v1811m-parade .parade{margin:0}
+.v1811m-parade .parade{position:relative;left:auto;right:auto;bottom:auto;margin:0;-webkit-mask-image:none;mask-image:none}
 
 /* entrance */
 .v1811m-intro .v1811m-in{animation:v1811m-up .75s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.3s + var(--v1811m-d,0)*.09s)}
