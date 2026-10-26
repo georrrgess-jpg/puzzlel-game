@@ -27,7 +27,7 @@ const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) process.exitCode=1;
   // Celebrations tab
   const pid=await page.evaluate(()=>{ const C=App.C; const L=squad(C,C.userSid,'V').sort((a,b)=>celebUnlocked(C,b).length-celebUnlocked(C,a).length); return L[0].id; });
   await page.evaluate(id=>{ App.modal={type:'player',id,tab:'celeb'}; renderModal(); },pid); await page.waitForTimeout(600);
-  const tiles=await page.$$('.cel-tile'); ok(tiles.length===10, 'ten celebrations are listed');
+  const CELN=await page.evaluate(()=>CELEBS.length); const tiles=await page.$$('.cel-tile'); ok(tiles.length===CELN, 'every celebration is listed ('+tiles.length+')');
   const un=await page.evaluate(id=>celebUnlocked(App.C,App.C.players[id]),pid);
   const pick=un[un.length-1]; await page.click(`.cel-tile[data-cel="${pick}"]`); await page.waitForTimeout(300);
   ok(await page.evaluate(([id,c])=>App.C.players[id].cel===c&&celebFor(App.C,App.C.players[id])===c,[pid,pick]), 'equipping a celebration sticks ('+pick+')');

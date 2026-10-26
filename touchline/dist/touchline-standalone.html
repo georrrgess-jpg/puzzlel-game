@@ -2180,6 +2180,129 @@ canvas.v18-hud{position:relative;z-index:1}
 /* v18.5 player plates: the canvas tags are decorative; this line names the carrier for screen readers on demand */
 .v185-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
+/* ---------- v18.11 main menu (92_menu.js): one column over a dimmed showcase match ----------
+   Colours come from the theme tokens (--bg, --surface, --line, --text, --muted, --accent, --on-accent); career cards use
+   --team1/--team2; amber --accent is used only for the primary action. Motion is transform/opacity only (the v17 start-screen
+   audit), no backdrop-filter, no blend mode, and none of it runs under reduced motion. */
+.start.v1811m{background:var(--bg);color:var(--text);justify-content:flex-start;align-items:stretch}
+.start.v1811m .start-live,.start.v1811m .start-snd,.start.v1811m .start-bug,.start.v1811m .start-ticker,.start.v1811m .start-feats{display:none}
+.start.v1811m .beam{opacity:.45}
+.start.v1811m .start-bg canvas{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.start.v1811m .start-shade{background:
+  linear-gradient(90deg,color-mix(in srgb,var(--bg) 95%,transparent) 0%,color-mix(in srgb,var(--bg) 84%,transparent) 34%,color-mix(in srgb,var(--bg) 58%,transparent) 68%,color-mix(in srgb,var(--bg) 68%,transparent) 100%),
+  linear-gradient(180deg,rgba(0,0,0,.35),transparent 28%,transparent 72%,rgba(0,0,0,.55))}
+.start.v1811m .start-ui{padding:0;gap:0;align-items:stretch;min-height:100vh;min-height:100dvh}
+
+
+.v1811m-wrap{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(26px,4.5vh,44px);width:min(580px,calc(100% - 48px));min-height:100vh;min-height:100dvh;box-sizing:border-box;padding:clamp(36px,7vh,80px) 0;margin-left:clamp(24px,8vw,136px)}
+.v1811m-main{display:flex;flex-direction:column;gap:22px}
+
+/* brand */
+.start.v1811m .v1811m-logo{margin:0;text-align:left;font-size:inherit;line-height:.85}
+.v1811m-kick{display:block;font-family:var(--f-display);font-weight:700;font-size:.82rem;letter-spacing:.38em;text-transform:uppercase;color:color-mix(in srgb,var(--text) 72%,transparent);margin:0 0 12px 2px}
+.start.v1811m .logo-word{font-size:clamp(4rem,7.4vw,6.6rem);letter-spacing:.015em;filter:none;text-align:left}
+.start.v1811m .logo-word:not(.v17-glint) span{color:var(--text);background:none;text-shadow:0 2px 0 rgba(0,0,0,.28),0 14px 34px rgba(0,0,0,.55)}
+.start.v1811m .logo.intro .logo-word:not(.v17-glint) span{animation:v1811m-letter .8s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.1s + var(--i)*.045s)}
+.v1811m-rule{display:block;width:76px;height:2px;margin:20px 0 0 2px;border-radius:2px;background:linear-gradient(90deg,var(--text),transparent);opacity:.45;transform-origin:left center}
+.v1811m-intro .v1811m-rule{animation:v1811m-rule .9s .65s cubic-bezier(.2,.8,.2,1) backwards}
+.start.v1811m .v1811m-logo small{display:block;margin:16px 0 0 2px;max-width:30em;font-family:var(--f-body);font-weight:500;font-size:1.02rem;line-height:1.5;letter-spacing:0;text-transform:none;color:var(--muted)}
+
+/* primary: continue the latest career */
+.start.v1811m .v1811m-cont{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;gap:16px;width:100%;padding:18px;border-radius:20px;cursor:pointer;text-align:left;font:inherit;color:var(--text);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--team1) 34%,var(--surface)) 0%,color-mix(in srgb,var(--surface) 94%,transparent) 62%);
+  border:1px solid color-mix(in srgb,var(--team1) 45%,var(--line));box-shadow:0 24px 60px rgba(0,0,0,.45);transition:transform .25s,box-shadow .25s,border-color .2s}
+.start.v1811m .v1811m-cont:hover{transform:translateY(-2px);box-shadow:0 30px 70px rgba(0,0,0,.5);border-color:color-mix(in srgb,var(--team1) 65%,var(--text))}
+.start.v1811m .v1811m-cont .slot-wm{position:absolute;right:-36px;top:-34px;bottom:auto;opacity:.09;transform:rotate(-8deg);pointer-events:none}
+.v1811m-cont-top{position:relative;display:flex;align-items:center;gap:16px;min-width:0}
+.start.v1811m .v1811m-cont .ch-logo{flex:none;animation:none;line-height:0}
+.start.v1811m .v1811m-cont .ch-logo>*{width:72px;height:72px}
+.v1811m-cont-t{display:flex;flex-direction:column;gap:4px;min-width:0}
+.v1811m-eye{font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--text) 70%,transparent)}
+.v1811m-cont-t b{font-family:var(--f-display);font-weight:900;font-size:clamp(1.5rem,2.6vw,2rem);line-height:1;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+.v1811m-cont-sub{font-size:.9rem;color:var(--muted)}
+.v1811m-go{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;min-height:54px;border-radius:14px;background:var(--accent);color:var(--on-accent);font-family:var(--f-display);font-weight:900;font-size:1.35rem;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 28%,transparent)}
+.v1811m-go>span:first-child{display:inline-flex;align-items:center;gap:8px}
+.v1811m-go kbd{font-family:var(--f-body);font-size:.66rem;font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:6px;border:1px solid currentColor;opacity:.6;background:none;color:inherit}
+
+/* primary: no careers yet */
+.start.v1811m .v1811m-new{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;width:100%;padding:18px 20px;border:0;border-radius:20px;cursor:pointer;text-align:left;font:inherit;background:var(--accent);color:var(--on-accent);box-shadow:0 18px 44px color-mix(in srgb,var(--accent) 26%,rgba(0,0,0,.4));transition:transform .25s,box-shadow .25s}
+.start.v1811m .v1811m-new:hover{transform:translateY(-2px)}
+.v1811m-new-ic{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:2px solid currentColor;opacity:.85}
+.v1811m-new-t{display:flex;flex-direction:column;gap:4px}
+.v1811m-new-t b{font-family:var(--f-display);font-weight:900;font-size:1.6rem;line-height:1;text-transform:uppercase;letter-spacing:.03em}
+.v1811m-new-t small{font-size:.88rem;opacity:.78;font-weight:500}
+.v1811m-sweep{position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.32) 50%,transparent 65%);transform:translateX(-120%);animation:v1811m-sweep 7s 2.4s ease-in-out infinite}
+
+/* your careers */
+.v1811m-saves h2{margin:0 0 10px 2px;font-size:.74rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.v1811m-saves ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.v1811m-slot{display:flex;align-items:center;min-height:58px;border-radius:14px;background:color-mix(in srgb,var(--surface) 76%,transparent);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);transition:background .2s,border-color .2s}
+.v1811m-slot.v1811m-filled{box-shadow:inset 3px 0 0 var(--team1)}
+.v1811m-slot.v1811m-empty{background:color-mix(in srgb,var(--surface) 45%,transparent);border-style:dashed}
+.v1811m-slot:hover{background:color-mix(in srgb,var(--surface) 92%,var(--text) 5%);border-color:var(--line)}
+.v1811m-slot-open,.v1811m-slot-new{flex:1;min-width:0;display:flex;align-items:center;gap:12px;align-self:stretch;padding:8px 14px;background:none;border:0;border-radius:14px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.v1811m-slot .slot-logo{flex:none;line-height:0;filter:none}
+.v1811m-slot .slot-logo>*{width:40px;height:40px}
+.v1811m-slot-ic{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px dashed color-mix(in srgb,var(--text) 40%,transparent);color:var(--muted)}
+.v1811m-slot-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v1811m-slot-t b{font-weight:700;font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811m-slot.v1811m-empty .v1811m-slot-t b{color:color-mix(in srgb,var(--text) 82%,transparent)}
+.v1811m-slot-t small{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811m-slot-del{flex:none;display:grid;place-items:center;width:44px;height:44px;margin-right:6px;border:0;border-radius:10px;background:none;color:var(--muted);cursor:pointer;opacity:.7;transition:opacity .2s,color .2s,background .2s}
+.v1811m-slot:hover .v1811m-slot-del,.v1811m-slot-del:focus-visible{opacity:1}
+.v1811m-slot-del:hover{color:var(--bad,#ff6b6b);background:rgba(255,255,255,.06)}
+
+/* secondary actions */
+.v1811m-links{display:flex;flex-wrap:wrap;gap:4px 0;margin-left:-6px}
+.start.v1811m .v1811m-links .v1811m-link,.start.v1811m .v1811m-links .sndbtn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 6px;border:0;border-radius:10px;background:none;box-shadow:none;color:color-mix(in srgb,var(--text) 80%,transparent);font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.start.v1811m .v1811m-links .v1811m-link:hover,.start.v1811m .v1811m-links .sndbtn:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.v1811m-ic{flex:none}
+
+/* keyboard focus */
+.start.v1811m button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.start.v1811m .v1811m-slot-open:focus-visible,.start.v1811m .v1811m-slot-new:focus-visible{outline-offset:-2px}
+
+/* mascot parade: one faint strip along the bottom edge, right of the column */
+.v1811m-parade{position:fixed;left:50%;right:0;bottom:14px;height:58px;z-index:0;opacity:.5;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 86%,transparent)}
+.v1811m-parade .parade{position:relative;left:auto;right:auto;bottom:auto;margin:0;-webkit-mask-image:none;mask-image:none}
+
+/* entrance */
+.v1811m-intro .v1811m-in{animation:v1811m-up .75s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.3s + var(--v1811m-d,0)*.09s)}
+@keyframes v1811m-up{from{opacity:0;transform:translateY(16px)}}
+@keyframes v1811m-letter{from{opacity:0;transform:translateY(.22em)}}
+@keyframes v1811m-rule{from{opacity:0;transform:scaleX(0)}}
+@keyframes v1811m-sweep{0%{transform:translateX(-120%)}28%,100%{transform:translateX(120%)}}
+
+/* phone: one centred column, brand at the top, the actions in the lower, thumb-reachable half */
+@media (max-width:720px){
+  .start.v1811m .start-shade{background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 70%,transparent),color-mix(in srgb,var(--bg) 82%,transparent) 40%,color-mix(in srgb,var(--bg) 94%,transparent))}
+  .v1811m-parade{display:none}
+  .v1811m-wrap{width:auto;margin:0;padding:max(28px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));justify-content:flex-start;gap:24px}
+  .v1811m-brand{text-align:center;padding-top:clamp(8px,4vh,40px)}
+  .start.v1811m .v1811m-logo,.start.v1811m .logo-word{text-align:center}
+  .start.v1811m .logo-word{font-size:clamp(3.2rem,18vw,4.6rem)}
+  .v1811m-kick{margin:0 0 10px;font-size:.72rem;letter-spacing:.3em}
+  .v1811m-rule{margin:16px auto 0;background:linear-gradient(90deg,transparent,var(--text),transparent);transform-origin:center}
+  .start.v1811m .v1811m-logo small{margin:14px auto 0;font-size:.94rem;max-width:22em}
+  .v1811m-main{margin-top:auto;gap:18px}
+  .start.v1811m .v1811m-cont{padding:14px;gap:14px}
+  .start.v1811m .v1811m-cont .ch-logo>*{width:56px;height:56px}
+  .v1811m-go{min-height:56px}
+  .v1811m-go kbd{display:none}
+  .v1811m-links{justify-content:center;margin:0}
+}
+
+/* reduced motion: no entrance, sweep or parallax */
+@media (prefers-reduced-motion:reduce){
+  .v1811m-intro .v1811m-in,.v1811m-intro .v1811m-rule,.start.v1811m .logo.intro .logo-word:not(.v17-glint) span,.v1811m-sweep{animation:none}
+  .v1811m-sweep{display:none}
+  .start.v1811m .start-bg canvas{transition:none;transform:none}
+}
+body.rm .v1811m-intro .v1811m-in,body.rm .v1811m-intro .v1811m-rule,body.rm .start.v1811m .logo.intro .logo-word:not(.v17-glint) span{animation:none}
+body.rm .v1811m-sweep{display:none}
+body.rm .start.v1811m .start-bg canvas{transition:none;transform:none}
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -20076,6 +20199,100 @@ const _v1810Draw=Stage.prototype.drawFigure;
 Stage.prototype.drawFigure=function(g,p){ const a=v1810SpinAng(this,p); if(!a) return _v1810Draw.apply(this,arguments); const y=p.yaw; p.yaw=(y==null?((p.face||1)>0?0:Math.PI):y)+a; try{ return _v1810Draw.apply(this,arguments); } finally{ p.yaw=y; } };
 if(typeof v18FigDraw==='function'){ const _v1810Fig=v18FigDraw;
   v18FigDraw=function(P,st,p){ const a=v1810SpinAng(st,p); if(!a) return _v1810Fig.apply(this,arguments); const y=p.yaw; p.yaw=(y==null?((p.face||1)>0?0:Math.PI):y)+a; try{ return _v1810Fig.apply(this,arguments); } finally{ p.yaw=y; } }; }
+
+/* ===================== v18.11 MAIN MENU (v1811m) =====================
+   The start screen is rebuilt as one calm column over the showcase match:
+     brand (kicker, wordmark, one-line subtitle)
+     ONE primary action: "Continue" the most recently played career (the old .cont-hero, so Enter and every test that clicks
+       .cont-hero / [data-a="openSlot"] still work), or "Start a new program" in the first empty slot when there is none
+     "Your careers": the three slots as compact rows (continue / delete a filled slot, new program in an empty one)
+     one quiet row of secondary actions: How to play, What's new, Appearance, Import a backup, Sound
+   The showcase match stays as a dimmed backdrop (a theme-tinted shade, no blur: a filter over the live canvas would be
+   re-run every frame), and the score bug hidden (the canvas has its own scoreboard); the ticker, the feature row, the pitch paragraph and the LIVE
+   badge are gone too, and the mascot parade is one faint strip along the bottom edge (desktop only).
+   Wraps renderStart: the old chain (ui_views.js + 10_start.js) still builds #start, the backdrop and the demo match;
+   this replaces only the contents of .start-ui, in the same task, so the old layout never paints.
+   Entrance: staggered fade/slide (transform + opacity only, first render only), a light sweep over the primary button and a
+   gentle pointer parallax on the backdrop; all off under reduced motion (OS setting or body.rm). */
+const V1811M_ICON={
+  play:'<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+  spark:'<path d="M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6L4.5 10.5l5.6-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.7 1.8-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7.3" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'
+};
+const v1811mIcon=(k,s=18)=>`<svg class="v1811m-ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${V1811M_ICON[k]||''}</svg>`;
+const v1811mPhase=ph=>({preseason:'Preseason',regular:'League play',sectionals:'Sectionals',regional:'Regional',states:'State tourney',awards:'Awards',offseason:'Offseason'}[ph]||ph||'');
+function v1811mLatest(metas){ return metas&&metas.length?[...metas].sort((a,b)=>(b.updated||0)-(a.updated||0))[0]:null; }
+const v1811mTeam=m=>`--team1:${esc(m.c1||'#3b4a5c')};--team2:${esc(m.c2||'#ffffff')}`;
+
+function v1811mPrimary(metas,by){ const m=v1811mLatest(metas);
+  if(!m){ const free=[1,2,3].find(n=>!by[n])||1;
+    return `<button class="v1811m-new v1811m-in" style="--v1811m-d:3" data-a="newCareerForm" data-slot="${free}">
+      <span class="v1811m-new-ic" aria-hidden="true">${v1811mIcon('plus',26)}</span>
+      <span class="v1811m-new-t"><b>Start a new program</b><small>Pick a mascot, colors and a town. Every world is generated fresh.</small></span>
+      <span class="v1811m-sweep" aria-hidden="true"></span></button>`; }
+  const md=m.phase==='regular'&&m.md!=null?` · Matchday ${m.md+1}`:'';
+  return `<button class="cont-hero v1811m-cont v1811m-in" style="--v1811m-d:3;${v1811mTeam(m)}" data-a="openSlot" data-slot="${m.slot}" aria-label="Continue ${esc(m.school)}, career ${m.slot}">
+    <span class="slot-wm" aria-hidden="true">${m.mk?mascotSVG(m.mk,m.c1,m.c2,170):''}</span>
+    <span class="v1811m-cont-top"><span class="ch-logo">${m.mk?mascotSVG(m.mk,m.c1,m.c2,72):''}</span>
+      <span class="v1811m-cont-t"><span class="v1811m-eye">Continue · Career ${m.slot}</span><b>${esc(m.school)}</b>
+      <span class="v1811m-cont-sub">${esc(m.mascot||'')} · Season ${m.seasonNo} (${m.year}) · ${esc(v1811mPhase(m.phase))}${md}</span></span></span>
+    <span class="v1811m-go"><span>${v1811mIcon('play',18)}Continue</span><kbd>Enter</kbd><span class="v1811m-sweep" aria-hidden="true"></span></span></button>`; }
+
+function v1811mSlots(by,latest){
+  const rows=[1,2,3].map(n=>{ const m=by[n];
+    if(!m) return `<li class="v1811m-slot v1811m-empty"><button class="v1811m-slot-new" data-a="newCareerForm" data-slot="${n}"><span class="v1811m-slot-ic" aria-hidden="true">${v1811mIcon('plus',18)}</span><span class="v1811m-slot-t"><b>New program</b><small>Slot ${n} · empty</small></span></button></li>`;
+    return `<li class="v1811m-slot v1811m-filled${latest&&latest.slot===n?' latest':''}" style="${v1811mTeam(m)}">
+      <button class="v1811m-slot-open" data-a="openSlot" data-slot="${n}" aria-label="Continue career ${n}: ${esc(m.school)}"><span class="slot-logo">${m.mk?mascotSVG(m.mk,m.c1,m.c2,40):''}</span>
+        <span class="v1811m-slot-t"><b>${esc(m.school)}</b><small>Slot ${n} · ${m.year} · ${esc(v1811mPhase(m.phase))} · Coach ${esc(m.coach)}</small></span></button>
+      <button class="v1811m-slot-del" data-a="askDelete" data-slot="${n}" aria-label="Delete career ${n}" title="Delete career ${n}">${v1811mIcon('trash',17)}</button></li>`; }).join('');
+  return `<section class="v1811m-saves v1811m-in" style="--v1811m-d:4" aria-labelledby="v1811m-saves-h"><h2 id="v1811m-saves-h">Your careers</h2><ul>${rows}</ul></section>`; }
+
+function v1811mLinks(){
+  const b=(a,ic,t,x='')=>`<button class="v1811m-link${x}" data-a="${a}">${v1811mIcon(ic,17)}<span>${t}</span></button>`;
+  return `<nav class="v1811m-links v1811m-in" style="--v1811m-d:5" aria-label="More">${b('howTo','book','How to play')}${b('whatsNew','spark',"What's new",' whatsnew')}${b('openTheme','palette','Appearance')}${b('importOpen','upload','Import backup')}${typeof soundBtn==='function'?soundBtn(true):''}</nav>`; }
+
+function v1811mHTML(metas,fresh){ const by={}; for(const m of metas) by[m.slot]=m; const latest=v1811mLatest(metas);
+  const word='TOUCHLINE'.split('').map((c,i)=>`<span style="--i:${i}">${c}</span>`).join('');
+  const logoWord=typeof v17LogoWord==='function'?v17LogoWord(word):`<span class="logo-word" aria-label="Touchline">${word}</span>`;
+  const parade=typeof v17ParadeHTML==='function'?v17ParadeHTML():'';
+  return `<div class="v1811m-wrap${fresh?' v1811m-intro':''}">
+    <header class="v1811m-brand"><h1 class="logo v1811m-logo${fresh?' intro':''}"><span class="v1811m-kick v1811m-in" style="--v1811m-d:0">Friday Night Varsity</span>${logoWord}<span class="v1811m-rule" aria-hidden="true"></span><small class="v1811m-in" style="--v1811m-d:1">High school soccer manager. Build a program from Modified to Varsity and chase the state crown.</small></h1></header>
+    <main class="v1811m-main">
+      ${v1811mPrimary(metas,by)}
+      ${App.mem?'<div class="notice warn v1811m-in" style="--v1811m-d:4">This browser blocked storage, so careers will not persist after you close the page. Use Settings → Backup to keep a copy.</div>':''}
+      ${v1811mSlots(by,latest)}
+      ${v1811mLinks()}
+    </main>
+  </div><div class="v1811m-parade" aria-hidden="true">${parade}</div>`; }
+
+const _v1811mRenderStart=renderStart;
+renderStart=async function(){
+  const fresh=!document.getElementById('start'); let metas=[];
+  try{ metas=await DB.getMeta(); }catch(e){}
+  const r=await _v1811mRenderStart.apply(this,arguments);
+  try{ const el=document.getElementById('start'), ui=el&&el.querySelector('.start-ui'); if(!ui) return r;
+    el.classList.add('v1811m');
+    const snd=el.querySelector('.start-snd'); if(snd) snd.innerHTML='';
+    ui.innerHTML=v1811mHTML(metas,fresh);
+    if(typeof v17MascotsToImg==='function') v17MascotsToImg(ui);
+    if(typeof v17ParadeBuild==='function'&&ui.querySelector('.v17-parade')) v17ParadeBuild();
+    if(fresh) v1811mParallax(el);
+  }catch(e){ console.warn('v1811m menu',e); }
+  return r; };
+
+/* pointer parallax on the backdrop canvas: a few px of transform with a CSS transition, desktop pointers only */
+function v1811mParallax(el){ if(!window.matchMedia||!matchMedia('(pointer:fine)').matches) return; let raf=0, px=0, py=0;
+  const move=e=>{ px=e.clientX/innerWidth-.5; py=e.clientY/innerHeight-.5; if(raf) return; raf=requestAnimationFrame(()=>{ raf=0;
+      const cv=document.getElementById('start-cv'); if(!cv||!el.isConnected){ document.removeEventListener('pointermove',move); return; }
+      if(reducedMotion()){ cv.style.transform=''; return; } cv.style.transform=`translate3d(${(-px*14).toFixed(1)}px,${(-py*9).toFixed(1)}px,0) scale(1.03)`; }); };
+  document.addEventListener('pointermove',move,{passive:true}); }
+/* Enter on the menu with no career yet opens the new-program form (with a career, ui_v8.js already clicks .cont-hero) */
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter'||App.C||App.modal||e.defaultPrevented) return; const t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName)) return;
+  if(document.querySelector('#start .cont-hero')) return; const b=document.querySelector('#start .v1811m-new'); if(b){ e.preventDefault(); b.click(); } });
 
 </script>
 </body></html>
