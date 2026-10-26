@@ -48,18 +48,18 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   ok(S0.sumOk&&S0.pcOk, 'at the start every town adds up to 100% (and so do the whole-number percentages)');
   ok(S0.home>0.99&&S0.reach>=1, `your home town starts at ${Math.round(S0.home*100)}%; reach ${S0.reach}`);
   ok(S0.sat.every(n=>n>=2), 'a satellite town starts split between the programs around it');
-  const M=await page.evaluate(()=>{ const C=App.C, geo=v1812mGeo(C); const T=geo.towns.find(t=>!t.sat&&t.id!==C.userSid); const A=C.league.find(id=>id!==T.id&&id!==C.userSid); const nb=geo.adj[T.id].map(o=>o.to); const far=geo.towns.filter(t=>t.id!==T.id&&!nb.includes(t.id)&&geo.mi(T.id,t.id)>=30).map(t=>t.id);
+  const M=await page.evaluate(()=>{ const C=App.C, geo=v1812mGeo(C); const T=geo.towns.find(t=>!t.sat&&t.id!==C.userSid); const A=C.league.find(id=>id!==T.id&&id!==C.userSid); const nb=geo.adj[T.id].map(o=>o.to); const far=[]; const Ytmp={}; v1812mContrib(geo,T.id,A,0,1,A,Ytmp); const fade=geo.towns.filter(t=>t.id!==T.id&&!nb.includes(t.id)).map(t=>[geo.miF(A,t.id),(Ytmp[t.id]&&Ytmp[t.id][A])||0]).sort((a,b)=>a[0]-b[0]);
     const sh=(Y)=>v1812mShares(C,geo,v1812mBox(C),false,{yr:C.year,Y}); const base=sh({});
     const Yaw={}; v1812mContrib(geo,T.id,A,0,1,A,Yaw); const Yho={}; v1812mContrib(geo,T.id,A,1,0,T.id,Yho); const Ydr={}; v1812mContrib(geo,T.id,A,1,1,null,Ydr);
     const aw=sh(Yaw), ho=sh(Yho), dr=sh(Ydr); const Ybig={}; v1812mContrib(geo,T.id,A,0,4,A,Ybig);
-    return {atT:[base[T.id][A]||0,aw[T.id][A]||0],homeDrop:[base[T.id][T.id],aw[T.id][T.id]],nb:nb.map(n=>[base[n][A]||0,aw[n][A]||0]),far:far.map(n=>[base[n][A]||0,aw[n][A]||0]),awayPts:Yaw[T.id][A],homePts:Yho[T.id][T.id],drawA:Ydr[T.id][A],drawH:Ydr[T.id][T.id],homeWinHelpsA:(ho[T.id][A]||0)<=(base[T.id][A]||0)+1e-12,homeWinH:[base[T.id][T.id],ho[T.id][T.id]],winA:V1812M.WIN_A,winH:V1812M.WIN_H,bigPts:Ybig[T.id][A],sums:[aw,ho,dr].every(S=>Object.values(S).every(t=>Math.abs(Object.values(t).reduce((a,b)=>a+b,0)-1)<1e-9))}; });
+    return {atT:[base[T.id][A]||0,aw[T.id][A]||0],homeDrop:[base[T.id][T.id],aw[T.id][T.id]],nb:nb.map(n=>[base[n][A]||0,aw[n][A]||0]),fade,awayPts:Yaw[T.id][A],homePts:Yho[T.id][T.id],drawA:Ydr[T.id][A],drawH:Ydr[T.id][T.id],homeWinHelpsA:(ho[T.id][A]||0)<=(base[T.id][A]||0)+1e-12,homeWinH:[base[T.id][T.id],ho[T.id][T.id]],winA:V1812M.WIN_A,winH:V1812M.WIN_H,bigPts:Ybig[T.id][A],sums:[aw,ho,dr].every(S=>Object.values(S).every(t=>Math.abs(Object.values(t).reduce((a,b)=>a+b,0)-1)<1e-9))}; });
   ok(M.atT[1]>M.atT[0]&&M.homeDrop[1]<M.homeDrop[0], `an away win moves the town toward the winner (${Math.round(M.atT[0]*100)}% to ${Math.round(M.atT[1]*100)}%) and away from its home program`);
   ok(M.winA===2*M.winH&&M.awayPts>=2*M.homePts, `an away win counts double (${M.winA} against ${M.winH} points; at the venue ${M.awayPts} against ${M.homePts})`);
   ok(M.homeWinH[1]>=M.homeWinH[0]&&M.homeWinHelpsA, 'a home win helps the home program and not the visitors');
   ok(M.drawA>0&&M.drawA<M.awayPts&&M.drawH===M.drawA, `a draw shifts less than a win and gives both sides the same (${M.drawA} points)`);
   ok(M.bigPts>M.awayPts, 'a bigger margin earns a little more');
   ok(M.nb.length>0&&M.nb.every(([a,b])=>b>=a-1e-12)&&M.nb.filter(([a,b])=>b>a).length>=Math.max(1,M.nb.length-1), `the win spreads along the roads: every neighbouring town moves toward the winner (${M.nb.map(([a,b])=>Math.round(a*100)+'-'+Math.round(b*100)).join(', ')})`);
-  ok(M.far.every(([a,b])=>b-a<=M.nb.reduce((m,[x,y])=>Math.max(m,y-x),0)+1e-9), 'the pull fades with road distance');
+  ok(M.fade.length>=4&&M.fade.every((p,i)=>i===0||p[1]<=M.fade[i-1][1])&&M.fade[0][1]>M.fade[M.fade.length-1][1], `the winner's pull fades with road distance from his town (${M.fade.map(p=>Math.round(p[0])+' mi: '+p[1]).join(', ')})`);
   ok(M.sums, 'shares still add up to 100% after any result');
   /* a real season through finishMatch */
   await page.evaluate(`(${SIM})(17)`);
@@ -90,6 +90,15 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
     return {eq:mine===sig(C2),n:mine.length,mapless:!C2.map}; });
   ok(same.eq&&same.n>200&&same.mapless, 'every score is exactly what the engine plays without the map hook: the map changes no result');
 
+  /* the round results carry a County Map strip when your colours moved */
+  const RS=await page.evaluate(()=>{ const C=App.C, B=C.map; const g=B.log.find(e=>e.k==='g'), v=B.log.find(e=>e.k==='v'&&e.p0!==e.p1&&!B.log.some(x=>x.fid===e.fid&&x.k!=='v'));
+    const out={flipLog:B.log.filter(e=>e.k==='g').length,hasV:!!v};
+    if(g){ App.modal={type:'results',ids:[g.fid],phase:'regular',ev:{},yr:C.year}; renderModal(); const el=document.querySelector('.modal .v1812m-rs'); out.flip=el?el.textContent:''; out.good=!!el&&el.classList.contains('v1812m-good'); out.btn=!!(el&&el.querySelector('[data-a="v1812mOpen"]')); }
+    if(v){ App.modal={type:'results',ids:[v.fid],phase:'regular',ev:{},yr:C.year}; renderModal(); const el=document.querySelector('.modal .v1812m-rs'); out.move=el?el.textContent:''; }
+    App.modal=null; renderModal(); return out; });
+  ok(RS.flipLog>0&&/flip/.test(RS.flip)&&RS.good&&RS.btn, `a result that flips a town shows it in the round results: "${RS.flip}"`);
+  ok(!RS.hasV||/%/.test(RS.move), 'a result that only moves the percentages says so'+(RS.hasV?` ("${RS.move}")`:''));
+
   /* ---------- the view: desktop ---------- */
   await page.evaluate(()=>{ App.route='countymap'; App.params={}; render(); }); await page.waitForTimeout(600);
   const V=await page.evaluate(()=>({marks:document.querySelectorAll('.v1812m-mk').length,glows:document.querySelectorAll('.v1812m-g').length,roads:document.querySelectorAll('.v1812m-road').length,rows:document.querySelectorAll('.v1812m-row').length,big:document.querySelector('.v1812m-big b').textContent,card:!!document.querySelector('.v1812m-fri'),rw:!!document.querySelector('.v1812m-rw'),bul:document.querySelectorAll('.v1812m-bul li').length,
@@ -102,10 +111,10 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   /* a tap on a town opens its panel */
   const pick=await page.evaluate(()=>{ const C=App.C, st=v1812mState(C), g=v1812mGeo(C); const t=g.towns.find(t=>!t.sat&&t.id!==C.userSid); return {id:t.id,name:t.name}; });
   await page.click(`.v1812m-mk[data-t="${pick.id}"] .v1812m-hit`,{force:true}); await page.waitForTimeout(300);
-  const TP=await page.evaluate(id=>({panel:!!document.getElementById('v1812m-town'),name:document.querySelector('#v1812m-town h3')&&document.querySelector('#v1812m-town h3').textContent,sel:document.querySelectorAll('.v1812m-mk.sel').length,row:document.querySelectorAll('.v1812m-row.sel').length,facts:[...document.querySelectorAll('#v1812m-town dt')].map(x=>x.textContent),legend:document.querySelectorAll('#v1812m-town .v1812m-leg span').length,co:!document.getElementById('v1812m-co').hidden,sel2:V1812M.sel===id}),pick.id);
+  const TP=await page.evaluate(id=>({panel:!!document.getElementById('v1812m-town'),name:document.querySelector('#v1812m-town h3')&&document.querySelector('#v1812m-town h3').textContent,sel:document.querySelectorAll('.v1812m-mk.v1812m-issel').length,row:document.querySelectorAll('.v1812m-row.v1812m-issel').length,facts:[...document.querySelectorAll('#v1812m-town dt')].map(x=>x.textContent),legend:document.querySelectorAll('#v1812m-town .v1812m-leg span').length,co:!document.getElementById('v1812m-co').hidden,sel2:V1812M.sel===id}),pick.id);
   ok(TP.panel&&TP.name===pick.name&&TP.sel===1&&TP.sel2&&TP.row===1, `tapping ${pick.name} opens its panel and selects it`);
-  ok(TP.facts.includes('By road')&&TP.facts.includes('Record vs them')&&TP.facts.includes('Next game')&&TP.facts.includes('Scouting pipeline')&&TP.legend>=2&&TP.co, 'the town panel has the control bar, distance, record, next game, pipeline and a callout on the map');
-  await page.click('.v1812m-x'); await page.waitForTimeout(100); ok(await page.evaluate(()=>!document.getElementById('v1812m-town')&&!document.querySelector('.v1812m-mk.sel')), 'the close button clears the selection');
+  ok(TP.facts.includes('By road')&&TP.facts.includes('Record vs them')&&TP.facts.includes('Next game')&&TP.facts.includes('Scouting pipeline')&&TP.facts.includes('Rivalry')&&TP.legend>=2&&TP.co, 'the town panel has the control bar, distance, record, next game, pipeline and a callout on the map');
+  await page.click('.v1812m-x'); await page.waitForTimeout(100); ok(await page.evaluate(()=>!document.getElementById('v1812m-town')&&!document.querySelector('.v1812m-mk.v1812m-issel')), 'the close button clears the selection');
   await page.click(`.v1812m-row[data-t="${pick.id}"]`); await page.waitForTimeout(500); ok(await page.evaluate(id=>V1812M.sel===id&&!!document.getElementById('v1812m-town'),pick.id), 'a row in the panel picks the town too');
   await page.keyboard.press('Escape');
   /* satellite town panel */
@@ -203,7 +212,7 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   await page.evaluate(()=>{ App.route='countymap'; render(); }); await page.waitForTimeout(2600);
   const AN=await page.evaluate(()=>{ const C=App.C, u=C.userSid, g=v1812mGeo(C), st=v1812mState(C); const t=g.towns.find(t=>!t.sat&&t.id!==u&&(st.S[t.id][u]||0)<0.4); const B=C.map;
     const seen=JSON.parse(JSON.stringify(B.seen)); seen.S[st.held[0]]=Object.assign({},seen.S[st.held[0]],{[u]:0.05}); /* pretend your best town was nearly lost at your last look */ B.seen=seen; App.route='office'; render(); App.route='countymap'; render();
-    const gl=[...document.querySelectorAll('.v1812m-g')].filter(c=>c.dataset.t===st.held[0]&&c.dataset.s===u)[0]; const r0=+gl.getAttribute('r'); const flip=document.querySelectorAll('.v1812m-mk.flip').length;
+    const gl=[...document.querySelectorAll('.v1812m-g')].filter(c=>c.dataset.t===st.held[0]&&c.dataset.s===u)[0]; const r0=+gl.getAttribute('r'); const flip=document.querySelectorAll('.v1812m-mk.v1812m-isflip').length;
     return {r0,x0:+gl.dataset.x0,x1:+gl.dataset.x1,flip,held:st.held[0]}; });
   await page.waitForTimeout(2600); const AN2=await page.evaluate(()=>{ const u=App.C.userSid, h=V1812M.st&&v1812mState(App.C).held[0]; const gl=[...document.querySelectorAll('.v1812m-g')].filter(c=>c.dataset.t===h&&c.dataset.s===u)[0]; return {r1:+gl.getAttribute('r'),seen:App.C.map.seen.S[h][u]}; });
   ok(AN.x0<AN.x1&&AN.flip>=1, `a town you won since your last look is marked to burst (${AN.flip} flipped), and its glow starts at ${AN.x0} of ${AN.x1}`);
@@ -212,11 +221,11 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   /* reduced motion: no tween, no flowing dashes, no burst */
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.evaluate(()=>{ const C=App.C, u=C.userSid, st=v1812mState(C); const seen=JSON.parse(JSON.stringify(C.map.seen)); seen.S[st.held[0]]=Object.assign({},seen.S[st.held[0]],{[u]:0.05}); C.map.seen=seen; App.route='office'; render(); App.route='countymap'; render(); });
-  const RM=await page.evaluate(()=>{ const u=App.C.userSid, h=v1812mState(App.C).held[0]; const gl=[...document.querySelectorAll('.v1812m-g')].filter(c=>c.dataset.t===h&&c.dataset.s===u)[0]; const dby=document.querySelector('.v1812m-dby.mine'); const fl=document.querySelector('.v1812m-mk.flip .v1812m-burst'); const pulse=document.querySelector('.v1812m-mk.user .v1812m-held');
+  const RM=await page.evaluate(()=>{ const u=App.C.userSid, h=v1812mState(App.C).held[0]; const gl=[...document.querySelectorAll('.v1812m-g')].filter(c=>c.dataset.t===h&&c.dataset.s===u)[0]; const dby=document.querySelector('.v1812m-dby.v1812m-mine'); const fl=document.querySelector('.v1812m-mk.v1812m-isflip .v1812m-burst'); const pulse=document.querySelector('.v1812m-mk.v1812m-isuser .v1812m-held');
     return {done:Math.abs(+gl.getAttribute('opacity')-v1812mGlowAttrs(v1812mGeo(App.C),h,u,+gl.dataset.x1).o)<0.01,dby:dby?getComputedStyle(dby).animationName:'none',burst:fl?getComputedStyle(fl).animationName:'none',pulse:pulse?getComputedStyle(pulse).animationName:'none'}; });
   ok(RM.done&&RM.dby==='none'&&RM.burst==='none'&&RM.pulse==='none', 'reduced motion: the glows jump to the new state; the flowing derby road, the pulse and the burst are off');
   await page.emulateMedia({reducedMotion:'no-preference'});
-  await page.evaluate(()=>{ App.route='countymap'; render(); }); ok(await page.evaluate(()=>{ const d=document.querySelector('.v1812m-dby.mine'); return !d||getComputedStyle(d).animationName.includes('flow'); }), 'with motion allowed the derby road dashes flow');
+  await page.evaluate(()=>{ App.route='countymap'; render(); }); ok(await page.evaluate(()=>{ const d=document.querySelector('.v1812m-dby.v1812m-mine'); return !d||getComputedStyle(d).animationName.includes('flow'); }), 'with motion allowed the derby road dashes flow');
 
   /* ---------- phone ---------- */
   { const ph=await open('map27',{width:390,height:844},true); await ph.evaluate(`(${SIM})(12)`); await ph.evaluate(()=>{ App.route='countymap'; App.params={}; render(); }); await ph.waitForTimeout(700);
@@ -235,7 +244,7 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
 
   /* ---------- light theme ---------- */
   await page.evaluate(()=>{ PREFS.theme={preset:null,custom:{bg:'#f3f0e8',surface:'#ffffff',text:'#1b1f25',accent:'#d97706',accent2:'#2563eb'}}; savePrefs(); App.route='countymap'; render(); }); await page.waitForTimeout(500);
-  ok(await page.evaluate(()=>document.getElementById('v1812m').classList.contains('light')&&getComputedStyle(document.getElementById('v1812m-stage')).backgroundImage!=='none'), 'a light theme gets a light map');
+  ok(await page.evaluate(()=>document.getElementById('v1812m').classList.contains('v1812m-light')&&getComputedStyle(document.getElementById('v1812m-stage')).backgroundImage!=='none'), 'a light theme gets a light map');
   await page.evaluate(()=>{ PREFS.theme={preset:'night'}; savePrefs(); });
 
   ok(errs.length===0, 'no page errors'+(errs.length?': '+errs.slice(0,4).join(' | '):''));

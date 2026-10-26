@@ -108,7 +108,7 @@ function v1812mFloyd(towns,edges){ const n=towns.length, idx={}; towns.forEach((
   for(const e of edges){ const i=idx[e.a], j=idx[e.b]; D[i][j]=D[j][i]=e.len; N[i][j]=j; N[j][i]=i; }
   for(let k=0;k<n;k++) for(let i=0;i<n;i++) for(let j=0;j<n;j++) if(D[i][k]+D[k][j]<D[i][j]-1e-9){ D[i][j]=D[i][k]+D[k][j]; N[i][j]=N[i][k]; } return {D,N,idx}; }
 
-function v1812mBuildGeo(C){ const W=V1812M.W, H=V1812M.H; const seed=hashStr(C.seed+'|county'); const u=C.userSid;
+function v1812mBuildGeo(C){ const W=V1812M.W, H=V1812M.H; const seed=hashStr(C.seed+'|county'); const u=C.userSid; let ct=null;
   const rv=v1812mMakeRiver(seed,{x:250,y:322});
   let best=null; for(let att=0;att<8;att++){ const pl=v1812mPlace(C,rv,att); const sc=Math.min(pl.minD,150)+Math.min(pl.rc,50); if(!best||sc>best.sc) best={pl,sc}; if(pl.minD>=126&&pl.rc>=38){ best={pl,sc}; break; } }
   const rn=rngFrom(hashStr(C.seed+'|county|names')); const used=new Set(C.league.map(id=>C.schools[id].town)); const satNames=[]; for(let i=0;i<V1812M.NSAT;i++){ const idn=genIdentity(rn,used); satNames.push(idn.town); }
@@ -139,7 +139,7 @@ function v1812mBuildGeo(C){ const W=V1812M.W, H=V1812M.H; const seed=hashStr(C.s
       let acc=0, lab=ps[0], li=0; const L=ps.reduce((s,q,m)=>m?s+v1812mDist(ps[m-1],q):0,0); for(let m=1;m<ps.length;m++){ acc+=v1812mDist(ps[m-1],ps[m]); if(acc>=L/2){ lab=ps[m]; li=m; break; } }
       const pa=ps[Math.max(0,li-3)], pb=ps[Math.min(ps.length-1,li+3)]; let ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI; if(ang>90) ang-=180; if(ang<-90) ang+=180;
       derby[a<b?a+'|'+b:b+'|'+a]={a:a<b?a:b,b:a<b?b:a,mi,path,edges:es,lab:{x:lab.x,y:lab.y},ang:Math.round(ang),len:Math.round(L),name:emap[es[0]].name}; } }
-  return {W,H,seed,towns,tmap,edges,emap,adj,river:{d:rv.d,tri:rv.tri.d,pts:rv.pts.filter((_,i)=>i%4===0).map(q=>({x:Math.round(q.x),y:Math.round(q.y)}))},lake,hamlets:ham,contours:v1812mContours(seed,rv),derby,nearest,
+  return {W,H,seed,towns,tmap,edges,emap,adj,river:{d:rv.d,tri:rv.tri.d,pts:rv.pts.filter((_,i)=>i%4===0).map(q=>({x:Math.round(q.x),y:Math.round(q.y)}))},lake,hamlets:ham,get contours(){ return ct||(ct=v1812mContours(seed,rv)); },derby,nearest,
     mi:(a,b)=>{ const d=fl.D[fl.idx[a]][fl.idx[b]]; return Math.max(0,Math.round(d*V1812M.MI*1.08)); },miF:(a,b)=>fl.D[fl.idx[a]][fl.idx[b]]*V1812M.MI*1.08,idx:fl.idx,anchor:v1812mAnchor(C)}; }
 function v1812mGeo(C){ const key=C.seed+'|'+C.league.join(',')+'|'+v1812mAnchor(C)+'|'+C.userSid; if(V1812M.geoKey===key&&V1812M.geo) return V1812M.geo; const g=v1812mBuildGeo(C); V1812M.geo=g; V1812M.geoKey=key; return g; }
 function v1812mDerbyOf(C,a,b){ if(!a||!b||a===b) return null; const g=v1812mGeo(C); return g.derby[a<b?a+'|'+b:b+'|'+a]||null; }
@@ -253,7 +253,7 @@ function v1812mPipeline(C,tid){ const st=v1812mState(C), u=C.userSid; const held
 function v1812mDerbyFx(C,f){ if(!f||(f.comp!=='reg'&&f.comp!=='sec')||!C.league.includes(f.h)||!C.league.includes(f.a)) return null; const d=v1812mDerbyOf(C,f.h,f.a); if(!d) return null; return {mi:d.mi,road:d.name,heated:isRivalry(C,f.h,f.a)==='heated'}; }
 function v1812mChip(d){ return `<span class="chip v1812m-chip" title="Neighbouring towns, ${d.mi} miles apart by road">${icon('map',13)} Derby · ${d.mi} mi</span>`; }
 if(typeof rivalChip==='function'){ const _v1812mRC=rivalChip; rivalChip=function(f){ let h=_v1812mRC.apply(this,arguments); try{ const d=v1812mDerbyFx(App.C,f); if(d) h+=v1812mChip(d); }catch(e){} return h; }; }
-if(typeof resultRow==='function'){ const _v1812mRR=resultRow; resultRow=function(f){ let h=_v1812mRR.apply(this,arguments); try{ const d=v1812mDerbyFx(App.C,f); if(d) h=h.replace('</div></div><b class="mono">',` <span class="v1812m-dtag">Derby · ${d.mi} mi</span></div></div><b class="mono">`); }catch(e){} return h; }; }
+if(typeof resultRow==='function'){ const _v1812mRR=resultRow; resultRow=function(f){ let h=_v1812mRR.apply(this,arguments); try{ const d=v1812mDerbyFx(App.C,f); if(d) h=h.replace('</div></div><b class="mono">',` <span class="v1812m-dtag" title="Derby road, ${d.mi} mi">Derby</span></div></div><b class="mono">`); }catch(e){} return h; }; }
 if(typeof v17GameRow==='function'){ const _v1812mGR=v17GameRow; v17GameRow=function(C,f){ let h=_v1812mGR.apply(this,arguments); try{ const d=v1812mDerbyFx(C,f); if(d) h=h.replace('</div><b class="mono">',` <span class="pill v1812m-dpill" title="${d.mi} miles apart by road">Derby</span></div><b class="mono">`); }catch(e){} return h; }; }
 /* the broadcast intro: a DERBY caption (the heated rivalry keeps its RIVALRY NIGHT, with a derby line under it) */
 if(typeof liveIntro==='function'){ const _v1812mLI=liveIntro; liveIntro=function(done){ const out=_v1812mLI.apply(this,arguments);
@@ -294,7 +294,7 @@ function v1812mFridayText(C,F){ const geo=v1812mGeo(C); const nm=id=>esc(geo.tma
   if(F.kind==='none') return 'No county game this round. Your colours hold where they are.';
   if(F.kind==='out') return 'This one is outside the county, so it will not move the map.';
   const pb=Math.round(F.before*100), pa=Math.round(F.after*100);
-  if(F.flips.length){ const t=F.flips[0]; return `Win and ${F.flips.length>1?F.flips.length+' towns flip':'the town flips'}: ${v1812mPlural(V1812M.QA,'Scouting Camp prospect')} from ${nm(t)} start looking your way.`; }
+  if(F.flips.length){ const t=F.flips.includes(F.t)?F.t:F.flips[0]; return `Win and ${t===F.t?(F.flips.length>1?F.flips.length+' towns flip':'the town flips'):nm(t)+(F.flips.length>1?' and '+(F.flips.length-1)+' more flip':' flips')}: ${v1812mPlural(V1812M.QA,'Scouting Camp prospect')} from ${nm(t)} start looking your way.`; }
   if(F.away) return F.heldNow?`Win and you tighten your grip on ${nm(F.t)} (${pb}% to ${pa}%).`:`Win and ${nm(F.t)} moves from ${pb}% to ${pa}% your colours${F.push.length?`, with the pull reaching ${F.push.map(p=>nm(p.id)).join(' and ')}`:''}.`;
   return `Defend ${nm(F.t)}. A win keeps it at ${pa}% and pushes your colours${F.push.length?` into ${F.push.map(p=>nm(p.id)).join(' and ')}`:' further along the roads'}.`; }
 
@@ -305,7 +305,7 @@ function v1812mGlowAttrs(geo,tid,sid,x){ const t=geo.tmap[tid], h=geo.tmap[sid];
 function v1812mStack(C,sh,dark,minPct){ const pc=v1812mPct(sh); const u=C.userSid; const ks=Object.keys(pc).filter(k=>pc[k]>=(minPct||2)).sort((a,b)=>(a===u?-1:b===u?1:0)||(sh[b]-sh[a])||(a<b?-1:1));
   return `<span class="v1812m-bar" aria-hidden="true">${ks.map(k=>`<i style="width:${sh[k]*100}%;background:${v1812mCol(C,k,dark)}"></i>`).join('')}<u></u></span>`; }
 function v1812mMark(C,t,st,dark,ctx){ const u=C.userSid, sh=st.S[t.id], x=sh[u]||0, held=x>=V1812M.HELD, ow=st.owner[t.id]; const pc=Math.round(x*100); const s=t.sat?null:C.schools[t.id];
-  const cls=['v1812m-mk',t.user?'user':'',held?'held':'',t.sat?'sat':'',ctx.next===t.id?'next':'',ctx.flip.includes(t.id)?'flip':'',ctx.lost.includes(t.id)?'lost':'',V1812M.sel===t.id?'sel':''].filter(Boolean).join(' ');
+  const cls=['v1812m-mk',t.user?'v1812m-isuser':'',held?'v1812m-isheld':'',t.sat?'v1812m-issat':'',ctx.next===t.id?'v1812m-isnext':'',ctx.flip.includes(t.id)?'v1812m-isflip':'',ctx.lost.includes(t.id)?'v1812m-islost':'',V1812M.sel===t.id?'v1812m-issel':''].filter(Boolean).join(' ');
   const rr=t.sat?13:25, ring=v1812mRing(rr); const col=v1812mCol(C,u,dark); const oc=ow&&C.schools[ow]?v1812mCol(C,ow,dark):'#889';
   const label=t.name; const aria=`${label}, ${held?'you hold this town':'you control '+pc+'%'}${s?'':', no varsity program'}`;
   const body=t.sat?`<circle class="v1812m-satring" r="${rr}"/><circle class="v1812m-rg" r="${rr}" stroke="${col}" data-c="${ring}" stroke-dasharray="${(x*ring).toFixed(1)} ${ring}" transform="rotate(-90)"/><circle class="v1812m-satdot" r="6.5" fill="${oc}"/>${held?`<path class="v1812m-flag" d="M-1 -2V-12L7 -9L-1 -6" fill="${col}"/>`:''}`
@@ -321,34 +321,34 @@ function v1812mSVG(C,st,geo,dark,seen){ const u=C.userSid; const F=v1812mFriday(
     glows+=`<circle class="v1812m-g" data-t="${t.id}" data-s="${sid}" data-x0="${x0.toFixed(3)}" data-x1="${x1.toFixed(3)}" cx="${a.cx.toFixed(1)}" cy="${a.cy.toFixed(1)}" r="${a.r.toFixed(1)}" opacity="${a.o.toFixed(3)}" fill="url(#v1812m-g-${sid})"/>`; }
   let rib='', roads='';
   for(const e of geo.edges){ const oa=st.owner[e.a], ob=st.owner[e.b]; const sa=st.S[e.a][oa]||0, sb=st.S[e.b][ob]||0; if(oa&&oa===ob&&sa>=0.5&&sb>=0.5) rib+=`<path class="v1812m-rib" d="${e.d}" stroke="${cols[oa]}"/>`; roads+=`<path class="v1812m-road" d="${e.d}"/>`; }
-  let dby=''; for(const k in geo.derby){ const d=geo.derby[k]; const mine=d.a===u||d.b===u; const col=cols[u]; dby+=d.edges.map(id=>`<path class="v1812m-dby ${mine?'mine':''}" d="${geo.emap[id].d}" ${mine?`stroke="${col}"`:''}/>`).join(''); }
+  let dby=''; for(const k in geo.derby){ const d=geo.derby[k]; const mine=d.a===u||d.b===u; const col=cols[u]; dby+=d.edges.map(id=>`<path class="v1812m-dby ${mine?'v1812m-mine':''}" d="${geo.emap[id].d}" ${mine?`stroke="${col}"`:''}/>`).join(''); }
   const marks=geo.towns.map(t=>v1812mMark(C,t,st,dark,ctx)).join('');
   const ham=geo.hamlets.map((h,i)=>`<g class="v1812m-hm" data-x="${h.x}" data-y="${h.y}"><circle r="2.4"/><text x="${h.s>0?7:-7}" y="3.5" text-anchor="${h.s>0?'start':'end'}">${esc(h.name)}</text></g>`).join('');
   const dl=Object.values(geo.derby).filter(d=>d.a===u||d.b===u).map(d=>`<g class="v1812m-dl" data-x="${d.lab.x}" data-y="${d.lab.y}" data-r="${d.ang}" data-len="${d.len}" data-mi="${d.mi}"><rect rx="9" ry="9" height="18" fill="${cols[u]}"/><text y="12.5" style="fill:${lum(cols[u])>0.42?'#10141a':'#ffffff'}">Derby road · ${d.mi} mi</text></g>`).join('');
   const rm=geo.edges.map(e=>`<g class="v1812m-rm" data-x="${e.mid.x}" data-y="${e.mid.y}"><text>${e.mi} mi</text></g>`).join('');
   return `<svg class="v1812m-svg" id="v1812m-svg" role="group" aria-label="County map: ${st.reach} of ${st.total} towns held" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>
-   <g id="v1812m-world"><g class="v1812m-ct">${geo.contours.map(c=>`<path class="${c.major?'maj':''}" d="${c.d}"/>`).join('')}</g>
-    <path class="v1812m-river bank" d="${geo.river.d}"/><path class="v1812m-river bank tri" d="${geo.river.tri}"/><path class="v1812m-lake" d="${geo.lake.d}"/><path class="v1812m-river" d="${geo.river.d}"/><path class="v1812m-river tri" d="${geo.river.tri}"/>
+   <g id="v1812m-world"><g class="v1812m-ct">${geo.contours.map(c=>`<path class="${c.major?'v1812m-maj':''}" d="${c.d}"/>`).join('')}</g>
+    <path class="v1812m-river v1812m-bank" d="${geo.river.d}"/><path class="v1812m-river v1812m-bank v1812m-tri" d="${geo.river.tri}"/><path class="v1812m-lake" d="${geo.lake.d}"/><path class="v1812m-river" d="${geo.river.d}"/><path class="v1812m-river v1812m-tri" d="${geo.river.tri}"/>
     <g class="v1812m-gl">${glows}</g><g class="v1812m-ribs">${rib}</g><g class="v1812m-roads">${roads}</g><g class="v1812m-dbys">${dby}</g></g>
    <g id="v1812m-sg"><g class="v1812m-rms">${rm}</g><g class="v1812m-hms">${ham}</g><g class="v1812m-dls">${dl}</g><g class="v1812m-mks">${marks}</g></g></svg>`; }
 
 /* ---------- the side panel ---------- */
 function v1812mRowHTML(C,t,st,dark){ const sh=st.S[t.id], x=sh[C.userSid]||0, pc=Math.round(x*100), s=t.sat?null:C.schools[t.id];
-  return `<button class="v1812m-row ${x>=V1812M.HELD?'held':''} ${V1812M.sel===t.id?'sel':''}" data-a="v1812mPick" data-t="${t.id}"><span class="v1812m-rt">${s?crest(s,20):'<i class="v1812m-sdot"></i>'}<b>${esc(t.name)}</b>${t.user?'<em>home</em>':''}</span><span class="v1812m-rp">${pc}%</span>${v1812mStack(C,sh,dark)}</button>`; }
+  return `<button class="v1812m-row ${x>=V1812M.HELD?'v1812m-isheld':''} ${V1812M.sel===t.id?'v1812m-issel':''}" data-a="v1812mPick" data-t="${t.id}"><span class="v1812m-rt">${s?crest(s,20):'<i class="v1812m-sdot"></i>'}<b>${esc(t.name)}</b>${t.user?'<em>home</em>':''}</span><span class="v1812m-rp">${pc}%</span>${v1812mStack(C,sh,dark)}</button>`; }
 function v1812mReachHTML(C,st,geo,dark){ const u=C.userSid; const rows=geo.towns.slice().sort((a,b)=>((st.S[b.id][u]||0)-(st.S[a.id][u]||0))||(a.name<b.name?-1:1)); const d=st.delta;
-  return `<section class="v1812m-card v1812m-reach"><div class="v1812m-eb">Program reach</div><div class="v1812m-big"><b>${st.reach}</b><span>OF ${st.total} TOWNS</span><em class="${d>0?'up':d<0?'dn':''}">${d>0?'+'+d+' this season':d<0?'−'+(-d)+' this season':'steady this season'}</em></div>
+  return `<section class="v1812m-card v1812m-reach"><div class="v1812m-eb">Program reach</div><div class="v1812m-big"><b>${st.reach}</b><span>OF ${st.total} TOWNS</span><em class="${d>0?'v1812m-up':d<0?'v1812m-dn':''}">${d>0?'+'+d+' this season':d<0?'−'+(-d)+' this season':'steady this season'}</em></div>
    <div class="v1812m-rows">${rows.map(t=>v1812mRowHTML(C,t,st,dark)).join('')}</div></section>`; }
 function v1812mSplit(C,aSid,bSid,sh,dark){ const a=sh[aSid]||0, b=bSid?(sh[bSid]||0):0; return `<span class="v1812m-split" aria-hidden="true"><i style="width:${(a*100).toFixed(1)}%;background:${v1812mCol(C,aSid,dark)}"></i><i style="width:${(b*100).toFixed(1)}%;background:${bSid?v1812mCol(C,bSid,dark):'transparent'}"></i></span>`; }
 function v1812mFridayHTML(C,st,geo,dark){ const F=v1812mFriday(C), u=C.userSid; const text=v1812mFridayText(C,F); let head='', foot='', bar='';
   if(F.kind==='lg'){ const o=C.schools[F.opp]; head=F.away?`At ${esc(geo.tmap[F.t].name)}`:`Home to ${esc(o.town)}`; const ow=st.owner[F.t]!==u?st.owner[F.t]:null;
-    bar=`<div class="v1812m-fb"><span>${F.away?esc(o.town):'Now'}</span>${v1812mSplit(C,u,ow,st.S[F.t],dark)}<b>${Math.round(F.before*100)}%</b><i>→</i><b class="up">${Math.round(F.after*100)}%</b></div>`;
+    bar=`<div class="v1812m-fb"><span>${F.away?esc(o.town):'Now'}</span>${v1812mSplit(C,u,ow,st.S[F.t],dark)}<b>${Math.round(F.before*100)}%</b><i>→</i><b class="v1812m-up">${Math.round(F.after*100)}%</b></div>`;
     foot=`<div class="v1812m-act"><button class="btn sm" data-a="v1812mPick" data-t="${F.t}">Show on map</button><button class="btn sm ghost" data-a="openFixture" data-id="${F.f.id}">Match preview</button></div>`;
     if(F.derby) head+=` <span class="v1812m-dtag">${icon('map',12)} Derby · ${F.derby.mi} mi</span>`; }
   else if(F.kind==='off'){ head='Scouting Camp'; foot=`<div class="v1812m-act"><button class="btn sm" data-a="go" data-r="camp">Open the camp</button></div>`; }
   else head=F.kind==='out'?'Outside the county':'Rest week';
   return `<section class="v1812m-card v1812m-fri"><div class="v1812m-eb">${F.kind==='off'?'Next up':'This Friday'}</div><h3>${head}</h3><p>${text}</p>${bar}${foot}</section>`; }
-function v1812mWarriorHTML(C,geo){ const W=v1812mWarrior(C); const chips=W.need.map(id=>{ const on=!!C.map.rw[id]; return `<button class="v1812m-wchip ${on?'on':''}" data-a="v1812mPick" data-t="${id}" aria-label="${esc(C.schools[id].town)}: ${on?'won there':'not won there yet'}">${on?'✓ ':''}${esc(C.schools[id].town)}</button>`; }).join('');
-  return `<section class="v1812m-card v1812m-rw ${W.done?'done':''}"><div class="v1812m-eb">Road Warrior</div><h3>${W.done?`Earned in ${W.info.yr}`:`${W.have.length} of ${W.need.length} grounds won`}</h3><p>Win in every town in the county: one victory at each of the ${W.need.length} other grounds, in any season.</p><div class="v1812m-wc">${chips}</div></section>`; }
+function v1812mWarriorHTML(C,geo){ const W=v1812mWarrior(C); const chips=W.need.map(id=>{ const on=!!C.map.rw[id]; return `<button class="v1812m-wchip ${on?'v1812m-on':''}" data-a="v1812mPick" data-t="${id}" aria-label="${esc(C.schools[id].town)}: ${on?'won there':'not won there yet'}">${on?'✓ ':''}${esc(C.schools[id].town)}</button>`; }).join('');
+  return `<section class="v1812m-card v1812m-rw ${W.done?'v1812m-done':''}"><div class="v1812m-eb">Road Warrior</div><h3>${W.done?`Earned in ${W.info.yr}`:`${W.have.length} of ${W.need.length} grounds won`}</h3><p>Win in every town in the county: one victory at each of the ${W.need.length} other grounds, in any season.</p><div class="v1812m-wc">${chips}</div></section>`; }
 function v1812mBulletsHTML(){ return `<ul class="v1812m-bul"><li>${icon('binoc',16)}<span><b>Scouting Camp prospects</b> come from towns you hold: two kids a town, three from home.</span></li><li>${icon('flag',16)}<span><b>Neighbours turn into natural rivals.</b> A short road between towns makes a derby.</span></li><li>${icon('trophy',16)}<span><b>Road Warrior:</b> win in every town in the county.</span></li></ul>`; }
 function v1812mTownHTML(C,tid,st,geo,dark){ const t=geo.tmap[tid]; if(!t) return ''; const u=C.userSid, sh=st.S[tid], pc=st.pct[tid]; const ks=Object.keys(pc).sort((a,b)=>(sh[b]-sh[a])||(a<b?-1:1)).filter(k=>pc[k]>=1).slice(0,5);
   const x=sh[u]||0, held=x>=V1812M.HELD, s=t.sat?null:C.schools[tid], ow=st.owner[tid]; const rec=!t.sat&&tid!==u?v1812mRecord(C,tid):null; const mi=tid===u?0:geo.mi(u,tid); const dby=!t.sat&&tid!==u?v1812mDerbyOf(C,u,tid):null;
@@ -357,12 +357,13 @@ function v1812mTownHTML(C,tid,st,geo,dark){ const t=geo.tmap[tid]; if(!t) return
   const last=rec&&rec.last?`${rec.last.w===u?'W':rec.last.w?'L':'D'} ${rec.last.h===u?rec.last.hg:rec.last.ag}–${rec.last.h===u?rec.last.ag:rec.last.hg}`:'';
   const pl=pipe.list.length?pipe.list.map(x=>esc(x.p.fn+' '+x.p.ln)).join(', '):'';
   return `<section class="v1812m-card v1812m-town" id="v1812m-town"><div class="v1812m-th">${s?crest(s,40):'<span class="v1812m-satbig"></span>'}<div class="grow"><h3>${esc(t.name)}</h3><small>${s?esc(s.mascot)+' · '+(tid===u?'your program':'rival program'):'County town · no varsity program'}</small></div><button class="v1812m-x" data-a="v1812mClose" aria-label="Close town panel">×</button></div>
-   <p class="v1812m-st ${held?'good':''}">${status}</p>${v1812mStack(C,sh,dark,1)}
+   <p class="v1812m-st ${held?'v1812m-good':''}">${status}</p>${v1812mStack(C,sh,dark,1)}
    <div class="v1812m-leg">${ks.map(k=>`<span><i style="background:${v1812mCol(C,k,dark)}"></i>${esc(C.schools[k].town)}${k===u?' (you)':''}<b>${pc[k]}%</b></span>`).join('')}</div>
    <dl class="v1812m-facts">
     <div><dt>By road</dt><dd>${tid===u?'Home':mi+' mi'}${dby?` <span class="v1812m-dtag">Derby</span>`:''}</dd></div>
     ${rec?`<div><dt>Record vs them</dt><dd>${rec.w}-${rec.d}-${rec.l}${last?` <small>last ${last}</small>`:''}</dd></div>`:''}
     <div><dt>Next game</dt><dd>${nf?`${nf.h===u?'Home':'At '+esc(t.name)} · <button class="link" data-a="openFixture" data-id="${nf.id}">Preview</button>`:'—'}</dd></div>
+    ${!t.sat&&tid!==u?`<div><dt>Rivalry</dt><dd>${dby?`Derby on ${esc(dby.name)}, ${dby.mi} mi`:'Not neighbours'}${isRivalry(C,u,tid)==='heated'?' · <b>Heated rivalry</b>':isRivalry(C,u,tid)==='seasonal'?' · Seasonal rival':''}</dd></div>`:''}
     <div><dt>Scouting pipeline</dt><dd>${pipe.held?`Sends ${v1812mPlural(pipe.n,'kid')} to your camp${pl?`: ${pl}`:''}`:'Hold the town to open it'}</dd></div>
     ${!t.sat&&tid!==u?`<div><dt>Road Warrior</dt><dd>${won?`✓ Won there (${won})`:'Win there to tick it off'}</dd></div>`:''}</dl></section>`; }
 
@@ -371,7 +372,7 @@ ICON.flag='<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>';
 function v1812mCompass(){ return `<svg viewBox="-30 -30 60 60" width="54" height="54" aria-hidden="true"><circle r="25" class="v1812m-cring"/><path class="v1812m-cn" d="M0 -22 L5 0 L0 -4 L-5 0Z"/><path class="v1812m-cs" d="M0 22 L5 0 L0 4 L-5 0Z"/><path class="v1812m-ct2" d="M-22 0H-8M8 0H22"/><text y="-26.5" text-anchor="middle">N</text></svg>`; }
 VIEWS.countymap=()=>{ const C=App.C; v1812mEnsure(C); const geo=v1812mGeo(C), st=v1812mState(C), B=v1812mBox(C), dark=v1812mDark(); const seen=B.seen&&B.seen.S?B.seen:null;
   if(V1812M.sel&&!geo.tmap[V1812M.sel]) V1812M.sel=null;
-  return `<div class="v1812m ${dark?'':'light'}" id="v1812m" style="--mu:${v1812mCol(C,C.userSid,dark)}"><div class="v1812m-stage" id="v1812m-stage">${v1812mSVG(C,st,geo,dark,seen)}
+  return `<div class="v1812m ${dark?'':'v1812m-light'}" id="v1812m" style="--mu:${v1812mCol(C,C.userSid,dark)}"><div class="v1812m-stage" id="v1812m-stage">${v1812mSVG(C,st,geo,dark,seen)}
     <div class="v1812m-hdr"><span class="v1812m-kick">LEAGUE WORLD</span><small>Your league laid out as real towns, roads and rivalries. Win and your colours spread town to town; the towns you hold send you their best kids.</small></div>
     <div class="v1812m-tools" role="group" aria-label="Map controls"><button data-a="v1812mZoom" data-d="in" aria-label="Zoom in">+</button><button data-a="v1812mZoom" data-d="out" aria-label="Zoom out">−</button><button data-a="v1812mZoom" data-d="you" aria-label="Centre on your town">${icon('shield',16)}</button><button data-a="v1812mZoom" data-d="fit" aria-label="Show the whole county">${icon('map',16)}</button></div>
     <div class="v1812m-compass">${v1812mCompass()}</div><div class="v1812m-scale" id="v1812m-scale"></div>
@@ -391,7 +392,7 @@ function v1812mPlaceAll(){ const E=V1812M.el; if(!E||!E.svg.isConnected) return;
   E.world.setAttribute('transform',`translate(${V.x.toFixed(2)} ${V.y.toFixed(2)}) scale(${k.toFixed(4)})`);
   for(const it of E.items) it.el.setAttribute('transform',`translate(${(it.x*k+V.x).toFixed(1)} ${(it.y*k+V.y).toFixed(1)})${it.r?` rotate(${it.r})`:''}`);
   for(const it of E.items){ if(!it.len) continue; const px=it.len*k; const mode=px>=330?'f':px>=235?'s':px>=170?'t':'x'; if(mode!==it.mode){ it.mode=mode; const g=it.el; if(mode==='x'){ g.style.display='none'; } else { g.style.display=''; const txt=mode==='f'?'Derby road \u00b7 '+it.mi+' mi':mode==='s'?'Derby \u00b7 '+it.mi+' mi':it.mi+' mi'; const tx=g.querySelector('text'), r=g.querySelector('rect'); tx.textContent=txt; const w=txt.length*6.6+18; r.setAttribute('width',w); r.setAttribute('x',-w/2); r.setAttribute('y',-9); tx.setAttribute('x',0); tx.setAttribute('y',3.6); } } }
-  E.svg.classList.toggle('z-lo',k<0.72); E.svg.classList.toggle('z-hi',k>1.25);
+  E.svg.classList.toggle('v1812m-zlo',k<0.72); E.svg.classList.toggle('v1812m-zhi',k>1.25);
   const miles=[2,5,10,20,50]; let mi=2; for(const m of miles) if(m/V1812M.MI*k<=150) mi=m; const px=mi/V1812M.MI*k; const sc=document.getElementById('v1812m-scale'); if(sc){ sc.style.width=px.toFixed(0)+'px'; sc.innerHTML=`<i></i><span>0</span><span>${mi} mi</span>`; }
   v1812mPlaceCallout(); }
 function v1812mSchedule(){ const E=V1812M.el; if(!E||E.raf) return; E.raf=requestAnimationFrame(()=>{ E.raf=0; v1812mPlaceAll(); }); }
@@ -401,23 +402,29 @@ function v1812mTween(to,ms){ const E=V1812M.el; if(!E) return; const V=V1812M.vi
 function v1812mZoomAt(f,cx,cy){ const E=V1812M.el; if(!E) return; const V=V1812M.view; const [lo,hi]=v1812mKRange(E); const nk=Math.max(lo,Math.min(hi,V.k*f)); const r=nk/V.k; V.x=cx-(cx-V.x)*r; V.y=cy-(cy-V.y)*r; V.k=nk; v1812mClampView(E); v1812mSchedule(); }
 
 /* the callout bubble on a town: the selected one, or the one you play next */
-function v1812mCalloutTarget(C,st){ if(V1812M.sel) return V1812M.sel; const F=v1812mFriday(C); if(F.kind==='lg'&&F.away) return F.t; return null; }
+function v1812mCalloutTarget(C,st){ if(V1812M.sel) return V1812M.sel; const F=v1812mFriday(C); if(F.kind!=='lg') return null; if(F.flips.length) return F.flips.includes(F.t)?F.t:F.flips[0]; return F.away&&F.after-F.before>=0.08?F.t:null; }
 function v1812mCalloutHTML(C,tid,st,geo,dark){ const t=geo.tmap[tid]; const u=C.userSid, x=st.S[tid][u]||0, ow=st.owner[tid]!==u?st.owner[tid]:null; const F=v1812mFriday(C); const me=C.schools[u]; const own=ow&&C.schools[ow];
-  const fl=F.kind==='lg'&&F.t===tid&&F.flips.includes(tid); const pu=Math.round(x*100), po=own?Math.round((st.S[tid][ow]||0)*100):0;
+  const fl=F.kind==='lg'&&F.flips.includes(tid)&&x<V1812M.HELD; const pu=Math.round(x*100), po=own?Math.round((st.S[tid][ow]||0)*100):0; const venue=F.kind==='lg'?geo.tmap[F.t].name:'';
   let title, body;
   if(x>=V1812M.HELD){ title=`${esc(t.name)} flies your colours`; body=`${pu}% ${esc(me.mascot)}${own?`, ${po}% ${esc(own.mascot)}`:''}. ${tid===u?'Your home town.':'Hold it and its kids come to your camp.'}`; }
-  else if(fl){ title=`${esc(t.name)} is up for grabs`; body=`${pu}% ${esc(me.mascot)}${own?`, ${po}% ${esc(own.mascot)}`:''}. Win there Friday and the town flips.`; }
+  else if(fl){ title=`${esc(t.name)} is up for grabs`; body=`${pu}% ${esc(me.mascot)}${own?`, ${po}% ${esc(own.mascot)}`:''}. ${tid===F.t?'Win there Friday':'Win '+(F.away?'at '+esc(venue):'at home')+' Friday'} and the town flips.`; }
   else { title=esc(t.name); body=`${pu}% ${esc(me.mascot)}${own?`, ${po}% ${esc(own.mascot)}`:''}${F.kind==='lg'&&F.t===tid?`. A win Friday takes it to ${Math.round(F.after*100)}%.`:'.'}`; }
   return `<b>${title}</b><p>${body}</p>${v1812mSplit(C,u,ow,st.S[tid],dark)}`; }
 function v1812mPlaceCallout(){ const E=V1812M.el, C=App.C; if(!E||!C) return; const el=document.getElementById('v1812m-co'); if(!el) return; const st=v1812mState(C), geo=v1812mGeo(C); const tid=v1812mCalloutTarget(C,st);
   if(!tid){ el.hidden=true; return; } const t=geo.tmap[tid], V=V1812M.view; const sx=t.x*V.k+V.x, sy=t.y*V.k+V.y; if(sx<-20||sy<-20||sx>E.cw+20||sy>E.ch+20){ el.hidden=true; return; }
   if(el.dataset.t!==tid||el.dataset.k!==String(st.reach+'|'+Object.keys(C.map.done).length)){ el.innerHTML=v1812mCalloutHTML(C,tid,st,geo,v1812mDark()); el.dataset.t=tid; el.dataset.k=String(st.reach+'|'+Object.keys(C.map.done).length); }
-  el.hidden=false; const w=Math.min(250,E.cw-20); el.style.width=w+'px'; const below=sy<170; const left=Math.max(10,Math.min(E.cw-w-66,sx-w/2)); el.style.left=left.toFixed(0)+'px'; el.style.top=(below?sy+(t.sat?50:68):sy-(t.sat?32:56)).toFixed(0)+'px';
-  el.classList.toggle('below',below); el.style.setProperty('--ax',(sx-left).toFixed(0)+'px'); el.style.transform=below?'translateY(0)':'translateY(-100%)'; }
+  el.hidden=false; const w=Math.min(250,E.cw-20); el.style.width=w+'px'; el.style.transform='none'; const h=el.offsetHeight; const rr=t.sat?13:25;
+  /* six places (above or below, centred or leaning left or right); take the one that covers the fewest other towns and stays on the map */
+  const boxes=geo.towns.filter(o=>o.id!==tid).map(o=>({x:o.x*V.k+V.x,y:o.y*V.k+V.y,s:o.sat?0:1})); let best=null;
+  for(const side of ['above','below']) for(const gap of [0,44]) for(const dx of [0,-(w/2-34),(w/2-34)]){ const left=Math.max(8,Math.min(E.cw-w-66,sx-w/2+dx)); const top=side==='above'?sy-(rr+(t.sat?16:22))-h-6-gap:sy+rr+(t.sat?22:38)+gap;
+    let pen=0; if(top<6) pen+=(6-top)*40; if(top+h>E.ch-6) pen+=(top+h-(E.ch-6))*40; if(sx<left+14||sx>left+w-14) pen+=900;
+    for(const o of boxes){ const ox=Math.max(0,Math.min(left+w,o.x+(o.s?52:44))-Math.max(left,o.x-(o.s?52:44))), oy=Math.max(0,Math.min(top+h,o.y+(o.s?50:34))-Math.max(top,o.y-(o.s?52:22))); pen+=ox*oy*(o.s?4:2); }
+    pen+=Math.abs(dx)*0.3+gap*1.5+(side==='below'?8:0); if(!best||pen<best.pen) best={pen,left,top,side,gap}; }
+  el.style.left=best.left.toFixed(0)+'px'; el.style.top=best.top.toFixed(0)+'px'; el.classList.toggle('v1812m-below',best.side==='below'&&best.gap===0); el.classList.toggle('v1812m-float',best.gap>0); el.style.setProperty('--ax',(sx-best.left).toFixed(0)+'px'); }
 
 /* choose a town (a tap on the map, a row in the panel) */
 function v1812mSelect(tid,pan){ const C=App.C, E=V1812M.el; V1812M.sel=tid||null; const geo=v1812mGeo(C), st=v1812mState(C), dark=v1812mDark();
-  document.querySelectorAll('.v1812m-mk.sel,.v1812m-row.sel').forEach(el=>el.classList.remove('sel')); if(tid){ document.querySelectorAll(`.v1812m-mk[data-t="${tid}"],.v1812m-row[data-t="${tid}"]`).forEach(el=>el.classList.add('sel')); }
+  document.querySelectorAll('.v1812m-mk.v1812m-issel,.v1812m-row.v1812m-issel').forEach(el=>el.classList.remove('v1812m-issel')); if(tid){ document.querySelectorAll(`.v1812m-mk[data-t="${tid}"],.v1812m-row[data-t="${tid}"]`).forEach(el=>el.classList.add('v1812m-issel')); }
   const tp=document.getElementById('v1812m-tp'); if(tp) tp.innerHTML=tid?v1812mTownHTML(C,tid,st,geo,dark):'';
   if(E&&tid&&pan){ const t=geo.tmap[tid], V=V1812M.view; const sx=t.x*V.k+V.x, sy=t.y*V.k+V.y; if(sx<70||sy<70||sx>E.cw-70||sy>E.ch-70||V.k<0.6){ const k=Math.max(V.k,0.9); v1812mTween({k,x:E.cw*0.5-t.x*k,y:E.ch*0.5-t.y*k},420); } }
   v1812mPlaceCallout();
@@ -454,8 +461,8 @@ function v1812mInit(){ const C=App.C; const stage=document.getElementById('v1812
   svg.addEventListener('pointermove',ev=>{ if(!P.has(ev.pointerId)) return; P.set(ev.pointerId,{x:ev.clientX,y:ev.clientY}); const r=svg.getBoundingClientRect();
     if(P.size===2&&pinch){ const [a,b]=[...P.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y)||1, mx=(a.x+b.x)/2-r.left, my=(a.y+b.y)/2-r.top; const [lo,hi]=v1812mKRange(E); const nk=Math.max(lo,Math.min(hi,pinch.k*d/pinch.d)); const rr=nk/pinch.k; const pmx=pinch.mx-r.left, pmy=pinch.my-r.top;
       V().k=nk; V().x=mx-(pmx-pinch.vx)*rr; V().y=my-(pmy-pinch.vy)*rr; v1812mClampView(E); v1812mSchedule(); }
-    else if(drag){ const dx=ev.clientX-drag.x, dy=ev.clientY-drag.y; if(!drag.moved&&Math.hypot(dx,dy)>6){ drag.moved=true; svg.classList.add('panning'); } if(drag.moved){ V().x=drag.vx+dx; V().y=drag.vy+dy; v1812mClampView(E); v1812mSchedule(); } } });
-  const up=ev=>{ if(!P.has(ev.pointerId)) return; P.delete(ev.pointerId); if(P.size<2) pinch=null; if(P.size===0){ if(tap&&drag&&!drag.moved&&performance.now()-tap.at<700){ v1812mSelect(tap.t?tap.t.dataset.t:null,false); } drag=null; tap=null; svg.classList.remove('panning'); } };
+    else if(drag){ const dx=ev.clientX-drag.x, dy=ev.clientY-drag.y; if(!drag.moved&&Math.hypot(dx,dy)>6){ drag.moved=true; svg.classList.add('v1812m-panning'); } if(drag.moved){ V().x=drag.vx+dx; V().y=drag.vy+dy; v1812mClampView(E); v1812mSchedule(); } } });
+  const up=ev=>{ if(!P.has(ev.pointerId)) return; P.delete(ev.pointerId); if(P.size<2) pinch=null; if(P.size===0){ if(tap&&drag&&!drag.moved&&performance.now()-tap.at<700){ v1812mSelect(tap.t?tap.t.dataset.t:null,false); } drag=null; tap=null; svg.classList.remove('v1812m-panning'); } };
   svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
   svg.addEventListener('wheel',ev=>{ ev.preventDefault(); const r=svg.getBoundingClientRect(); v1812mZoomAt(Math.exp(-ev.deltaY*(ev.ctrlKey?0.01:0.0017)),ev.clientX-r.left,ev.clientY-r.top); },{passive:false});
   svg.addEventListener('dblclick',ev=>{ const r=svg.getBoundingClientRect(); v1812mZoomAt(1.6,ev.clientX-r.left,ev.clientY-r.top); });
@@ -467,15 +474,15 @@ function v1812mLeave(){ const E=V1812M.el; if(!E) return; if(E.ro) E.ro.disconne
 /* ---------- the Overview teaser, the results strip, the camp, the Hall of Fame ---------- */
 function v1812mThumb(C,st,geo,dark){ const u=C.userSid; const cols={}; for(const sid of C.league) cols[sid]=v1812mCol(C,sid,dark);
   const glow=geo.towns.map(t=>{ const x=st.S[t.id][u]||0; return x>=0.12?`<circle cx="${t.x}" cy="${t.y}" r="${(40+90*Math.sqrt(x)).toFixed(0)}" fill="${cols[u]}" opacity="${(0.1+0.4*x).toFixed(2)}"/>`:''; }).join('');
-  const roads=geo.edges.map(e=>`<path d="${e.d}" class="r"/>`).join(''); const dots=geo.towns.map(t=>{ const x=st.S[t.id][u]||0, ow=st.owner[t.id]; return `<circle cx="${t.x}" cy="${t.y}" r="${t.user?22:t.sat?11:17}" fill="${x>=V1812M.HELD?cols[u]:ow&&cols[ow]?cols[ow]:'#889'}" class="${x>=V1812M.HELD?'h':'o'}"/>`; }).join('');
-  return `<svg class="v1812m-thumb ${dark?'':'light'}" viewBox="0 0 ${geo.W} ${geo.H}" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><path class="w" d="${geo.lake.d}"/><path class="w s" d="${geo.river.d}"/>${glow}<g class="rd">${roads}</g>${dots}</svg>`; }
+  const roads=geo.edges.map(e=>`<path d="${e.d}"/>`).join(''); const dots=geo.towns.map(t=>{ const x=st.S[t.id][u]||0, ow=st.owner[t.id]; return `<circle cx="${t.x}" cy="${t.y}" r="${t.user?22:t.sat?11:17}" fill="${x>=V1812M.HELD?cols[u]:ow&&cols[ow]?cols[ow]:'#889'}" class="${x>=V1812M.HELD?'v1812m-th2':'v1812m-to'}"/>`; }).join('');
+  return `<svg class="v1812m-thumb ${dark?'':'v1812m-light'}" viewBox="0 0 ${geo.W} ${geo.H}" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><path class="v1812m-tw" d="${geo.lake.d}"/><path class="v1812m-tw v1812m-tws" d="${geo.river.d}"/>${glow}<g class="v1812m-trd">${roads}</g>${dots}</svg>`; }
 function v1812mTeaser(C){ const geo=v1812mGeo(C), st=v1812mState(C), dark=v1812mDark(), F=v1812mFriday(C); const d=st.delta;
   const line=F.kind==='lg'?(F.flips.length?`${F.away?'At':'Home vs'} ${esc(geo.tmap[F.t].name)}: a win flips the town.`:F.away?`At ${esc(geo.tmap[F.t].name)}: ${Math.round(F.before*100)}% yours.`:`Home to ${esc(C.schools[F.opp].town)}: defend the roads.`):(C.phase==='offseason'?'The towns you hold send their kids to the Scouting Camp.':'Wins spread your colours along the roads.');
-  return `<section class="ov-card v1812m-tz ${dark?'':'light'}"><div class="hd"><h3>${icon('map',18)} The County Map</h3><button class="btn sm" data-a="go" data-r="countymap">Open map</button></div>
-   <button class="v1812m-tzb" data-a="go" data-r="countymap" aria-label="Open the County Map">${v1812mThumb(C,st,geo,dark)}<span class="v1812m-tzt"><span class="v1812m-tzn"><b>${st.reach}</b> of ${st.total} towns</span><em class="${d>0?'up':d<0?'dn':''}">${d>0?'+'+d+' this season':d<0?'−'+(-d)+' this season':'steady this season'}</em><span class="v1812m-tzl">${line}</span></span></button></section>`; }
+  return `<section class="ov-card v1812m-tz ${dark?'':'v1812m-light'}"><div class="hd"><h3>${icon('map',18)} The County Map</h3><button class="btn sm" data-a="go" data-r="countymap">Open map</button></div>
+   <button class="v1812m-tzb" data-a="go" data-r="countymap" aria-label="Open the County Map">${v1812mThumb(C,st,geo,dark)}<span class="v1812m-tzt"><span class="v1812m-tzn"><b>${st.reach}</b> of ${st.total} towns</span><em class="${d>0?'v1812m-up':d<0?'v1812m-dn':''}">${d>0?'+'+d+' this season':d<0?'−'+(-d)+' this season':'steady this season'}</em><span class="v1812m-tzl">${line}</span></span></button></section>`; }
 if(typeof v15Overview==='function'){ const _v1812mOv=v15Overview; v15Overview=function(){ let h=_v1812mOv.apply(this,arguments); try{ v1812mEnsure(App.C); h=h.replace('<div class="ov-more">','<div class="ov-more">'+v1812mTeaser(App.C)); }catch(e){ console.error(e); } return h; }; }
 if(typeof v15MatchCard==='function'){ const _v1812mMC=v15MatchCard; v15MatchCard=function(){ let h=_v1812mMC.apply(this,arguments); try{ const C=App.C, F=v1812mFriday(C); if(F.kind==='lg'){ const geo=v1812mGeo(C), st=v1812mState(C); const line=F.flips.length?`${esc(geo.tmap[F.t].name)} flips if you win`:F.away?`At ${esc(geo.tmap[F.t].name)}: ${Math.round(F.before*100)}% your colours`:`Home: defend ${Math.round(F.before*100)}% of ${esc(geo.tmap[F.t].name)}`;
-        const add=`<button class="v1812m-ovline ${F.flips.length?'good':''}" data-a="go" data-r="countymap" aria-label="Open the County Map">${icon('map',16)}<span><b>County Map</b> ${line}</span><i>${st.reach} of ${st.total} towns</i></button>`; const i=h.indexOf('<button class="btn pri play om-play"'); if(i>=0) h=h.slice(0,i)+add+h.slice(i); } }catch(e){ console.error(e); } return h; }; }
+        const add=`<button class="v1812m-ovline ${F.flips.length?'v1812m-good':''}" data-a="go" data-r="countymap" aria-label="Open the County Map">${icon('map',16)}<span><b>County Map</b> ${line}</span><i>${st.reach} of ${st.total} towns</i></button>`; const i=h.indexOf('<button class="btn pri play om-play"'); if(i>=0) h=h.slice(0,i)+add+h.slice(i); } }catch(e){ console.error(e); } return h; }; }
 if(typeof offseasonView==='function'){ const _v1812mOff=offseasonView; offseasonView=function(){ let h=_v1812mOff.apply(this,arguments); try{ v1812mEnsure(App.C); h+=`<div class="ov-more" style="margin-top:16px">${v1812mTeaser(App.C)}</div>`; }catch(e){ console.error(e); } return h; }; }
 function v1812mResultsHTML(m){ const C=App.C, B=v1812mBox(C); const ids=new Set(m.ids||[]); const L=B.log.filter(e=>ids.has(e.fid)); if(!L.length) return ''; const geo=v1812mGeo(C);
   const g=L.filter(e=>e.k==='g'), l=L.filter(e=>e.k==='l'), v=L.find(e=>e.k==='v'); const nm=e=>geo.tmap[e.t].name; let txt='', good=false;
@@ -483,11 +490,11 @@ function v1812mResultsHTML(m){ const C=App.C, B=v1812mBox(C); const ids=new Set(
   else if(l.length) txt=`${l.map(nm).join(' and ')} slip${l.length>1?'':'s'} out of your hands.`;
   else if(v&&v.p1!==v.p0) txt=`${nm(v)}: your colours ${v.p0}% → ${v.p1}%.`; else return '';
   const rw=B.rwDone&&B.rwDone.fid&&ids.has(B.rwDone.fid)?' Road Warrior earned: you have won in every town in the county.':'';
-  return `<div class="v1812m-rs ${good?'good':''}">${icon('map',20)}<div class="grow"><b>County Map</b><span>${txt}${rw}</span></div><button class="btn sm" data-a="v1812mOpen">View map</button></div>`; }
+  return `<div class="v1812m-rs ${good?'v1812m-good':''}">${icon('map',20)}<div class="grow"><b>County Map</b><span>${txt}${rw}</span></div><button class="btn sm" data-a="v1812mOpen">View map</button></div>`; }
 if(typeof MODALS!=='undefined'&&MODALS.results){ const _v1812mRes=MODALS.results; MODALS.results=m=>{ const h=_v1812mRes(m); try{ const add=v1812mResultsHTML(m); if(add){ const i=h.indexOf('<div class="mbody">'); return i<0?h:h.slice(0,i+19)+add+h.slice(i+19); } }catch(e){ console.error(e); } return h; }; }
 function v1812mDecorateCamp(){ const C=App.C; if(App.route!=='camp') return; const K=C.camp&&C.camp.yr===C.year&&C.camp.v1812m?C.camp:null; if(!K) return; const geo=v1812mGeo(C), st=v1812mState(C), dark=v1812mDark(), u=C.userSid;
   document.querySelectorAll('.pros .pro').forEach(el=>{ if(el.querySelector('.v1812m-from')) return; const b=el.querySelector('[data-id]'); const x=b&&K.prospects.find(y=>y.p.id===b.dataset.id); if(!x||!x.tid) return; const line=el.querySelector('.pro-top .grow .small');
-    const col=v1812mCol(C,st.owner[x.tid]||u,dark); const html=`<div class="v1812m-from ${x.held?'held':''}"><i style="background:${col}"></i>From ${esc(x.town)}<span>${x.held?(x.tid===u?'your home town':'you hold it'):'contested'}</span></div>`; if(line) line.insertAdjacentHTML('afterend',html); });
+    const col=v1812mCol(C,st.owner[x.tid]||u,dark); const html=`<div class="v1812m-from ${x.held?'v1812m-isheld':''}"><i style="background:${col}"></i>From ${esc(x.town)} <span>${x.held?(x.tid===u?'your home town':'you hold it'):'contested'}</span></div>`; if(line) line.insertAdjacentHTML('afterend',html); });
   const pros=document.querySelector('.pros'); if(pros&&!document.querySelector('.v1812m-campbar')){ const n=K.prospects.filter(x=>x.held).length; const held=st.held.length;
     pros.insertAdjacentHTML('beforebegin',`<div class="v1812m-campbar">${icon('map',20)}<div class="grow"><b>Kids from your towns</b><span>You hold ${held} of ${st.total} towns, and ${n} of this year's ${K.prospects.length} prospects come from them. Towns you hold send no rival bids.</span></div><button class="btn sm" data-a="go" data-r="countymap">County Map</button></div>`); } }
 if(typeof VIEWS!=='undefined'&&VIEWS.hof){ const _v1812mHof=VIEWS.hof; VIEWS.hof=function(){ let h=_v1812mHof.apply(this,arguments); try{ const C=App.C, B=C.map; if(B&&B.rwDone){ const me=Sx(C.userSid);
