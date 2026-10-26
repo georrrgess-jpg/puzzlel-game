@@ -157,7 +157,7 @@ function v1812tDrills(C,id,day){ const raw=v1812tAllRaw(C)[id]; const p=v1812tFi
   return d.filter(x=>x.day<=day); }
 
 /* ---------- the view model of one candidate at the current day ---------- */
-function v1812tView(C,id){ const T=v1812tBox(C); const p=v1812tFind(C,id); if(!p) return null; const info=v1812tInfo(C,id); const rg=v1812tRanges(C,id); const day=Math.min(3,Math.max(0,T.day|0));
+function v1812tView(C,id){ const T=v1812tBox(C); const p=v1812tFind(C,id); if(!p) return null; const info=v1812tInfo(C,id); const rg=v1812tRanges(C,id); const day=Math.min(3,Math.max(0,(V1812T.dayO!=null?V1812T.dayO:T.day)|0));
   const o=rg.o[day], s=rg.s[day]; const dr=v1812tDrills(C,id,day);
   const ret=!!C.players[id]; const code=v1812tAsg(C,id);
   return {id,p,kind:info.kind||'ret',story:info.story||'',info,lo:o[0],hi:o[1],mid:(o[0]+o[1])/2,slo:s[0],shi:s[1],smid:(s[0]+s[1])/2,t:rg.t,ts:rg.ts,drills:dr,
@@ -326,7 +326,7 @@ const _v1812tFindPerson=findPerson;
 findPerson=function(C,id){ const p=_v1812tFindPerson.apply(this,arguments); if(p) return p; const T=C&&C.tryout; return (T&&T.cut&&T.cut[id])||null; };
 /* a preseason fixture is about to be played: the tryouts end here, on the coaching staff's list if nobody posted one */
 const _v1812tStartMatch=startMatch;
-startMatch=function(C,fid){ try{ const f=C&&C.fixtures[fid]; if(f&&f.comp==='pre'&&C.phase==='preseason'&&C.userSid&&(!C.tryout||C.tryout.yr!==C.year||C.tryout.st==='open')){ v1812tEnsure(C); if(v1812tIsOpen(C)){ v1812tAutoResolve(C); if(typeof v1812tAfterAuto==='function') v1812tAfterAuto(C); } } }catch(e){ if(typeof console!=='undefined') console.error('tryouts auto',e); }
+startMatch=function(C,fid,opts){ try{ const f=C&&C.fixtures[fid]; if(!(opts&&(opts.fast||opts.seedSalt))&&f&&f.comp==='pre'&&C.phase==='preseason'&&C.userSid&&(!C.tryout||C.tryout.yr!==C.year||C.tryout.st==='open')){ v1812tEnsure(C); if(v1812tIsOpen(C)){ v1812tAutoResolve(C); if(typeof v1812tAfterAuto==='function') v1812tAfterAuto(C); } } }catch(e){ if(typeof console!=='undefined') console.error('tryouts auto',e); }
   return _v1812tStartMatch.apply(this,arguments); };
 /* a cut player who scores against the program that cut him: it makes the Newswire */
 const _v1812tFinish=finishMatch;
