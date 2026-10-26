@@ -52,7 +52,7 @@ function v1812tBar(C){ const chk=v1812tCheck(C); const n=chk.n; const T=C.tryout
   const chips=[...chk.errors.map(e=>`<span class="v1812t-chip bad">${esc(e.msg)}</span>`),...chk.warns.map(e=>`<span class="v1812t-chip warn">${esc(e.msg)}</span>`)].join('');
   return `<div class="v1812t-bar" id="v1812t-bar" role="region" aria-label="Roster counters" aria-live="polite"><div class="v1812t-bar-in">
     <div class="v1812t-cts">${cell('V','Varsity')}${cell('JV','JV')}${cell('MOD','Modified')}<div class="v1812t-ct cutc"><span class="lab">Cut</span><b class="mono">${n.X}</b></div><div class="v1812t-ct ${n.U?'under':'ok'}"><span class="lab">Undecided</span><b class="mono">${n.U}</b></div></div>
-    <div class="v1812t-bar-acts"><button class="btn sm" data-a="v1812tAuto" title="Suggest a roster from what the drills have shown so far">Auto-sort</button>${V1812T_UI.undo?`<button class="btn sm ghost" data-a="v1812tUndo">Undo auto-sort</button>`:''}<button class="btn pri ${chk.ok?'':'dim'}" data-a="v1812tPostAsk" ${chk.ok?'':'aria-disabled="true"'}>${chk.ok?'Post the roster':'Post the roster…'}</button></div></div>
+    <div class="v1812t-bar-acts"><button class="btn sm" data-a="v1812tAuto" title="Suggest a roster from what the drills have shown so far">Auto-sort</button>${V1812T_UI.undo&&V1812T_UI.undo.k===C.seed+':'+C.year?`<button class="btn sm ghost" data-a="v1812tUndo">Undo auto-sort</button>`:''}<button class="btn pri ${chk.ok?'':'dim'}" data-a="v1812tPostAsk" ${chk.ok?'':'aria-disabled="true"'}>${chk.ok?'Post the roster':'Post the roster…'}</button></div></div>
     ${chips?`<div class="v1812t-chips">${chips}</div>`:''}</div>`; }
 
 /* ---------- the day header and the stepper ---------- */
@@ -152,8 +152,8 @@ A.v1812tSeg=el=>{ const C=App.C; if(!v1812tIsOpen(C)) return; const id=el.datase
   const card=el.closest('.v1812t-card'); if(card){ card.dataset.code=code; card.classList.toggle('is-cut',code==='X'); card.classList.remove('undec'); card.querySelectorAll('.v1812t-seg button').forEach(b=>{ const on=b.dataset.code===code; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); }); card.classList.remove('v1812t-pulse'); void card.offsetWidth; card.classList.add('v1812t-pulse'); }
   v1812tPaint(); v1812tSave(); try{ Sound.ui(code==='X'?'close':'tick'); }catch(e){} };
 A.v1812tTag=el=>{ const T=App.C.tryout; const id=el.dataset.id; if(T.tags[id]) delete T.tags[id]; else T.tags[id]=1; el.classList.toggle('on',!!T.tags[id]); el.setAttribute('aria-pressed',!!T.tags[id]); const card=el.closest('.v1812t-card'); if(card) card.classList.toggle('tagged',!!T.tags[id]); v1812tSave(); };
-A.v1812tAuto=()=>{ const C=App.C; if(!v1812tIsOpen(C)) return; const T=C.tryout; V1812T_UI.undo=JSON.stringify(T.a); const plan=v1812tApplyAuto(C); v1812tSave(); App.keepScroll=true; render(); toast('Auto-sort placed everyone from what the drills have shown. Review the cards, then post.'); };
-A.v1812tUndo=()=>{ const C=App.C; if(!V1812T_UI.undo||!v1812tIsOpen(C)) return; try{ C.tryout.a=JSON.parse(V1812T_UI.undo); }catch(e){} V1812T_UI.undo=null; v1812tSave(); App.keepScroll=true; render(); };
+A.v1812tAuto=()=>{ const C=App.C; if(!v1812tIsOpen(C)) return; const T=C.tryout; V1812T_UI.undo={k:C.seed+':'+C.year,a:JSON.stringify(T.a)}; const plan=v1812tApplyAuto(C); v1812tSave(); App.keepScroll=true; render(); toast('Auto-sort placed everyone from what the drills have shown. Review the cards, then post.'); };
+A.v1812tUndo=()=>{ const C=App.C; if(!V1812T_UI.undo||V1812T_UI.undo.k!==C.seed+':'+C.year||!v1812tIsOpen(C)) return; try{ C.tryout.a=JSON.parse(V1812T_UI.undo.a); }catch(e){} V1812T_UI.undo=null; v1812tSave(); App.keepScroll=true; render(); };
 /* running a day: the drill animations, then the numbers fill in */
 function v1812tHeadline(C,kind){ const raw=v1812tAllRaw(C); const ids=Object.keys(raw); const best=(f,cmp)=>ids.reduce((a,id)=>(a==null||cmp(f(raw[id]),f(raw[a])))?id:a,null); const nm=id=>{ const p=v1812tFind(C,id); return p?pname(p):''; };
   if(kind==='spr'){ const a=best(r=>r.spr,(x,y)=>x<y); return {to:raw[a].spr,dec:2,suf:' s',who:nm(a),txt:`Fastest 40 so far: ${nm(a)}, ${raw[a].spr.toFixed(2)} s`}; }
@@ -216,11 +216,12 @@ A.v1812tDoorSquads=()=>{ v1812tDoorClose(); App.route='squads'; App.params={lvl:
 /* ---------- gate: leaving tryouts half-done by playing the Preseason Cup ---------- */
 function v1812tNeedGate(C){ if(!C||C.phase!=='preseason'||App.live) return false; const T=C.tryout; return !!(T&&v1812tIsOpen(C)&&(T.seen||T.day>0)); }
 function v1812tQuiet(C){ if(C&&C.phase==='preseason'&&C.userSid&&(!C.tryout||C.tryout.yr!==C.year||C.tryout.st==='open')){ v1812tEnsure(C); if(v1812tIsOpen(C)&&!v1812tNeedGate(C)){ if(v1812tAutoResolve(C)) v1812tAfterAuto(C); } } }
-function v1812tGuard(name){ const orig=A[name]; if(!orig) return; A[name]=function(el,ev){ const C=App.C; if(C&&C.phase==='preseason'){ try{ v1812tEnsure(C); }catch(e){}
+function v1812tGuard(name,quiet){ const orig=A[name]; if(!orig) return; A[name]=function(el,ev){ const C=App.C; if(C&&C.phase==='preseason'){ try{ v1812tEnsure(C); }catch(e){}
       if(v1812tNeedGate(C)){ V1812T_UI.then=()=>orig.call(this,el,ev); App.modal={type:'v1812tGate'}; renderModal(); return; }
-      if(name!=='openFixture'||(C.fixtures[el&&el.dataset&&el.dataset.id]||{}).comp==='pre') v1812tQuiet(C); }
+      if(quiet) v1812tQuiet(C); }
     return orig.apply(this,arguments); }; }
-for(const n of ['playNext','skipPre','simAhead','quickSim','openFixture']) v1812tGuard(n);
+/* Play and skip settle the tryouts first (so the match preview shows the final lineups); simulating and kicking off settle them when the match starts (the engine hook); merely looking at a preview never does */
+v1812tGuard('playNext',true); v1812tGuard('skipPre',true); for(const n of ['simAhead','quickSim','kickoff']) v1812tGuard(n,false);
 MODALS.v1812tGate=m=>{ const C=App.C; const T=C.tryout; const n=T?v1812tCounts(C).U:0;
   return modalShell('<h2>Tryouts are still open</h2>',`<p style="margin-top:0">You have started the tryouts but have not posted the roster${n?` (${n} undecided)`:''}. If you go on, the coaching staff finish the drills and post a sensible list for you. It is final.</p>`,`<button class="btn pri" data-a="v1812tGateBack" data-autofocus>Back to tryouts</button><button class="btn" data-a="v1812tGateGo">Auto-sort and continue</button>`,'v1812t-modal'); };
 A.v1812tGateBack=()=>{ V1812T_UI.then=null; A.v1812tOpen(); };

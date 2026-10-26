@@ -19,7 +19,8 @@ function invariants(X,C,tag){ const u=C.userSid; const bad=[];
   return bad; }
 
 (async()=>{
-/* ================= Part A: rules in Node ================= */
+/* ================= Part A: rules in Node (SKIP_A=1 skips it while iterating on part B) ================= */
+if(!process.env.SKIP_A){
 { const X=loadNode(); const SEED=4242;
   const A=mk(X,SEED), B=mk(X,SEED), Z=mk(X,SEED+1);
   X.v1812tEnsure(A); X.v1812tEnsure(B); X.v1812tEnsure(Z);
@@ -63,8 +64,7 @@ function invariants(X,C,tag){ const u=C.userSid; const bad=[];
   let chk=X.v1812tCheck(A); ok(!chk.ok&&chk.errors.some(e=>e.k==='gk0'), 'cutting every keeper is a hard error (no goalkeeper)');
   ok(!X.v1812tPost(A,'user').ok&&X.v1812tSt(A)==='open', 'posting with errors is refused and nothing changes');
   X.v1812tApplyAuto(A); chk=X.v1812tCheck(A); ok(chk.ok, 'auto-sort yields a legal roster: '+JSON.stringify(chk.n&&{V:chk.n.V,JV:chk.n.JV,MOD:chk.n.MOD,X:chk.n.X}));
-  const one=X.v1812tPoolIds(A).filter(id=>X.v1812tAsg(A,id)==='V'&&X.v1812tFind(A,id).pos==='GK'); one.slice(1).forEach(id=>X.v1812tSet(A,id,'JV')); one.length&&X.v1812tSet(A,one[0],'V');
-  const gkV=()=>X.v1812tPoolIds(A).filter(id=>X.v1812tAsg(A,id)==='V'&&X.v1812tFind(A,id).pos==='GK').length; X.v1812tPoolIds(A).filter(id=>X.v1812tAsg(A,id)==='V'&&X.v1812tFind(A,id).pos==='GK').slice(1).forEach(id=>X.v1812tSet(A,id,'JV'));
+  const gkV=()=>X.v1812tPoolIds(A).filter(id=>X.v1812tAsg(A,id)==='V'&&X.v1812tFind(A,id).pos==='GK').length; X.v1812tPoolIds(A).filter(id=>X.v1812tAsg(A,id)==='V'&&X.v1812tFind(A,id).pos==='GK').slice(1).forEach(id=>X.v1812tSet(A,id,'X'));
   chk=X.v1812tCheck(A); ok(gkV()===1&&chk.warns.some(w=>w.k==='gk1'&&w.l==='V'), 'one keeper on Varsity is a warning, not an error');
   /* over the cap and undecided */
   const Q=mk(X,SEED+7); X.v1812tEnsure(Q); const qn=X.v1812tPoolIds(Q); X.v1812tApplyAuto(Q);
@@ -127,6 +127,7 @@ function run(seed,seasons){ const X=loadNode(); const C=mk(X,seed); const log=[]
   /* JSON round trip mid-career continues identically */
   const R3=run(5150,3); const J=JSON.parse(JSON.stringify(R3.C)); const X2=R3.X; X2.v1812tEnsure(R3.C); X2.v1812tEnsure(J);
   ok(JSON.stringify(X2.v1812tPoolIds(R3.C).map(id=>X2.v1812tView(R3.C,id).story))===JSON.stringify(X2.v1812tPoolIds(J).map(id=>X2.v1812tView(J,id).story)), 'a saved and reloaded career builds the same next pool'); }
+}
 /* ================= Part B: the page ================= */
 const { chromium, DIST } = require('./_pw');
 const SHOTS=path.join(__dirname,'shots','v1812','tryouts'); fs.mkdirSync(SHOTS,{recursive:true});
@@ -136,7 +137,7 @@ async function career(page,seed){ await page.goto(DIST); await page.waitForTimeo
 const b=await chromium.launch(); const errs=[];
 const watch=page=>{ page.on('pageerror',e=>errs.push('PAGEERR '+e.message)); page.on('console',m=>{ if(m.type()==='error') errs.push('CONSOLE '+m.text()); }); };
 { const page=await b.newPage({viewport:{width:1280,height:900}}); watch(page); await career(page,'tryouts-ui1');
-  ok(await page.evaluate(()=>!!document.querySelector('.v1812t-hero [data-a="v1812tOpen"]')&&/Tryouts/.test(document.querySelector('.v1812t-hero').innerText)), 'the Overview shows the Tryout week card in preseason');
+  ok(await page.evaluate(()=>!!document.querySelector('.v1812t-hero [data-a="v1812tOpen"]')&&/tryouts/i.test(document.querySelector('.v1812t-hero').innerText)), 'the Overview shows the Tryout week card in preseason');
   ok(await page.evaluate(()=>navBadges(App.C).tryouts==='NEW'&&!!document.querySelector('.tn-dot')), 'the Squad menu carries a NEW badge while tryouts are open');
   await page.click('.v1812t-hero [data-a="v1812tOpen"]'); await page.waitForTimeout(400);
   const d0=await page.evaluate(()=>{ const C=App.C; return {route:App.route,cards:document.querySelectorAll('.v1812t-card').length,pool:v1812tPoolIds(C).length,newc:C.tryout.pool.length,bar:document.querySelector('#v1812t-bar').innerText,day:C.tryout.day,stepNow:document.querySelector('.v1812t-steps .now span').innerText,run:document.querySelector('[data-a="v1812tRun"]').innerText,sheet:document.querySelectorAll('.v1812t-sheet .sh-list li').length}; });
@@ -162,7 +163,7 @@ const watch=page=>{ page.on('pageerror',e=>errs.push('PAGEERR '+e.message)); pag
   ok(seg.dis[1]&&seg.dis[2]&&!seg.dis[0]&&!seg.dis[3], 'a junior or senior can only be placed on Varsity or cut (JV and Modified disabled)');
   ok(seg.vA===seg.vB-1&&seg.xA===seg.xB+1&&seg.code==='X'&&seg.pressed==='true'&&seg.asg==='X'&&seg.barV.startsWith(String(seg.vA)), 'the segmented control moves a player, updates the card and the counters in place');
   /* warnings: only one keeper, then none */
-  await page.evaluate(()=>{ const C=App.C; const gk=v1812tPoolIds(C).filter(id=>v1812tAsg(C,id)==='V'&&v1812tFind(C,id).pos==='GK'); gk.slice(1).forEach(id=>v1812tSet(C,id,'JV')); v1812tPaint(); });
+  await page.evaluate(()=>{ const C=App.C; const gk=v1812tPoolIds(C).filter(id=>v1812tAsg(C,id)==='V'&&v1812tFind(C,id).pos==='GK'); gk.slice(1).forEach(id=>v1812tSet(C,id,'X')); v1812tPaint(); });
   ok(await page.evaluate(()=>/goalkeeper/i.test(document.querySelector('.v1812t-chips').innerText)), 'a one-keeper Varsity shows a warning chip');
   await page.click('[data-a="v1812tAuto"]'); await page.waitForTimeout(300);
   ok(await page.evaluate(()=>v1812tCheck(App.C).ok&&!!document.querySelector('[data-a="v1812tUndo"]')), 'Auto-sort places everyone legally and offers an undo');
@@ -195,7 +196,7 @@ const watch=page=>{ page.on('pageerror',e=>errs.push('PAGEERR '+e.message)); pag
   /* save, reload, same state */
   await page.evaluate(()=>saveNow()); await page.waitForTimeout(500);
   const keep=await page.evaluate(()=>({n:Object.keys(App.C.players).length,st:App.C.tryout.st,cut:Object.keys(App.C.tryout.cut).length}));
-  await page.reload(); await page.waitForTimeout(700); await page.click('[data-a="openSlot"]'); await page.waitForTimeout(900);
+  await page.reload(); await page.waitForTimeout(1000); if(!await page.evaluate(()=>!!App.C)){ await page.locator('[data-a="openSlot"][data-slot="1"]').first().click(); await page.waitForTimeout(900); }
   const rl=await page.evaluate(()=>({n:Object.keys(App.C.players).length,st:App.C.tryout.st,cut:Object.keys(App.C.tryout.cut).length,mem:Object.keys(App.C.tryout.mem).length}));
   ok(rl.n===keep.n&&rl.st==='posted'&&rl.cut===keep.cut&&rl.mem===keep.cut, 'save and reload keep the posted roster, the cut players and their memories');
   /* backup export/import round trip keeps C.tryout */
@@ -207,7 +208,7 @@ const watch=page=>{ page.on('pageerror',e=>errs.push('PAGEERR '+e.message)); pag
   await page.evaluate(()=>{ App.route='tryouts'; render(); }); await page.waitForTimeout(300);
   await page.evaluate(()=>{ A.v1812tRun(); }); await page.waitForFunction(()=>!V1812T_UI.running,null,{timeout:20000}); await page.evaluate(()=>{ A.v1812tRun(); }); await page.waitForFunction(()=>!V1812T_UI.running,null,{timeout:20000});
   const sig=()=>page.evaluate(()=>{ const C=App.C; return JSON.stringify(v1812tPoolIds(C).map(id=>{ const v=v1812tView(C,id); return [id,v.lo,v.hi,v.drills.map(d=>d.txt)]; })); });
-  const s1=await sig(); await page.evaluate(()=>saveNow()); await page.waitForTimeout(500); await page.reload(); await page.waitForTimeout(700); await page.click('[data-a="openSlot"]'); await page.waitForTimeout(900);
+  const s1=await sig(); await page.evaluate(()=>saveNow()); await page.waitForTimeout(500); await page.reload(); await page.waitForTimeout(1000); if(!await page.evaluate(()=>!!App.C)){ await page.locator('[data-a="openSlot"][data-slot="1"]').first().click(); await page.waitForTimeout(900); }
   const s2=await sig(); ok(s1===s2&&await page.evaluate(()=>App.C.tryout.day)===2, 'reloading in the middle of tryouts shows identical ranges and drill results (day 2)');
   await page.evaluate(()=>{ App.route='tryouts'; render(); }); await page.waitForTimeout(200);
   /* skip tryouts */
