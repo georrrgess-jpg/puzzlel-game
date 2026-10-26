@@ -1,0 +1,74 @@
+/* Performance layer. Loaded last so it can trim the decoration in the other stylesheets.
+   Quality tier classes (html.q-high / q-med / q-low) come from js/perf.js; html.modal-open is set while a popup is up. */
+
+/* ---- never blur the screen behind things: full-screen blur is the #1 mobile jank source ---- */
+#modal,.nextcard{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+#modal{background:radial-gradient(circle at 50% 40%,#000a,#000d)}
+.nextcard{background-color:#14102c66}
+/* 3D context on the board forces every child onto its own compositing layer */
+#board{perspective:none}
+
+/* ---- nothing animates underneath a popup (it is covered anyway) ---- */
+html.modal-open .screen *,html.modal-open .screen *::before,html.modal-open .screen *::after{animation-play-state:paused !important}
+
+/* ---- drop-shadow filters are re-rasterised every frame when the element animates: use text-shadow instead ---- */
+.mtile i,.mtile.on i{filter:none;text-shadow:0 3px 3px #0006}
+.fing{filter:none;text-shadow:0 2px 3px #000a}
+.node.bonus::after{filter:none;text-shadow:0 2px 3px #0008,0 0 8px #ffd166aa}
+
+/* ---- MED: keep the brand moments, trim the always-on extras ---- */
+html.q-med .logo .word span::after,
+html.q-med .logo .spk,
+html.q-med .nextcard::after,
+html.q-med .stage .rays,
+html.q-med .bar>div::after,
+html.q-med .card .bar>div::before,
+html.q-med .swatch::after,
+html.q-med .rays.r2,
+html.q-med .wheelwrap .bulbs i,
+html.q-med .tube.ok{animation:none !important}
+html.q-med .logo .word span{animation:letterin .8s cubic-bezier(.3,1.7,.5,1) backwards !important}
+
+/* ---- LOW (battery saver): static decoration everywhere, interactions keep their feedback ---- */
+html.q-low .logo .word span{animation:none !important}
+html.q-low .logo .word span::after,
+html.q-low .logo small,
+html.q-low .logo .spk,
+html.q-low .nextcard::after,
+html.q-low .stage .rays,
+html.q-low .stage .halo,
+html.q-low .nexticon,
+html.q-low .playbtn,
+html.q-low .btn .shine::before,
+html.q-low .bar>div::after,
+html.q-low .card .bar>div::before,
+html.q-low .mtile.on i,
+html.q-low .mtile.on::after,
+html.q-low .dot,
+html.q-low .chest .cglow,
+html.q-low .chest.near,
+html.q-low .chest.near .clid,
+html.q-low .streakpill.hot,
+html.q-low .swatch::after,
+html.q-low .rays,
+html.q-low .rays.r2,
+html.q-low .wheelwrap .bulbs i,
+html.q-low .node.cur::before,
+html.q-low .node .pin,
+html.q-low .node.bonus::after,
+html.q-low .ribbon.gold span,
+html.q-low .day.now,
+html.q-low .quest.ready .qi,
+html.q-low .quest.ready .btn,
+html.q-low .banner i,
+html.q-low .medal::after,
+html.q-low .tube.ok,
+html.q-low .cell.light.on u,
+html.q-low .cell.light.on b::before,
+html.q-low .seg.top::before{animation:none !important}
+/* in low, drop the costliest box-shadow glow layers on repeated board pieces */
+html.q-low .cell.light.on u{opacity:.85}
+html.q-low .card{box-shadow:0 18px 40px #000a}
+
+/* the board never affects layout outside itself, so animating inside it can't re-layout the page */
+#board{contain:layout style}

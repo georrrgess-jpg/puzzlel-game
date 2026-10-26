@@ -406,3 +406,9 @@
 .wmodes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 4px}
 .wm{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;border-radius:99px;background:#0000003a;box-shadow:inset 0 0 0 1px #ffffff1a;font-size:13.5px;font-weight:600}
 .wm i{font-style:normal;font-size:18px}
+
+/* graphics quality segmented control */
+.seg3{display:flex;gap:6px;margin:2px 0 6px;padding:4px;border-radius:16px;background:#0000003a;box-shadow:inset 0 1px 4px #0006}
+.seg3 button{flex:1;padding:9px 4px;border-radius:12px;font-size:13px;font-weight:600;color:var(--dim);white-space:nowrap}
+.seg3 button.on{background:linear-gradient(180deg,#fff3b8 -30%,var(--acc) 40%,color-mix(in srgb,var(--acc) 70%,#ff8a00));color:#2a1a00;box-shadow:0 2px 0 color-mix(in srgb,var(--acc) 55%,#5a3500)}
+.gfxset small{display:block}

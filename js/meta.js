@@ -188,8 +188,11 @@ function showSettings(){
   openModal(`<h2>Settings</h2>
     <div class="sgroup"><div class="sgh">Sound</div>${sw('music','🎵','Music','Relaxing generative soundtrack')}${rg('musVol','Volume')}${sw('sfx','🔊','Sound effects')}${rg('sfxVol','Volume')}</div>
     <div class="sgroup"><div class="sgh">Gameplay</div>${sw('haptics','📳','Vibration')}${sw('symbols','🔣','Colour symbols','Shapes on colours, helps colour-blind players')}</div>
+    <div class="sgroup"><div class="sgh">Graphics</div><div class="set gfxset"><span class="si">✨</span><b>Quality<small id="gfxNote"></small></b></div><div class="seg3" id="gfxSeg">${[['auto','Auto'],['high','High'],['med','Medium'],['low','Battery saver']].map(([v,l])=>`<button data-g="${v}" class="${(S.gfx||'auto')===v?'on':''}">${l}</button>`).join('')}</div></div>
     <div class="sgroup danger"><div class="sgh">Danger zone</div><div class="set"><span class="si">🗑️</span><b>Reset progress<small>Erases all levels, coins and trophies</small></b><button class="btn sm sec" id="resetBtn">Reset</button></div></div>`,
     [{label:'Done',fn:()=>{closeModal();refreshHUD()}}],{icon:'⚙️',cls:'settings'});
+  const gfxNote=()=>{$('#gfxNote').textContent=(S.gfx||'auto')==='auto'?`Auto picked: ${{high:'High',med:'Medium',low:'Battery saver'}[Q.tier]}`:'Smoother on older phones if you lower it'};gfxNote();
+  $$('#gfxSeg button').forEach(b=>b.onclick=()=>{S.gfx=b.dataset.g;save();Q.apply();$$('#gfxSeg button').forEach(x=>x.classList.toggle('on',x===b));gfxNote();sfx.click()});
   $$('#modal .sw').forEach(b=>b.onclick=()=>{const k=b.dataset.k;S[k]=!S[k];b.classList.toggle('on',S[k]);save();applyVolumes();audio();if(k==='music'&&S.music)Music.start();sfx.click();if(k==='haptics')buzz(30)});
   $$('#modal input[type=range]').forEach(r=>r.oninput=()=>{S[r.dataset.v]=+r.value;r.style.setProperty('--p',r.value*100+'%');applyVolumes();save()});
   $$('#modal input[type=range]').forEach(r=>r.onchange=()=>sfx.good());

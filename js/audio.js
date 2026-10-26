@@ -49,7 +49,7 @@ function voice(o){
   let n=osc;
   if(o.lp){const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=o.lp;f.Q.value=o.q||.7;n.connect(f);n=f}
   n.connect(g);g.connect(o.bus||AU.sfx);
-  if(o.verb){const s=c.createGain();s.gain.value=o.verb;g.connect(s);s.connect(AU.verb)}
+  if(o.verb&&Q.sfxVerb){const s=c.createGain();s.gain.value=o.verb;g.connect(s);s.connect(AU.verb)}
   osc.start(t);osc.stop(t+d+.05);
 }
 /* filtered noise burst: o={t,dur,vol,type,f,f2,q,bus,verb} */
@@ -61,7 +61,7 @@ function noise(o){
   if(o.f2)f.frequency.exponentialRampToValueAtTime(o.f2,t+d);
   const g=c.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(o.vol||.1,t+(o.a||.004));g.gain.exponentialRampToValueAtTime(.0001,t+d);
   s.connect(f);f.connect(g);g.connect(o.bus||AU.sfx);
-  if(o.verb){const r=c.createGain();r.gain.value=o.verb;g.connect(r);r.connect(AU.verb)}
+  if(o.verb&&Q.sfxVerb){const r=c.createGain();r.gain.value=o.verb;g.connect(r);r.connect(AU.verb)}
   s.start(t,Math.random()*.5);s.stop(t+d+.05);
 }
 const PENT=[0,2,4,7,9];

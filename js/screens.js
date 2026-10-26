@@ -21,10 +21,18 @@ function renderHome(){
   const dd=dailyDone();ringP('#tDaily',dd?1:0);ringP('#tSpin',spinReady()?1:typeof SPIN_CD!=='undefined'?1-(S.spinAt-Date.now())/SPIN_CD:0);
   ringP('#tQuests',S.quests.list.filter(q=>q.claimed).length/3);ringP('#tTrophy',achCount()/ACH.length);
   $('#tDaily').classList.toggle('on',!dd);$('#dailySub').textContent=dd?`✅ ${fmtTime(untilMidnight())}`:'Play now!';
-  const sr=spinReady();$('#tSpin').classList.toggle('on',sr);$('#spinSub').textContent=sr?'Free spin!':fmtTime(S.spinAt-Date.now());
+  const sr=spinReady();renderHome._k=dd+'|'+sr;$('#tSpin').classList.toggle('on',sr);$('#spinSub').textContent=sr?'Free spin!':fmtTime(S.spinAt-Date.now());
   const qr=questsReady(),qd=S.quests.list.filter(q=>q.claimed).length;$('#tQuests').classList.toggle('on',qr>0);$('#questSub').textContent=qr?`${qr} to claim!`:`${qd}/3 done`;
   $('#achSub').textContent=`${achCount()}/${ACH.length}`;
   refreshCoins();
+}
+/* once a second: only the countdown labels, and only when their text actually changed (avoids pointless relayout) */
+const setTxt=(sel,t)=>{const e=$(sel);if(e.textContent!==t)e.textContent=t};
+function tickHome(){
+  const dd=dailyDone(),sr=spinReady();
+  setTxt('#dailySub',dd?`✅ ${fmtTime(untilMidnight())}`:'Play now!');
+  setTxt('#spinSub',sr?'Free spin!':fmtTime(S.spinAt-Date.now()));
+  if(dd+'|'+sr!==renderHome._k)renderHome();   // a state flipped (spin ready, daily reset): full refresh
 }
 let mapCount=48;
 const PADLOCK='<svg class="pad" viewBox="0 0 24 28"><path d="M6 12V8a6 6 0 0 1 12 0v4" fill="none" stroke="#cfd3e6" stroke-width="3.2" stroke-linecap="round"/><rect x="2.5" y="11" width="19" height="15" rx="4" fill="#f2c94c" stroke="#8a6200" stroke-width="1.4"/><rect x="2.5" y="11" width="19" height="5" rx="3" fill="#ffffff55"/><circle cx="12" cy="18.5" r="2.3" fill="#6b4a00"/><rect x="11" y="19" width="2" height="4.2" rx="1" fill="#6b4a00"/></svg>';

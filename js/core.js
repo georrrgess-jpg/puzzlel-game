@@ -23,7 +23,7 @@ function fmtTime(ms){ms=Math.max(0,ms);const h=Math.floor(ms/36e5),m=Math.floor(
 const KEY='endless-puzzle-pop-v1';
 const DEFAULTS={ver:3,unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},
   // big update
-  xp:0,plv:1,music:true,sfx:true,musVol:.55,sfxVol:.85,haptics:true,symbols:false,
+  xp:0,plv:1,music:true,sfx:true,musVol:.55,sfxVol:.85,haptics:true,symbols:false,gfx:'auto',
   login:{last:-1,streak:0},spinAt:0,quests:{day:-1,list:[],bonus:false},ach:{},
   dchal:{last:-1,streak:0},deal:{day:-1,bought:false},
   stats:{wins:0,perfect:0,types:{},bestStreak:0,maxCombo:0,daily:0,spins:0,nohint:0,quests:0,bestLogin:0,coinsEarned:0,hints:0}

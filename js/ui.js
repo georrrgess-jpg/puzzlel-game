@@ -20,7 +20,7 @@ const api={
   fail(t,m){onFail(t,m)},
   over:()=>!cur||cur.over,
   shake(){board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake')},
-  coach(t){const c=$('#coach');if(c._t===t)return;c._t=t;c.innerHTML=t;if(t){c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump')}},
+  coach(t){const c=$('#coach');if(c._t===t)return;c._t=t;c.innerHTML=t;if(t&&!REDUCED&&c.animate)c.animate([{transform:'scale(.9)',opacity:.4},{transform:'scale(1.06)',opacity:1,offset:.6},{transform:'none'}],{duration:340,easing:'cubic-bezier(.3,1.6,.5,1)'})},
   setTip(h){$('#instr').innerHTML=h},
   flash(e,ms=2600){e.classList.add('hint');clearTimeout(e._ht);e._ht=setTimeout(()=>e.classList.remove('hint'),ms)},
   good(e,o={}){
@@ -190,9 +190,9 @@ function openModal(html,btns,o={}){
   m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}"${st}>${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}<div class="mbtns"></div></div>`;
   const row=$('.mbtns',m);
   btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);x.onclick=()=>{sfx.click();b.fn(x)};row.appendChild(x)});
-  m.classList.add('on');
+  m.classList.add('on');Q.setModal(true);
 }
-function closeModal(){$('#modal').classList.remove('on')}
+function closeModal(){$('#modal').classList.remove('on');Q.setModal(false)}
 function show(id){
   $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
   if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
@@ -241,5 +241,5 @@ function wakeUntilRunning(){wake();if(AU.ctx&&AU.ctx.state==='running')WAKE_EVEN
 
 buildLogo();applyTheme();BG.start();ensureQuests();checkAch();refreshHUD();renderHome();
 if(S.welcome3)setTimeout(showWelcome,700);else if(loginDue())setTimeout(()=>{if(!$('#modal').classList.contains('on'))showLogin()},800);
-setInterval(()=>{if($('#home').classList.contains('active'))renderHome()},1000);
-window.__game={S,TYPES,typeFor,startLevel,get cur(){return cur},show,api};
+setInterval(()=>{if($('#home').classList.contains('active')&&!document.hidden&&!Q.modal)tickHome()},1000);
+window.__game={S,TYPES,typeFor,startLevel,get cur(){return cur},show,api,closeModal};

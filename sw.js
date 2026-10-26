@@ -3,8 +3,8 @@
 const VERSION = 'pop-v5';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
-  'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/lights.css', 'css/modes/tubes.css',
-  'js/core.js', 'js/audio.js', 'js/fx.js', 'js/meta.js', 'js/howto.js',
+  'css/font.css', 'fonts/fredoka-latin.woff2', 'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/lights.css', 'css/modes/tubes.css', 'css/perf.css',
+  'js/core.js', 'js/perf.js', 'js/audio.js', 'js/fx.js', 'js/meta.js', 'js/howto.js',
   'js/modes/common.js', 'js/modes/lights.js', 'js/modes/tubes.js', 'js/screens.js', 'js/ui.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'
 ];

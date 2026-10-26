@@ -14,6 +14,7 @@ const srv = http.createServer((q, r) => {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const args = process.argv.slice(2);
 const throttle = /^\d+$/.test(args[0] || '') ? +args.shift() : 4;
+const GFX = process.env.GFX || 'auto';   // auto | high | med | low
 const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'win', 'modal'];
 (async () => {
   await new Promise(r => srv.listen(8766, r));
@@ -22,8 +23,9 @@ const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'win', 'mod
   const page = await ctx.newPage();
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   const cdp = await ctx.newCDPSession(page);
+  await page.addInitScript(g => { window.__gfx = g }, GFX);
   await page.goto('http://localhost:8766/'); await sleep(1500);
-  await page.evaluate(() => { document.querySelector('#modal').classList.remove('on'); const S = __game.S; S.coins = 5000; for (const t of Object.keys(S.seen)) S.seen[t] = true; for (const t of ['lights', 'tubes', 'blocks', 'merge', 'threads']) S.seen[t] = true; S.unlocked = 40; S.login.last = Math.floor(Date.now() / 864e5) });
+  await page.evaluate(() => { __game.closeModal(); const S = __game.S; S.coins = 5000; for (const t of Object.keys(S.seen)) S.seen[t] = true; for (const t of ['lights', 'tubes', 'blocks', 'merge', 'threads']) S.seen[t] = true; S.unlocked = 40; S.gfx = window.__gfx; if (S.gfx !== 'auto') Q.apply(); S.login.last = Math.floor(Date.now() / 864e5) });
   await page.evaluate(() => {
     window.__perf = { frames: [], long: 0, on: false };
     let last = performance.now();
@@ -37,13 +39,13 @@ const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'win', 'mod
     const r = await page.evaluate(() => { window.__perf.on = false; return { f: window.__perf.frames.slice(3), long: window.__perf.long } });
     const f = r.f.length ? r.f : [999], tot = f.reduce((a, b) => a + b, 0), sorted = [...f].sort((a, b) => b - a);
     const p5 = sorted[Math.floor(sorted.length * .05)] || sorted[0];
-    console.log(name.padEnd(8), 'avg', (1000 * f.length / tot).toFixed(1).padStart(5), 'fps | p5', (1000 / p5).toFixed(1).padStart(5), 'fps | long tasks', String(r.long).padStart(2), '| worst', sorted[0].toFixed(0) + 'ms');
+    console.log(name.padEnd(8), '[' + await page.evaluate(() => Q.tier) + ']', 'avg', (1000 * f.length / tot).toFixed(1).padStart(5), 'fps | p5', (1000 / p5).toFixed(1).padStart(5), 'fps | long tasks', String(r.long).padStart(2), '| worst', sorted[0].toFixed(0) + 'ms');
   };
   const tapHint = async () => {
     await page.evaluate(() => { document.querySelectorAll('.hint').forEach(e => e.classList.remove('hint')); __game.cur.puz.hint() }); await sleep(60);
     await page.evaluate(() => { const h = document.querySelector('#board .hint'); if (h) h.click() });
   };
-  console.log(`CPU throttle ${throttle}x, Pixel 5 viewport`);
+  console.log(`CPU throttle ${throttle}x, Pixel 5 viewport, graphics=${GFX}`);
   for (const s of want) {
     try {
       if (s === 'home') { await page.evaluate(() => __game.show('home')); await sleep(800); await measure('home', async () => { }, 5000) }
@@ -54,7 +56,7 @@ const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'win', 'mod
         await measure(s, async () => { for (let i = 0; i < 8; i++) { if (await page.evaluate(() => __game.cur.over)) break; await tapHint(); await sleep(s === 'tubes' ? 500 : 250) } }, 5000);
       }
       if (s === 'win') { await page.evaluate(() => __game.startLevel(1)); await sleep(2500); await measure('win', async () => { for (let i = 0; i < 20; i++) { if (await page.evaluate(() => __game.cur.over)) break; await tapHint(); await sleep(150) } }, 6000) }
-      if (s === 'modal') { await page.evaluate(() => { document.querySelector('#modal').classList.remove('on'); __game.show('home') }); await sleep(500); await measure('modal', async () => { await page.evaluate(() => document.querySelector('#tQuests').click()) }, 3000) }
+      if (s === 'modal') { await page.evaluate(() => { __game.closeModal(); __game.show('home') }); await sleep(500); await measure('modal', async () => { await page.evaluate(() => document.querySelector('#tQuests').click()) }, 3000) }
     } catch (e) { console.log(s, 'FAILED', e.message.split('\n')[0]) }
   }
   console.log(errs.length ? 'ERRORS: ' + errs.join(' | ') : 'no errors');

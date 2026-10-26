@@ -43,15 +43,19 @@ MAKERS.lights=function({R,tier,board,api}){
     const need=sol[i]^U[i],before=grid.slice();apply(grid,i);U[i]^=1;moves++;
     const lit=glow();sfx.flip(1+(n*n-lit)/(n*n)*.7);buzz(8);
     const x0=i%n,y0=(i/n)|0;
-    cells.forEach((c,j)=>{if(before[j]===grid[j])return;
-      const d=Math.abs(j%n-x0)+Math.abs(((j/n)|0)-y0),ms=d*65;
-      c.style.setProperty('--d',ms+'ms');gfx.pulse(c,'flip');
+    /* read phase first, then one write phase: a forced reflow per cell is what made big boards stutter */
+    const changed=[];cells.forEach((c,j)=>{if(before[j]!==grid[j])changed.push(j)});
+    const pos=changed.map(j=>centerOf(cells[j])),[cx,cy]=centerOf(cells[i]),cw=cells[i].offsetWidth;
+    changed.forEach(j=>cells[j].classList.remove('flip'));
+    void wrap.offsetWidth;
+    changed.forEach((j,k)=>{const c=cells[j],d=Math.abs(j%n-x0)+Math.abs(((j/n)|0)-y0),ms=d*65;
+      c.style.setProperty('--d',ms+'ms');c.classList.add('flip');
       clearTimeout(c._lt);
       const set=()=>{c.classList.toggle('on',!!grid[j]);
-        if(before[j]&&!grid[j]&&gfx.live(c)){gfx.pulse(c,'out');const[x,y]=centerOf(c);burst(x,y,gfx.acc(),8,.55)}};
+        if(before[j]&&!grid[j]&&gfx.live(c)){gfx.pulse(c,'out');burst(pos[k][0],pos[k][1],gfx.acc(),8,.55)}};
       ms?c._lt=setTimeout(set,ms+60):set();
     });
-    const[cx,cy]=centerOf(cells[i]);ring(cx,cy,'var(--acc)',cells[i].offsetWidth*2.4);
+    ring(cx,cy,'var(--acc)',cw*2.4);
     need?api.good(cells[i]):api.meh();
     cells.forEach(c=>c.classList.remove('hint'));
     api.moves(moves,s3,s2);api.commit();

@@ -26,7 +26,7 @@ const W = +process.env.W || 400, H = +process.env.H || 860;
   await page.goto('file:///home/user/puzzlel-game/index.html');
   await sleep(1300);
   const snap = async name => { const f = path.join(out, name + '.png'); await page.screenshot({ path: f }); console.log('saved', f) };
-  const closeModal = () => page.evaluate(() => document.querySelector('#modal').classList.remove('on'));
+  const closeModal = () => page.evaluate(() => __game.closeModal());
   if (scen.includes('login')) await snap('login');
   if (await page.evaluate(() => document.querySelector('#modal').classList.contains('on'))) { await page.click('#modal .mbtns .btn'); await sleep(1400) }
   await page.evaluate(() => { const S = __game.S; S.coins = Math.max(S.coins, 1000); for (const t of __game.TYPES) S.seen[t] = true; __game.show('home') });
