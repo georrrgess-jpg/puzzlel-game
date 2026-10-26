@@ -91,14 +91,15 @@ function v1812pMovers(C,poll,prev){
    ${nw.length?line('New in','nw',nw.map(r=>item(`${t(r)} <span class="muted">No. ${r.rk}</span>`)).join('')):''}${out.length?line('Dropped out','dn',out.map(r=>item(`${t(r)} <span class="muted">was No. ${r.rk}</span>`)).join('')):''}
    ${!rise&&!fall&&!nw.length&&!out.length?'<div class="muted small">The poll did not move this week.</div>':''}</section>`;
 }
+function v1812pPollYr(C){ const y=+App.params.py; return y&&y>=v1812pS(C).y0&&y<=C.year?y:C.year; }
 function v1812pPollTab(C){
-  const yr=C.year; const polls=v1812pPolls(C,yr); const me=C.userSid; if(!polls.length) return '<div class="empty card">The first poll is on its way.</div>';
+  const yr=v1812pPollYr(C); const polls=v1812pPolls(C,yr); const me=C.userSid; if(!polls.length) return '<div class="empty card">The first poll is on its way.</div>';
   let wk=App.params.pw!=null&&App.params.pw!==''?v1812pClamp(+App.params.pw,0,polls.length-1):polls.length-1; const poll=polls[wk]; const prev=polls[wk-1]||null;
   const recs=v1812pRecords(C,yr,wk); const prevPts=new Map(prev?prev.rows.map(r=>[r.id,r.pts]):[]); const from={}; if(prev) for(const r of prev.rows) from[r.id]=r.rk;
   const key=[yr,wk,C.slot||0].join('|');
   const opts_=polls.map((p,i)=>`<option value="${i}" ${i===wk?'selected':''}>${esc(v1812pTitle(C,p))}</option>`).join('');
   const board=`<section class="v1812p-card v1812p-board"><header class="v1812p-bh"><div><span class="v1812p-kick">Poll of ${poll.n} voters</span><h2>${esc(C.stateName)} Varsity <i>·</i> ${esc(v1812pTitle(C,poll))}</h2></div>
-    <div class="v1812p-step"><button class="btn sm ghost" data-a="v1812pWeek" data-d="-1" ${wk===0?'disabled':''} aria-label="Previous poll">${icon('chevl',16)}</button><select data-c="v1812pWeekSel" aria-label="Poll week">${opts_}</select><button class="btn sm ghost" data-a="v1812pWeek" data-d="1" ${wk>=polls.length-1?'disabled':''} aria-label="Next poll">${icon('chev',16)}</button></div></header>
+    <div class="v1812p-step">${V1812P_YRS(C).length>1?`<select data-c="v1812pPYr" aria-label="Season">${V1812P_YRS(C).map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}</select>`:''}<button class="btn sm ghost" data-a="v1812pWeek" data-d="-1" ${wk===0?'disabled':''} aria-label="Previous poll">${icon('chevl',16)}</button><select data-c="v1812pWeekSel" aria-label="Poll week">${opts_}</select><button class="btn sm ghost" data-a="v1812pWeek" data-d="1" ${wk>=polls.length-1?'disabled':''} aria-label="Next poll">${icon('chev',16)}</button></div></header>
     <div class="v1812p-colh"><span>#</span><span></span><span></span><span>School</span><span>W-D-L</span><span>Pts</span></div>
     <ol class="v1812p-rows" data-key="${key}" data-from='${JSON.stringify(from)}'>${poll.rows.map(r=>v1812pRow(C,r,poll,recs,prevPts.has(r.id)?prevPts.get(r.id):0,me)).join('')}</ol>
     <p class="v1812p-ov"><b>Others receiving votes:</b> ${poll.ov.length?poll.ov.map(o=>`${v1812pTeamBtn(C,o.id,v1812pName(C,o.id),'v1812p-olink')} ${o.pts}`).join(', '):'none'}.</p>
@@ -108,7 +109,8 @@ function v1812pPollTab(C){
   const side=`<div class="v1812p-side">${v1812pSeasonCard(C,me,yr)}${sideTop.join('')}${v1812pVotersCard(C,me,yr,wk)}${v1812pMovers(C,poll,prev)}</div>`;
   return `<div class="v1812p-grid" data-v1812p-key="${key}">${board}${side}</div>`;
 }
-A.v1812pWeek=el=>{ const C=App.C; const polls=v1812pPolls(C,C.year); const cur=App.params.pw!=null&&App.params.pw!==''?+App.params.pw:polls.length-1; App.params.pw=v1812pClamp(cur+(+el.dataset.d||0),0,polls.length-1); App.keepScroll=true; render(); };
+A.v1812pWeek=el=>{ const C=App.C; const polls=v1812pPolls(C,v1812pPollYr(C)); const cur=App.params.pw!=null&&App.params.pw!==''?+App.params.pw:polls.length-1; App.params.pw=v1812pClamp(cur+(+el.dataset.d||0),0,polls.length-1); App.keepScroll=true; render(); };
+CH.v1812pPYr=el=>{ App.params.py=el.value; delete App.params.pw; App.keepScroll=true; render(); };
 CH.v1812pWeekSel=el=>{ App.params.pw=+el.value; App.keepScroll=true; render(); };
 
 /* ---------- Teams tab ---------- */

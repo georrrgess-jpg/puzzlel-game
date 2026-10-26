@@ -5,7 +5,8 @@
 const { chromium, DIST } = require('./_pw');
 const fs = require('fs'), os = require('os'), path = require('path'), cp = require('child_process');
 /* a build of the same sources without the State Poll files, to prove the poll code changes no result */
-function baselineUrl() { const root = path.resolve(__dirname, '..'); const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'poll-base-')); fs.cpSync(path.join(root, 'src'), path.join(dir, 'src'), { recursive: true });
+let baseDir = null;
+function baselineUrl() { const root = path.resolve(__dirname, '..'); const dir = baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'poll-base-')); fs.cpSync(path.join(root, 'src'), path.join(dir, 'src'), { recursive: true });
   for (const f of fs.readdirSync(path.join(dir, 'src', 'v17'))) if (f.startsWith('94_poll')) fs.rmSync(path.join(dir, 'src', 'v17', f));
   fs.symlinkSync(path.join(root, 'fonts'), path.join(dir, 'fonts')); fs.symlinkSync(path.join(root, 'vendor'), path.join(dir, 'vendor')); fs.copyFileSync(path.join(root, 'build.py'), path.join(dir, 'build.py'));
   cp.execFileSync('python3', ['build.py'], { cwd: dir, stdio: 'ignore' }); return 'file://' + path.join(dir, 'dist', 'touchline-standalone.html'); }
@@ -267,6 +268,8 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
     /* the previous season's final standings equal the archive */ const arc = C.archives.find(x => x.yr === C.year - 1); out.arc = arc ? arc.stand.V.every(s => { const r = a.find(x => x.id === s.sid); return r && r.A.pts === s.pts && r.A.gd === s.gf - s.ga; }) : false; return out; });
   ok(ST.yrs === '2027,2026' && ST.prev === 5 && ST.prevTable && ST.prevPolls === 15, 'season selectors reach last season’s leaderboards, team table and 15 polls');
   ok(ST.arc, 'last season’s analytics for your section match the archived standings');
+  const PY = await page.evaluate(() => { App.route = 'statepoll'; App.params = { py: String(App.C.year - 1) }; render(); const r = { title: document.querySelector('.v1812p-bh h2').textContent, opts: document.querySelectorAll('select[data-c="v1812pWeekSel"] option').length, yrs: document.querySelectorAll('select[data-c="v1812pPYr"] option').length, rows: document.querySelectorAll('.v1812p-row').length, head: document.querySelector('.v1812p-season .v1812p-head').textContent }; App.params = {}; render(); return r; });
+  ok(PY.rows === 25 && PY.opts === 15 && PY.yrs === 2 && /Final/.test(PY.title), `the Poll tab can show last season: 15 polls, the final one first ("${PY.title.trim().replace(/\s+/g, ' ')}", ${PY.head})`);
   /* player modal: real player, Across seasons tab, many seasons */
   const AC = await page.evaluate(() => { const C = App.C; const p = everyone(C).filter(x => C.league.includes(x.sid) && v1812pSeasonRows(C, x).filter(r => r.lvl === 'V').length >= 2).sort((a, b) => (careerTotals(b).g + careerTotals(b).a) - (careerTotals(a).g + careerTotals(a).a))[0];
     if (!p) return null; App.modal = { type: 'player', id: p.id, tab: 'across' }; renderModal(); const tab = document.querySelector('.modal [data-v="across"]'); const rows = document.querySelectorAll('.modal .v1812p-stt tbody tr:not(.tags):not(.tot)').length; const tot = document.querySelector('.modal .v1812p-stt tr.tot');
@@ -308,6 +311,6 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   ok(await PH.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1 && !!document.querySelector('.v1812p-ovcard')), 'phone: the Overview strip fits');
 
   ok(errs.length === 0, 'no page errors' + (errs.length ? ': ' + errs.slice(0, 3).join(' | ') : ''));
-  await b.close();
+  await b.close(); if (baseDir) fs.rmSync(baseDir, { recursive: true, force: true });
   console.log(fails ? `${fails} FAILED` : 'ALL PASSED'); process.exit(fails ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });

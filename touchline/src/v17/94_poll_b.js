@@ -1,5 +1,5 @@
 /* ===================== v18.12 THE STATE POLL, part b: voters, ballots, polls, Game of the Week, season story, quotes ===================== */
-/* Seven voters. w = what each cares about (z-scores across the 64 teams): R starting-XI rating, PRES prestige, PPG points per game,
+/* Seven voters. w = what each cares about (z-scores across the 88 teams): R starting-XI rating, PRES prestige, PPG points per game,
    GD goal difference, ATT goals for, DEF goals against, REC the last three games, SOS strength of schedule, WIN win percentage,
    Q wins over ranked teams, XG expected-goal difference. loc = hometown pride (+ to the user's school, a third of it to its section). */
 const V1812P_VOTERS=[
