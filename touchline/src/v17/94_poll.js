@@ -4,11 +4,11 @@
    Presentation only: nothing here touches the match engine, its RNG streams or any result. Everything is a pure function of
    the career seed, the played results and (for the other sections of the state) a deterministic simulated season.
    State lives on C.poll (saved with the career); it is created on first use, so old saves migrate by opening them.
-   Layout: pool of 56 statewide schools in seven sections of eight (plus the user's eight-school section = 64 teams);
+   Layout: pool of 80 statewide schools in ten sections of eight (plus the user's eight-school section 5 = 88 teams);
    the league plays the real engine games, the other sections play a seeded model calibrated on the engine (3.7 goals a game,
    0.38 goals of margin per point of starting-XI rating); polls are built week by week from records, with inertia.
    UI is in 94_poll_ui.js. All identifiers are prefixed v1812p / V1812P. */
-const V1812P={ TOP:25, WEEKS:14, SECS:[1,2,3,4,6,7,8], PER:8, GM:1.865, SLOPE:0.19, MIN:80 };
+const V1812P={ TOP:25, WEEKS:14, SECS:[1,2,3,4,6,7,8,9,10,11], PER:8, GM:1.865, SLOPE:0.19, MIN:80 };
 const v1812pMem={ vy:new Map(), vr:new Map(), ros:new Map(), vs:new Map(), cmp:new Map() };
 const v1812pClamp=(v,a,b)=>v<a?a:v>b?b:v;
 const v1812pAvg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;

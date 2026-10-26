@@ -24,7 +24,7 @@ function v1812pOverviewCard(C){
 { const _v1812pMD=VIEWS.matchday; VIEWS.matchday=function(){ let h=_v1812pMD.apply(this,arguments); try{ const C=App.C; if(C.phase!=='regular') return h; const g=v1812pGotw(C); if(!g) return h;
     const card=v1812pShowCard(C,g,{cls:'in-md'}); const i=h.indexOf('<section class="mc-hero">'); if(i>=0) h=h.slice(0,i)+card+h.slice(i); else h=card+h;
     const all=v1812pRankedGames(C,C.year,C.md); const byF=new Map(all.map(x=>[x.fid,x]));
-    h=h.split('<article class="mc-game').map((chunk,ix)=>{ if(!ix) return chunk; const m=/data-id="([^"]+)"/.exec(chunk); if(!m) return chunk; const x=byF.get(m[1]); const isG=g.fid===m[1];
+    h=h.split('<article class="mc-game').map((chunk,ix)=>{ if(!ix) return chunk; const m=/data-(?:wb|id)="([^"]+)"/.exec(chunk); if(!m) return chunk; const x=byF.get(m[1]); const isG=g.fid===m[1];
       if(!isG&&!x) return chunk; const pill=isG?`<span class="pill v1812p-pill gotw">Game of the week · No. ${g.rh||'NR'} v No. ${g.ra||'NR'}</span>`:`<span class="pill v1812p-pill">Ranked · No. ${x.rh} v No. ${x.ra}</span>`;
       return (isG?' v1812p-gotwc':'')+chunk.replace('<div class="mc-top">','<div class="mc-top">'+pill); }).join('<article class="mc-game'); }catch(e){ console.warn('poll matchday',e); } return h; }; }
 

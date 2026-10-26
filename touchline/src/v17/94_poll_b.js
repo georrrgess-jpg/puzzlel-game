@@ -56,8 +56,13 @@ function v1812pBuild(C,yr,wk,prev,prior,recs){
 function v1812pPrior(C,yr){ const P=v1812pS(C); const a=P.polls[yr-1]; return a&&a.length?a[a.length-1]:null; }
 
 /* publish every poll that is due: the preseason poll with the season, one more after each completed round */
+let v1812pBusy=false;
 function v1812pSync(C){
   if(!C||!C.league||!C.league.length) return null;
+  if(v1812pBusy) return 0;
+  v1812pBusy=true; try{ return v1812pSync1(C); } finally{ v1812pBusy=false; }
+}
+function v1812pSync1(C){
   const P=v1812pS(C); const yr=C.year; v1812pSnap(C);
   try{ v1812pBackfill(C); }catch(e){}
   const bound=v1812pBound(C,yr); const arr=P.polls[yr]||(P.polls[yr]=[]); let made=0;
@@ -222,7 +227,8 @@ function v1812pNews(C,yr,wk,poll,prev){
   else if(!now&&was) text=`${town} fall out of the State Poll after dropping from No. ${was}`;
   else if(now&&now<=10&&(was==null||was>10)) text=`${town} climb into the State Poll top 10 at No. ${now}`;
   else if(now&&seasonBest!==99&&now<seasonBest&&wk>=2) text=`${town} reach a season-best No. ${now} in the State Poll`;
-  if(text) addNews(C,'poll',text,u,{pollWk:wk});
+  /* the id counter is shared with the generators, so a news item must not consume one: the world a seed builds stays exactly as it was */
+  if(text){ const keep=C.nextId; addNews(C,'poll',text,u,{pollWk:wk}); C.nextId=keep; }
 }
 
 /* ---------- hooks: save/migration, results, season start ---------- */

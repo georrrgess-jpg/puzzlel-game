@@ -38,6 +38,7 @@
 .v1812p-nm b{font-weight:800;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;min-width:0}
 .v1812p-nm .v1812p-fp{flex:none;font-style:normal;color:var(--muted);font:700 .78rem var(--f-mono)}
 .v1812p-nm small{color:var(--muted);font-size:.72rem;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1812p-nm small.m{display:none}
 .v1812p-rec{font:600 .86rem var(--f-mono);text-align:right;color:var(--muted)}
 .v1812p-pts{font:800 1.15rem var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
 .v1812p-ov{margin:12px 2px 0;color:var(--muted);font-size:.84rem;line-height:1.55}
@@ -263,7 +264,7 @@
   .v1812p-card{padding:12px;border-radius:14px}
   .v1812p-colh,.v1812p-rb{grid-template-columns:34px 40px 30px minmax(0,1fr) 54px 44px;gap:5px;padding-left:4px;padding-right:4px}
   .v1812p-rk{font-size:1.7rem}
-  .v1812p-nm b{font-size:.9rem} .v1812p-nm small{display:none}
+  .v1812p-nm b{font-size:.95rem} .v1812p-nm small.d,.v1812p-mas{display:none} .v1812p-nm small.m{display:block}
   .v1812p-rec{font-size:.74rem}
   .v1812p-pts{font-size:1rem}
   .v1812p-stats{grid-template-columns:repeat(2,1fr)}

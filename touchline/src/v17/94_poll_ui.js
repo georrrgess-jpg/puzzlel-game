@@ -76,7 +76,7 @@ function v1812pRow(C,r,poll,recs,prevPts,me){
   const s=v1812pSchool(C,r.id); const rec=v1812pWDL(recs.get(r.id)); const isMe=r.id===me; const lg=v1812pIsLeague(C,r.id);
   return `<li class="v1812p-row ${isMe?'me':''} ${lg?'lg':''}" data-tid="${r.id}" data-rk="${r.rk}" style="--c1:${s.c1};--c2:${s.c2}"><button class="v1812p-rb" data-a="v1812pTeam" data-id="${r.id}" aria-label="${esc(s.town)}, number ${r.rk}${isMe?', your team':''}">
    <span class="v1812p-rk">${r.rk}</span>${v1812pMv(r)}<span class="v1812p-sh">${crest(s,30)}</span>
-   <span class="v1812p-nm"><span class="v1812p-nl"><b>${esc(s.town)} ${esc(s.mascot)}</b>${r.fp?`<em class="v1812p-fp" title="${r.fp} first-place vote${r.fp>1?'s':''}">(${r.fp})</em>`:''}</span><small>${lg?`Section ${C.section}${isMe?' · your program':''}`:'Section '+v1812pSec(C,r.id)}</small></span>
+   <span class="v1812p-nm"><span class="v1812p-nl"><b>${esc(s.town)}<span class="v1812p-mas"> ${esc(s.mascot)}</span></b>${r.fp?`<em class="v1812p-fp" title="${r.fp} first-place vote${r.fp>1?'s':''}">(${r.fp})</em>`:''}</span><small class="d">${lg?`Section ${C.section}${isMe?' · your program':''}`:'Section '+v1812pSec(C,r.id)}</small><small class="m">${esc(s.mascot)}</small></span>
    <span class="v1812p-rec">${rec}</span><span class="v1812p-pts" data-to="${r.pts}" data-from="${prevPts==null?0:prevPts}">${r.pts}</span></button></li>`;
 }
 function v1812pMovers(C,poll,prev){
