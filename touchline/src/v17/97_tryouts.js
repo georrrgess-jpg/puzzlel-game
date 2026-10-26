@@ -150,7 +150,7 @@ function v1812tAllRaw(C){ const ids=v1812tPoolIds(C); const key=C.seed+':'+C.yea
 function v1812tLetter(pct){ const G=[[.95,'A+'],[.86,'A'],[.74,'A-'],[.62,'B+'],[.48,'B'],[.36,'B-'],[.24,'C+'],[.13,'C'],[.05,'C-']]; for(const [t,l] of G) if(pct>=t) return l; return 'D'; }
 const v1812tPosDrill={GK:'Reaction saves',DEF:'1v1 defending',MID:'Passing squares',FWD:'Finishing circuit'};
 /* the numbers a card shows after `day` days: [{k, lab, txt, bar, day}] */
-function v1812tDrills(C,id,day){ const raw=v1812tAllRaw(C)[id]; const p=v1812tFind(C,id); if(!raw||!p) return [];
+function v1812tDrills(C,id,day,rawAll){ const raw=(rawAll||v1812tAllRaw(C))[id]; const p=v1812tFind(C,id); if(!raw||!p) return [];
   const d=[{k:'spr',lab:'40-yd sprint',val:raw.spr,txt:raw.spr.toFixed(2)+' s',bar:clamp((6.15-raw.spr)/(6.15-4.7),.04,1),day:1},
     {k:'jug',lab:'Juggling',val:raw.jug,txt:String(raw.jug),bar:clamp(raw.jug/90,.04,1),day:1},
     {k:'beep',lab:'Beep test',val:raw.beep,txt:raw.beep.toFixed(1),bar:clamp((raw.beep-4)/9,.04,1),day:2},
@@ -159,11 +159,11 @@ function v1812tDrills(C,id,day){ const raw=v1812tAllRaw(C)[id]; const p=v1812tFi
   return d.filter(x=>x.day<=day); }
 
 /* ---------- the view model of one candidate at the current day ---------- */
-function v1812tView(C,id){ const T=v1812tBox(C); const p=v1812tFind(C,id); if(!p) return null; const info=v1812tInfo(C,id); const rg=v1812tRanges(C,id); const day=Math.min(3,Math.max(0,(V1812T.dayO!=null?V1812T.dayO:T.day)|0));
-  const o=rg.o[day], s=rg.s[day]; const dr=v1812tDrills(C,id,day);
+function v1812tView(C,id,rawAll){ const T=v1812tBox(C); const RA=rawAll||v1812tAllRaw(C); const p=v1812tFind(C,id); if(!p) return null; const info=v1812tInfo(C,id); const rg=v1812tRanges(C,id); const day=Math.min(3,Math.max(0,(V1812T.dayO!=null?V1812T.dayO:T.day)|0));
+  const o=rg.o[day], s=rg.s[day]; const dr=v1812tDrills(C,id,day,RA);
   const ret=!!C.players[id]; const code=v1812tAsg(C,id);
   return {id,p,kind:info.kind||'ret',story:info.story||'',info,lo:o[0],hi:o[1],mid:(o[0]+o[1])/2,slo:s[0],shi:s[1],smid:(s[0]+s[1])/2,t:rg.t,ts:rg.ts,drills:dr,
-    scr:(raw=>raw&&day>=3?raw.pct:null)(v1812tAllRaw(C)[id]),elig:v1812tElig(p),code,ret,tag:!!T.tags[id],mem:info.mem?T.mem[info.mem]:(p.cutMem||null)}; }
+    scr:(raw=>raw&&day>=3?raw.pct:null)(RA[id]),elig:v1812tElig(p),code,ret,tag:!!T.tags[id],mem:info.mem?T.mem[info.mem]:(p.cutMem||null)}; }
 
 /* ---------- the roster the choices make, and the rules it must meet ---------- */
 function v1812tCounts(C){ const ids=v1812tPoolIds(C); const out={V:0,JV:0,MOD:0,X:0,U:0,N:ids.length}; const pos={V:{GK:0,DEF:0,MID:0,FWD:0},JV:{GK:0,DEF:0,MID:0,FWD:0},MOD:{GK:0,DEF:0,MID:0,FWD:0}};
@@ -193,7 +193,7 @@ function v1812tScore(v,lvl,day){ let s=v.mid; const g=v.p.grade;
   if(g<=9&&lvl!=='V') s+=(v.smid-3)*.8;
   if(day>=3&&v.scr!=null) s+=(v.scr-.5)*3;
   return s; }
-function v1812tAutoPlan(C){ const T=v1812tBox(C); const day=Math.min(3,T.day|0); const ids=v1812tPoolIds(C); const views=ids.map(id=>v1812tView(C,id)).filter(Boolean);
+function v1812tAutoPlan(C){ const T=v1812tBox(C); const day=Math.min(3,T.day|0); const ids=v1812tPoolIds(C); const RA=v1812tAllRaw(C); const views=ids.map(id=>v1812tView(C,id,RA)).filter(Boolean);
   const out={}; const left=new Set(views.map(v=>v.id)); const byId=Object.fromEntries(views.map(v=>[v.id,v]));
   for(const l of LVLS){ const cap=V1812T.caps[l]; const el=views.filter(v=>left.has(v.id)&&v.elig[l]); const sc=v=>v1812tScore(v,l,day);
     const sorted=el.slice().sort((a,b)=>(sc(b)-sc(a))||(a.id<b.id?-1:1)); const chosen=[]; const have=new Set();

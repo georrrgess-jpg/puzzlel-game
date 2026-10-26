@@ -32,5 +32,8 @@ const theme=process.argv[3]||'night';
     console.log(tag,'revenge fixture this season:',rv);
     if(rv){ await page.evaluate(id=>{ App.modal={type:'fixture',id}; renderModal(); },rv); await page.waitForTimeout(500); await S('05-revenge-preview'); await page.evaluate(()=>{ App.modal=null; renderModal(); }); }
     await page.evaluate(()=>{ App.route='news'; App.params={nv:'wire'}; render(); window.scrollTo(0,0); }); await page.waitForTimeout(500); await S('06-newswire');
+    await page.evaluate(()=>{ const C=App.C; simRound(C); advance(C); });
+    const ix=await page.evaluate(()=>{ const C=App.C; const L=courierIssues(C); return L.findIndex(is=>is.comp==='pre'&&is.rd===0&&C.tryout.hist[is.yr]); });
+    if(ix>=0){ await page.evaluate(i=>{ App.route='news'; App.params={nv:'courier',ix:i}; render(); window.scrollTo(0,0); },ix); await page.waitForTimeout(600); await S('07-courier-cut-day'); }
     await ctx.close(); }
   console.log(errs.length?errs.join(' | '):'no errors'); await b.close(); })();
