@@ -57,7 +57,7 @@ function startLevel(n,opts={}){
 function showIntro(){
   if(!cur)return;$$('.lvintro').forEach(e=>e.remove());
   const c=cur,i=INFO[c.type],L=c.last,best=c.daily?0:S.stars[c.level]||0;
-  const goal=L?`★★★ in ${L.s3} moves or fewer`:c.type==='memory'?'★★★ with at most 1 slip':'';
+  const goal=L?`★★★ in ${L.s3} moves or fewer`:'';
   const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
     <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':'LEVEL '+c.level}</small><b>${i.name}</b>
     ${goal?`<em>${goal}</em>`:''}${best?`<span class="lvi-best">Your best: ${'★'.repeat(best)}${'☆'.repeat(3-best)}</span>`:''}</div>`);
@@ -128,7 +128,7 @@ function onWin(stars){
   emit('coins',coins+chest);
   sfx.win();buzz([30,40,60]);confetti();
   const[bx,by]=centerOf(board);burst(bx,by,'#ffd166',50,1.8);ring(bx,by,'#fff',420,900);
-  const els=$$('#board .cell,#board .tile,#board .pad,#board .tube,#board .cbtn'),step=Math.min(28,700/Math.max(1,els.length));
+  const els=$$('#board .cell,#board .tube,#board .cel'),step=Math.min(28,700/Math.max(1,els.length));
   els.forEach((c,i)=>{c.style.animationDelay=i*step+'ms';c.classList.add('celebrate')});
   const L=cur.last,near=!daily&&stars<3&&L?L.m-(stars===2?L.s3:L.s2):0;
   setTimeout(()=>{
@@ -240,6 +240,6 @@ WAKE_EVENTS.forEach(ev=>addEventListener(ev,wakeUntilRunning,{passive:true}));
 function wakeUntilRunning(){wake();if(AU.ctx&&AU.ctx.state==='running')WAKE_EVENTS.forEach(ev=>removeEventListener(ev,wakeUntilRunning))}
 
 buildLogo();applyTheme();BG.start();ensureQuests();checkAch();refreshHUD();renderHome();
-if(loginDue())setTimeout(()=>{if(!$('#modal').classList.contains('on'))showLogin()},800);
+if(S.welcome3)setTimeout(showWelcome,700);else if(loginDue())setTimeout(()=>{if(!$('#modal').classList.contains('on'))showLogin()},800);
 setInterval(()=>{if($('#home').classList.contains('active'))renderHome()},1000);
-window.__game={S,typeFor,startLevel,get cur(){return cur},show,api};
+window.__game={S,TYPES,typeFor,startLevel,get cur(){return cur},show,api};

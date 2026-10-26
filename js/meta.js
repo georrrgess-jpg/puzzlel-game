@@ -136,7 +136,7 @@ const dailyDone=()=>S.dchal.last===today();
 function dailyCfg(){
   const d=today();
   if(S.dchal.tday!==d){S.dchal.tday=d;S.dchal.tier=clamp(tierFor(S.unlocked)+2,2,14);save()}
-  return{type:TYPES[hashSeed(d,5)%6],tier:S.dchal.tier,seed:hashSeed(d,777)};
+  return{type:TYPES[hashSeed(d,5)%TYPES.length],tier:S.dchal.tier,seed:hashSeed(d,777)};
 }
 function startDaily(){if(dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}startLevel(0,{daily:true})}
 
@@ -195,4 +195,15 @@ function showSettings(){
   $$('#modal input[type=range]').forEach(r=>r.onchange=()=>sfx.good());
   $('#resetBtn').onclick=()=>openModal('<h2>Erase everything?</h2><p>All levels, stars, coins, themes and trophies will be lost. This cannot be undone.</p>',
     [{label:'Cancel',cls:'sec',fn:showSettings},{label:'Erase',cls:'pink',fn:()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}],{icon:'⚠️',cls:'fail'});
+}
+
+/* ---------- one-time welcome card for players who had v1/v2 progress ---------- */
+function showWelcome(){
+  S.welcome3=false;save();
+  const list=TYPES.map(t=>`<div class="wm"><i>${INFO[t].icon}</i><b>${INFO[t].name}</b></div>`).join('');
+  openModal(`<div class="kicker">Big update</div><h2>Welcome to v3!</h2>
+    <p>The game now has ${TYPES.length} calm, easy-to-learn puzzle modes. Your levels start fresh, and everything else came with you: coins, level, themes and trophies.</p>
+    <div class="wmodes">${list}</div>
+    <div class="reward"><i class="coin"></i><b>+200</b></div><div class="extra gold">🎁 Welcome gift: 200 coins and 3 hints</div>`,
+    [{label:"Let's go! ▶",cls:'big',fn:()=>{closeModal();renderHome();if(loginDue())setTimeout(showLogin,300)}}],{icon:'🌟',cls:'welcome'});
 }

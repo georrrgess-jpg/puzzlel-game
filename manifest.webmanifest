@@ -1,7 +1,7 @@
 {
   "name": "Endless Puzzle Pop",
   "short_name": "Puzzle Pop",
-  "description": "Endless puzzles: Lights Out, Sort Tubes, Spin Lock, Slide Tiles, Colour Flood and Echo Pads.",
+  "description": "Endless puzzles: Lights Out, Sand Tubes, Star Threads, Merge Bloom and Block Garden.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

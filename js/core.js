@@ -21,7 +21,7 @@ function fmtTime(ms){ms=Math.max(0,ms);const h=Math.floor(ms/36e5),m=Math.floor(
 
 /* ====================== save data ====================== */
 const KEY='endless-puzzle-pop-v1';
-const DEFAULTS={unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},
+const DEFAULTS={ver:3,unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},
   // big update
   xp:0,plv:1,music:true,sfx:true,musVol:.55,sfxVol:.85,haptics:true,symbols:false,
   login:{last:-1,streak:0},spinAt:0,quests:{day:-1,list:[],bonus:false},ach:{},
@@ -38,6 +38,16 @@ function load(){
   // migrate older saves: count existing clears so trophies make sense
   if(!raw.stats&&raw.stars){const v=Object.values(raw.stars);s.stats.wins=v.length;s.stats.perfect=v.filter(x=>x===3).length}
   if(raw.muted&&raw.music===undefined){s.music=false;s.sfx=false}
+  if(!(raw.ver>=3)){
+    // v3 replaced four puzzle modes, so level N is a different puzzle now: per-level progress restarts,
+    // everything else (coins, XP, themes, trophies, hints, login/daily streaks) is kept.
+    const hadProgress=!!(raw.unlocked>1||raw.coins>0||(raw.stats&&raw.stats.wins));
+    s.stars={};s.unlocked=1;s.milestone=0;s.streak=0;s.seen={};
+    s.quests={day:-1,list:[],bonus:false};s.dchal.tday=-1;
+    s.stats.types={};
+    if(hadProgress){s.coins+=200;s.hints+=3;s.welcome3=true}
+    s.ver=3;
+  }
   return s;
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -61,26 +71,20 @@ const THEMES={
 function applyTheme(){const t=THEMES[S.theme]||THEMES.midnight;for(const k in t.v)document.documentElement.style.setProperty(k,t.v[k]);$('meta[name=theme-color]').content=t.v['--bg1'];if(typeof BG!=='undefined')BG.retheme()}
 
 /* ====================== level generation ====================== */
-const TYPES=['lights','tubes','rotate','slide','flood','memory'];
-const INFO={
-  lights:{name:'Lights Out',icon:'💡',col:'#f5b82e',tip:'Tap a square to flip it and its neighbours. Turn every light off.'},
-  tubes:{name:'Sort Tubes',icon:'🧪',col:'#22b8c9',tip:'Tap a tube to pick up its top colour, then tap another tube to pour. Make every tube one colour.'},
-  rotate:{name:'Spin Lock',icon:'🧭',col:'#4fb35a',tip:'Tap an arrow to turn it and its neighbours. Make every arrow point up.'},
-  slide:{name:'Slide Tiles',icon:'🔢',col:'#4d7dff',tip:'Tap or swipe a tile beside the gap to slide it. Put the numbers in order, gap in the bottom-right.'},
-  flood:{name:'Colour Flood',icon:'🎨',col:'#e45bc4',tip:'Tap a colour to flood from the top-left corner. Cover the whole board before moves run out.'},
-  memory:{name:'Echo Pads',icon:'🎵',col:'#8b5cf6',tip:'Watch the pads light up, then tap them in the same order. You have 4 lives, and one slip still earns 3 stars.'}
-};
+/* Modes register themselves (js/modes/*.js, loaded in this order) so the rotation always matches what exists. */
+const TYPES=[],INFO={},MAKERS={};
+function registerMode(id,info,howto){TYPES.push(id);INFO[id]=info;if(howto)HOWTO[id]=howto}
 function bagOrder(b){
+  const N=TYPES.length;
   if(b===0)return TYPES.slice();
   const a=shuffle(TYPES.slice(),mulberry32(hashSeed(b,99)));
-  const prevLast=b===1?TYPES[5]:shuffle(TYPES.slice(),mulberry32(hashSeed(b-1,99)))[5];
+  const prevLast=b===1?TYPES[N-1]:shuffle(TYPES.slice(),mulberry32(hashSeed(b-1,99)))[N-1];
   if(a[0]===prevLast)[a[0],a[1]]=[a[1],a[0]];
   return a;
 }
-function typeFor(n){const b=Math.floor((n-1)/6);return bagOrder(b)[(n-1)%6]}
-const tierFor=n=>Math.floor((n-1)/6);
+function typeFor(n){const N=TYPES.length,b=Math.floor((n-1)/N);return bagOrder(b)[(n-1)%N]}
+const tierFor=n=>Math.floor((n-1)/TYPES.length);
 const isBonus=n=>n%10===0;
-const MAKERS={};
 const starsFor=(v,s3,s2)=>v<=s3?3:v<=s2?2:1;
 const WORLDS=['Twilight Grove','Crystal Caves','Neon Harbor','Sunken Temple','Cloud Citadel','Ember Peaks','Starfall Bay','Clockwork City','Aurora Fields','Moonlit Maze','Prism Desert','Cosmic Garden'];
 const worldName=c=>WORLDS[c%WORLDS.length]+(c>=WORLDS.length?' '+'I'.repeat(Math.floor(c/WORLDS.length)+1):'');

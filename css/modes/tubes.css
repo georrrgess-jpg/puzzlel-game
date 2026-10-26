@@ -1,0 +1,96 @@
+/* Sort Tubes board */
+.tubes{display:flex;flex-wrap:wrap;gap:22px 14px;justify-content:center;align-content:center;max-width:min(94vw,540px);--seg:clamp(22px,min(8vw,6.4dvh),38px);padding-top:26px}
+.tube{width:calc(var(--seg)*1.3);height:calc(var(--seg)*4 + 18px);border-radius:10px 10px calc(var(--seg)*.65) calc(var(--seg)*.65);border:3px solid #ffffff55;border-top-color:#ffffff22;background:linear-gradient(90deg,#ffffff1c,#ffffff06 35%,#ffffff04 60%,#ffffff1a);display:flex;flex-direction:column-reverse;padding:3px;gap:2px;transition:transform .28s cubic-bezier(.3,1.6,.5,1),box-shadow .3s,border-color .3s,opacity .3s;position:relative;overflow:visible;box-shadow:inset 0 0 14px #ffffff10,0 10px 20px #0004}
+.tube::before{content:'';position:absolute;top:-7px;left:-7px;right:-7px;height:8px;border-radius:6px;background:linear-gradient(180deg,#ffffff70,#ffffff28);box-shadow:0 2px 4px #0004}
+.tube::after{content:'';position:absolute;top:10px;bottom:16px;left:16%;width:13%;border-radius:99px;background:linear-gradient(180deg,#ffffff70,#ffffff10);pointer-events:none;z-index:2}
+.tube.sel{transform:translateY(-22px);box-shadow:inset 0 0 14px #ffffff18,0 0 0 2px var(--acc),0 18px 26px #0006}
+.tube.sel .seg:last-child{animation:segbob .5s ease-in-out infinite alternate}
+@keyframes segbob{to{transform:translateY(-4px);filter:brightness(1.25)}}
+.tube.done{border-color:var(--good);box-shadow:0 0 22px #6be58599,inset 0 0 14px #ffffff18}
+.tube.done::before{top:-14px;left:8%;right:8%;height:15px;border-radius:5px 5px 3px 3px;background:linear-gradient(90deg,#8a5a2b,#d49a5c 40%,#a86d36);animation:cork .5s cubic-bezier(.3,1.8,.5,1) both;box-shadow:0 3px 0 #0005}
+@keyframes cork{from{transform:translateY(-40px) rotate(-30deg);opacity:0}}
+.seg{height:var(--seg);border-radius:6px;box-shadow:inset 6px 0 8px #ffffff30,inset -6px 0 10px #0003,inset 0 -3px 0 #0002;flex:none;position:relative;display:grid;place-items:center;font-size:calc(var(--seg)*.45);color:#0009;font-weight:700}
+.seg:first-child{border-radius:6px 6px calc(var(--seg)*.55) calc(var(--seg)*.55)}
+.seg:last-child::before{content:'';position:absolute;top:-1px;left:4%;right:4%;height:5px;border-radius:50%;background:#ffffff60}
+.seg.new{animation:drop .42s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes drop{from{transform:scaleY(0);transform-origin:bottom;opacity:.2}}
+.tube.tilt{animation:tilt .45s ease}
+@keyframes tilt{35%{transform:translateY(-24px) rotate(-24deg)}}
+.tube.ok{border-color:#ffffffd0;box-shadow:0 0 16px #fff8,inset 0 0 14px #ffffff18}.tube.no{opacity:.4}
+.tube[data-h]::marker{content:none}
+.tube[data-h] .hn{position:absolute;top:-38px;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;background:var(--acc);color:#2a1a00;font-weight:700;display:grid;place-items:center;font-size:14px;box-shadow:0 0 12px var(--acc)}
+.drop{position:fixed;width:12px;height:12px;border-radius:50%;z-index:64;pointer-events:none;box-shadow:inset 0 2px 0 #ffffff80}
+/* ================= Sort Tubes ================= */
+.tubes{gap:22px 12px;padding-top:28px}
+.tube{width:calc(var(--seg)*1.16 + 6px);height:calc(var(--seg)*4 + 22px);
+  border:2px solid #ffffff4d;border-top:0;border-radius:6px 6px calc(var(--seg)*.66) calc(var(--seg)*.66);
+  background:linear-gradient(90deg,#ffffff2a 0,#ffffff08 16%,#ffffff00 40%,#ffffff00 68%,#ffffff12 84%,#ffffff33 100%),linear-gradient(180deg,#ffffff06,#ffffff10);
+  padding:4px;gap:0;justify-content:flex-start;
+  box-shadow:inset 0 -8px 14px #ffffff12,inset 0 0 0 1px #ffffff0d,0 14px 16px -8px #0009;
+  transition:transform .3s cubic-bezier(.3,1.6,.5,1),box-shadow .3s,border-color .3s,opacity .3s}
+/* glass rim */
+.tube::before{top:-6px;left:-7px;right:-7px;height:9px;border-radius:99px;
+  background:linear-gradient(180deg,#ffffffc0,#ffffff55 55%,#ffffff30);box-shadow:0 2px 3px #0005,inset 0 -1px 0 #ffffff70;z-index:3}
+/* refraction highlights: bright stripe left, faint one right (box-shadow copy) */
+.tube::after{top:12px;bottom:14px;left:14%;width:11%;background:linear-gradient(180deg,#ffffffa0,#ffffff30 60%,#ffffff08);z-index:3;
+  box-shadow:calc(var(--seg)*.72) 0 0 -1px #ffffff1c}
+/* liquid */
+.seg{height:var(--seg);border-radius:0;color:#0009;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 62%,#fff) 0,var(--c) 24%,var(--c) 52%,color-mix(in srgb,var(--c) 66%,#000) 100%);
+  box-shadow:inset 0 -1px 0 #0000002e}
+.seg.same{box-shadow:none}
+.seg:first-child{border-radius:0 0 calc(var(--seg)*.56) calc(var(--seg)*.56)}
+.seg::before{content:none}
+/* top surface: a lighter ellipse that gently sloshes */
+.seg.top::before{content:'';position:absolute;left:0;right:0;top:calc(var(--seg)*-.13);height:calc(var(--seg)*.26);border-radius:50%;
+  background:radial-gradient(ellipse at 40% 40%,color-mix(in srgb,var(--c) 40%,#fff),color-mix(in srgb,var(--c) 80%,#fff) 70%);
+  box-shadow:inset 0 -1px 0 #ffffff60;animation:slosh 2.2s ease-in-out infinite alternate;z-index:1}
+@keyframes slosh{0%{transform:rotate(-4deg) scaleX(.97)}100%{transform:rotate(4deg) scaleX(.97) translateY(1px)}}
+.seg.new{transform-origin:bottom;animation:tfill .32s cubic-bezier(.3,1.3,.5,1) both}
+@keyframes tfill{from{transform:scaleY(0)}}
+.seg.gone{transform-origin:bottom;animation:tdrain .28s ease-in both}
+@keyframes tdrain{to{transform:scaleY(0);opacity:.3}}
+/* rising bubbles */
+.bub{position:absolute;bottom:9px;width:5px;height:5px;margin-left:-2px;border-radius:50%;border:1px solid #ffffffc0;background:#ffffff35;
+  z-index:2;pointer-events:none;opacity:0;animation:bub 3.2s ease-in infinite}
+@keyframes bub{0%{transform:translateY(0) scale(.4);opacity:0}15%{opacity:.85}85%{opacity:.7}100%{transform:translateY(calc(var(--n)*var(--seg)*-1 + 6px)) scale(1.1);opacity:0}}
+/* pour stream (fixed, created by pourAnim) */
+.pourst{position:fixed;z-index:63;pointer-events:none;border-radius:99px;transform-origin:top;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--c) 60%,#fff),var(--c) 45%,color-mix(in srgb,var(--c) 70%,#000));
+  box-shadow:0 0 8px color-mix(in srgb,var(--c) 70%,transparent)}
+.tube.tilt{animation:none}
+/* states */
+.tube.sel{transform:translateY(-24px);border-color:color-mix(in srgb,var(--acc) 70%,#fff);
+  box-shadow:0 0 0 2px var(--acc),0 0 24px color-mix(in srgb,var(--acc) 55%,transparent),inset 0 -8px 14px #ffffff18,0 30px 18px -12px #0008}
+.tube.sel::before{background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--acc) 55%,#fff))}
+.tube.ok{border-color:#ffffffe0;animation:okglow .8s ease-in-out infinite alternate}
+@keyframes okglow{from{box-shadow:0 0 0 1px #ffffff80,0 0 10px #ffffff50,inset 0 -8px 14px #ffffff18}to{box-shadow:0 0 0 2px #fff,0 0 26px #ffffffa0,inset 0 -8px 14px #ffffff28}}
+.tube.no{opacity:.38;transform:scale(.96)}
+.tube.done{border-color:color-mix(in srgb,var(--good) 75%,#fff);
+  box-shadow:0 0 0 1px #ffffff30,0 0 26px color-mix(in srgb,var(--good) 50%,transparent),inset 0 -8px 14px #ffffff18,0 14px 16px -8px #0009}
+/* cork */
+.tube.done::before{top:-17px;left:12%;right:12%;height:19px;border-radius:7px 7px 4px 4px;
+  background:radial-gradient(circle at 30% 35%,#5a3418 0 1.5px,transparent 2px) 0 0/7px 6px,linear-gradient(90deg,#7a4a22,#dca46a 34%,#c08447 62%,#7a4a22);
+  box-shadow:inset 0 3px 0 #ffffff50,inset 0 -3px 0 #0003,0 3px 0 #0005;animation:tcork .6s cubic-bezier(.3,1.8,.5,1) .35s both}
+@keyframes tcork{from{transform:translateY(-46px) rotate(-35deg) scale(1.25);opacity:0}}
+.tube[data-h] .hn{top:-46px;width:28px;height:28px;font-size:15px;color:#2a1a00;
+  background:radial-gradient(circle at 35% 30%,#fff,var(--acc) 60%);box-shadow:0 0 0 3px #ffffff90,0 0 16px var(--acc),0 3px 0 #0004;animation:hnbob .6s ease-in-out infinite alternate}
+@keyframes hnbob{to{transform:translate(-50%,-5px)}}
+.drop{box-shadow:inset 0 2px 0 #ffffff80,0 0 8px #fff6}
+/* Tubes: measurement tick marks printed on the glass */
+.gf-tk{position:absolute;right:9%;top:4px;width:22%;height:calc(var(--seg)*4);pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(180deg,transparent 0 calc(var(--seg) - 1.5px),#ffffffa0 calc(var(--seg) - 1.5px) var(--seg)) right top/100% 100% no-repeat,
+    repeating-linear-gradient(180deg,transparent 0 calc(var(--seg)/2 - 1px),#ffffff50 calc(var(--seg)/2 - 1px) calc(var(--seg)/2)) right top/55% 100% no-repeat;
+  opacity:.8;mix-blend-mode:screen}
+/* Tubes: liquid settles with a decaying wobble after a pour */
+.seg.new.top::before{animation:gf-settle .9s ease-out .45s both,slosh 2.2s ease-in-out 1.35s infinite alternate}
+@keyframes gf-settle{0%{transform:rotate(-14deg) scaleX(.9) translateY(-2px)}25%{transform:rotate(10deg) scaleX(.95)}50%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}100%{transform:rotate(-4deg) scaleX(.97)}}
+/* Tubes: completed tube gets a glint sweeping down the glass */
+.gf-gl{position:absolute;inset:4px;border-radius:0 0 calc(var(--seg)*.56) calc(var(--seg)*.56);overflow:hidden;pointer-events:none;z-index:3}
+.gf-gl::before{content:'';position:absolute;left:-30%;right:-30%;top:0;height:28%;
+  background:linear-gradient(170deg,transparent 30%,#ffffffb0 50%,transparent 70%);transform:translateY(-120%);animation:gf-glint 2.8s ease-in-out .9s infinite}
+@keyframes gf-glint{0%{transform:translateY(-120%)}45%,100%{transform:translateY(420%)}}
+/* Tubes: shadow pool under each tube to seat it on the table */
+.tube .gf-sh{position:absolute;left:-10%;right:-10%;bottom:-12px;height:10px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse at center,#00000070,transparent 70%);z-index:-1}
+.tube.sel .gf-sh{opacity:.4;transform:translateY(24px) scale(.8)}

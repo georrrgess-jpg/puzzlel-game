@@ -1,11 +1,11 @@
 // Offline support: game files are cached on install and served cache-first, refreshed in the background.
 // Bump VERSION whenever any file below changes so phones pick up the update.
-const VERSION = 'pop-v4';
+const VERSION = 'pop-v5';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
-  'css/style.css', 'css/menus.css', 'css/hud.css', 'css/games-grid.css', 'css/games-fluid.css',
+  'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/lights.css', 'css/modes/tubes.css',
   'js/core.js', 'js/audio.js', 'js/fx.js', 'js/meta.js', 'js/howto.js',
-  'js/puzzles-grid.js', 'js/puzzles-fluid.js', 'js/screens.js', 'js/ui.js',
+  'js/modes/common.js', 'js/modes/lights.js', 'js/modes/tubes.js', 'js/screens.js', 'js/ui.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'
 ];
 self.addEventListener('install', e => {
