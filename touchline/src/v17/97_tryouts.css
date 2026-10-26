@@ -226,7 +226,7 @@
 .v1812t-scene.inst *{transition:none!important;animation:none!important}
 .v1812t-scene.inst.final .s-gym .v1812t-sheet,.v1812t-scene.inst .s-gym .v1812t-sheet{opacity:1;transform:rotate(-.6deg)}
 @media (max-width:899px){
-  .st-grid{grid-template-columns:minmax(0,1fr)}
+  .st-grid{grid-template-columns:minmax(0,1fr)} .st-clock{font-size:1.25rem;padding:1px 8px;top:6px} .st-title{font-size:1.2rem}
   .v1812t-body{grid-template-columns:minmax(0,1fr)} .v1812t-aside{position:static;order:-1}
   .v1812t-doord>summary{display:block;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:8px} .v1812t-doord[open]>summary{margin-bottom:10px}
   .v1812t-week{padding:16px 14px 14px} .v1812t-week-r{flex-direction:row;flex-wrap:wrap;width:100%;min-width:0} .v1812t-week-r .v1812t-run{flex:1 1 100%}

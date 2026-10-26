@@ -89,7 +89,7 @@ function v1812tOpenView(C){
   const bubble=v=>!!(plan&&v.code&&plan[v.id]!==v.code&&v.ret);
   const F={new:{l:'Newcomers',f:v=>v.kind!=='ret'},bubble:{l:'On the bubble',f:bubble},all:{l:'Everyone',f:()=>true},V:{l:'Varsity',f:v=>v.code==='V'},JV:{l:'JV',f:v=>v.code==='JV'},MOD:{l:'Modified',f:v=>v.code==='MOD'},X:{l:'Cut',f:v=>v.code==='X'},U:{l:'Undecided',f:v=>!v.code},tag:{l:'Tagged',f:v=>v.tag},gk:{l:'Keepers',f:v=>v.p.pos==='GK'}};
   if(!F[f]) f='all'; if(f==='bubble'&&!plan) f='new';
-  let list=views.filter(F[f].f);
+  let list=views.filter(F[f].f); if(sort==="level") list=list.slice().sort((a,b)=>(a.code?1:0)-(b.code?1:0));
   if(sort==='rating') list=list.slice().sort((a,b)=>(b.mid-a.mid)||(a.id<b.id?-1:1)); else if(sort==='name') list=list.slice().sort((a,b)=>a.p.ln.localeCompare(b.p.ln)||a.p.fn.localeCompare(b.p.fn)); else if(sort==='pos') list=list.slice().sort((a,b)=>GROUPS.indexOf(a.p.pos)-GROUPS.indexOf(b.p.pos)||(b.mid-a.mid));
   const chip=k=>{ if(k==='bubble'&&!plan) return ''; const n=views.filter(F[k].f).length; if(k==='tag'&&!n&&f!=='tag') return ''; return `<button class="v1812t-fc ${f===k?'on':''}" data-a="v1812tFilter" data-v="${k}" aria-pressed="${f===k}">${F[k].l}<em>${n}</em></button>`; };
   const mobileClosed=window.innerWidth<900;
