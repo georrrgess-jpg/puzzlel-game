@@ -288,6 +288,17 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
     await LV.evaluate(() => { const L = App.live; if (L && L.introGo) L.introGo(); }); }
   else ok(false, 'live intro: no ranked showdown found in three seeds');
 
+  /* ---- ranks beside school names; sim-ahead through a regular season ---- */
+  const RK = await page.evaluate(() => { const C = App.C; const pl = C.poll.polls[C.year]; const last = pl[pl.length - 1]; const want = C.league.filter(s => last.rows.some(r => r.id === s)).length;
+    App.route = 'league'; App.params = {}; render(); const chips = [...document.querySelectorAll('.v1812p-rkc')]; const okTxt = chips.every(c => { const row = last.rows.find(r => '#' + r.rk === c.textContent); return !!row; });
+    const ranked = C.league.find(s => last.rows.some(r => r.id === s)); const rl = ranked ? recLine(ranked) : ''; const unr = C.league.find(s => !last.rows.some(r => r.id === s)); const ru = unr ? recLine(unr) : '';
+    return { want, got: chips.length, okTxt, rl, ru, phase: C.phase }; });
+  ok(RK.got === RK.want && RK.okTxt, `the League table puts a #rank chip beside each ranked school (${RK.got} of ${RK.want})`);
+  ok(!RK.ranked && (RK.phase !== 'regular' || (/in the state/.test(RK.rl) && !/in the state/.test(RK.ru))), 'record lines in the matchday cards add the state rank only for ranked schools');
+  const SA = await mk('poll-t5'); await SA.evaluate(async () => { await A.simAhead({ dataset: { k: 'regular' } }); });
+  const SAR = await SA.evaluate(() => { const C = App.C; const pl = C.poll.polls[C.year]; return { n: pl.length, phase: C.phase, md: C.md, rows: pl.every(p => p.rows.length === 25), last: pl[14] && pl[14].label, wk: pl.map(p => p.wk).join(',') }; });
+  ok(SAR.n === 15 && SAR.rows && SAR.wk === '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14', `sim to the end of the regular season publishes all 15 polls (${SAR.n})`);
+
   /* ---- phone layout ---- */
   const PH = await mk('poll-t1', { width: 390, height: 844 }); await PH.evaluate(`(${SIM})(8)`);
   for (const tab of ['poll', 'teams', 'players']) { await PH.evaluate((t) => { App.route = 'statepoll'; App.params = { pt: t }; render(); window.scrollTo(0, 0); }, tab); await PH.waitForTimeout(400);

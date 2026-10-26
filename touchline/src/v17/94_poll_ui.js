@@ -27,7 +27,7 @@ function v1812pChart(C,sid,yr,opt){
   area=n>1?`${d}L${X(n-1).toFixed(1)} ${Y(28).toFixed(1)}L${X(0).toFixed(1)} ${Y(28).toFixed(1)}Z`:'';
   const dots=S.ranks.map((r,i)=>`<circle class="v1812p-dot ${r?'':'nr'}" cx="${X(i).toFixed(1)}" cy="${Y(r).toFixed(1)}" r="${i===n-1?5:3.4}" style="--i:${i}"><title>${i===0?'Preseason':'Week '+i}: ${r?'No. '+r:'Unranked'}${S.notes[i]?' · '+S.notes[i].text:''}</title></circle>`).join('');
   const li=n-1; const note=S.notes[li]; let ann='';
-  if(note){ const tx=X(li), ty=Y(S.ranks[li]); const txt=note.text; const w=Math.min(W-L-Rr-4,txt.length*5.6+16); const left=tx+w+6>W-Rr; const bx=left?tx-w-8:tx+8; const by=Math.max(T,Math.min(H-B-18,ty-26));
+  if(note){ const tx=X(li), ty=Y(S.ranks[li]); const txt=note.text; const w=Math.min(W-L-Rr-4,txt.length*5.6+16); const left=tx+w+6>W-Rr; const bx=left?tx-w-8:tx+8; const below=ty<T+(H-T-B)*0.45; const by=below?Math.min(H-B-20,ty+12):Math.max(T,ty-26);
     ann=`<g class="v1812p-ann" style="--i:${n}"><rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${w.toFixed(1)}" height="18" rx="9"/><text x="${(bx+w/2).toFixed(1)}" y="${(by+12.5).toFixed(1)}" text-anchor="middle">${esc(txt)}</text></g>`; }
   return `<svg class="v1812p-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Rank by week: ${esc(S.head.toLowerCase())}"><defs><linearGradient id="v1812pg${sid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--vt,var(--team-hi,#2f5fb3))" stop-opacity=".34"/><stop offset="1" stop-color="var(--vt,var(--team-hi,#2f5fb3))" stop-opacity="0"/></linearGradient></defs>
    <g class="v1812p-gl">${grid}${xl}</g>${area?`<path class="v1812p-area" d="${area}" fill="url(#v1812pg${sid})"/>`:''}<path class="v1812p-line" d="${d}" pathLength="1"/>${dots}${ann}</svg>`;

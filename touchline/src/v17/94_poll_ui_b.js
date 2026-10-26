@@ -3,7 +3,7 @@
 /* ---------- player seasons ---------- */
 function v1812pTrendSVG(rows,gk){
   const R=rows.filter(r=>r.rt!=null); if(R.length<1) return ''; const W=360,H=132,L=30,Rr=12,T=12,B=24; const n=R.length;
-  const X=i=>n===1?(L+(W-L-Rr)/2):L+i/(n-1)*(W-L-Rr); const lo=5.5, hi=9.5; const Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const pad=n===1?0:34; const X=i=>n===1?(L+(W-L-Rr)/2):L+pad+i/(n-1)*(W-L-Rr-2*pad); const lo=5.5, hi=9.5; const Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
   const val=r=>gk?r.t.sv:r.ga; const mx=Math.max(1,...R.map(val)); const bw=Math.min(34,(W-L-Rr)/Math.max(n,2)*0.5);
   const bars=R.map((r,i)=>{ const h=(val(r)/mx)*(H-T-B)*0.62; return `<rect class="v1812p-bar" x="${(X(i)-bw/2).toFixed(1)}" y="${(H-B-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" style="--i:${i}"><title>${r.yr}: ${val(r)} ${gk?'saves':'goals + assists'}</title></rect>`; }).join('');
   const line=R.map((r,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(r.rt).toFixed(1)).join(''); const dots=R.map((r,i)=>`<circle class="v1812p-dot" cx="${X(i).toFixed(1)}" cy="${Y(r.rt).toFixed(1)}" r="3.6" style="--i:${i}"><title>${r.yr}: rating ${r.rt.toFixed(2)}</title></circle>`).join('');
@@ -32,7 +32,7 @@ function v1812pAcross(C,p){
 }
 { const _v1812pMP=MODALS.player;
   MODALS.player=m=>{ let h=_v1812pMP(m); try{ const C=App.C; const p=Px(m.id); if(!p) return h; const tab=m.tab||'overview';
-    const btn=`<button role="tab" class="tab ${tab==='across'?'on':''}" aria-selected="${tab==='across'}" data-a="modalTab" data-k="ptab" data-v="across">Across seasons</button>`;
+    const btn=`<button role="tab" class="tab ${tab==='across'?'on':''}" aria-selected="${tab==='across'}" data-a="modalTab" data-k="ptab" data-v="across"><span class="v1812p-tl">Across seasons</span><span class="v1812p-ts">Seasons</span></button>`;
     h=h.replace(/(<button role="tab"[^>]*data-v="career">Career<\/button>)/,'$1'+btn);
     if(tab==='across') h=h.replace('</div><div class="mfoot">',v1812pAcross(C,p)+'</div><div class="mfoot">'); }catch(e){ console.warn('across',e); } return h; }; }
 

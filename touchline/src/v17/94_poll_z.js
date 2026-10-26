@@ -81,6 +81,13 @@ function v1812pAfter(){
 { const _v1812pR=render; render=function(){ const r=_v1812pR.apply(this,arguments); try{ v1812pAfter(); }catch(e){ console.warn('poll after',e); } return r; }; }
 { const _v1812pAM=afterModal; afterModal=function(root){ _v1812pAM.apply(this,arguments); try{ if(!reducedMotion()) root.querySelectorAll('.v1812p-chart').forEach(c=>c.closest('.card,.modal')&&c.closest('.card,.modal').classList.add('v1812p-in')); }catch(e){} }; }
 
+/* ---------- the poll rank beside each ranked school in the standings and the matchday record lines ---------- */
+function v1812pLatestRank(C,sid){ try{ const a=C.poll&&C.poll.polls&&C.poll.polls[C.year]; if(!a||!a.length) return null; return v1812pRankOf(a[a.length-1],sid); }catch(e){ return null; } }
+function v1812pChips(C,html){ return html.replace(/(<button class="link" data-a="openSchool" data-id="([^"]+)">[^<]*<\/button>)/g,(m,btn,id)=>{ const rk=v1812pLatestRank(C,id); return rk?btn+`<span class="v1812p-rkc" title="No. ${rk} in the State Poll">#${rk}</span>`:btn; }); }
+{ const _v1812pRL=recLine; recLine=function(sid){ const r=_v1812pRL.apply(this,arguments); try{ const C=App.C; const rk=C&&C.phase==='regular'?v1812pLatestRank(C,sid):null; return rk?r+' · No. '+rk+' in the state':r; }catch(e){ return r; } }; }
+{ const _v1812pT=v15Table; v15Table=function(){ const h=_v1812pT.apply(this,arguments); try{ return v1812pChips(App.C,h); }catch(e){ return h; } }; }
+{ const _v1812pLg=VIEWS.league; VIEWS.league=function(){ const h=_v1812pLg.apply(this,arguments); try{ return (App.params.tab||'table')==='table'?v1812pChips(App.C,h):h; }catch(e){ return h; } }; }
+
 /* ---------- a new career: the school can be renamed after the world is drawn, so the preseason item is written when the career starts ---------- */
 { const _v1812pCC=A.createCareer; A.createCareer=async function(el){ const D=App.draft; try{ if(D&&D.poll){ D.news=D.news.filter(n=>n.type!=='poll'); } }catch(e){}
     const r=await _v1812pCC.apply(this,arguments);
