@@ -7,13 +7,13 @@ const ROOT = path.resolve(__dirname, '..');
 const srv = http.createServer((q, r) => { let p = q.url.split('?')[0]; if (p.endsWith('/')) p += 'index.html'; fs.readFile(path.join(ROOT, p), (e, d) => { if (e) { r.writeHead(404); r.end() } else { r.writeHead(200, { 'content-type': { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.woff2': 'font/woff2' }[path.extname(p)] || 'application/octet-stream' }); r.end(d) } }) });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
-  await new Promise(r => srv.listen(8770, r));
+  await new Promise(r => srv.listen(0, r)); const PORT = srv.address().port;
   const browser = await chromium.launch();
   const dev = process.argv[2] ? { viewport: { width: +process.argv[2], height: +process.argv[3] }, hasTouch: true, isMobile: true, deviceScaleFactor: 2, userAgent: devices['Pixel 5'].userAgent } : devices['Pixel 5'];
   const ctx = await browser.newContext({ ...dev, serviceWorkers: 'block' });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(e.message));
   const cdp = await ctx.newCDPSession(page);
-  await page.goto('http://localhost:8770/'); await sleep(1400);
+  await page.goto('http://localhost:' + PORT + '/'); await sleep(1400);
   await page.evaluate(() => { __game.closeModal(); for (const t of __game.TYPES) __game.S.seen[t] = true; __game.S.login.last = Math.floor(Date.now() / 864e5) });
   const touch = async (x0, y0, x1, y1, steps = 14) => {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: x0, y: y0, id: 1 }] });

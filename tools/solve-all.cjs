@@ -8,11 +8,11 @@ const srv = http.createServer((q, r) => { let p = q.url.split('?')[0]; if (p.end
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const tiers = (process.argv[2] || '0,1,2,3,5,7,9,12,20,40').split(',').map(Number);
 (async () => {
-  await new Promise(r => srv.listen(8771, r));
+  await new Promise(r => srv.listen(0, r)); const PORT = srv.address().port;
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ ...devices['Pixel 5'], serviceWorkers: 'block' });
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(e.message));
-  await page.goto('http://localhost:8771/'); await sleep(1400);
+  await page.goto('http://localhost:' + PORT + '/'); await sleep(1400);
   await page.evaluate(() => { __game.closeModal(); for (const t of __game.TYPES) __game.S.seen[t] = true; __game.S.login.last = Math.floor(Date.now() / 864e5) });
   const types = await page.evaluate(() => __game.TYPES);
   let bad = 0;

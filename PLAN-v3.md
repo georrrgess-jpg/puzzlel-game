@@ -1,6 +1,6 @@
 # Endless Puzzle Pop: v3 "Big Update" plan
 
-**Status:** plan only. Nothing in this document is implemented yet.
+**Status:** implemented (phases 0-7). See "Results" at the end.
 **Builder:** a follow-up session runs it phase by phase, committing at the end of every phase.
 **Target device:** phones first (iPhone SE 320×568 up to large Android/iPhone), so every decision below favours smooth touch play on mid- and low-end phones.
 
@@ -411,3 +411,32 @@ Never cut perf, mobile QA or solvability checks.
 - [ ] `tools/economy-sim.cjs` passes.
 - [ ] No console errors. Offline works (SW). `VERSION` bumped. README updated.
 - [ ] Pushed to `claude/intelligent-dijkstra-ezmh7r` and `gh-pages`. The claude.ai artifact is republished.
+
+---
+
+## Results (as built)
+
+Assumptions A1-A5 were used as written (Echo Pads removed, 5 modes, saves keep everything except per-level progress, welcome gift 200 coins + 3 hints).
+
+| Phase | Outcome |
+|---|---|
+| 0 | `tools/perf.cjs` baseline at 4x CPU throttle: home 20 fps, map 20, lights 12, tubes 19, win 14, popup 12 |
+| 1 | Four modes removed; `registerMode()`; level rotation follows `TYPES.length`; save migration v3 + welcome card |
+| 2 | Quality tiers, half-resolution background, particle caps/pooling, popup-aware animation pausing, no blur, self-hosted font. Final: every screen/mode 52-60 fps avg, near-zero long tasks |
+| 3 | Star Threads, Merge Bloom, Block Garden built with a shared drag controller; generators/bots verified on 1,600+ seeds and across tiers 0-40 |
+| 4 | Sand Tubes (grain texture, grain streams, in-place updates). Lights Out kept its look; its per-tap layout thrash was removed in phase 2 |
+| 5 | `ECON` table + simulator. The plan's numbers paid ~55 coins/level from all sources; scaled down to ~32. Added garden decorations as a long-term sink |
+| 6 | Six-device matrix clean; boards size from free space; compact play screen; 42-44px touch targets |
+| 7 | Final QA below |
+
+Deviations from the plan, and why:
+- **Economy**: the plan's prices (section 6.3) were too generous once quests, daily challenge, chests, level-ups, login and spin were counted;
+  the simulator drove the final values (first 3-star clear = 18 coins, hint 40, skip 150, themes 400-2000).
+- **Star Threads**: sizes are 6 / 10 / 15 stars up to tier 11 and 21 stars from tier 12 (the plan had 21 from tier 9).
+- **Block Garden**: no "Shuffle tray" button; when nothing fits the game glows Undo (which is unlimited), so there is never a game over.
+- **Merge Bloom**: no "Prune"; a guaranteed-pair rule makes dead ends impossible.
+- **Lights Out**: no new lantern art; the existing glass-bulb look was kept and its rendering cost was cut.
+- **Fonts**: the one variable Fredoka file covers every weight, so it is a single 29 KB download.
+
+Known limits: performance numbers come from a GPU-less headless browser with CPU throttling, so they are pessimistic for real phones with
+GPUs but are a fair relative measure; sound could not be listened to in the test environment.
