@@ -2303,6 +2303,230 @@ body.rm .v1811m-intro .v1811m-in,body.rm .v1811m-intro .v1811m-rule,body.rm .sta
 body.rm .v1811m-sweep{display:none}
 body.rm .start.v1811m .start-bg canvas{transition:none;transform:none}
 
+/* v18.11 Player of the Match cards (93_cards.js). Sizes are in em: font-size = card width / 16, so one design scales
+   from the 96 px profile thumbnails to the 320 px reveal. Finishes: matte bronze, brushed silver, gold foil, holographic. */
+.v1811c-card{--rx:0deg;--ry:0deg;--mx:50%;width:var(--w);height:calc(var(--w)*1.4);font-size:calc(var(--w)/16);perspective:calc(var(--w)*4.5);position:relative;flex:0 0 auto;
+  --f1:#5a3418;--f2:#b47444;--f3:#e3a86f;--glow:rgba(205,127,50,.0);--badge:#8a5228;--bink:#fff3e6}
+.v1811c-in{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.v1811c-tilting .v1811c-in{transition:transform .08s linear}
+.v1811c-flipped .v1811c-in{transform:rotateX(var(--rx)) rotateY(calc(180deg + var(--ry)))}
+.v1811c-face{position:absolute;inset:0;border-radius:.95em;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;padding:.5em;
+  background:linear-gradient(135deg,var(--f1),var(--f2) 28%,var(--f3) 46%,var(--f2) 64%,var(--f1));
+  box-shadow:0 .1em 0 rgba(255,255,255,.25) inset,0 -.1em 0 rgba(0,0,0,.35) inset,0 .9em 1.8em -.6em rgba(0,0,0,.65),0 0 1.6em var(--glow)}
+.v1811c-back{transform:rotateY(180deg)}
+.v1811c-panel{position:relative;height:100%;border-radius:.6em;overflow:hidden;color:var(--ink,#fff);
+  background:radial-gradient(120% 70% at 50% 18%,var(--c1l),var(--c1) 45%,var(--c1d));box-shadow:0 0 0 .08em rgba(0,0,0,.45),0 0 0 .16em rgba(255,255,255,.18)}
+/* front */
+.v1811c-art{position:absolute;left:0;right:0;top:0;height:13.7em;overflow:hidden}
+.v1811c-stripes{position:absolute;inset:-2em;background:repeating-linear-gradient(118deg,transparent 0 1.1em,color-mix(in srgb,var(--c2) 16%,transparent) 1.1em 1.5em);mask-image:linear-gradient(#000 30%,transparent 92%);-webkit-mask-image:linear-gradient(#000 30%,transparent 92%)}
+.v1811c-mark{position:absolute;right:-2.4em;top:1.2em;width:11em;height:11em;opacity:.16;filter:grayscale(.2)}
+.v1811c-mark svg{width:100%;height:100%}
+.v1811c-por{position:absolute;left:50%;bottom:-1em;width:11.4em;transform:translateX(-46%);filter:drop-shadow(0 .4em .5em rgba(0,0,0,.45))}
+.v1811c-por svg{display:block;width:100%;height:auto}
+.v1811c-tl{position:absolute;left:.75em;top:.65em;display:flex;flex-direction:column;align-items:center;gap:.05em;z-index:2;text-shadow:0 .08em .2em rgba(0,0,0,.35)}
+.v1811c-rt b{font:800 2.7em/0.95 'Big Shoulders Display',sans-serif;letter-spacing:-.02em;display:block}
+.v1811c-rtl{font:700 .58em/1 'JetBrains Mono',monospace;letter-spacing:.18em;opacity:.8}
+.v1811c-pos{margin-top:.35em;font:800 1.05em/1 'Big Shoulders Display',sans-serif;letter-spacing:.06em;padding:.12em .35em;border-radius:.25em;background:color-mix(in srgb,var(--c2) 85%,transparent);color:var(--c1d)}
+.v1811c-num{font:800 1.1em/1.1 'Big Shoulders Display',sans-serif;opacity:.9}
+.v1811c-crest{position:absolute;right:.6em;top:.6em;width:3.1em;height:3.1em;border-radius:50%;display:grid;place-items:center;z-index:2;
+  background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--c2) 35%,#fff),var(--c2));box-shadow:0 0 0 .12em var(--f3),0 .2em .5em rgba(0,0,0,.4)}
+.v1811c-crest svg{width:2.7em;height:2.7em}
+.v1811c-name{position:absolute;left:0;right:0;top:13.4em;padding:.35em .6em .3em;text-align:center;z-index:2;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c1d) 85%,transparent) 15% 85%,transparent);border-top:.12em solid var(--c2);border-bottom:.06em solid color-mix(in srgb,var(--c2) 45%,transparent)}
+.v1811c-name small{display:block;font:600 .72em/1.1 'Instrument Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:.85;color:#fff}
+.v1811c-name b{display:block;font:800 1.7em/1 'Big Shoulders Display',sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811c-ml{position:absolute;left:.8em;right:.8em;top:22.25em;text-align:center;font:600 .74em/1.25 'Instrument Sans',sans-serif}
+.v1811c-ml>span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811c-ml small{display:block;font-size:.86em;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811c-res{font:800 1em/1 'Big Shoulders Display',sans-serif;font-style:normal;padding:.08em .3em;border-radius:.2em;background:rgba(0,0,0,.35);color:#fff}
+.v1811c-res-W{background:#1f9d5a}.v1811c-res-L{background:#b3363c}.v1811c-res-D{background:#5b6573}
+.v1811c-st{position:absolute;left:.55em;right:.55em;top:18.35em;display:grid;grid-template-columns:repeat(4,1fr);gap:.25em}
+.v1811c-st span{display:flex;flex-direction:column;align-items:center;padding:.22em 0 .2em;border-radius:.35em;background:rgba(0,0,0,.24);box-shadow:inset 0 0 0 .06em rgba(255,255,255,.12)}
+.v1811c-st b{font:800 1.25em/1 'Big Shoulders Display',sans-serif;color:#fff}
+.v1811c-st i{font:700 .48em/1.3 'JetBrains Mono',monospace;font-style:normal;letter-spacing:.12em;opacity:.8;color:#fff}
+.v1811c-badge{position:absolute;left:50%;bottom:.12em;transform:translateX(-50%);display:flex;align-items:center;gap:.4em;white-space:nowrap;padding:.18em .7em .2em;border-radius:1em;z-index:3;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--badge) 70%,#fff),var(--badge));color:var(--bink);box-shadow:0 .1em .3em rgba(0,0,0,.45),inset 0 .06em 0 rgba(255,255,255,.45)}
+.v1811c-badge b{font:800 .66em/1 'JetBrains Mono',monospace;letter-spacing:.2em;text-transform:uppercase}
+.v1811c-badge i{font:600 .62em/1 'Instrument Sans',sans-serif;font-style:normal;opacity:.9;padding-left:.45em;border-left:.08em solid currentColor}
+/* foil sheen: a bright band that follows --mx (the pointer) and sweeps across on reveal */
+.v1811c-foil{position:absolute;inset:0;pointer-events:none;border-radius:inherit;mix-blend-mode:soft-light;opacity:.55;
+  background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.0) 38%,rgba(255,255,255,.85) 47%,rgba(255,255,255,.0) 56%,transparent 64%);background-size:250% 100%;background-position:calc(100% - var(--mx)) 0}
+.v1811c-holo{position:absolute;inset:0;pointer-events:none;display:none}
+/* finishes */
+.v1811c-r-bronze .v1811c-face{background-image:radial-gradient(rgba(0,0,0,.14) .06em,transparent .07em),linear-gradient(135deg,var(--f1),var(--f2) 28%,var(--f3) 46%,var(--f2) 64%,var(--f1));background-size:.32em .32em,auto}
+.v1811c-r-bronze .v1811c-foil{opacity:.25}
+.v1811c-r-silver{--f1:#59626d;--f2:#b9c1ca;--f3:#f4f7fa;--badge:#aab3be;--bink:#1b2129}
+.v1811c-r-silver .v1811c-face{background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.11) 0 .04em,rgba(0,0,0,.07) .04em .1em,transparent .1em .16em),linear-gradient(135deg,var(--f1),var(--f2) 26%,var(--f3) 44%,#8d96a1 62%,var(--f3) 80%,var(--f1))}
+.v1811c-r-gold{--f1:#6b4508;--f2:#d9ac3f;--f3:#fff0a8;--glow:rgba(255,196,60,.35);--badge:#e0b23e;--bink:#3a2604}
+.v1811c-r-gold .v1811c-face{background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.5) .05em,transparent .12em),radial-gradient(circle at 70% 80%,rgba(255,250,220,.45) .05em,transparent .1em),linear-gradient(135deg,var(--f1),var(--f2) 22%,var(--f3) 40%,#b8841e 58%,#f6d97a 76%,var(--f1));background-size:1.3em 1.7em,1.1em 1.3em,auto}
+.v1811c-r-gold .v1811c-foil{opacity:.75}
+.v1811c-r-legend{--f1:#ff8fd8;--f2:#9fe3ff;--f3:#fdf7a8;--glow:rgba(190,140,255,.5);--badge:#c9a2ff;--bink:#24113f}
+.v1811c-r-legend .v1811c-face{background:linear-gradient(115deg,#ff9ad8,#a6e8ff 16%,#b9ffb4 32%,#fff59a 48%,#ffb38a 64%,#cba6ff 80%,#ff9ad8);background-size:300% 300%;animation:v1811cHolo 7s linear infinite}
+.v1811c-r-legend .v1811c-holo{display:block;mix-blend-mode:color-dodge;opacity:.32;border-radius:inherit;
+  background:repeating-linear-gradient(115deg,#ff4fb5 0 6%,#3fd0ff 12%,#7dff6a 18%,#ffe34a 24%,#ff4fb5 30%),radial-gradient(circle,rgba(255,255,255,.9) .06em,transparent .11em);background-size:300% 300%,1.4em 1.4em;
+  background-position:var(--mx) 30%,0 0;animation:v1811cHolo 5s linear infinite}
+.v1811c-r-legend .v1811c-badge{background:linear-gradient(90deg,#ffb3e2,#b6ecff,#fff7b0,#d7b9ff);background-size:200% 100%;animation:v1811cHolo 4s linear infinite}
+.v1811c-r-legend .v1811c-foil{opacity:.8}
+@keyframes v1811cHolo{0%{background-position:0% 50%,0 0}100%{background-position:300% 50%,1.4em 1.4em}}
+/* back */
+.v1811c-bpat{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 46%,color-mix(in srgb,var(--c2) 10%,transparent) 0 6deg,transparent 6deg 12deg),radial-gradient(circle at 50% 46%,color-mix(in srgb,var(--c2) 22%,transparent),transparent 60%)}
+.v1811c-bring{position:absolute;left:50%;top:46%;width:9.5em;height:9.5em;transform:translate(-50%,-55%);border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--c2) 30%,#fff),var(--c2));box-shadow:0 0 0 .3em var(--f2),0 0 0 .42em rgba(0,0,0,.35),0 .5em 1.4em rgba(0,0,0,.5)}
+.v1811c-bring svg{width:8.2em;height:8.2em}
+.v1811c-bword{position:absolute;left:0;right:0;bottom:1.3em;text-align:center;color:#fff}
+.v1811c-bword b{display:block;font:800 1.9em/1 'Big Shoulders Display',sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.v1811c-bword small{display:block;font:700 .6em/1.6 'JetBrains Mono',monospace;letter-spacing:.24em;text-transform:uppercase;opacity:.85}
+.v1811c-bword i{display:block;font:600 .7em/1.4 'Instrument Sans',sans-serif;font-style:normal;opacity:.7}
+
+/* ---------- reveal overlay ---------- */
+.v1811c-rv{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;overflow:hidden;outline:none;cursor:pointer;
+  --tc:#d79a5e;animation:v1811cFade .35s ease both}
+.v1811c-rv.v1811c-rv-in{position:absolute;z-index:40}
+.v1811c-t-silver{--tc:#dfe6ee}.v1811c-t-gold{--tc:#ffcc4d}.v1811c-t-legend{--tc:#c79bff}
+.v1811c-rv-bg{position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 45%,color-mix(in srgb,var(--tc) 22%,rgba(8,10,14,.82)),rgba(6,8,12,.94) 70%);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.v1811c-rv-rays{position:absolute;left:50%;top:45%;width:180vmax;height:180vmax;margin:-90vmax 0 0 -90vmax;opacity:0;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--tc) 30%,transparent) 0 5deg,transparent 5deg 15deg);mask-image:radial-gradient(circle,#000 0,transparent 32%);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 32%)}
+.v1811c-t-legend .v1811c-rv-rays{background:repeating-conic-gradient(from 0deg,rgba(255,120,210,.32) 0 5deg,transparent 5deg 10deg,rgba(110,220,255,.32) 10deg 15deg,transparent 15deg 20deg,rgba(255,240,120,.3) 20deg 25deg,transparent 25deg 30deg)}
+.v1811c-rv[data-ph=show] .v1811c-rv-rays,.v1811c-rv[data-ph=done] .v1811c-rv-rays{opacity:1;animation:v1811cSpin 24s linear infinite,v1811cFade .8s ease both}
+.v1811c-rv-head,.v1811c-rv-stage,.v1811c-rv-cap,.v1811c-rv-act,.v1811c-rv-hint{position:relative;z-index:2}
+.v1811c-rv-head .eyebrow{color:#fff;opacity:.9;letter-spacing:.3em}
+.v1811c-rv-stage{perspective:1400px;display:grid;place-items:center}
+.v1811c-rv-cap{text-align:center;color:#fff;display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
+.v1811c-rv-tier{font:800 1.9rem/1 'Big Shoulders Display',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--tc);text-shadow:0 0 18px color-mix(in srgb,var(--tc) 60%,transparent)}
+.v1811c-t-legend .v1811c-rv-tier{background:linear-gradient(90deg,#ff9ad8,#a6e8ff,#fff59a,#cba6ff,#ff9ad8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:v1811cHolo 4s linear infinite}
+.v1811c-rv-cap span{font-size:.9rem;opacity:.85}
+.v1811c-rv-act{display:flex;gap:10px;opacity:0;pointer-events:none;transition:opacity .35s}
+.v1811c-rv-hint{color:#fff;opacity:.55;font-size:.75rem;min-height:1em}
+.v1811c-rv[data-ph=show] .v1811c-rv-cap,.v1811c-rv[data-ph=done] .v1811c-rv-cap{opacity:1;transform:none}
+.v1811c-rv[data-ph=done] .v1811c-rv-act{opacity:1;pointer-events:auto}
+.v1811c-rv[data-ph=done] .v1811c-rv-hint{opacity:0}
+.v1811c-rv .v1811c-card{transition:none}
+/* phases: fly in face-down, tease, flip, sheen and count-up */
+.v1811c-rv .v1811c-in{transition:none}
+.v1811c-rv[data-ph=in] .v1811c-fly{animation:v1811cFly .76s cubic-bezier(.16,1.1,.3,1) both}
+.v1811c-rv[data-ph=in] .v1811c-in,.v1811c-rv[data-ph=tease] .v1811c-in{transform:rotateY(180deg)}
+.v1811c-rv[data-ph=tease] .v1811c-in{animation:v1811cTease .4s ease-in-out both}
+.v1811c-rv[data-ph=tease] .v1811c-back{box-shadow:0 0 0 .1em color-mix(in srgb,var(--tc) 80%,#fff),0 0 2.4em color-mix(in srgb,var(--tc) 70%,transparent)}
+.v1811c-rv[data-ph=flip] .v1811c-in{animation:v1811cFlip .75s cubic-bezier(.3,.1,.2,1) both}
+.v1811c-rv[data-ph=show] .v1811c-front .v1811c-foil{animation:v1811cSweep 1s cubic-bezier(.4,0,.2,1) both;opacity:1;mix-blend-mode:overlay}
+.v1811c-rv[data-ph=show] .v1811c-card::after{content:'';position:absolute;inset:-1em;border-radius:1.6em;pointer-events:none;background:radial-gradient(closest-side,color-mix(in srgb,var(--tc) 85%,#fff),transparent);animation:v1811cFlash .7s ease-out both}
+.v1811c-t-gold[data-ph=show] .v1811c-face,.v1811c-t-gold[data-ph=done] .v1811c-face,.v1811c-t-legend[data-ph=show] .v1811c-face,.v1811c-t-legend[data-ph=done] .v1811c-face{box-shadow:0 .1em 0 rgba(255,255,255,.25) inset,0 .9em 1.8em -.6em rgba(0,0,0,.65),0 0 2.6em var(--glow),0 0 5em color-mix(in srgb,var(--tc) 40%,transparent)}
+.v1811c-t-gold[data-ph=show] .v1811c-front,.v1811c-t-gold[data-ph=done] .v1811c-front{animation:v1811cPulse 2.4s ease-in-out infinite}
+.v1811c-rv[data-ph=done] .v1811c-fly{animation:v1811cFloat 4s ease-in-out infinite}
+.v1811c-rv-sparks{position:absolute;left:50%;top:45%;width:0;height:0;z-index:3;pointer-events:none}
+.v1811c-rv-sparks i{position:absolute;left:0;top:0;width:var(--s);height:var(--s);border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c),0 0 2px #fff;opacity:0;animation:v1811cSpark 1.25s cubic-bezier(.1,.7,.3,1) var(--d) both}
+.v1811c-rv.v1811c-skip *,.v1811c-rv.v1811c-skip{animation-duration:0s!important;animation-delay:0s!important;transition:none!important}
+.v1811c-rv.v1811c-skip[data-ph=done] .v1811c-rv-rays{animation:v1811cSpin 24s linear infinite!important}
+.v1811c-rv.v1811c-skip .v1811c-rv-sparks{display:none}
+.v1811c-rv.v1811c-rm,.v1811c-rv.v1811c-rm *{animation:none!important;transition:none!important}
+.v1811c-rv.v1811c-rm{animation:v1811cFade .3s ease both!important}
+.v1811c-rv.v1811c-out{animation:v1811cFadeOut .25s ease both}
+@keyframes v1811cFade{from{opacity:0}to{opacity:1}}
+@keyframes v1811cFadeOut{to{opacity:0}}
+@keyframes v1811cSpin{to{transform:rotate(360deg)}}
+@keyframes v1811cFly{0%{transform:translate(38vw,70vh) rotate(-28deg) scale(.45);opacity:0}35%{opacity:1}100%{transform:none}}
+@keyframes v1811cTease{0%,100%{transform:rotateY(180deg) translateY(0)}30%{transform:rotateY(170deg) translateY(-6px) rotateZ(-2deg)}65%{transform:rotateY(190deg) translateY(-3px) rotateZ(2deg)}}
+@keyframes v1811cFlip{0%{transform:rotateY(180deg) scale(1)}45%{transform:rotateY(95deg) scale(1.14) translateZ(40px)}100%{transform:rotateY(0deg) scale(1)}}
+@keyframes v1811cSweep{0%{background-position:160% 0}100%{background-position:-60% 0}}
+@keyframes v1811cFlash{0%{opacity:.9;transform:scale(.8)}100%{opacity:0;transform:scale(1.35)}}
+@keyframes v1811cPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
+@keyframes v1811cFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(.4deg)}}
+@keyframes v1811cSpark{0%{opacity:1;transform:translate(0,0) scale(1)}80%{opacity:.9}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.3)}}
+@media (prefers-reduced-motion:reduce){.v1811c-card *,.v1811c-pack *{animation:none!important}}
+
+/* ---------- pack in results / summary modals ---------- */
+.v1811c-pack{display:flex;gap:18px;align-items:center;padding:14px 16px;margin:0 0 14px;border-radius:14px;background:linear-gradient(120deg,color-mix(in srgb,var(--team,#335) 22%,var(--surface)),var(--surface2,var(--surface)));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--team,#556) 35%,transparent)}
+.v1811c-fan{position:relative;flex:0 0 auto;width:140px;height:170px;margin-left:4px}
+.v1811c-fan.n2{width:186px}.v1811c-fan.n3{width:226px}
+.v1811c-fc{position:absolute;left:calc(var(--k)*36px);top:0;padding:0;border:0;background:none;cursor:pointer;transform:rotate(calc(var(--k)*7deg - 4deg));transform-origin:50% 120%;z-index:calc(5 - var(--k));transition:transform .2s}
+.v1811c-fan .v1811c-fc:first-child{transform:rotate(-4deg)}
+.v1811c-fc:hover,.v1811c-fc:focus-visible{transform:translateY(-6px) rotate(calc(var(--k)*7deg - 4deg))}
+.v1811c-anim .v1811c-fc .v1811c-in{animation:v1811cFlipIn 1s cubic-bezier(.3,.1,.2,1) both;animation-delay:calc(var(--k)*180ms + 250ms)}
+.v1811c-anim .v1811c-fc .v1811c-front .v1811c-foil{animation:v1811cSweep 1s ease both;animation-delay:calc(var(--k)*180ms + 1000ms)}
+@keyframes v1811cFlipIn{0%{transform:rotateY(180deg) translateY(30px) scale(.8);opacity:0}25%{opacity:1}60%{transform:rotateY(70deg) scale(1.06)}100%{transform:rotateY(0) scale(1)}}
+.v1811c-pinfo{display:flex;flex-direction:column;gap:4px;min-width:0}
+.v1811c-pinfo b{font:800 1.4rem/1.1 'Big Shoulders Display',sans-serif;letter-spacing:.02em}
+.v1811c-pbtn{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.v1811c-chips{display:flex;gap:6px;flex-wrap:wrap}
+.v1811c-chip{font:700 .7rem/1 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:99px;color:#1a1208}
+.v1811c-chip-bronze{background:linear-gradient(135deg,#b47444,#e3a86f)}.v1811c-chip-silver{background:linear-gradient(135deg,#b9c1ca,#f4f7fa)}
+.v1811c-chip-gold{background:linear-gradient(135deg,#d9ac3f,#fff0a8)}.v1811c-chip-legend{background:linear-gradient(90deg,#ffb3e2,#b6ecff,#fff7b0,#d7b9ff)}
+@media (max-width:560px){.v1811c-pack{flex-direction:column;align-items:flex-start}}
+
+/* ---------- binder ---------- */
+.v1811c-head{display:flex;gap:18px;align-items:center;padding:18px 20px;border-radius:var(--r-lg,16px);margin-bottom:14px;color:#fff;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--c1) 80%,#000),color-mix(in srgb,var(--c1) 55%,#000));box-shadow:inset 0 -3px 0 var(--c2)}
+.v1811c-head .eyebrow{color:#fff;opacity:.8}
+.v1811c-head h2{margin:2px 0 4px;font:800 1.9rem/1.05 'Big Shoulders Display',sans-serif;letter-spacing:.02em}
+.v1811c-head p{margin:0;color:rgba(255,255,255,.78)!important;max-width:52ch}
+.v1811c-hcrest{flex:0 0 auto}
+.v1811c-htxt{flex:1;min-width:0}
+.v1811c-sum{display:grid;grid-template-columns:repeat(4,auto);gap:8px}
+.v1811c-sum-t{display:flex;flex-direction:column;align-items:center;min-width:64px;padding:8px 6px;border-radius:10px;background:rgba(0,0,0,.25)}
+.v1811c-sum-t i{width:22px;height:30px;border-radius:4px;margin-bottom:4px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.v1811c-sum-t b{font:800 1.4rem/1 'Big Shoulders Display',sans-serif}
+.v1811c-sum-t span{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.v1811c-sum-bronze i,.v1811c-dot-bronze{background:linear-gradient(135deg,#5a3418,#e3a86f,#5a3418)}
+.v1811c-sum-silver i,.v1811c-dot-silver{background:linear-gradient(135deg,#59626d,#f4f7fa,#59626d)}
+.v1811c-sum-gold i,.v1811c-dot-gold{background:linear-gradient(135deg,#6b4508,#fff0a8,#6b4508)}
+.v1811c-sum-legend i,.v1811c-dot-legend{background:linear-gradient(135deg,#ff9ad8,#a6e8ff,#fff59a,#cba6ff)}
+.v1811c-dot{display:inline-block;width:10px;height:13px;border-radius:2px;vertical-align:-2px;margin-right:6px}
+.v1811c-filters{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.v1811c-chiprow{display:flex;gap:6px;flex-wrap:wrap}
+.v1811c-f{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:99px;padding:7px 13px;font-weight:600;font-size:.85rem;cursor:pointer}
+.v1811c-f.on{background:var(--team,#2a4);border-color:var(--team-hi,var(--team));color:var(--team-ink,#fff)}
+.v1811c-selrow{display:flex;gap:10px;flex-wrap:wrap}
+.v1811c-sel{display:flex;flex-direction:column;gap:3px}
+.v1811c-sel select{min-width:120px}
+.v1811c-top{margin-bottom:12px}
+.v1811c-toprow{display:flex;gap:8px;overflow-x:auto;padding:4px 0 6px;scrollbar-width:thin}
+.v1811c-pc{display:flex;align-items:center;gap:8px;flex:0 0 auto;padding:6px 10px 6px 6px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer;text-align:left}
+.v1811c-pc.on{border-color:var(--team-hi,var(--team));box-shadow:inset 0 0 0 1px var(--team-hi,var(--team))}
+.v1811c-pcf{width:34px;height:40px;border-radius:8px;overflow:hidden;background:var(--surface2,rgba(0,0,0,.2))}
+.v1811c-pcf svg{width:34px;height:auto;display:block}
+.v1811c-pc b{display:block;font-size:.85rem;white-space:nowrap}
+.v1811c-pc small{color:var(--muted);font-size:.72rem}
+.v1811c-pc em{font:800 1.3rem/1 'Big Shoulders Display',sans-serif;font-style:normal;margin-left:6px}
+.v1811c-count{margin:4px 0 10px}
+.v1811c-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:22px 16px;justify-items:center}
+.v1811c-gc{position:relative;padding:0;border:0;background:none;cursor:pointer;border-radius:14px;transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.v1811c-gc:hover,.v1811c-gc:focus-visible{transform:translateY(-5px) scale(1.02)}
+.v1811c-gc:hover .v1811c-foil{background-position:20% 0;transition:background-position .7s}
+.v1811c-gc:focus-visible{outline:2px solid var(--team-hi,var(--accent));outline-offset:4px}
+.v1811c-new{position:absolute;z-index:5;top:-7px;right:-7px;font:800 .66rem/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;padding:5px 7px;border-radius:99px;background:var(--team,#2a4);color:var(--team-ink,#fff);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.v1811c-more{display:flex;justify-content:center;margin:20px 0}
+.v1811c-empty{display:flex;gap:24px;align-items:center;padding:28px;border-radius:var(--r-lg,16px);background:var(--surface);border:1px dashed var(--line)}
+.v1811c-empty h3{margin:0 0 6px}
+.v1811c-empty.sm{justify-content:center;text-align:center}
+.v1811c-ghost{opacity:.85;transform:rotate(-6deg)}
+@media (max-width:700px){.v1811c-head{flex-wrap:wrap;padding:14px}.v1811c-hcrest svg{width:52px;height:52px}.v1811c-sum{width:100%;grid-template-columns:repeat(4,1fr)}.v1811c-sum-t{min-width:0}
+  .v1811c-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 10px}.v1811c-grid .v1811c-card{--w:calc((100vw - 52px)/2)!important;max-width:176px}
+  .v1811c-selrow{width:100%;display:grid;grid-template-columns:1fr 1fr}.v1811c-sel select{min-width:0;width:100%}.v1811c-empty{flex-direction:column;text-align:center}}
+/* detail */
+.v1811c-modal .mbody{overflow-x:hidden}
+.v1811c-det{display:flex;gap:28px;align-items:center;flex-wrap:wrap;justify-content:center}
+.v1811c-dstage{padding:14px;perspective:1400px}
+.v1811c-dstage.v1811c-anim .v1811c-in{animation:v1811cFlipIn 1s cubic-bezier(.3,.1,.2,1) both}
+.v1811c-dstage.v1811c-anim .v1811c-front .v1811c-foil{animation:v1811cSweep 1.1s ease .8s both}
+.v1811c-dinfo{flex:1;min-width:240px;max-width:380px;display:flex;flex-direction:column;gap:8px}
+.v1811c-dinfo h3{margin:0;font:800 2rem/1 'Big Shoulders Display',sans-serif}
+.v1811c-dinfo p{margin:0}
+.v1811c-dline{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;font-weight:600}
+.v1811c-dline small{width:100%;color:var(--muted);font-weight:500}
+.v1811c-feat{align-self:flex-start;font-weight:700;padding:4px 10px;border-radius:8px;background:color-mix(in srgb,var(--team,#2a4) 25%,transparent);border:1px solid color-mix(in srgb,var(--team-hi,#2a4) 50%,transparent)}
+.v1811c-dst{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.v1811c-dst div{display:flex;flex-direction:column;align-items:center;padding:8px 0;border-radius:10px;background:var(--surface2,rgba(127,127,127,.12))}
+.v1811c-dst b{font:800 1.35rem/1 'Big Shoulders Display',sans-serif}
+.v1811c-dst span{font:700 .62rem/1.4 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--muted)}
+.v1811c-dtally{display:flex;flex-direction:column;gap:4px}
+.v1811c-dbtn{display:flex;gap:8px;flex-wrap:wrap}
+.v1811c-pg{margin:0 auto}
+@media (max-width:560px){.v1811c-det .v1811c-card{--w:min(260px,calc(100vw - 96px))!important}}
+/* player profile strip */
+.v1811c-mini{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--surface2,rgba(127,127,127,.1))}
+.v1811c-mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.v1811c-mrow{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px}
+
 </style>
 <div id="app"></div>
 <script>
@@ -20293,5 +20517,208 @@ function v1811mParallax(el){ if(!window.matchMedia||!matchMedia('(pointer:fine)'
 /* Enter on the menu with no career yet opens the new-program form (with a career, ui_v8.js already clicks .cont-hero) */
 document.addEventListener('keydown',e=>{ if(e.key!=='Enter'||App.C||App.modal||e.defaultPrevented) return; const t=e.target; if(t&&/^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(t.tagName)) return;
   if(document.querySelector('#start .cont-hero')) return; const b=document.querySelector('#start .v1811m-new'); if(b){ e.preventDefault(); b.click(); } });
+
+/* v18.11 Player of the Match cards (93_cards.js, styles in 93_cards.css).
+   After every match of the user's school (any level, live or simulated) the best-rated player on the user's side gets a
+   collectible card, stored on the career as C.cards = {v, list:[card], lk:{pid:look}} (saved with the career, exported
+   with it). Presentation only: minting reads the finished match log and never touches a random stream or the result.
+   - Rarity: Legendary (hat trick, bicycle kick, rating 9.8+, the player of a won Sectional/Regional/State final),
+     Gold (rating 9.0+, a brace rated 8.6+, a scissor kick, a clean sheet with 5+ saves), Silver (rating 7.8+), else Bronze.
+   - Reveal: live matches get a full reveal over the pitch once the full-time card is up (the control bar stays usable);
+     the round results and simulation summaries show the new cards flipping in inline, and "Open pack" plays the reveal.
+   - Card Binder (route 'cards', under Squad): filters by season, rarity, level and player, counts per player, a detail
+     view with the flip, and the player profile lists his cards. */
+const V1811C={tiers:['bronze','silver','gold','legend'], name:{bronze:'Bronze',silver:'Silver',gold:'Gold',legend:'Legendary'},
+  finish:{bronze:'Matte bronze',silver:'Brushed silver',gold:'Gold foil',legend:'Holographic'}, page:48, fresh:[], rv:null, delay:1100};
+
+function v1811cBox(C){ const B=C.cards||(C.cards={v:1,list:[],lk:{}}); if(!Array.isArray(B.list)) B.list=[]; if(!B.lk) B.lk={}; return B; }
+function v1811cCmp(a,b){ return (b.rt||0)-(a.rt||0)||(b.g||0)-(a.g||0)||(b.a||0)-(a.a||0)||(b.sv||0)-(a.sv||0)||((b.tk||0)+(b.int||0))-((a.tk||0)+(a.int||0))||(String(a.pid)<String(b.pid)?-1:String(a.pid)>String(b.pid)?1:0); }
+function v1811cPick(rows){ let best=null; for(const r of rows||[]){ if(!r||r.gp===0||r.pid==null) continue; if(!best||v1811cCmp(r,best)<0) best=r; } return best; }
+function v1811cFinal(f){ return (f.comp==='sec'&&f.rd===2)||f.comp==='rgn'||(f.comp==='st'&&f.rd===2); }
+/* pure: the tier and the feat line from the player's row, his goals' finishes and the fixture */
+function v1811cRarity(row,o){ o=o||{}; const g=row.g||0, rt=row.rt||0, sty=o.sty||[], grp=ROLE_GROUP[row.role]||'';
+  const bike=sty.includes('bike'), sci=sty.includes('scissor'), cs=!!o.cs, fin=!!o.finalWin;
+  let rar='bronze'; if(rt>=7.8) rar='silver';
+  if(rt>=9||(g>=2&&rt>=8.6)||sci||(grp==='GK'&&cs&&(row.sv||0)>=5)) rar='gold';
+  if(g>=3||bike||rt>=9.8||fin) rar='legend';
+  const feat=bike?'Bicycle kick':g>=4?g+'-goal haul':g===3?'Hat trick':fin?(f=>f.comp==='st'?'State final hero':f.comp==='rgn'?'Regional final hero':'Section final hero')(o.f||{}):sci?'Scissor kick':g===2?'Brace':(grp==='GK'||grp==='DEF')&&cs?'Clean sheet':(row.a||0)>=2?'Playmaker':(row.sv||0)>=6?'Brick wall':g===1&&o.winner?'Match winner':'';
+  return {rar,feat}; }
+function v1811cRound(f){ const L=f.lvl&&f.lvl!=='V'?(LVL_NAME[f.lvl]||f.lvl)+' · ':''; const rd=f.rd||0;
+  const s=f.comp==='pre'?'Preseason Cup':f.comp==='reg'?`Matchday ${rd+1}`:f.comp==='sec'?['Sectional quarterfinal','Sectional semifinal','Sectional final'][rd]||'Sectionals':f.comp==='rgn'?'Regional final':f.comp==='st'?['State quarterfinal','State semifinal','State final'][rd]||'State Tournament':'Match';
+  return L+s; }
+/* mint the card for a finished fixture (idempotent: one card per fixture, id 'K'+fid) */
+function v1811cMint(C,f,M){ if(!C||!f||f.st!=='d') return null; const u=C.userSid; if(f.h!==u&&f.a!==u) return null;
+  const lg=C.logs&&C.logs[f.id]; if(!lg||!lg.box) return null; const B=v1811cBox(C); const id='K'+f.id; if(B.list.some(c=>c.id===id)) return null;
+  const i=f.h===u?0:1; const row=v1811cPick(lg.box[i]); if(!row) return null; const p=C.players[row.pid]; if(!p) return null;
+  const evs=((M&&M.ev)||lg.ev||[]).filter(e=>e.t==='goal'&&e.pid===row.pid&&e.s===i);
+  const us=i===0?f.hg:f.ag, th=i===0?f.ag:f.hg; const won=f.w===u;
+  const lastWin=won&&evs.some(e=>e.sc&&e.sc[i]===th+1&&e.sc[1-i]<e.sc[i]);
+  const R=v1811cRarity(row,{sty:evs.map(e=>e.sty||''),cs:th===0,finalWin:won&&f.lvl==='V'&&v1811cFinal(f),f,winner:lastWin&&(row.g||0)===1});
+  const st={}; for(const k of ['g','a','sh','sot','sv','tk','int','cl','ga']) st[k]=row[k]||0;
+  const card={id,pid:p.id,fid:f.id,yr:f.yr,lvl:f.lvl,sid:u,opp:i===0?f.a:f.h,home:i===0,us,th,pk:f.pk?[f.pk[i],f.pk[1-i]]:null,res:won?'W':f.w?'L':'D',comp:f.comp,rd:f.rd||0,
+    rt:row.rt||0,rar:R.rar,feat:R.feat,st,role:row.role||p.pos,pos:p.pos,num:p.num,nm:pname(p),fn:p.fn,ln:p.ln,n:B.list.length+1,nw:1};
+  B.list.push(card); if(!B.lk[p.id]) B.lk[p.id]={...lookOf(p)}; V1811C.fresh.push(id); return card; }
+
+if(typeof finishMatch==='function'){ const _v1811cFinish=finishMatch;
+  finishMatch=function(C,M){ const f=C&&M&&C.fixtures[M.fid]; const was=f&&f.st; const out=_v1811cFinish.apply(this,arguments);
+    try{ if(was!=='d'&&f&&f.st==='d') v1811cMint(C,f,M); }catch(e){ console.error(e); }
+    return out; }; }
+/* save shape: a career from before v18.11 simply starts with an empty binder */
+if(typeof migrate==='function'){ const _v1811cMig=migrate; migrate=function(C){ const r=_v1811cMig.apply(this,arguments); try{ if(C&&C.cards) v1811cBox(C); }catch(e){} return r; }; }
+
+/* ---------- card art ---------- */
+function v1811cInk(hex){ const h=String(hex||'#000').replace('#',''); const n=h.length===3?h.split('').map(x=>x+x).join(''):h; const r=parseInt(n.slice(0,2),16)/255, g=parseInt(n.slice(2,4),16)/255, b=parseInt(n.slice(4,6),16)/255;
+  const L=0.2126*r+0.7152*g+0.0722*b; return L>0.6?'#10141a':'#ffffff'; }
+function v1811cPerson(c){ const C=App.C; const B=v1811cBox(C); const p=findPerson(C,c.pid); const base=p?{...p}:{id:c.pid,fn:c.fn,ln:c.ln,num:c.num,pos:c.pos,grade:12};
+  base.sid=c.sid; base.look=B.lk[c.pid]||(p&&p.look)||lookOf(base); return base; }
+function v1811cStats(c){ const s=c.st||{}, grp=ROLE_GROUP[c.role]||ROLE_GROUP[c.pos]||'MID';
+  if(grp==='GK') return [['SV',s.sv],['GA',s.ga],['CL',s.cl],['A',s.a]];
+  if(grp==='DEF') return [['TK',s.tk],['INT',s.int],['CL',s.cl],['G',s.g]];
+  return [['G',s.g],['A',s.a],['SOT',s.sot],['TK',s.tk+(s.int||0)]]; }
+function v1811cMatchLine(c){ const O=Sx(c.opp); const sc=`${c.us}–${c.th}${c.pk?` (${c.pk[0]}–${c.pk[1]} p)`:''}`; return {opp:O?O.town:'Opponent',sc,res:c.res,where:c.home?'vs':'at'}; }
+/* o: {w:px width, cls, count:true (numbers count up from 0), back:true (render the back face too)} */
+function v1811cCardHTML(c,o){ o=o||{}; const s=Sx(c.sid)||{c1:'#1d4ed8',c2:'#ffffff',town:''}; const p=v1811cPerson(c); const ink=v1811cInk(s.c1); const c1d=_mc(s.c1,'#000000',0.45), c1l=_mc(s.c1,'#ffffff',0.12);
+  const ml=v1811cMatchLine(c); const w=o.w||220; const lite=w<200; const cnt=(v,d)=>o.count?`<b data-v1811c-to="${v}" data-d="${d||0}">${d?'0.0':'0'}</b>`:`<b>${d?Number(v).toFixed(d):v}</b>`;
+  const stats=v1811cStats(c).map(([k,v])=>`<span>${cnt(v||0)}<i>${k}</i></span>`).join('');
+  const face=`<div class="v1811c-face v1811c-front"><div class="v1811c-panel">
+      <div class="v1811c-art"><div class="v1811c-stripes"></div><div class="v1811c-mark">${logo(s,lite?30:120)}</div><div class="v1811c-por">${portraitSVG(p,140,{c1:s.c1,c2:s.c2})}</div></div>
+      <div class="v1811c-tl"><span class="v1811c-rt">${cnt(c.rt,1)}</span><span class="v1811c-rtl">RTG</span><span class="v1811c-pos">${esc(c.pos||'')}</span><span class="v1811c-num">#${esc(c.num==null?'':c.num)}</span></div>
+      <div class="v1811c-crest">${logo(s,lite?30:44)}</div>
+      <div class="v1811c-name"><small>${esc(c.fn||'')}</small><b>${esc(c.ln||c.nm||'')}</b></div>
+      <div class="v1811c-ml"><span><em class="v1811c-res v1811c-res-${c.res}">${c.res}</em> ${ml.sc} ${ml.where} <b>${esc(ml.opp)}</b></span><small>${esc(v1811cRound(c))} · ${c.yr}</small></div>
+      <div class="v1811c-st">${stats}</div>
+    </div><div class="v1811c-badge"><b>${V1811C.name[c.rar]}</b>${c.feat?`<i>${esc(c.feat)}</i>`:''}</div><div class="v1811c-holo"></div><div class="v1811c-foil"></div></div>`;
+  const back=o.back===false?'':`<div class="v1811c-face v1811c-back"><div class="v1811c-panel"><div class="v1811c-bpat"></div><div class="v1811c-bring">${logo(s,lite?30:150)}</div><div class="v1811c-bword"><b>Touchline</b><small>Player of the Match</small><i>${esc(s.town||'')}</i></div></div><div class="v1811c-foil"></div></div>`;
+  return `<div class="v1811c-card v1811c-r-${c.rar} ${o.cls||''}" style="--w:${w}px;--c1:${s.c1};--c2:${s.c2};--c1d:${c1d};--c1l:${c1l};--ink:${ink}" data-card="${esc(c.id)}"><div class="v1811c-in">${face}${back}</div></div>`; }
+
+/* ---------- the reveal ---------- */
+function v1811cOrder(list){ const r=c=>V1811C.tiers.indexOf(c.rar); return list.slice().sort((a,b)=>r(a)-r(b)||a.rt-b.rt||(a.n||0)-(b.n||0)); }
+function v1811cTake(ids){ const out=V1811C.fresh.filter(id=>!ids||ids.includes(id)); V1811C.fresh=V1811C.fresh.filter(id=>!out.includes(id)); return out; }
+function v1811cById(id){ const C=App.C; return C?v1811cBox(C).list.find(c=>c.id===id)||null:null; }
+function v1811cOpen(cards,opts){ opts=opts||{}; cards=(cards||[]).filter(Boolean); if(!cards.length) return; v1811cClose(true);
+  const host=opts.host||document.body; const ov=document.createElement('div'); ov.className='v1811c-rv'+(opts.host?' v1811c-rv-in':''); ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true'); ov.setAttribute('aria-label','Player of the Match card'); ov.tabIndex=-1;
+  if(opts.bottom) ov.style.bottom=opts.bottom+'px';
+  host.appendChild(ov); const R={ov,cards,i:0,t:[],raf:0,prev:document.activeElement,ph:''}; V1811C.rv=R;
+  ov.addEventListener('click',e=>{ if(e.target.closest('button')) return; e.stopPropagation(); v1811cAdvance(); });
+  v1811cShow(R); try{ ov.focus({preventScroll:true}); }catch(e){} }
+function v1811cSize(R){ const r=R.ov.getBoundingClientRect(); const h=r.height||innerHeight, w=r.width||innerWidth; return Math.round(Math.max(150,Math.min(320,w*0.74,(h-190)/1.4))); }
+function v1811cShow(R){ const c=R.cards[R.i]; const rm=reducedMotion(); R.t.forEach(clearTimeout); R.t=[]; cancelAnimationFrame(R.raf); const w=v1811cSize(R); const many=R.cards.length>1; const last=R.i===R.cards.length-1;
+  const top=c.rar==='gold'||c.rar==='legend';
+  R.ov.className=R.ov.className.replace(/ ?v1811c-t-\w+/g,'')+' v1811c-t-'+c.rar; R.ov.style.setProperty('--w',w+'px');
+  R.ov.innerHTML=`<div class="v1811c-rv-bg"></div>${top?'<div class="v1811c-rv-rays"></div>':''}<div class="v1811c-rv-sparks"></div>
+    <div class="v1811c-rv-head"><span class="eyebrow">Player of the Match${many?` · ${R.i+1} of ${R.cards.length}`:''}</span></div>
+    <div class="v1811c-rv-stage"><div class="v1811c-fly">${v1811cCardHTML(c,{w,count:!rm})}</div></div>
+    <div class="v1811c-rv-cap"><b class="v1811c-rv-tier">${V1811C.name[c.rar]}</b><span>${esc(V1811C.finish[c.rar])}${c.feat?` · ${esc(c.feat)}`:''}</span></div>
+    <div class="v1811c-rv-act">${App.live?'':`<button class="btn" data-a="v1811cBinder" data-id="${esc(c.id)}">Card binder</button>`}<button class="btn pri" data-a="v1811cNext">${many&&!last?'Next card':'Done'}</button></div>
+    <small class="v1811c-rv-hint">${rm?'':'Click, Esc or Enter to skip'}</small>`;
+  if(rm){ v1811cPhase(R,'done'); R.ov.classList.add('v1811c-rm'); return; }
+  const T=(ms,f)=>R.t.push(setTimeout(f,ms));
+  v1811cPhase(R,'in'); T(760,()=>v1811cPhase(R,'tease')); T(1150,()=>v1811cPhase(R,'flip'));
+  T(1900,()=>{ v1811cPhase(R,'show'); v1811cCount(R,900); if(top) v1811cSparks(R,c.rar==='legend'?44:30); });
+  T(2900,()=>v1811cPhase(R,'done')); }
+function v1811cPhase(R,ph){ R.ph=ph; R.ov.dataset.ph=ph; if(ph==='done'){ R.ov.querySelectorAll('[data-v1811c-to]').forEach(el=>{ const d=+el.dataset.d||0; el.textContent=Number(el.dataset.v1811cTo).toFixed(d); }); } }
+function v1811cCount(R,dur){ const els=[...R.ov.querySelectorAll('[data-v1811c-to]')]; const t0=performance.now();
+  const step=now=>{ const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); for(const el of els){ const d=+el.dataset.d||0; el.textContent=(Number(el.dataset.v1811cTo)*e).toFixed(d); } if(k<1&&V1811C.rv===R) R.raf=requestAnimationFrame(step); };
+  R.raf=requestAnimationFrame(step); }
+function v1811cSparks(R,n){ const box=R.ov.querySelector('.v1811c-rv-sparks'); if(!box) return; const leg=R.cards[R.i].rar==='legend'; let h='';
+  for(let k=0;k<n;k++){ const a=Math.random()*Math.PI*2, d=120+Math.random()*260, s=3+Math.random()*6; const col=leg?`hsl(${Math.round(Math.random()*360)} 95% 75%)`:['#fff4c2','#ffd76a','#f6b73c','#ffffff'][k%4];
+    h+=`<i style="--x:${Math.round(Math.cos(a)*d)}px;--y:${Math.round(Math.sin(a)*d*0.8)}px;--s:${s.toFixed(1)}px;--d:${Math.round(Math.random()*180)}ms;--c:${col}"></i>`; }
+  box.innerHTML=h; }
+function v1811cAdvance(){ const R=V1811C.rv; if(!R) return; if(R.ph!=='done'){ R.t.forEach(clearTimeout); R.t=[]; cancelAnimationFrame(R.raf); R.ov.classList.add('v1811c-skip'); v1811cPhase(R,'done'); return; }
+  if(R.i<R.cards.length-1){ R.i++; R.ov.classList.remove('v1811c-skip'); v1811cShow(R); return; } v1811cClose(); }
+function v1811cClose(quiet){ const R=V1811C.rv; if(!R) return; V1811C.rv=null; R.t.forEach(clearTimeout); cancelAnimationFrame(R.raf); const ov=R.ov;
+  if(quiet||reducedMotion()) ov.remove(); else { ov.classList.add('v1811c-out'); setTimeout(()=>ov.remove(),260); }
+  if(!quiet&&R.prev&&R.prev.isConnected) try{ R.prev.focus({preventScroll:true}); }catch(e){} }
+document.addEventListener('keydown',e=>{ const R=V1811C.rv; if(!R) return; if(e.key==='Escape'){ e.preventDefault(); e.stopImmediatePropagation(); if(R.ph!=='done') v1811cAdvance(); else v1811cClose(); return; }
+  if(e.key==='Enter'||e.key===' '){ if(R.ph==='done'&&e.target&&e.target.closest&&e.target.closest('.v1811c-rv button')) return; e.preventDefault(); e.stopImmediatePropagation(); v1811cAdvance(); return; }
+  if(e.key==='ArrowRight'&&R.ph==='done'&&R.i<R.cards.length-1){ e.preventDefault(); e.stopImmediatePropagation(); v1811cAdvance(); } },true);
+A.v1811cNext=()=>v1811cAdvance();
+A.v1811cBinder=()=>{ const live=!!App.live; v1811cClose(true); if(live){ A.liveContinue(); return; } App.modal=null; A.go({dataset:{r:'cards'}}); };
+A.v1811cPack=el=>{ const ids=String(el.dataset.ids||'').split(',').filter(Boolean); v1811cOpen(v1811cOrder(ids.map(v1811cById).filter(Boolean))); };
+
+/* live: the reveal opens over the pitch once the full-time card is up; the control bar (Continue, Match report) stays clickable */
+if(typeof endLive==='function'){ const _v1811cEnd=endLive;
+  endLive=function(){ const L=App.live; const had=L&&!L.done; const r=_v1811cEnd.apply(this,arguments);
+    try{ if(had&&L&&L.done&&App.C){ const c=v1811cById('K'+L.fid); if(c){ v1811cTake([c.id]); clearTimeout(V1811C.lt);
+        V1811C.lt=setTimeout(()=>{ if(App.live!==L||App.modal) return; const root=document.querySelector('.live'); const ctrl=document.getElementById('lv-ctrl'); if(!root) return;
+          const rr=root.getBoundingClientRect(), cr=ctrl?ctrl.getBoundingClientRect():null; const bottom=cr&&cr.height?Math.max(0,Math.round(rr.bottom-cr.top)):0;
+          v1811cOpen([c],{host:root,bottom}); }, (reducedMotion()?200:1500)+V1811C.delay); } } }catch(e){ console.error(e); }
+    return r; }; }
+if(typeof closeLiveAndContinue==='function'){ const _v1811cCLC=closeLiveAndContinue;
+  closeLiveAndContinue=function(){ clearTimeout(V1811C.lt); if(V1811C.rv&&V1811C.rv.ov.classList.contains('v1811c-rv-in')) v1811cClose(true); return _v1811cCLC.apply(this,arguments); }; }
+
+/* round results and simulation summaries: the new cards flip in inline; Open pack plays the full reveal */
+function v1811cPackHTML(m,cards,title){ if(!cards.length) return ''; const first=!m._v1811cAn; m._v1811cAn=1; const ord=v1811cOrder(cards); const show=ord.slice(-3).reverse();
+  const cnt={}; for(const c of cards) cnt[c.rar]=(cnt[c.rar]||0)+1; const chips=V1811C.tiers.slice().reverse().filter(t=>cnt[t]).map(t=>`<span class="v1811c-chip v1811c-chip-${t}">${cnt[t]} ${V1811C.name[t]}</span>`).join('');
+  return `<div class="v1811c-pack ${first?'v1811c-anim':''}"><div class="v1811c-fan n${show.length}">${show.map((c,k)=>`<button class="v1811c-fc" style="--k:${k}" data-a="v1811cPack" data-ids="${esc(c.id)}" aria-label="Reveal ${esc(c.nm)}'s ${V1811C.name[c.rar]} card">${v1811cCardHTML(c,{w:118,back:true})}</button>`).join('')}</div>
+    <div class="v1811c-pinfo"><span class="eyebrow">${esc(title)}</span><b>${cards.length===1?esc(cards[0].nm):`${cards.length} new cards`}</b><div class="v1811c-chips">${chips}</div><small class="muted">${cards.length===1?`${esc(V1811C.finish[cards[0].rar])}${cards[0].feat?' · '+esc(cards[0].feat):''} · rating ${fmtRt(cards[0].rt)}`:'Added to your Card Binder'}</small>
+    <div class="v1811c-pbtn"><button class="btn sm" data-a="v1811cPack" data-ids="${esc(ord.slice(-5).map(c=>c.id).join(','))}">${cards.length>1?'Open pack':'Reveal card'}</button><button class="btn sm ghost" data-a="v1811cGoBinder">Card binder</button></div></div></div>`; }
+const fmtRt=v=>Number(v||0).toFixed(1);
+A.v1811cGoBinder=()=>{ App.modal=null; A.go({dataset:{r:'cards'}}); };
+if(MODALS.results){ const _v1811cRes=MODALS.results; MODALS.results=m=>{ const h=_v1811cRes(m); try{ const C=App.C; if(!m.v1811c){ const ids=(m.ids||[]).map(id=>'K'+id); v1811cTake(ids); m.v1811c=ids.filter(id=>v1811cById(id)); }
+    const cards=m.v1811c.map(v1811cById).filter(Boolean); if(!cards.length) return h; const add=v1811cPackHTML(m,cards,'Player of the Match');
+    const i=h.indexOf('<div class="mbody">'); return i<0?h:h.slice(0,i+19)+add+h.slice(i+19); }catch(e){ console.error(e); return h; } }; }
+if(MODALS.simSummary){ const _v1811cSum=MODALS.simSummary; MODALS.simSummary=m=>{ const h=_v1811cSum(m); try{ if(!m.v1811c) m.v1811c=v1811cTake(); const cards=m.v1811c.map(v1811cById).filter(Boolean); if(!cards.length) return h;
+    const add=v1811cPackHTML(m,cards,cards.length===1?'Player of the Match':'Player of the Match cards'); const i=h.lastIndexOf('<div class="mfoot">'); return i<0?h+add:h.slice(0,i).replace(/<\/div>$/,add+'</div>')+h.slice(i); }catch(e){ console.error(e); return h; } }; }
+
+/* ---------- Card Binder ---------- */
+ICON.cards='<rect x="7" y="3" width="12" height="16" rx="2"/><path d="M5 6.5v12A2.5 2.5 0 0 0 7.5 21H15"/><path d="M13 7.5l1 2 2.2.3-1.6 1.5.4 2.2-2-1-2 1 .4-2.2-1.6-1.5 2.2-.3z"/>';
+NAV_ICON.cards='cards'; TITLES.cards='Card Binder';
+if(typeof NAV_DESC!=='undefined') NAV_DESC.cards='Player of the Match cards';
+if(typeof TOPNAV!=='undefined'){ const g=TOPNAV.find(t=>t[0]==='squads'); if(g&&!g[3].includes('cards')) g[3].push('cards'); }
+{ const i=NAV.findIndex(x=>x[0]==='dev'); if(i>=0&&!NAV.some(x=>x[0]==='cards')) NAV.splice(i+1,0,['cards','Card Binder']); }
+if(typeof navBadges==='function'){ const _v1811cNB=navBadges; navBadges=function(C){ const b=_v1811cNB(C); try{ const n=C&&C.cards?C.cards.list.filter(c=>c.nw).length:0; if(n) b.cards=String(Math.min(n,99)); }catch(e){} return b; }; }
+
+function v1811cFilter(C,P){ let L=v1811cBox(C).list.slice(); if(P.yr) L=L.filter(c=>String(c.yr)===String(P.yr)); if(P.rar) L=L.filter(c=>c.rar===P.rar); if(P.lvl) L=L.filter(c=>c.lvl===P.lvl); if(P.pid) L=L.filter(c=>c.pid===P.pid);
+  const r=c=>V1811C.tiers.indexOf(c.rar); const so=P.sort||'new';
+  L.sort(so==='rar'?(a,b)=>r(b)-r(a)||b.rt-a.rt||b.n-a.n:so==='rt'?(a,b)=>b.rt-a.rt||r(b)-r(a)||b.n-a.n:(a,b)=>b.n-a.n); return L; }
+VIEWS.cards=()=>{ const C=App.C; const B=v1811cBox(C); const P=App.params||{}; const all=B.list; const s=Sx(C.userSid);
+  const by={}; for(const c of all) by[c.rar]=(by[c.rar]||0)+1; const players={}; for(const c of all){ const q=players[c.pid]||(players[c.pid]={pid:c.pid,nm:c.nm,n:0,best:'bronze',c}); q.n++; if(V1811C.tiers.indexOf(c.rar)>V1811C.tiers.indexOf(q.best)){ q.best=c.rar; } }
+  const years=[...new Set(all.map(c=>c.yr))].sort((a,b)=>b-a); const plist=Object.values(players).sort((a,b)=>b.n-a.n||a.nm.localeCompare(b.nm));
+  const chip=(k,v,label,extra)=>`<button class="v1811c-f ${String(P[k]||'')===String(v)?'on':''} ${extra||''}" data-a="v1811cF" data-k="${k}" data-v="${esc(v)}" aria-pressed="${String(P[k]||'')===String(v)}">${label}</button>`;
+  const sel=(k,arr,label)=>`<label class="v1811c-sel"><span class="lab">${label}</span><select data-c="v1811cSel" data-k="${k}" aria-label="${label}">${arr.map(([v,t])=>`<option value="${esc(v)}" ${String(P[k]||'')===String(v)?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
+  const stat=(t)=>`<div class="v1811c-sum-t v1811c-sum-${t}"><i></i><b>${by[t]||0}</b><span>${V1811C.name[t]}</span></div>`;
+  const head=`<section class="v1811c-head" style="--c1:${s.c1};--c2:${s.c2}"><div class="v1811c-hcrest">${logo(s,72)}</div><div class="v1811c-htxt"><span class="eyebrow">${esc(s.town)} · Player of the Match</span><h2>${all.length} card${all.length===1?'':'s'} collected</h2><p class="muted small">After every match of yours, at every level, the best-rated player earns a card. Hat tricks, bicycle kicks and final heroes are Legendary.</p></div><div class="v1811c-sum">${V1811C.tiers.slice().reverse().map(stat).join('')}</div></section>`;
+  if(!all.length) return head+`<div class="v1811c-empty"><div class="v1811c-ghost">${v1811cBackOnly(s)}</div><div><h3>The binder is empty</h3><p class="muted">Play or simulate your next match: the ${esc(s.town)} Player of the Match will be your first card.</p><button class="btn pri" data-a="playNext">${esc(typeof playLabel==='function'?playLabel(C):'Play next match')}</button></div></div>`;
+  const L=v1811cFilter(C,P); const n=Math.max(V1811C.page,+P.n||V1811C.page); const shown=L.slice(0,n);
+  const filters=`<div class="v1811c-filters"><div class="v1811c-chiprow" role="group" aria-label="Rarity">${chip('rar','','All')}${V1811C.tiers.slice().reverse().map(t=>chip('rar',t,`<i class="v1811c-dot v1811c-dot-${t}"></i>${V1811C.name[t]}`)).join('')}</div>
+    <div class="v1811c-selrow">${sel('yr',[['','All seasons'],...years.map(y=>[y,String(y)])],'Season')}${sel('lvl',[['','All levels'],['V','Varsity'],['JV','JV'],['MOD','Modified']],'Level')}${sel('pid',[['','All players'],...plist.map(q=>[q.pid,`${q.nm} (${q.n})`])],'Player')}${sel('sort',[['new','Newest first'],['rar','Rarity'],['rt','Rating']],'Sort')}</div></div>`;
+  const top=`<div class="v1811c-top"><span class="lab">Most cards</span><div class="v1811c-toprow">${plist.slice(0,8).map(q=>`<button class="v1811c-pc ${P.pid===q.pid?'on':''}" data-a="v1811cF" data-k="pid" data-v="${esc(P.pid===q.pid?'':q.pid)}"><span class="v1811c-pcf">${portraitSVG(v1811cPerson(q.c),34,{c1:s.c1,c2:s.c2})}</span><span class="grow"><b>${esc(q.nm)}</b><small><i class="v1811c-dot v1811c-dot-${q.best}"></i>best ${V1811C.name[q.best]}</small></span><em>${q.n}</em></button>`).join('')}</div></div>`;
+  const grid=shown.length?`<div class="v1811c-grid">${shown.map(c=>`<button class="v1811c-gc" data-a="v1811cView" data-id="${esc(c.id)}" aria-label="${esc(c.nm)}, ${V1811C.name[c.rar]} card, rating ${fmtRt(c.rt)}">${c.nw?'<span class="v1811c-new">New</span>':''}${v1811cCardHTML(c,{w:176,back:false})}</button>`).join('')}</div>${L.length>n?`<div class="v1811c-more"><button class="btn" data-a="v1811cF" data-k="n" data-v="${n+V1811C.page}">Show more (${L.length-n} left)</button></div>`:''}`
+    :`<div class="v1811c-empty sm"><div><h3>No cards match these filters</h3><button class="btn" data-a="v1811cReset">Clear filters</button></div></div>`;
+  if(all.some(c=>c.nw)) setTimeout(()=>{ if(App.route!=='cards'||!App.C) return; let ch=0; for(const c of v1811cBox(App.C).list) if(c.nw){ delete c.nw; ch=1; } if(ch) queueSave(); },400);
+  return head+filters+top+`<div class="v1811c-count small muted">${L.length} of ${all.length} cards</div>`+grid; };
+function v1811cBackOnly(s){ return `<div class="v1811c-card v1811c-r-silver v1811c-flipped" style="--w:150px;--c1:${s.c1};--c2:${s.c2};--c1d:${_mc(s.c1,'#000000',0.45)};--c1l:${_mc(s.c1,'#ffffff',0.12)}"><div class="v1811c-in"><div class="v1811c-face v1811c-back"><div class="v1811c-panel"><div class="v1811c-bpat"></div><div class="v1811c-bring">${logo(s,150)}</div><div class="v1811c-bword"><b>Touchline</b><small>Player of the Match</small></div></div></div></div></div>`; }
+A.v1811cF=el=>{ const k=el.dataset.k, v=el.dataset.v; const P={...(App.params||{})}; if(v===''||v==null) delete P[k]; else P[k]=v; if(k!=='n') delete P.n; App.params=P; App.keepScroll=true; render(); };
+CH.v1811cSel=el=>A.v1811cF({dataset:{k:el.dataset.k,v:el.value}});
+A.v1811cReset=()=>{ App.params={}; render(); };
+A.v1811cView=el=>{ const C=App.C; const P=App.route==='cards'?App.params||{}:{}; const ids=App.route==='cards'?v1811cFilter(C,P).map(c=>c.id):(el.dataset.ids||'').split(',').filter(Boolean);
+  App.modal={type:'v1811cCard',id:el.dataset.id,ids:ids.length?ids:[el.dataset.id],back:App.modal&&App.modal.type!=='v1811cCard'?App.modal:(App.modal&&App.modal.back)||null,an:1}; renderModal(); };
+A.v1811cStep=el=>{ const m=App.modal; if(!m) return; const i=m.ids.indexOf(m.id); const j=i+(+el.dataset.d); if(j<0||j>=m.ids.length) return; m.id=m.ids[j]; m.an=1; m.fl=0; renderModal(); };
+A.v1811cFlip=()=>{ const m=App.modal; if(!m) return; m.fl=!m.fl; m.an=0; const el=document.querySelector('.v1811c-det .v1811c-card'); if(el) el.classList.toggle('v1811c-flipped',!!m.fl); else renderModal(); };
+MODALS.v1811cCard=m=>{ const C=App.C; const c=v1811cById(m.id); if(!c) return modalShell('<h2>Card</h2>','<p class="muted">This card is no longer in the binder.</p>','<button class="btn" data-a="closeModal">Close</button>');
+  const an=m.an; m.an=0; const i=m.ids.indexOf(c.id); const O=Sx(c.opp); const p=findPerson(C,c.pid); const all=v1811cBox(C).list.filter(x=>x.pid===c.pid);
+  const tally=V1811C.tiers.slice().reverse().map(t=>{ const k=all.filter(x=>x.rar===t).length; return k?`<span class="v1811c-chip v1811c-chip-${t}">${k} ${V1811C.name[t]}</span>`:''; }).join('');
+  const st=v1811cStats(c).map(([k,v])=>`<div><b>${v||0}</b><span>${k}</span></div>`).join('');
+  const body=`<div class="v1811c-det"><div class="v1811c-dstage ${an?'v1811c-anim':''}" data-v1811c-tilt>${v1811cCardHTML(c,{w:280,cls:m.fl?'v1811c-flipped':''})}</div>
+    <div class="v1811c-dinfo"><span class="eyebrow">${esc(V1811C.finish[c.rar])} · card ${c.n}</span><h3>${esc(c.nm)}</h3><p class="muted small">${esc(c.pos||'')} · #${esc(c.num==null?'':c.num)} · ${esc(LVL_NAME[c.lvl]||c.lvl)}${p?'':' · graduated'}</p>
+      <div class="v1811c-dline"><b class="v1811c-res v1811c-res-${c.res}">${c.res}</b> ${c.us}–${c.th}${c.pk?` (${c.pk[0]}–${c.pk[1]} pens)`:''} ${c.home?'vs':'at'} ${O?esc(O.town):''}<small>${esc(v1811cRound(c))} · ${c.yr}</small></div>
+      ${c.feat?`<div class="v1811c-feat">${esc(c.feat)}</div>`:''}
+      <div class="v1811c-dst"><div><b>${fmtRt(c.rt)}</b><span>RTG</span></div>${st}</div>
+      <div class="v1811c-dtally"><span class="lab">His cards (${all.length})</span><div class="v1811c-chips">${tally}</div></div>
+      <div class="v1811c-dbtn"><button class="btn sm" data-a="v1811cFlip">Flip card</button>${C.fixtures[c.fid]?`<button class="btn sm" data-a="openFixture" data-id="${esc(c.fid)}">Match report</button>`:''}${p||C.alumni[c.pid]?`<button class="btn sm" data-a="openPlayer" data-id="${esc(c.pid)}">Profile</button>`:''}</div></div></div>`;
+  const foot=`<button class="btn" data-a="v1811cStep" data-d="-1" ${i<=0?'disabled':''} aria-label="Previous card">‹ Prev</button><span class="v1811c-pg small muted">${i+1} / ${m.ids.length}</span><button class="btn" data-a="v1811cStep" data-d="1" ${i>=m.ids.length-1?'disabled':''} aria-label="Next card">Next ›</button><button class="btn pri" data-a="closeModal">Close</button>`;
+  return modalShell(`<h2>${V1811C.name[c.rar]} card</h2>`,body,foot,'wide v1811c-modal'); };
+/* tilt: the detail card follows the pointer, and the foil follows the light */
+document.addEventListener('pointermove',e=>{ const st=e.target&&e.target.closest&&e.target.closest('[data-v1811c-tilt]'); if(!st||reducedMotion()) return; const card=st.querySelector('.v1811c-card'); if(!card) return; const r=card.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width-0.5, y=(e.clientY-r.top)/r.height-0.5; card.style.setProperty('--rx',(-y*14).toFixed(2)+'deg'); card.style.setProperty('--ry',(x*18).toFixed(2)+'deg'); card.style.setProperty('--mx',((x+0.5)*100).toFixed(1)+'%'); card.classList.add('v1811c-tilting'); },{passive:true});
+document.addEventListener('pointerout',e=>{ const st=e.target&&e.target.closest&&e.target.closest('[data-v1811c-tilt]'); if(!st||(e.relatedTarget&&st.contains(e.relatedTarget))) return; const card=st.querySelector('.v1811c-card'); if(card){ card.style.removeProperty('--rx'); card.style.removeProperty('--ry'); card.classList.remove('v1811c-tilting'); } },{passive:true});
+
+/* player profile: his cards */
+if(MODALS.player){ const _v1811cMP=MODALS.player; MODALS.player=m=>{ const h=_v1811cMP(m); try{ if((m.tab||'overview')!=='overview'||!App.C) return h; const cards=v1811cBox(App.C).list.filter(c=>c.pid===m.id); if(!cards.length) return h;
+    const ord=cards.slice().sort((a,b)=>V1811C.tiers.indexOf(b.rar)-V1811C.tiers.indexOf(a.rar)||b.rt-a.rt).slice(0,6); const ids=ord.map(c=>c.id).join(',');
+    const sec=`<div class="v1811c-mini"><div class="v1811c-mhd"><span class="eyebrow">Player of the Match cards · ${cards.length}</span><button class="link" data-a="v1811cF2" data-pid="${esc(m.id)}">Open in binder</button></div><div class="v1811c-mrow">${ord.map(c=>`<button class="v1811c-gc" data-a="v1811cView" data-id="${esc(c.id)}" data-ids="${esc(ids)}" aria-label="${esc(V1811C.name[c.rar])} card, ${esc(v1811cRound(c))} ${c.yr}">${v1811cCardHTML(c,{w:96,back:false})}</button>`).join('')}</div></div>`;
+    const i=h.lastIndexOf('<div class="mfoot">'); return i<0?h+sec:h.slice(0,i).replace(/<\/div>$/,sec+'</div>')+h.slice(i); }catch(e){ console.error(e); return h; } }; }
+A.v1811cF2=el=>{ App.modal=null; A.go({dataset:{r:'cards',p:JSON.stringify({pid:el.dataset.pid})}}); };
 
 </script>
