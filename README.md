@@ -49,4 +49,4 @@ Code layout:
 - `js/screens.js`: home, map, shop.
 - `js/ui.js`: game flow, popups, HUD.
 
-See `PLAN.md` for the update plan.
+See `PLAN.md` for the original update plan and `PLAN-v3.md` for the next big update. Test tools live in `tools/`.
