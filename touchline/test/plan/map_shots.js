@@ -27,7 +27,7 @@ const SEED=process.argv[3]||'map27';
     /* the Overview teaser */
     await go('office'); await page.evaluate(()=>{ const t=document.querySelector('.v1812m-tz'); if(t) t.scrollIntoView({block:'center'}); }); await page.waitForTimeout(400); await page.screenshot({path:S('05-overview-teaser')});
     await page.evaluate(()=>window.scrollTo(0,0)); await page.waitForTimeout(150); await page.screenshot({path:S('05b-overview')});
-    if(dev==='desktop'){
+    {
       /* a derby: schedule, matchday, preview, the broadcast intro */
       const d=await page.evaluate(()=>{ const C=App.C, u=C.userSid, g=v1812mGeo(C); const dd=Object.values(g.derby).find(x=>x.a===u||x.b===u); const o=dd.a===u?dd.b:dd.a; const f=Object.values(C.fixtures).find(f=>f.lvl==='V'&&f.comp==='reg'&&f.st==='s'&&((f.h===u&&f.a===o)||(f.a===u&&f.h===o)))||Object.values(C.fixtures).find(f=>f.lvl==='V'&&f.comp==='reg'&&((f.h===u&&f.a===o)||(f.a===u&&f.h===o))); C.phase='regular'; C.md=f.rd; return {fid:f.id}; });
       await go('office'); await page.screenshot({path:S('06-derby-overview')});
@@ -46,6 +46,6 @@ const SEED=process.argv[3]||'map27';
       await p2.waitForTimeout(500); await p2.screenshot({path:S('13-camp')});
       await p2.evaluate(()=>{ App.route='hof'; render(); }); await p2.waitForTimeout(400); await p2.screenshot({path:S('14-halloffame')});
       await p2.evaluate(()=>{ App.route='countymap'; render(); }); await p2.waitForTimeout(2500); await p2.screenshot({path:S('15-roadwarrior')});
-      await c2.close(); } else await ctx.close();
+      await c2.close(); }
   }
   console.log(errs.length?errs.join('\n'):'no page errors'); await b.close(); })();

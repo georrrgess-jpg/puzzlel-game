@@ -66,7 +66,7 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   const R=await page.evaluate(()=>{ const C=App.C, B=C.map, st=v1812mState(C), g=v1812mGeo(C), u=C.userSid; const clone=JSON.stringify(B.y), done=Object.keys(B.done).length, rw=JSON.stringify(B.rw); const nQual=Object.values(C.fixtures).filter(f=>v1812mQual(C,f)).length;
     const sums=g.towns.every(t=>Math.abs(Object.values(st.S[t.id]).reduce((a,b)=>a+b,0)-1)<1e-9); const held=st.held.every(t=>Math.round((st.S[t][u]||0)*100)>=50)&&g.towns.filter(t=>!st.held.includes(t.id)).every(t=>(st.S[t.id][u]||0)<V1812M.HELD);
     const top=C.league.map(id=>[id,g.towns.filter(t=>(st.S[t.id][id]||0)>=V1812M.HELD).length]).sort((a,b)=>b[1]-a[1]);
-    return {clone,done,nQual,rw,sums,held,reach:st.reach,delta:st.delta,topHeld:top[0][1],phase:C.phase,newsMap:C.news.filter(n=>n.type==='map').length}; });
+    return {clone,done,nQual,rw,sums,held,reach:st.reach,delta:st.delta,topHeld:top[0][1],phase:C.phase,newsMap:C.news.filter(n=>n.type==='county').length}; });
   console.log(JSON.stringify({...R,clone:R.clone.length,rw:undefined}));
   ok(R.done===R.nQual&&R.nQual===56, `every finished league game is in the map (${R.done} of ${R.nQual})`);
   ok(R.sums&&R.held, `after a season the shares add up and "held" means 50% or more (reach ${R.reach}, ${R.delta>=0?'+':''}${R.delta} this season)`);
@@ -78,9 +78,9 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   ok(RB.same&&RB.rwSame&&RB.n, 'rebuilding the map from C.fixtures gives exactly the incremental state');
   ok(RB.rev, 'applying the same games in reverse order gives the same points (order independent)');
   /* a save from before the map: no C.map, the first open rebuilds it from the results, silently */
-  const OLD=await page.evaluate(()=>{ const C=App.C; v1812mRebuild(C); const st0=v1812mState(C); const held0=st0.held.slice(), reach0=st0.reach, y0=JSON.stringify(C.map.y); const news0=C.news.filter(n=>n.type==='map').length;
+  const OLD=await page.evaluate(()=>{ const C=App.C; v1812mRebuild(C); const st0=v1812mState(C); const held0=st0.held.slice(), reach0=st0.reach, y0=JSON.stringify(C.map.y); const news0=C.news.filter(n=>n.type==='county').length;
     const raw=JSON.parse(JSON.stringify(careerForSave(C))); delete raw.map; const M2=migrate(raw); const st=v1812mState(M2);
-    const out={has:!!M2.map&&M2.map.v===1,sameY:JSON.stringify(M2.map.y)===y0,held:JSON.stringify(st.held)===JSON.stringify(held0),reach:st.reach===reach0,news:M2.news.filter(n=>n.type==='map').length===news0,seen:!!M2.map.seen&&!!M2.map.seen.S,idem:(()=>{ const a=JSON.stringify(M2.map.y); migrate(M2); return a===JSON.stringify(M2.map.y); })()};
+    const out={has:!!M2.map&&M2.map.v===1,sameY:JSON.stringify(M2.map.y)===y0,held:JSON.stringify(st.held)===JSON.stringify(held0),reach:st.reach===reach0,news:M2.news.filter(n=>n.type==='county').length===news0,seen:!!M2.map.seen&&!!M2.map.seen.S,idem:(()=>{ const a=JSON.stringify(M2.map.y); migrate(M2); return a===JSON.stringify(M2.map.y); })()};
     V1812M.stC=null; V1812M.stKey=''; return out; });
   ok(OLD.has&&OLD.sameY&&OLD.held&&OLD.reach, 'an old save (no C.map) rebuilds the identical map from its results on first open');
   ok(OLD.news&&OLD.seen&&OLD.idem, 'the migration adds no news, starts with the map already seen (no replay), and is idempotent');
@@ -149,9 +149,9 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
     const f=Object.values(C.fixtures).find(f=>f.lvl==='V'&&f.comp==='reg'&&f.h===u&&f.a===o); C.pre.rd=3; C.phase='regular'; C.md=f.rd; App.route='office'; render();
     return {fid:f.id,o,mi:d.mi,heated:C.rivals.heated===o,town:C.schools[o].town}; });
   ok(await page.evaluate(id=>{ const f=App.C.fixtures[id]; return rivalChip(f).includes('Derby')&&resultRow(f).includes('v1812m-dtag')&&v17GameRow(App.C,f).includes('v1812m-dpill'); },D.fid), `a derby game (${D.town}, ${D.mi} mi) carries a Derby tag in the chips, schedule rows and results`);
-  const NW=await page.evaluate(()=>App.C.news.filter(n=>n.type==='map'&&/Derby|derby|road/.test(n.text)).map(n=>n.text));
+  const NW=await page.evaluate(()=>App.C.news.filter(n=>n.type==='county'&&/Derby|derby|road/.test(n.text)).map(n=>n.text));
   ok(NW.length===1&&/miles/.test(NW[0]), `derby week puts one hype item on the Newswire: "${NW[0]}"`);
-  await page.evaluate(()=>{ render(); render(); }); ok(await page.evaluate(()=>App.C.news.filter(n=>n.type==='map'&&/miles/.test(n.text)).length)===1, 'the hype is posted once per game');
+  await page.evaluate(()=>{ render(); render(); }); ok(await page.evaluate(()=>App.C.news.filter(n=>n.type==='county'&&/miles/.test(n.text)).length)===1, 'the hype is posted once per game');
   await page.evaluate(()=>{ App.route='schedule'; App.params={}; render(); }); await page.waitForTimeout(200); ok(await page.evaluate(()=>document.querySelectorAll('.v1812m-dpill,.v1812m-dtag').length>0), 'the schedule shows derby tags');
   await page.evaluate(()=>{ App.route='matchday'; App.params={}; render(); }); await page.waitForTimeout(200); ok(await page.evaluate(()=>[...document.querySelectorAll('.mc-game')].some(e=>e.querySelector('.v1812m-dtag'))), 'the Matchday Center marks derby games');
   await page.evaluate(id=>{ App.route='office'; render(); App.modal={type:'fixture',id}; renderModal(); },D.fid); await page.waitForTimeout(400); ok(await page.evaluate(()=>!!document.querySelector('.modal .v1812m-chip')), 'the match preview shows the Derby chip with the miles');
@@ -160,6 +160,13 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   const intro=await page.waitForSelector('#lv-intro .lvi',{timeout:5000}).then(()=>page.evaluate(()=>({txt:document.querySelector('#lv-intro .lvi-top').textContent,sub:!!document.querySelector('#lv-intro .v1812m-lvisub'),cls:document.querySelector('#lv-intro .lvi').classList.contains('v1812m-derby')}))).catch(()=>null);
   ok(intro&&(/DERBY/.test(intro.txt)||(/RIVALRY NIGHT/.test(intro.txt)&&D.heated))&&intro.sub&&intro.cls, `the broadcast intro says ${intro&&/DERBY/.test(intro.txt)?'DERBY':'RIVALRY NIGHT'} with the derby road line`);
   await page.evaluate(()=>{ try{ liveStop&&liveStop(); }catch(e){} });
+  /* a derby that is not the heated rivalry gets the DERBY caption */
+  { const old=page; page=await open('map27'); await old.context().close(); }
+  const D2=await page.evaluate(()=>{ const C=App.C, u=C.userSid, g=v1812mGeo(C); const d=Object.values(g.derby).find(x=>x.a===u||x.b===u); const o=d.a===u?d.b:d.a; const other=C.league.find(id=>id!==u&&id!==o); C.rivals.heated=other; C.rivals.seasonal=C.league.find(id=>id!==u&&id!==o&&id!==other);
+    const f=Object.values(C.fixtures).find(f=>f.lvl==='V'&&f.comp==='reg'&&f.h===u&&f.a===o); C.pre.rd=3; C.phase='regular'; C.md=f.rd; App.route='office'; render(); return {fid:f.id,heated:isRivalry(C,f.h,f.a)}; });
+  await page.click('.cta [data-a="playNext"]'); await page.waitForTimeout(500); await page.click('[data-a="pvSpeed"][data-v="8"]').catch(()=>{}); await page.click('[data-a="kickoff"]');
+  const intro2=await page.waitForSelector('#lv-intro .lvi',{timeout:5000}).then(()=>page.evaluate(()=>({txt:document.querySelector('#lv-intro .lvi-top').textContent,sub:document.querySelector('#lv-intro .v1812m-lvisub')&&document.querySelector('#lv-intro .v1812m-lvisub').textContent}))).catch(()=>null);
+  ok(D2.heated===null&&intro2&&/DERBY/.test(intro2.txt)&&!/RIVALRY/.test(intro2.txt)&&/Derby road/.test(intro2.sub||''), `a plain derby opens with the DERBY caption and "${intro2&&intro2.sub}"`);
 
   /* ---------- Road Warrior ---------- */
   { const old=page; page=await open('map27'); await old.context().close(); }
@@ -176,10 +183,10 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   { const old=page; page=await open('map27'); await old.context().close(); } await page.evaluate(`(${SEASON})()`);
   const CP=await page.evaluate(()=>{ const C=App.C, u=C.userSid; const st=v1812mState(C), g=v1812mGeo(C); const K=campEnsure(C); const held=st.held; const slots=v1812mCampSlots(C,st,g);
     const counts={}; for(const x of K.prospects) if(x.tid) counts[x.tid]=(counts[x.tid]||0)+1; const heldKids=K.prospects.filter(x=>x.held);
-    const quota=(t)=>t===u?3:2; const okQuota=held.every(t=>(counts[t]||0)===Math.min(quota(t),slots.filter(s=>s===t).length)||K.prospects.length<slots.length+0)||heldKids.length===Math.min(slots.length,K.prospects.length);
+    const quota=(t)=>v1812mQuota(C,st,t); const okQuota=held.every(t=>(counts[t]||0)<=quota(t))&&(counts[u]||0)===Math.min(3,K.prospects.length)&&held.every(t=>quota(t)===(t===u?3:st.S[t][u]>=0.8?3:2))&&heldKids.length===Math.min(slots.length,K.prospects.length);
     return {phase:C.phase,n:K.prospects.length,held:held.length,slots:slots.length,heldKids:heldKids.length,okQuota,noRival:heldKids.every(x=>!x.rival),labels:K.prospects.filter(x=>x.tid).every(x=>x.feeder===x.town+' Middle'&&g.tmap[x.tid]),homeKids:K.prospects.filter(x=>x.tid===u).length,sig:JSON.stringify(K.prospects.map(x=>[x.p.id,x.tid,x.stars,x.know,x.rival]))}; });
   console.log(JSON.stringify({...CP,sig:CP.sig.length}));
-  ok(CP.phase==='offseason'&&CP.n>=8&&CP.heldKids===Math.min(CP.slots,CP.n)&&CP.okQuota, `the camp's ${CP.n} prospects: ${CP.heldKids} come from the ${CP.held} towns you hold (three from home, two from each other town)`);
+  ok(CP.phase==='offseason'&&CP.n>=8&&CP.heldKids===Math.min(CP.slots,CP.n)&&CP.okQuota, `the camp's ${CP.n} prospects: ${CP.heldKids} come from the ${CP.held} towns you hold (three from home, two from each other town, three where your grip is 80%+)`);
   ok(CP.noRival&&CP.labels&&CP.homeKids>=1, 'prospects from held towns have no rival bids and a hometown middle school');
   await page.evaluate(()=>{ App.route='camp'; render(); }); await page.waitForTimeout(300);
   const CU=await page.evaluate(()=>({from:[...document.querySelectorAll('.v1812m-from')].map(e=>e.textContent),bar:!!document.querySelector('.v1812m-campbar'),cards:document.querySelectorAll('.pros .pro').length}));
