@@ -8,9 +8,9 @@ const OUT=path.resolve(process.argv[2]||path.join(__dirname,'../shots/v1812/game
     await page.goto(DIST); await page.waitForTimeout(500);
     await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Shot Coach'); await page.fill('#nc-seed','gd-sheet'); await page.click('[data-a="ncNext"]'); await page.waitForTimeout(200); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(800);
     await page.evaluate(n=>{ const C=App.C; for(let i=0;i<n;i++){ simRound(C); try{ advance(C); }catch(e){} } App.route='office'; render(); },ROUNDS);
-    if(theme==='gold') await page.evaluate(()=>{ try{ PREFS.theme='gold'; applyTheme(); }catch(e){} });
-    if(theme==='light') await page.evaluate(()=>{ try{ PREFS.theme='custom'; PREFS.custom={...(PREFS.custom||{}),bg:'#f3efe6',surface:'#ffffff',text:'#14110d',accent:'#d9930d'}; applyTheme(); }catch(e){} });
-    await page.waitForTimeout(1200); await page.screenshot({path:path.join(OUT,`ui-${name}-office.png`),fullPage:false});
+    if(theme==='gold') await page.evaluate(()=>{ PREFS.theme={preset:'gold'}; applyTheme(); });
+    if(theme==='light') await page.evaluate(()=>{ PREFS.theme={custom:{bg:'#f3efe6',surface:'#ffffff',text:'#14110d',accent:'#d9930d',accent2:'#2a7f62'}}; applyTheme(); });
+    await page.waitForTimeout(1200); await page.evaluate(()=>{ const c=document.querySelector('.v1812g-off'); if(c) c.scrollIntoView({block:'center'}); }); await page.waitForTimeout(1500); await page.screenshot({path:path.join(OUT,`ui-${name}-office.png`),fullPage:false}); await page.evaluate(()=>window.scrollTo(0,0));
     await page.evaluate(()=>{ App.route='gameday'; App.params={}; render(); }); await page.waitForFunction(()=>document.querySelector('.v1812g-cv'),null,{timeout:60000}); await page.waitForTimeout(2500);
     await page.screenshot({path:path.join(OUT,`ui-${name}-route.png`),fullPage:name.startsWith('phone')});
     if(name==='desk'){ await page.evaluate(()=>A.v1812gTpl({dataset:{k:'final'}})); await page.waitForTimeout(2500); await page.evaluate(()=>A.v1812gStyle({dataset:{v:'chrome'}})); await page.waitForTimeout(2500); await page.screenshot({path:path.join(OUT,`ui-${name}-final-chrome.png`)}); }

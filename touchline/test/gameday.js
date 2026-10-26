@@ -97,6 +97,11 @@ const pngSize=buf=>({sig:buf.slice(0,8).toString('hex'),w:buf.readUInt32BE(16),h
     const stat=v1812gStats(cv); return {two:r,thrown:{r3d:c2.r3d,n:v1812gOpaque(c2.cv)},poster:{w:cv.width,h:cv.height,meta:cv._gd,stat}}; });
   ok(!two.two.r3d&&two.two.n>3000, 'the 2-D figure fallback draws the player when 3-D is switched off ('+two.two.n+' px)');
   ok(!two.thrown.r3d&&two.thrown.n>3000&&two.poster.w===1080&&two.poster.h===1350&&two.poster.stat.colors>300, 'when the 3-D capture throws, a full poster is still made with the 2-D figure');
+  /* the context is lost while posters are being made: the renderer is dropped, later posters use the 2-D figure */
+  const lost=await page.evaluate(async()=>{ const C=App.C; const p=Object.values(C.players).find(q=>q.sid===C.userSid&&q.pos!=='GK'); const star=v1812gStar(C,p.id,null); V1812G.cuts.clear(); V1812G.fail=false; const c1=await v1812gCutout(star,'fist',480,{}); const had=!!V1812G.P&&c1.r3d;
+    V1812G.P.canvas.dispatchEvent(new Event('webglcontextlost',{cancelable:true})); const after={P:!!V1812G.P,fail:V1812G.fail}; V1812G.cuts.clear(); const c2=await v1812gCutout(star,'fist',480,{}); const M=v1812gModel(C,v1812gCur(C)); const cv=await v1812gPoster(M,'chrome',{fmt:'square'}); V1812G.fail=false; V1812G.cuts.clear();
+    return {had,after,c2:{r3d:c2.r3d,n:v1812gOpaque(c2.cv)},poster:{w:cv.width,h:cv.height,colors:v1812gStats(cv).colors},alive:window.__gl.filter(x=>!x.isContextLost()).length}; });
+  ok(lost.had&&!lost.after.P&&lost.after.fail&&!lost.c2.r3d&&lost.c2.n>3000&&lost.poster.h===1080&&lost.poster.colors>250&&lost.alive===0, 'a lost WebGL context drops the renderer and posters carry on with the 2-D figure ('+JSON.stringify({after:lost.after,r3d:lost.c2.r3d,alive:lost.alive})+')');
   /* idle: the renderer is released */
   await page.waitForTimeout(11500);
   const idle=await page.evaluate(()=>({alive:window.__gl.filter(x=>!x.isContextLost()).length,P:!!V1812G.P,made:window.__gl.length}));
@@ -131,7 +136,7 @@ const pngSize=buf=>({sig:buf.slice(0,8).toString('hex'),w:buf.readUInt32BE(16),h
   ok(await page.evaluate(()=>V1812G.ui.cur.height===1080&&document.querySelector('.v1812g-cvbox').classList.contains('sq')), 'the square format option');
   await page.click('[data-a="v1812gFmt"][data-v="portrait"]'); await page.waitForFunction(()=>V1812G.ui.cur&&V1812G.ui.cur._gd.fmt==='portrait',null,{timeout:60000});
   await page.click('.v1812g-chip[data-v="chrome"]'); await page.waitForFunction(()=>V1812G.ui.cur&&V1812G.ui.cur._gd.style==='chrome',null,{timeout:60000}); await page.waitForTimeout(3000);
-  const th=await page.evaluate(()=>({n:document.querySelectorAll('.v1812g-th:not(.v1812g-more)').length,ready:document.querySelectorAll('canvas.v1812g-thc.ready').length,feed:App.C.gd.feed.length}));
+  const th=await page.evaluate(()=>({n:document.querySelectorAll('.v1812g-th:not(.v1812g-more)').length,ready:document.querySelectorAll('.v1812g-strip canvas.v1812g-thc.ready').length,nb:document.querySelectorAll('.v1812g-nb canvas.v1812g-thc').length,feed:App.C.gd.feed.length}));
   ok(th.n===Math.min(12,th.feed)&&th.ready===th.n, `the Program feed strip shows ${th.n} thumbnails, all drawn`);
   await page.click('.v1812g-th:nth-child(2)'); await page.waitForTimeout(300); ok(await page.evaluate(()=>{ const e=App.C.gd.feed.slice().sort((a,b)=>b.t-a.t)[1]; return V1812G.ui.sel===e.id&&document.querySelector('.v1812g-th.on').dataset.id===e.id; }), 'a feed thumbnail opens that poster in the big preview');
   await page.waitForFunction(()=>V1812G.ui.cur&&V1812G.ui.curE&&V1812G.ui.curE.id===V1812G.ui.sel&&document.querySelector('#v1812g-cv canvas'),null,{timeout:60000});
@@ -154,7 +159,8 @@ const pngSize=buf=>({sig:buf.slice(0,8).toString('hex'),w:buf.readUInt32BE(16),h
   /* downloads blocked (the artifact view without the downloads capability): the image opens so it can be pressed and held */
   await page.evaluate(()=>{ window.claude={use:async()=>null}; });
   await page.click('[data-a="v1812gSave"]'); await page.waitForSelector('.v1812g-ov img:not([hidden])',{timeout:20000});
-  const vw=await page.evaluate(async()=>{ const im=document.querySelector('.v1812g-ov img'); if(!im.complete) await new Promise(r=>{ im.onload=r; setTimeout(r,3000); }); return {blob:im.src.startsWith('blob:'),w:im.naturalWidth,h:im.naturalHeight}; });
+  await page.waitForFunction(()=>{ const im=document.querySelector('.v1812g-ov img'); return im&&im.naturalWidth>0; },null,{timeout:20000}).catch(()=>{});
+  const vw=await page.evaluate(()=>{ const im=document.querySelector('.v1812g-ov img'); return {blob:im.src.startsWith('blob:'),w:im.naturalWidth,h:im.naturalHeight}; });
   ok(vw.blob&&vw.w===1080&&vw.h===1350, 'when saving is not available, "View full size" opens the poster as an image to press and hold ('+vw.w+' x '+vw.h+')');
   await page.keyboard.press('Escape'); await page.waitForTimeout(200); ok(await page.evaluate(()=>!document.querySelector('.v1812g-ov')), 'Esc closes the viewer');
   await page.evaluate(()=>{ delete window.claude; });
@@ -188,6 +194,18 @@ const pngSize=buf=>({sig:buf.slice(0,8).toString('hex'),w:buf.readUInt32BE(16),h
   ok(mig.has&&mig.on===true&&mig.st==='varsity'&&mig.feed===0&&mig.pins===0, 'an old save (no gd) migrates to the defaults');
   const bf=await page.evaluate(()=>{ const C=App.C; const gd=C.gd; C.gd=undefined; delete C.gd; V1812G.syncSig=null; v1812gSync(C); const B=C.gd; return {fin:B.feed.filter(e=>e.k==='final').length,seen:B.feed.every(e=>!e.nw||e.k!=='final'),gd:B.feed.filter(e=>e.k==='gameday').length,bf:B.bf}; });
   ok(bf.fin>=1&&bf.fin<=4&&bf.seen&&bf.gd>=1, `an old career gets its last results as quiet Final posters (${bf.fin}) and the next Gameday (${bf.gd})`);
+
+  /* ---- a fresh career: templates with nothing to show yet, previews from real data, extra tags ---- */
+  const ctx2=await b.newContext({viewport:{width:1280,height:900}}); const p2=await ctx2.newPage(); p2.on('pageerror',e=>errs.push('fresh: '+e.message)); await career(p2,'gd-t2');
+  await p2.evaluate(()=>{ App.route='gameday'; App.params={}; render(); V1812G.ui.tpl='final'; V1812G.ui.sel=null; V1812G.ui.cur=null; render(); }); await p2.waitForTimeout(600);
+  const fr=await p2.evaluate(()=>({none:!!document.querySelector('.v1812g-none'),save:document.querySelector('[data-a="v1812gSave"]').disabled,prev:{final:v1812gPreviewEntry(App.C,'final'),potw:v1812gPreviewEntry(App.C,'potw'),mile:v1812gPreviewEntry(App.C,'milestone'),sen:!!v1812gPreviewEntry(App.C,'senior'),gd:!!v1812gPreviewEntry(App.C,'gameday')},off:/Posters are made automatically|feed has/.test(v1812gOfficeCard(App.C))}));
+  ok(fr.none&&fr.save&&fr.prev.final===null&&fr.prev.potw===null&&fr.prev.mile===null, 'before the first result, Final / Player of the week / Milestone say there is nothing yet and Save is disabled');
+  ok(fr.prev.sen&&fr.prev.gd&&fr.off, 'Senior Night and Gameday still draw from the roster and fixtures; the Office card explains the feed');
+  await p2.evaluate(()=>{ V1812G.ui.tpl='senior'; V1812G.ui.sel=null; V1812G.ui.cur=null; render(); }); await p2.waitForFunction(()=>document.querySelector('.v1812g-cv'),null,{timeout:60000});
+  ok(await p2.evaluate(()=>/Preview/.test(document.getElementById('v1812g-title').textContent)&&V1812G.ui.cur._gd.k==='senior'&&!document.querySelector('[data-a="v1812gSave"]').disabled), 'a template with no entry yet shows a labelled preview from the real roster, and it can be saved');
+  const tg=await p2.evaluate(()=>{ const C=App.C; const f=userFixture(C); V1812G.tagHooks.push(()=>['RANKED 2']); const t=v1812gTags(C,f); const M=v1812gModel(C,{id:'GD:'+f.id,k:'gameday',fid:f.id,pid:v1812gStarFor(C,C.userSid,'V').id}); V1812G.tagHooks.length=0; return {t,m:M.tags}; });
+  ok(tg.t.includes('RANKED 2')&&tg.m.includes('RANKED 2'), 'other units can add tags to Gameday posters (V1812G.tagHooks)');
+  await p2.close(); await ctx2.close();
 
   /* ---- phone layout ---- */
   const ph=await ctx.newPage(); await ph.setViewportSize({width:390,height:844}); ph.on('pageerror',e=>errs.push('phone: '+e.message));
