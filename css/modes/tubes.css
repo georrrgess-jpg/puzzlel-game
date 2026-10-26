@@ -4,8 +4,12 @@
 .tube::before{content:'';position:absolute;top:-7px;left:-7px;right:-7px;height:8px;border-radius:6px;background:linear-gradient(180deg,#ffffff70,#ffffff28);box-shadow:0 2px 4px #0004}
 .tube::after{content:'';position:absolute;top:10px;bottom:16px;left:16%;width:13%;border-radius:99px;background:linear-gradient(180deg,#ffffff70,#ffffff10);pointer-events:none;z-index:2}
 .tube.sel{transform:translateY(-22px);box-shadow:inset 0 0 14px #ffffff18,0 0 0 2px var(--acc),0 18px 26px #0006}
-.tube.sel .seg.top{animation:segbob .5s ease-in-out infinite alternate}
-@keyframes segbob{to{transform:translateY(-4px);filter:brightness(1.25)}}
+/* selected tube: the whole same-colour run that will pour glows together and its mound heaves; no layer moves,
+   so the sand never separates (js/modes/tubes.js marks the run with .run) */
+.seg.run::after{content:'';position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;pointer-events:none;will-change:opacity;animation:runglow .55s ease-in-out infinite alternate}
+@keyframes runglow{to{opacity:.3}}
+.seg.run.top::before{transform-origin:50% 100%;animation:runheave .55s ease-in-out infinite alternate}
+@keyframes runheave{to{transform:translateY(-3px) scaleY(1.35)}}
 .tube.done{border-color:var(--good);box-shadow:0 0 22px #6be58599,inset 0 0 14px #ffffff18}
 .tube.done::before{top:-14px;left:8%;right:8%;height:15px;border-radius:5px 5px 3px 3px;background:linear-gradient(90deg,#8a5a2b,#d49a5c 40%,#a86d36);animation:cork .5s cubic-bezier(.3,1.8,.5,1) both;box-shadow:0 3px 0 #0005}
 @keyframes cork{from{transform:translateY(-40px) rotate(-30deg);opacity:0}}

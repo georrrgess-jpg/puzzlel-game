@@ -84,6 +84,10 @@ MAKERS.tubes=function({R,tier,board,api}){
       const key=t.join('')+(S.symbols?'s':''),fresh=lastNew&&lastNew.i===i?1400:lastGhost&&lastGhost.i===i?820:0;
       if(e._k!==key||fresh){e._k=key;buildSand(e,t,i);clearTimeout(e._st);if(fresh)e._st=setTimeout(()=>settle(e),FL_RM?0:fresh)}
       e.classList.toggle('sel',i===sel);
+      /* mark the top run of one colour (what a pour would move) on the selected tube */
+      const segs=e.querySelectorAll('.seg:not(.gone)');let run=0;
+      if(i===sel)while(run<t.length&&t[t.length-1-run]===t[t.length-1])run++;
+      segs.forEach((x,j)=>x.classList.toggle('run',j>=segs.length-run));
       e.classList.toggle('done',t.length===cap&&uniform(t));
       e.classList.remove('hint');e.removeAttribute('data-h');
       const can=sel>=0&&i!==sel&&canPour(tubes,sel,i)>0;
