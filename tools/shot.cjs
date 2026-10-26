@@ -40,6 +40,8 @@ const W = +process.env.W || 400, H = +process.env.H || 860;
     return false;
   };
   const hintMove = async (type) => {
+    // modes with an auto-solver (drag modes) expose puz._bot(): one solving step per call
+    if (await page.evaluate(() => !!(__game.cur && __game.cur.puz._bot))) { await page.evaluate(() => __game.cur.puz._bot()); await sleep(260); return }
     await page.evaluate(() => { document.querySelectorAll('.hint').forEach(e => e.classList.remove('hint')); __game.cur.puz.hint() });
     await sleep(80);
     if (type === 'tubes') {

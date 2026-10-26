@@ -141,3 +141,12 @@ const Music={
   }
 };
 document.addEventListener('visibilitychange',()=>{if(!AU.ctx)return;if(document.hidden)AU.ctx.suspend();else AU.ctx.resume()});
+
+/* ---------- sounds for the drag modes ---------- */
+sfx.tok=()=>{if(!ok())return;voice({f:210,dur:.1,vol:.3,slide:.5,slideT:.07});noise({dur:.035,vol:.1,type:'bandpass',f:1100,q:2})};
+sfx.lift=()=>{if(!ok())return;voice({f:520,dur:.08,type:'triangle',vol:.1,slide:1.4,slideT:.06})};
+sfx.bonk=()=>{if(!ok())return;voice({f:160,dur:.14,type:'triangle',vol:.16,slide:.6})};
+sfx.bloom=i=>{if(!ok())return;marimba(pent(i*2+4,60),.26);bell(pent(i*2+9,60),.1,.7,.05)};
+sfx.pluck=i=>{if(!ok())return;const f=pent((i||0)%10+7,60);voice({f,dur:.9,type:'triangle',vol:.16,verb:.45});voice({f:f*2,dur:.25,vol:.05,verb:.3})};
+sfx.sparkle=()=>{if(!ok())return;[88,91,95,100].forEach((n,i)=>bell(mtof(n),.05,.5,i*.045))};
+sfx.clear=n=>{if(!ok())return;for(let k=0;k<Math.min(4,n+1);k++)marimba(pent(k*2+5,60),.2,k*.07);noise({dur:.18,vol:.05,type:'highpass',f:6000,verb:.3})};

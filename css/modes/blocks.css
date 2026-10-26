@@ -1,0 +1,38 @@
+/* Block Garden board */
+.bgw{--bw:min(92vw,calc(100dvh - 470px),430px);width:var(--bw);display:flex;flex-direction:column;align-items:center;gap:10px}
+.bgp{width:100%;display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:13.5px;text-align:center;color:var(--text)}
+.bgpb{height:9px;border-radius:99px;background:#0000004a;overflow:hidden;box-shadow:inset 0 2px 3px #0006}
+.bgpb i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#b4f06a,#2ecc8f);box-shadow:inset 0 2px 0 #ffffff60;transition:width .5s cubic-bezier(.2,1.2,.4,1)}
+.bgb{width:100%;display:grid;gap:clamp(3px,1vw,5px);padding:clamp(6px,2vw,10px);border-radius:24px;touch-action:none;background:linear-gradient(165deg,#5a9c7022,#ffffff06 45%,#00000028)}
+.bz{position:relative;aspect-ratio:1;border-radius:20%;background:radial-gradient(circle at 50% 28%,#437f5c,#21503a 84%);box-shadow:inset 0 2px 5px #000a,inset 0 -1px 0 #ffffff16}
+/* blocks: glossy jelly in the piece colour */
+.bz.f,.bp{background:linear-gradient(160deg,color-mix(in srgb,var(--c) 62%,#fff),var(--c) 46%,color-mix(in srgb,var(--c) 76%,#000));
+  box-shadow:inset 0 -4px 0 #0003,inset 0 3px 0 #ffffff70,inset 3px 0 0 #ffffff22,0 2px 4px #0006}
+.bz.f::before,.bp::before{content:'';position:absolute;left:14%;right:14%;top:8%;height:32%;border-radius:50% 50% 40% 40%;background:linear-gradient(180deg,#ffffff7a,#ffffff10);pointer-events:none}
+.bp{position:relative;display:block;border-radius:20%}
+.bz.w{background:radial-gradient(circle at 50% 28%,#55792f,#2c4719 84%)}
+.bz.w::after{content:'🌿';position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--bw)/var(--n)*.56);filter:none;text-shadow:0 2px 2px #0007}
+/* drag preview: where the block lands, and which lines will bloom */
+.bz.pv{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px color-mix(in srgb,var(--acc) 80%,transparent),inset 0 2px 5px #000a;background-color:#fff}
+.bz.f.pv{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px var(--acc)}
+.bz.clr::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,#fff6,#fff2);box-shadow:inset 0 0 0 2px var(--acc),0 0 12px var(--acc);pointer-events:none}
+.bz.w.clr::after{content:'🌿';display:grid;place-items:center;background:#fff3;font-size:calc(var(--bw)/var(--n)*.56)}
+.bz.drop{animation:bgDrop .34s cubic-bezier(.3,1.7,.5,1)}
+@keyframes bgDrop{0%{transform:scale(1.35)}55%{transform:scale(.92)}100%{transform:none}}
+.bz.vanish{animation:bgVan .46s ease-in var(--d,0ms) both}
+@keyframes bgVan{0%{transform:none;opacity:1}30%{transform:scale(1.22) rotate(5deg);opacity:1}100%{transform:scale(0) rotate(-38deg);opacity:0}}
+.bz.ht{box-shadow:inset 0 0 0 2.5px #fff,0 0 12px #fff;animation:bgHt .55s ease-in-out infinite alternate}
+@keyframes bgHt{to{box-shadow:inset 0 0 0 3px #fff,0 0 22px var(--acc)}}
+.bz.ht::after{content:none}
+/* tray */
+.bgt{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bgs{height:clamp(66px,calc(var(--bw)*.27),108px);border-radius:20px;display:grid;place-items:center;touch-action:none;cursor:grab;
+  background:radial-gradient(circle at 50% 0,#ffffff12,#0000003f);box-shadow:inset 0 3px 8px #0008,inset 0 0 0 1px #ffffff12;transition:opacity .2s,transform .15s}
+.bgs.used{opacity:.35}
+.bgs.lifted .bpc{opacity:.25}
+.bgs.hint{animation:hint .6s ease-in-out infinite alternate}
+.bpc{display:grid;pointer-events:none;transition:opacity .15s}
+.bpc i{display:block}
+.bgg{position:fixed;left:0;top:0;z-index:72;pointer-events:none;will-change:transform}
+.bgg .bp{box-shadow:inset 0 -4px 0 #0003,inset 0 3px 0 #ffffff70,0 6px 10px #0007}
+@media (max-height:700px){.bgw{--bw:min(92vw,calc(100dvh - 392px),430px)}}

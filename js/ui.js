@@ -2,6 +2,10 @@
 /* ====================== game harness ====================== */
 let cur=null,meterKey='';
 const board=$('#board');
+/* Boards size themselves from the space that is actually free (whatever the phone), via --bw0 / --bh0 on #board.
+   #board is a flex:1 area, so its own size doesn't depend on what is inside it: no feedback loop. */
+(()=>{let w=0,h=0;const set=()=>{const nw=board.clientWidth,nh=board.clientHeight;if(nw===w&&nh===h||!nw)return;w=nw;h=nh;board.style.setProperty('--bw0',w+'px');board.style.setProperty('--bh0',h+'px')};
+  if(window.ResizeObserver)new ResizeObserver(set).observe(board);addEventListener('resize',set);addEventListener('orientationchange',()=>setTimeout(set,200))})();
 const api={
   commit(){cur.history.push(cur.puz.snap())},
   setInfo(h){$('#hudInfo').innerHTML=h;meterKey=''},

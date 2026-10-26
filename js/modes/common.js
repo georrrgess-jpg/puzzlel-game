@@ -38,3 +38,41 @@ const gfx={
   }
 };
 
+
+/* ---------- drag controller shared by the drag modes ----------
+   One pointer at a time, moves coalesced to once per frame, pointer capture so the finger can leave the element.
+   h.start(e) -> return false to ignore; h.move(x,y,e); h.end(x,y,e,moved); h.cancel().  Coordinates are client px. */
+function dragify(host,h){
+  let id=null,sx=0,sy=0,lx=0,ly=0,moved=false,raf=0,lastE=null;
+  host.style.touchAction='none';
+  const flush=()=>{raf=0;if(id!==null&&h.move)h.move(lx,ly,lastE)};
+  host.addEventListener('pointerdown',e=>{
+    if(id!==null||(e.pointerType==='mouse'&&e.button!==0))return;
+    if(h.start&&h.start(e)===false)return;
+    id=e.pointerId;sx=lx=e.clientX;sy=ly=e.clientY;moved=false;lastE=e;
+    try{host.setPointerCapture(id)}catch(_){}
+    e.preventDefault();
+    if(h.move)h.move(lx,ly,e);
+  });
+  host.addEventListener('pointermove',e=>{
+    if(e.pointerId!==id)return;
+    lx=e.clientX;ly=e.clientY;lastE=e;
+    if(!moved&&Math.hypot(lx-sx,ly-sy)>7)moved=true;
+    if(!raf)raf=requestAnimationFrame(flush);
+  });
+  const finish=(e,cancel)=>{
+    if(e.pointerId!==id)return;
+    cancelAnimationFrame(raf);raf=0;const pid=id;id=null;
+    try{host.releasePointerCapture(pid)}catch(_){}
+    if(cancel){if(h.cancel)h.cancel();return}
+    if(h.end)h.end(e.clientX,e.clientY,e,moved);
+  };
+  host.addEventListener('pointerup',e=>finish(e,false));
+  host.addEventListener('pointercancel',e=>finish(e,true));
+  host.addEventListener('lostpointercapture',e=>finish(e,true));
+  return{abort(){id=null;cancelAnimationFrame(raf);raf=0}};
+}
+/* how far above a touching finger a dragged piece floats, so the finger never hides it */
+const LIFT=e=>e&&e.pointerType==='touch'?56:0;
+/* animate with the Web Animations API unless the player asked for reduced motion; returns the animation or null */
+const wa=(e,k,o)=>gfx.anim(e,k,o);

@@ -1,0 +1,43 @@
+/* Star Threads board: a night-sky panel with one SVG */
+.thr{--ts:min(92vw,calc(100dvh - 400px),470px);width:var(--ts);height:var(--ts);padding:0;position:relative;overflow:hidden;touch-action:none;
+  background:radial-gradient(120% 90% at 50% 0%,#2c2a6a,#12102e 62%,#0a0920);
+  box-shadow:inset 0 0 0 1px #ffffff1c,inset 0 2px 0 #ffffff26,0 18px 40px #0007}
+/* a few static background stars (one painted layer, no elements) */
+.thr::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(1.4px 1.4px at 12% 18%,#fff9,#0000),radial-gradient(1px 1px at 82% 12%,#fff8,#0000),radial-gradient(1.2px 1.2px at 70% 82%,#fff9,#0000),radial-gradient(1px 1px at 22% 74%,#fff7,#0000),radial-gradient(1.2px 1.2px at 46% 8%,#fff8,#0000),radial-gradient(1px 1px at 91% 56%,#fff7,#0000),radial-gradient(1.2px 1.2px at 6% 50%,#fff8,#0000),radial-gradient(1px 1px at 58% 94%,#fff7,#0000)}
+.thsvg{position:relative;width:100%;height:100%;display:block;touch-action:none;user-select:none}
+.thg{stroke:var(--acc);stroke-width:3.2;stroke-opacity:.16;stroke-linecap:round;fill:none;pointer-events:none}
+.th{stroke:var(--acc);stroke-width:.9;stroke-linecap:round;fill:none;pointer-events:none;transition:stroke .2s}
+.thg.bad{stroke:#ff5d73;stroke-opacity:.26}
+.th.bad{stroke:#ff7a8a}
+.st{cursor:grab}
+.st .hit{fill:transparent}
+.st .halo{opacity:.55;transition:opacity .25s}
+.st .core{transform-box:fill-box;transform-origin:center;transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
+.st:not(.cx) .halo{opacity:.95}
+.st.cx .halo{opacity:.3}
+.st.drag .core{transform:scale(1.9)}
+.st.drag .halo{opacity:1}
+.st.sel .core{transform:scale(1.7)}
+.st.sel .halo{opacity:1}
+.st.hint .core{animation:thHint .7s ease-in-out infinite alternate}
+@keyframes thHint{to{transform:scale(1.9)}}
+.tghost{opacity:0;pointer-events:none;transition:opacity .2s}
+.tghost.on{opacity:1}
+.tghost circle{fill:#ffffff14;stroke:#fff;stroke-width:.8;stroke-dasharray:2 1.6;transform-box:fill-box;transform-origin:center;animation:thGhost 1s ease-in-out infinite alternate}
+.tghost line{stroke:#ffffffa0;stroke-width:.5;stroke-dasharray:1.6 1.6}
+@keyframes thGhost{to{transform:scale(1.25)}}
+/* solved: threads glow, board settles into night */
+.thr.solved{box-shadow:inset 0 0 0 1px #ffffff30,0 0 40px color-mix(in srgb,var(--acc) 45%,transparent),0 18px 40px #0007;transition:box-shadow .8s}
+.thr.solved .th{stroke:#fff3b8;stroke-width:1.2;stroke-dasharray:60;animation:thDraw .9s ease-out both}
+.thr.solved .thg{stroke-opacity:.34}
+@keyframes thDraw{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
+.thr.solved .st .halo{opacity:1}
+.thr.solved .st .core{animation:thTwinkle 1.6s ease-in-out infinite alternate}
+@keyframes thTwinkle{to{transform:scale(1.35)}}
+/* how-to demo svg */
+.thd{width:128px;height:86px;overflow:visible}
+.thd line{stroke-width:2.4;stroke-linecap:round}.thd line.g{stroke:var(--acc)}.thd line.b{stroke:#ff7a8a}
+.thd circle{fill:var(--acc);stroke:#fff8;stroke-width:1.5}
+.thd .fg{font-size:20px}
+@media (max-height:700px){.thr{--ts:min(92vw,calc(100dvh - 330px),470px)}}

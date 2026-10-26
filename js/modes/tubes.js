@@ -49,7 +49,7 @@ MAKERS.tubes=function({R,tier,board,api}){
   const par=t0sol?t0sol.length:nc*3;
   const s3=par+2+Math.floor(par*.2),s2=Math.ceil(par*1.7)+5;
   let moves=0,sel=-1,hintPair=null,lastNew=null,lastFrom=-1,lastGhost=null;
-  const wrap=el('div','tubes');if(tubes.length<=6)wrap.style.setProperty('--seg','clamp(30px,min(11vw,8dvh),48px)');board.appendChild(wrap);
+  const wrap=el('div','tubes');if(tubes.length<=6)wrap.style.setProperty('--seg','clamp(28px,min(11vw,calc((var(--bh0,500px) - 52px) / 4.7)),48px)');board.appendChild(wrap);
   const tEls=tubes.map((_,i)=>{const t=el('div','tube');t.onclick=()=>tapTube(i);wrap.appendChild(t);return t});
   api.stagger(tEls,50);
   function render(){
