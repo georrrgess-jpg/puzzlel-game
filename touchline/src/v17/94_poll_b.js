@@ -160,7 +160,7 @@ function v1812pLines(vid,f){
     [true,`Organized and hard to break down. That is how you win in October.`]],
    radio:[
     [f.streak>=3,`${t} are the hottest team in the state right now. Period.`],
-    [f.last&&f.last.res==='L'&&f.gp>=2,`Did anybody watch ${o} last time out? That was an exposure.`],
+    [f.last&&f.last.res==='L'&&f.gp>=2,`${t} lost ${f.last&&f.last.gf}\u2013${f.last&&f.last.ga} to ${o}. Did anybody watch that? That was an exposure.`],
     [f.gp>=3&&f.gd>=8,`+${f.gd} goal difference. Somebody stop them. Please.`],
     [f.last&&f.last.res==='W'&&f.last.gf-f.last.ga>=3,`${f.last&&f.last.gf}–${f.last&&f.last.ga} against ${o}? That's a statement, folks.`],
     [f.gp>=3&&f.gfpg>=2.6,`Goals, goals, goals. Turn on a ${t} game and thank me later.`],

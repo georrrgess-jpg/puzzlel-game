@@ -87,7 +87,7 @@
 .v1812p-st{display:flex;align-items:center;gap:10px;min-width:0}
 .v1812p-st.r{flex-direction:row-reverse;text-align:right}
 .v1812p-st>div{display:flex;flex-direction:column;min-width:0}
-.v1812p-st b{font:800 1.55rem var(--f-display);line-height:1.05;text-transform:uppercase;letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1812p-st b{font:800 1.5rem var(--f-display);line-height:1.02;text-transform:uppercase;letter-spacing:.03em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 .v1812p-no{font:800 .74rem var(--f-display);letter-spacing:.2em;color:var(--muted)}
 .v1812p-vsm{font:800 1rem var(--f-display);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .v1812p-ven{margin:-4px 0 10px;text-align:center;font-size:.74rem;color:var(--muted);letter-spacing:.04em}
@@ -191,6 +191,8 @@
 .v1812p-mvl{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--muted)}
 .v1812p-mvl.up{color:var(--good)} .v1812p-mvl.dn{color:var(--bad)}
 .v1812p-mvr .link{font-weight:700}
+.v1812p-mvr>div{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.v1812p-mvi{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .v1812p-mvr svg{vertical-align:middle}
 .v1812p-ovbig .v1812p-nr{font:800 clamp(3rem,5vw,4.4rem)/.9 var(--f-display);color:var(--muted)}
 .v1812p-lr button{appearance:none;background:none;border:0;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);color:inherit;font:inherit;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px}

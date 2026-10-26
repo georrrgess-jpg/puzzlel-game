@@ -79,15 +79,16 @@ function v1812pRow(C,r,poll,recs,prevPts,me){
    <span class="v1812p-nm"><span class="v1812p-nl"><b>${esc(s.town)}<span class="v1812p-mas"> ${esc(s.mascot)}</span></b>${r.fp?`<em class="v1812p-fp" title="${r.fp} first-place vote${r.fp>1?'s':''}">(${r.fp})</em>`:''}</span><small class="d">${lg?`Section ${C.section}${isMe?' · your program':''}`:'Section '+v1812pSec(C,r.id)}</small><small class="m">${esc(s.mascot)}</small></span>
    <span class="v1812p-rec">${rec}</span><span class="v1812p-pts" data-to="${r.pts}" data-from="${prevPts==null?0:prevPts}">${r.pts}</span></button></li>`;
 }
+function v1812pTitle(C,p){ return p.wk===V1812P.WEEKS&&(p.yr<C.year||C.phase!=='regular')?p.label+' \u00b7 Final':p.label; }
 function v1812pMovers(C,poll,prev){
   if(!prev) return `<section class="v1812p-card v1812p-movers"><div class="v1812p-kick">How it works</div><p class="v1812p-how">Seven voters (coaches, writers, radio hosts and scouts) each submit a top-25 ballot every week. A first-place vote is worth 25 points, 25th place 1. Each voter has a lean, and nobody changes his mind all at once: ballots start from last week’s and move with the results.</p></section>`;
   const rows=poll.rows; const rise=rows.filter(r=>r.mv>0).sort((a,b)=>b.mv-a.mv||a.rk-b.rk)[0]; const fall=rows.filter(r=>r.mv<0).sort((a,b)=>a.mv-b.mv||a.rk-b.rk)[0];
   const nw=rows.filter(r=>r.nw); const cur=new Set(rows.map(r=>r.id)); const out=prev.rows.filter(r=>!cur.has(r.id));
-  const line=(lab,cls,html)=>`<div class="v1812p-mvr"><span class="v1812p-mvl ${cls}">${lab}</span><div>${html}</div></div>`;
+  const line=(lab,cls,html)=>`<div class="v1812p-mvr"><span class="v1812p-mvl ${cls}">${lab}</span><div>${html}</div></div>`; const item=h=>`<span class="v1812p-mvi">${h}</span>`;
   const t=(r)=>`${crest(v1812pSchool(C,r.id),18)} ${v1812pTeamBtn(C,r.id)}`;
   return `<section class="v1812p-card v1812p-movers"><div class="v1812p-kick">This week’s movers</div>
    ${rise?line('Biggest rise','up',`${t(rise)} <b class="v1812p-mv up">▲${rise.mv}</b> <span class="muted">to No. ${rise.rk}</span>`):''}${fall?line('Biggest fall','dn',`${t(fall)} <b class="v1812p-mv dn">▼${-fall.mv}</b> <span class="muted">to No. ${fall.rk}</span>`):''}
-   ${nw.length?line('New in','nw',nw.map(r=>`${t(r)} <span class="muted">No. ${r.rk}</span>`).join(' · ')):''}${out.length?line('Dropped out','dn',out.map(r=>`${t(r)} <span class="muted">was No. ${r.rk}</span>`).join(' · ')):''}
+   ${nw.length?line('New in','nw',nw.map(r=>item(`${t(r)} <span class="muted">No. ${r.rk}</span>`)).join('')):''}${out.length?line('Dropped out','dn',out.map(r=>item(`${t(r)} <span class="muted">was No. ${r.rk}</span>`)).join('')):''}
    ${!rise&&!fall&&!nw.length&&!out.length?'<div class="muted small">The poll did not move this week.</div>':''}</section>`;
 }
 function v1812pPollTab(C){
@@ -95,8 +96,8 @@ function v1812pPollTab(C){
   let wk=App.params.pw!=null&&App.params.pw!==''?v1812pClamp(+App.params.pw,0,polls.length-1):polls.length-1; const poll=polls[wk]; const prev=polls[wk-1]||null;
   const recs=v1812pRecords(C,yr,wk); const prevPts=new Map(prev?prev.rows.map(r=>[r.id,r.pts]):[]); const from={}; if(prev) for(const r of prev.rows) from[r.id]=r.rk;
   const key=[yr,wk,C.slot||0].join('|');
-  const opts_=polls.map((p,i)=>`<option value="${i}" ${i===wk?'selected':''}>${esc(p.label)}</option>`).join('');
-  const board=`<section class="v1812p-card v1812p-board"><header class="v1812p-bh"><div><span class="v1812p-kick">Poll of ${poll.n} voters</span><h2>${esc(C.stateName)} Varsity <i>·</i> ${esc(poll.label)}</h2></div>
+  const opts_=polls.map((p,i)=>`<option value="${i}" ${i===wk?'selected':''}>${esc(v1812pTitle(C,p))}</option>`).join('');
+  const board=`<section class="v1812p-card v1812p-board"><header class="v1812p-bh"><div><span class="v1812p-kick">Poll of ${poll.n} voters</span><h2>${esc(C.stateName)} Varsity <i>·</i> ${esc(v1812pTitle(C,poll))}</h2></div>
     <div class="v1812p-step"><button class="btn sm ghost" data-a="v1812pWeek" data-d="-1" ${wk===0?'disabled':''} aria-label="Previous poll">${icon('chevl',16)}</button><select data-c="v1812pWeekSel" aria-label="Poll week">${opts_}</select><button class="btn sm ghost" data-a="v1812pWeek" data-d="1" ${wk>=polls.length-1?'disabled':''} aria-label="Next poll">${icon('chev',16)}</button></div></header>
     <div class="v1812p-colh"><span>#</span><span></span><span></span><span>School</span><span>W-D-L</span><span>Pts</span></div>
     <ol class="v1812p-rows" data-key="${key}" data-from='${JSON.stringify(from)}'>${poll.rows.map(r=>v1812pRow(C,r,poll,recs,prevPts.has(r.id)?prevPts.get(r.id):0,me)).join('')}</ol>
