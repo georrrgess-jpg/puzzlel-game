@@ -5,39 +5,71 @@
 /* a few static background stars (one painted layer, no elements) */
 .thr::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(1.4px 1.4px at 12% 18%,#fff9,#0000),radial-gradient(1px 1px at 82% 12%,#fff8,#0000),radial-gradient(1.2px 1.2px at 70% 82%,#fff9,#0000),radial-gradient(1px 1px at 22% 74%,#fff7,#0000),radial-gradient(1.2px 1.2px at 46% 8%,#fff8,#0000),radial-gradient(1px 1px at 91% 56%,#fff7,#0000),radial-gradient(1.2px 1.2px at 6% 50%,#fff8,#0000),radial-gradient(1px 1px at 58% 94%,#fff7,#0000)}
-.thsvg{position:relative;width:100%;height:100%;display:block;touch-action:none;user-select:none}
-.thg{stroke:var(--acc);stroke-width:3.2;stroke-opacity:.16;stroke-linecap:round;fill:none;pointer-events:none}
-.th{stroke:var(--acc);stroke-width:.9;stroke-linecap:round;fill:none;pointer-events:none;transition:stroke .2s}
-.thg.bad{stroke:#ff5d73;stroke-opacity:.26}
-.th.bad{stroke:#ff7a8a}
-.st{cursor:grab}
+.thsvg{position:relative;width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+
+/* threads: dark ones are faint dotted guides, lit ones are glowing gold */
+.th{stroke:#c9d4ff;stroke-opacity:.42;stroke-width:.9;stroke-linecap:round;stroke-dasharray:.1 2.1;fill:none;pointer-events:none;transition:stroke-opacity .2s}
+.th.lit{stroke:#ffe9a8;stroke-opacity:1;stroke-width:1.35;stroke-dasharray:none}
+.thg{stroke:#ffc84a;stroke-width:4.4;stroke-linecap:round;fill:none;pointer-events:none;opacity:0}
+.thg.lit{opacity:.3}
+.th.next{stroke:#fff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:1.6 1.6;animation:thNext .6s linear infinite}
+@keyframes thNext{to{stroke-dashoffset:-3.2}}
+.th.no{stroke:#ff7a8a;stroke-opacity:1;stroke-width:1.5;animation:thNo .42s ease-out}
+@keyframes thNo{30%{stroke-width:2.6}}
+/* the rubber band from the bright star to the finger */
+.trb{stroke:#ffe9a8;stroke-width:.9;stroke-linecap:round;stroke-dasharray:1.4 1.4;opacity:0;pointer-events:none;transition:opacity .12s}
+.trb.on{opacity:.75}
+.tspark{fill:#fff;pointer-events:none;filter:drop-shadow(0 0 1.5px #ffd166)}
+
+/* stars: pale until all their threads are lit, then gold */
+.st{cursor:pointer}
 .st .hit{fill:transparent}
-.st .halo{opacity:.55;transition:opacity .25s}
-.st .core{transform-box:fill-box;transform-origin:center;transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
-.st:not(.cx) .halo{opacity:.95}
-.st.cx .halo{opacity:.3}
-.st.drag .core{transform:scale(1.9)}
-.st.drag .halo{opacity:1}
-.st.sel .core{transform:scale(1.7)}
-.st.sel .halo{opacity:1}
-.st.hint .core{animation:thHint .7s ease-in-out infinite alternate}
-@keyframes thHint{to{transform:scale(1.9)}}
-.tghost{opacity:0;pointer-events:none;transition:opacity .2s}
-.tghost.on{opacity:1}
-.tghost circle{fill:#ffffff14;stroke:#fff;stroke-width:.8;stroke-dasharray:2 1.6;transform-box:fill-box;transform-origin:center;animation:thGhost 1s ease-in-out infinite alternate}
-.tghost line{stroke:#ffffffa0;stroke-width:.5;stroke-dasharray:1.6 1.6}
-@keyframes thGhost{to{transform:scale(1.25)}}
-/* solved: threads glow, board settles into night */
-.thr.solved{box-shadow:inset 0 0 0 1px #ffffff30,0 0 40px color-mix(in srgb,var(--acc) 45%,transparent),0 18px 40px #0007;transition:box-shadow .8s}
-.thr.solved .th{stroke:#fff3b8;stroke-width:1.2;stroke-dasharray:60;animation:thDraw .9s ease-out both}
-.thr.solved .thg{stroke-opacity:.34}
-@keyframes thDraw{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
-.thr.solved .st .halo{opacity:1}
-.thr.solved .st .core{animation:thTwinkle 1.6s ease-in-out infinite alternate}
-@keyframes thTwinkle{to{transform:scale(1.35)}}
+.st .halo{fill:url(#thHaloDim);transform-box:fill-box;transform-origin:center;transition:opacity .3s}
+.st .core{fill:url(#thStarDim);transform-box:fill-box;transform-origin:center;transform:scale(1.35);transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.st.part .core{fill:url(#thStar);opacity:.85}
+.st.done .halo{fill:url(#thHalo)}
+.st.done .core{fill:url(#thStar);transform:scale(1.55)}
+.st .ring{fill:none;stroke:#ffe9a8;stroke-width:.7;opacity:0;transform-box:fill-box;transform-origin:center;pointer-events:none}
+/* the bright star: where the path carries on from */
+.st.end .core{fill:#fff;transform:scale(1.8)}
+.st.end .halo{fill:url(#thHalo)}
+.st.end .ring{opacity:1;animation:thRing 1.1s ease-out infinite}
+@keyframes thRing{0%{transform:scale(.7);opacity:.95}100%{transform:scale(1.5);opacity:0}}
+.st.stuck .ring{stroke:#ff7a8a}
+.st.stuck .core{fill:#ffb3bd}
+/* first levels: the start star is marked */
+.st.start .ring{opacity:1;stroke:#7dffb0;stroke-dasharray:1.6 1.2;animation:thSpin 3s linear infinite}
+.st.start .core{transform:scale(1.7)}
+@keyframes thSpin{to{transform:rotate(360deg)}}
+.st.hint .core{animation:thHint .55s ease-in-out infinite alternate}
+@keyframes thHint{to{transform:scale(2.2)}}
+.st.nudge{animation:thNudge .5s ease-in-out}
+@keyframes thNudge{20%,60%{translate:-1.4px 0}40%,80%{translate:1.4px 0}}
+
+/* solved: a wave of light runs along the path, stars twinkle, the constellation is named, a shooting star crosses */
+.thr.solved{box-shadow:inset 0 0 0 1px #ffffff30,0 0 40px #ffd16666,0 18px 40px #0007;transition:box-shadow .8s}
+.thr.solved .th{animation:thWave .7s ease-out both}
+.thr.solved .thg{animation:thWaveG .7s ease-out both}
+@keyframes thWave{40%{stroke:#fff;stroke-width:2.4}100%{stroke:#ffe9a8;stroke-width:1.35}}
+@keyframes thWaveG{40%{opacity:.75}100%{opacity:.38}}
+.thr.solved .st .core{fill:url(#thStar);animation:thTwinkle 1.5s ease-in-out var(--tw,0ms) infinite alternate}
+.thr.solved .st .halo{fill:url(#thHalo)}
+@keyframes thTwinkle{from{transform:scale(1.55)}to{transform:scale(1.95)}}
+.thname{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);pointer-events:none;opacity:0;text-align:center;white-space:nowrap;z-index:2;
+  padding:6px 18px 8px;border-radius:18px;background:#0a0920c8;box-shadow:0 0 0 1px #ffd16640,0 6px 18px #0008;
+  font-weight:700;font-size:clamp(18px,5.4vw,24px);color:#fff4c2;text-shadow:0 2px 0 #0008,0 0 16px #ffd166}
+.thname small{display:block;font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:#c9d4ff;text-shadow:none;font-weight:600}
+.thr.solved .thname{animation:thName 1s cubic-bezier(.2,1.4,.4,1) .35s both}
+@keyframes thName{from{opacity:0;transform:translate(-50%,14px) scale(.85)}to{opacity:1;transform:translate(-50%,0)}}
+.tshoot{position:absolute;top:14%;left:-30%;width:28%;height:2px;border-radius:2px;pointer-events:none;transform:rotate(16deg);
+  background:linear-gradient(90deg,#fff0,#fff);box-shadow:0 0 8px #fff;animation:thShoot 1.1s ease-in .25s both}
+@keyframes thShoot{from{translate:0 0;opacity:0}15%{opacity:1}to{translate:520% 160%;opacity:0}}
+
 /* how-to demo svg */
 .thd{width:128px;height:86px;overflow:visible}
-.thd line{stroke-width:2.4;stroke-linecap:round}.thd line.g{stroke:var(--acc)}.thd line.b{stroke:#ff7a8a}
-.thd circle{fill:var(--acc);stroke:#fff8;stroke-width:1.5}
+.thd line{stroke-width:2.4;stroke-linecap:round}
+.thd line.g{stroke:#ffd166}
+.thd line.d{stroke:#c9d4ff;stroke-opacity:.6;stroke-dasharray:.1 4.5}
+.thd circle{fill:#ffd166;stroke:#fff8;stroke-width:1.5}
 .thd .fg{font-size:20px}
 @media (max-height:700px){.thr{--ts:min(92vw,calc(100dvh - 330px),470px)}}

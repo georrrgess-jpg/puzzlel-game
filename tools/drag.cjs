@@ -33,8 +33,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       await page.evaluate(() => __game.cur.puz.hint()); await sleep(150);
       let from, to;
       if (type === 'threads') {
-        from = await center('.st[data-h="1"]');
-        to = await page.evaluate(() => { const c = document.querySelector('.tghost circle'), s = document.querySelector('.thsvg'), r = s.getBoundingClientRect(); return [r.left + (+c.getAttribute('cx')) / 100 * r.width, r.top + (+c.getAttribute('cy')) / 100 * r.height] });
+        // Star Threads: press the bright star and slide to the linked star (drawing follows the finger, no lift)
+        from = await center('.st[data-h="1"] .core'); to = await center('.st[data-h="2"] .core');
       } else if (type === 'merge') {
         from = await center('.mg[data-h="1"]'); to = await center('.mg[data-h="2"]');
       } else {
@@ -43,7 +43,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       }
       if (!from || !to) { check(`${type} round ${round}: hint targets`, false, JSON.stringify({ from, to })); break }
       if (await page.evaluate(() => __game.cur.over)) break;
-      await touch(from[0], from[1], to[0], to[1] + LIFT);
+      await touch(from[0], from[1], to[0], to[1] + (type === 'threads' ? 0 : LIFT));
       const m1 = await moves();
       check(`${type} round ${round}: finger drag counted a move`, m1 === m0 + 1, `(moves ${m0} -> ${m1})`);
     }

@@ -9,7 +9,7 @@ An endless, relaxing puzzle game for phones. It runs in the browser: open `index
 |---|---|
 | 💡 **Lights Out** | Tap a square to flip it and its neighbours. Turn every light off. |
 | ⏳ **Sand Tubes** | Scoop the top sand from a tube and pour it into another. Make every tube one colour. |
-| ✨ **Star Threads** | Drag the stars until no glowing thread crosses another. The constellation lights up. |
+| ✨ **Star Threads** | Light up every thread of a constellation in one continuous path: press a star and slide along the threads. Each thread lights only once. |
 | 🌸 **Merge Bloom** | Drag a plant onto its twin to grow the next stage. Seed → sprout → sapling → bud → flower → blossom → golden tree. |
 | 🌱 **Block Garden** | Drag blocks from the tray onto the bed. Full rows and columns bloom away. Some levels are weed-pulling levels. |
 

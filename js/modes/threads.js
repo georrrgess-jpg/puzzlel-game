@@ -1,188 +1,240 @@
 'use strict';
-/* ---------- Star Threads: drag the stars until no thread crosses another ----------
-   Generation (guaranteed solvable): take L lines in general position; every intersection is a star and
-   consecutive intersections along a line are joined by a thread. The intersection layout is a crossing-free
-   solution. The puzzle shows the same stars scrambled around a circle. */
+/* ---------- Star Threads: light up every thread of a constellation in one continuous path ----------
+   Press a star and slide to a star it is linked to: that thread lights up and the path carries on from there. Each
+   thread can be lit only once. The constellation is generated so that a single path through every thread exists
+   (connected, at most two stars with an odd number of threads), so every level can be finished. Hints and the bot use
+   Hierholzer's algorithm from the current end of the path, and rewind the path first if it can no longer finish. */
 const CONSTELLATIONS=['The Sleepy Fox','The Little Teapot','The Paper Lantern','The Gentle Whale','The Moon Moth','The Tiny Crown','The Garden Gate','The Night Owl','The Dancing Crane','The Lucky Clover','The Silver Kite','The Quiet Harbor'];
-const thrDemo=(P,E,bad,finger)=>`<svg class="thd" viewBox="0 0 120 80">${E.map(([a,b],i)=>`<line class="${bad.includes(i)?'b':'g'}" x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}"/>`).join('')}${P.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="6"/>`).join('')}${finger?`<text class="fg" x="${finger[0]}" y="${finger[1]}">👆</text>`:''}</svg>`;
-registerMode('threads',{name:'Star Threads',icon:'✨',col:'#7c6bff',tip:'Drag the stars so that no glowing threads cross. When every thread is gold, the constellation lights up!'},{
-  goal:'Untangle the stars so that no threads cross.',
-  steps:['Press and drag a star to move it. On a phone it floats just above your finger.','Threads that cross glow red. Free threads glow gold.','Move stars until every thread is gold. Tap 💡 if you want a suggestion.'],
-  demo:()=>{const E=[[0,1],[1,2],[2,3],[3,0],[0,2]];
-    return htStage(thrDemo([[20,16],[100,16],[20,64],[100,64]],E,[1,3],[88,70]),thrDemo([[20,16],[100,16],[100,64],[20,64]],E,[]),'Two threads cross. Drag a star','Swap them: every thread is gold!')}
+const thrDemo=(P,E,lit,finger)=>`<svg class="thd" viewBox="0 0 120 80">${E.map(([a,b],i)=>`<line class="${lit.includes(i)?'g':'d'}" x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}"/>`).join('')}${P.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="5.5"/>`).join('')}${finger?`<text class="fg" x="${finger[0]}" y="${finger[1]}">👆</text>`:''}</svg>`;
+registerMode('threads',{name:'Star Threads',icon:'✨',col:'#7c6bff',tip:'Light up every thread in one continuous path: press a star and slide to a linked star. Each thread lights only once.'},{
+  goal:'Light up every thread of the constellation in one continuous path.',
+  steps:['Press a star and slide to a star it is linked to. The thread lights up.','Keep going from the bright star. Each thread can only be lit once. You can lift your finger and carry on.','Light every thread to finish. Stuck? Undo ↩️, or tap 💡 for the next thread.'],
+  demo:()=>{const P=[[16,62],[60,14],[104,62],[60,62]],E=[[0,1],[1,2],[2,3],[3,0],[1,3]];
+    return htStage(thrDemo(P,E,[],[10,76]),thrDemo(P,E,[0,1,2,3,4]),'Press a star and slide along the threads','Every thread lit: the stars shine!')}
 });
 
-/* L lines in general position -> every intersection is a star, consecutive intersections on a line are threads.
-   The arrangement is kept near the centre (so every pair intersects) and then stretched to fill the board; stretching
-   is an affine map, so the layout stays crossing-free. Returns {sol:[[x,y]..], E:[[a,b]..]}. */
-function thrGenerate(R,L,SIZE,PAD){
-  const lo=PAD+3,hi=SIZE-PAD-3,minD0={4:18,5:11,6:6,7:3.8}[L]||4;
-  for(let tries=0;tries<600;tries++){
-    const minD=minD0*(tries<200?1:tries<400?.8:.6);
-    const lines=[...Array(L)].map((_,i)=>({th:(i+R()*.5-.25)*Math.PI/L,off:(R()-.5)*14}));
-    const V=[],idx={};let ok=true;
-    for(let i=0;i<L&&ok;i++)for(let j=i+1;j<L;j++){
-      const ni=[-Math.sin(lines[i].th),Math.cos(lines[i].th)],nj=[-Math.sin(lines[j].th),Math.cos(lines[j].th)],det=ni[0]*nj[1]-ni[1]*nj[0];
-      if(Math.abs(det)<.12){ok=false;break}
-      idx[i+','+j]=V.length;V.push([(lines[i].off*nj[1]-ni[1]*lines[j].off)/det,(ni[0]*lines[j].off-lines[i].off*nj[0])/det]);
+/* A constellation: N stars spread over the board, threads between near neighbours that never cross, never pass close
+   to another star and never meet at a sliver angle. Then the odd-thread stars are paired off until at most two remain,
+   which makes one continuous path through every thread possible. Returns {P,E}. */
+function thrGenerate(R,N,Et,SIZE,PAD){
+  const seg=(a,b,c,d)=>{const o=(p,q,r)=>(q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]);return o(a,b,c)*o(a,b,d)<0&&o(c,d,a)*o(c,d,b)<0};
+  const ptSeg=(p,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],t=clamp(((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy),0,1);return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)};
+  for(let tries=0;tries<300;tries++){
+    const P=[],minD=N>9?16:18;
+    for(let k=0;k<4000&&P.length<N;k++){const p=[PAD+R()*(SIZE-2*PAD),PAD+R()*(SIZE-2*PAD)];if(P.every(q=>Math.hypot(p[0]-q[0],p[1]-q[1])>=minD))P.push(p)}
+    if(P.length<N)continue;
+    const E=[],deg=Array(N).fill(0),has=new Set(),key=(a,b)=>Math.min(a,b)+','+Math.max(a,b);
+    const ok=(a,b,maxDeg)=>{
+      if(has.has(key(a,b))||deg[a]>=maxDeg||deg[b]>=maxDeg)return false;
+      for(const[c,d]of E)if(c!==a&&c!==b&&d!==a&&d!==b&&seg(P[a],P[b],P[c],P[d]))return false;
+      for(let v=0;v<N;v++)if(v!==a&&v!==b&&ptSeg(P[v],P[a],P[b])<6)return false;
+      const ang=(u,w)=>Math.atan2(P[w][1]-P[u][1],P[w][0]-P[u][0]);
+      for(const[c,d]of E)for(const[u,w]of[[a,b],[b,a]]){const o=c===u?d:d===u?c:-1;if(o<0)continue;let t=Math.abs(ang(u,w)-ang(u,o));if(t>Math.PI)t=2*Math.PI-t;if(t<.42)return false}
+      return true;
+    };
+    const add=(a,b)=>{E.push([a,b]);deg[a]++;deg[b]++;has.add(key(a,b))};
+    const cand=[];for(let a=0;a<N;a++)for(let b=a+1;b<N;b++){const d=Math.hypot(P[a][0]-P[b][0],P[a][1]-P[b][1]);if(d<52)cand.push([a,b,d*(.8+R()*.45)])}
+    cand.sort((x,y)=>x[2]-y[2]);
+    // connect everything first (Kruskal over the planar candidates), then add threads up to the target count
+    const comp=[...Array(N).keys()],find=v=>comp[v]===v?v:comp[v]=find(comp[v]);
+    for(const[a,b]of cand)if(find(a)!==find(b)&&ok(a,b,4)){add(a,b);comp[find(a)]=find(b)}
+    if(new Set(P.map((_,v)=>find(v))).size>1)continue;
+    for(const[a,b]of cand)if(E.length<Et&&ok(a,b,4))add(a,b);
+    // pair off odd stars: join two of them with a new thread, or drop a thread between two of them if that keeps it connected
+    const connected=()=>{const seen=new Set([0]),st=[0];while(st.length){const v=st.pop();for(const[a,b]of E){const o=a===v?b:b===v?a:-1;if(o>=0&&!seen.has(o)){seen.add(o);st.push(o)}}}return seen.size===N};
+    for(let guard=0;guard<40;guard++){
+      const odd=[...Array(N).keys()].filter(v=>deg[v]%2);if(odd.length<=2)break;
+      let done=false;
+      for(const[a,b]of cand)if(deg[a]%2&&deg[b]%2&&ok(a,b,5)){add(a,b);done=true;break}
+      if(done)continue;
+      for(let i=E.length-1;i>=0&&!done;i--){const[a,b]=E[i];if(!(deg[a]%2&&deg[b]%2))continue;E.splice(i,1);if(connected()){deg[a]--;deg[b]--;has.delete(key(a,b));done=true}else E.splice(i,0,[a,b])}
+      if(!done)break;
     }
-    if(!ok)continue;
-    const xs=V.map(p=>p[0]),ys=V.map(p=>p[1]),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
-    if(x1-x0<1||y1-y0<1)continue;
-    const P=V.map(p=>[lo+(p[0]-x0)/(x1-x0)*(hi-lo),lo+(p[1]-y0)/(y1-y0)*(hi-lo)]);
-    let md=1e9;for(let a=0;a<P.length;a++)for(let b=a+1;b<P.length;b++)md=Math.min(md,Math.hypot(P[a][0]-P[b][0],P[a][1]-P[b][1]));
-    if(md<minD)continue;
-    const E=[];
-    for(let i=0;i<L;i++){
-      const on=[];for(let j=0;j<L;j++)if(j!==i)on.push(idx[Math.min(i,j)+','+Math.max(i,j)]);
-      const d=[Math.cos(lines[i].th),Math.sin(lines[i].th)];
-      on.sort((a,b)=>(V[a][0]*d[0]+V[a][1]*d[1])-(V[b][0]*d[0]+V[b][1]*d[1]));
-      for(let k=0;k+1<on.length;k++)E.push([on[k],on[k+1]]);
-    }
-    return{sol:P,E,minD:md,tries};
+    if([...Array(N).keys()].filter(v=>deg[v]%2).length>2||!connected()||E.length<N)continue;
+    return{P,E,tries};
   }
-  return{sol:[[20,20],[80,20],[80,80],[20,80],[50,50]],E:[[0,1],[1,2],[2,3],[3,0],[4,0],[4,2]],fallback:true};
+  return{P:[[22,78],[50,22],[78,78],[50,58],[22,40],[78,40]],E:[[0,1],[1,2],[2,3],[3,0],[0,4],[4,1],[1,5],[5,2]],fallback:true};
 }
 
 MAKERS.threads=function({R,tier,board,api}){
-  const L=tier<2?4:tier<5?5:tier<12?6:7;
-  const SIZE=100,PAD=9;
-  /* ---- build a planar graph from L lines ---- */
-  const gen=thrGenerate(R,L,SIZE,PAD);
-  const sol=gen.sol,E=gen.E;
-  const N=sol.length;
-  const share=(a,b)=>a[0]===b[0]||a[0]===b[1]||a[1]===b[0]||a[1]===b[1];
-  const orient=(p,q,r)=>(q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]);
-  const crosses=(P,e,f)=>{if(share(e,f))return false;const a=P[e[0]],b=P[e[1]],c=P[f[0]],d=P[f[1]];return orient(a,b,c)*orient(a,b,d)<0&&orient(c,d,a)*orient(c,d,b)<0};
-  const countAll=P=>{let n=0;for(let i=0;i<E.length;i++)for(let j=i+1;j<E.length;j++)if(crosses(P,E[i],E[j]))n++;return n};
-  const countAt=(P,v)=>{let n=0;for(let i=0;i<E.length;i++){if(E[i][0]!==v&&E[i][1]!==v)continue;for(let j=0;j<E.length;j++)if(j!==i&&crosses(P,E[i],E[j]))n++}return n};
-  /* ---- scrambled start: stars evenly round a circle in shuffled order ---- */
-  let P;
-  for(let t=0;t<60;t++){
-    const ord=shuffle([...Array(N).keys()],R);
-    P=Array(N);ord.forEach((v,k)=>{const a=k/N*Math.PI*2-Math.PI/2;P[v]=[50+Math.cos(a)*37,50+Math.sin(a)*37]});
-    if(countAll(P)>=Math.max(2,Math.floor(E.length*.28)))break;
-  }
-  const s3=N+3,s2=2*N+5;
-  let moves=0,sel=-1,fallback=false,hintTO=0;
+  const SIZE=100,PAD=11;
+  const N=tier<1?5:tier<2?6:tier<4?7:tier<6?8:tier<9?9:tier<13?10:11;
+  const Et=N+1+Math.min(Math.floor(N*.7),1+Math.floor(tier*.8));
+  const gen=thrGenerate(R,N,Et,SIZE,PAD),P=gen.P,E=gen.E,NS='http://www.w3.org/2000/svg';
+  const eKey={};E.forEach(([a,b],i)=>{eKey[a+','+b]=eKey[b+','+a]=i});
+  const deg=Array(N).fill(0);E.forEach(([a,b])=>{deg[a]++;deg[b]++});
+  const odd=[...Array(N).keys()].filter(v=>deg[v]%2);
+  const other=(i,v)=>E[i][0]===v?E[i][1]:E[i][0];
+  const s3=E.length+Math.max(2,Math.ceil(E.length*.3)),s2=2*E.length+4;
   const name=R.pick(CONSTELLATIONS);
+  let path=[],moves=0,used=new Uint8Array(E.length),over=false,hintTO=0;
+
+  /* ---- path logic ---- */
+  const usedOf=pth=>{const u=new Uint8Array(E.length);for(let k=1;k<pth.length;k++)u[eKey[pth[k-1]+','+pth[k]]]=1;return u};
+  const left=()=>E.length-used.reduce((a,b)=>a+b,0);
+  const freeFrom=v=>E.some(([a,b],i)=>!used[i]&&(a===v||b===v));
+  /* one path through every unused thread starting at s (Hierholzer), as edge indices; null if impossible */
+  function trailFrom(s,u){
+    const cnt=E.length-u.reduce((a,b)=>a+b,0);if(!cnt)return[];
+    const adj=[...Array(N)].map(()=>[]);E.forEach(([a,b],i)=>{if(!u[i]){adj[a].push(i);adj[b].push(i)}});
+    const taken=new Uint8Array(E.length),ptr=Array(N).fill(0),stack=[[s,-1]],out=[];
+    while(stack.length){
+      const[v,e]=stack[stack.length-1];
+      while(ptr[v]<adj[v].length&&taken[adj[v][ptr[v]]])ptr[v]++;
+      if(ptr[v]===adj[v].length){stack.pop();if(e>=0)out.push(e)}
+      else{const ei=adj[v][ptr[v]];taken[ei]=1;stack.push([other(ei,v),ei])}
+    }
+    if(out.length!==cnt)return null;
+    out.reverse();let cur=s;for(const ei of out){if(E[ei][0]!==cur&&E[ei][1]!==cur)return null;cur=other(ei,cur)}
+    return out;
+  }
+  const goodStart=()=>odd.length?odd[0]:0;
+  /* the next thread to light; if the current path can no longer finish, how far to rewind first */
+  function plan(){
+    if(!path.length){const s=goodStart();return{keep:0,from:s,to:other(trailFrom(s,used)[0],s)}}
+    for(let k=path.length;k>=1;k--){const pth=path.slice(0,k),t=trailFrom(pth[k-1],usedOf(pth));if(t&&t.length)return{keep:k,from:pth[k-1],to:other(t[0],pth[k-1])}}
+    const s=goodStart();return{keep:0,from:s,to:other(trailFrom(s,new Uint8Array(E.length))[0],s)};
+  }
 
   /* ---- DOM ---- */
-  const NS='http://www.w3.org/2000/svg';
   const box=el('div','thr glass');
   const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('class','thsvg');
-  svg.innerHTML=`<defs><radialGradient id="thHalo"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="var(--acc)" stop-opacity=".55"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></radialGradient>
-    <linearGradient id="thStar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8d6"/><stop offset=".55" stop-color="var(--acc)"/><stop offset="1" stop-color="color-mix(in srgb,var(--acc) 60%,#c47a00)"/></linearGradient></defs>
-    <g class="tl"></g><g class="ts"></g><g class="tg"></g>`;
-  box.appendChild(svg);board.appendChild(box);
-  const gl=svg.querySelector('.tl'),gs=svg.querySelector('.ts'),gg=svg.querySelector('.tg');
-  const line=(cls)=>{const l=document.createElementNS(NS,'line');l.setAttribute('class',cls);return l};
-  const tg=E.map(()=>{const g=line('thg'),c=line('th');gl.append(g,c);return[g,c]});
+  svg.innerHTML=`<defs><radialGradient id="thHalo"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#ffd166" stop-opacity=".55"/><stop offset="1" stop-color="#ffd166" stop-opacity="0"/></radialGradient>
+    <radialGradient id="thHaloDim"><stop offset="0" stop-color="#dfe6ff" stop-opacity=".7"/><stop offset=".4" stop-color="#8fa2ff" stop-opacity=".22"/><stop offset="1" stop-color="#8fa2ff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="thStar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe6"/><stop offset=".55" stop-color="#ffd166"/><stop offset="1" stop-color="#f0a020"/></linearGradient>
+    <linearGradient id="thStarDim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#aab8ff"/></linearGradient></defs>
+    <g class="tl"></g><line class="trb"/><g class="ts"></g><g class="tfx"></g>`;
+  const banner=el('div','thname',`<small>constellation</small>${name}`);
+  box.append(svg,banner);board.appendChild(box);
+  const gl=svg.querySelector('.tl'),gs=svg.querySelector('.ts'),gfx_=svg.querySelector('.tfx'),band=svg.querySelector('.trb');
+  const mk=(tag,cls)=>{const e=document.createElementNS(NS,tag);if(cls)e.setAttribute('class',cls);return e};
+  const setL=(l,a,b)=>{l.setAttribute('x1',a[0].toFixed(2));l.setAttribute('y1',a[1].toFixed(2));l.setAttribute('x2',b[0].toFixed(2));l.setAttribute('y2',b[1].toFixed(2))};
+  const thr=E.map(([a,b])=>{const g=mk('line','thg'),c=mk('line','th');setL(g,P[a],P[b]);setL(c,P[a],P[b]);gl.append(g,c);return{g,c}});
   const STAR_D='M0-4.6L1.35-1.5 4.4-1.3 2.1 .7 2.8 3.8 0 2.1-2.8 3.8-2.1 .7-4.4-1.3-1.35-1.5z';
-  const sg=P.map((_,i)=>{const g=document.createElementNS(NS,'g');g.setAttribute('class','st');g.dataset.i=i;
-    g.innerHTML=`<circle class="halo" r="8.5" fill="url(#thHalo)"/><path class="core" d="${STAR_D}" transform="scale(1.35)" fill="url(#thStar)"/><circle class="hit" r="8.5"/>`;gs.appendChild(g);return g});
-  const ghost=document.createElementNS(NS,'g');ghost.setAttribute('class','tghost');ghost.innerHTML='<circle r="6"/><line/>';gg.appendChild(ghost);
-  api.stagger(sg.map(g=>g),40);
+  const sg=P.map((p,i)=>{const g=mk('g','st');g.dataset.i=i;g.setAttribute('transform',`translate(${p[0].toFixed(2)} ${p[1].toFixed(2)})`);
+    g.innerHTML=`<circle class="ring" r="6.6"/><circle class="halo" r="9"/><path class="core" d="${STAR_D}"/><circle class="hit" r="9"/>`;gs.appendChild(g);return g});
+  api.stagger(sg,45);
 
-  const pos=(g,x,y)=>g.setAttribute('transform',`translate(${x.toFixed(2)} ${y.toFixed(2)})`);
-  let badE=[],badV=[];
-  function refresh(){
-    const bad=new Uint8Array(E.length),vb=new Uint8Array(N);
-    for(let i=0;i<E.length;i++)for(let j=i+1;j<E.length;j++)if(crosses(P,E[i],E[j])){bad[i]=bad[j]=1}
-    E.forEach((e,i)=>{if(bad[i]){vb[e[0]]=vb[e[1]]=1}});
-    E.forEach((e,i)=>{const[g,c]=tg[i],a=P[e[0]],b=P[e[1]];
-      for(const l of[g,c]){l.setAttribute('x1',a[0].toFixed(2));l.setAttribute('y1',a[1].toFixed(2));l.setAttribute('x2',b[0].toFixed(2));l.setAttribute('y2',b[1].toFixed(2))}
-      if(bad[i]!==badE[i]){c.setAttribute('class',bad[i]?'th bad':'th');g.setAttribute('class',bad[i]?'thg bad':'thg')}});
-    sg.forEach((g,i)=>{pos(g,P[i][0],P[i][1]);if(vb[i]!==badV[i])g.classList.toggle('cx',!!vb[i])});
-    badE=[...bad];badV=[...vb];
-    const pairs=countAll(P);
-    api.coach(pairs?`✨ ${pairs} crossing${pairs>1?'s':''} left`:`🌟 ${name}`);
+  function render(){
+    const lit=new Uint8Array(N),dark=new Uint8Array(N);
+    E.forEach(([a,b],i)=>{if(used[i]){lit[a]=lit[b]=1}else{dark[a]=dark[b]=1}thr[i].c.classList.toggle('lit',!!used[i]);thr[i].g.classList.toggle('lit',!!used[i])});
+    const end=path.length?path[path.length-1]:-1,stuck=end>=0&&!freeFrom(end)&&left()>0;
+    sg.forEach((g,i)=>{g.classList.toggle('done',!dark[i]);g.classList.toggle('part',!!lit[i]&&!!dark[i]);g.classList.toggle('end',i===end&&!over);g.classList.toggle('stuck',i===end&&stuck);
+      g.classList.toggle('start',!path.length&&tier<2&&i===goodStart())});
+    const n=left();
+    if(over)api.coach(`🌟 ${name}`);
+    else if(stuck)api.coach(`🌑 Dead end: ${n} thread${n>1?'s':''} still dark. Undo ↩️ or tap a star to start over`);
+    else if(!path.length)api.coach(tier<2?'👆 Press the glowing star and slide along a thread':'👆 Press any star and slide along a thread');
+    else api.coach(`✨ ${n} thread${n>1?'s':''} left · keep going from the bright star`);
     api.moves(moves,s3,s2);
-    return pairs;
   }
-  refresh();
-  api.setTip('Drag the stars so that no glowing threads cross. Threads that cross glow red.');
+  api.setTip('Light every thread once, in one continuous path: press a star and slide to a linked star. You can lift your finger and carry on from the bright star.');
 
-  /* ---- input ---- */
-  let rect=svg.getBoundingClientRect();   // refreshed at the start of every drag (the board never moves mid-drag)
-  const toView=(x,y)=>[(x-rect.left)/rect.width*SIZE,(y-rect.top)/rect.height*SIZE];
-  const clampP=(x,y)=>[clamp(x,PAD,SIZE-PAD),clamp(y,PAD,SIZE-PAD)];
-  let drag=-1,dragStartPos=null;
-  function clearHint(){clearTimeout(hintTO);ghost.classList.remove('on');sg.forEach(g=>g.classList.remove('hint'))}
-  function place(v,x,y,count){
-    const[cx,cy]=clampP(x,y);P[v]=[cx,cy];moves+=count?1:0;
-    const pairs=refresh();api.commit();
-    const was=sg[v];if(count)sfx.pluck(v);
-    if(!pairs)finish();
-    else if(count&&countAt(P,v)===0)api.good(was);else if(count)api.meh();
+  /* ---- effects ---- */
+  let rect=svg.getBoundingClientRect();
+  const toClient=p=>[rect.left+p[0]/SIZE*rect.width,rect.top+p[1]/SIZE*rect.height];
+  function lightUp(i,from,to){
+    const{c,g}=thr[i];setL(c,P[from],P[to]);setL(g,P[from],P[to]);   // draw in the direction travelled
+    const len=Math.hypot(P[to][0]-P[from][0],P[to][1]-P[from][1]);
+    wa(c,[{strokeDasharray:String(len),strokeDashoffset:String(len)},{strokeDasharray:String(len),strokeDashoffset:'0'}],{duration:220,easing:'ease-out'});
+    wa(g,[{opacity:0},{opacity:1}],{duration:260,easing:'ease-out'});
+    if(!FL_RM){const sp=mk('circle','tspark');sp.setAttribute('r','2.2');gfx_.appendChild(sp);
+      const a=wa(sp,[{transform:`translate(${P[from][0]}px,${P[from][1]}px) scale(1)`,opacity:1},{transform:`translate(${P[to][0]}px,${P[to][1]}px) scale(1.6)`,opacity:1,offset:.85},{transform:`translate(${P[to][0]}px,${P[to][1]}px) scale(2.6)`,opacity:0}],{duration:260,easing:'ease-out'});
+      if(a)a.onfinish=()=>sp.remove();else sp.remove()}
+    const core=sg[to].querySelector('.core');
+    wa(core,[{transform:'scale(1.35)'},{transform:'scale(2.3)',offset:.35},{transform:'scale(1.35)'}],{duration:380,delay:180,easing:'cubic-bezier(.3,1.6,.5,1)'});
   }
+  function starDone(v){
+    const[x,y]=toClient(P[v]);setTimeout(()=>{if(box.isConnected&&!Q.modal){flBurst(x,y,'#ffd166',6,.45)}},200);
+    const h=sg[v].querySelector('.halo');wa(h,[{transform:'scale(1)'},{transform:'scale(1.9)',offset:.35},{transform:'scale(1)'}],{duration:600,delay:180,easing:'ease-out'});
+  }
+  function flashThread(i){const c=thr[i].c;c.classList.remove('no');void c.getBoundingClientRect();c.classList.add('no');setTimeout(()=>c.classList.remove('no'),420)}
+  function nudgeEnd(){const end=path[path.length-1];if(end==null)return;const g=sg[end];g.classList.remove('nudge');void g.getBoundingClientRect();g.classList.add('nudge');setTimeout(()=>g.classList.remove('nudge'),600)}
+
+  /* ---- moves ---- */
+  function addSeg(to){
+    const from=path[path.length-1],i=eKey[from+','+to];
+    used[i]=1;path.push(to);moves++;
+    lightUp(i,from,to);sfx.pluck(path.length+3);buzz(8);
+    const doneTo=E.every(([a,b],j)=>used[j]||(a!==to&&b!==to)),doneFrom=E.every(([a,b],j)=>used[j]||(a!==from&&b!==from));
+    if(doneTo)starDone(to);if(doneFrom&&from!==to)starDone(from);
+    clearHint();render();api.commit();
+    if(!left())finish();
+    else if(!freeFrom(to)){sfx.bonk();buzz([20,40,20]);api.meh();nudgeEnd();const u=$('#undoBtn');u.classList.add('glow');setTimeout(()=>u.classList.remove('glow'),3000)}
+    else if(doneTo)api.good(null,{silent:true});   // a star fully lit keeps the combo going
+  }
+  function startAt(v){path=[v];used=new Uint8Array(E.length);clearHint();render();sfx.lift();
+    wa(sg[v].querySelector('.core'),[{transform:'scale(1.35)'},{transform:'scale(2.1)',offset:.4},{transform:'scale(1.35)'}],{duration:340,easing:'cubic-bezier(.3,1.6,.5,1)'})}
   function finish(){
-    box.classList.add('solved');sel=-1;sg.forEach(g=>g.classList.remove('sel'));
+    over=true;box.classList.add('solved');band.classList.remove('on');render();
     sfx.sparkle();buzz([20,40,30]);
-    sg.forEach((g,i)=>setTimeout(()=>{if(!g.isConnected||Q.modal)return;const b=g.getBoundingClientRect();burst(b.left+b.width/2,b.top+b.height/2,'#ffd166',5,.45)},120+i*50));
+    for(let k=1;k<path.length;k++){const i=eKey[path[k-1]+','+path[k]];thr[i].c.style.animationDelay=thr[i].g.style.animationDelay=k*55+'ms'}
+    sg.forEach((g,i)=>{g.style.setProperty('--tw',(i*137%900)+'ms');setTimeout(()=>{if(!g.isConnected||Q.modal)return;const[x,y]=toClient(P[i]);flBurst(x,y,'#ffd166',5,.45)},150+i*60)});
+    if(!FL_RM){const sh=el('i','tshoot');box.appendChild(sh);setTimeout(()=>sh.remove(),1600)}
     api.win(starsFor(moves,s3,s2));
   }
+
+  /* ---- input: press a star, slide along threads ---- */
+  const toView=(x,y)=>[(x-rect.left)/rect.width*SIZE,(y-rect.top)/rect.height*SIZE];
+  const starAt=(x,y,r)=>{let best=-1,bd=r;P.forEach((p,i)=>{const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=i}});return best};
+  let drawing=false,lastNo=-1;
   dragify(svg,{
     start(e){
-      if(api.over())return false;
+      if(api.over()||over)return false;
       rect=svg.getBoundingClientRect();
-      const t=e.target.closest&&e.target.closest('.st');
-      clearHint();
-      if(t){drag=+t.dataset.i;dragStartPos=P[drag].slice();sg[drag].classList.add('drag');sfx.lift();return true}
-      if(sel>=0){const[x,y]=toView(e.clientX,e.clientY);const v=sel;sel=-1;sg[v].classList.remove('sel');place(v,x,y,true);return false}
-      return false;
-    },
-    move(x,y,e){
-      if(drag<0)return;
-      const[vx,vy]=toView(x,y);
-      P[drag]=clampP(vx,vy-LIFT(e)/rect.height*SIZE);
-      refresh();
-    },
-    end(x,y,e,moved){
-      if(drag<0)return;const v=drag;drag=-1;sg[v].classList.remove('drag');
-      const d=Math.hypot(P[v][0]-dragStartPos[0],P[v][1]-dragStartPos[1]);
-      if(!moved||d<2.2){ // a tap: select this star (then tap an empty spot to put it there)
-        P[v]=dragStartPos;refresh();
-        const was=sel===v;sel=was?-1:v;sg.forEach((g,i)=>g.classList.toggle('sel',i===sel));sfx.tick(was?.8:1.2);return;
+      const[x,y]=toView(e.clientX,e.clientY),s=starAt(x,y,9.5);if(s<0)return false;
+      const end=path.length?path[path.length-1]:-1;
+      if(end<0)startAt(s);
+      else if(s!==end){
+        const i=eKey[end+','+s];
+        if(i!=null&&!used[i])addSeg(s);                                  // tapping a linked star draws to it
+        else if(path.length===1||!freeFrom(end)){const had=path.length>1;startAt(s);if(had)api.commit()}   // re-pick the start, or start over after a dead end
+        else{sfx.bonk();nudgeEnd();if(i!=null)flashThread(i);api.coach('✨ Carry on from the bright star');return false}
       }
-      sel=-1;sg.forEach(g=>g.classList.remove('sel'));
-      place(v,P[v][0],P[v][1],true);
+      drawing=true;lastNo=-1;band.classList.add('on');setL(band,P[path[path.length-1]],[x,y]);return true;
     },
-    cancel(){if(drag>=0){P[drag]=dragStartPos;sg[drag].classList.remove('drag');drag=-1;refresh()}}
+    move(x,y){
+      if(!drawing||over)return;
+      const[vx,vy]=toView(x,y),end=path[path.length-1];
+      setL(band,P[end],[vx,vy]);
+      const s=starAt(vx,vy,7);
+      if(s<0||s===end){lastNo=-1;return}
+      const i=eKey[end+','+s];
+      if(i!=null&&!used[i]){addSeg(s);lastNo=-1;if(!over)setL(band,P[s],[vx,vy])}
+      else if(s!==lastNo){lastNo=s;if(i!=null){flashThread(i);sfx.bonk()}}
+    },
+    end(){drawing=false;band.classList.remove('on')},
+    cancel(){drawing=false;band.classList.remove('on')}
   });
 
-  /* ---- hint / bot: the star with most crossings goes to the spot that removes the most ---- */
-  function nextMove(){
-    const cur=countAll(P);if(!cur)return null;
-    if(!fallback){
-      const order=[...Array(N).keys()].sort((a,b)=>countAt(P,b)-countAt(P,a)).filter(v=>countAt(P,v)>0);
-      for(const v of order){
-        let best=null,bc=countAll(P);const old=P[v];
-        const cand=[sol[v]];for(let k=0;k<110;k++)cand.push([PAD+R()*(SIZE-2*PAD),PAD+R()*(SIZE-2*PAD)]);
-        for(const c of cand){
-          if(P.some((p,i)=>i!==v&&Math.hypot(p[0]-c[0],p[1]-c[1])<6))continue;
-          P[v]=c;const n=countAll(P);if(n<bc){bc=n;best=c}
-        }
-        P[v]=old;if(best)return{v,x:best[0],y:best[1]};
-      }
-      fallback=true;
+  /* ---- hint / bot ---- */
+  function clearHint(){clearTimeout(hintTO);thr.forEach(t=>t.c.classList.remove('next'));sg.forEach(g=>{g.classList.remove('hint');g.removeAttribute('data-h')})}
+  /* rewinds a path that can no longer finish (the hint does it for you), then returns the next thread */
+  function fixAndPlan(){
+    const p=plan();
+    if(p.keep<path.length){
+      const drop=path.length-Math.max(p.keep,1);
+      path=p.keep?path.slice(0,p.keep):[p.from];used=usedOf(path);render();api.commit();
+      if(drop>0)toast(`Rewound ${drop} thread${drop>1?'s':''}: that route could not finish ✨`);
     }
-    const v=[...Array(N).keys()].filter(i=>Math.hypot(P[i][0]-sol[i][0],P[i][1]-sol[i][1])>2).sort((a,b)=>countAt(P,b)-countAt(P,a))[0];
-    return v===undefined?null:{v,x:sol[v][0],y:sol[v][1]};
+    if(!path.length){path=[p.from];render()}
+    return p;
   }
+  function restore(s){({path,moves}=JSON.parse(s));used=usedOf(path);over=false;box.classList.remove('solved');clearHint();
+    thr.forEach(t=>{t.c.style.animationDelay=t.g.style.animationDelay=''});render()}
+  render();
   return{
-    snap:()=>JSON.stringify({P,moves}),
-    restore(s){({P,moves}=JSON.parse(s));fallback=false;sel=-1;box.classList.remove('solved');clearHint();sg.forEach(g=>g.classList.remove('sel'));badE=[];badV=[];refresh()},
+    snap:()=>JSON.stringify({path,moves}),
+    restore,
     hint(){
-      const m=nextMove();if(!m)return;clearHint();
-      const g=sg[m.v];api.flash(g,3200);g.dataset.h=1;
-      const c=ghost.querySelector('circle'),l=ghost.querySelector('line');
-      c.setAttribute('cx',m.x);c.setAttribute('cy',m.y);l.setAttribute('x1',P[m.v][0]);l.setAttribute('y1',P[m.v][1]);l.setAttribute('x2',m.x);l.setAttribute('y2',m.y);
-      ghost.classList.add('on');hintTO=setTimeout(clearHint,3200);
-      api.coach('💡 Drag the glowing star to the dashed circle');
+      if(over)return;const p=fixAndPlan();clearHint();
+      sg[p.from].dataset.h=1;sg[p.to].dataset.h=2;api.flash(sg[p.to],3200);sg[p.to].classList.add('hint');
+      thr[eKey[p.from+','+p.to]].c.classList.add('next');
+      hintTO=setTimeout(clearHint,3200);
+      api.coach('💡 Slide from the bright star along the glowing thread');
     },
-    _info:{stars:N,threads:E.length,lines:L,fallback:!!gen.fallback,minD:gen.minD},
-    _bot(){const m=nextMove();if(!m)return false;place(m.v,m.x,m.y,true);return true},
+    _info:{stars:N,threads:E.length,odd:odd.length,fallback:!!gen.fallback},
+    _bot(){if(over)return false;const p=fixAndPlan();addSeg(p.to);return true},
     destroy(){clearHint()}
   };
 };
