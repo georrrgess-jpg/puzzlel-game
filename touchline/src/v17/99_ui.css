@@ -1,0 +1,140 @@
+/* ===================== v18.15 UI polish: header fit, transitions, menus, modals, empty states, phone ===================== */
+
+/* ---------- views: a short stagger when a page opens, nothing when the same page re-renders ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .content>*{animation:none!important}
+  .content.enter>*{animation:v1815in .36s cubic-bezier(.2,.8,.2,1) both!important;animation-delay:var(--d,0ms)!important}
+}
+@keyframes v1815in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ---------- top bar: everything fits at every width ---------- */
+.tn-tabs{min-width:0}
+.tn-right{flex:0 1 auto}
+@media (min-width:901px) and (max-width:1700px){
+  .tnav .search{width:44px;height:42px;flex:none;position:relative;margin-left:0}
+  .tnav .search input[type=text]{position:absolute;right:0;top:0;width:44px;height:42px;padding:0 0 0 40px;cursor:pointer;z-index:6;transition:width .26s cubic-bezier(.2,.8,.2,1),box-shadow .2s,border-color .2s}
+  .tnav .search input[type=text]::placeholder{color:transparent}
+  .tnav .search svg{left:auto;right:14px;z-index:7}
+  .tnav .search:focus-within input[type=text],.tnav .search input[type=text]:not(:placeholder-shown){width:340px;padding:0 40px 0 14px;cursor:text;box-shadow:0 14px 40px rgba(0,0,0,.45);border-color:color-mix(in srgb,var(--accent) 50%,var(--line))}
+  .tnav .search:focus-within input[type=text]::placeholder{color:var(--muted)}
+  .tnav .search .sres{left:auto;right:0;width:380px}
+}
+@media (min-width:901px) and (max-width:1480px){
+  .tn-brand small{display:none}
+  .tn-brand b{font-size:1.45rem}
+  .tn-tabs{margin-left:6px}
+  .tn-btn{padding:0 11px;gap:7px}
+  .tn-caret{display:none}
+  .tnav .cta-opp{display:none}
+}
+@media (min-width:1221px) and (max-width:1340px){ .tn-btn>svg{display:none} .tn-btn{padding:0 12px} .tn-dot{left:6px;top:16px} }
+@media (min-width:901px) and (max-width:1100px){ .tn-brand>span{display:none} .tnav .search{display:block} }
+.tnav .cta .play{min-width:0;white-space:nowrap}
+
+/* ---------- phone: one header row ---------- */
+@media (max-width:900px){
+  .top.tnav{flex-wrap:nowrap;height:60px;min-height:60px;padding:8px 10px;gap:8px}
+  .tn-brand{padding:2px 0}
+  .tn-brand>span{display:none}
+  .tn-right{flex:1 1 auto;order:0;min-width:0;gap:8px;justify-content:flex-end}
+  .tnav .search{flex:none;width:42px;height:42px;position:relative}
+  .tnav .search input[type=text]{width:42px;height:42px;padding:0 0 0 40px;color:transparent;cursor:pointer}
+  .tnav .search input[type=text]::placeholder{color:transparent}
+  .tnav .search svg{left:13px}
+  .tnav .search:focus-within,.tnav .search:has(input:not(:placeholder-shown)){position:static}
+  .tnav .search:focus-within input[type=text],.tnav .search input[type=text]:not(:placeholder-shown){position:absolute;left:10px;right:10px;top:9px;width:auto;z-index:8;color:var(--text);cursor:text;padding-left:40px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+  .tnav .search:focus-within input[type=text]::placeholder{color:var(--muted)}
+  .tnav .search:focus-within svg,.tnav .search:has(input:not(:placeholder-shown)) svg{left:24px;top:30px;z-index:9}
+  .tnav .search:focus-within .sres,.tnav .search:has(input:not(:placeholder-shown)) .sres{left:10px;right:10px;top:calc(100% - 2px)}
+  .tnav .cta{min-width:0;flex:0 1 auto;display:flex}
+  .tnav .cta .play{height:42px;padding:2px 12px;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .tnav .cta .play>span{overflow:hidden;text-overflow:ellipsis}
+  .tnav .cta .cta-more{height:42px}
+  /* the side menu: a scrim behind it, a smoother slide */
+  .side{z-index:72;transition:transform .28s cubic-bezier(.2,.8,.2,1)!important}
+  body::after{content:"";position:fixed;inset:0;background:rgba(2,4,8,.55);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:71}
+  body.navopen::after{opacity:1;pointer-events:auto}
+  /* tab rows scroll sideways instead of wrapping */
+  .content .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .content .tabs::-webkit-scrollbar{display:none}
+  .content .tabs .tab{flex:none}
+}
+
+/* ---------- menus: hover intent, a softer reveal, staggered items, shut after a pick ---------- */
+.tn-dd{transform:translateY(-6px) scale(.985);transform-origin:top left;transition:opacity .16s ease .14s,transform .2s cubic-bezier(.2,.8,.2,1) .14s,visibility 0s linear .34s}
+.tn-dd-r{transform-origin:top right}
+.tn-tab.has-dd:hover>.tn-dd,.tn-tab.has-dd:focus-within>.tn-dd{transition:opacity .16s ease .06s,transform .22s cubic-bezier(.2,.8,.2,1) .06s,visibility 0s linear 0s}
+@media (prefers-reduced-motion:no-preference){
+  .tn-tab.has-dd:hover>.tn-dd .tn-item,.tn-tab.has-dd:focus-within>.tn-dd .tn-item{animation:v1815item .24s cubic-bezier(.2,.8,.2,1) both}
+  .tn-dd .tn-item:nth-child(2){animation-delay:.03s!important}.tn-dd .tn-item:nth-child(3){animation-delay:.06s!important}.tn-dd .tn-item:nth-child(4){animation-delay:.09s!important}.tn-dd .tn-item:nth-child(5){animation-delay:.12s!important}.tn-dd .tn-item:nth-child(n+6){animation-delay:.15s!important}
+  .top .menu{animation:v1815drop .18s cubic-bezier(.2,.8,.2,1) both}
+}
+@keyframes v1815item{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+@keyframes v1815drop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+body.v1815-ddshut .tn-dd{opacity:0!important;visibility:hidden!important;transition:none!important}
+.tn-item{transition:background .15s ease}
+.tn-item .tn-ico{transition:transform .2s cubic-bezier(.2,.8,.2,1),color .15s}
+.tn-item:hover .tn-ico{transform:scale(1.08);color:var(--accent)}
+.tn-btn:focus-visible,.tab:focus-visible,.tn-item:focus-visible,.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* ---------- modals and drawers: a smoother pop, a short exit ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .scrim{animation:v1815fade .2s ease both}
+  .scrim>.modal{animation:v1815pop .28s cubic-bezier(.2,.9,.25,1) both}
+  .scrim.v1815-out{animation:v1815fadeout .16s ease forwards!important;pointer-events:none}
+  .scrim.v1815-out>.modal{animation:v1815popout .16s ease forwards!important}
+  .drawer.v1815-out{animation:v1815slideout .18s ease forwards!important}
+}
+.scrim.v1815-still,.scrim.v1815-still>.modal,.drawer.v1815-still{animation:none!important}
+@keyframes v1815fade{from{opacity:0}to{opacity:1}}
+@keyframes v1815fadeout{to{opacity:0}}
+@keyframes v1815pop{from{opacity:0;transform:translateY(10px) scale(.975)}to{opacity:1;transform:none}}
+@keyframes v1815popout{to{opacity:0;transform:translateY(6px) scale(.98)}}
+@keyframes v1815slideout{to{transform:translateX(100%)}}
+
+/* ---------- toasts: tap to dismiss, a soft exit ---------- */
+.toast{cursor:pointer;max-width:min(520px,calc(100vw - 32px));text-align:center}
+.toast.v1815-out{animation:v1815toastout .22s ease forwards!important}
+@keyframes v1815toastout{to{opacity:0;transform:translate(-50%,12px) scale(.96)}}
+@media (max-width:900px){ .toast{bottom:84px} }
+
+/* ---------- empty states ---------- */
+:where(.content,.modal) div.empty:not(.matchhero):not(.slot){position:relative;padding:38px 26px 32px;border:1px dashed color-mix(in srgb,var(--line) 70%,var(--muted));background:radial-gradient(70% 90% at 50% 0%,color-mix(in srgb,var(--accent) 6%,transparent),transparent 70%),color-mix(in srgb,var(--surface) 70%,transparent);font-size:.97rem;line-height:1.55;color:color-mix(in srgb,var(--text) 72%,var(--bg))}
+:where(.content,.modal) div.empty:not(.matchhero):not(.slot)::before{content:"";display:block;width:46px;height:46px;margin:0 auto 14px;border-radius:50%;opacity:.85;
+  background:center/26px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239aa6b8' stroke-width='1.6' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.2'/%3E%3Cpath d='M12 7.4l3.6 2.6-1.4 4.3H9.8L8.4 10z'/%3E%3Cpath d='M12 7.4V2.9M15.6 10l4.3-1.4M14.2 14.3l2.6 3.7M9.8 14.3L7.2 18M8.4 10L4.1 8.6'/%3E%3C/svg%3E"),color-mix(in srgb,var(--surface2) 80%,transparent);
+  box-shadow:inset 0 0 0 1px var(--line)}
+:where(.content,.modal) div.empty:not(.matchhero):not(.slot)>hr,:where(.content,.modal) div.empty:not(.matchhero):not(.slot)>.ld-dash{display:none}
+
+/* ---------- tables: a hint when there is more to the right; rows ease on hover ---------- */
+.tw{background:linear-gradient(to right,var(--surface) 30%,transparent) left/40px 100% no-repeat local,linear-gradient(to left,var(--surface) 30%,transparent) right/40px 100% no-repeat local,radial-gradient(farthest-side at 0 50%,rgba(0,0,0,.4),transparent) left/14px 100% no-repeat scroll,radial-gradient(farthest-side at 100% 50%,rgba(0,0,0,.4),transparent) right/14px 100% no-repeat scroll,var(--surface)}
+.tw tbody tr{transition:background .15s ease}
+@media (max-width:640px){
+  .view-league .tw table:has(>thead th:nth-child(12))>*>tr>:is(:nth-child(4),:nth-child(5),:nth-child(6),:nth-child(7),:nth-child(8),:nth-child(11),:nth-child(12)){display:none}
+}
+
+/* ---------- back to top ---------- */
+.v1815-top{position:fixed;right:22px;bottom:24px;z-index:35;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 92%,transparent);color:var(--text);display:grid;place-items:center;cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.4);
+  opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;transition:opacity .22s ease,transform .26s cubic-bezier(.2,.8,.2,1),background .15s}
+.v1815-top.on{opacity:1;transform:none;pointer-events:auto}
+.v1815-top:hover{background:var(--surface2)}
+.v1815-top svg{transform:rotate(180deg)}
+@media (max-width:900px){ .v1815-top{bottom:88px;right:14px;width:42px;height:42px} }
+body.locked .v1815-top{display:none}
+
+/* ---------- small things ---------- */
+.card,.ov-card{transition:border-color .2s ease,box-shadow .25s ease,transform .25s ease}
+.seg button{transition:background .18s ease,color .18s ease,box-shadow .18s ease}
+.pagehead h1{animation:none}
+::selection{background:color-mix(in srgb,var(--accent) 40%,transparent)}
+
+/* ---------- narrow phones: the Overview section table drops W/D/L, the State Poll tabs scroll ---------- */
+@media (max-width:420px){ .ov-card table.ot>*>tr>:is(:nth-child(4),:nth-child(5),:nth-child(6)){display:none} .ov-card .ot-s{min-width:0} }
+.v1812p-tabs{min-width:0;max-width:100%}
+@media (max-width:640px){
+  .view-league .tw table:has(>thead th:nth-child(12)) td:nth-child(2) .row{gap:6px!important;min-width:0}
+  .view-league .tw table:has(>thead th:nth-child(12)) td:nth-child(2) .link{display:block;max-width:calc(100vw - 272px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+  .view-league .tw table:has(>thead th:nth-child(12)) .tbadge{--sz:32px!important}
+  .view-league .tw table:has(>thead th:nth-child(12)) .tbadge svg{width:26px;height:26px}
+}
+@media (max-width:420px){ .ov-card .ot .ot-s{display:flex;align-items:center;gap:6px;min-width:0} .ov-card .ot .ot-s .link{display:block;max-width:calc(100vw - 222px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left} }
+@media (max-width:360px){ .ov-card{padding:14px} .ov-card table.ot th,.ov-card table.ot td{padding-left:4px;padding-right:4px} }

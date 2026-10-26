@@ -2,6 +2,44 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.15 (UI polish pass)
+
+All in `src/v17/99_ui.js` + `99_ui.css`, presentation only; before/after shots in `test/shots/ui19/`.
+
+**Top bar**
+- It overflowed between ~1130 and 1700 px: the header was 1489 px wide at 1280-1440, so the whole page scrolled sideways and Play/Settings were off screen.
+- Now:
+  - search collapses to a 44 px icon at ≤1700 px and expands to 340 px on focus;
+  - brand subtitle and carets go at ≤1480 px;
+  - tab icons go at 1221-1340 px (labels stay);
+  - the existing icon-only range is unchanged.
+- Phone (≤900 px) is one 60 px row: burger, mark, search icon (opens across the bar), Play (ellipsis).
+- `test/ui1815.js` checks 21 widths × 3 Play labels.
+
+**Views**
+- `style_v15.css` replayed `polishIn` on every render with `!important`, so every tab or filter click re-faded the page and the v8 route stagger never ran.
+- Now: no animation on same-route renders; route changes use the `.content.enter` stagger (40 ms steps, max 6, 360 ms).
+
+**Menus**
+- Hover intent: 60 ms open, 140 ms close delay.
+- Staggered items.
+- `body.v1815-ddshut` closes a dropdown after a pick, until the pointer leaves the tabs.
+- The phone side menu has a scrim (`body::after`) and closes on an outside tap or Escape.
+
+**Modals, drawers, toasts**
+- `A.closeModal` / `A.closeDrawer` play a 150-170 ms exit first. Skipped for stacked "back" modals and reduced motion.
+- A same-key `renderModal` adds `.v1815-still`, so the pop doesn't replay. The old inline `animation:none` only reached the scrim, not the `.modal`.
+- Toasts fade out and dismiss on tap.
+
+**Misc**
+- `/` focuses search; Escape clears it.
+- Back-to-top button after 900 px of scroll.
+- Empty states have an icon, more padding and readable text.
+- Wide tables show scroll shadows.
+- Phone standings keep # / School / P / GD / Pts, with names truncated.
+- Tab rows scroll sideways on phones instead of wrapping.
+- No page scrolls sideways at 320 or 390 px (all 24 routes checked).
+
 ## Version 18.14 (one state: a top 50, poll schools in the playoffs, the State Awards)
 
 **Bigger poll** (`src/v17/94_poll_zz_link.js`)
