@@ -193,6 +193,7 @@ function newCareer(opts){
   for(const sid of C.league) for(const lvl of LVLS) setLineup(C, sid, lvl, autoLineup(C, sid, lvl, C.coaches[C.schools[sid].coachId].form));
   const us = C.schools[C.userSid];
   for(const lvl of LVLS){ const best=bestFormation(C, C.userSid, lvl); setLineup(C, C.userSid, lvl, best.lineup); us.lu[lvl].strat='balanced'; us.lu[lvl].tac={pass:50,tempo:50,press:50,ment:50}; }
+  balanceLeague(C,true);
   seasonStart(C);
   addNews(C,'program',`${C.coaches[C.userCoachId].name} named head coach at ${us.name}`, C.userSid);
   addNews(C,'rivalry',`${us.town} and ${C.schools[C.rivals.heated].town} renew one of ${C.stateName}'s fiercest rivalries this fall`, C.rivals.heated);
@@ -727,6 +728,27 @@ function genExt(C, target, tag, nameHint){
 const POST_CAP=85;
 function capTeam(C,sid,cap){ if(sid===C.userSid) return; for(let k=0;k<12;k++){ const r=xiRating(C,sid,'V'); if(r<=cap) break; const d=r-cap+0.15; squad(C,sid,'V').forEach(p=>shiftOvr(p,-d,'balanced')); } }
 function capPostTeams(C){ for(const id in C.schools){ const s=C.schools[id]; if(s.ext==='post'&&id!==C.userSid) capTeam(C,id,POST_CAP); } }
+/* v18.13 league balance: each season the league's Varsity XIs are set to a standard band at season start. Other schools
+   sit at 65-70 with one or two at 70-72; every third season one of them (never the user) has a golden senior class
+   rated near 85 that graduates afterwards; the user's school starts the career at 70-72 and is never touched again. */
+const BAL={lo:65,hi:69.4,top:[70,72.4],gold:[84.5,85.4],every:3,seniors:10};
+function fitTeam(C,sid,target,who){ for(let k=0;k<8;k++){ const xi=xiRating(C,sid,'V'); if(Math.abs(xi-target)<0.15) break; const sq=squad(C,sid,'V').filter(p=>!who||who(p)); if(!sq.length) break; const lu=getLu(C,sid,'V'); const inXi=new Set(lu.slots.map(x=>x.pid)); const n=Math.max(1,sq.filter(p=>inXi.has(p.id)).length); const d=clamp((target-xi)*(who?11/n:1),-12,14); sq.forEach(p=>{ shiftOvr(p,d,'balanced'); p.pot=Math.max(p.pot,Math.ceil(ovr(p))); }); relineup(C,sid); } }
+function relineup(C,sid){ const s=C.schools[sid]; const lu=getLu(C,sid,'V'); const caps=(lu&&lu.caps||[]).filter(id=>C.players[id]&&C.players[id].sid===sid&&C.players[id].lvl==='V'); const user=sid===C.userSid; const form=user&&lu?lu.form:C.coaches[s.coachId].form; s.lu.V={...autoLineup(C,sid,'V',form), tac:lu&&lu.tac, strat:lu&&lu.strat||'balanced', caps}; if(!s.lu.V.tac) s.lu.V.tac={...C.coaches[s.coachId].tac}; if(caps.length<2) s.lu.V.caps=[...caps,...defaultCaptains(C,sid,'V').filter(x=>!caps.includes(x))].slice(0,2); }
+function balanceLeague(C,start){
+  const r=rngFrom(hashStr(C.seed+':bal:'+C.year)); const off=diffOffset(C)/2; C.golden=C.golden||{};
+  if(start){ fitTeam(C,C.userSid,70+r()*2.4); }
+  const others=C.league.filter(s=>s!==C.userSid);
+  let gold=null; if(C.seasonNo%BAL.every===0&&!C.golden[C.year]){ const prev=new Set(Object.values(C.golden)); const pool=others.filter(s=>!prev.has(s)); gold=pick(r,pool.length?pool:others); C.golden[C.year]=gold; }
+  else if(C.golden[C.year]) gold=C.golden[C.year];
+  const rest=others.filter(s=>s!==gold).map(sid=>({sid,k:xiRating(C,sid,'V')+gauss(r)*1.5})).sort((a,b)=>b.k-a.k);
+  const nTop=r()<0.5?1:2; const n=rest.length-nTop;
+  rest.forEach((t,i)=>{ const T=i<nTop? BAL.top[0]+r()*(BAL.top[1]-BAL.top[0]) : clamp(BAL.hi-(BAL.hi-BAL.lo)*(n>1?(i-nTop)/(n-1):0.5)+(r()-.5)*0.6,BAL.lo,BAL.hi); fitTeam(C,t.sid,T+off); });
+  if(gold){ const sch=C.schools[gold]; fitTeam(C,gold,BAL.lo+2+r()*2+off); const sen=squad(C,gold,'V').filter(p=>p.grade>=12); const need={GK:1,DEF:4,MID:4,FWD:2}; const have={GK:0,DEF:0,MID:0,FWD:0}; sen.forEach(p=>have[p.pos]++);
+    const want=[]; for(const g of GROUPS) for(let i=have[g];i<need[g];i++) want.push(g); while(sen.length+want.length<BAL.seniors) want.push(pick(r,['DEF','MID','FWD']));
+    const used=new Set(squad(C,gold,'V').map(p=>p.num)); for(const g of want){ const p=genPlayer(C,r,{sid:gold,lvl:'V',grade:12,pos:g,target:80,potGap:2}); p.num=assignNum(r,used,g); p.mi=true; C.players[p.id]=p; }
+    relineup(C,gold); fitTeam(C,gold,BAL.gold[0]+r()*(BAL.gold[1]-BAL.gold[0])+off,p=>p.grade>=12);
+    addNews(C,'program',`Scouts circle ${sch.town}: a golden senior class has ${sch.name} rated among the best in ${C.stateName}`,gold); }
+}
 function diffOffset(C){ return {easy:-4,normal:0,hard:2}[C.settings.difficulty]||0; }
 function seasonStart(C){
   // plans for development, breakouts, season start ratings
@@ -1114,6 +1136,7 @@ function rollover(C){
       const titles=s.honors.filter(h=>h.yr>yr-st.every).length; const score=(8-avgPos)/7*60+titles*12+s.prestige*0.3;
       const need={1:30,2:42,3:58}[st.tier]; if(st.tier<4 && score>=need){ st.tier++; const T=STADIUM_TIERS[st.tier]; st.cap=Math.round((T.min+r()*(T.max-T.min))/10)*10; addNews(C,'facility',`${s.town} unveil upgrades: ${st.name} becomes a ${T.n} (${st.cap.toLocaleString()} seats)`,sid); } } }
   addNews(C,'program',`${grads.filter(id=>C.alumni[id].sid===C.userSid).length} seniors graduate from ${C.schools[C.userSid].town}`,C.userSid);
+  balanceLeague(C,false);
   seasonStart(C);
   return {ok:true, grads};
 }

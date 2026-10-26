@@ -7,7 +7,7 @@ let fails=0; const ok=(c,msg)=>{ console.log((c?'PASS ':'FAIL ')+msg); if(!c) fa
 const SRC=path.join(__dirname,'..','src');
 function loadNode(){ const src=['data.js','mascots.js','engine.js','v17/97_tryouts.js'].map(f=>fs.readFileSync(path.join(SRC,f),'utf8').replace(/if \(typeof module[^\n]*\n?/g,'')).join('\n');
   const ctx={console,Math,JSON,Object,Array,Set,Map,String,Number,Date}; vm.createContext(ctx);
-  vm.runInContext(src+'\n;this.X={LVLS,LVL_NAME,GROUPS,eligible,newCareer,rollover,simRound,advance,squad,schoolPlayers,ovr,validateLineup,getLu,migrate,startMatch,userFixture,roundFixtures,findPerson,everyone,standings,addNews,V1812T,v1812tEnsure,v1812tView,v1812tRanges,v1812tDrills,v1812tCounts,v1812tCheck,v1812tAutoPlan,v1812tApplyAuto,v1812tPost,v1812tRunDay,v1812tPoolIds,v1812tSet,v1812tAutoResolve,v1812tBox,v1812tSt,v1812tIsOpen,v1812tRevenge,v1812tAsg,v1812tFind,v1812tAllRaw,v1812tInfo,rngFrom,hashStr};',ctx); return ctx.X; }
+  vm.runInContext(src+'\n;this.X={LVLS,LVL_NAME,GROUPS,eligible,newCareer,rollover,simRound,advance,squad,schoolPlayers,ovr,validateLineup,getLu,migrate,startMatch,userFixture,roundFixtures,findPerson,everyone,standings,addNews,V1812T,v1812tEnsure,v1812tTransferDest,v1812tView,v1812tRanges,v1812tDrills,v1812tCounts,v1812tCheck,v1812tAutoPlan,v1812tApplyAuto,v1812tPost,v1812tRunDay,v1812tPoolIds,v1812tSet,v1812tAutoResolve,v1812tBox,v1812tSt,v1812tIsOpen,v1812tRevenge,v1812tAsg,v1812tFind,v1812tAllRaw,v1812tInfo,rngFrom,hashStr};',ctx); return ctx.X; }
 const mk=(X,seed)=>X.newCareer({slot:1,seed,coachName:'T'});
 function season(X,C){ let g=0; while(C.phase!=='offseason'&&g++<300){ X.simRound(C); const ev=X.advance(C); if(!ev) return false; } return C.phase==='offseason'; }
 function invariants(X,C,tag){ const u=C.userSid; const bad=[];
@@ -116,7 +116,8 @@ function run(seed,seasons){ const X=loadNode(); const C=mk(X,seed); const log=[]
   const X=R1.X, C=R1.C; const tr=Object.values(C.players).filter(p=>p.cutMem&&p.cutMem.from===C.userSid&&p.sid!==C.userSid);
   ok(tr.length>=1&&tr.every(p=>C.league.includes(p.sid)&&p.sid!==C.userSid), `${tr.length} cut players play for rivals in the league`);
   ok(C.news.some(n=>n.type==='transfer'&&/transfers to/.test(n.text)), 'a transfer makes the Newswire ("He remembers ... transfers to ...")');
-  ok(C.rivals.heated&&Object.values(C.tryout.mem).filter(m=>m.status==='rival'&&m.sid===C.rivals.heated).length>=Object.values(C.tryout.mem).filter(m=>m.status==='rival').length*.4, 'most transfers go to the heated rival');
+  { const others=C.league.filter(s=>s!==C.userSid); let h=0, n=4000, x=7; const rr=()=>{ x=(x*1103515245+12345)%2147483648; return x/2147483648; }; for(let i=0;i<n;i++) if(X.v1812tTransferDest(C,others,rr(),rr)===C.rivals.heated) h++;
+    const real=Object.values(C.tryout.mem).filter(m=>m.status==='rival'); ok(C.rivals.heated&&h/n>0.55&&real.every(m=>others.includes(m.sid)), `most transfers go to the heated rival (${(h/n*100).toFixed(1)} % of ${n} draws; this career: ${real.filter(m=>m.sid===C.rivals.heated).length} of ${real.length})`); }
   const mk2=Object.values(C.tryout.mem).filter(m=>m.status==='made'); ok(mk2.length===0||mk2.every(m=>{ const p=C.players[m.pid]; return !p||p.cutMem&&p.cutMem.yr===m.cutYr; }), 'comeback players who made a roster carry their story (cutMem)');
   const brk=Object.values(C.tryout.mem).filter(m=>m.brk); ok(brk.length>=1, `some cut players break out (${brk.length})`);
   ok(C.news.some(n=>n.type==='comeback')||brk.length===0||true, 'comebacks are reported');

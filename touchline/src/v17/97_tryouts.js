@@ -285,6 +285,8 @@ function v1812tPlaceAtRival(C,p,dest,rr){ const sch=C.schools[dest]; const prefe
     if(weakest){ const down=['JV','MOD'].find(l=>v1812tLvlOrd[l]>v1812tLvlOrd[lvl]&&eligible(weakest,l)&&squad(C,dest,l).length<V1812T.caps[l]);
       if(down){ weakest.lvl=down; weakest.num=freeNum(C,dest,down,weakest); touched.add(down); } else { C.alumni[weakest.id]=compactAlum(weakest,C.year-1,'Left the program before his final season'); delete C.players[weakest.id]; } } }
   v1812tRelineup(C,dest,[...touched]); return lvl; }
+/* where a cut player who transfers ends up: the heated rival 60 %, the seasonal rival 20 %, anyone else in the league otherwise */
+function v1812tTransferDest(C,others,w,rr){ const heated=C.rivals.heated, seasonal=C.rivals.seasonal; return w<.6&&others.includes(heated)?heated:w<.8&&others.includes(seasonal)?seasonal:others[Math.floor(rr()*others.length)]; }
 function v1812tAfterRollover(C){
   const T=v1812tBox(C); const u=C.userSid; if(!u) return; const newYr=C.year;
   const left=Object.values(T.mem).filter(m=>m.status==='cut'&&T.cut[m.pid]).sort((a,b)=>a.pid<b.pid?-1:1);
@@ -304,7 +306,7 @@ function v1812tAfterRollover(C){
     if(x<pQ){ m.status='quit'; m.endYr=newYr; delete T.cut[m.pid]; if(m.fromLvl==='V') addNews(C,'tryouts',`${m.name}, cut from the Varsity last fall, has quit the sport`,u); }
     else if(x<pQ+pM){ m.status='away'; m.endYr=newYr; delete T.cut[m.pid]; }
     else if(x<pQ+pM+pT&&others.length){ const w=rr(); const heated=C.rivals.heated, seasonal=C.rivals.seasonal;
-      const dest=w<.6&&others.includes(heated)?heated:w<.8&&others.includes(seasonal)?seasonal:others[Math.floor(rr()*others.length)];
+      const dest=v1812tTransferDest(C,others,w,rr);
       delete T.cut[m.pid]; p.sid=dest; p.cutMem={yr:m.cutYr,lvl:m.fromLvl,g:m.grudge,from:u,rv:dest===heated,brk:!!m.brk,to:dest}; delete p.cutYr; delete p.tryKind;
       const lvl=v1812tPlaceAtRival(C,p,dest,rr); m.status='rival'; m.sid=dest; m.endYr=newYr; m.toLvl=lvl;
       addNews(C,'transfer',`He remembers: ${m.name}, cut by ${town} in ${m.cutYr}, transfers to ${C.schools[dest].town}${dest===heated?' (your heated rival)':''}${m.brk?' and has grown into a player':''}`,dest,{pid:m.pid}); }
