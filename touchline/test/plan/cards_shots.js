@@ -27,5 +27,10 @@ const THEMES={night:{preset:'night'},light:{preset:null,custom:{bg:'#f3f0e8',sur
     await page.evaluate(()=>{ const el=document.querySelector('.v1811c-mini'); if(el) el.scrollIntoView(); }); await page.screenshot({path:S('profile')});
     /* the results pack after a round */
     await page.evaluate(()=>{ App.modal=null; renderModal(); App.route='office'; render(); const C=App.C; const uf=userFixture(C); completeRound(uf?uf.id:null); }); await page.waitForTimeout(1600); await page.screenshot({path:S('results-pack')});
+    /* a live match: the reveal over the pitch, mid-flip and final */
+    if(th==='night'){ await page.evaluate(()=>{ document.querySelectorAll('.ceremony').forEach(x=>x.remove()); App.modal=null; renderModal(); App.route='office'; render(); });
+      await page.click('.cta [data-a="playNext"]'); await page.waitForTimeout(400); await page.click('[data-a="kickoff"]'); await page.waitForTimeout(1200);
+      for(let k=0;k<14;k++){ if(await page.$('#lv-cont')) break; if(await page.$('#lv-ht .htbox')){ await page.click('#ht-go').catch(()=>{}); await page.waitForTimeout(400); } await page.click('[data-a="liveSkip"][data-to="ft"]',{timeout:3000}).catch(()=>{}); await page.waitForTimeout(1500); }
+      await page.waitForSelector('.live .v1811c-rv-in',{timeout:15000}).catch(()=>{}); await page.waitForTimeout(1500); await page.screenshot({path:S('live-reveal-flip')}); await page.waitForTimeout(2200); await page.screenshot({path:S('live-reveal-final')}); }
     await page.close(); }
   console.log(errs.length?errs.join('\n'):'no page errors'); await b.close(); })();

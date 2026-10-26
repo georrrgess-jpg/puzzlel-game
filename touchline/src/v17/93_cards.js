@@ -58,17 +58,17 @@ function v1811cStats(c){ const s=c.st||{}, grp=ROLE_GROUP[c.role]||ROLE_GROUP[c.
 function v1811cMatchLine(c){ const O=Sx(c.opp); const sc=`${c.us}–${c.th}${c.pk?` (${c.pk[0]}–${c.pk[1]} p)`:''}`; return {opp:O?O.town:'Opponent',sc,res:c.res,where:c.home?'vs':'at'}; }
 /* o: {w:px width, cls, count:true (numbers count up from 0), back:true (render the back face too)} */
 function v1811cCardHTML(c,o){ o=o||{}; const s=Sx(c.sid)||{c1:'#1d4ed8',c2:'#ffffff',town:''}; const p=v1811cPerson(c); const ink=v1811cInk(s.c1); const c1d=_mc(s.c1,'#000000',0.45), c1l=_mc(s.c1,'#ffffff',0.12);
-  const ml=v1811cMatchLine(c); const w=o.w||220; const cnt=(v,d)=>o.count?`<b data-v1811c-to="${v}" data-d="${d||0}">${d?'0.0':'0'}</b>`:`<b>${d?Number(v).toFixed(d):v}</b>`;
+  const ml=v1811cMatchLine(c); const w=o.w||220; const lite=w<200; const cnt=(v,d)=>o.count?`<b data-v1811c-to="${v}" data-d="${d||0}">${d?'0.0':'0'}</b>`:`<b>${d?Number(v).toFixed(d):v}</b>`;
   const stats=v1811cStats(c).map(([k,v])=>`<span>${cnt(v||0)}<i>${k}</i></span>`).join('');
   const face=`<div class="v1811c-face v1811c-front"><div class="v1811c-panel">
-      <div class="v1811c-art"><div class="v1811c-stripes"></div><div class="v1811c-mark">${logo(s,120)}</div><div class="v1811c-por">${portraitSVG(p,140,{c1:s.c1,c2:s.c2})}</div></div>
+      <div class="v1811c-art"><div class="v1811c-stripes"></div><div class="v1811c-mark">${logo(s,lite?30:120)}</div><div class="v1811c-por">${portraitSVG(p,140,{c1:s.c1,c2:s.c2})}</div></div>
       <div class="v1811c-tl"><span class="v1811c-rt">${cnt(c.rt,1)}</span><span class="v1811c-rtl">RTG</span><span class="v1811c-pos">${esc(c.pos||'')}</span><span class="v1811c-num">#${esc(c.num==null?'':c.num)}</span></div>
-      <div class="v1811c-crest">${logo(s,44)}</div>
+      <div class="v1811c-crest">${logo(s,lite?30:44)}</div>
       <div class="v1811c-name"><small>${esc(c.fn||'')}</small><b>${esc(c.ln||c.nm||'')}</b></div>
       <div class="v1811c-ml"><span><em class="v1811c-res v1811c-res-${c.res}">${c.res}</em> ${ml.sc} ${ml.where} <b>${esc(ml.opp)}</b></span><small>${esc(v1811cRound(c))} · ${c.yr}</small></div>
       <div class="v1811c-st">${stats}</div>
     </div><div class="v1811c-badge"><b>${V1811C.name[c.rar]}</b>${c.feat?`<i>${esc(c.feat)}</i>`:''}</div><div class="v1811c-holo"></div><div class="v1811c-foil"></div></div>`;
-  const back=o.back===false?'':`<div class="v1811c-face v1811c-back"><div class="v1811c-panel"><div class="v1811c-bpat"></div><div class="v1811c-bring">${logo(s,150)}</div><div class="v1811c-bword"><b>Touchline</b><small>Player of the Match</small><i>${esc(s.town||'')}</i></div></div><div class="v1811c-foil"></div></div>`;
+  const back=o.back===false?'':`<div class="v1811c-face v1811c-back"><div class="v1811c-panel"><div class="v1811c-bpat"></div><div class="v1811c-bring">${logo(s,lite?30:150)}</div><div class="v1811c-bword"><b>Touchline</b><small>Player of the Match</small><i>${esc(s.town||'')}</i></div></div><div class="v1811c-foil"></div></div>`;
   return `<div class="v1811c-card v1811c-r-${c.rar} ${o.cls||''}" style="--w:${w}px;--c1:${s.c1};--c2:${s.c2};--c1d:${c1d};--c1l:${c1l};--ink:${ink}" data-card="${esc(c.id)}"><div class="v1811c-in">${face}${back}</div></div>`; }
 
 /* ---------- the reveal ---------- */
@@ -89,7 +89,7 @@ function v1811cShow(R){ const c=R.cards[R.i]; const rm=reducedMotion(); R.t.forE
     <div class="v1811c-rv-head"><span class="eyebrow">Player of the Match${many?` · ${R.i+1} of ${R.cards.length}`:''}</span></div>
     <div class="v1811c-rv-stage"><div class="v1811c-fly">${v1811cCardHTML(c,{w,count:!rm})}</div></div>
     <div class="v1811c-rv-cap"><b class="v1811c-rv-tier">${V1811C.name[c.rar]}</b><span>${esc(V1811C.finish[c.rar])}${c.feat?` · ${esc(c.feat)}`:''}</span></div>
-    <div class="v1811c-rv-act"><button class="btn" data-a="v1811cBinder" data-id="${esc(c.id)}">Card binder</button><button class="btn pri" data-a="v1811cNext">${many&&!last?'Next card':'Done'}</button></div>
+    <div class="v1811c-rv-act">${App.live?'':`<button class="btn" data-a="v1811cBinder" data-id="${esc(c.id)}">Card binder</button>`}<button class="btn pri" data-a="v1811cNext">${many&&!last?'Next card':'Done'}</button></div>
     <small class="v1811c-rv-hint">${rm?'':'Click, Esc or Enter to skip'}</small>`;
   if(rm){ v1811cPhase(R,'done'); R.ov.classList.add('v1811c-rm'); return; }
   const T=(ms,f)=>R.t.push(setTimeout(f,ms));
@@ -198,5 +198,5 @@ document.addEventListener('pointerout',e=>{ const st=e.target&&e.target.closest&
 if(MODALS.player){ const _v1811cMP=MODALS.player; MODALS.player=m=>{ const h=_v1811cMP(m); try{ if((m.tab||'overview')!=='overview'||!App.C) return h; const cards=v1811cBox(App.C).list.filter(c=>c.pid===m.id); if(!cards.length) return h;
     const ord=cards.slice().sort((a,b)=>V1811C.tiers.indexOf(b.rar)-V1811C.tiers.indexOf(a.rar)||b.rt-a.rt).slice(0,6); const ids=ord.map(c=>c.id).join(',');
     const sec=`<div class="v1811c-mini"><div class="v1811c-mhd"><span class="eyebrow">Player of the Match cards · ${cards.length}</span><button class="link" data-a="v1811cF2" data-pid="${esc(m.id)}">Open in binder</button></div><div class="v1811c-mrow">${ord.map(c=>`<button class="v1811c-gc" data-a="v1811cView" data-id="${esc(c.id)}" data-ids="${esc(ids)}" aria-label="${esc(V1811C.name[c.rar])} card, ${esc(v1811cRound(c))} ${c.yr}">${v1811cCardHTML(c,{w:96,back:false})}</button>`).join('')}</div></div>`;
-    const i=h.lastIndexOf('<div class="mfoot">'); return i<0?h+sec:h.slice(0,i)+sec+h.slice(i); }catch(e){ console.error(e); return h; } }; }
+    const i=h.lastIndexOf('<div class="mfoot">'); return i<0?h+sec:h.slice(0,i).replace(/<\/div>$/,sec+'</div>')+h.slice(i); }catch(e){ console.error(e); return h; } }; }
 A.v1811cF2=el=>{ App.modal=null; A.go({dataset:{r:'cards',p:JSON.stringify({pid:el.dataset.pid})}}); };
