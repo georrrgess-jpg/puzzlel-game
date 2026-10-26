@@ -80,3 +80,13 @@ function v1812pAfter(){
 }
 { const _v1812pR=render; render=function(){ const r=_v1812pR.apply(this,arguments); try{ v1812pAfter(); }catch(e){ console.warn('poll after',e); } return r; }; }
 { const _v1812pAM=afterModal; afterModal=function(root){ _v1812pAM.apply(this,arguments); try{ if(!reducedMotion()) root.querySelectorAll('.v1812p-chart').forEach(c=>c.closest('.card,.modal')&&c.closest('.card,.modal').classList.add('v1812p-in')); }catch(e){} }; }
+
+/* ---------- a new career: the school can be renamed after the world is drawn, so the preseason item is written when the career starts ---------- */
+{ const _v1812pCC=A.createCareer; A.createCareer=async function(el){ const D=App.draft; try{ if(D&&D.poll){ D.news=D.news.filter(n=>n.type!=='poll'); } }catch(e){}
+    const r=await _v1812pCC.apply(this,arguments);
+    try{ const C=App.C; if(C&&C.poll&&C.poll.polls[C.year]&&C.poll.polls[C.year][0]&&!C.news.some(n=>n.type==='poll')){ delete C.poll.news[C.year+':0']; v1812pNews(C,C.year,0,C.poll.polls[C.year][0],null); queueSave(); } }catch(e){ console.warn('poll start',e); }
+    return r; }; }
+
+/* ---------- offseason: the season in the poll goes on the wrap-up page ---------- */
+{ const _v1812pOS=offseasonView; offseasonView=function(){ let h=_v1812pOS.apply(this,arguments); try{ const C=App.C; const polls=v1812pPolls(C,C.year); if(polls.length>1){ const poll=polls[polls.length-1]; const rk=v1812pRankOf(poll,C.userSid);
+      h+=`<div class="v1812p-off">${v1812pSeasonCard(C,C.userSid,C.year)}<section class="v1812p-card"><div class="v1812p-kick">The State Poll · ${esc(v1812pTitle(C,poll))}</div><h3 class="v1812p-head sm">${rk?'Finished No. '+rk+' in '+esc(C.stateName):'Finished outside the '+esc(C.stateName)+' top 25'}</h3><ol class="v1812p-ovt">${poll.rows.slice(0,5).map(r=>`<li class="${r.id===C.userSid?'me':''}"><b class="v1812p-ork">${r.rk}</b>${v1812pMv(r)}${crest(v1812pSchool(C,r.id),20)}<span class="trunc">${esc(v1812pName(C,r.id))}</span><i class="mono">${r.pts}</i></li>`).join('')}</ol><button class="btn sm" data-a="go" data-r="statepoll">Open State Poll</button></section></div>`; } }catch(e){ console.warn('poll offseason',e); } return h; }; }

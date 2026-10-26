@@ -155,6 +155,7 @@ function v1812pLines(vid,f){
     [f.cs>=3,`${f.cs} clean sheets already. That back four does not blink.`],
     [f.gp>=3&&f.gapg>=2,`Too many goals against. I want a back line first, results second.`],
     [f.best&&f.best.orank&&f.best.orank<=10,`The win over No. ${f.best&&f.best.orank} ${f.best&&f.best.oppName} was the real thing. Schedule strength matters.`],
+    [f.worst&&f.gp>=4&&f.worst.ga-f.worst.gf>=3,`A ${f.worst&&f.worst.gf}–${f.worst&&f.worst.ga} loss to ${f.worst&&f.worst.oppName} tells me that back line can be had.`],
     [f.sos!=null&&f.gp>=4&&f.sos<69,`${f.rec} against that schedule? I need to see more before I move them.`],
     [f.gp===0,`Talent on paper. Coaches vote on what happens in November.`],
     [true,`Organized and hard to break down. That is how you win in October.`]],
@@ -178,6 +179,7 @@ function v1812pLines(vid,f){
     [f.gp>=3&&f.l>=3,`${f.l} losses is ${f.l} losses. Records don't lie.`],
     [f.gp>=2&&f.last&&f.last.res==='W'&&f.streak===1,`One good win. Show me it again Friday.`],
     [f.last&&f.last.res==='L',`A loss to ${o} costs you in my book. That's how I vote.`],
+    [f.worst&&f.l>=1&&f.gp>=4,`Losing ${f.worst&&f.worst.gf}–${f.worst&&f.worst.ga} to ${f.worst&&f.worst.oppName} is a bad loss. I don't forget those.`],
     [f.gp===0,`I rank on wins and losses. Nothing to rank yet, so I'm going on last year.`],
     [true,`${f.rec} is a respectable record. Not a special one.`]],
    insider:[
@@ -229,6 +231,10 @@ function v1812pNews(C,yr,wk,poll,prev){
   else if(now&&seasonBest!==99&&now<seasonBest&&wk>=2) text=`${town} reach a season-best No. ${now} in the State Poll`;
   /* the id counter is shared with the generators, so a news item must not consume one: the world a seed builds stays exactly as it was */
   if(text){ const keep=C.nextId; addNews(C,'poll',text,u,{pollWk:wk}); C.nextId=keep; }
+  /* the game of the week, once it has been played */
+  if(wk>=1){ const g=v1812pGotw(C,yr,wk-1); const f=g&&C.fixtures[g.fid]; if(g&&g.kind==='showdown'&&f&&f.st==='d'){ const win=f.w; const rk=win===f.h?g.rh:g.ra, rl=win===f.h?g.ra:g.rh; const loser=win===f.h?f.a:f.h; const now=win?v1812pRankOf(poll,win):null;
+      const msg=win?`Game of the week: No. ${rk} ${v1812pName(C,win)} beat No. ${rl} ${v1812pName(C,loser)} ${Math.max(f.hg,f.ag)}–${Math.min(f.hg,f.ag)}${now?` and sit No. ${now} in the State Poll`:''}`:`Game of the week: No. ${g.rh} ${v1812pName(C,f.h)} and No. ${g.ra} ${v1812pName(C,f.a)} draw ${f.hg}–${f.ag}`;
+      const keep2=C.nextId; addNews(C,'poll',msg,win||f.h,{pollWk:wk,fid:f.id}); C.nextId=keep2; } }
 }
 
 /* ---------- hooks: save/migration, results, season start ---------- */

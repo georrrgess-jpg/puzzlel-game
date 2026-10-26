@@ -181,7 +181,7 @@ VIEWS.statepoll=()=>{
   const intro=!P.seen.intro; P.seen.intro=1;
   const hero=`<section class="v1812p-hero"><div><span class="v1812p-kick">Statewide · ${esc(C.stateName)}${intro?' · <b class="v1812p-new">New</b>':''}</span><p>A weekly ${esc(C.stateName)} top 25 voted by coaches and writers. Climb it all season; a ranked showdown becomes the game of the week.</p></div>
    <div class="v1812p-tabs">${tabs('pt',[['poll','Poll'],['teams','Teams'],['players','Players']],tab)}</div></section>`;
-  const body=tab==='teams'?v1812pTeamsTab(C):tab==='players'?v1812pPlayersTab(C):v1812pPollTab(C);
+  let body; try{ body=tab==='teams'?v1812pTeamsTab(C):tab==='players'?v1812pPlayersTab(C):v1812pPollTab(C); }catch(e){ console.error('State Poll',e); body='<div class="empty card">The State Poll could not be drawn this time. Your career is unaffected.</div>'; }
   return `<div class="v1812p" data-tab="${tab}">${hero}${body}</div>`;
 };
 TITLES.statepoll="The State Poll"; NAV_ICON.statepoll='statepoll'; NAV_DESC.statepoll='Statewide top 25, team analytics and player stats';

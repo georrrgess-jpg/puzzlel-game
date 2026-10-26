@@ -123,7 +123,9 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   /* ---- Newsroom ---- */
   const N = await page.evaluate(() => { const C = App.C; App.route = 'news'; App.params = { nv: 'courier' }; render(); const box = document.querySelector('.v1812p-np'); const wire = C.news.filter(n => n.type === 'poll').map(n => n.text); return { box: !!box, txt: box ? box.textContent.replace(/\s+/g, ' ').slice(0, 160) : '', wire, ids: C.news.map(n => n.id).length === new Set(C.news.filter(n => n.type !== 'poll').map(n => n.id)).size + C.news.filter(n => n.type === 'poll').length }; });
   ok(N.box && /State Poll/.test(N.txt), 'The Courier carries a State Poll box');
-  ok(N.wire.length >= 1 && N.wire.every(t => /State Poll|poll/i.test(t)), 'the Newswire has poll items (' + N.wire.length + '): ' + N.wire[0]);
+  ok(N.wire.length >= 1 && N.wire.every(t => /State Poll|poll|Game of the week/i.test(t)), 'the Newswire has poll items (' + N.wire.length + '): ' + N.wire[0]);
+  const GN = await page.evaluate(() => { const C = App.C; const played = []; for (let rd = 0; rd < C.poll.polls[C.year].length - 1; rd++) { const g = v1812pGotw(C, C.year, rd); if (g && g.kind === 'showdown' && C.fixtures[g.fid].st === 'd') played.push(g.fid); } const items = C.news.filter(n => n.type === 'poll' && /^Game of the week/.test(n.text)); return { played: played.length, items: items.length, linked: items.every(n => C.fixtures[n.fid]), sample: items[0] && items[0].text, once: new Set(items.map(n => n.fid)).size === items.length }; });
+  ok(GN.items === GN.played && GN.linked && GN.once, 'each played Game of the Week gets one Newswire item linked to its report (' + GN.items + ' of ' + GN.played + (GN.sample ? ': ' + GN.sample : '') + ')');
 
   /* ---- team metrics ---- */
   const T = await page.evaluate(() => { const C = App.C; const yr = C.year; const tb = v1812pTable(C, yr); const st = standings(C, 'V'); const bad = [];
