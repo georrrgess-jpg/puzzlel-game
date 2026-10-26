@@ -2,6 +2,48 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.14 (one state: a top 50, poll schools in the playoffs, the State Awards)
+
+**Bigger poll** (`src/v17/94_poll_zz_link.js`)
+- `V1812P.TOP` is 50. Every "25" in the poll code now reads `V1812P.TOP`: ballot inertia, prior-rank feature, chart scale, texts.
+- Four more simulated sections (12-15) make 112 pool schools plus your 8, 120 in all.
+- `v1812pMakePool` is overridden to build tiered sections: each section of 8 has one power (base 82), one contender (77) and six others (69).
+  - It only uses league towns for name uniqueness, so the pool does not depend on when it is first built.
+- `v1812pVR` mean-reverts to the team's base `B` (was 70.2).
+- Older pools (`!pool.v14`) gain the missing sections, and each section's best teams become power/contender. Bases apply from `pool.bY = year+1`, so history is unchanged.
+
+**Opponents are poll schools**
+- `genExt` is wrapped (still consumes the same `genR`):
+  - `pre`: a pool team with its rating near the engine's target. The third is a power or contender near target+4.
+  - Regionals (`post`, `'Section 6'`): the Section 6 champion from the simulated table (`v1814Table`).
+  - States (`post`, other): the 7 best section champions by final poll rank, then power (`v1814Field`).
+- `v1814Dress` copies the identity and fits the XI to the team's rating for the year (+`diffOffset` in the postseason, capped at `POST_CAP`). It renames the Varsity to the poll players, position by position, best with best (`p.vpid`).
+- Map: `C.v1814[yr] = {pre, rgn, st, field, ext: {schoolId: vid}}`.
+- Newswire:
+  - type `preseason`: the Cup draw (`createCareer` strips `program` news).
+  - type `playoffs`: the Regional final, the State field, and a "Preseason Cup rematch possible" line.
+- This is the only part of the poll that changes games. `V1814.on=false` turns it off; `test/poll.js` does that for its "poll is presentation only" comparison.
+
+**Calibration** (`94_poll_c.js`)
+- The simulated players' per-game tackles, interceptions and clearances by position are set to the engine's measured rates.
+- The per-game rating spread is shrunk to the engine's: season-average sd is 0.34 in both. Before this, simulated players took nearly every award.
+
+**State Awards** (`94_poll_zz_awards.js`, `94_poll_zz.css`)
+- New boards in `V1812P_BOARDS`: tackles, interceptions, clearances, defensive actions, shots on target, xG, save % (the Players tab now picks the board with a select).
+- `v1814Compute(C,yr)` works from the regular-season statewide pool (min 8 GP) plus team context (`v1814Ctx`: final and preseason poll rank, points vs expected from ratings, State Tournament run).
+- Awards: POY, OPOY (MID/FWD), DPOY (DEF/MID), GK, Underclassman (grade ≤10), Coach of the Year (points over expectation, poll climb, State run; simulated schools get seeded coach names), and All-State 1st/2nd teams in a 1-4-3-3. Player-award winners are distinct.
+- Stored once in `C.poll.aw[yr]` when the season reaches the offseason (an `advance` wrapper).
+- League winners get `p.honors` and Newswire lines. Simulated players show theirs through the `v1812pStateHonors` wrapper.
+- The Awards tab shows the ceremony, finalists, the State Tournament field (with "met you in the Preseason Cup") and both All-State pitches. Mid-season it shows the four award races.
+
+**Tests**
+- `test/statelink.js` (in `run_all.sh`).
+- `test/poll.js` was updated for 120 schools and a top 50, with the link off in its baseline comparison.
+
+**Not verified / known**
+- The Preseason Cup final is now tougher: a contender or power is about 80, where the engine used to target up to about 77.
+- The awards use regular-season numbers only. Playoff games of poll schools are played by the dressed rosters, but they don't feed the awards.
+
 ## Version 18.13 (league balance)
 
 - Problem: other league schools regressed every season (Varsity XI from about 72 to about 60 over four seasons in Node sims). The cause is development: youth rosters are generated low and `DEV_RATE=0.5` means they never grow into the level of the seniors they replace.

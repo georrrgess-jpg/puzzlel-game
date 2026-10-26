@@ -58,7 +58,8 @@ function v1812pVStarters(C,vid,yr){
   for(const p of ros){ if(st.length>=11) break; if(!used.has(p.id)&&p.pos!=='GK'){ st.push(p); used.add(p.id); } }
   return {starters:st,bench:ros.filter(p=>!used.has(p.id))};
 }
-const V1812P_RATE={GK:{tk:0.05,int:0.05,cl:0.6},DEF:{tk:1.5,int:1.2,cl:2.4},MID:{tk:1.2,int:0.8,cl:0.5},FWD:{tk:0.3,int:0.15,cl:0.05}};
+/* per-game defensive actions by position, measured on the engine (v18.14) */
+const V1812P_RATE={GK:{tk:0,int:0,cl:0},DEF:{tk:2.34,int:2.11,cl:1.85},MID:{tk:1.02,int:0.93,cl:0.75},FWD:{tk:0.14,int:0.11,cl:0.09}};
 const V1812P_SCW={GK:0,DEF:0.09,MID:0.38,FWD:1};
 const V1812P_ASW={GK:0.01,DEF:0.32,MID:1,FWD:0.6};
 function v1812pBlank(){ return {gp:0,gs:0,g:0,a:0,sh:0,sot:0,sv:0,tk:0,int:0,cl:0,y:0,r:0,ga:0,cs:0,rt:0,xg:0}; }
@@ -86,7 +87,7 @@ function v1812pVTeamSeason(C,vid,yr,bound){
     for(const p of present){ const q=row.get(p.id), S=stats.get(p.id); const grp=p.pos;
       let rt=6.1+q.g*1.0+q.a*0.6+q.sot*0.12+(q.tk+q.int)*0.08+q.cl*0.04-q.y*0.4-q.r*1.6;
       if(grp==='GK') rt+=q.sv*0.28-conc*0.35+(conc===0?0.6:0); if(grp==='DEF') rt+=(conc===0?0.5:-0.12*conc);
-      rt+=res==='W'?0.35:res==='D'?0.05:-0.25; rt+=(r()-0.5)*0.6; rt=v1812pClamp(Math.round(rt*10)/10,3.5,10);
+      rt+=res==='W'?0.35:res==='D'?0.05:-0.25; rt+=(r()-0.5)*0.6; rt=6.66+(rt-6.66)*0.68; /* v18.14: the engine's spread */ rt=v1812pClamp(Math.round(rt*10)/10,3.5,10);
       S.gp++; S.gs++; for(const k of ['g','a','sh','sot','sv','tk','int','cl','y','r']) S[k]+=q[k]; S.rt+=rt; S.xg+=xgT*(q.sh+0.6*q.g)/(xsT+0.6*rec.gf)*0.9;
       if(grp==='GK'){ S.ga+=conc; if(conc===0) S.cs++; } }
   }

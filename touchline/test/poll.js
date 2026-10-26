@@ -1,4 +1,4 @@
-// v18.12 The State Poll (src/v17/94_poll*.js): a deterministic statewide top 25 from seven voters with ballots, points,
+// v18.12 The State Poll (src/v17/94_poll*.js): a deterministic statewide top 50 from seven voters with ballots, points,
 // movement and first-place votes; the rank-by-week story; the Game of the Week (Matchday Center card, schedule badge, odds,
 // live intro caption); advanced team metrics for every school in the state; player seasons across a career for any player;
 // old-save migration; save and reload; results unchanged against the bare engine; UI renders and tabs switch; no page errors.
@@ -21,10 +21,10 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   const mk = async (seed, vw) => { const ctx = await b.newContext({ viewport: vw || { width: 1280, height: 900 } }); const page = await ctx.newPage(); page.on('pageerror', e => errs.push(e.message)); page.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); }); await career(page, seed); return page; };
   const page = await mk('poll-t1');
 
-  /* ---- the world: a preseason poll, 88 teams, the nav entry ---- */
+  /* ---- the world: a preseason poll, 120 teams, the nav entry ---- */
   const P0 = await page.evaluate(() => { const C = App.C; const P = C.poll; const pl = P.polls[C.year]; return { v: P.v, n: pl.length, rows: pl[0].rows.length, label: pl[0].label, pool: P.pool.teams.length, all: v1812pAllIds(C).length, secs: [...new Set(P.pool.teams.map(t => t.sec))].sort((a, b) => a - b).join(','), voters: pl[0].bal.length, news: C.news.filter(n => n.type === 'poll').length, state: C.stateName }; });
-  ok(P0.v === 1 && P0.n === 1 && P0.rows === 25 && P0.label === 'Preseason', 'a new career publishes the preseason poll (25 teams)');
-  ok(P0.pool === 80 && P0.all === 88 && P0.secs === '1,2,3,4,6,7,8,9,10,11', 'the state is 88 teams: the 8-school section plus 10 simulated sections of 8');
+  ok(P0.v === 1 && P0.n === 1 && P0.rows === 50 && P0.label === 'Preseason', 'a new career publishes the preseason poll (50 teams)');
+  ok(P0.pool === 112 && P0.all === 120 && P0.secs === '1,2,3,4,6,7,8,9,10,11,12,13,14,15', 'the state is 120 teams: the 8-school section plus 14 simulated sections of 8');
   ok(P0.voters === 7 && P0.news === 1, 'seven ballots, and the preseason poll puts a Courier item on the Newswire');
   ok(await page.evaluate(() => { App.route = 'office'; render(); return !!document.querySelector('.tn-dd [data-r="statepoll"]') && NAV.some(n => n[0] === 'statepoll'); }), 'State Poll is in the Competition menu and the side navigation');
 
@@ -33,14 +33,14 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   const sig10 = await page.evaluate(() => JSON.stringify(App.C.poll.polls));
   const W = await page.evaluate(() => { const C = App.C; const pl = C.poll.polls[C.year];
     const bad = []; const sig = [];
-    pl.forEach((p, wk) => { if (p.rows.length !== 25) bad.push('rows ' + wk); const rks = p.rows.map(r => r.rk); if (rks.join() !== Array.from({ length: 25 }, (_, i) => i + 1).join()) bad.push('rank order ' + wk); if (new Set(p.rows.map(r => r.id)).size !== 25) bad.push('dup ' + wk);
+    pl.forEach((p, wk) => { if (p.rows.length !== 50) bad.push('rows ' + wk); const rks = p.rows.map(r => r.rk); if (rks.join() !== Array.from({ length: 50 }, (_, i) => i + 1).join()) bad.push('rank order ' + wk); if (new Set(p.rows.map(r => r.id)).size !== 50) bad.push('dup ' + wk);
       /* ballots and points */
-      const pts = {}, fp = {}; p.bal.forEach(bl => { if (bl.length !== 25 || new Set(bl).size !== 25) bad.push('ballot ' + wk); bl.forEach((id, i) => { pts[id] = (pts[id] || 0) + 25 - i; if (i === 0) fp[id] = (fp[id] || 0) + 1; }); });
+      const pts = {}, fp = {}; p.bal.forEach(bl => { if (bl.length !== 50 || new Set(bl).size !== 50) bad.push('ballot ' + wk); bl.forEach((id, i) => { pts[id] = (pts[id] || 0) + 50 - i; if (i === 0) fp[id] = (fp[id] || 0) + 1; }); });
       for (const r of p.rows) { if (pts[r.id] !== r.pts) bad.push('pts ' + wk + r.id); if ((fp[r.id] || 0) !== r.fp) bad.push('fp ' + wk + r.id); }
       for (let i = 1; i < p.rows.length; i++) { const a = p.rows[i - 1], c = p.rows[i]; if (a.pts < c.pts || (a.pts === c.pts && a.fp < c.fp)) bad.push('sorted ' + wk + ':' + i); }
       const top = new Set(p.rows.map(r => r.id)); for (const o of p.ov) { if (top.has(o.id) || pts[o.id] !== o.pts || !(o.pts > 0)) bad.push('others ' + wk); }
       const maxOthers = Math.max(0, ...Object.keys(pts).filter(id => !top.has(id)).map(id => pts[id])); if (p.ov.length && p.ov[0].pts !== maxOthers) bad.push('others order ' + wk);
-      const total = Object.values(pts).reduce((a, x) => a + x, 0); if (total !== 7 * 325) bad.push('total ' + wk + ' ' + total);
+      const total = Object.values(pts).reduce((a, x) => a + x, 0); if (total !== 7 * 1275) bad.push('total ' + wk + ' ' + total);
       /* movement */
       if (wk === 0) { if (p.rows.some(r => r.mv != null || r.nw)) bad.push('pre mv'); }
       else { const pr = new Map(pl[wk - 1].rows.map(r => [r.id, r.rk])); for (const r of p.rows) { const was = pr.get(r.id); if (was ? (r.mv !== was - r.rk || r.prev !== was || r.nw) : (r.mv != null || !r.nw)) bad.push('mv ' + wk + r.id); } }
@@ -48,7 +48,7 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
     return { n: pl.length, md: C.md, phase: C.phase, bad, sig: sig.join('|'), others: pl.every(p => p.ov.length > 0) }; });
   console.log(JSON.stringify({ n: W.n, md: W.md, phase: W.phase, bad: W.bad.slice(0, 6) }));
   ok(W.phase === 'regular' && W.n === W.md + 1, `one poll per completed round (${W.n} polls after ${W.md} matchdays)`);
-  ok(W.bad.length === 0, '25 distinct teams ranked every week; ballots, Borda points (25..1), first-place votes, sorting, others receiving votes and movement all agree' + (W.bad.length ? ': ' + W.bad.slice(0, 4).join(' ') : ''));
+  ok(W.bad.length === 0, '50 distinct teams ranked every week; ballots, Borda points (50..1), first-place votes, sorting, others receiving votes and movement all agree' + (W.bad.length ? ': ' + W.bad.slice(0, 4).join(' ') : ''));
   ok(W.others, 'every poll lists others receiving votes');
 
   /* ---- movement arrows in the DOM ---- */
@@ -58,7 +58,7 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
     for (const li of rows) { const id = li.dataset.tid, rk = +li.dataset.rk; const was = pr.get(id); const exp = !was ? 'NEW' : was > rk ? '▲' + (was - rk) : was < rk ? '▼' + (rk - was) : '–'; const got = li.querySelector('.v1812p-mv').textContent.trim(); if (got !== exp) bad.push(id + ' ' + got + '/' + exp);
       const cls = li.querySelector('.v1812p-mv').className; if (was && was > rk && !cls.includes('up')) bad.push('cls up ' + id); if (was && was < rk && !cls.includes('dn')) bad.push('cls dn ' + id); }
     const me = document.querySelector('.v1812p-row.me'); return { n: rows.length, bad, meOk: !!me === !!last.rows.find(r => r.id === C.userSid), title: document.querySelector('.v1812p-bh h2').textContent, pts: rows.map(li => li.querySelector('.v1812p-pts').textContent === li.querySelector('.v1812p-pts').dataset.to).every(Boolean), fp: document.querySelectorAll('.v1812p-fp').length, ovl: document.querySelector('.v1812p-ov').textContent.slice(0, 24) }; });
-  ok(D.n === 25 && D.bad.length === 0, 'the table shows 25 rows with the right arrows (green up, red down, dash, NEW)' + (D.bad.length ? ': ' + D.bad.slice(0, 3).join(' ') : ''));
+  ok(D.n === 50 && D.bad.length === 0, 'the table shows 50 rows with the right arrows (green up, red down, dash, NEW)' + (D.bad.length ? ': ' + D.bad.slice(0, 3).join(' ') : ''));
   ok(/Week \d+/.test(D.title) && D.title.includes(await page.evaluate(() => App.C.stateName)), `table title names the state and the week ("${D.title.trim().replace(/\s+/g, ' ')}")`);
   ok(D.pts && D.fp > 0 && /Others receiving votes/.test(D.ovl), 'points settle on their final values, first-place votes and the footer show');
   ok(D.meOk, 'your team’s row is highlighted exactly when it is ranked');
@@ -88,7 +88,7 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   const F = await page.evaluate(() => { const C = App.C; const yr = C.year; const rd = C.md; const pl = C.poll.polls[yr]; const keep = JSON.stringify(pl[rd].rows);
     const fx = v1812pRoundGames(C, yr, rd); const u = C.userSid; const other = fx.filter(f => f.h !== u && f.a !== u); const mine = fx.find(f => f.h === u || f.a === u); const oppOf = mine.h === u ? mine.a : mine.h;
     const virt = C.poll.pool.teams.map(t => t.id);
-    const fill = (spec) => { const rows = []; const used = new Set(Object.values(spec)); let k = 0; for (let r = 1; r <= 25; r++) { let id = spec[r]; if (!id) { do { id = virt[k++]; } while (used.has(id)); } rows.push({ id, rk: r, pts: 200 - r, fp: 0, prev: null, mv: null, nw: false }); } return rows; };
+    const fill = (spec) => { const rows = []; const used = new Set(Object.values(spec)); let k = 0; for (let r = 1; r <= 50; r++) { let id = spec[r]; if (!id) { do { id = virt[k++]; } while (used.has(id)); } rows.push({ id, rk: r, pts: 200 - r, fp: 0, prev: null, mv: null, nw: false }); } return rows; };
     const out = {};
     pl[rd].rows = fill({ 2: other[0].h, 9: other[0].a }); const g1 = v1812pGotw(C, yr, rd); out.one = g1 && g1.kind === 'showdown' && g1.fid === other[0].id && g1.rh === 2 && g1.ra === 9;
     pl[rd].rows = fill({ 4: other[0].h, 6: other[0].a, 1: other[1].h, 3: other[1].a }); const g2 = v1812pGotw(C, yr, rd); out.best = g2 && g2.fid === other[1].id && g2.kind === 'showdown' && g2.all.length === 2;
@@ -142,16 +142,16 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
     const pollsRanked = tb.filter(r => r.poll).length;
     return { n: tb.length, bad, xgBad, secBad, sane, posSum, gpg: +gpg.toFixed(2), rankOk, pollsRanked, nx: tb.filter(r => r.A.nx > 0).length, vgames: tb.filter(r => !r.league).every(r => r.A.gp === C.md) }; });
   console.log(JSON.stringify({ ...T, bad: T.bad.slice(0, 3) }));
-  ok(T.n === 88 && T.bad.length === 0, 'team analytics: goal difference, record and points of your section equal the standings');
-  ok(T.xgBad === 0 && T.nx === 88, 'xG for and against equal the sums of the match logs; every team has xG');
+  ok(T.n === 120 && T.bad.length === 0, 'team analytics: goal difference, record and points of your section equal the standings');
+  ok(T.xgBad === 0 && T.nx === 120, 'xG for and against equal the sums of the match logs; every team has xG');
   ok(T.secBad === 0 && T.rankOk && T.sane && T.posSum, 'every section balances (GF=GA, W=L), seeds run 1-8, power ranks are unique, shares and possession are sane');
-  ok(T.gpg > 1.2 && T.gpg < 2.6 && T.vgames && T.pollsRanked === 25, `simulated sections play the same number of games and score ${T.gpg} goals a team a game`);
+  ok(T.gpg > 1.2 && T.gpg < 2.6 && T.vgames && T.pollsRanked === 50, `simulated sections play the same number of games and score ${T.gpg} goals a team a game`);
 
   /* ---- UI: tabs, filters, sorting, panels ---- */
   await page.evaluate(() => { App.route = 'statepoll'; App.params = {}; render(); });
   await page.click('.v1812p-hero .tab:has-text("Teams")'); await page.waitForTimeout(250);
   const T1 = await page.evaluate(() => ({ rows: document.querySelectorAll('#v1812p-tb tr').length, tab: document.querySelector('.v1812p').dataset.tab }));
-  ok(T1.tab === 'teams' && T1.rows === 88, 'Teams tab lists all 88 schools');
+  ok(T1.tab === 'teams' && T1.rows === 120, 'Teams tab lists all 120 schools');
   await page.click('.v1812p-sortb[data-k="ppg"]'); await page.waitForTimeout(200);
   const T2 = await page.evaluate(() => { const v = [...document.querySelectorAll('#v1812p-tb tr')].map(tr => +tr.children[3].textContent); return { desc: v.every((x, i) => !i || v[i - 1] >= x), n: v.length }; });
   ok(T2.desc, 'sorting by points per game puts the best first');
@@ -160,7 +160,7 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   await page.selectOption('select[data-k="tsec"]', 'mine'); await page.waitForTimeout(250);
   ok(await page.evaluate(() => document.querySelectorAll('#v1812p-tb tr').length === 8), 'the section filter narrows to your eight schools');
   await page.selectOption('select[data-k="tsec"]', 'all'); await page.selectOption('select[data-k="trk"]', 'ranked'); await page.waitForTimeout(250);
-  ok(await page.evaluate(() => document.querySelectorAll('#v1812p-tb tr').length === 25), 'the Top 25 filter keeps the 25 ranked schools');
+  ok(await page.evaluate(() => document.querySelectorAll('#v1812p-tb tr').length === 50), 'the Top 50 filter keeps the 50 ranked schools');
   await page.selectOption('select[data-k="trk"]', 'all'); await page.fill('input[data-v1812p-q]', 'zzzz'); await page.waitForTimeout(200);
   const none = await page.evaluate(() => document.querySelectorAll('#v1812p-tb tr').length); await page.fill('input[data-v1812p-q]', ''); await page.waitForTimeout(150);
   const q = await page.evaluate(() => { const C = App.C; const t = C.poll.pool.teams[5]; return t.town; }); await page.fill('input[data-v1812p-q]', q); await page.waitForTimeout(200);
@@ -180,8 +180,8 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   await page.click('.v1812p-hero .tab:has-text("Players")'); await page.waitForTimeout(250);
   const PL = await page.evaluate(() => ({ pod: document.querySelectorAll('.v1812p-pp').length, list: document.querySelectorAll('.v1812p-lr').length, title: document.querySelector('.v1812p-lcard h2').textContent }));
   ok(PL.pod === 3 && PL.list === 22 && /scorers/i.test(PL.title), 'Players tab: top-scorer podium and list');
-  for (const k of ['a', 'ga', 'gk', 'cs', 'rt']) { await page.click(`[data-a="setParam"][data-k="pb"][data-v="${k}"]`); await page.waitForTimeout(120); }
-  ok(await page.evaluate(() => document.querySelectorAll('.v1812p-pp').length >= 1 && /rating/i.test(document.querySelector('.v1812p-lcard h2').textContent)), 'every leaderboard renders (assists, G+A, keepers, clean sheets, ratings)');
+  const LB = []; for (const k of ['a', 'ga', 'gk', 'cs', 'tk', 'int', 'cl', 'def', 'sot', 'xg', 'svp', 'rt']) { await page.selectOption('select[data-k="pb"]', k); await page.waitForTimeout(120); LB.push(k + ':' + await page.evaluate(() => document.querySelectorAll('.v1812p-pp').length + '/' + document.querySelector('.v1812p-lcard h2').textContent)); }
+  ok(LB.every(x => /:[1-3]\//.test(x)) && /rating/i.test(LB[LB.length - 1]), 'every leaderboard renders, the v18.14 ones too (tackles, interceptions, clearances, defensive actions, shots on target, xG, save %): ' + LB.join(', '));
   await page.click('[data-a="setParam"][data-k="psc"][data-v="league"]'); await page.waitForTimeout(200);
   const LS = await page.evaluate(() => { const C = App.C; return [...document.querySelectorAll('.v1812p-lr, .v1812p-pp')].every(el => true) && document.querySelectorAll('.v1812p-lcard').length === 1; });
   ok(LS, 'the leaderboards can be limited to your section');
@@ -195,7 +195,7 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   /* week stepping */
   await page.click('[data-a="v1812pWeek"][data-d="-1"]'); await page.waitForTimeout(300);
   const WS = await page.evaluate(() => ({ title: document.querySelector('.v1812p-bh h2').textContent, sel: +document.querySelector('select[data-c="v1812pWeekSel"]').value, want: App.C.poll.polls[App.C.year].length - 2, n: document.querySelectorAll('.v1812p-row').length, id0: document.querySelector('.v1812p-row').dataset.tid, exp0: App.C.poll.polls[App.C.year][App.C.poll.polls[App.C.year].length - 2].rows[0].id }));
-  ok(WS.n === 25 && WS.sel === WS.want && WS.id0 === WS.exp0, `the week stepper moves to the previous poll (${WS.title.trim().replace(/\s+/g, ' ')})`);
+  ok(WS.n === 50 && WS.sel === WS.want && WS.id0 === WS.exp0, `the week stepper moves to the previous poll (${WS.title.trim().replace(/\s+/g, ' ')})`);
   await page.evaluate(() => { App.params = {}; render(); });
 
   /* ---- motion: rows slide, points count, and reduced motion skips it ---- */
@@ -210,10 +210,11 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   await page.evaluate(() => { PREFS.rm = false; });
 
   /* ---- results unchanged: this build against the same sources without the poll files ---- */
-  const RUN = (seedN) => { const C = newCareer({ slot: 1, seed: seedN, coachName: 'Seth Test' }); C.logs = C.logs || {}; const run = () => { let g = 0; while (C.phase !== 'offseason' && g++ < 200) { simRound(C); if (!advance(C)) break; } }; run(); rollover(C); for (let i = 0; i < 10; i++) { simRound(C); advance(C); }
+  const RUN = (seedN) => { if (typeof V1814 !== 'undefined') V1814.on = false; const C = newCareer({ slot: 1, seed: seedN, coachName: 'Seth Test' }); C.logs = C.logs || {}; const run = () => { let g = 0; while (C.phase !== 'offseason' && g++ < 200) { simRound(C); if (!advance(C)) break; } }; run(); rollover(C); for (let i = 0; i < 10; i++) { simRound(C); advance(C); }
     return { sig: Object.values(C.fixtures).filter(f => f.st === 'd').map(f => f.id + ':' + f.hg + '-' + f.ag + (f.pk ? 'p' + f.pk.join('-') : '')).sort().join('|') + '|nid' + C.nextId + '|gs' + C.gs + '|players' + Object.keys(C.players).length + '|news' + C.news.filter(n => n.type !== 'poll').length, polls: C.poll ? Object.keys(C.poll.polls).join(',') : null }; };
   const baseCtx = await b.newContext(); const base = await baseCtx.newPage(); base.on('pageerror', e => errs.push('baseline: ' + e.message)); await base.goto(baselineUrl()); await base.waitForTimeout(500);
   const bare = await base.evaluate(`(${RUN})(12345)`); const withPoll = await page.evaluate(`(${RUN})(12345)`);
+  await page.evaluate(() => { V1814.on = true; });
   ok(bare.polls === null && await base.evaluate(() => typeof v1812pS === 'undefined'), 'the baseline build really has no poll code');
   ok(withPoll.sig === bare.sig, 'a season, the offseason and ten rounds of the next season give identical results, ids, RNG state and rosters with the poll code present or absent');
   const pageRes = '#' + withPoll.polls;
@@ -231,12 +232,12 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   const sigC = await page.evaluate(() => JSON.stringify(App.C.poll.polls));
   ok(sigC === sigA, 'save and reload keep every published poll exactly');
   const R = await page.evaluate(() => { App.route = 'statepoll'; App.params = {}; render(); return { rows: document.querySelectorAll('.v1812p-row').length, again: JSON.stringify(App.C.poll.polls) }; });
-  ok(R.rows === 25, 'the poll renders after a reload');
+  ok(R.rows === 50, 'the poll renders after a reload');
   /* syncing again publishes nothing new, and re-ingesting is idempotent */
   const again = await page.evaluate(() => { const C = App.C; const n = v1812pSync(C); const k = Object.keys(C.poll.fx).length; v1812pBackfill(C); return { n, same: k === Object.keys(C.poll.fx).length }; });
   ok(again.n === 0 && again.same, 'syncing is idempotent');
-  const MG = await page.evaluate(() => { const C = App.C; const raw = JSON.parse(JSON.stringify(careerForSave(C))); delete raw.poll; const M = migrate(raw); const had = !!M.poll && M.poll.v === 1 && M.poll.pool.teams.length === 80; v1812pSync(M); const pl = M.poll.polls[M.year];
-    return { had, same: JSON.stringify(v1812pMakePool(M)) === JSON.stringify(v1812pMakePool(M)), n: pl.length, md: M.md, rows: pl.every(p => p.rows.length === 25), top: pl[pl.length - 1].rows[0].id, idem: (() => { const m2 = migrate(JSON.parse(JSON.stringify(careerForSave(M)))); return m2.poll.polls[m2.year].length === pl.length; })() }; });
+  const MG = await page.evaluate(() => { const C = App.C; const raw = JSON.parse(JSON.stringify(careerForSave(C))); delete raw.poll; const M = migrate(raw); const had = !!M.poll && M.poll.v === 1 && M.poll.pool.teams.length === 112; v1812pSync(M); const pl = M.poll.polls[M.year];
+    return { had, same: JSON.stringify(v1812pMakePool(M)) === JSON.stringify(v1812pMakePool(M)), n: pl.length, md: M.md, rows: pl.every(p => p.rows.length === 50), top: pl[pl.length - 1].rows[0].id, idem: (() => { const m2 = migrate(JSON.parse(JSON.stringify(careerForSave(M)))); return m2.poll.polls[m2.year].length === pl.length; })() }; });
   ok(MG.had && MG.same && MG.n === MG.md + 1 && MG.rows && MG.idem, `an old save (no poll data) migrates: a deterministic statewide pool, polls rebuilt from its results (${MG.n} polls)`);
   const MP = await mk('poll-t3');
   const MP2 = await MP.evaluate(() => { const C = App.C; const before = JSON.stringify(C.poll.polls[C.year][0].rows); const raw = JSON.parse(JSON.stringify(careerForSave(C))); delete raw.poll; const M = migrate(raw); v1812pSync(M); return before === JSON.stringify(M.poll.polls[M.year][0].rows); });
@@ -264,12 +265,12 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
     return { bad, multi }; });
   ok(VP.bad === 0, 'statewide teams: player goals sum to the team’s goals, assists never exceed goals, keepers carry the goals against and the clean sheets');
   ok(VP.multi > 20, `statewide players carry across seasons (${VP.multi} with more than one)`);
-  const ST = await page.evaluate(() => { const C = App.C; const out = {}; const yrs = V1812P_YRS(C); out.yrs = yrs.join(','); const prev = v1812pBoard(C, C.year - 1, 'g', 'state', 5); out.prev = prev.length; const a = v1812pTable(C, C.year - 1); out.prevTable = a.length === 88 && a.every(r => r.A.gp === 14); out.prevPolls = C.poll.polls[C.year - 1].length;
+  const ST = await page.evaluate(() => { const C = App.C; const out = {}; const yrs = V1812P_YRS(C); out.yrs = yrs.join(','); const prev = v1812pBoard(C, C.year - 1, 'g', 'state', 5); out.prev = prev.length; const a = v1812pTable(C, C.year - 1); out.prevTable = a.length === 120 && a.every(r => r.A.gp === 14); out.prevPolls = C.poll.polls[C.year - 1].length;
     /* the previous season's final standings equal the archive */ const arc = C.archives.find(x => x.yr === C.year - 1); out.arc = arc ? arc.stand.V.every(s => { const r = a.find(x => x.id === s.sid); return r && r.A.pts === s.pts && r.A.gd === s.gf - s.ga; }) : false; return out; });
   ok(ST.yrs === '2027,2026' && ST.prev === 5 && ST.prevTable && ST.prevPolls === 15, 'season selectors reach last season’s leaderboards, team table and 15 polls');
   ok(ST.arc, 'last season’s analytics for your section match the archived standings');
   const PY = await page.evaluate(() => { App.route = 'statepoll'; App.params = { py: String(App.C.year - 1) }; render(); const r = { title: document.querySelector('.v1812p-bh h2').textContent, opts: document.querySelectorAll('select[data-c="v1812pWeekSel"] option').length, yrs: document.querySelectorAll('select[data-c="v1812pPYr"] option').length, rows: document.querySelectorAll('.v1812p-row').length, head: document.querySelector('.v1812p-season .v1812p-head').textContent }; App.params = {}; render(); return r; });
-  ok(PY.rows === 25 && PY.opts === 15 && PY.yrs === 2 && /Final/.test(PY.title), `the Poll tab can show last season: 15 polls, the final one first ("${PY.title.trim().replace(/\s+/g, ' ')}", ${PY.head})`);
+  ok(PY.rows === 50 && PY.opts === 15 && PY.yrs === 2 && /Final/.test(PY.title), `the Poll tab can show last season: 15 polls, the final one first ("${PY.title.trim().replace(/\s+/g, ' ')}", ${PY.head})`);
   /* player modal: real player, Across seasons tab, many seasons */
   const AC = await page.evaluate(() => { const C = App.C; const p = everyone(C).filter(x => C.league.includes(x.sid) && v1812pSeasonRows(C, x).filter(r => r.lvl === 'V').length >= 2).sort((a, b) => (careerTotals(b).g + careerTotals(b).a) - (careerTotals(a).g + careerTotals(a).a))[0];
     if (!p) return null; App.modal = { type: 'player', id: p.id, tab: 'across' }; renderModal(); const tab = document.querySelector('.modal [data-v="across"]'); const rows = document.querySelectorAll('.modal .v1812p-stt tbody tr:not(.tags):not(.tot)').length; const tot = document.querySelector('.modal .v1812p-stt tr.tot');
@@ -299,7 +300,7 @@ const SEASON = () => { const C = App.C; let g = 0; while (C.phase !== 'offseason
   ok(RK.got === RK.want && RK.okTxt, `the League table puts a #rank chip beside each ranked school (${RK.got} of ${RK.want})`);
   ok(!RK.ranked && (RK.phase !== 'regular' || (/in the state/.test(RK.rl) && !/in the state/.test(RK.ru))), 'record lines in the matchday cards add the state rank only for ranked schools');
   const SA = await mk('poll-t5'); await SA.evaluate(async () => { await A.simAhead({ dataset: { k: 'regular' } }); });
-  const SAR = await SA.evaluate(() => { const C = App.C; const pl = C.poll.polls[C.year]; return { n: pl.length, phase: C.phase, md: C.md, rows: pl.every(p => p.rows.length === 25), last: pl[14] && pl[14].label, wk: pl.map(p => p.wk).join(',') }; });
+  const SAR = await SA.evaluate(() => { const C = App.C; const pl = C.poll.polls[C.year]; return { n: pl.length, phase: C.phase, md: C.md, rows: pl.every(p => p.rows.length === 50), last: pl[14] && pl[14].label, wk: pl.map(p => p.wk).join(',') }; });
   ok(SAR.n === 15 && SAR.rows && SAR.wk === '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14', `sim to the end of the regular season publishes all 15 polls (${SAR.n})`);
 
   /* ---- phone layout ---- */

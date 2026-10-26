@@ -50,7 +50,7 @@ function v1812pOverviewCard(C){
 /* ---------- Newsroom: the Courier carries the poll ---------- */
 { const _v1812pCF=courierFront; courierFront=function(C,is,ix,issues){ let h=_v1812pCF.apply(this,arguments); try{ const f0=is.fx&&C.fixtures[is.fx[0]]; if(!f0||f0.comp!=='reg') return h; const polls=v1812pPolls(C,is.yr); const wk=f0.rd+1; const poll=polls[wk]; if(!poll) return h;
     const me=C.userSid; const rk=v1812pRankOf(poll,me); const row=poll.rows.find(r=>r.id===me); const prev=polls[wk-1]; const was=prev?v1812pRankOf(prev,me):null; const feat=v1812pVoterView(C,me,is.yr,wk)[0]; const q=v1812pQuote(C,0,me,is.yr,wk);
-    const line=rk?(was?(rk<was?`up ${was-rk} to No. ${rk}`:rk>was?`down ${rk-was} to No. ${rk}`:`holding at No. ${rk}`):`into the poll at No. ${rk}`):(was?`out of the poll after No. ${was}`:'still outside the top 25');
+    const line=rk?(was?(rk<was?`up ${was-rk} to No. ${rk}`:rk>was?`down ${rk-was} to No. ${rk}`:`holding at No. ${rk}`):`into the poll at No. ${rk}`):(was?`out of the poll after No. ${was}`:'still outside the top '+V1812P.TOP);
     const t3=poll.rows.slice(0,3).map((r,i)=>`${i+1}. ${esc(v1812pName(C,r.id))}`).join(' · ');
     const box=`<div class="np-box v1812p-np"><h5>State Poll · ${esc(poll.label)}</h5><p class="np-note"><b>${esc(Sx(me).town)}</b> ${line}.</p><p class="np-note">“${esc(q)}” <span class="muted">— ${esc(V1812P_VOTERS[0].name)}, Courier sports desk</span></p><p class="np-note tiny muted">Top three: ${t3}</p><button class="btn sm ghost" data-a="go" data-r="statepoll">Full poll</button></div>`;
     h=h.replace('<aside class="np-side">','<aside class="np-side">'+box); }catch(e){ console.warn('poll courier',e); } return h; }; }

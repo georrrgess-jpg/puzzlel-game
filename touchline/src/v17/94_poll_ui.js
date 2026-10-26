@@ -20,11 +20,11 @@ function v1812pSpark(run,w,h){ w=w||64; h=h||20; if(!run||run.length<2) return `
 function v1812pChart(C,sid,yr,opt){
   opt=opt||{}; const S=v1812pStory(C,sid,yr); const n=S.ranks.length; const W=opt.w||380, H=opt.h||176, L=34, Rr=16, T=14, B=26;
   if(!n) return '<div class="muted small">The first poll comes out before the first game.</div>';
-  const Y=r=>T+((r||28)-1)/27*(H-T-B); const X=i=>n===1?(L+(W-L-Rr)/2):L+i/(n-1)*(W-L-Rr);
-  const grid=[1,5,10,15,20,25,28].map(r=>`<line x1="${L}" x2="${W-Rr}" y1="${Y(r).toFixed(1)}" y2="${Y(r).toFixed(1)}" class="${r===28?'nr':''}"/><text x="${L-6}" y="${(Y(r)+3.5).toFixed(1)}" text-anchor="end">${r===28?'NR':r}</text>`).join('');
+  const NR=V1812P.TOP+3; const Y=r=>T+((r||NR)-1)/(NR-1)*(H-T-B); const X=i=>n===1?(L+(W-L-Rr)/2):L+i/(n-1)*(W-L-Rr);
+  const grid=[1,...[1,2,3,4,5].map(k=>Math.round(V1812P.TOP*k/5)),NR].map(r=>`<line x1="${L}" x2="${W-Rr}" y1="${Y(r).toFixed(1)}" y2="${Y(r).toFixed(1)}" class="${r===NR?'nr':''}"/><text x="${L-6}" y="${(Y(r)+3.5).toFixed(1)}" text-anchor="end">${r===NR?'NR':r}</text>`).join('');
   const labelEvery=n>10?2:1; const xl=S.ranks.map((r,i)=>(i%labelEvery===0||i===n-1)?`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle">${i===0?'P':'W'+i}</text>`:'').join('');
   let d='', area=''; S.ranks.forEach((r,i)=>{ const x=X(i).toFixed(1), y=Y(r).toFixed(1); d+=(i?'L':'M')+x+' '+y; });
-  area=n>1?`${d}L${X(n-1).toFixed(1)} ${Y(28).toFixed(1)}L${X(0).toFixed(1)} ${Y(28).toFixed(1)}Z`:'';
+  area=n>1?`${d}L${X(n-1).toFixed(1)} ${Y(NR).toFixed(1)}L${X(0).toFixed(1)} ${Y(NR).toFixed(1)}Z`:'';
   const dots=S.ranks.map((r,i)=>`<circle class="v1812p-dot ${r?'':'nr'}" cx="${X(i).toFixed(1)}" cy="${Y(r).toFixed(1)}" r="${i===n-1?5:3.4}" style="--i:${i}"><title>${i===0?'Preseason':'Week '+i}: ${r?'No. '+r:'Unranked'}${S.notes[i]?' · '+S.notes[i].text:''}</title></circle>`).join('');
   const li=n-1; const note=S.notes[li]; let ann='';
   if(note){ const tx=X(li), ty=Y(S.ranks[li]); const txt=note.text; const w=Math.min(W-L-Rr-4,txt.length*5.6+16); const left=tx+w+6>W-Rr; const bx=left?tx-w-8:tx+8; const below=ty<T+(H-T-B)*0.45; const by=below?Math.min(H-B-20,ty+12):Math.max(T,ty-26);
@@ -68,7 +68,7 @@ function v1812pVotersCard(C,sid,yr,wk){
   const row=x=>{ const q=v1812pQuote(C,x.i,sid,yr,wk); return `<div class="v1812p-vt"><span class="v1812p-face">${v1812pVoterFace(x.v,46)}</span><div class="v1812p-vb"><b>${esc(x.v.name)}</b><small>${esc(x.v.outlet)}</small><p>“${esc(q)}”</p></div><div class="v1812p-vr ${x.rank?'':'nr'}" title="${esc(x.v.name)} had ${esc(sch.town)} ${x.rank?'No. '+x.rank:'off the ballot'}"><small>Had you</small><b>${x.rank?'#'+x.rank:'—'}</b></div></div>`; };
   const rest=all.filter(x=>!feat.includes(x));
   return `<section class="v1812p-card v1812p-voters"><div class="v1812p-kick">The voters · where they had ${sid===C.userSid?'you':esc(sch.town)}</div>${feat.map(row).join('')}
-   ${rest.length?`<details class="v1812p-more"><summary>All ${all.length} voters</summary>${rest.map(row).join('')}<p class="tiny muted">Seven voters submit a top-25 ballot each week; 25 points for a first-place vote down to 1 for 25th. Each has a lean: ${V1812P_VOTERS.map(v=>esc(v.name.split(' ')[1])+' '+esc(v.bias.toLowerCase())).join('; ')}.</p></details>`:''}</section>`;
+   ${rest.length?`<details class="v1812p-more"><summary>All ${all.length} voters</summary>${rest.map(row).join('')}<p class="tiny muted">Seven voters submit a top-${V1812P.TOP} ballot each week; ${V1812P.TOP} points for a first-place vote down to 1 for ${V1812P.TOP}th. Each has a lean: ${V1812P_VOTERS.map(v=>esc(v.name.split(' ')[1])+' '+esc(v.bias.toLowerCase())).join('; ')}.</p></details>`:''}</section>`;
 }
 
 /* ---------- Poll tab ---------- */
@@ -81,7 +81,7 @@ function v1812pRow(C,r,poll,recs,prevPts,me){
 }
 function v1812pTitle(C,p){ return p.wk===V1812P.WEEKS&&(p.yr<C.year||C.phase!=='regular')?p.label+' \u00b7 Final':p.label; }
 function v1812pMovers(C,poll,prev){
-  if(!prev) return `<section class="v1812p-card v1812p-movers"><div class="v1812p-kick">How it works</div><p class="v1812p-how">Seven voters (coaches, writers, radio hosts and scouts) each submit a top-25 ballot every week. A first-place vote is worth 25 points, 25th place 1. Each voter has a lean, and nobody changes his mind all at once: ballots start from last week’s and move with the results.</p></section>`;
+  if(!prev) return `<section class="v1812p-card v1812p-movers"><div class="v1812p-kick">How it works</div><p class="v1812p-how">Seven voters (coaches, writers, radio hosts and scouts) each submit a top-${V1812P.TOP} ballot every week. A first-place vote is worth ${V1812P.TOP} points, ${V1812P.TOP}th place 1. Each voter has a lean, and nobody changes his mind all at once: ballots start from last week’s and move with the results.</p></section>`;
   const rows=poll.rows; const rise=rows.filter(r=>r.mv>0).sort((a,b)=>b.mv-a.mv||a.rk-b.rk)[0]; const fall=rows.filter(r=>r.mv<0).sort((a,b)=>a.mv-b.mv||a.rk-b.rk)[0];
   const nw=rows.filter(r=>r.nw); const cur=new Set(rows.map(r=>r.id)); const out=prev.rows.filter(r=>!cur.has(r.id));
   const line=(lab,cls,html)=>`<div class="v1812p-mvr"><span class="v1812p-mvl ${cls}">${lab}</span><div>${html}</div></div>`; const item=h=>`<span class="v1812p-mvi">${h}</span>`;
@@ -147,7 +147,7 @@ function v1812pTeamsTab(C){
   const th=V1812P_COLS.map(c=>`<th class="n"><button class="v1812p-sortb ${sort===c[0]?'on':''}" data-a="v1812pSort" data-k="${c[0]}" title="${esc(c[2])}">${c[1]}${sort===c[0]?`<i>${(P.td?(P.td==='a'):(c[5]))?'▲':'▼'}</i>`:''}</button></th>`).join('');
   return `<div class="v1812p-filters"><label class="v1812p-f"><span>Season</span><select data-c="v1812pYr" data-k="tyr" aria-label="Season">${V1812P_YRS(C).map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}</select></label>
     <label class="v1812p-f"><span>Section</span><select data-c="v1812pFil" data-k="tsec" aria-label="Section">${secs.map(s=>`<option value="${s}" ${String(P.tsec||'all')===s?'selected':''}>${esc(secLab[s]||'Section '+s)}</option>`).join('')}</select></label>
-    <label class="v1812p-f"><span>Poll</span><select data-c="v1812pFil" data-k="trk" aria-label="Poll status"><option value="all" ${(P.trk||'all')==='all'?'selected':''}>Everyone</option><option value="ranked" ${P.trk==='ranked'?'selected':''}>Top 25 only</option></select></label>
+    <label class="v1812p-f"><span>Poll</span><select data-c="v1812pFil" data-k="trk" aria-label="Poll status"><option value="all" ${(P.trk||'all')==='all'?'selected':''}>Everyone</option><option value="ranked" ${P.trk==='ranked'?'selected':''}>Top ${V1812P.TOP} only</option></select></label>
     <label class="v1812p-f grow"><span>Find a school</span><input type="search" placeholder="Name or mascot" value="${esc(P.tq||'')}" data-v1812p-q="1" aria-label="Find a school" autocomplete="off"></label>
     <span class="v1812p-count tiny muted"><b id="v1812p-n">${shown.length}</b> of ${rows.length} schools</span></div>
    <div class="v1812p-card v1812p-tcard"><div class="tw v1812p-tw"><table class="v1812p-tt"><thead><tr><th class="v1812p-t1">Team <small class="muted">(power rank)</small></th>${th}<th>Form</th><th>GD trend</th></tr></thead><tbody id="v1812p-tb">${v1812pTeamRows(C,shown,me)}</tbody></table></div>
@@ -163,7 +163,7 @@ document.addEventListener('input',e=>{ const el=e.target.closest&&e.target.close
 function v1812pPlayersTab(C){
   const P=App.params; const yr=P.pyr?+P.pyr:C.year; const key=P.pb||'g'; const scope=P.psc||'state'; const bound=v1812pBound(C,yr);
   const def=V1812P_BOARDS.find(b=>b[0]===key)||V1812P_BOARDS[0]; const list=v1812pBoard(C,yr,def[0],scope,25); const me=C.userSid;
-  const fmtv=x=>def[0]==='rt'?x.v.toFixed(2):x.v;
+  const fmtv=x=>def[0]==='rt'?x.v.toFixed(2):Number.isInteger(x.v)?x.v:x.v.toFixed(1);
   const pod=list.slice(0,3), rest=list.slice(3);
   const open=x=>x.virtual?`data-a="v1812pPlayer" data-id="${x.id}"`:`data-a="openPlayer" data-id="${x.id}"`;
   const face=(x,sz)=>{ if(!x.virtual){ const p=findPerson(C,x.id); return p?portraitSVG(p,sz):''; } const p=v1812pPlayerRec(C,x.id); return p?portraitSVG(p,sz,{c1:v1812pSchool(C,x.sid).c1,c2:v1812pSchool(C,x.sid).c2}):''; };
@@ -171,7 +171,7 @@ function v1812pPlayersTab(C){
   const rows=rest.map(x=>{ const sc=v1812pSchool(C,x.sid); return `<li class="v1812p-lr ${x.sid===me?'mine':''}"><button ${open(x)}><b class="v1812p-lrk">${x.rk}</b><span class="v1812p-lf">${face(x,30)}</span>${crest(sc,18)}<span class="v1812p-ln"><b>${esc(x.name)}</b><small>${esc(sc.town)} · ${x.pos}</small></span><small class="v1812p-lsub">${esc(x.sub)}</small><b class="v1812p-lv">${fmtv(x)}</b></button></li>`; }).join('');
   return `<div class="v1812p-filters"><label class="v1812p-f"><span>Season</span><select data-c="v1812pYr" data-k="pyr" aria-label="Season">${V1812P_YRS(C).map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}</select></label>
     <div class="v1812p-f"><span>Scope</span>${seg('psc',[['state','Whole state'],['league','My section']],scope)}</div>
-    <div class="v1812p-f grow"><span>Leaderboard</span>${seg('pb',V1812P_BOARDS.map(b=>[b[0],b[1].split(' ')[0]==='Goal'?'G+A':b[1]]),def[0])}</div></div>
+    <div class="v1812p-f grow"><span>Leaderboard</span><select data-c="v1812pYr" data-k="pb" aria-label="Leaderboard" class="v1814-bsel">${V1812P_BOARDS.map(b=>`<option value="${b[0]}" ${b[0]===def[0]?'selected':''}>${esc(b[1])}</option>`).join('')}</select></div></div>
    <div class="v1812p-card v1812p-lcard"><div class="v1812p-bh"><div><span class="v1812p-kick">${yr} regular season · ${scope==='state'?'all '+esc(C.stateName)+' schools':'Section '+C.section}</span><h2>${esc(def[1])}</h2></div><span class="chip">${esc(def[2])}</span></div>
    ${list.length?podium+`<ol class="v1812p-list">${rows}</ol>`:`<div class="empty">${bound?'Nobody qualifies yet.':'The season has not started.'}</div>`}
    <p class="tiny muted v1812p-note">${def[0]==='rt'?'Average match rating, minimum five games. ':''}Statewide players outside your section are simulated from their team’s season; tap anyone for every season they have played.</p></div>`;
@@ -181,12 +181,12 @@ function v1812pPlayersTab(C){
 VIEWS.statepoll=()=>{
   const C=App.C; v1812pSync(C); const P=v1812pS(C); const tab=App.params.pt||'poll'; const polls=P.polls[C.year]||[]; if(polls.length) P.seen[C.year+':'+(polls.length-1)]=1;
   const intro=!P.seen.intro; P.seen.intro=1;
-  const hero=`<section class="v1812p-hero"><div><span class="v1812p-kick">Statewide · ${esc(C.stateName)}${intro?' · <b class="v1812p-new">New</b>':''}</span><p>A weekly ${esc(C.stateName)} top 25 voted by coaches and writers. Climb it all season; a ranked showdown becomes the game of the week.</p></div>
-   <div class="v1812p-tabs">${tabs('pt',[['poll','Poll'],['teams','Teams'],['players','Players']],tab)}</div></section>`;
-  let body; try{ body=tab==='teams'?v1812pTeamsTab(C):tab==='players'?v1812pPlayersTab(C):v1812pPollTab(C); }catch(e){ console.error('State Poll',e); body='<div class="empty card">The State Poll could not be drawn this time. Your career is unaffected.</div>'; }
+  const hero=`<section class="v1812p-hero"><div><span class="v1812p-kick">Statewide · ${esc(C.stateName)}${intro?' · <b class="v1812p-new">New</b>':''}</span><p>A weekly ${esc(C.stateName)} top ${V1812P.TOP} voted by coaches and writers. Climb it all season; a ranked showdown becomes the game of the week, the best of the other sections are who you meet at Regionals and States, and the season ends with the State Awards.</p></div>
+   <div class="v1812p-tabs">${tabs('pt',[['poll','Poll'],['teams','Teams'],['players','Players'],['awards','Awards']],tab)}</div></section>`;
+  let body; try{ body=tab==='teams'?v1812pTeamsTab(C):tab==='players'?v1812pPlayersTab(C):tab==='awards'&&typeof v1814AwardsTab==='function'?v1814AwardsTab(C):v1812pPollTab(C); }catch(e){ console.error('State Poll',e); body='<div class="empty card">The State Poll could not be drawn this time. Your career is unaffected.</div>'; }
   return `<div class="v1812p" data-tab="${tab}">${hero}${body}</div>`;
 };
-TITLES.statepoll="The State Poll"; NAV_ICON.statepoll='statepoll'; NAV_DESC.statepoll='Statewide top 25, team analytics and player stats';
+TITLES.statepoll="The State Poll"; NAV_ICON.statepoll='statepoll'; NAV_DESC.statepoll='Statewide top 50, team analytics, player stats and state awards';
 { const i=NAV.findIndex(n=>n[0]==='league'); if(i>=0&&!NAV.some(n=>n[0]==='statepoll')) NAV.splice(i+1,0,['statepoll','State Poll']); }
 { const g=TOPNAV.find(t=>t[0]==='league'); if(g&&!g[3].includes('statepoll')) g[3].splice(1,0,'statepoll'); }
 if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('statepoll');

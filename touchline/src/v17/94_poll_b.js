@@ -18,7 +18,7 @@ function v1812pLabel(wk){ return wk===0?'Preseason':'Week '+wk; }
 /* z-scored features for every team */
 function v1812pFeatures(C,yr,wk,recs,prevRank,priorRank){
   const ids=v1812pAllIds(C); const Rof=id=>v1812pRating(C,id,yr); const F=new Map();
-  for(const id of ids){ const A=v1812pAgg(recs.get(id)||[],Rof,prevRank?(o=>prevRank.get(o)||null):null); F.set(id,{A,R:Rof(id),PRES:v1812pPrestige(C,id),PRIOR:priorRank&&priorRank.get(id)?(26-priorRank.get(id)):0}); }
+  for(const id of ids){ const A=v1812pAgg(recs.get(id)||[],Rof,prevRank?(o=>prevRank.get(o)||null):null); F.set(id,{A,R:Rof(id),PRES:v1812pPrestige(C,id),PRIOR:priorRank&&priorRank.get(id)?(V1812P.TOP+1-priorRank.get(id)):0}); }
   const meanR=v1812pAvg(ids.map(i=>F.get(i).R));
   const raw=(f,k)=>{ const A=f.A; switch(k){ case 'R':return f.R; case 'PRES':return f.PRES; case 'PRIOR':return f.PRIOR; case 'PPG':return A.ppg; case 'GD':return A.gdpg; case 'ATT':return A.gfpg; case 'DEF':return -A.gapg; case 'REC':return A.last3*0.35+A.last3gd*0.65; case 'SOS':return A.sos==null?meanR:A.sos; case 'WIN':return A.winPct; case 'Q':return A.qw; case 'XG':return A.xgdpg!=null?A.xgdpg:A.gdpg; } return 0; };
   const Z=new Map(); for(const id of ids) Z.set(id,{});
@@ -35,7 +35,7 @@ function v1812pBallot(C,yr,wk,voter,Z,prevBal,userId){
     let s=(w.R||0)*(1-0.7*g)*z.R+(w.PRES||0)*(1-g)*z.PRES+0.14*(1-g)*z.PRIOR;
     for(const k of V1812P_PERF) if(w[k]) s+=w[k]*g*z[k];
     if(voter.loc){ if(id===userId) s+=voter.loc; else if(v1812pIsLeague(C,id)) s+=voter.loc*0.33; }
-    if(prevBal){ const pp=prevPos.get(id); s+=voter.inert*(pp?((26-pp)/25*2.6-0.5):-0.95); }
+    if(prevBal){ const pp=prevPos.get(id); s+=voter.inert*(pp?((V1812P.TOP+1-pp)/V1812P.TOP*2.6-0.5):-0.95); }
     const r=v1812pRng(C,'n',yr,wk,voter.id,id); s+=gauss(r)*voter.noise*(1-0.3*g)*0.9;
     scores.push([id,s]); }
   scores.sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:1));
@@ -105,7 +105,7 @@ function v1812pProject(C,f){
   const res={h:{win:rks.win.get(f.h)||null,draw:rks.draw.get(f.h)||null,loss:rks.loss.get(f.h)||null},a:{win:rks.loss.get(f.a)||null,draw:rks.draw.get(f.a)||null,loss:rks.win.get(f.a)||null}};
   v1812pMem.cmp.set('pj'+key,res); if(v1812pMem.cmp.size>200) v1812pMem.cmp.delete(v1812pMem.cmp.keys().next().value); return res;
 }
-function v1812pProjText(rank,cur){ if(rank) return 'projected No. '+rank; return cur?'projected out of the top 25':'projected unranked'; }
+function v1812pProjText(rank,cur){ if(rank) return 'projected No. '+rank; return cur?'projected out of the top '+V1812P.TOP:'projected unranked'; }
 
 /* ---------- a team's season in the poll ---------- */
 function v1812pStory(C,sid,yr){
@@ -113,7 +113,7 @@ function v1812pStory(C,sid,yr){
   const ranked=ranks.map((r,i)=>r?{r,wk:i}:null).filter(Boolean);
   const best=ranked.length?ranked.reduce((a,b)=>b.r<a.r?b:a):null; const worst=ranked.length?ranked.reduce((a,b)=>b.r>a.r?b:a):null;
   const start=ranks.length?ranks[0]:null, now=ranks.length?ranks[ranks.length-1]:null;
-  const head=ranks.length<2?(now?'NO. '+now+' TO START':'UNRANKED TO START'):(!ranked.length?'OUTSIDE THE TOP 25':(start&&now&&start===now&&ranked.length===ranks.length?'HOLDING AT NO. '+now:(start?'NO. '+start:'UNRANKED')+' TO '+(now?'NO. '+now:'UNRANKED')));
+  const head=ranks.length<2?(now?'NO. '+now+' TO START':'UNRANKED TO START'):(!ranked.length?'OUTSIDE THE TOP '+V1812P.TOP:(start&&now&&start===now&&ranked.length===ranks.length?'HOLDING AT NO. '+now:(start?'NO. '+start:'UNRANKED')+' TO '+(now?'NO. '+now:'UNRANKED')));
   const notes={}; for(let wk=1;wk<polls.length;wk++){ const f=v1812pRoundGames(C,yr,wk-1).find(x=>x.h===sid||x.a===sid); if(!f||f.st!=='d') continue;
     const home=f.h===sid, opp=home?f.a:f.h, gf=home?f.hg:f.ag, ga=home?f.ag:f.hg; const orank=v1812pRankOf(polls[wk-1],opp);
     notes[wk]={res:gf>ga?'W':gf<ga?'L':'D',gf,ga,home,opp,orank,text:`${gf>ga?'Won':gf<ga?'Lost':'Drew'} ${gf}–${ga} ${home?'vs':'at'} ${orank?'No. '+orank+' ':''}${v1812pName(C,opp)}`}; }
@@ -223,7 +223,7 @@ function v1812pNews(C,yr,wk,poll,prev){
   const now=v1812pRankOf(poll,u), was=prev?v1812pRankOf(prev,u):null; const st=v1812pStory(C,u,yr);
   const polls=P.polls[yr]||[]; const seasonBest=Math.min(99,...polls.slice(0,wk).map(p=>v1812pRankOf(p,u)||99));
   let text=null;
-  if(wk===0){ text=now?`Preseason State Poll: ${town} open the season ranked No. ${now} in ${C.stateName}`:`Preseason State Poll: ${town} start the season outside the ${C.stateName} top 25`; }
+  if(wk===0){ text=now?`Preseason State Poll: ${town} open the season ranked No. ${now} in ${C.stateName}`:`Preseason State Poll: ${town} start the season outside the ${C.stateName} top ${V1812P.TOP}`; }
   else if(now===1&&was!==1) text=`${town} reach No. 1 in the ${C.stateName} State Poll`;
   else if(now&&!was) text=`${town} crack the ${C.stateName} State Poll at No. ${now}`;
   else if(!now&&was) text=`${town} fall out of the State Poll after dropping from No. ${was}`;
