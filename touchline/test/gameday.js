@@ -211,9 +211,9 @@ const pngSize=buf=>({sig:buf.slice(0,8).toString('hex'),w:buf.readUInt32BE(16),h
   const ph=await ctx.newPage(); await ph.setViewportSize({width:390,height:844}); ph.on('pageerror',e=>errs.push('phone: '+e.message));
   await ph.goto(DIST); await ph.waitForTimeout(600); if(!await ph.evaluate(()=>!!App.C)){ await ph.locator('[data-a="openSlot"][data-slot="1"]').first().click(); await ph.waitForTimeout(1200); }
   await ph.evaluate(()=>{ App.route='gameday'; App.params={}; render(); }); await ph.waitForFunction(()=>document.querySelector('.v1812g-cv'),null,{timeout:60000}); await ph.waitForTimeout(800);
-  const pl=await ph.evaluate(()=>{ const de=document.documentElement; const cv=document.querySelector('.v1812g-frame').getBoundingClientRect(); const side=document.querySelector('.v1812g-side').getBoundingClientRect(); return {sw:de.scrollWidth,cw:de.clientWidth,cvTop:cv.top,sideTop:side.top,cvW:cv.width}; });
+  const pl=await ph.evaluate(()=>{ const de=document.documentElement; const cv=document.querySelector('.v1812g-frame').getBoundingClientRect(); const save=document.querySelector('[data-a="v1812gSave"]').getBoundingClientRect(); const tpl=document.querySelector('.v1812g-tpls').getBoundingClientRect(); return {sw:de.scrollWidth,cw:de.clientWidth,cvTop:cv.top,cvBottom:cv.bottom,saveTop:save.top,tplTop:tpl.top,cvW:cv.width}; });
   ok(pl.sw<=pl.cw+1, 'phone: no horizontal page scroll ('+pl.sw+' / '+pl.cw+')');
-  ok(pl.cvTop<pl.sideTop&&pl.cvW>300, 'phone: the preview is on top and the controls are below it');
+  ok(pl.cvTop<pl.tplTop&&pl.cvW>300&&pl.saveTop>=pl.cvBottom&&pl.saveTop<pl.tplTop, 'phone: the preview is on top, Save image sits right under it, the templates and style controls are below');
   await ph.close();
 
   /* ---- no leaks, no errors ---- */

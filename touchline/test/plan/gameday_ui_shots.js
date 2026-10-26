@@ -3,7 +3,7 @@
 const { chromium, DIST } = require('../_pw'); const fs=require('fs'), path=require('path');
 const OUT=path.resolve(process.argv[2]||path.join(__dirname,'../shots/v1812/gameday')); const ROUNDS=+(process.argv[3]||9); fs.mkdirSync(OUT,{recursive:true});
 (async()=>{ const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-webgl','--ignore-gpu-blocklist']}); const errs=[];
-  for(const [name,vp,dsf,theme] of [['desk',{width:1440,height:900},1,null],['phone',{width:390,height:844},2,null],['desk-gold',{width:1440,height:900},1,'gold'],['phone-light',{width:390,height:844},2,'light']]){
+  for(const [name,vp,dsf,theme] of [['desk',{width:1440,height:900},1,null],['phone',{width:390,height:844},2,null],['desk-gold',{width:1440,height:900},1,'gold'],['phone-light',{width:390,height:844},2,'light']].filter(x=>!process.env.ONLY||process.env.ONLY.split(',').includes(x[0]))){
     const ctx=await b.newContext({viewport:vp,deviceScaleFactor:dsf,hasTouch:name.startsWith('phone'),isMobile:name.startsWith('phone')}); const page=await ctx.newPage(); page.on('pageerror',e=>errs.push(name+': '+e.message)); page.on('console',m=>{ if(m.type()==='error') errs.push(name+' console: '+m.text().slice(0,200)); });
     await page.goto(DIST); await page.waitForTimeout(500);
     await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Shot Coach'); await page.fill('#nc-seed','gd-sheet'); await page.click('[data-a="ncNext"]'); await page.waitForTimeout(200); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(800);
