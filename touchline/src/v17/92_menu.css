@@ -1,0 +1,122 @@
+/* ---------- v18.11 main menu (92_menu.js): one column over a dimmed showcase match ----------
+   Colours come from the theme tokens (--bg, --surface, --line, --text, --muted, --accent, --on-accent); career cards use
+   --team1/--team2; amber --accent is used only for the primary action. Motion is transform/opacity only (the v17 start-screen
+   audit), no backdrop-filter, no blend mode, and none of it runs under reduced motion. */
+.start.v1811m{background:var(--bg);color:var(--text);justify-content:flex-start;align-items:stretch}
+.start.v1811m .start-live,.start.v1811m .start-snd,.start.v1811m .start-bug,.start.v1811m .start-ticker,.start.v1811m .start-feats{display:none}
+.start.v1811m .beam{opacity:.45}
+.start.v1811m .start-bg canvas{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.start.v1811m .start-shade{background:
+  linear-gradient(90deg,color-mix(in srgb,var(--bg) 95%,transparent) 0%,color-mix(in srgb,var(--bg) 84%,transparent) 34%,color-mix(in srgb,var(--bg) 58%,transparent) 68%,color-mix(in srgb,var(--bg) 68%,transparent) 100%),
+  linear-gradient(180deg,rgba(0,0,0,.35),transparent 28%,transparent 72%,rgba(0,0,0,.55))}
+.start.v1811m .start-ui{padding:0;gap:0;align-items:stretch;min-height:100vh;min-height:100dvh}
+
+
+.v1811m-wrap{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(26px,4.5vh,44px);width:min(580px,calc(100% - 48px));min-height:100vh;min-height:100dvh;box-sizing:border-box;padding:clamp(36px,7vh,80px) 0;margin-left:clamp(24px,8vw,136px)}
+.v1811m-main{display:flex;flex-direction:column;gap:22px}
+
+/* brand */
+.start.v1811m .v1811m-logo{margin:0;text-align:left;font-size:inherit;line-height:.85}
+.v1811m-kick{display:block;font-family:var(--f-display);font-weight:700;font-size:.82rem;letter-spacing:.38em;text-transform:uppercase;color:color-mix(in srgb,var(--text) 72%,transparent);margin:0 0 12px 2px}
+.start.v1811m .logo-word{font-size:clamp(4rem,7.4vw,6.6rem);letter-spacing:.015em;filter:none;text-align:left}
+.start.v1811m .logo-word:not(.v17-glint) span{color:var(--text);background:none;text-shadow:0 2px 0 rgba(0,0,0,.28),0 14px 34px rgba(0,0,0,.55)}
+.start.v1811m .logo.intro .logo-word:not(.v17-glint) span{animation:v1811m-letter .8s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.1s + var(--i)*.045s)}
+.v1811m-rule{display:block;width:76px;height:2px;margin:20px 0 0 2px;border-radius:2px;background:linear-gradient(90deg,var(--text),transparent);opacity:.45;transform-origin:left center}
+.v1811m-intro .v1811m-rule{animation:v1811m-rule .9s .65s cubic-bezier(.2,.8,.2,1) backwards}
+.start.v1811m .v1811m-logo small{display:block;margin:16px 0 0 2px;max-width:30em;font-family:var(--f-body);font-weight:500;font-size:1.02rem;line-height:1.5;letter-spacing:0;text-transform:none;color:var(--muted)}
+
+/* primary: continue the latest career */
+.start.v1811m .v1811m-cont{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;gap:16px;width:100%;padding:18px;border-radius:20px;cursor:pointer;text-align:left;font:inherit;color:var(--text);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--team1) 34%,var(--surface)) 0%,color-mix(in srgb,var(--surface) 94%,transparent) 62%);
+  border:1px solid color-mix(in srgb,var(--team1) 45%,var(--line));box-shadow:0 24px 60px rgba(0,0,0,.45);transition:transform .25s,box-shadow .25s,border-color .2s}
+.start.v1811m .v1811m-cont:hover{transform:translateY(-2px);box-shadow:0 30px 70px rgba(0,0,0,.5);border-color:color-mix(in srgb,var(--team1) 65%,var(--text))}
+.start.v1811m .v1811m-cont .slot-wm{position:absolute;right:-36px;top:-34px;bottom:auto;opacity:.09;transform:rotate(-8deg);pointer-events:none}
+.v1811m-cont-top{position:relative;display:flex;align-items:center;gap:16px;min-width:0}
+.start.v1811m .v1811m-cont .ch-logo{flex:none;animation:none;line-height:0}
+.start.v1811m .v1811m-cont .ch-logo>*{width:72px;height:72px}
+.v1811m-cont-t{display:flex;flex-direction:column;gap:4px;min-width:0}
+.v1811m-eye{font-size:.74rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--text) 70%,transparent)}
+.v1811m-cont-t b{font-family:var(--f-display);font-weight:900;font-size:clamp(1.5rem,2.6vw,2rem);line-height:1;text-transform:uppercase;letter-spacing:.01em;overflow-wrap:anywhere}
+.v1811m-cont-sub{font-size:.9rem;color:var(--muted)}
+.v1811m-go{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;min-height:54px;border-radius:14px;background:var(--accent);color:var(--on-accent);font-family:var(--f-display);font-weight:900;font-size:1.35rem;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 10px 26px color-mix(in srgb,var(--accent) 28%,transparent)}
+.v1811m-go>span:first-child{display:inline-flex;align-items:center;gap:8px}
+.v1811m-go kbd{font-family:var(--f-body);font-size:.66rem;font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:6px;border:1px solid currentColor;opacity:.6;background:none;color:inherit}
+
+/* primary: no careers yet */
+.start.v1811m .v1811m-new{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;width:100%;padding:18px 20px;border:0;border-radius:20px;cursor:pointer;text-align:left;font:inherit;background:var(--accent);color:var(--on-accent);box-shadow:0 18px 44px color-mix(in srgb,var(--accent) 26%,rgba(0,0,0,.4));transition:transform .25s,box-shadow .25s}
+.start.v1811m .v1811m-new:hover{transform:translateY(-2px)}
+.v1811m-new-ic{flex:none;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:2px solid currentColor;opacity:.85}
+.v1811m-new-t{display:flex;flex-direction:column;gap:4px}
+.v1811m-new-t b{font-family:var(--f-display);font-weight:900;font-size:1.6rem;line-height:1;text-transform:uppercase;letter-spacing:.03em}
+.v1811m-new-t small{font-size:.88rem;opacity:.78;font-weight:500}
+.v1811m-sweep{position:absolute;inset:0;pointer-events:none;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.32) 50%,transparent 65%);transform:translateX(-120%);animation:v1811m-sweep 7s 2.4s ease-in-out infinite}
+
+/* your careers */
+.v1811m-saves h2{margin:0 0 10px 2px;font-size:.74rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.v1811m-saves ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.v1811m-slot{display:flex;align-items:center;min-height:58px;border-radius:14px;background:color-mix(in srgb,var(--surface) 76%,transparent);border:1px solid color-mix(in srgb,var(--line) 75%,transparent);transition:background .2s,border-color .2s}
+.v1811m-slot.v1811m-filled{box-shadow:inset 3px 0 0 var(--team1)}
+.v1811m-slot.v1811m-empty{background:color-mix(in srgb,var(--surface) 45%,transparent);border-style:dashed}
+.v1811m-slot:hover{background:color-mix(in srgb,var(--surface) 92%,var(--text) 5%);border-color:var(--line)}
+.v1811m-slot-open,.v1811m-slot-new{flex:1;min-width:0;display:flex;align-items:center;gap:12px;align-self:stretch;padding:8px 14px;background:none;border:0;border-radius:14px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.v1811m-slot .slot-logo{flex:none;line-height:0;filter:none}
+.v1811m-slot .slot-logo>*{width:40px;height:40px}
+.v1811m-slot-ic{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px dashed color-mix(in srgb,var(--text) 40%,transparent);color:var(--muted)}
+.v1811m-slot-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v1811m-slot-t b{font-weight:700;font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811m-slot.v1811m-empty .v1811m-slot-t b{color:color-mix(in srgb,var(--text) 82%,transparent)}
+.v1811m-slot-t small{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1811m-slot-del{flex:none;display:grid;place-items:center;width:44px;height:44px;margin-right:6px;border:0;border-radius:10px;background:none;color:var(--muted);cursor:pointer;opacity:.7;transition:opacity .2s,color .2s,background .2s}
+.v1811m-slot:hover .v1811m-slot-del,.v1811m-slot-del:focus-visible{opacity:1}
+.v1811m-slot-del:hover{color:var(--bad,#ff6b6b);background:rgba(255,255,255,.06)}
+
+/* secondary actions */
+.v1811m-links{display:flex;flex-wrap:wrap;gap:4px 2px;margin-left:-7px}
+.start.v1811m .v1811m-links .v1811m-link,.start.v1811m .v1811m-links .sndbtn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 7px;border:0;border-radius:10px;background:none;box-shadow:none;color:color-mix(in srgb,var(--text) 80%,transparent);font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
+.start.v1811m .v1811m-links .v1811m-link:hover,.start.v1811m .v1811m-links .sndbtn:hover{background:rgba(255,255,255,.07);color:var(--text)}
+.v1811m-ic{flex:none}
+
+/* keyboard focus */
+.start.v1811m button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.start.v1811m .v1811m-slot-open:focus-visible,.start.v1811m .v1811m-slot-new:focus-visible{outline-offset:-2px}
+
+/* mascot parade: one faint strip along the bottom edge, right of the column */
+.v1811m-parade{position:fixed;left:48%;right:0;bottom:8px;z-index:0;opacity:.3;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 86%,transparent)}
+.v1811m-parade .parade{margin:0}
+
+/* entrance */
+.v1811m-intro .v1811m-in{animation:v1811m-up .75s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(.3s + var(--v1811m-d,0)*.09s)}
+@keyframes v1811m-up{from{opacity:0;transform:translateY(16px)}}
+@keyframes v1811m-letter{from{opacity:0;transform:translateY(.22em)}}
+@keyframes v1811m-rule{from{opacity:0;transform:scaleX(0)}}
+@keyframes v1811m-sweep{0%{transform:translateX(-120%)}28%,100%{transform:translateX(120%)}}
+
+/* phone: one centred column, brand at the top, the actions in the lower, thumb-reachable half */
+@media (max-width:720px){
+  .start.v1811m .start-shade{background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 70%,transparent),color-mix(in srgb,var(--bg) 82%,transparent) 40%,color-mix(in srgb,var(--bg) 94%,transparent))}
+  .v1811m-parade{display:none}
+  .v1811m-wrap{width:auto;margin:0;padding:max(28px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));justify-content:flex-start;gap:24px}
+  .v1811m-brand{text-align:center;padding-top:clamp(8px,4vh,40px)}
+  .start.v1811m .v1811m-logo,.start.v1811m .logo-word{text-align:center}
+  .start.v1811m .logo-word{font-size:clamp(3.2rem,18vw,4.6rem)}
+  .v1811m-kick{margin:0 0 10px;font-size:.72rem;letter-spacing:.3em}
+  .v1811m-rule{margin:16px auto 0;background:linear-gradient(90deg,transparent,var(--text),transparent);transform-origin:center}
+  .start.v1811m .v1811m-logo small{margin:14px auto 0;font-size:.94rem;max-width:22em}
+  .v1811m-main{margin-top:auto;gap:18px}
+  .start.v1811m .v1811m-cont{padding:14px;gap:14px}
+  .start.v1811m .v1811m-cont .ch-logo>*{width:56px;height:56px}
+  .v1811m-go{min-height:56px}
+  .v1811m-go kbd{display:none}
+  .v1811m-links{justify-content:center;margin:0}
+}
+
+/* reduced motion: no entrance, sweep or parallax */
+@media (prefers-reduced-motion:reduce){
+  .v1811m-intro .v1811m-in,.v1811m-intro .v1811m-rule,.start.v1811m .logo.intro .logo-word:not(.v17-glint) span,.v1811m-sweep{animation:none}
+  .v1811m-sweep{display:none}
+  .start.v1811m .start-bg canvas{transition:none;transform:none}
+}
+body.rm .v1811m-intro .v1811m-in,body.rm .v1811m-intro .v1811m-rule,body.rm .start.v1811m .logo.intro .logo-word:not(.v17-glint) span{animation:none}
+body.rm .v1811m-sweep{display:none}
+body.rm .start.v1811m .start-bg canvas{transition:none;transform:none}
