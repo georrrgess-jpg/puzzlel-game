@@ -72,11 +72,12 @@ let nudgeT=0,nudges=0;
 function resetNudge(full){
   clearTimeout(nudgeT);if(full)nudges=0;
   if(!cur||cur.over||cur.puz.noNudge)return;
+  /* a quiet helping hand after a long pause: the hint just appears (no toast, no sound), at most twice per level */
   nudgeT=setTimeout(()=>{
-    if(!cur||cur.over||nudges>=3)return;
-    if($('#modal').classList.contains('on')){resetNudge();return}
-    nudges++;toast('Stuck? Here\'s a free hint 💡');sfx.good();cur.puz.hint();resetNudge();
-  },cur.level<=6&&!cur.daily?7000:16000);
+    if(!cur||cur.over||nudges>=2)return;
+    if($('#modal').classList.contains('on')||document.hidden){resetNudge();return}
+    nudges++;cur.puz.hint();resetNudge();
+  },cur.level<=6&&!cur.daily?12000:24000);
 }
 $('#play').addEventListener('pointerdown',()=>resetNudge());
 function showHowTo(type,done){

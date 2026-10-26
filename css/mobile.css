@@ -29,3 +29,11 @@
   .tool{min-width:58px}
   .tool span{font-size:18px}
 }
+
+/* comfortable touch targets */
+.btn.sm{min-height:42px}
+.tool,.iconbtn{min-width:44px}
+
+/* no pull-to-refresh / rubber-banding mid-drag, no long-press callouts, no auto text inflation */
+html,body{overscroll-behavior:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.mapwrap,.shoplist,.card{overscroll-behavior:contain}
