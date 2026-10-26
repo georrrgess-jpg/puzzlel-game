@@ -2527,6 +2527,303 @@ body.rm .start.v1811m .start-bg canvas{transition:none;transform:none}
 .v1811c-mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .v1811c-mrow{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px}
 
+/* ===================== v18.12 THE STATE POLL ===================== */
+.v1812p{display:flex;flex-direction:column;gap:16px;--v1812p-rh:58px}
+.v1812p-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:14px 24px;flex-wrap:wrap;padding:6px 2px 2px}
+.v1812p-hero h2{font-size:clamp(2rem,4vw,2.9rem);line-height:.95;letter-spacing:.03em;margin:.18em 0 .12em}
+.v1812p-hero p{margin:0;color:var(--muted);max-width:620px;font-size:.95rem}
+.v1812p-hero .tabs{border-bottom:0;gap:6px}
+.v1812p-hero .tab{border:1px solid var(--line);border-radius:999px;padding:8px 18px;margin:0;background:color-mix(in srgb,var(--surface) 80%,transparent)}
+.v1812p-hero .tab.on{background:var(--team,var(--accent));color:var(--team-ink,var(--on-accent));border-color:var(--team,var(--accent));box-shadow:inset 0 -2px 0 var(--team2,transparent)}
+.v1812p-kick{display:flex;align-items:center;gap:8px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1812p-kick i{width:8px;height:8px;border-radius:50%;background:var(--team-hi,var(--accent));box-shadow:0 0 0 4px color-mix(in srgb,var(--team-hi,var(--accent)) 25%,transparent);flex:none}
+.v1812p-new{background:var(--accent);color:var(--on-accent);padding:1px 8px;border-radius:99px;letter-spacing:.1em;font-size:.68rem}
+.v1812p-card{position:relative;min-width:0;background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 100%,#fff 2.5%),var(--surface));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.v1812p-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(300px,.82fr);gap:16px;align-items:start}
+.v1812p-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.v1812p-bh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.v1812p-bh h2{font-size:clamp(1.4rem,2.6vw,1.95rem);letter-spacing:.03em;margin-top:4px}
+.v1812p-bh h2 i{font-style:normal;color:var(--muted);margin:0 .15em}
+.v1812p-step{display:flex;align-items:center;gap:6px}
+.v1812p-step select{background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:7px 10px;font-weight:700}
+
+/* the table */
+.v1812p-colh{display:grid;grid-template-columns:46px 50px 38px minmax(0,1fr) 70px 62px;gap:8px;padding:6px 10px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800;border-bottom:1px solid var(--line)}
+.v1812p-colh span:last-child,.v1812p-colh span:nth-child(5){text-align:right}
+.v1812p-rows{list-style:none;margin:0;padding:0}
+.v1812p-row{position:relative;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);will-change:transform}
+.v1812p-rb{appearance:none;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer;display:grid;grid-template-columns:46px 50px 38px minmax(0,1fr) 70px 62px;align-items:center;gap:8px;width:100%;height:var(--v1812p-rh);padding:0 10px;transition:background .15s}
+.v1812p-rb:hover{background:color-mix(in srgb,var(--text) 5%,transparent)}
+.v1812p-row.me .v1812p-rb{background:linear-gradient(90deg,color-mix(in srgb,var(--team) 38%,transparent),color-mix(in srgb,var(--team) 8%,transparent) 80%);box-shadow:inset 4px 0 0 var(--team2,var(--team))}
+.v1812p-row.lg:not(.me) .v1812p-rb{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--team-hi,var(--muted)) 55%,transparent)}
+.v1812p-rk{font-family:var(--f-display);font-weight:800;font-size:2.15rem;line-height:1;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.v1812p-row:nth-child(-n+3) .v1812p-rk{color:var(--text)}
+.v1812p-mv{font:800 .8rem/1 var(--f-mono);color:var(--muted);text-align:center;white-space:nowrap}
+.v1812p-mv.up{color:var(--good)} .v1812p-mv.dn{color:var(--bad)}
+.v1812p-mv.nw{font:800 .6rem/1 var(--f-body);letter-spacing:.12em;color:var(--on-accent);background:var(--accent);border-radius:99px;padding:3px 5px}
+.v1812p-sh{display:grid;place-items:center}
+.v1812p-nm{min-width:0;display:flex;flex-direction:column;gap:1px}
+.v1812p-nl{display:flex;align-items:baseline;gap:6px;min-width:0}
+.v1812p-nm b{font-weight:800;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;min-width:0}
+.v1812p-nm .v1812p-fp{flex:none;font-style:normal;color:var(--muted);font:700 .78rem var(--f-mono)}
+.v1812p-nm small{color:var(--muted);font-size:.72rem;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1812p-nm small.m{display:none}
+.v1812p-rec{font:600 .86rem var(--f-mono);text-align:right;color:var(--muted)}
+.v1812p-pts{font:800 1.15rem var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+.v1812p-ov{margin:12px 2px 0;color:var(--muted);font-size:.84rem;line-height:1.55}
+.v1812p-ov b{color:var(--text)}
+.v1812p-ov .link{font-size:inherit}
+.v1812p-ov.me{margin-top:4px}
+
+/* rank-by-week chart */
+.v1812p-chart{width:100%;height:auto;display:block;overflow:visible}
+.v1812p-gl line{stroke:var(--line);stroke-width:1}
+.v1812p-gl line.nr{stroke-dasharray:3 4}
+.v1812p-gl text{fill:var(--muted);font:600 9.5px var(--f-mono)}
+.v1812p-line{fill:none;stroke:var(--vt,var(--team-hi,var(--accent)));stroke-width:2.8;stroke-linejoin:round;stroke-linecap:round}
+.v1812p-dot{fill:var(--vt,var(--team-hi,var(--accent)));stroke:var(--surface);stroke-width:2}
+.v1812p-dot.nr{fill:var(--surface);stroke:var(--muted);stroke-width:1.6}
+.v1812p-bar{fill:color-mix(in srgb,var(--vt,var(--team-hi,var(--accent))) 30%,transparent)}
+.v1812p-ann rect{fill:var(--surface2);stroke:var(--vt,var(--team-hi));stroke-width:1}
+.v1812p-ann text{fill:var(--text);font:700 9.5px var(--f-body)}
+.v1812p-legend{display:flex;gap:14px;font-size:.72rem;color:var(--muted);margin-top:4px}
+.v1812p-legend i{display:inline-block;vertical-align:middle;margin-right:5px}
+.v1812p-legend i.ln{width:16px;height:3px;border-radius:2px;background:var(--vt,var(--team-hi,var(--accent)))}
+.v1812p-legend i.bar{width:10px;height:10px;border-radius:2px;background:color-mix(in srgb,var(--vt,var(--team-hi,var(--accent))) 40%,transparent)}
+.v1812p-in .v1812p-line{stroke-dasharray:1;stroke-dashoffset:1;animation:v1812pdraw 1.1s .15s cubic-bezier(.4,.1,.2,1) forwards}
+.v1812p-in .v1812p-area{opacity:0;animation:v1812pfade .8s .7s ease forwards}
+.v1812p-in .v1812p-dot{opacity:0;animation:v1812ppop .35s calc(.2s + var(--i,0)*.07s) cubic-bezier(.2,1.6,.4,1) forwards;transform-box:fill-box;transform-origin:center}
+.v1812p-in .v1812p-ann{opacity:0;animation:v1812pfade .5s calc(.25s + var(--i,0)*.07s) ease forwards}
+.v1812p-in .v1812p-bar{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);animation:v1812pgrow .6s calc(.1s + var(--i,0)*.08s) cubic-bezier(.2,.9,.3,1) forwards}
+.v1812p-in .v1812p-mv.up{animation:v1812pmvu .7s .55s cubic-bezier(.2,1.4,.4,1) both}
+.v1812p-in .v1812p-mv.dn{animation:v1812pmvd .7s .55s cubic-bezier(.2,1.4,.4,1) both}
+.v1812p-in .v1812p-mv.nw{animation:v1812ppop .5s .6s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes v1812pmvu{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:none}}
+@keyframes v1812pmvd{0%{opacity:0;transform:translateY(-10px)}100%{opacity:1;transform:none}}
+@keyframes v1812pdraw{to{stroke-dashoffset:0}}
+@keyframes v1812pfade{to{opacity:1}}
+@keyframes v1812ppop{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+@keyframes v1812pgrow{to{transform:scaleY(1)}}
+
+/* season card */
+.v1812p-season .v1812p-head{font-size:clamp(1.7rem,3.2vw,2.35rem);letter-spacing:.03em;margin:6px 0 8px;line-height:1}
+.v1812p-season .v1812p-head.sm{font-size:1.5rem}
+.v1812p-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.v1812p-stats div{display:flex;flex-direction:column;gap:1px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+.v1812p-stats span{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1812p-stats b{font:800 1.25rem var(--f-display);letter-spacing:.02em}
+.v1812p-stats em{font-style:normal;font-size:.7rem;color:var(--muted)}
+
+/* ranked showdown */
+.v1812p-show{overflow:hidden;background:linear-gradient(115deg,color-mix(in srgb,var(--hc,#335) 34%,var(--surface)) 0,var(--surface) 48%,color-mix(in srgb,var(--ac,#533) 34%,var(--surface)) 100%);border-color:color-mix(in srgb,var(--text) 18%,var(--line))}
+.v1812p-show::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--hc) 0 50%,var(--ac) 50% 100%)}
+.v1812p-vs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin:14px 0 12px}
+.v1812p-st{display:flex;align-items:center;gap:10px;min-width:0}
+.v1812p-st.r{flex-direction:row-reverse;text-align:right}
+.v1812p-st>div{display:flex;flex-direction:column;min-width:0}
+.v1812p-st b{font:800 1.5rem var(--f-display);line-height:1.02;text-transform:uppercase;letter-spacing:.03em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.v1812p-no{font:800 .74rem var(--f-display);letter-spacing:.2em;color:var(--muted)}
+.v1812p-vsm{font:800 1rem var(--f-display);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.v1812p-ven{margin:-4px 0 10px;text-align:center;font-size:.74rem;color:var(--muted);letter-spacing:.04em}
+.v1812p-chips{display:flex;flex-wrap:wrap;gap:6px}
+.v1812p-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;border:1px solid var(--line);background:color-mix(in srgb,var(--text) 6%,transparent);font-size:.76rem;font-weight:700}
+.v1812p-chip.gotw{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 60%,var(--line));color:var(--text)}
+.v1812p-chip.win{border-color:color-mix(in srgb,var(--good) 55%,var(--line));color:var(--good)}
+.v1812p-chip.fin{font-family:var(--f-mono)}
+.v1812p-odds{font-family:var(--f-mono);letter-spacing:.02em}
+.v1812p-odds i{font-style:normal;color:var(--muted)}
+.v1812p-odds.wait{color:var(--muted);font-family:var(--f-body)}
+.v1812p-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.v1812p-show.in-ov{box-shadow:none;padding:14px}
+.v1812p-show.in-ov .v1812p-st b{font-size:1.15rem}
+.v1812p-show.in-md{margin-bottom:2px}
+.v1812p-pill{white-space:nowrap}
+.v1812p-pill.gotw{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 70%,var(--line));color:var(--team-hi,var(--accent))}
+.mc-game.v1812p-gotwc{box-shadow:0 0 0 1px color-mix(in srgb,var(--team-hi,var(--accent)) 55%,transparent),0 14px 36px rgba(0,0,0,.25)}
+.v1812p-sb{flex:none;font:800 .66rem var(--f-mono);letter-spacing:.04em;padding:2px 6px;border-radius:6px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+@media (max-width:760px){ .v1812p-sbg{display:none} }
+.v1812p-sb.gotw{color:var(--team-ink,#fff);background:var(--team,var(--surface2));border-color:var(--team,var(--line))}
+.v1812p-sb.one{border-style:dashed}
+.v1812p-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;margin-bottom:12px;border:1px solid color-mix(in srgb,var(--team-hi,var(--accent)) 45%,var(--line));background:color-mix(in srgb,var(--team,var(--accent)) 16%,var(--surface))}
+.v1812p-banner i{width:8px;height:8px;border-radius:50%;background:var(--team-hi,var(--accent));flex:none}
+.v1812p-banner b{flex:1;font-size:.9rem}
+
+/* voters */
+.v1812p-voters .v1812p-kick{margin-bottom:6px}
+.v1812p-vt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.v1812p-vt:last-child{border-bottom:0}
+.v1812p-face{width:46px;height:46px;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--text) 14%,var(--surface2)),var(--surface2));border:2px solid var(--line);display:block;flex:none}
+.v1812p-face svg{display:block;margin:-2px 0 0 0}
+.v1812p-vb{min-width:0}
+.v1812p-vb b{display:block;font-size:.95rem}
+.v1812p-vb small{display:block;color:var(--muted);font-size:.72rem;letter-spacing:.04em;margin-bottom:3px}
+.v1812p-vb p{margin:0;font-size:.88rem;font-style:italic;line-height:1.35;color:color-mix(in srgb,var(--text) 90%,var(--muted))}
+.v1812p-vr{text-align:center;min-width:52px}
+.v1812p-vr small{display:block;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1812p-vr b{font:800 1.7rem var(--f-display);line-height:1.1}
+.v1812p-vr.nr b{color:var(--muted)}
+.v1812p-more{margin-top:6px}
+.v1812p-more summary{cursor:pointer;color:var(--muted);font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 0}
+
+/* teams tab */
+.v1812p-filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end}
+.v1812p-f{display:flex;flex-direction:column;gap:4px;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1812p-f.grow{flex:1;min-width:160px}
+.v1812p-f select,.v1812p-f input{background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px;font:600 .92rem var(--f-body);letter-spacing:0;text-transform:none;min-height:38px}
+.v1812p-count{margin-left:auto;align-self:center}
+.v1812p-tcard{padding:0;overflow:hidden}
+.v1812p-tw{max-height:none;overflow-x:auto}
+.v1812p-tt{border-collapse:separate;border-spacing:0;width:100%;font-size:.86rem}
+.v1812p-tt th{position:sticky;top:0;background:var(--surface2);z-index:2;padding:8px 8px;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;text-align:left;border-bottom:1px solid var(--line)}
+.v1812p-tt th.n{text-align:right}
+.v1812p-tt td{padding:6px 8px;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);white-space:nowrap;vertical-align:middle}
+.v1812p-tt td.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.v1812p-tt td.n small{font-family:var(--f-body);color:var(--muted);font-size:.6rem;margin-left:3px}
+.v1812p-tt td.pw{color:var(--text)}
+.v1812p-tt tr.me td{background:color-mix(in srgb,var(--team) 20%,transparent)}
+.v1812p-tt tr.lg:not(.me) td:first-child{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--team-hi,var(--muted)) 55%,transparent)}
+.v1812p-tt tr:hover td{background:color-mix(in srgb,var(--text) 5%,transparent)}
+.v1812p-tt .v1812p-t1{position:sticky;left:0;z-index:1;background:var(--surface);min-width:210px}
+.v1812p-tt thead .v1812p-t1{z-index:3;background:var(--surface2)}
+.v1812p-tt tr.me .v1812p-t1{background:color-mix(in srgb,var(--team) 20%,var(--surface))}
+.v1812p-tb{appearance:none;background:none;border:0;color:inherit;font:inherit;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:left;padding:0;width:100%}
+.v1812p-pr{font:800 1.15rem var(--f-display);width:26px;text-align:right;color:var(--muted)}
+.v1812p-tn{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.v1812p-tn b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis}
+.v1812p-tn small{color:var(--muted);font-size:.68rem}
+.v1812p-sortb{appearance:none;background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;padding:2px 0;white-space:nowrap}
+.v1812p-sortb:hover,.v1812p-sortb.on{color:var(--text)}
+.v1812p-sortb i{font-style:normal;margin-left:3px;font-size:.62rem;color:var(--team-hi,var(--accent))}
+.v1812p-form{display:inline-flex;gap:2px}
+.v1812p-form i{font-style:normal;width:17px;height:17px;border-radius:4px;display:grid;place-items:center;font:800 .62rem var(--f-mono);color:#0b0b0b}
+.v1812p-form i.W{background:var(--good)} .v1812p-form i.D{background:#9aa7b6} .v1812p-form i.L{background:var(--bad)}
+.v1812p-spark{display:block}
+.v1812p-spark line{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.v1812p-spark polyline{fill:none;stroke:var(--good);stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.v1812p-spark.dn polyline{stroke:var(--bad)}
+.v1812p-note{padding:10px 16px 14px;margin:0}
+.v1812p-tcard .v1812p-note{border-top:1px solid var(--line)}
+
+/* players tab */
+.v1812p-lcard .v1812p-bh{margin-bottom:6px}
+.v1812p-pod{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px;align-items:end;margin:8px 0 14px}
+.v1812p-pp{appearance:none;border:1px solid var(--line);color:inherit;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;padding:14px 8px 12px;border-radius:16px;position:relative;background:linear-gradient(180deg,color-mix(in srgb,var(--c1) 26%,var(--surface)),var(--surface) 70%)}
+.v1812p-pp.p1{padding-top:20px;padding-bottom:16px;border-color:color-mix(in srgb,var(--text) 22%,var(--line))}
+.v1812p-pp.mine{box-shadow:0 0 0 2px var(--team2,var(--team))}
+.v1812p-prk{position:absolute;top:8px;left:12px;font:800 1.5rem var(--f-display);color:var(--muted)}
+.v1812p-pface{display:block;border-radius:50%;overflow:hidden;width:76px;height:76px;background:var(--surface2);border:2px solid var(--line)}
+.v1812p-pp.p1 .v1812p-pface{width:96px;height:96px}
+.v1812p-pface svg{display:block;margin:-2px auto 0}
+.v1812p-pp b{font:800 1.05rem var(--f-display);text-transform:uppercase;letter-spacing:.03em;line-height:1.1}
+.v1812p-psc{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.74rem}
+.v1812p-pv{font:800 2rem var(--f-display);line-height:1;margin-top:2px}
+.v1812p-pp small{color:var(--muted);font-size:.7rem}
+.v1812p-list{list-style:none;margin:0;padding:0}
+@media (min-width:1100px){ .v1812p-list{display:grid;grid-template-columns:1fr 1fr;column-gap:22px} }
+.v1812p-movers .v1812p-how{margin:6px 0 0;color:var(--muted);font-size:.86rem;line-height:1.5}
+.v1812p-mvr{display:grid;grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);font-size:.88rem}
+.v1812p-mvr:last-child{border-bottom:0}
+.v1812p-mvl{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.v1812p-mvl.up{color:var(--good)} .v1812p-mvl.dn{color:var(--bad)}
+.v1812p-mvr .link{font-weight:700}
+.v1812p-mvr>div{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.v1812p-mvi{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.v1812p-mvr svg{vertical-align:middle}
+.v1812p-ovbig .v1812p-nr{font:800 clamp(3rem,5vw,4.4rem)/.9 var(--f-display);color:var(--muted)}
+.v1812p-lr button{appearance:none;background:none;border:0;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);color:inherit;font:inherit;text-align:left;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;padding:7px 8px}
+.v1812p-lr button:hover{background:color-mix(in srgb,var(--text) 5%,transparent)}
+.v1812p-lr.mine button{background:color-mix(in srgb,var(--team) 20%,transparent)}
+.v1812p-lrk{font:800 1.1rem var(--f-display);width:24px;text-align:right;color:var(--muted)}
+.v1812p-lf{display:block;width:32px;height:32px;border-radius:50%;overflow:hidden;background:var(--surface2);flex:none}
+.v1812p-lf svg{display:block;margin:-1px auto 0}
+.v1812p-ln{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.15}
+.v1812p-ln b{font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1812p-ln small,.v1812p-lsub{color:var(--muted);font-size:.72rem}
+.v1812p-lsub{white-space:nowrap}
+.v1812p-lv{font:800 1.15rem var(--f-mono);min-width:48px;text-align:right}
+
+/* team panel and player seasons */
+.v1812p-th{display:flex;gap:16px;align-items:center;padding:16px;border-radius:16px;margin-bottom:12px;background:linear-gradient(110deg,color-mix(in srgb,var(--c1) 38%,var(--surface)),var(--surface) 70%);border:1px solid var(--line)}
+.v1812p-th h2{font-size:1.8rem;margin:2px 0}
+.v1812p-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+.v1812p-kpi{display:flex;flex-direction:column;gap:1px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,var(--surface));border:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.v1812p-kpi span{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1812p-kpi b{font:800 1.5rem var(--f-display);letter-spacing:.02em;line-height:1.1}
+.v1812p-kpi em{font-style:normal;font-size:.7rem;color:var(--muted)}
+.v1812p-kpi.good b{color:var(--good)} .v1812p-kpi.bad b{color:var(--bad)}
+.v1812p-two{align-items:start;margin-bottom:12px}
+.v1812p-rs{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.v1812p-rsl{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--muted);width:70px}
+.v1812p-rs b{font-size:.92rem} .v1812p-rs small{display:block;color:var(--muted);font-size:.72rem}
+.v1812p-rs.win .mono{color:var(--good)} .v1812p-rs.loss .mono{color:var(--bad)}
+.v1812p-res{min-width:22px;text-align:center}
+.v1812p-res.W{background:var(--good);color:#0b0b0b} .v1812p-res.L{background:var(--bad);color:#0b0b0b}
+.v1812p-results{max-height:260px;overflow:auto}
+.v1812p-stt{width:100%;border-collapse:collapse;font-size:.84rem}
+.v1812p-stt th{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:6px 6px;text-align:left;white-space:nowrap}
+.v1812p-stt td{padding:6px 6px;border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent);white-space:nowrap}
+.v1812p-stt th.n,.v1812p-stt td.n{text-align:right;font-family:var(--f-mono)}
+.v1812p-stt tr.minor td{color:var(--muted)}
+.v1812p-stt tr.tot td{border-top:2px solid var(--line);font-weight:800}
+.v1812p-stt tr.tags td{border-top:0;padding-top:0;padding-bottom:7px;white-space:normal}
+.v1812p-stt .v1812p-sch{display:flex;align-items:center;gap:5px;font-family:var(--f-body)}
+.v1812p-tag{display:inline-block;margin:0 5px 0 0;padding:1px 8px;border-radius:99px;border:1px solid var(--line);font-size:.68rem;font-weight:700;color:var(--muted)}
+.v1812p-tag.aw{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 55%,var(--line));color:var(--text)}
+.v1812p-tag.st{border-color:color-mix(in srgb,var(--good) 50%,var(--line));color:var(--good)}
+.v1812p-across .tw{margin-top:4px}
+.v1812p-trend{margin-top:6px}
+.v1812p-ts{display:none}
+
+/* overview strip */
+.ov-card.v1812p-ovcard{grid-column:1/-1;display:grid;grid-template-columns:minmax(220px,.9fr) minmax(0,1.05fr) minmax(0,.95fr) minmax(0,1.25fr);gap:20px;align-items:center;background:linear-gradient(110deg,color-mix(in srgb,var(--team) 22%,var(--surface)),var(--surface) 55%)}
+.v1812p-ovl{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.v1812p-ovbig{display:flex;align-items:baseline;gap:8px;line-height:.9}
+.v1812p-ovbig b{font:800 clamp(3.4rem,6vw,5rem)/.9 var(--f-display);letter-spacing:.01em}
+.v1812p-ovbig .v1812p-no{font-size:1.1rem}
+.v1812p-ovbig .v1812p-mv{font-size:1rem}
+.v1812p-ovh{font:800 1.15rem var(--f-display);letter-spacing:.06em;color:var(--text)}
+.v1812p-ovt{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.v1812p-ovt li{display:grid;grid-template-columns:24px 40px 22px minmax(0,1fr) auto;gap:6px;align-items:center;padding:4px 8px;border-radius:9px;font-size:.88rem}
+.v1812p-ovt li.me{background:color-mix(in srgb,var(--team) 30%,transparent);font-weight:800}
+.v1812p-ork{font:800 1.15rem var(--f-display);text-align:right}
+.v1812p-ovt i{font-style:normal;color:var(--muted);font-size:.8rem}
+.v1812p-ovs{min-width:0}
+.v1812p-ovq .v1812p-vt{border:0;padding:6px 0 0}
+.v1812p-ovc .v1812p-chart{max-height:170px}
+
+/* live intro */
+.v1812p-lvb{display:inline-flex;align-items:center;gap:8px;margin-bottom:8px;padding:5px 16px;border-radius:99px;font:800 clamp(.8rem,1.6vw,1.05rem) var(--f-display);letter-spacing:.2em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,211,107,.55)}
+.v1812p-lvb i{width:8px;height:8px;border-radius:50%;background:#ff5d5d;box-shadow:0 0 12px #ff5d5d;animation:pulse 1.4s infinite}
+.v1812p-lvr{font:800 clamp(.8rem,1.6vw,1.1rem) var(--f-display);letter-spacing:.2em;color:#ffd36b}
+
+@media (max-width:1100px){ .v1812p-grid{grid-template-columns:minmax(0,1fr)} .ov-card.v1812p-ovcard{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+@media (max-width:760px){
+  .v1812p{--v1812p-rh:52px}
+  .v1812p-card{padding:12px;border-radius:14px}
+  .v1812p-colh,.v1812p-rb{grid-template-columns:34px 40px 30px minmax(0,1fr) 54px 44px;gap:5px;padding-left:4px;padding-right:4px}
+  .v1812p-rk{font-size:1.7rem}
+  .v1812p-nm b{font-size:.95rem} .v1812p-nm small.d,.v1812p-mas{display:none} .v1812p-nm small.m{display:block}
+  .v1812p-rec{font-size:.74rem}
+  .v1812p-pts{font-size:1rem}
+  .v1812p-stats{grid-template-columns:repeat(2,1fr)}
+  .v1812p-vs{grid-template-columns:minmax(0,1fr)} .v1812p-vsm{text-align:center} .v1812p-st.r{flex-direction:row;text-align:left}
+  .v1812p-hero{align-items:flex-start}
+  .v1812p-pod{grid-template-columns:1fr;gap:8px} .v1812p-pp.p1{order:-1} .v1812p-pp{flex-direction:row;text-align:left;flex-wrap:wrap;padding:10px 12px;gap:4px 10px} .v1812p-pp.p1{padding:10px 12px}
+  .v1812p-pface,.v1812p-pp.p1 .v1812p-pface{width:54px;height:54px} .v1812p-prk{position:static}
+  .v1812p-lsub{display:none}
+  .v1812p-tt .v1812p-t1{min-width:0;width:152px;max-width:152px} .v1812p-tn small{display:none} .v1812p-tn b{display:block;max-width:92px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .v1812p-pr{width:20px;font-size:1rem}
+  .v1812p-tl{display:none} .v1812p-ts{display:inline}
+  .v1812p-th{flex-direction:column;align-items:flex-start;text-align:left}
+  .ov-card.v1812p-ovcard{grid-template-columns:minmax(0,1fr)}
+  .v1812p-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media (prefers-reduced-motion:reduce){ .v1812p-in .v1812p-mv{animation:none!important;opacity:1!important;transform:none!important} .v1812p-in .v1812p-line,.v1812p-in .v1812p-area,.v1812p-in .v1812p-dot,.v1812p-in .v1812p-ann,.v1812p-in .v1812p-bar{animation:none!important;opacity:1!important;stroke-dashoffset:0!important;transform:none!important} .v1812p-row{transition:none!important} }
+body.rm .v1812p-in .v1812p-mv,body.rm .v1812p-in .v1812p-line,body.rm .v1812p-in .v1812p-area,body.rm .v1812p-in .v1812p-dot,body.rm .v1812p-in .v1812p-ann,body.rm .v1812p-in .v1812p-bar{animation:none!important;opacity:1!important;stroke-dashoffset:0!important;transform:none!important}
+.v1812p-off{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start}
+.v1812p-off .v1812p-ovt{margin:10px 0 12px}
+@media (max-width:900px){ .v1812p-off{grid-template-columns:minmax(0,1fr)} }
+.v1812p-rkc{display:inline-block;margin-left:6px;padding:0 5px;border-radius:5px;font:800 .66rem/1.5 var(--f-mono);letter-spacing:.02em;color:var(--team-ink,#fff);background:color-mix(in srgb,var(--team,var(--accent)) 70%,var(--surface));vertical-align:middle;white-space:nowrap}
+
 /* v18.12 The County Map (95_countymap.js). Every class is prefixed v1812m. Team colour = identity and selection; the amber accent is only used on the action buttons the game already styles. */
 .v1812m{--m-bg:color-mix(in srgb,var(--bg) 58%,#0b2236);--m-bg2:color-mix(in srgb,var(--bg) 40%,#12324c);--m-ct:rgba(140,185,225,.12);--m-ctm:rgba(140,185,225,.22);--m-water:#123650;--m-bank:rgba(104,176,230,.42);--m-road:rgba(205,226,246,.2);--m-lbl:#e8f0f8;--m-halo:rgba(5,12,22,.9);--m-ham:rgba(186,208,230,.62);--m-disc:#0a1522;--m-glass:rgba(10,20,32,.78);--m-ink:#e8f0f8;
   display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:16px;align-items:start}
@@ -21275,6 +21572,911 @@ if(MODALS.player){ const _v1811cMP=MODALS.player; MODALS.player=m=>{ const h=_v1
     const sec=`<div class="v1811c-mini"><div class="v1811c-mhd"><span class="eyebrow">Player of the Match cards · ${cards.length}</span><button class="link" data-a="v1811cF2" data-pid="${esc(m.id)}">Open in binder</button></div><div class="v1811c-mrow">${ord.map(c=>`<button class="v1811c-gc" data-a="v1811cView" data-id="${esc(c.id)}" data-ids="${esc(ids)}" aria-label="${esc(V1811C.name[c.rar])} card, ${esc(v1811cRound(c))} ${c.yr}">${v1811cCardHTML(c,{w:96,back:false})}</button>`).join('')}</div></div>`;
     const i=h.lastIndexOf('<div class="mfoot">'); return i<0?h+sec:h.slice(0,i).replace(/<\/div>$/,sec+'</div>')+h.slice(i); }catch(e){ console.error(e); return h; } }; }
 A.v1811cF2=el=>{ App.modal=null; A.go({dataset:{r:'cards',p:JSON.stringify({pid:el.dataset.pid})}}); };
+
+/* ===================== v18.12 THE STATE POLL (core: pool, polls, analytics, players) =====================
+   A weekly statewide top 25 voted by seven named voters, a Game of the Week when two ranked teams meet, advanced team
+   metrics for every school in the state and season-by-season player stats for any player.
+   Presentation only: nothing here touches the match engine, its RNG streams or any result. Everything is a pure function of
+   the career seed, the played results and (for the other sections of the state) a deterministic simulated season.
+   State lives on C.poll (saved with the career); it is created on first use, so old saves migrate by opening them.
+   Layout: pool of 80 statewide schools in ten sections of eight (plus the user's eight-school section 5 = 88 teams);
+   the league plays the real engine games, the other sections play a seeded model calibrated on the engine (3.7 goals a game,
+   0.38 goals of margin per point of starting-XI rating); polls are built week by week from records, with inertia.
+   UI is in 94_poll_ui.js. All identifiers are prefixed v1812p / V1812P. */
+const V1812P={ TOP:25, WEEKS:14, SECS:[1,2,3,4,6,7,8,9,10,11], PER:8, GM:1.865, SLOPE:0.19, MIN:80 };
+const v1812pMem={ vy:new Map(), vr:new Map(), ros:new Map(), vs:new Map(), cmp:new Map() };
+const v1812pClamp=(v,a,b)=>v<a?a:v>b?b:v;
+const v1812pAvg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const v1812pHash=(...a)=>hashStr(a.join('|'));
+function v1812pRng(C,...k){ return rngFrom(v1812pHash(C.seed,'v1812p',...k)); }
+function v1812pOrd(n){ return n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:n%10<4?n%10:0]||'th'); }
+function v1812pPoisson(r,m){ const L=Math.exp(-m); let k=0,p=1; do{ k++; p*=r(); }while(p>L&&k<14); return k-1; }
+
+/* ---------- state ---------- */
+function v1812pS(C){
+  let P=C.poll;
+  if(!P||P.v!==1){ P=C.poll={v:1,y0:C.year,pool:null,r0:{},fx:{},px:{},polls:{},news:{},seen:{},done:{}}; }
+  for(const k of ['r0','fx','px','polls','news','seen','done']) if(!P[k]) P[k]={};
+  if(!P.pool) P.pool=v1812pMakePool(C);
+  return P;
+}
+function v1812pMakePool(C){
+  const r=v1812pRng(C,'pool'); const used=new Set(Object.values(C.schools).map(s=>s.town)); const teams=[]; let n=0;
+  for(const sec of V1812P.SECS){ for(let i=0;i<V1812P.PER;i++){
+    const id='vt'+(++n); const idt=genIdentity(r,used); const mk=MASCOT_KEYS[Math.floor(r()*MASCOT_KEYS.length)]; const mascot=pick(r,MASCOT_BY[mk].alt); const cp=pick(r,COLOR_PAIRS);
+    const R=v1812pClamp(70.2+gauss(r)*4.3,58,83);
+    teams.push({id,town:idt.town,name:idt.name,mk,mascot,c1:cp[0],c2:cp[1],sec,R:Math.round(R*100)/100,pres:Math.round(v1812pClamp(30+(R-58)*2.4+gauss(r)*8,5,98))}); } }
+  return {teams,sig:v1812pHash(teams.map(t=>t.id+t.town+t.R).join(','))};
+}
+function v1812pPoolMap(C){ const P=v1812pS(C); const k=P.pool.sig; let m=v1812pMem.cmp.get('pool'+k); if(!m){ m=new Map(P.pool.teams.map(t=>[t.id,t])); v1812pMem.cmp.set('pool'+k,m); } return m; }
+/* a school-like object for crest(), logo() and friends, for league and statewide schools alike */
+function v1812pSchool(C,id){ const s=C.schools[id]; if(s) return s; const t=v1812pPoolMap(C).get(id); if(!t) return null; return {id:t.id,town:t.town,name:t.name,mk:t.mk,mascot:t.mascot,c1:t.c1,c2:t.c2,virtual:true,section:'Section '+t.sec,prestige:t.pres}; }
+function v1812pIsLeague(C,id){ return C.league.includes(id); }
+function v1812pAllIds(C){ return [...C.league,...v1812pS(C).pool.teams.map(t=>t.id)]; }
+function v1812pSec(C,id){ if(v1812pIsLeague(C,id)) return C.section; const t=v1812pPoolMap(C).get(id); return t?t.sec:0; }
+function v1812pName(C,id){ const s=v1812pSchool(C,id); return s?s.town:'?'; }
+
+/* ---------- team strength: league = starting-XI rating snapshotted at the start of each season; others = a drifting seeded rating ---------- */
+function v1812pSnap(C){
+  const P=v1812pS(C); const yr=C.year; if(P.r0[yr]) return P.r0[yr];
+  const o={}; for(const sid of C.league){ try{ o[sid]=Math.round(xiRating(C,sid,'V')*100)/100; }catch(e){ o[sid]=70; } }
+  P.r0[yr]=o; return o;
+}
+function v1812pVR(C,vid,yr){
+  const P=v1812pS(C); const k=P.pool.sig+'|'+vid+'|'+yr; let v=v1812pMem.vr.get(k); if(v!=null) return v;
+  const t=v1812pPoolMap(C).get(vid); let R=t.R;
+  for(let y=P.y0+1;y<=yr;y++){ const r=v1812pRng(C,'vr',vid,y); R=0.72*R+0.28*70.2+gauss(r)*2; }
+  v=Math.round(v1812pClamp(R,56,85)*100)/100; v1812pMem.vr.set(k,v); return v;
+}
+function v1812pRating(C,id,yr){
+  if(v1812pIsLeague(C,id)){ const P=v1812pS(C); const o=P.r0[yr]; if(o&&o[id]!=null) return o[id]; if(yr===C.year) return v1812pSnap(C)[id]; const e=Object.keys(P.r0).sort()[0]; return e&&P.r0[e][id]!=null?P.r0[e][id]:70; }
+  return v1812pVR(C,id,yr);
+}
+function v1812pPrestige(C,id){ const s=C.schools[id]; if(s) return s.prestige; const t=v1812pPoolMap(C).get(id); return t?t.pres:40; }
+
+/* ---------- the other sections: a seeded season, calibrated on the engine ---------- */
+function v1812pGame(C,yr,rd,h,a){
+  const r=v1812pRng(C,'vg',yr,rd,h,a); const Rh=v1812pVR(C,h,yr), Ra=v1812pVR(C,a,yr); const d=Rh-Ra+0.25;
+  const nz=()=>Math.exp(gauss(r)*0.2);
+  const mh=v1812pClamp(V1812P.GM+V1812P.SLOPE*d,0.3,4.8)*nz(), ma=v1812pClamp(V1812P.GM-V1812P.SLOPE*d,0.3,4.8)*nz();
+  const hg=v1812pPoisson(r,mh), ag=v1812pPoisson(r,ma);
+  const tot=Math.round(25*Math.exp(gauss(r)*0.18)); const share=v1812pClamp(0.506+0.032*d+gauss(r)*0.055,0.2,0.8);
+  const shh=Math.max(hg,Math.round(tot*share)), sha=Math.max(ag,tot-Math.round(tot*share));
+  const soth=v1812pClamp(Math.round(shh*0.49+gauss(r)*1.2),hg,shh), sota=v1812pClamp(Math.round(sha*0.49+gauss(r)*1.2),ag,sha);
+  const xgh=Math.max(0.12,0.55*mh+0.3*hg+0.15*shh*0.125+gauss(r)*0.2), xga=Math.max(0.12,0.55*ma+0.3*ag+0.15*sha*0.125+gauss(r)*0.2);
+  const ph=v1812pClamp(50.3+1.46*d+gauss(r)*3.5,25,75);
+  return {rd,h,a,hg,ag,sh:[shh,sha],sot:[soth,sota],xg:[Math.round(xgh*100)/100,Math.round(xga*100)/100],pos:[Math.round(ph*10)/10,Math.round((100-ph)*10)/10]};
+}
+function v1812pVSeason(C,yr){
+  const P=v1812pS(C); const k=P.pool.sig+'|'+yr; let v=v1812pMem.vy.get(k); if(v) return v;
+  const bySec={}; for(const t of P.pool.teams) (bySec[t.sec]||(bySec[t.sec]=[])).push(t.id);
+  const games=[]; for(const sec of V1812P.SECS){ const rounds=roundRobin(bySec[sec]); rounds.forEach((pairs,rd)=>{ for(const [h,a] of pairs) games.push(v1812pGame(C,yr,rd,h,a)); }); }
+  const rec=new Map(); for(const t of P.pool.teams) rec.set(t.id,[]);
+  for(const g of games){ rec.get(g.h).push(v1812pRec(g,0)); rec.get(g.a).push(v1812pRec(g,1)); }
+  for(const arr of rec.values()) arr.sort((x,y)=>x.rd-y.rd);
+  v=v1812pMem.vy.set(k,{games,rec}).get(k); if(v1812pMem.vy.size>12) v1812pMem.vy.delete(v1812pMem.vy.keys().next().value); return v;
+}
+/* one team's view of a game: side 0 = home */
+function v1812pRec(g,i){ const j=1-i; const opp=i?g.h:g.a; const gf=i?g.ag:g.hg, ga=i?g.hg:g.ag;
+  return {rd:g.rd,opp,home:i===0,gf,ga,xgf:g.xg[i],xga:g.xg[j],sh:g.sh[i],sha:g.sh[j],sot:g.sot[i],sota:g.sot[j],pos:g.pos[i],fid:g.fid||null}; }
+
+/* ---------- league games: team lines kept per fixture (so analytics never depend on the lazily loaded match logs) ---------- */
+function v1812pIngest(C,f){
+  const P=v1812pS(C); if(!f||f.st!=='d'||f.lvl!=='V'||P.done[f.id]) return false;
+  const lg=C.logs&&C.logs[f.id]; if(!lg||!lg.st||!lg.st[0]) return false;
+  const s=lg.st; const pt=(s[0].pos+s[1].pos)||1;
+  P.fx[f.id]={xg:[Math.round(s[0].xg*100)/100,Math.round(s[1].xg*100)/100],sh:[s[0].sh,s[1].sh],sot:[s[0].sot,s[1].sot],pos:[Math.round(s[0].pos/pt*1000)/10,Math.round(s[1].pos/pt*1000)/10]};
+  if(lg.shots){ const key=f.comp==='pre'?'p':f.comp==='reg'?'r':'o'; for(const sh of lg.shots){ if(!sh.pid||!sh.xg) continue; const o=P.px[sh.pid]||(P.px[sh.pid]={}); const y=o[f.yr]||(o[f.yr]={p:0,r:0,o:0}); y[key]=Math.round((y[key]+sh.xg)*1000)/1000; } }
+  P.done[f.id]=1; return true;
+}
+function v1812pBackfill(C){
+  const P=v1812pS(C); let n=0;
+  for(const f of Object.values(C.fixtures)){ if(f.st==='d'&&f.lvl==='V'&&!P.done[f.id]&&C.logs&&C.logs[f.id]) if(v1812pIngest(C,f)) n++; }
+  return n;
+}
+function v1812pLeagueRecs(C,yr,bound){
+  const P=v1812pS(C); const rec=new Map(); for(const sid of C.league) rec.set(sid,[]);
+  for(const f of Object.values(C.fixtures)){ if(f.yr!==yr||f.comp!=='reg'||f.lvl!=='V'||f.st!=='d'||f.rd>=bound) continue; if(!rec.has(f.h)||!rec.has(f.a)) continue;
+    const x=P.fx[f.id]; const lg=!x&&C.logs&&C.logs[f.id]; let z=x;
+    if(!z&&lg&&lg.st&&lg.st[0]){ const s=lg.st, pt=(s[0].pos+s[1].pos)||1; z={xg:[s[0].xg,s[1].xg],sh:[s[0].sh,s[1].sh],sot:[s[0].sot,s[1].sot],pos:[s[0].pos/pt*100,s[1].pos/pt*100]}; }
+    const g={rd:f.rd,h:f.h,a:f.a,hg:f.hg,ag:f.ag,fid:f.id,sh:z?z.sh:[null,null],sot:z?z.sot:[null,null],xg:z?z.xg:[null,null],pos:z?z.pos:[null,null]};
+    rec.get(f.h).push(v1812pRec(g,0)); rec.get(f.a).push(v1812pRec(g,1)); }
+  for(const arr of rec.values()) arr.sort((x,y)=>x.rd-y.rd);
+  return rec;
+}
+/* how many rounds of the regular season are complete in a year */
+function v1812pBound(C,yr){ if(yr<C.year) return V1812P.WEEKS; if(yr>C.year) return 0; if(C.phase==='preseason') return 0; if(C.phase==='regular') return C.md; return V1812P.WEEKS; }
+/* records for every team, rounds before `bound` only, plus optional hypothetical games [{rd,h,a,hg,ag}] */
+function v1812pRecords(C,yr,bound,extra){
+  const lg=v1812pLeagueRecs(C,yr,bound); const vs=v1812pVSeason(C,yr); const out=new Map(lg);
+  for(const [id,arr] of vs.rec) out.set(id,arr.filter(x=>x.rd<bound));
+  if(extra) for(const g of extra){ const base={rd:g.rd,h:g.h,a:g.a,hg:g.hg,ag:g.ag,sh:[null,null],sot:[null,null],xg:[null,null],pos:[null,null]}; const a=out.get(g.h), b=out.get(g.a); if(a&&b){ out.set(g.h,[...a,v1812pRec(base,0)]); out.set(g.a,[...b,v1812pRec(base,1)]); } }
+  return out;
+}
+
+/* ---------- aggregates ---------- */
+function v1812pAgg(recs,Rof,rankOf){
+  const a={gp:0,w:0,d:0,l:0,gf:0,ga:0,pts:0,cs:0,xgf:0,xga:0,nx:0,sh:0,sha:0,sot:0,sota:0,posS:0,np:0,sosS:0,form:[],qw:0,best:null,worst:null,gdRun:[],last3:0,last3gd:0,streak:0,unb:0,games:[]};
+  const rs=recs.slice().sort((x,y)=>x.rd-y.rd);
+  for(const r0 of rs){ const res=r0.gf>r0.ga?'W':r0.gf<r0.ga?'L':'D'; const Ro=Rof(r0.opp); const orank=rankOf?rankOf(r0.opp):null; const r={...r0,res,orank,Ro};
+    a.games.push(r); a.gp++; a.gf+=r.gf; a.ga+=r.ga; a.form.push(res); if(res==='W'){a.w++;a.pts+=3;} else if(res==='D'){a.d++;a.pts++;} else a.l++;
+    if(r.ga===0) a.cs++; if(r.xgf!=null){ a.xgf+=r.xgf; a.xga+=r.xga; a.nx++; a.sh+=r.sh; a.sha+=r.sha; a.sot+=r.sot; a.sota+=r.sota; a.posS+=r.pos; a.np++; }
+    a.sosS+=Ro; a.gdRun.push((a.gdRun.length?a.gdRun[a.gdRun.length-1]:0)+r.gf-r.ga);
+    if(res==='W'){ if(orank) a.qw++; const ob=a.best?(a.best.orank||100):101, on=orank||100; if(!a.best||on<ob||(on===ob&&Ro>a.best.Ro)) a.best=r; }
+    if(res==='L'){ if(!a.worst||Ro<a.worst.Ro) a.worst=r; } }
+  let s=0; for(let i=a.games.length-1;i>=0&&a.games[i].res==='W';i--) s++; a.streak=s; let u=0; for(let i=a.games.length-1;i>=0&&a.games[i].res!=='L';i--) u++; a.unb=u;
+  const l3=a.games.slice(-3); a.last3=l3.length?l3.reduce((x,r)=>x+(r.res==='W'?3:r.res==='D'?1:0),0)/l3.length:0; a.last3gd=l3.length?l3.reduce((x,r)=>x+r.gf-r.ga,0)/l3.length:0;
+  const g=a.gp||1; a.ppg=a.pts/g; a.gd=a.gf-a.ga; a.gdpg=a.gd/g; a.gfpg=a.gf/g; a.gapg=a.ga/g; a.winPct=a.w/g; a.csPct=a.cs/g;
+  a.xgd=a.nx?(a.xgf-a.xga):null; a.xgdpg=a.nx?a.xgd/a.nx:null; a.shShare=(a.sh+a.sha)?a.sh/(a.sh+a.sha):null; a.pos=a.np?a.posS/a.np:null; a.sos=a.gp?a.sosS/a.gp:null;
+  return a;
+}
+
+/* ===================== v18.12 THE STATE POLL, part b: voters, ballots, polls, Game of the Week, season story, quotes ===================== */
+/* Seven voters. w = what each cares about (z-scores across the 88 teams): R starting-XI rating, PRES prestige, PPG points per game,
+   GD goal difference, ATT goals for, DEF goals against, REC the last three games, SOS strength of schedule, WIN win percentage,
+   Q wins over ranked teams, XG expected-goal difference. loc = hometown pride (+ to the user's school, a third of it to its section). */
+const V1812P_VOTERS=[
+ {id:'courier',name:'Dana Whitlock',outlet:'Courier sports desk',kind:'Hometown writer',bias:'Loves a hometown story',w:{R:.28,PRES:.1,WIN:.32,REC:.22,GD:.14,PPG:.1},loc:.36,noise:.34,inert:.34},
+ {id:'coaches',name:'Ray Tolliver',outlet:'State coaches association',kind:'Coaches poll',bias:'Respects defense and schedule',w:{R:.2,PRES:.06,DEF:.36,SOS:.3,PPG:.18,Q:.12},loc:0,noise:.22,inert:.42},
+ {id:'radio',name:'Marcus Delgado',outlet:'Sports talk radio',kind:'Radio host',bias:'Chases the hot team',w:{R:.12,REC:.44,ATT:.3,GD:.2,WIN:.1},loc:0,noise:.5,inert:.2},
+ {id:'weekly',name:'Priya Nair',outlet:'Statewide Soccer Weekly',kind:'Analytics writer',bias:'Loves goal difference',w:{R:.16,GD:.44,XG:.26,ATT:.08,DEF:.08},loc:0,noise:.2,inert:.36},
+ {id:'tribune',name:'Gene Hargrove',outlet:'Metro Tribune',kind:'Veteran columnist',bias:'Overrates records',w:{R:.12,WIN:.5,PPG:.34,REC:.1},loc:0,noise:.26,inert:.4},
+ {id:'insider',name:'Tess Okafor',outlet:'Prep Insider',kind:'Podcast host',bias:'Wants a résumé',w:{R:.2,Q:.4,SOS:.3,PPG:.14},loc:0,noise:.24,inert:.3},
+ {id:'scout',name:'Walt Brennan',outlet:'Blue Ridge Preps',kind:'Talent scout',bias:'Trusts talent over results',w:{R:.56,PRES:.1,DEF:.2,PPG:.12},loc:0,noise:.16,inert:.46}
+];
+const V1812P_PERF=['PPG','GD','ATT','DEF','REC','SOS','WIN','Q','XG'];
+function v1812pRankMap(poll){ const m=new Map(); if(poll) for(const r of poll.rows) m.set(r.id,r.rk); return m; }
+function v1812pLabel(wk){ return wk===0?'Preseason':'Week '+wk; }
+
+/* z-scored features for every team */
+function v1812pFeatures(C,yr,wk,recs,prevRank,priorRank){
+  const ids=v1812pAllIds(C); const Rof=id=>v1812pRating(C,id,yr); const F=new Map();
+  for(const id of ids){ const A=v1812pAgg(recs.get(id)||[],Rof,prevRank?(o=>prevRank.get(o)||null):null); F.set(id,{A,R:Rof(id),PRES:v1812pPrestige(C,id),PRIOR:priorRank&&priorRank.get(id)?(26-priorRank.get(id)):0}); }
+  const meanR=v1812pAvg(ids.map(i=>F.get(i).R));
+  const raw=(f,k)=>{ const A=f.A; switch(k){ case 'R':return f.R; case 'PRES':return f.PRES; case 'PRIOR':return f.PRIOR; case 'PPG':return A.ppg; case 'GD':return A.gdpg; case 'ATT':return A.gfpg; case 'DEF':return -A.gapg; case 'REC':return A.last3*0.35+A.last3gd*0.65; case 'SOS':return A.sos==null?meanR:A.sos; case 'WIN':return A.winPct; case 'Q':return A.qw; case 'XG':return A.xgdpg!=null?A.xgdpg:A.gdpg; } return 0; };
+  const Z=new Map(); for(const id of ids) Z.set(id,{});
+  for(const k of ['R','PRES','PRIOR',...V1812P_PERF]){
+    const use=(k==='R'||k==='PRES'||k==='PRIOR')?ids:ids.filter(i=>F.get(i).A.gp>0);
+    const vals=use.map(i=>raw(F.get(i),k)); const m=v1812pAvg(vals); const sd=Math.sqrt(v1812pAvg(vals.map(v=>(v-m)*(v-m))))||1;
+    for(const id of ids){ const f=F.get(id); const isPerf=V1812P_PERF.includes(k); Z.get(id)[k]=(isPerf&&f.A.gp===0)?0:(raw(f,k)-m)/sd; } }
+  return {F,Z};
+}
+function v1812pBallot(C,yr,wk,voter,Z,prevBal,userId){
+  const g=wk/(wk+2.5); const w=voter.w; const scores=[];
+  const prevPos=new Map(); if(prevBal) prevBal.forEach((id,i)=>prevPos.set(id,i+1));
+  for(const [id,z] of Z){
+    let s=(w.R||0)*(1-0.7*g)*z.R+(w.PRES||0)*(1-g)*z.PRES+0.14*(1-g)*z.PRIOR;
+    for(const k of V1812P_PERF) if(w[k]) s+=w[k]*g*z[k];
+    if(voter.loc){ if(id===userId) s+=voter.loc; else if(v1812pIsLeague(C,id)) s+=voter.loc*0.33; }
+    if(prevBal){ const pp=prevPos.get(id); s+=voter.inert*(pp?((26-pp)/25*2.6-0.5):-0.95); }
+    const r=v1812pRng(C,'n',yr,wk,voter.id,id); s+=gauss(r)*voter.noise*(1-0.3*g)*0.9;
+    scores.push([id,s]); }
+  scores.sort((a,b)=>b[1]-a[1]||(a[0]<b[0]?-1:1));
+  return scores.slice(0,V1812P.TOP).map(x=>x[0]);
+}
+/* one poll. prev = the previous poll of the same season (or null), prior = the last poll of the season before (or null) */
+function v1812pBuild(C,yr,wk,prev,prior,recs){
+  const prevRank=prev?v1812pRankMap(prev):null; const priorRank=prior?v1812pRankMap(prior):null;
+  const {F,Z}=v1812pFeatures(C,yr,wk,recs,prevRank,priorRank);
+  const bal=V1812P_VOTERS.map((v,i)=>v1812pBallot(C,yr,wk,v,Z,prev&&prev.bal?prev.bal[i]:null,C.userSid));
+  const pts=new Map(), fp=new Map();
+  bal.forEach(b=>b.forEach((id,i)=>{ pts.set(id,(pts.get(id)||0)+(V1812P.TOP+1-(i+1))); if(i===0) fp.set(id,(fp.get(id)||0)+1); }));
+  const all=[...pts.keys()].sort((a,b)=>pts.get(b)-pts.get(a)||(fp.get(b)||0)-(fp.get(a)||0)||((prevRank&&prevRank.get(a)||99)-(prevRank&&prevRank.get(b)||99))||(a<b?-1:1));
+  const rows=all.slice(0,V1812P.TOP).map((id,i)=>{ const p=prevRank?prevRank.get(id):null; return {id,rk:i+1,pts:pts.get(id),fp:fp.get(id)||0,prev:p||null,mv:p?p-(i+1):null,nw:!!prevRank&&!p}; });
+  const ov=all.slice(V1812P.TOP,V1812P.TOP+12).map(id=>({id,pts:pts.get(id)}));
+  return {yr,wk,label:v1812pLabel(wk),rows,ov,bal,n:V1812P_VOTERS.length};
+}
+function v1812pPrior(C,yr){ const P=v1812pS(C); const a=P.polls[yr-1]; return a&&a.length?a[a.length-1]:null; }
+
+/* publish every poll that is due: the preseason poll with the season, one more after each completed round */
+let v1812pBusy=false;
+function v1812pSync(C){
+  if(!C||!C.league||!C.league.length) return null;
+  if(v1812pBusy) return 0;
+  v1812pBusy=true; try{ return v1812pSync1(C); } finally{ v1812pBusy=false; }
+}
+function v1812pSync1(C){
+  const P=v1812pS(C); const yr=C.year; v1812pSnap(C);
+  try{ v1812pBackfill(C); }catch(e){}
+  const bound=v1812pBound(C,yr); const arr=P.polls[yr]||(P.polls[yr]=[]); let made=0;
+  for(let wk=arr.length;wk<=bound;wk++){
+    const prev=wk?arr[wk-1]:null; const recs=v1812pRecords(C,yr,wk);
+    const poll=v1812pBuild(C,yr,wk,prev,v1812pPrior(C,yr),recs); arr.push(poll); made++;
+    try{ v1812pNews(C,yr,wk,poll,prev); }catch(e){} }
+  for(const y of Object.keys(P.polls)) if(+y<yr-1) for(const p of P.polls[y]) if(p.bal) delete p.bal;
+  return made;
+}
+function v1812pPolls(C,yr){ v1812pSync(C); return v1812pS(C).polls[yr||C.year]||[]; }
+function v1812pLatest(C){ const a=v1812pPolls(C,C.year); return a.length?a[a.length-1]:null; }
+function v1812pRankOf(poll,id){ if(!poll) return null; const r=poll.rows.find(x=>x.id===id); return r?r.rk:null; }
+
+/* ---------- Game of the Week ---------- */
+function v1812pRoundGames(C,yr,rd){ return Object.values(C.fixtures).filter(f=>f.yr===yr&&f.comp==='reg'&&f.lvl==='V'&&f.rd===rd).sort((a,b)=>a.id<b.id?-1:1); }
+function v1812pRankedGames(C,yr,rd){
+  const poll=v1812pPolls(C,yr)[rd]; if(!poll) return [];
+  const rk=v1812pRankMap(poll); const u=C.userSid; const out=[];
+  for(const f of v1812pRoundGames(C,yr,rd)){ const ra=rk.get(f.h)||null, rb=rk.get(f.a)||null; if(ra&&rb) out.push({fid:f.id,rd,h:f.h,a:f.a,rh:ra,ra:rb,kind:'showdown',user:f.h===u||f.a===u,score:100-(ra+rb)+(f.h===u||f.a===u?2.5:0)-0.05*Math.abs(ra-rb)}); }
+  return out.sort((a,b)=>b.score-a.score||(a.fid<b.fid?-1:1));
+}
+function v1812pGotw(C,yr,rd){
+  yr=yr||C.year; if(rd==null) rd=C.phase==='regular'?C.md:-1; if(rd<0||rd>=V1812P.WEEKS) return null;
+  const poll=v1812pPolls(C,yr)[rd]; if(!poll) return null;
+  const list=v1812pRankedGames(C,yr,rd); if(list.length) return {...list[0],all:list};
+  const rk=v1812pRankMap(poll); const uf=v1812pRoundGames(C,yr,rd).find(f=>f.h===C.userSid||f.a===C.userSid);
+  if(uf){ const ra=rk.get(uf.h)||null, rb=rk.get(uf.a)||null; if(ra||rb) return {fid:uf.id,rd,h:uf.h,a:uf.a,rh:ra,ra:rb,kind:'spotlight',user:true,score:50,all:[]}; }
+  return null;
+}
+/* the poll after this game under a win, a draw and a loss for each side (the rest of the round is unplayed) */
+function v1812pProject(C,f){
+  const polls=v1812pPolls(C,f.yr); const prev=polls[f.rd]; if(!prev) return null;
+  const key=f.id+'|'+prev.rows.map(r=>r.id).join('')+'|'+Object.values(C.fixtures).filter(x=>x.yr===f.yr&&x.comp==='reg'&&x.lvl==='V'&&x.st==='d').length;
+  const hit=v1812pMem.cmp.get('pj'+key); if(hit) return hit;
+  const rks={}; const prior=v1812pPrior(C,f.yr);
+  for(const [name,hg,ag] of [['win',2,1],['draw',1,1],['loss',1,2]]){
+    const extra=f.st==='d'?[]:[{rd:f.rd,h:f.h,a:f.a,hg,ag}];
+    rks[name]=v1812pRankMap(v1812pBuild(C,f.yr,f.rd+1,prev,prior,v1812pRecords(C,f.yr,f.rd+1,extra))); }
+  const res={h:{win:rks.win.get(f.h)||null,draw:rks.draw.get(f.h)||null,loss:rks.loss.get(f.h)||null},a:{win:rks.loss.get(f.a)||null,draw:rks.draw.get(f.a)||null,loss:rks.win.get(f.a)||null}};
+  v1812pMem.cmp.set('pj'+key,res); if(v1812pMem.cmp.size>200) v1812pMem.cmp.delete(v1812pMem.cmp.keys().next().value); return res;
+}
+function v1812pProjText(rank,cur){ if(rank) return 'projected No. '+rank; return cur?'projected out of the top 25':'projected unranked'; }
+
+/* ---------- a team's season in the poll ---------- */
+function v1812pStory(C,sid,yr){
+  yr=yr||C.year; const polls=v1812pPolls(C,yr); const ranks=polls.map(p=>v1812pRankOf(p,sid));
+  const ranked=ranks.map((r,i)=>r?{r,wk:i}:null).filter(Boolean);
+  const best=ranked.length?ranked.reduce((a,b)=>b.r<a.r?b:a):null; const worst=ranked.length?ranked.reduce((a,b)=>b.r>a.r?b:a):null;
+  const start=ranks.length?ranks[0]:null, now=ranks.length?ranks[ranks.length-1]:null;
+  const head=ranks.length<2?(now?'NO. '+now+' TO START':'UNRANKED TO START'):(!ranked.length?'OUTSIDE THE TOP 25':(start&&now&&start===now&&ranked.length===ranks.length?'HOLDING AT NO. '+now:(start?'NO. '+start:'UNRANKED')+' TO '+(now?'NO. '+now:'UNRANKED')));
+  const notes={}; for(let wk=1;wk<polls.length;wk++){ const f=v1812pRoundGames(C,yr,wk-1).find(x=>x.h===sid||x.a===sid); if(!f||f.st!=='d') continue;
+    const home=f.h===sid, opp=home?f.a:f.h, gf=home?f.hg:f.ag, ga=home?f.ag:f.hg; const orank=v1812pRankOf(polls[wk-1],opp);
+    notes[wk]={res:gf>ga?'W':gf<ga?'L':'D',gf,ga,home,opp,orank,text:`${gf>ga?'Won':gf<ga?'Lost':'Drew'} ${gf}–${ga} ${home?'vs':'at'} ${orank?'No. '+orank+' ':''}${v1812pName(C,opp)}`}; }
+  return {ranks,best,worst,start,now,head,notes,weeks:ranked.length,top10:ranked.filter(x=>x.r<=10).length,yr};
+}
+
+/* ---------- facts and quotes ---------- */
+function v1812pFacts(C,sid,yr,wk){
+  const polls=v1812pPolls(C,yr); const poll=polls[wk==null?polls.length-1:wk]||polls[polls.length-1]; const wkk=poll?poll.wk:0;
+  const ck='ft'+sid+'|'+yr+'|'+wkk+'|'+polls.length+'|'+v1812pDoneCount(C,yr); const hit=v1812pMem.cmp.get(ck); if(hit) return hit;
+  const before=polls[wkk-1]||null; const recs=v1812pRecords(C,yr,wkk); const Rof=id=>v1812pRating(C,id,yr); const rkBefore=before?v1812pRankMap(before):null;
+  const rkOf=o=>rkBefore?(rkBefore.get(o)||null):null; const A=v1812pAgg(recs.get(sid)||[],Rof,rkOf);
+  const others=v1812pAllIds(C).map(i=>{ const x=v1812pAgg(recs.get(i)||[],Rof,null); return {gf:x.gfpg,ga:x.gapg}; });
+  const attRank=others.filter(o=>o.gf>A.gfpg).length+1, defRank=others.filter(o=>o.ga<A.gapg).length+1;
+  const last=A.games.length?A.games[A.games.length-1]:null;
+  const nx=v1812pRoundGames(C,yr,wkk).find(f=>f.h===sid||f.a===sid); const next=nx&&nx.st==='s'?{opp:nx.h===sid?nx.a:nx.h,home:nx.h===sid,orank:v1812pRankOf(poll,nx.h===sid?nx.a:nx.h)}:null;
+  const F={id:sid,town:v1812pName(C,sid),wk:wkk,A,gp:A.gp,rec:`${A.w}-${A.d}-${A.l}`,w:A.w,d:A.d,l:A.l,streak:A.streak,unb:A.unb,gd:A.gd,gfpg:A.gfpg,gapg:A.gapg,cs:A.cs,xgd:A.xgd,
+    last:last?{res:last.res,gf:last.gf,ga:last.ga,home:last.home,opp:last.opp,oppName:v1812pName(C,last.opp),orank:last.orank}:null,
+    best:A.best?{opp:A.best.opp,oppName:v1812pName(C,A.best.opp),orank:A.best.orank,gf:A.best.gf,ga:A.best.ga}:null,
+    worst:A.worst?{opp:A.worst.opp,oppName:v1812pName(C,A.worst.opp),gf:A.worst.gf,ga:A.worst.ga}:null,
+    rank:v1812pRankOf(poll,sid),prev:before?v1812pRankOf(before,sid):null,next,nextName:next?v1812pName(C,next.opp):'',attRank,defRank,qw:A.qw,sos:A.sos};
+  v1812pMem.cmp.set(ck,F); if(v1812pMem.cmp.size>300) v1812pMem.cmp.delete(v1812pMem.cmp.keys().next().value); return F;
+}
+function v1812pDoneCount(C,yr){ let n=0; for(const f of Object.values(C.fixtures)) if(f.yr===yr&&f.comp==='reg'&&f.lvl==='V'&&f.st==='d') n++; return n; }
+/* [condition, text] lists in priority order; the first few that apply compete, a hash picks one so the same week always reads the same */
+function v1812pLines(vid,f){
+  const t=f.town, o=f.last?f.last.oppName:'', nx=f.nextName;
+  const L={
+   courier:[
+    [f.gp>=1&&f.last&&f.last.res==='L',`One bad night doesn't change what I saw the other ${Math.max(1,f.gp-1)}. ${t} are fine.`],
+    [f.streak>=3,`Hometown bias? Maybe. But ${f.streak} straight wins is ${f.streak} straight wins.`],
+    [f.rank&&f.prev&&f.rank<f.prev,`Moving up to No. ${f.rank} is overdue. I have watched every minute of this team.`],
+    [f.last&&f.last.res==='W'&&f.last.orank,`Beating No. ${f.last&&f.last.orank} ${o} is the kind of night the town remembers.`],
+    [f.next&&f.next.orank,`Friday is the test: No. ${f.next&&f.next.orank} ${nx} comes to town. I'll believe it after.`],
+    [f.gp===0,`Everyone in town is talking about this team. Let's see if the talk holds up.`],
+    [true,`${f.rec} and a team the town can get behind. Good enough for my ballot.`]],
+   coaches:[
+    [f.gp>=3&&f.gapg<=0.8,`Best back line in the section. They're for real.`],
+    [f.cs>=3,`${f.cs} clean sheets already. That back four does not blink.`],
+    [f.gp>=3&&f.gapg>=2,`Too many goals against. I want a back line first, results second.`],
+    [f.best&&f.best.orank&&f.best.orank<=10,`The win over No. ${f.best&&f.best.orank} ${f.best&&f.best.oppName} was the real thing. Schedule strength matters.`],
+    [f.worst&&f.gp>=4&&f.worst.ga-f.worst.gf>=3,`A ${f.worst&&f.worst.gf}–${f.worst&&f.worst.ga} loss to ${f.worst&&f.worst.oppName} tells me that back line can be had.`],
+    [f.sos!=null&&f.gp>=4&&f.sos<69,`${f.rec} against that schedule? I need to see more before I move them.`],
+    [f.gp===0,`Talent on paper. Coaches vote on what happens in November.`],
+    [true,`Organized and hard to break down. That is how you win in October.`]],
+   radio:[
+    [f.streak>=3,`${t} are the hottest team in the state right now. Period.`],
+    [f.last&&f.last.res==='L'&&f.gp>=2,`${t} lost ${f.last&&f.last.gf}\u2013${f.last&&f.last.ga} to ${o}. Did anybody watch that? That was an exposure.`],
+    [f.gp>=3&&f.gd>=8,`+${f.gd} goal difference. Somebody stop them. Please.`],
+    [f.last&&f.last.res==='W'&&f.last.gf-f.last.ga>=3,`${f.last&&f.last.gf}–${f.last&&f.last.ga} against ${o}? That's a statement, folks.`],
+    [f.gp>=3&&f.gfpg>=2.6,`Goals, goals, goals. Turn on a ${t} game and thank me later.`],
+    [f.gp===0,`Give me a week of games and I'll tell you who's for real.`],
+    [true,`Can't call it yet, but I like what I'm seeing from ${t}.`]],
+   weekly:[
+    [f.xgd!=null&&f.gp>=3&&f.xgd>f.gd+2,`The numbers say ${t} are better than the table: ${(f.xgd||0)>=0?"+":""}${(f.xgd||0).toFixed(1)} expected goals.`],
+    [f.xgd!=null&&f.gp>=3&&f.xgd<f.gd-2,`Results are running ahead of the chances. Regression is coming.`],
+    [f.gp>=3&&f.gd>=6,`A +${f.gd} goal difference travels. That's why they're where they are.`],
+    [f.gp>=3&&f.gd<=-3,`${f.gd} on goal difference. It's hard to justify more than this.`],
+    [f.gp===0,`My model likes ${t} more than the consensus does. We'll see.`],
+    [true,`Goal difference of ${f.gd>=0?'+':''}${f.gd} after ${f.gp}. The model has them about right.`]],
+   tribune:[
+    [f.gp>=3&&f.l===0,`${f.rec}. You can't argue with the record.`],
+    [f.gp>=3&&f.l>=3,`${f.l} losses is ${f.l} losses. Records don't lie.`],
+    [f.gp>=2&&f.last&&f.last.res==='W'&&f.streak===1,`One good win. Show me it again Friday.`],
+    [f.last&&f.last.res==='L',`A loss to ${o} costs you in my book. That's how I vote.`],
+    [f.worst&&f.l>=1&&f.gp>=4,`Losing ${f.worst&&f.worst.gf}–${f.worst&&f.worst.ga} to ${f.worst&&f.worst.oppName} is a bad loss. I don't forget those.`],
+    [f.gp===0,`I rank on wins and losses. Nothing to rank yet, so I'm going on last year.`],
+    [true,`${f.rec} is a respectable record. Not a special one.`]],
+   insider:[
+    [f.gp>=3&&!f.qw&&(!f.rank||f.rank>5),`Not on my ballot until they beat a top-five team.`],
+    [f.best&&f.best.orank,`The ${f.best&&f.best.oppName} win goes on the résumé. Now I need a second one.`],
+    [f.next&&f.next.orank&&f.next.orank<=10,`${nx} on Friday decides whether they're a contender or a pretender.`],
+    [f.gp>=3&&f.sos!=null&&f.sos>=71,`A real schedule and a real record. That's a résumé.`],
+    [f.gp===0,`Résumés are written in games. Ask me again in three weeks.`],
+    [true,`The résumé is thin so far. Good wins are what move me.`]],
+   scout:[
+    [f.gp>=3&&f.attRank<=5&&f.defRank>12,`Attackers I'd pay to see. Somebody has to teach them to defend.`],
+    [f.gp>=3&&f.defRank<=4,`Back line has real college players on it. That travels.`],
+    [f.gp>=3&&f.attRank<=4,`The front line is the best I've scouted in this section.`],
+    [f.rank&&f.rank<=10,`The talent is there. The results are catching up to it.`],
+    [f.gp===0,`I vote on talent in September. The tape comes later.`],
+    [true,`Solid group, not a special one. I'd want to see a real finisher.`]]
+  };
+  return (L[vid]||[]).filter(x=>x[0]).map(x=>x[1]);
+}
+function v1812pQuote(C,vi,sid,yr,wk){
+  const v=V1812P_VOTERS[vi]; const f=v1812pFacts(C,sid,yr,wk); const lines=v1812pLines(v.id,f);
+  const pick=lines.slice(0,Math.min(2,lines.length)); const h=v1812pHash(C.seed,'q',yr,f.wk,v.id,sid);
+  return pick[h%pick.length]||'';
+}
+/* who had you where: personal rank on each ballot */
+function v1812pVoterView(C,sid,yr,wk){
+  const polls=v1812pPolls(C,yr); const poll=polls[wk==null?polls.length-1:wk]; if(!poll||!poll.bal) return [];
+  return V1812P_VOTERS.map((v,i)=>{ const ix=poll.bal[i].indexOf(sid); return {v,i,rank:ix<0?null:ix+1}; });
+}
+/* the three voters shown on a card: the hometown paper, the highest and the lowest ballot */
+function v1812pFeatured(C,sid,yr,wk){
+  const all=v1812pVoterView(C,sid,yr,wk); if(!all.length) return [];
+  const rk=x=>x.rank||99; const out=[all[0]]; const hi=all.slice().sort((a,b)=>rk(a)-rk(b)||a.i-b.i).find(x=>!out.includes(x)); if(hi) out.push(hi);
+  const lo=all.slice().sort((a,b)=>rk(b)-rk(a)||a.i-b.i).find(x=>!out.includes(x)); if(lo) out.push(lo);
+  return out.sort((a,b)=>a.i-b.i);
+}
+
+/* ---------- news: the Courier tie-in lines ---------- */
+function v1812pNews(C,yr,wk,poll,prev){
+  const P=v1812pS(C); const k=yr+':'+wk; if(P.news[k]) return; P.news[k]=1; const u=C.userSid; const town=v1812pName(C,u);
+  const now=v1812pRankOf(poll,u), was=prev?v1812pRankOf(prev,u):null; const st=v1812pStory(C,u,yr);
+  const polls=P.polls[yr]||[]; const seasonBest=Math.min(99,...polls.slice(0,wk).map(p=>v1812pRankOf(p,u)||99));
+  let text=null;
+  if(wk===0){ text=now?`Preseason State Poll: ${town} open the season ranked No. ${now} in ${C.stateName}`:`Preseason State Poll: ${town} start the season outside the ${C.stateName} top 25`; }
+  else if(now===1&&was!==1) text=`${town} reach No. 1 in the ${C.stateName} State Poll`;
+  else if(now&&!was) text=`${town} crack the ${C.stateName} State Poll at No. ${now}`;
+  else if(!now&&was) text=`${town} fall out of the State Poll after dropping from No. ${was}`;
+  else if(now&&now<=10&&(was==null||was>10)) text=`${town} climb into the State Poll top 10 at No. ${now}`;
+  else if(now&&seasonBest!==99&&now<seasonBest&&wk>=2) text=`${town} reach a season-best No. ${now} in the State Poll`;
+  /* the id counter is shared with the generators, so a news item must not consume one: the world a seed builds stays exactly as it was */
+  if(text){ const keep=C.nextId; addNews(C,'poll',text,u,{pollWk:wk}); C.nextId=keep; }
+  /* the game of the week, once it has been played */
+  if(wk>=1){ const g=v1812pGotw(C,yr,wk-1); const f=g&&C.fixtures[g.fid]; if(g&&g.kind==='showdown'&&f&&f.st==='d'){ const win=f.w; const rk=win===f.h?g.rh:g.ra, rl=win===f.h?g.ra:g.rh; const loser=win===f.h?f.a:f.h; const now=win?v1812pRankOf(poll,win):null;
+      const msg=win?`Game of the week: No. ${rk} ${v1812pName(C,win)} beat No. ${rl} ${v1812pName(C,loser)} ${Math.max(f.hg,f.ag)}–${Math.min(f.hg,f.ag)}${now?` and sit No. ${now} in the State Poll`:''}`:`Game of the week: No. ${g.rh} ${v1812pName(C,f.h)} and No. ${g.ra} ${v1812pName(C,f.a)} draw ${f.hg}–${f.ag}`;
+      const keep2=C.nextId; addNews(C,'poll',msg,win||f.h,{pollWk:wk,fid:f.id}); C.nextId=keep2; } }
+}
+
+/* ---------- hooks: save/migration, results, season start ---------- */
+const _v1812pMigrate=migrate;
+migrate=function(C){ const r=_v1812pMigrate.apply(this,arguments); try{ if(r&&r.league&&r.league.length){ v1812pS(r); } }catch(e){ console.warn('poll migrate',e); } return r; };
+if(typeof finishMatch==='function'){ const _v1812pFin=finishMatch; finishMatch=function(C,M){ const f=_v1812pFin.apply(this,arguments); try{ if(f) v1812pIngest(C,f); }catch(e){} return f; }; }
+if(typeof seasonStart==='function'){ const _v1812pSS=seasonStart; seasonStart=function(C){ const r=_v1812pSS.apply(this,arguments); try{ if(C.userSid){ v1812pSnap(C); v1812pSync(C); } }catch(e){ console.warn('poll season',e); } return r; }; }
+if(typeof advance==='function'){ const _v1812pAdv=advance; advance=function(C){ const r=_v1812pAdv.apply(this,arguments); try{ if(r&&C.userSid) v1812pSync(C); }catch(e){ console.warn('poll sync',e); } return r; }; }
+
+/* ===================== v18.12 THE STATE POLL, part c: team analytics, statewide players, seasons across a career ===================== */
+
+/* ---------- power rating (a Massey-style rating on the starting-XI scale, shrunk toward each team's XI rating) ---------- */
+function v1812pPower(C,yr,recs){
+  const ids=v1812pAllIds(C); const lam=5, K=V1812P.SLOPE*2; let P=new Map(ids.map(i=>[i,v1812pRating(C,i,yr)])); const R0=new Map(P);
+  for(let it=0;it<28;it++){ const N=new Map();
+    for(const i of ids){ const rs=recs.get(i)||[]; let s=lam*R0.get(i); for(const r of rs) s+=v1812pClamp(r.gf-r.ga,-4,4)/K+P.get(r.opp); N.set(i,s/(lam+rs.length)); }
+    P=N; }
+  return P;
+}
+function v1812pEPts(d){ /* expected league points for a rating gap d (home or away is ignored) */
+  const mu=d*V1812P.SLOPE*2; const cdf=x=>0.5*(1+Math.tanh(0.7978845608*(x+0.044715*x*x*x)));
+  const pw=cdf((mu-0.5)/2.6), pl=cdf((-mu-0.5)/2.6), pd=Math.max(0,1-pw-pl); return 3*pw+pd;
+}
+/* all the schedule still to play, by team */
+function v1812pRemaining(C,yr,bound){
+  const rem=new Map(); for(const id of v1812pAllIds(C)) rem.set(id,[]);
+  for(const f of Object.values(C.fixtures)) if(f.yr===yr&&f.comp==='reg'&&f.lvl==='V'&&f.rd>=bound&&rem.has(f.h)){ rem.get(f.h).push(f.a); rem.get(f.a).push(f.h); }
+  for(const [id,arr] of v1812pVSeason(C,yr).rec) for(const r of arr) if(r.rd>=bound) rem.get(id).push(r.opp);
+  return rem;
+}
+/* every school in the state, one row each, with the numbers behind the poll */
+function v1812pTable(C,yr){
+  yr=yr||C.year; const polls=v1812pPolls(C,yr); const bound=v1812pBound(C,yr); const ck='tb'+yr+'|'+bound+'|'+polls.length+'|'+v1812pDoneCount(C,yr)+'|'+v1812pS(C).pool.sig;
+  const hit=v1812pMem.cmp.get(ck); if(hit) return hit;
+  const recs=v1812pRecords(C,yr,bound); const Rof=id=>v1812pRating(C,id,yr); const power=v1812pPower(C,yr,recs); const rem=v1812pRemaining(C,yr,bound);
+  const poll=polls.length?polls[Math.min(polls.length-1,Math.max(0,bound))]:null; const rk=v1812pRankMap(poll); const prevRk=v1812pRankMap(polls[bound-1]||null);
+  const ids=v1812pAllIds(C); const rows=ids.map(id=>{ const A=v1812pAgg(recs.get(id)||[],Rof,o=>prevRk.get(o)||null); const sec=v1812pSec(C,id);
+    let proj=A.pts; for(const o of rem.get(id)) proj+=v1812pEPts(power.get(id)-power.get(o));
+    return {id,sec,A,R:Rof(id),power:power.get(id),poll:rk.get(id)||null,mv:poll&&poll.rows.find(x=>x.id===id)?poll.rows.find(x=>x.id===id).mv:null,projPts:proj,league:v1812pIsLeague(C,id)}; });
+  const bySec={}; for(const r of rows) (bySec[r.sec]||(bySec[r.sec]=[])).push(r);
+  for(const sec in bySec){ bySec[sec].sort((a,b)=>b.projPts-a.projPts||b.power-a.power||(a.id<b.id?-1:1)).forEach((r,i)=>{ r.seed=i+1; }); }
+  rows.sort((a,b)=>b.power-a.power||(a.id<b.id?-1:1)).forEach((r,i)=>{ r.prank=i+1; });
+  v1812pMem.cmp.set(ck,rows); if(v1812pMem.cmp.size>300) v1812pMem.cmp.delete(v1812pMem.cmp.keys().next().value); return rows;
+}
+function v1812pTeamRow(C,id,yr){ return v1812pTable(C,yr).find(r=>r.id===id)||null; }
+
+/* ---------- statewide players: real league players + the seeded rosters of the other sections ---------- */
+function v1812pVPlayer(C,vid,c,k){
+  const key='vpl|'+v1812pS(C).pool.sig+'|'+vid+'|'+c+'|'+k; let p=v1812pMem.ros.get(key); if(p) return p;
+  const r=v1812pRng(C,'vp',vid,c,k); const g0=k<4?10:k<7?11:12; const years=13-g0;
+  const pos=[c%2===0?'GK':'DEF','DEF','MID','FWD','DEF',c%2?'GK':'MID','FWD','DEF','MID'][k];
+  const [fn,ln]=genName(r); const team=v1812pPoolMap(C).get(vid); const base=v1812pVR(C,vid,c);
+  const num=pos==='GK'?[1,1,12,13,18,21][Math.floor(r()*6)]:2+Math.floor(r()*29);
+  p={id:`vp_${vid}_${c}_${k}`,fn,ln,num,sid:vid,pos,c,k,years,g0,ov0:base+gauss(r)*4.2+(pos==='GK'?-0.8:0),virtual:true,aw:[],honors:[]};
+  v1812pMem.ros.set(key,p); return p;
+}
+function v1812pVOv(p,yr){ return p.ov0+1.6*(yr-p.c); }
+function v1812pVRoster(C,vid,yr){
+  const out=[]; for(let c=yr-2;c<=yr;c++) for(let k=0;k<9;k++){ const p=v1812pVPlayer(C,vid,c,k); if(yr<c+p.years) out.push(p); } return out;
+}
+function v1812pVGrade(p,yr){ return Math.min(12,p.g0+(yr-p.c)); }
+function v1812pParseVP(id){ const m=/^vp_(vt\d+)_(\d+)_(\d)$/.exec(String(id)); return m?{vid:m[1],c:+m[2],k:+m[3]}:null; }
+const V1812P_SLOTS={GK:1,DEF:4,MID:3,FWD:3};
+function v1812pVStarters(C,vid,yr){
+  const ros=v1812pVRoster(C,vid,yr).slice().sort((a,b)=>v1812pVOv(b,yr)-v1812pVOv(a,yr)||(a.id<b.id?-1:1)); const st=[]; const used=new Set();
+  for(const g of ['GK','DEF','MID','FWD']){ let n=0; for(const p of ros){ if(p.pos===g&&n<V1812P_SLOTS[g]){ st.push(p); used.add(p.id); n++; } } }
+  for(const p of ros){ if(st.length>=11) break; if(!used.has(p.id)&&p.pos!=='GK'){ st.push(p); used.add(p.id); } }
+  return {starters:st,bench:ros.filter(p=>!used.has(p.id))};
+}
+const V1812P_RATE={GK:{tk:0.05,int:0.05,cl:0.6},DEF:{tk:1.5,int:1.2,cl:2.4},MID:{tk:1.2,int:0.8,cl:0.5},FWD:{tk:0.3,int:0.15,cl:0.05}};
+const V1812P_SCW={GK:0,DEF:0.09,MID:0.38,FWD:1};
+const V1812P_ASW={GK:0.01,DEF:0.32,MID:1,FWD:0.6};
+function v1812pBlank(){ return {gp:0,gs:0,g:0,a:0,sh:0,sot:0,sv:0,tk:0,int:0,cl:0,y:0,r:0,ga:0,cs:0,rt:0,xg:0}; }
+/* a statewide team's player stats for a season, game by game (so totals only grow as the season goes on) */
+function v1812pVTeamSeason(C,vid,yr,bound){
+  bound=bound==null?v1812pBound(C,yr):bound; const key='vts|'+v1812pS(C).pool.sig+'|'+vid+'|'+yr+'|'+bound; let hit=v1812pMem.vs.get(key); if(hit) return hit;
+  const {starters,bench}=v1812pVStarters(C,vid,yr); const stats=new Map(); for(const p of [...starters,...bench]) stats.set(p.id,v1812pBlank());
+  const recs=v1812pVSeason(C,yr).rec.get(vid).filter(x=>x.rd<bound);
+  for(const rec of recs){
+    const r=v1812pRng(C,'vsx',vid,yr,rec.rd); const res=rec.gf>rec.ga?'W':rec.gf<rec.ga?'L':'D';
+    const usedB=new Set(); const on=starters.map(p=>{ if(p.pos==='GK'||r()>0.06) return p; const sub=bench.find(b=>b.pos===p.pos&&!usedB.has(b.id)); if(sub){ usedB.add(sub.id); return sub; } return p; });
+    const present=[...new Set(on)];
+    const w=(p,tab,pw)=>tab[p.pos]*Math.exp((v1812pVOv(p,yr)-70)/pw);
+    const pickBy=(list,fn)=>{ let t=0; const ws=list.map(p=>{ const x=Math.max(0,fn(p)); t+=x; return x; }); if(t<=0) return list[Math.floor(r()*list.length)]; let x=r()*t; for(let i=0;i<list.length;i++){ x-=ws[i]; if(x<=0) return list[i]; } return list[list.length-1]; };
+    const row=new Map(present.map(p=>[p.id,{g:0,a:0,sh:0,sot:0,tk:0,int:0,cl:0,y:0,r:0,sv:0,xs:0}]));
+    for(let i=0;i<rec.gf;i++){ const s=pickBy(present,p=>w(p,V1812P_SCW,18)); row.get(s.id).g++; row.get(s.id).sh++; row.get(s.id).sot++; row.get(s.id).xs+=1.1;
+      if(r()<0.74){ const others=present.filter(p=>p!==s); if(others.length){ const a=pickBy(others,p=>w(p,V1812P_ASW,25)); row.get(a.id).a++; } } }
+    const rest=Math.max(0,(rec.sh==null?rec.gf+8:rec.sh)-rec.gf); const sotRest=rec.sot==null?Math.round(rest*0.4):Math.max(0,rec.sot-rec.gf); const pOn=rest?sotRest/rest:0;
+    const shooters=present.filter(p=>p.pos!=='GK');
+    for(let i=0;i<rest;i++){ const s=pickBy(shooters,p=>w(p,V1812P_SCW,22)+0.04); const q=row.get(s.id); q.sh++; q.xs+=1; if(r()<pOn) q.sot++; }
+    const xgT=rec.xgf==null?rec.gf*0.95+0.2:rec.xgf; const xsT=[...row.values()].reduce((s,q)=>s+q.xs,0)||1;
+    for(const p of present){ const q=row.get(p.id); const rt=V1812P_RATE[p.pos]; q.tk=v1812pPoisson(r,rt.tk*(0.8+0.4*r())); q.int=v1812pPoisson(r,rt.int*(0.8+0.4*r())); q.cl=v1812pPoisson(r,rt.cl*(0.7+0.6*r()));
+      if(p.pos!=='GK'){ if(r()<0.045) q.y=1; if(r()<0.003) q.r=1; } }
+    const gk=present.find(p=>p.pos==='GK'); const conc=rec.ga; if(gk){ const sota=rec.sota==null?Math.round(conc+3):rec.sota; row.get(gk.id).sv=Math.max(0,sota-conc); }
+    for(const p of present){ const q=row.get(p.id), S=stats.get(p.id); const grp=p.pos;
+      let rt=6.1+q.g*1.0+q.a*0.6+q.sot*0.12+(q.tk+q.int)*0.08+q.cl*0.04-q.y*0.4-q.r*1.6;
+      if(grp==='GK') rt+=q.sv*0.28-conc*0.35+(conc===0?0.6:0); if(grp==='DEF') rt+=(conc===0?0.5:-0.12*conc);
+      rt+=res==='W'?0.35:res==='D'?0.05:-0.25; rt+=(r()-0.5)*0.6; rt=v1812pClamp(Math.round(rt*10)/10,3.5,10);
+      S.gp++; S.gs++; for(const k of ['g','a','sh','sot','sv','tk','int','cl','y','r']) S[k]+=q[k]; S.rt+=rt; S.xg+=xgT*(q.sh+0.6*q.g)/(xsT+0.6*rec.gf)*0.9;
+      if(grp==='GK'){ S.ga+=conc; if(conc===0) S.cs++; } }
+  }
+  for(const S of stats.values()){ S.rt=Math.round(S.rt*10)/10; S.xg=Math.round(S.xg*100)/100; }
+  const out={stats,starters,bench}; v1812pMem.vs.set(key,out); if(v1812pMem.vs.size>400) v1812pMem.vs.delete(v1812pMem.vs.keys().next().value); return out;
+}
+/* a virtual player as a record shaped like the engine's: p.st[year].V.reg */
+function v1812pVPlayerRec(C,id){
+  const q=v1812pParseVP(id); if(!q) return null; const P=v1812pS(C); const p=v1812pVPlayer(C,q.vid,q.c,q.k); if(!p) return null;
+  const st={}, xg={}; const y1=Math.min(C.year,p.c+p.years-1);
+  for(let y=Math.max(p.c,P.y0);y<=y1;y++){ if(v1812pBound(C,y)===0) continue; const S=v1812pVTeamSeason(C,q.vid,y).stats.get(p.id); if(!S||!S.gp) continue;
+    const b={...S}; delete b.xg; st[y]={V:{reg:b,pre:null,post:null,sid:q.vid}}; xg[y]=S.xg; }
+  const last=Math.min(C.year,p.c+p.years-1);
+  return {...p,st,vxg:xg,grade:v1812pVGrade(p,last),awards:[],honors:[],gradYr:p.c+p.years-1,ovr:Math.round(v1812pVOv(p,last)*10)/10};
+}
+function v1812pPlayerRec(C,id){
+  if(String(id).indexOf('vp_')===0) return v1812pVPlayerRec(C,id);
+  const p=findPerson(C,id); return p||null;
+}
+function v1812pIsVirtual(p){ return !!(p&&p.virtual); }
+function v1812pPlayerName(p){ return p.fn+' '+p.ln; }
+function v1812pPlayerXg(C,p,yr){
+  if(p.virtual) return p.vxg&&p.vxg[yr]!=null?p.vxg[yr]:null;
+  const o=v1812pS(C).px[p.id]; if(!o||!o[yr]) return null; return Math.round((o[yr].r+o[yr].o)*100)/100;
+}
+function v1812pSum(b){ const t={gp:0,g:0,a:0,sh:0,sot:0,sv:0,tk:0,int:0,cl:0,y:0,r:0,ga:0,cs:0,rt:0}; for(const bk of ['reg','post']){ const x=b&&b[bk]; if(!x) continue; for(const k in t) t[k]+=x[k]||0; } return t; }
+/* season rows: one per year and squad, Varsity first. Totals for Varsity equal careerTotals(p) */
+function v1812pSeasonRows(C,p){
+  const rows=[]; const keys=Object.keys(p.st||{}).map(Number).sort((a,b)=>a-b);
+  for(const yr of keys) for(const lvl of ['V','JV','MOD']){ const b=p.st[yr][lvl]; if(!b) continue; const t=v1812pSum(b); if(!t.gp) continue;
+    const xg=lvl==='V'?v1812pPlayerXg(C,p,yr):null; const sid=b.sid||p.sid;
+    const awards=(p.awards||[]).filter(a=>a.yr===yr).map(a=>AWARD_NAME[a.k]||a.k); const honors=(p.honors||[]).filter(h=>h.yr===yr).map(h=>h.label);
+    rows.push({yr,lvl,sid,t,xg,g90:t.g/(t.gp*V1812P.MIN)*90,a90:t.a/(t.gp*V1812P.MIN)*90,ga:t.g+t.a,rt:t.gp?t.rt/t.gp:null,awards,honors}); }
+  return rows;
+}
+function v1812pCareer(rows,lvl){ const t={gp:0,g:0,a:0,sh:0,sot:0,sv:0,tk:0,int:0,cl:0,y:0,r:0,ga:0,cs:0,rt:0}; let xg=0, hasXg=false, n=0; for(const r of rows){ if(lvl&&r.lvl!==lvl) continue; n++; for(const k in t) t[k]+=r.t[k]; if(r.xg!=null){ xg+=r.xg; hasXg=true; } }
+  return {t,xg:hasXg?xg:null,seasons:n,g90:t.gp?t.g/(t.gp*V1812P.MIN)*90:0,a90:t.gp?t.a/(t.gp*V1812P.MIN)*90:0,rt:t.gp?t.rt/t.gp:null}; }
+
+/* ---------- state leaderboards for a season (regular season, Varsity) ---------- */
+function v1812pLeaderPool(C,yr,scope){
+  const ck='lp'+yr+'|'+scope+'|'+v1812pBound(C,yr)+'|'+v1812pDoneCount(C,yr)+'|'+v1812pS(C).pool.sig+'|'+Object.keys(C.players).length+'|'+Object.keys(C.alumni).length; const hit=v1812pMem.cmp.get(ck); if(hit) return hit;
+  const out=[];
+  for(const p of everyone(C)){ const y=p.st&&p.st[yr]&&p.st[yr].V; if(!y||!y.reg||!y.reg.gp) continue; const sid=y.sid||p.sid; if(!C.league.includes(sid)) continue; out.push({id:p.id,virtual:false,name:pname(p),sid,pos:p.pos,s:y.reg,xg:v1812pPlayerXg(C,p,yr)}); }
+  if(scope!=='league'){ const bound=v1812pBound(C,yr); if(bound>0) for(const t of v1812pS(C).pool.teams){ const T=v1812pVTeamSeason(C,t.id,yr,bound); for(const p of T.starters.concat(T.bench)){ const S=T.stats.get(p.id); if(!S||!S.gp) continue; out.push({id:p.id,virtual:true,name:v1812pPlayerName(p),sid:t.id,pos:p.pos,s:S,xg:S.xg}); } } }
+  v1812pMem.cmp.set(ck,out); if(v1812pMem.cmp.size>300) v1812pMem.cmp.delete(v1812pMem.cmp.keys().next().value); return out;
+}
+const V1812P_BOARDS=[
+ ['g','Top scorers','Goals',x=>x.s.g,x=>`${x.s.gp} GP · ${x.s.a} A`,1],
+ ['a','Assist leaders','Assists',x=>x.s.a,x=>`${x.s.gp} GP · ${x.s.g} G`,1],
+ ['ga','Goal involvements','G+A',x=>x.s.g+x.s.a,x=>`${x.s.g} G · ${x.s.a} A`,1],
+ ['gk','Keepers','Saves',x=>x.pos==='GK'?x.s.sv:0,x=>`${x.s.cs} CS · ${x.s.gp} GP · ${x.s.sv+x.s.ga?Math.round(x.s.sv/(x.s.sv+x.s.ga)*100):0}% saved`,1],
+ ['cs','Clean sheets','Clean sheets',x=>x.pos==='GK'?x.s.cs:0,x=>`${x.s.sv} saves · ${x.s.gp} GP`,1],
+ ['rt','Rating leaders','Avg rating',x=>x.s.gp>=5?x.s.rt/x.s.gp:0,x=>`${x.s.gp} GP · ${x.s.g} G · ${x.s.a} A`,0]
+];
+function v1812pBoard(C,yr,key,scope,n){
+  const def=V1812P_BOARDS.find(b=>b[0]===key)||V1812P_BOARDS[0]; const pool=v1812pLeaderPool(C,yr,scope||'state');
+  return pool.map(x=>({x,v:def[3](x)})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v||(a.x.s.gp-b.x.s.gp)||(a.x.id<b.x.id?-1:1)).slice(0,n||25).map((o,i)=>({...o.x,rk:i+1,v:o.v,sub:def[4](o.x)}));
+}
+/* pseudo-honors for the statewide leaders of a past or current season (shown in the player's career view) */
+function v1812pStateHonors(C,id,yr){
+  const out=[]; for(const [key,label] of [['g','Top scorer in the state'],['a','Assist leader in the state'],['gk','Keeper with the most saves'],['rt','Highest rated in the state']]){ const b=v1812pBoard(C,yr,key,'state',1); if(b[0]&&b[0].id===id) out.push(label); }
+  return out;
+}
+
+/* ===================== v18.12 THE STATE POLL, part d: the State Poll route (Poll / Teams / Players), team and player panels ===================== */
+ICON.statepoll='<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/><path d="M13 7l3-3 3 3"/>';
+const V1812P_YRS=C=>{ const P=v1812pS(C); const out=[]; for(let y=C.year;y>=P.y0;y--) out.push(y); return out; };
+const v1812pCr=(C,id,size)=>crest(v1812pSchool(C,id),size);
+const v1812pTeamBtn=(C,id,label,cls)=>`<button class="link ${cls||''}" data-a="v1812pTeam" data-id="${id}">${esc(label==null?v1812pName(C,id):label)}</button>`;
+const v1812pSgn=n=>n>0?'+'+n:String(n);
+/* a school colour that reads on the current theme's cards (the same recipe as the team tokens) */
+function v1812pHi(s){ try{ const tc=themeColors(); const surf=validHex(tc.surface)?tc.surface:'#131c26'; const dark=lum(tc.bg||'#0b1016')<.3; const hi=dark?'#f4f7fa':'#0d1014'; return towards(mascotPalette(s.c1,s.c2).P,hi,3.1,surf); }catch(e){ return s.c1; } }
+function v1812pFixed(v,d){ return v==null||isNaN(v)?'—':v.toFixed(d); }
+function v1812pPct(v){ return v==null?'—':Math.round(v*100)+'%'; }
+function v1812pVoterFace(v,size){ const p={id:'v1812p-'+v.id,fn:v.name.split(' ')[0],ln:v.name.split(' ').slice(1).join(' '),grade:12,num:null}; p.look={...defaultLook(p.id,12),band:0}; return portraitSVG(p,size,{c1:'#26303f',c2:'#d9d2bd'}); }
+function v1812pWDL(recs){ let w=0,d=0,l=0; for(const r of recs||[]){ if(r.gf>r.ga) w++; else if(r.gf<r.ga) l++; else d++; } return `${w}-${d}-${l}`; }
+function v1812pMv(r){ if(r.nw) return '<span class="v1812p-mv nw">NEW</span>'; if(r.mv>0) return `<span class="v1812p-mv up" title="Up ${r.mv} from No. ${r.prev}">▲${r.mv}</span>`; if(r.mv<0) return `<span class="v1812p-mv dn" title="Down ${-r.mv} from No. ${r.prev}">▼${-r.mv}</span>`; return '<span class="v1812p-mv">–</span>'; }
+function v1812pForm(arr,n){ const f=(arr||[]).slice(-(n||5)); return `<span class="v1812p-form" aria-label="Recent form">${f.map(x=>`<i class="${x}">${x}</i>`).join('')||'<em>—</em>'}</span>`; }
+function v1812pSpark(run,w,h){ w=w||64; h=h||20; if(!run||run.length<2) return `<svg class="v1812p-spark" width="${w}" height="${h}" aria-hidden="true"></svg>`; const mn=Math.min(0,...run), mx=Math.max(0,...run), sp=(mx-mn)||1;
+  const pts=run.map((v,i)=>`${(i/(run.length-1)*(w-4)+2).toFixed(1)},${(h-3-(v-mn)/sp*(h-6)).toFixed(1)}`).join(' '); const z=(h-3-(0-mn)/sp*(h-6)).toFixed(1); const up=run[run.length-1]>=0;
+  return `<svg class="v1812p-spark ${up?'up':'dn'}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Cumulative goal difference by game"><line x1="2" x2="${w-2}" y1="${z}" y2="${z}"/><polyline points="${pts}"/></svg>`; }
+
+/* ---------- the rank-by-week chart ---------- */
+function v1812pChart(C,sid,yr,opt){
+  opt=opt||{}; const S=v1812pStory(C,sid,yr); const n=S.ranks.length; const W=opt.w||380, H=opt.h||176, L=34, Rr=16, T=14, B=26;
+  if(!n) return '<div class="muted small">The first poll comes out before the first game.</div>';
+  const Y=r=>T+((r||28)-1)/27*(H-T-B); const X=i=>n===1?(L+(W-L-Rr)/2):L+i/(n-1)*(W-L-Rr);
+  const grid=[1,5,10,15,20,25,28].map(r=>`<line x1="${L}" x2="${W-Rr}" y1="${Y(r).toFixed(1)}" y2="${Y(r).toFixed(1)}" class="${r===28?'nr':''}"/><text x="${L-6}" y="${(Y(r)+3.5).toFixed(1)}" text-anchor="end">${r===28?'NR':r}</text>`).join('');
+  const labelEvery=n>10?2:1; const xl=S.ranks.map((r,i)=>(i%labelEvery===0||i===n-1)?`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle">${i===0?'P':'W'+i}</text>`:'').join('');
+  let d='', area=''; S.ranks.forEach((r,i)=>{ const x=X(i).toFixed(1), y=Y(r).toFixed(1); d+=(i?'L':'M')+x+' '+y; });
+  area=n>1?`${d}L${X(n-1).toFixed(1)} ${Y(28).toFixed(1)}L${X(0).toFixed(1)} ${Y(28).toFixed(1)}Z`:'';
+  const dots=S.ranks.map((r,i)=>`<circle class="v1812p-dot ${r?'':'nr'}" cx="${X(i).toFixed(1)}" cy="${Y(r).toFixed(1)}" r="${i===n-1?5:3.4}" style="--i:${i}"><title>${i===0?'Preseason':'Week '+i}: ${r?'No. '+r:'Unranked'}${S.notes[i]?' · '+S.notes[i].text:''}</title></circle>`).join('');
+  const li=n-1; const note=S.notes[li]; let ann='';
+  if(note){ const tx=X(li), ty=Y(S.ranks[li]); const txt=note.text; const w=Math.min(W-L-Rr-4,txt.length*5.6+16); const left=tx+w+6>W-Rr; const bx=left?tx-w-8:tx+8; const below=ty<T+(H-T-B)*0.45; const by=below?Math.min(H-B-20,ty+12):Math.max(T,ty-26);
+    ann=`<g class="v1812p-ann" style="--i:${n}"><rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${w.toFixed(1)}" height="18" rx="9"/><text x="${(bx+w/2).toFixed(1)}" y="${(by+12.5).toFixed(1)}" text-anchor="middle">${esc(txt)}</text></g>`; }
+  return `<svg class="v1812p-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Rank by week: ${esc(S.head.toLowerCase())}"><defs><linearGradient id="v1812pg${sid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--vt,var(--team-hi,#2f5fb3))" stop-opacity=".34"/><stop offset="1" stop-color="var(--vt,var(--team-hi,#2f5fb3))" stop-opacity="0"/></linearGradient></defs>
+   <g class="v1812p-gl">${grid}${xl}</g>${area?`<path class="v1812p-area" d="${area}" fill="url(#v1812pg${sid})"/>`:''}<path class="v1812p-line" d="${d}" pathLength="1"/>${dots}${ann}</svg>`;
+}
+function v1812pSeasonCard(C,sid,yr){
+  const S=v1812pStory(C,sid,yr); const sch=v1812pSchool(C,sid);
+  const stat=(l,v,s)=>`<div><span>${l}</span><b>${v}</b>${s?`<em>${s}</em>`:''}</div>`;
+  return `<section class="v1812p-card v1812p-season" style="--vt:${v1812pHi(sch)}"><div class="v1812p-kick">${sid===C.userSid?'Your season in the poll':esc(sch.town)+'’s season in the poll'}</div>
+   <h3 class="v1812p-head">${S.head}</h3>${v1812pChart(C,sid,yr)}
+   <div class="v1812p-stats">${stat('Best',S.best?'No. '+S.best.r:'—',S.best?(S.best.wk===0?'Preseason':'Week '+S.best.wk):'')}${stat('Lowest',S.worst?'No. '+S.worst.r:'—',S.worst?(S.worst.wk===0?'Preseason':'Week '+S.worst.wk):'')}${stat('Weeks ranked',S.weeks+'/'+S.ranks.length,'')}${stat('Top-10 weeks',S.top10,'')}</div></section>`;
+}
+
+/* ---------- ranked showdown card (Matchday Center, Overview, State Poll) ---------- */
+function v1812pOddsChip(C,f){
+  if(!C.settings.odds||f.st==='d') return ''; const o=oddsFor(f.id,true);
+  if(!o) return `<span class="v1812p-chip v1812p-odds wait" data-v1812p-od="${f.id}" title="Fictional moneyline">Odds loading…</span>`;
+  const ml=moneyline2(o.h,o.a); return `<span class="v1812p-chip v1812p-odds" data-v1812p-od="${f.id}" title="Fictional moneyline from ${o.n} simulations. A draw returns the stake."><b>${ml[0]}</b><i>/</i><b>${ml[1]}</b></span>`;
+}
+function v1812pShowCard(C,g,o){
+  o=o||{}; const f=C.fixtures[g.fid]; if(!f) return ''; const u=C.userSid; const proj=f.st==='s'?v1812pProject(C,f):null;
+  let L=f.h, Rg=f.a, rl=g.rh, rr=g.ra, side='h'; if(f.a===u){ L=f.a; Rg=f.h; rl=g.ra; rr=g.rh; side='a'; }
+  const projFor=(id,rank)=>{ if(!proj) return ''; const k=id===f.h?'h':'a'; const p=proj[k]; return `<span class="v1812p-chip win" title="If ${esc(v1812pName(C,id))} lose: ${p.loss?'No. '+p.loss:'unranked'} · draw: ${p.draw?'No. '+p.draw:'unranked'}">${id===u?'Win':esc(v1812pName(C,id))+' win'}: ${v1812pProjText(p.win,rank)}</span>`; };
+  const team=(id,rank,cls)=>`<div class="v1812p-st ${cls}">${v1812pCr(C,id,o.small?38:52)}<div><span class="v1812p-no">${rank?'NO. '+rank:'UNRANKED'}</span><b>${esc(v1812pName(C,id))}</b></div></div>`;
+  const kick=g.kind==='showdown'?'Ranked showdown':'Ranked opponent';
+  const fin=f.st==='d'?`<span class="v1812p-chip fin">Final ${f.hg}–${f.ag}</span>`:'';
+  const where=f.st==='d'?esc(fixtureLabel(f)):'Friday 7:00 PM';
+  const acts=o.noActs?'':f.st==='d'?`<button class="btn sm" data-a="openFixture" data-id="${f.id}">Match report</button>`:
+    (f.h===u||f.a===u)?`<button class="btn sm" data-a="openFixture" data-id="${f.id}">Match preview</button>`:`<button class="btn sm" data-a="openFixture" data-id="${f.id}">Preview</button><button class="btn sm pri" data-a="spectate" data-id="${f.id}">▶ Watch live</button>`;
+  return `<section class="v1812p-card v1812p-show ${o.cls||''}" style="--hc:${v1812pSchool(C,L).c1};--ac:${v1812pSchool(C,Rg).c1}"><div class="v1812p-kick"><i></i>${kick} · ${where}</div>
+   <div class="v1812p-vs">${team(L,rl,'l')}<span class="v1812p-vsm">vs</span>${team(Rg,rr,'r')}</div>
+   <div class="v1812p-ven">${esc(f.ven||'')} · ${esc(fixtureLabel(f))}</div>
+   <div class="v1812p-chips"><span class="v1812p-chip gotw">${g.kind==='showdown'?'Game of the week in the Matchday Center':'Spotlight game in the Matchday Center'}</span>${fin}${f.st==='s'?projFor(L,rl):''}${f.st==='s'&&L!==u&&!(f.h===u||f.a===u)?projFor(Rg,rr):''}${v1812pOddsChip(C,f)}</div>
+   ${acts?`<div class="v1812p-act">${acts}</div>`:''}</section>`;
+}
+function v1812pVotersCard(C,sid,yr,wk){
+  const feat=v1812pFeatured(C,sid,yr,wk); const sch=v1812pSchool(C,sid); if(!feat.length) return '';
+  const all=v1812pVoterView(C,sid,yr,wk);
+  const row=x=>{ const q=v1812pQuote(C,x.i,sid,yr,wk); return `<div class="v1812p-vt"><span class="v1812p-face">${v1812pVoterFace(x.v,46)}</span><div class="v1812p-vb"><b>${esc(x.v.name)}</b><small>${esc(x.v.outlet)}</small><p>“${esc(q)}”</p></div><div class="v1812p-vr ${x.rank?'':'nr'}" title="${esc(x.v.name)} had ${esc(sch.town)} ${x.rank?'No. '+x.rank:'off the ballot'}"><small>Had you</small><b>${x.rank?'#'+x.rank:'—'}</b></div></div>`; };
+  const rest=all.filter(x=>!feat.includes(x));
+  return `<section class="v1812p-card v1812p-voters"><div class="v1812p-kick">The voters · where they had ${sid===C.userSid?'you':esc(sch.town)}</div>${feat.map(row).join('')}
+   ${rest.length?`<details class="v1812p-more"><summary>All ${all.length} voters</summary>${rest.map(row).join('')}<p class="tiny muted">Seven voters submit a top-25 ballot each week; 25 points for a first-place vote down to 1 for 25th. Each has a lean: ${V1812P_VOTERS.map(v=>esc(v.name.split(' ')[1])+' '+esc(v.bias.toLowerCase())).join('; ')}.</p></details>`:''}</section>`;
+}
+
+/* ---------- Poll tab ---------- */
+function v1812pRow(C,r,poll,recs,prevPts,me){
+  const s=v1812pSchool(C,r.id); const rec=v1812pWDL(recs.get(r.id)); const isMe=r.id===me; const lg=v1812pIsLeague(C,r.id);
+  return `<li class="v1812p-row ${isMe?'me':''} ${lg?'lg':''}" data-tid="${r.id}" data-rk="${r.rk}" style="--c1:${s.c1};--c2:${s.c2}"><button class="v1812p-rb" data-a="v1812pTeam" data-id="${r.id}" aria-label="${esc(s.town)}, number ${r.rk}${isMe?', your team':''}">
+   <span class="v1812p-rk">${r.rk}</span>${v1812pMv(r)}<span class="v1812p-sh">${crest(s,30)}</span>
+   <span class="v1812p-nm"><span class="v1812p-nl"><b>${esc(s.town)}<span class="v1812p-mas"> ${esc(s.mascot)}</span></b>${r.fp?`<em class="v1812p-fp" title="${r.fp} first-place vote${r.fp>1?'s':''}">(${r.fp})</em>`:''}</span><small class="d">${lg?`Section ${C.section}${isMe?' · your program':''}`:'Section '+v1812pSec(C,r.id)}</small><small class="m">${esc(s.mascot)}</small></span>
+   <span class="v1812p-rec">${rec}</span><span class="v1812p-pts" data-to="${r.pts}" data-from="${prevPts==null?0:prevPts}">${r.pts}</span></button></li>`;
+}
+function v1812pTitle(C,p){ return p.wk===V1812P.WEEKS&&(p.yr<C.year||C.phase!=='regular')?p.label+' \u00b7 Final':p.label; }
+function v1812pMovers(C,poll,prev){
+  if(!prev) return `<section class="v1812p-card v1812p-movers"><div class="v1812p-kick">How it works</div><p class="v1812p-how">Seven voters (coaches, writers, radio hosts and scouts) each submit a top-25 ballot every week. A first-place vote is worth 25 points, 25th place 1. Each voter has a lean, and nobody changes his mind all at once: ballots start from last week’s and move with the results.</p></section>`;
+  const rows=poll.rows; const rise=rows.filter(r=>r.mv>0).sort((a,b)=>b.mv-a.mv||a.rk-b.rk)[0]; const fall=rows.filter(r=>r.mv<0).sort((a,b)=>a.mv-b.mv||a.rk-b.rk)[0];
+  const nw=rows.filter(r=>r.nw); const cur=new Set(rows.map(r=>r.id)); const out=prev.rows.filter(r=>!cur.has(r.id));
+  const line=(lab,cls,html)=>`<div class="v1812p-mvr"><span class="v1812p-mvl ${cls}">${lab}</span><div>${html}</div></div>`; const item=h=>`<span class="v1812p-mvi">${h}</span>`;
+  const t=(r)=>`${crest(v1812pSchool(C,r.id),18)} ${v1812pTeamBtn(C,r.id)}`;
+  return `<section class="v1812p-card v1812p-movers"><div class="v1812p-kick">This week’s movers</div>
+   ${rise?line('Biggest rise','up',`${t(rise)} <b class="v1812p-mv up">▲${rise.mv}</b> <span class="muted">to No. ${rise.rk}</span>`):''}${fall?line('Biggest fall','dn',`${t(fall)} <b class="v1812p-mv dn">▼${-fall.mv}</b> <span class="muted">to No. ${fall.rk}</span>`):''}
+   ${nw.length?line('New in','nw',nw.map(r=>item(`${t(r)} <span class="muted">No. ${r.rk}</span>`)).join('')):''}${out.length?line('Dropped out','dn',out.map(r=>item(`${t(r)} <span class="muted">was No. ${r.rk}</span>`)).join('')):''}
+   ${!rise&&!fall&&!nw.length&&!out.length?'<div class="muted small">The poll did not move this week.</div>':''}</section>`;
+}
+function v1812pPollYr(C){ const y=+App.params.py; return y&&y>=v1812pS(C).y0&&y<=C.year?y:C.year; }
+function v1812pPollTab(C){
+  const yr=v1812pPollYr(C); const polls=v1812pPolls(C,yr); const me=C.userSid; if(!polls.length) return '<div class="empty card">The first poll is on its way.</div>';
+  let wk=App.params.pw!=null&&App.params.pw!==''?v1812pClamp(+App.params.pw,0,polls.length-1):polls.length-1; const poll=polls[wk]; const prev=polls[wk-1]||null;
+  const recs=v1812pRecords(C,yr,wk); const prevPts=new Map(prev?prev.rows.map(r=>[r.id,r.pts]):[]); const from={}; if(prev) for(const r of prev.rows) from[r.id]=r.rk;
+  const key=[yr,wk,C.slot||0].join('|');
+  const opts_=polls.map((p,i)=>`<option value="${i}" ${i===wk?'selected':''}>${esc(v1812pTitle(C,p))}</option>`).join('');
+  const board=`<section class="v1812p-card v1812p-board"><header class="v1812p-bh"><div><span class="v1812p-kick">Poll of ${poll.n} voters</span><h2>${esc(C.stateName)} Varsity <i>·</i> ${esc(v1812pTitle(C,poll))}</h2></div>
+    <div class="v1812p-step">${V1812P_YRS(C).length>1?`<select data-c="v1812pPYr" aria-label="Season">${V1812P_YRS(C).map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}</select>`:''}<button class="btn sm ghost" data-a="v1812pWeek" data-d="-1" ${wk===0?'disabled':''} aria-label="Previous poll">${icon('chevl',16)}</button><select data-c="v1812pWeekSel" aria-label="Poll week">${opts_}</select><button class="btn sm ghost" data-a="v1812pWeek" data-d="1" ${wk>=polls.length-1?'disabled':''} aria-label="Next poll">${icon('chev',16)}</button></div></header>
+    <div class="v1812p-colh"><span>#</span><span></span><span></span><span>School</span><span>W-D-L</span><span>Pts</span></div>
+    <ol class="v1812p-rows" data-key="${key}" data-from='${JSON.stringify(from)}'>${poll.rows.map(r=>v1812pRow(C,r,poll,recs,prevPts.has(r.id)?prevPts.get(r.id):0,me)).join('')}</ol>
+    <p class="v1812p-ov"><b>Others receiving votes:</b> ${poll.ov.length?poll.ov.map(o=>`${v1812pTeamBtn(C,o.id,v1812pName(C,o.id),'v1812p-olink')} ${o.pts}`).join(', '):'none'}.</p>
+    ${v1812pRankOf(poll,me)||poll.ov.some(o=>o.id===me)?'':`<p class="v1812p-ov me"><b>${esc(v1812pName(C,me))}</b> is not on a ballot this week.</p>`}</section>`;
+  const sideTop=[]; const gk=v1812pGotw(C,yr,wk);
+  if(gk&&(gk.user||gk.kind==='showdown')) sideTop.push(v1812pShowCard(C,gk,{}));
+  const side=`<div class="v1812p-side">${v1812pSeasonCard(C,me,yr)}${sideTop.join('')}${v1812pVotersCard(C,me,yr,wk)}${v1812pMovers(C,poll,prev)}</div>`;
+  return `<div class="v1812p-grid" data-v1812p-key="${key}">${board}${side}</div>`;
+}
+A.v1812pWeek=el=>{ const C=App.C; const polls=v1812pPolls(C,v1812pPollYr(C)); const cur=App.params.pw!=null&&App.params.pw!==''?+App.params.pw:polls.length-1; App.params.pw=v1812pClamp(cur+(+el.dataset.d||0),0,polls.length-1); App.keepScroll=true; render(); };
+CH.v1812pPYr=el=>{ App.params.py=el.value; delete App.params.pw; App.keepScroll=true; render(); };
+CH.v1812pWeekSel=el=>{ App.params.pw=+el.value; App.keepScroll=true; render(); };
+
+/* ---------- Teams tab ---------- */
+const V1812P_COLS=[
+ ['poll','Poll','Rank in the latest poll',r=>r.poll||99,r=>r.poll?'<b>'+r.poll+'</b>':'<span class="muted">NR</span>',1],
+ ['rec','W-D-L','Record',r=>r.A.pts+r.A.gd/1000,r=>`${r.A.w}-${r.A.d}-${r.A.l}`,0],
+ ['ppg','PPG','Points per game',r=>r.A.ppg,r=>v1812pFixed(r.A.ppg,2),0],
+ ['gd','GD','Goal difference',r=>r.A.gd,r=>`<span class="${r.A.gd>0?'good':r.A.gd<0?'bad':''}">${v1812pSgn(r.A.gd)}</span>`,0],
+ ['xgf','xGF','Expected goals for, per game',r=>r.A.nx?r.A.xgf/r.A.nx:-9,r=>r.A.nx?v1812pFixed(r.A.xgf/r.A.nx,2):'—',0],
+ ['xga','xGA','Expected goals against, per game',r=>r.A.nx?r.A.xga/r.A.nx:99,r=>r.A.nx?v1812pFixed(r.A.xga/r.A.nx,2):'—',1],
+ ['xgd','xGD','Expected goal difference, per game',r=>r.A.xgdpg==null?-99:r.A.xgdpg,r=>r.A.xgdpg==null?'—':`<span class="${r.A.xgdpg>0?'good':r.A.xgdpg<0?'bad':''}">${v1812pSgn(+r.A.xgdpg.toFixed(2))}</span>`,0],
+ ['sh','Shot %','Share of all shots taken',r=>r.A.shShare==null?-1:r.A.shShare,r=>v1812pPct(r.A.shShare),0],
+ ['pos','Poss.','Average possession',r=>r.A.pos==null?-1:r.A.pos,r=>r.A.pos==null?'—':Math.round(r.A.pos)+'%',0],
+ ['cs','CS %','Clean-sheet rate',r=>r.A.csPct,r=>v1812pPct(r.A.gp?r.A.csPct:null),0],
+ ['sos','SOS','Strength of schedule: the average opponent starting-XI rating',r=>r.A.sos==null?-1:r.A.sos,r=>v1812pFixed(r.A.sos,1),0],
+ ['power','Power','Power rating on the starting-XI scale: results shrunk toward the team’s XI rating',r=>r.power,r=>`<b>${r.power.toFixed(1)}</b>`,0],
+ ['seed','Seed','Projected finish in its section',r=>r.seed,r=>`${r.seed}${r.A.gp<14?'<small>proj</small>':''}`,1]
+];
+function v1812pFilterRows(C,rows,P){
+  const sec=P.tsec||'all', rk=P.trk||'all', q=(P.tq||'').trim().toLowerCase();
+  return rows.filter(r=>{ if(sec==='mine'&&!r.league) return false; if(sec!=='all'&&sec!=='mine'&&String(r.sec)!==String(sec)) return false; if(rk==='ranked'&&!r.poll) return false; if(q){ const s=v1812pSchool(C,r.id); if(!(s.town+' '+s.mascot+' '+s.name).toLowerCase().includes(q)) return false; } return true; });
+}
+function v1812pSortRows(rows,P){ const k=P.ts||'power'; const col=V1812P_COLS.find(c=>c[0]===k); const dir=P.td?(P.td==='a'?1:-1):(col?(col[5]?1:-1):-1);
+  const f=col?col[3]:(r=>r.power); return rows.slice().sort((a,b)=>(f(a)-f(b))*dir||(b.power-a.power)||(a.id<b.id?-1:1)); }
+function v1812pTeamRows(C,rows,me){
+  return rows.map(r=>{ const s=v1812pSchool(C,r.id);
+    return `<tr class="${r.id===me?'me':''} ${r.league?'lg':''}" data-tid="${r.id}"><td class="v1812p-t1"><button class="v1812p-tb" data-a="v1812pTeam" data-id="${r.id}"><span class="v1812p-pr">${r.prank}</span>${crest(s,22)}<span class="v1812p-tn"><b>${esc(s.town)}</b><small>${esc(s.mascot)} · ${r.league?'Sec. '+C.section+' · yours':'Sec. '+r.sec}</small></span></button></td>
+     ${V1812P_COLS.map(c=>`<td class="n ${c[0]==='power'?'pw':''}">${c[4](r)}</td>`).join('')}<td>${v1812pForm(r.A.form,5)}</td><td>${v1812pSpark(r.A.gdRun,60,20)}</td></tr>`; }).join('');
+}
+function v1812pTeamsTab(C){
+  const P=App.params; const yr=P.tyr?+P.tyr:C.year; const rows=v1812pTable(C,yr); const me=C.userSid; const sort=P.ts||'power';
+  const secs=['all','mine',...V1812P.SECS.map(String)]; const secLab={all:'All sections',mine:`My section (${C.section})`};
+  const shown=v1812pSortRows(v1812pFilterRows(C,rows,P),P);
+  const th=V1812P_COLS.map(c=>`<th class="n"><button class="v1812p-sortb ${sort===c[0]?'on':''}" data-a="v1812pSort" data-k="${c[0]}" title="${esc(c[2])}">${c[1]}${sort===c[0]?`<i>${(P.td?(P.td==='a'):(c[5]))?'▲':'▼'}</i>`:''}</button></th>`).join('');
+  return `<div class="v1812p-filters"><label class="v1812p-f"><span>Season</span><select data-c="v1812pYr" data-k="tyr" aria-label="Season">${V1812P_YRS(C).map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}</select></label>
+    <label class="v1812p-f"><span>Section</span><select data-c="v1812pFil" data-k="tsec" aria-label="Section">${secs.map(s=>`<option value="${s}" ${String(P.tsec||'all')===s?'selected':''}>${esc(secLab[s]||'Section '+s)}</option>`).join('')}</select></label>
+    <label class="v1812p-f"><span>Poll</span><select data-c="v1812pFil" data-k="trk" aria-label="Poll status"><option value="all" ${(P.trk||'all')==='all'?'selected':''}>Everyone</option><option value="ranked" ${P.trk==='ranked'?'selected':''}>Top 25 only</option></select></label>
+    <label class="v1812p-f grow"><span>Find a school</span><input type="search" placeholder="Name or mascot" value="${esc(P.tq||'')}" data-v1812p-q="1" aria-label="Find a school" autocomplete="off"></label>
+    <span class="v1812p-count tiny muted"><b id="v1812p-n">${shown.length}</b> of ${rows.length} schools</span></div>
+   <div class="v1812p-card v1812p-tcard"><div class="tw v1812p-tw"><table class="v1812p-tt"><thead><tr><th class="v1812p-t1">Team <small class="muted">(power rank)</small></th>${th}<th>Form</th><th>GD trend</th></tr></thead><tbody id="v1812p-tb">${v1812pTeamRows(C,shown,me)}</tbody></table></div>
+   <p class="tiny muted v1812p-note">Every school in ${esc(C.stateName)}: your Section ${C.section} plays the real engine; the other ${V1812P.SECS.length} sections are simulated on the same scale (about ${V1812P.GM*2} goals a game, ${V1812P.SLOPE*2} goals of margin per rating point). xG, shot share and possession come from each game’s shot log. Power starts from the starting-XI rating and moves with goal difference and opponents; the seed projects the section finish from the remaining schedule.</p></div>`;
+}
+A.v1812pSort=el=>{ const P=App.params; const k=el.dataset.k; const col=V1812P_COLS.find(c=>c[0]===k); const cur=P.ts||'power'; if(cur===k){ const was=P.td||(col&&col[5]?'a':'d'); P.td=was==='a'?'d':'a'; } else { P.ts=k; delete P.td; } App.keepScroll=true; render(); };
+CH.v1812pYr=el=>{ App.params[el.dataset.k]=el.value; App.keepScroll=true; render(); };
+CH.v1812pFil=el=>{ App.params[el.dataset.k]=el.value; App.keepScroll=true; render(); };
+document.addEventListener('input',e=>{ const el=e.target.closest&&e.target.closest('[data-v1812p-q]'); if(!el||!App.C) return; App.params.tq=el.value; const C=App.C; const P=App.params; const yr=P.tyr?+P.tyr:C.year;
+  const rows=v1812pSortRows(v1812pFilterRows(C,v1812pTable(C,yr),P),P); const tb=document.getElementById('v1812p-tb'); if(tb) tb.innerHTML=v1812pTeamRows(C,rows,C.userSid); const n=document.getElementById('v1812p-n'); if(n) n.textContent=rows.length; });
+
+/* ---------- Players tab ---------- */
+function v1812pPlayersTab(C){
+  const P=App.params; const yr=P.pyr?+P.pyr:C.year; const key=P.pb||'g'; const scope=P.psc||'state'; const bound=v1812pBound(C,yr);
+  const def=V1812P_BOARDS.find(b=>b[0]===key)||V1812P_BOARDS[0]; const list=v1812pBoard(C,yr,def[0],scope,25); const me=C.userSid;
+  const fmtv=x=>def[0]==='rt'?x.v.toFixed(2):x.v;
+  const pod=list.slice(0,3), rest=list.slice(3);
+  const open=x=>x.virtual?`data-a="v1812pPlayer" data-id="${x.id}"`:`data-a="openPlayer" data-id="${x.id}"`;
+  const face=(x,sz)=>{ if(!x.virtual){ const p=findPerson(C,x.id); return p?portraitSVG(p,sz):''; } const p=v1812pPlayerRec(C,x.id); return p?portraitSVG(p,sz,{c1:v1812pSchool(C,x.sid).c1,c2:v1812pSchool(C,x.sid).c2}):''; };
+  const podium=pod.length?`<div class="v1812p-pod">${[1,0,2].filter(i=>pod[i]).map(i=>{ const x=pod[i]; const sc=v1812pSchool(C,x.sid); return `<button class="v1812p-pp p${i+1} ${x.sid===me?'mine':''}" style="--c1:${sc.c1};--c2:${sc.c2}" ${open(x)}><span class="v1812p-prk">${x.rk}</span><span class="v1812p-pface">${face(x,i===0?92:72)}</span><b>${esc(x.name)}</b><span class="v1812p-psc">${crest(sc,16)} ${esc(sc.town)} · ${x.pos}</span><span class="v1812p-pv">${fmtv(x)}</span><small>${esc(x.sub)}</small></button>`; }).join('')}</div>`:'';
+  const rows=rest.map(x=>{ const sc=v1812pSchool(C,x.sid); return `<li class="v1812p-lr ${x.sid===me?'mine':''}"><button ${open(x)}><b class="v1812p-lrk">${x.rk}</b><span class="v1812p-lf">${face(x,30)}</span>${crest(sc,18)}<span class="v1812p-ln"><b>${esc(x.name)}</b><small>${esc(sc.town)} · ${x.pos}</small></span><small class="v1812p-lsub">${esc(x.sub)}</small><b class="v1812p-lv">${fmtv(x)}</b></button></li>`; }).join('');
+  return `<div class="v1812p-filters"><label class="v1812p-f"><span>Season</span><select data-c="v1812pYr" data-k="pyr" aria-label="Season">${V1812P_YRS(C).map(y=>`<option value="${y}" ${y===yr?'selected':''}>${y}</option>`).join('')}</select></label>
+    <div class="v1812p-f"><span>Scope</span>${seg('psc',[['state','Whole state'],['league','My section']],scope)}</div>
+    <div class="v1812p-f grow"><span>Leaderboard</span>${seg('pb',V1812P_BOARDS.map(b=>[b[0],b[1].split(' ')[0]==='Goal'?'G+A':b[1]]),def[0])}</div></div>
+   <div class="v1812p-card v1812p-lcard"><div class="v1812p-bh"><div><span class="v1812p-kick">${yr} regular season · ${scope==='state'?'all '+esc(C.stateName)+' schools':'Section '+C.section}</span><h2>${esc(def[1])}</h2></div><span class="chip">${esc(def[2])}</span></div>
+   ${list.length?podium+`<ol class="v1812p-list">${rows}</ol>`:`<div class="empty">${bound?'Nobody qualifies yet.':'The season has not started.'}</div>`}
+   <p class="tiny muted v1812p-note">${def[0]==='rt'?'Average match rating, minimum five games. ':''}Statewide players outside your section are simulated from their team’s season; tap anyone for every season they have played.</p></div>`;
+}
+
+/* ---------- the route ---------- */
+VIEWS.statepoll=()=>{
+  const C=App.C; v1812pSync(C); const P=v1812pS(C); const tab=App.params.pt||'poll'; const polls=P.polls[C.year]||[]; if(polls.length) P.seen[C.year+':'+(polls.length-1)]=1;
+  const intro=!P.seen.intro; P.seen.intro=1;
+  const hero=`<section class="v1812p-hero"><div><span class="v1812p-kick">Statewide · ${esc(C.stateName)}${intro?' · <b class="v1812p-new">New</b>':''}</span><p>A weekly ${esc(C.stateName)} top 25 voted by coaches and writers. Climb it all season; a ranked showdown becomes the game of the week.</p></div>
+   <div class="v1812p-tabs">${tabs('pt',[['poll','Poll'],['teams','Teams'],['players','Players']],tab)}</div></section>`;
+  let body; try{ body=tab==='teams'?v1812pTeamsTab(C):tab==='players'?v1812pPlayersTab(C):v1812pPollTab(C); }catch(e){ console.error('State Poll',e); body='<div class="empty card">The State Poll could not be drawn this time. Your career is unaffected.</div>'; }
+  return `<div class="v1812p" data-tab="${tab}">${hero}${body}</div>`;
+};
+TITLES.statepoll="The State Poll"; NAV_ICON.statepoll='statepoll'; NAV_DESC.statepoll='Statewide top 25, team analytics and player stats';
+{ const i=NAV.findIndex(n=>n[0]==='league'); if(i>=0&&!NAV.some(n=>n[0]==='statepoll')) NAV.splice(i+1,0,['statepoll','State Poll']); }
+{ const g=TOPNAV.find(t=>t[0]==='league'); if(g&&!g[3].includes('statepoll')) g[3].splice(1,0,'statepoll'); }
+if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('statepoll');
+{ const _v1812pNB=navBadges; navBadges=function(C){ const b=_v1812pNB.apply(this,arguments); try{ const P=C.poll; const n=P&&P.polls[C.year]?P.polls[C.year].length:0; if(n&&App.route!=='statepoll'&&!P.seen[C.year+':'+(n-1)]&&C.phase!=='offseason') b.statepoll='NEW'; }catch(e){} return b; }; }
+
+/* ===================== v18.12 THE STATE POLL, part e: team panel, player seasons ("Across seasons"), virtual player profile ===================== */
+
+/* ---------- player seasons ---------- */
+function v1812pTrendSVG(rows,gk){
+  const R=rows.filter(r=>r.rt!=null); if(R.length<1) return ''; const W=360,H=132,L=30,Rr=12,T=12,B=24; const n=R.length;
+  const pad=n===1?0:34; const X=i=>n===1?(L+(W-L-Rr)/2):L+pad+i/(n-1)*(W-L-Rr-2*pad); const lo=5.5, hi=9.5; const Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const val=r=>gk?r.t.sv:r.ga; const mx=Math.max(1,...R.map(val)); const bw=Math.min(34,(W-L-Rr)/Math.max(n,2)*0.5);
+  const bars=R.map((r,i)=>{ const h=(val(r)/mx)*(H-T-B)*0.62; return `<rect class="v1812p-bar" x="${(X(i)-bw/2).toFixed(1)}" y="${(H-B-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3" style="--i:${i}"><title>${r.yr}: ${val(r)} ${gk?'saves':'goals + assists'}</title></rect>`; }).join('');
+  const line=R.map((r,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(r.rt).toFixed(1)).join(''); const dots=R.map((r,i)=>`<circle class="v1812p-dot" cx="${X(i).toFixed(1)}" cy="${Y(r.rt).toFixed(1)}" r="3.6" style="--i:${i}"><title>${r.yr}: rating ${r.rt.toFixed(2)}</title></circle>`).join('');
+  const grid=[6,7,8,9].map(v=>`<line x1="${L}" x2="${W-Rr}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"/><text x="${L-5}" y="${(Y(v)+3.5).toFixed(1)}" text-anchor="end">${v}.0</text>`).join('');
+  const xl=R.map((r,i)=>`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle">${r.yr}</text>`).join('');
+  return `<svg class="v1812p-chart v1812p-trend" viewBox="0 0 ${W} ${H}" role="img" aria-label="Average rating and ${gk?'saves':'goal involvements'} by season"><g class="v1812p-gl">${grid}${xl}</g>${bars}<path class="v1812p-line" d="${line}" pathLength="1"/>${dots}</svg><div class="v1812p-legend"><span><i class="ln"></i>Average rating</span><span><i class="bar"></i>${gk?'Saves':'Goals + assists'}</span></div>`;
+}
+function v1812pAcross(C,p){
+  const rows=v1812pSeasonRows(C,p); const gk=p.pos==='GK';
+  if(!rows.length) return '<div class="empty card">No games recorded yet. Season-by-season stats appear after his first appearance.</div>';
+  const V=v1812pCareer(rows,'V'); const hasV=V.seasons>0; const tot=hasV?V:v1812pCareer(rows);
+  const kp=(l,v,s)=>`<div class="v1812p-kpi"><span>${l}</span><b>${v}</b>${s?`<em>${s}</em>`:''}</div>`;
+  const kpis=gk?[kp('Varsity seasons',tot.seasons),kp('Games',tot.t.gp),kp('Saves',tot.t.sv),kp('Clean sheets',tot.t.cs),kp('Save %',tot.t.sv+tot.t.ga?Math.round(tot.t.sv/(tot.t.sv+tot.t.ga)*100)+'%':'—'),kp('Avg rating',tot.rt==null?'—':tot.rt.toFixed(2))]:
+    [kp('Varsity seasons',tot.seasons),kp('Games',tot.t.gp),kp('Goals',tot.t.g,tot.g90.toFixed(2)+' per 90'),kp('Assists',tot.t.a,tot.a90.toFixed(2)+' per 90'),kp('xG',tot.xg==null?'—':tot.xg.toFixed(1),tot.xg==null?'':(tot.t.g-tot.xg>=0?'+':'')+(tot.t.g-tot.xg).toFixed(1)+' vs goals'),kp('Avg rating',tot.rt==null?'—':tot.rt.toFixed(2))];
+  const th=gk?['Year','Squad','School','GP','SV','SV%','CS','GA','GA/90','TK','INT','RTG']:['Year','Squad','School','GP','G','A','G+A','TK','INT','RTG','xG','G/90','A/90'];
+  const body=rows.map(r=>{ const t=r.t; const sc=v1812pSchool(C,r.sid); const sn=sc?`${crest(sc,16)} ${esc(sc.town)}`:'';
+    const cells=gk?[t.gp,t.sv,t.sv+t.ga?Math.round(t.sv/(t.sv+t.ga)*100)+'%':'—',t.cs,t.ga,(t.ga/(t.gp*V1812P.MIN)*90).toFixed(2),t.tk,t.int,r.rt==null?'—':r.rt.toFixed(2)]:
+      [t.gp,t.g,t.a,r.ga,t.tk,t.int,r.rt==null?'—':r.rt.toFixed(2),r.xg==null?'—':r.xg.toFixed(1),r.g90.toFixed(2),r.a90.toFixed(2)];
+    const tags=[...r.awards.map(a=>`<span class="v1812p-tag aw">${esc(a)}</span>`),...r.honors.map(h=>`<span class="v1812p-tag">${esc(h)}</span>`),...(r.lvl==='V'?v1812pStateHonors(C,p.id,r.yr).map(h=>`<span class="v1812p-tag st">${esc(h)}</span>`):[])];
+    return `<tr class="${r.lvl==='V'?'':'minor'}"><td><b>${r.yr}</b></td><td>${LVL_NAME[r.lvl]}</td><td class="v1812p-sch">${sn}</td>${cells.map(c=>`<td class="n">${c}</td>`).join('')}</tr>${tags.length?`<tr class="tags"><td></td><td colspan="${th.length-1}">${tags.join('')}</td></tr>`:''}`; }).join('');
+  const foot=hasV&&V.seasons>1?(()=>{ const t=V.t; const cells=gk?[t.gp,t.sv,t.sv+t.ga?Math.round(t.sv/(t.sv+t.ga)*100)+'%':'—',t.cs,t.ga,(t.ga/(t.gp*V1812P.MIN)*90).toFixed(2),t.tk,t.int,V.rt==null?'—':V.rt.toFixed(2)]:[t.gp,t.g,t.a,t.g+t.a,t.tk,t.int,V.rt==null?'—':V.rt.toFixed(2),V.xg==null?'—':V.xg.toFixed(1),V.g90.toFixed(2),V.a90.toFixed(2)]; return `<tr class="tot"><td colspan="3">Varsity career</td>${cells.map(c=>`<td class="n">${c}</td>`).join('')}</tr>`; })():'';
+  return `<div class="v1812p-across"><div class="v1812p-kpis">${kpis.join('')}</div>
+   <div class="grid g2 v1812p-two"><div class="card"><h3>Season by season</h3><div class="tw"><table class="v1812p-stt"><thead><tr>${th.map((h,i)=>`<th class="${i>2?'n':''}">${h}</th>`).join('')}</tr></thead><tbody>${body}${foot}</tbody></table></div>
+     <p class="tiny muted">Regular season and postseason, all squads. Per 90 assumes a full 80-minute game scaled to 90. xG is kept for Varsity games since this feature began; earlier games show a dash.${p.virtual?' This player belongs to a statewide school outside your section: his seasons are simulated from his team’s results.':''}</p></div>
+     <div class="card"><h3>Trend</h3>${v1812pTrendSVG(rows.filter(r=>r.lvl==='V'&&r.t.gp),gk)||'<div class="muted small">A trend appears after the first Varsity season.</div>'}</div></div></div>`;
+}
+{ const _v1812pMP=MODALS.player;
+  MODALS.player=m=>{ let h=_v1812pMP(m); try{ const C=App.C; const p=Px(m.id); if(!p) return h; const tab=m.tab||'overview';
+    const btn=`<button role="tab" class="tab ${tab==='across'?'on':''}" aria-selected="${tab==='across'}" data-a="modalTab" data-k="ptab" data-v="across"><span class="v1812p-tl">Across seasons</span><span class="v1812p-ts">Seasons</span></button>`;
+    h=h.replace(/(<button role="tab"[^>]*data-v="career">Career<\/button>)/,'$1'+btn);
+    if(tab==='across') h=h.replace('</div><div class="mfoot">',v1812pAcross(C,p)+'</div><div class="mfoot">'); }catch(e){ console.warn('across',e); } return h; }; }
+
+/* ---------- a statewide player's profile ---------- */
+A.v1812pPlayer=el=>{ App.modal={type:'v1812pPlayer',id:el.dataset.id,back:App.modal}; renderModal(); };
+MODALS.v1812pPlayer=m=>{
+  const C=App.C; const p=v1812pPlayerRec(C,m.id); if(!p) return modalShell('<h2>Player</h2>','<div class="empty">Player not found.</div>');
+  const sc=v1812pSchool(C,p.sid); const last=Object.keys(p.st).sort().pop(); const Y=last?+last:C.year;
+  const head=`<div class="phead"><span class="ph-face">${portraitSVG(p,72,{c1:sc.c1,c2:sc.c2})}</span><div><div class="eyebrow">${esc(sc.name)} · Section ${v1812pSec(C,p.sid)} · Grade ${p.grade} in ${Y}</div><h2 style="font-size:1.9rem">${esc(p.fn)} ${esc(p.ln)} <span class="mono muted" style="font-size:1.1rem">#${p.num}</span></h2><div class="row small">${posTag(p.pos)}<button class="link" data-a="v1812pTeam" data-id="${p.sid}">${esc(sc.town)} ${esc(sc.mascot)} team page</button></div></div></div>`;
+  return modalShell('<h2>Player profile · Statewide</h2>',head+v1812pAcross(C,p),'<button class="btn" data-a="closeModal">Close</button>','wide');
+};
+
+/* ---------- team panel ---------- */
+A.v1812pTeam=el=>{ App.modal={type:'v1812pTeam',id:el.dataset.id,yr:el.dataset.yr?+el.dataset.yr:null,back:App.modal&&App.modal.type==='v1812pTeam'?App.modal:null}; renderModal(); };
+function v1812pRosterRows(C,id,yr){
+  const out=[];
+  if(v1812pIsLeague(C,id)){ for(const p of squad(C,id,'V')){ const b=seasonBucket(p,yr,'V','reg'); if(b&&b.gp) out.push({id:p.id,virtual:false,name:pname(p),pos:p.pos,num:p.num,s:b,xg:v1812pPlayerXg(C,p,yr)}); } for(const p of Object.values(C.alumni)){ const y=p.st&&p.st[yr]&&p.st[yr].V; if(y&&y.reg&&y.reg.gp&&(y.sid||p.sid)===id) out.push({id:p.id,virtual:false,name:pname(p),pos:p.pos,num:p.num,s:y.reg,xg:v1812pPlayerXg(C,p,yr)}); } }
+  else if(v1812pBound(C,yr)>0){ const T=v1812pVTeamSeason(C,id,yr); for(const p of T.starters.concat(T.bench)){ const S=T.stats.get(p.id); if(S&&S.gp) out.push({id:p.id,virtual:true,name:v1812pPlayerName(p),pos:p.pos,num:p.num,s:S,xg:S.xg}); } }
+  const order={GK:0,DEF:1,MID:2,FWD:3}; return out.sort((a,b)=>order[a.pos]-order[b.pos]||(b.s.rt/b.s.gp)-(a.s.rt/a.s.gp));
+}
+MODALS.v1812pTeam=m=>{
+  const C=App.C; const id=m.id; const yr=m.yr||C.year; const s=v1812pSchool(C,id); if(!s) return modalShell('<h2>Team</h2>','<div class="empty">Team not found.</div>');
+  const row=v1812pTeamRow(C,id,yr); const A=row.A; const polls=v1812pPolls(C,yr); const latest=polls[polls.length-1]; const rk=latest?v1812pRankOf(latest,id):null; const S=v1812pStory(C,id,yr);
+  const kp=(l,v,sub,tone)=>`<div class="v1812p-kpi ${tone||''}"><span>${l}</span><b>${v}</b>${sub?`<em>${sub}</em>`:''}</div>`;
+  const tb=v1812pTable(C,yr);
+  const head=`<div class="v1812p-th" style="--c1:${s.c1};--c2:${s.c2}"><span class="v1812p-thc">${crest(s,84)}</span><div class="grow"><div class="eyebrow">${esc(C.stateName)} · ${row.league?`Section ${C.section} (your league)`:'Section '+row.sec}${id===C.userSid?' · your program':''}</div><h2>${esc(s.name)}</h2><div class="muted">${esc(s.mascot)}</div>
+     <div class="row" style="margin-top:8px"><span class="chip ${rk?'acc':''}">${rk?'No. '+rk+' in the State Poll':'Unranked'}</span><span class="chip">${A.w}-${A.d}-${A.l}</span><span class="chip">${yr}</span>${row.league?`<button class="btn sm" data-a="openSchool" data-id="${id}">School profile</button>`:''}</div></div></div>`;
+  const kpis=`<div class="v1812p-kpis">${kp('Power',row.power.toFixed(1),'#'+row.prank+' of '+tb.length)}${kp('Proj. seed',row.seed,'in Section '+row.sec)}${kp('Points / game',A.gp?A.ppg.toFixed(2):'—',A.pts+' pts')}${kp('Goal diff',v1812pSgn(A.gd),A.gp?(A.gfpg.toFixed(1)+' for · '+A.gapg.toFixed(1)+' against'):'', A.gd>0?'good':A.gd<0?'bad':'')}${kp('xG diff',A.xgdpg==null?'—':v1812pSgn(+A.xgdpg.toFixed(2)),A.nx?A.xgf.toFixed(1)+' xGF · '+A.xga.toFixed(1)+' xGA':'')}${kp('Strength of schedule',A.sos==null?'—':A.sos.toFixed(1),'avg opponent XI')}${kp('Shots / possession',A.shShare==null?'—':v1812pPct(A.shShare)+' · '+Math.round(A.pos)+'%',A.sh+' shots for · '+A.sha+' against')}${kp('Clean sheets',A.cs,A.gp?v1812pPct(A.csPct)+' of games':'')}</div>`;
+  const resume=(g,kind)=>g?`<div class="v1812p-rs ${kind}"><span class="v1812p-rsl">${kind==='win'?'Best win':'Worst loss'}</span>${v1812pCr(C,g.opp,24)}<div class="grow"><b>${g.home?'vs':'at'} ${esc(v1812pName(C,g.opp))}</b><small>${g.orank?'No. '+g.orank+' at the time · ':''}XI ${g.Ro.toFixed(0)}</small></div><b class="mono">${g.gf}–${g.ga}</b></div>`:`<div class="v1812p-rs"><span class="v1812p-rsl">${kind==='win'?'Best win':'Worst loss'}</span><small class="muted">None yet</small></div>`;
+  const results=A.games.slice().reverse().map(g=>`<div class="li"><span class="pill v1812p-res ${g.res}">${g.res}</span><span class="mono muted" style="width:26px">R${g.rd+1}</span>${v1812pCr(C,g.opp,18)}<div class="grow trunc small">${g.home?'vs':'at'} ${v1812pTeamBtn(C,g.opp)}${g.orank?` <span class="pill">No. ${g.orank}</span>`:''}</div>${g.xgf!=null?`<span class="tiny muted mono">xG ${g.xgf.toFixed(1)}–${g.xga.toFixed(1)}</span>`:''}<b class="mono">${g.gf}–${g.ga}</b></div>`).join('')||'<div class="muted small">No games yet this season.</div>';
+  const R=v1812pRosterRows(C,id,yr); const open=x=>x.virtual?`data-a="v1812pPlayer" data-id="${x.id}"`:`data-a="openPlayer" data-id="${x.id}"`;
+  const players=R.length?`<div class="tw"><table><thead><tr><th class="n">#</th><th>Player</th><th>Pos</th><th class="n">GP</th><th class="n">G</th><th class="n">A</th><th class="n">SV</th><th class="n">CS</th><th class="n">TK</th><th class="n">INT</th><th class="n">xG</th><th class="n">RTG</th></tr></thead><tbody>${R.map(x=>`<tr><td class="n">${x.num}</td><td><button class="link" ${open(x)}>${esc(x.name)}</button></td><td>${posTag(x.pos)}</td><td class="n">${x.s.gp}</td><td class="n">${x.s.g}</td><td class="n">${x.s.a}</td><td class="n">${x.pos==='GK'?x.s.sv:''}</td><td class="n">${x.pos==='GK'?x.s.cs:''}</td><td class="n">${x.s.tk}</td><td class="n">${x.s.int}</td><td class="n">${x.xg==null?'—':x.xg.toFixed(1)}</td><td class="n"><b>${(x.s.rt/x.s.gp).toFixed(2)}</b></td></tr>`).join('')}</tbody></table></div><p class="tiny muted">Regular season ${yr}. Tap a player for every season he has played.</p>`:'<div class="muted small">No appearances recorded yet.</div>';
+  const body=`${head}${kpis}
+   <div class="grid g2 v1812p-two"><div class="card v1812p-season" style="--vt:${v1812pHi(s)}"><div class="v1812p-kick">Season in the poll</div><h3 class="v1812p-head sm">${S.head}</h3>${v1812pChart(C,id,yr,{w:360,h:150})}<div class="row" style="justify-content:space-between;margin-top:6px"><span class="tiny muted">Form</span>${v1812pForm(A.form,5)}</div><div class="row" style="justify-content:space-between;margin-top:6px"><span class="tiny muted">GD trend</span>${v1812pSpark(A.gdRun,120,26)}</div></div>
+    <div class="card"><h3>Résumé</h3>${resume(A.best,'win')}${resume(A.worst,'loss')}<h3 style="margin-top:14px">Results</h3><div class="list v1812p-results">${results}</div></div></div>
+   <div class="card"><h3>Players</h3>${players}</div>`;
+  return modalShell('<h2>Team analytics</h2>',body,'<button class="btn" data-a="closeModal">Close</button>','wide');
+};
+
+/* ===================== v18.12 THE STATE POLL, part f: where it shows up (Overview, Matchday Center, schedule, live intro, Courier) and the animations ===================== */
+function v1812pFixInfo(C,f){
+  if(!f||f.comp!=='reg'||f.lvl!=='V'||!C.poll) return null; const polls=C.poll.polls&&C.poll.polls[f.yr]; const poll=polls&&polls[f.rd]; if(!poll) return null;
+  const rh=v1812pRankOf(poll,f.h), ra=v1812pRankOf(poll,f.a); if(!rh&&!ra) return null;
+  const g=v1812pGotw(C,f.yr,f.rd); return {rh,ra,both:!!(rh&&ra),gotw:!!(g&&g.fid===f.id),kind:rh&&ra?'showdown':'one'};
+}
+
+/* ---------- Overview: the State Poll strip ---------- */
+function v1812pOverviewCard(C){
+  const yr=C.year; const polls=v1812pPolls(C,yr); if(!polls.length) return ''; const me=C.userSid; const poll=polls[polls.length-1]; const rk=v1812pRankOf(poll,me); const row=poll.rows.find(x=>x.id===me); const s=v1812pSchool(C,me); const S=v1812pStory(C,me,yr);
+  const top=poll.rows.slice(0,5).map(r=>({r,me:r.id===me})); if(rk&&rk>5) top.push({r:row,me:true});
+  const list=top.map(({r,me:m})=>`<li class="${m?'me':''}"><b class="v1812p-ork">${r.rk}</b>${v1812pMv(r)}${crest(v1812pSchool(C,r.id),20)}<span class="trunc">${esc(v1812pName(C,r.id))}</span><i class="mono">${r.pts}</i></li>`).join('')+(rk?'':`<li class="me nr"><b class="v1812p-ork">NR</b><span class="v1812p-mv">–</span>${crest(s,20)}<span class="trunc">${esc(s.town)}</span><i class="mono">${poll.ov.find(o=>o.id===me)?poll.ov.find(o=>o.id===me).pts:0}</i></li>`);
+  const g=v1812pGotw(C);
+  const side=g?v1812pShowCard(C,g,{small:true,cls:'in-ov',noActs:true}):(()=>{ const feat=v1812pFeatured(C,me,yr,polls.length-1)[0]; if(!feat) return ''; const q=v1812pQuote(C,feat.i,me,yr,polls.length-1); return `<div class="v1812p-ovq"><div class="v1812p-kick">The voters</div><div class="v1812p-vt"><span class="v1812p-face">${v1812pVoterFace(feat.v,44)}</span><div class="v1812p-vb"><b>${esc(feat.v.name)}</b><small>${esc(feat.v.outlet)}</small><p>“${esc(q)}”</p></div><div class="v1812p-vr ${feat.rank?'':'nr'}"><small>Had you</small><b>${feat.rank?'#'+feat.rank:'—'}</b></div></div></div>`; })();
+  return `<section class="ov-card v1812p-ovcard" data-v1812p-ov="${yr}|${polls.length}"><div class="v1812p-ovl"><div class="v1812p-kick"><i></i>The State Poll · ${esc(poll.label)}</div>
+    <div class="v1812p-ovbig"><span class="v1812p-no">${rk?'NO.':'UNRANKED'}</span>${rk?`<b>${rk}</b>`:'<b class="v1812p-nr">NR</b>'}${row?v1812pMv(row):''}</div><div class="v1812p-ovh">${S.head}</div>
+    <button class="btn sm pri" data-a="go" data-r="statepoll">Open State Poll</button></div>
+   <div class="v1812p-ovc">${v1812pChart(C,me,yr,{w:300,h:150})}</div>
+   <ol class="v1812p-ovt" aria-label="Top of the State Poll">${list}</ol><div class="v1812p-ovs">${side}</div></section>`;
+}
+{ const _v1812pOv=v15Overview; v15Overview=function(){ let h=_v1812pOv.apply(this,arguments); try{ const card=v1812pOverviewCard(App.C); if(card){ const i=h.indexOf('<div class="ov-more-h">'); if(i>0){ const j=h.lastIndexOf('</div>',i); h=h.slice(0,j)+card+h.slice(j); } } }catch(e){ console.warn('poll overview',e); } return h; }; }
+
+/* ---------- Matchday Center: the showdown card on top, a badge on each ranked-vs-ranked game ---------- */
+{ const _v1812pMD=VIEWS.matchday; VIEWS.matchday=function(){ let h=_v1812pMD.apply(this,arguments); try{ const C=App.C; if(C.phase!=='regular') return h; const g=v1812pGotw(C); if(!g) return h;
+    const card=v1812pShowCard(C,g,{cls:'in-md'}); const i=h.indexOf('<section class="mc-hero">'); if(i>=0) h=h.slice(0,i)+card+h.slice(i); else h=card+h;
+    const all=v1812pRankedGames(C,C.year,C.md); const byF=new Map(all.map(x=>[x.fid,x]));
+    h=h.split('<article class="mc-game').map((chunk,ix)=>{ if(!ix) return chunk; const m=/data-(?:wb|id)="([^"]+)"/.exec(chunk); if(!m) return chunk; const x=byF.get(m[1]); const isG=g.fid===m[1];
+      if(!isG&&!x) return chunk; const pill=isG?`<span class="pill v1812p-pill gotw">${g.kind==='showdown'?`Game of the week · No. ${g.rh} v No. ${g.ra}`:`Spotlight · ${g.rh&&g.ra?'No. '+g.rh+' v No. '+g.ra:'No. '+(g.rh||g.ra)+' vs unranked'}`}</span>`:`<span class="pill v1812p-pill">Ranked · No. ${x.rh} v No. ${x.ra}</span>`;
+      return (isG?' v1812p-gotwc':'')+chunk.replace('<div class="mc-top">','<div class="mc-top">'+pill); }).join('<article class="mc-game'); }catch(e){ console.warn('poll matchday',e); } return h; }; }
+
+/* ---------- schedule rows ---------- */
+{ const _v1812pGR=v17GameRow; v17GameRow=function(C,f){ let h=_v1812pGR.apply(this,arguments); try{ const x=v1812pFixInfo(C,f); if(!x) return h;
+    const tag=x.gotw?`<span class="v1812p-sb gotw" title="${x.both?'Game of the week: No. '+x.rh+' vs No. '+x.ra:'Spotlight game: a ranked team (No. '+(x.rh||x.ra)+') plays'}"><span class="v1812p-sbg">${x.both?'GOTW':'SPOTLIGHT'} · </span>${x.both?'#'+x.rh+' v #'+x.ra:'#'+(x.rh||x.ra)}</span>`:x.both?`<span class="v1812p-sb" title="Ranked matchup: No. ${x.rh} vs No. ${x.ra}">#${x.rh} v #${x.ra}</span>`:`<span class="v1812p-sb one" title="${x.rh?'Home':'Away'} team ranked No. ${x.rh||x.ra}">#${x.rh||x.ra}</span>`;
+    return h.replace('</div><b class="mono">','</div>'+tag+'<b class="mono">'); }catch(e){} return h; }; }
+
+/* ---------- the live broadcast intro ---------- */
+{ const _v1812pLI=liveIntro; liveIntro=function(done){ _v1812pLI.apply(this,arguments); try{ const L=App.live, C=App.C; const f=L&&C.fixtures[L.fid]; const x=v1812pFixInfo(C,f); const el=$('#lv-intro .lvi'); if(!x||!el) return;
+    const top=el.querySelector('.lvi-top'); const label=x.both?(x.gotw?'Game of the week':'Ranked showdown'):'Ranked opponent';
+    if(top) top.insertAdjacentHTML('afterbegin',`<div class="v1812p-lvb"><i></i>${label} · ${x.rh?'No. '+x.rh:'Unranked'} vs ${x.ra?'No. '+x.ra:'Unranked'}</div>`);
+    const teams=el.querySelectorAll('.lvi-team'); [x.rh,x.ra].forEach((r,i)=>{ if(r&&teams[i]) teams[i].insertAdjacentHTML('afterbegin',`<em class="v1812p-lvr">NO. ${r}</em>`); }); }catch(e){} }; }
+
+/* ---------- match preview ---------- */
+{ const _v1812pFM=MODALS.fixture; MODALS.fixture=function(m){ let h=_v1812pFM.apply(this,arguments); try{ const C=App.C; const f=C.fixtures[m.id]; const x=v1812pFixInfo(C,f); if(!x||f.st!=='s') return h;
+    const g=x.gotw?v1812pGotw(C,f.yr,f.rd):null; const txt=x.both?`${x.gotw?'Game of the week':'Ranked showdown'}: No. ${x.rh} ${esc(v1812pName(C,f.h))} vs No. ${x.ra} ${esc(v1812pName(C,f.a))}`:`Ranked opponent: No. ${x.rh||x.ra} ${esc(v1812pName(C,x.rh?f.h:f.a))}`;
+    h=h.replace('<div class="mbody">',`<div class="mbody"><div class="v1812p-banner"><i></i><b>${txt}</b><button class="btn sm ghost" data-a="go" data-r="statepoll">State Poll</button></div>`); }catch(e){} return h; }; }
+
+/* ---------- school profile: a way into the team analytics ---------- */
+{ const _v1812pMS=MODALS.school; MODALS.school=function(m){ let h=_v1812pMS.apply(this,arguments); try{ if(m&&App.C&&App.C.league.includes(m.id)) h=h.replace('<div class="mfoot">',`<div class="mfoot"><button class="btn" data-a="v1812pTeam" data-id="${esc(m.id)}">Team analytics</button>`); }catch(e){} return h; }; }
+
+/* ---------- Newsroom: the Courier carries the poll ---------- */
+{ const _v1812pCF=courierFront; courierFront=function(C,is,ix,issues){ let h=_v1812pCF.apply(this,arguments); try{ const f0=is.fx&&C.fixtures[is.fx[0]]; if(!f0||f0.comp!=='reg') return h; const polls=v1812pPolls(C,is.yr); const wk=f0.rd+1; const poll=polls[wk]; if(!poll) return h;
+    const me=C.userSid; const rk=v1812pRankOf(poll,me); const row=poll.rows.find(r=>r.id===me); const prev=polls[wk-1]; const was=prev?v1812pRankOf(prev,me):null; const feat=v1812pVoterView(C,me,is.yr,wk)[0]; const q=v1812pQuote(C,0,me,is.yr,wk);
+    const line=rk?(was?(rk<was?`up ${was-rk} to No. ${rk}`:rk>was?`down ${rk-was} to No. ${rk}`:`holding at No. ${rk}`):`into the poll at No. ${rk}`):(was?`out of the poll after No. ${was}`:'still outside the top 25');
+    const t3=poll.rows.slice(0,3).map((r,i)=>`${i+1}. ${esc(v1812pName(C,r.id))}`).join(' · ');
+    const box=`<div class="np-box v1812p-np"><h5>State Poll · ${esc(poll.label)}</h5><p class="np-note"><b>${esc(Sx(me).town)}</b> ${line}.</p><p class="np-note">“${esc(q)}” <span class="muted">— ${esc(V1812P_VOTERS[0].name)}, Courier sports desk</span></p><p class="np-note tiny muted">Top three: ${t3}</p><button class="btn sm ghost" data-a="go" data-r="statepoll">Full poll</button></div>`;
+    h=h.replace('<aside class="np-side">','<aside class="np-side">'+box); }catch(e){ console.warn('poll courier',e); } return h; }; }
+
+/* ---------- odds chips fill in with the rest of the odds ---------- */
+{ const _v1812pOR=oddsRun; oddsRun=function(){ const fid=_oddsQ[0]; const r=_v1812pOR.apply(this,arguments); try{ if(fid){ const C=App.C; const f=C&&C.fixtures[fid]; if(f) document.querySelectorAll(`[data-v1812p-od="${fid}"]`).forEach(el=>{ el.outerHTML=v1812pOddsChip(C,f); }); } }catch(e){} return r; }; }
+
+/* ---------- animation: rows slide to their new ranks, points count up, the chart draws in ---------- */
+const v1812pAnim={key:null,ov:null};
+function v1812pCount(el,from,to,ms){ if(from===to){ el.textContent=to; return; } const t0=performance.now(); el.textContent=from;
+  const step=t=>{ if(!el.isConnected) return; const k=Math.min(1,(t-t0)/ms); const e=1-Math.pow(1-k,3); el.textContent=Math.round(from+(to-from)*e); if(k<1) requestAnimationFrame(step); else el.textContent=to; }; requestAnimationFrame(step); }
+function v1812pPlay(root,withRows){
+  if(reducedMotion()) return; root.classList.remove('v1812p-in'); void root.offsetWidth; root.classList.add('v1812p-in');
+  if(!withRows) return; const list=root.querySelector('.v1812p-rows'); if(!list) return;
+  let from={}; try{ from=JSON.parse(list.dataset.from||'{}'); }catch(e){} const rows=[...list.children]; if(!rows.length) return; const h=rows[0].getBoundingClientRect().height;
+  rows.forEach(r=>{ const pr=from[r.dataset.tid]; const rk=+r.dataset.rk; const first=pr==null; const dy=(first?(rk+3):pr)-rk; r.style.transition='none'; r.style.transform=`translateY(${(dy*h).toFixed(1)}px)`; r.style.opacity=first?'0':''; });
+  void list.offsetWidth;
+  requestAnimationFrame(()=>{ rows.forEach((r,i)=>{ r.style.transition=`transform .8s cubic-bezier(.2,.8,.2,1) ${Math.min(i,10)*18}ms, opacity .5s ease ${Math.min(i,10)*18}ms`; r.style.transform=''; r.style.opacity=''; setTimeout(()=>{ r.style.transition=''; },1400); }); });
+  list.querySelectorAll('.v1812p-pts').forEach(el=>v1812pCount(el,+el.dataset.from||0,+el.dataset.to||0,900));
+}
+function v1812pAfter(){
+  const C=App.C; if(!C) return;
+  if(App.route==='statepoll'){ const root=document.querySelector('.v1812p'); if(!root) return; const list=root.querySelector('.v1812p-rows'); const key=list?list.dataset.key:'tab:'+(App.params.pt||'');
+    if(v1812pAnim.key!==key){ v1812pAnim.key=key; v1812pPlay(root,!!list); } }
+  else v1812pAnim.key=null;
+  const ov=document.querySelector('.v1812p-ovcard'); if(ov){ if(v1812pAnim.ov!==ov.dataset.v1812pOv){ v1812pAnim.ov=ov.dataset.v1812pOv; v1812pPlay(ov,false); } } else if(App.route!=='office') v1812pAnim.ov=null;
+}
+{ const _v1812pR=render; render=function(){ const r=_v1812pR.apply(this,arguments); try{ v1812pAfter(); }catch(e){ console.warn('poll after',e); } return r; }; }
+{ const _v1812pAM=afterModal; afterModal=function(root){ _v1812pAM.apply(this,arguments); try{ if(!reducedMotion()) root.querySelectorAll('.v1812p-chart').forEach(c=>c.closest('.card,.modal')&&c.closest('.card,.modal').classList.add('v1812p-in')); }catch(e){} }; }
+
+/* ---------- the poll rank beside each ranked school in the standings and the matchday record lines ---------- */
+function v1812pLatestRank(C,sid){ try{ const a=C.poll&&C.poll.polls&&C.poll.polls[C.year]; if(!a||!a.length) return null; return v1812pRankOf(a[a.length-1],sid); }catch(e){ return null; } }
+function v1812pChips(C,html){ return html.replace(/(<button class="link" data-a="openSchool" data-id="([^"]+)">[^<]*<\/button>)/g,(m,btn,id)=>{ const rk=v1812pLatestRank(C,id); return rk?btn+`<span class="v1812p-rkc" title="No. ${rk} in the State Poll">#${rk}</span>`:btn; }); }
+{ const _v1812pRL=recLine; recLine=function(sid){ const r=_v1812pRL.apply(this,arguments); try{ const C=App.C; const rk=C&&C.phase==='regular'?v1812pLatestRank(C,sid):null; return rk?r+' · No. '+rk+' in the state':r; }catch(e){ return r; } }; }
+{ const _v1812pT=v15Table; v15Table=function(){ const h=_v1812pT.apply(this,arguments); try{ return v1812pChips(App.C,h); }catch(e){ return h; } }; }
+{ const _v1812pLg=VIEWS.league; VIEWS.league=function(){ const h=_v1812pLg.apply(this,arguments); try{ return (App.params.tab||'table')==='table'?v1812pChips(App.C,h):h; }catch(e){ return h; } }; }
+
+/* ---------- a new career: the school can be renamed after the world is drawn, so the preseason item is written when the career starts ---------- */
+{ const _v1812pCC=A.createCareer; A.createCareer=async function(el){ const D=App.draft; try{ if(D&&D.poll){ D.news=D.news.filter(n=>n.type!=='poll'); } }catch(e){}
+    const r=await _v1812pCC.apply(this,arguments);
+    try{ const C=App.C; if(C&&C.poll&&C.poll.polls[C.year]&&C.poll.polls[C.year][0]&&!C.news.some(n=>n.type==='poll')){ delete C.poll.news[C.year+':0']; v1812pNews(C,C.year,0,C.poll.polls[C.year][0],null); queueSave(); } }catch(e){ console.warn('poll start',e); }
+    return r; }; }
+
+/* ---------- offseason: the season in the poll goes on the wrap-up page ---------- */
+{ const _v1812pOS=offseasonView; offseasonView=function(){ let h=_v1812pOS.apply(this,arguments); try{ const C=App.C; const polls=v1812pPolls(C,C.year); if(polls.length>1){ const poll=polls[polls.length-1]; const rk=v1812pRankOf(poll,C.userSid);
+      h+=`<div class="v1812p-off">${v1812pSeasonCard(C,C.userSid,C.year)}<section class="v1812p-card"><div class="v1812p-kick">The State Poll · ${esc(v1812pTitle(C,poll))}</div><h3 class="v1812p-head sm">${rk?'Finished No. '+rk+' in '+esc(C.stateName):'Finished outside the '+esc(C.stateName)+' top 25'}</h3><ol class="v1812p-ovt">${poll.rows.slice(0,5).map(r=>`<li class="${r.id===C.userSid?'me':''}"><b class="v1812p-ork">${r.rk}</b>${v1812pMv(r)}${crest(v1812pSchool(C,r.id),20)}<span class="trunc">${esc(v1812pName(C,r.id))}</span><i class="mono">${r.pts}</i></li>`).join('')}</ol><button class="btn sm" data-a="go" data-r="statepoll">Open State Poll</button></section></div>`; } }catch(e){ console.warn('poll offseason',e); } return h; }; }
 
 /* v18.12 The County Map (95_countymap.js, styles in 95_countymap.css).
    The league becomes a county of real towns joined by roads. Winning spreads your colours from town to town, the towns you
