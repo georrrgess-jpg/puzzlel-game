@@ -100,6 +100,8 @@ function v1812tBuild(C){
     const o=v1812tNewcomer(C,r,i++,'walk',{walk:true,pos:'GK',grade:need}); T.cands[o.p.id]=o.p; T.pool.push(o.p.id); T.info[o.p.id]=o.info; }
   /* the returning players start where they are */
   for(const p of schoolPlayers(C,u)) T.a[p.id]=p.lvl;
+  const nm=T.pool.filter(id=>T.info[id].kind==='move').length, nw=T.pool.filter(id=>T.info[id].kind==='walk').length, nb=T.pool.filter(id=>T.info[id].kind==='back').length;
+  if(Array.isArray(C.news)) addNews(C,'tryouts',`Tryout week at ${C.schools[u].town}: ${nm} move-in${nm===1?'':'s'}, ${nw} walk-on${nw===1?'':'s'}${nb?` and ${nb} player${nb===1?'':'s'} cut last time`:''} join ${schoolPlayers(C,u).length} returning players`,u);
   return T; }
 /* the one entry point: make this preseason's tryouts exist (idempotent). Years in which the Preseason Cup has begun get none. */
 function v1812tEnsure(C){
@@ -263,7 +265,7 @@ function v1812tPost(C,mode){
   /* the story, in the Newswire */
   const town=C.schools[u].town; const N=(t,x,sid,e)=>addNews(C,t,x,sid||u,e);
   N('tryouts',`${town} post the ${yr} roster: ${sum.n.V} on Varsity, ${sum.n.JV} on JV, ${sum.n.MOD} on Modified, ${sum.n.X} cut`,u);
-  for(const id of sum.backs.slice(0,3)){ const p=C.players[id]; N('comeback',`He remembers: ${pname(p)}, cut in ${p.cutMem.yr}, makes the ${LVL_NAME[p.lvl]} roster`,u,{pid:id}); }
+  for(const id of sum.backs.slice(0,3)){ const p=C.players[id]; N('comeback',`He remembers: ${pname(p)}, cut in ${p.cutMem.yr}, ${p.cutMem.brk?'came back a different player and ':''}makes the ${LVL_NAME[p.lvl]} roster`,u,{pid:id}); }
   for(const c of sum.cut.filter(c=>c.from==='V').slice(0,2)) N('tryouts',`${c.name}, a Varsity player last fall, is cut`,u);
   const nv=sum.newV.map(id=>C.players[id]).filter(p=>p&&p.tryKind===undefined).sort((a,b)=>ovr(b)-ovr(a));
   for(const x of sum.newcomers.filter(x=>x.lvl==='V'&&x.kind!=='back').slice(0,2)){ const p=C.players[x.id]; const inf=T.info[x.id]||{}; N('tryouts',`${x.kind==='move'?'Move-in':'Walk-on'} ${pname(p)} makes Varsity${inf.from?` (from ${inf.from})`:''}`,u,{pid:x.id}); }
@@ -293,8 +295,8 @@ function v1812tAfterRollover(C){
     p.h=Math.max(p.h,p.ah-growthLeft(p.age,p.mat));
     const gap0=p.pot-ovr(p); if(p.plan&&gap0>0) shiftOvr(p,Math.min(gap0,p.plan.gain*clamp(gap0/12,.2,1)*.8),'balanced');
     const bonus=(.6+2.2*m.grudge/100)*(.6+rr()*.8); const g1=p.pot-ovr(p); if(bonus>g1) p.pot=Math.min(99,Math.round(ovr(p)+bonus)); shiftOvr(p,bonus,'balanced');
-    const pB=clamp(.05+m.grudge*.0012+Math.max(0,m.pot-m.ovr-12)*.004,.04,.26); const brk=rr()<pB;
-    if(brk){ shiftOvr(p,4+rr()*5,'balanced'); p.pot=Math.min(99,Math.max(p.pot,Math.round(ovr(p)+2+rr()*4))); p.bo=(p.bo||0)+1; m.brk=true; }
+    const pB=clamp(.035+m.grudge*.0011+Math.max(0,m.pot-m.ovr-15)*.003,.03,.2); const brk=rr()<pB;
+    if(brk){ shiftOvr(p,7+rr()*9,'balanced'); p.pot=Math.min(99,Math.max(p.pot,Math.round(ovr(p)+3+rr()*5))); p.bo=(p.bo||0)+1; m.brk=true; }
     const o=ovr(p); const cn=m.cuts||1;
     const pQ=clamp(.07+(58-o)*.004-m.grudge*.0004+(cn-1)*.06,.03,.3), pM=clamp(.3+(cn-1)*.18-m.grudge*.002,.12,.62), pT=clamp(.03+m.grudge*.0009+Math.max(0,o-60)*.0035+(m.brk?.05:0),.02,.22); const x=rr();
     planDev(C,p,rr); p.ovr0[newYr]=r1(ovr(p)); m.ovrNow=r1(o); m.gradeNow=p.grade;

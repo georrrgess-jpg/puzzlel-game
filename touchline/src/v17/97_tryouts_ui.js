@@ -35,13 +35,13 @@ function v1812tCard(C,v,plan){
     return `<div class="v1812t-dt ${fresh?'new':''}" style="--d:${i*80}ms;--bc:${badgeColor(35+d.bar*60)}" title="${esc(lab)}"><span class="l">${lab}</span><b class="mono" ${fresh&&num?`data-count="${(+raw).toFixed(dec)}" data-dec="${dec}" data-suf="${k==='spr'?' s':''}" data-delay="${i*80}"`:''}>${d.txt}</b><i class="bar"><u style="width:${(d.bar*100).toFixed(0)}%"></u></i></div>`; };
   const pd=v.drills.find(x=>x.k==='pos');
   const seg=['V','JV','MOD','X'].map(c=>{ const dis=c!=='X'&&!v.elig[c]; const on=code===c; return `<button type="button" class="c-${c} ${on?'on':''}" data-a="v1812tSeg" data-id="${id}" data-code="${c}" aria-pressed="${on}" ${dis?`disabled title="Grade ${p.grade} players are not eligible for ${V1812T_LVL[c]}"`:''}>${V1812T_LVL[c]}</button>`; }).join('');
-  const now=v.ret?`<span class="v1812t-now" title="Where he played last season">Now: ${V1812T_LVL[p.lvl]}</span>`:'';
+  const now=v.ret?`<span class="v1812t-now" title="Where he played last season">Now: ${V1812T_LVL[p.lvl]}</span>`:(v.kind==='back'&&v.mem?`<span class="v1812t-now" title="His rating on the day he was cut">Was ${Math.round(v.mem.ovr)} when cut</span>`:'');
   const sugg=day>=1&&sug&&code&&sug!==code?`<span class="v1812t-sug" title="Auto-sort would put him here">Auto: ${V1812T_LVL[sug]}</span>`:'';
   return `<article class="v1812t-card ${v.kind==='ret'?'':'newc'} ${code==='X'?'is-cut':''} ${code?'':'undec'} ${v.tag?'tagged':''}" data-id="${id}" data-code="${code||''}" data-kind="${v.kind}" aria-label="${esc(pname(p))}">
    <header class="v1812t-top"><span class="v1812t-face">${portraitSVG(p,64)}</span>
     <div class="v1812t-id"><h4 class="v1812t-name">${esc(p.fn)} ${esc(p.ln)}</h4><div class="v1812t-sub">${v1812tPos(p)}<span>Grade ${p.grade}</span>${p.num?`<span class="mono">#${p.num}</span>`:''}${km?`<span class="v1812t-kind k-${km[1]}">${km[0]}</span>`:''}${v.kind==='back'&&v.info.brk?'<span class="v1812t-kind k-rem">He remembers</span>':''}</div><p class="v1812t-story">${esc(v.story)}</p></div>
     <div class="v1812t-side">${v1812tStars(v)}<button type="button" class="v1812t-tagbtn ${v.tag?'on':''}" data-a="v1812tTag" data-id="${id}" aria-pressed="${v.tag}" aria-label="${v.tag?'Remove tag from':'Tag'} ${esc(pname(p))}" title="Tag to watch">${icon('flag',15)}</button></div></header>
-   <div class="v1812t-ovr"><span class="lab">OVR</span><b class="mono v1812t-rng" style="color:${badgeColor(v.mid)}">${rng}</b><span class="v1812t-track" aria-hidden="true"><i style="left:${pctL.toFixed(1)}%;width:${pctW.toFixed(1)}%;background:${badgeColor(v.mid)}"></i></span><small>${day>=3?'final read':day===0?'wide open':`narrowing (${gaps})`}</small>${now}${sugg}</div>
+   <div class="v1812t-ovr"><span class="lab">OVR</span><b class="mono v1812t-rng" style="color:${badgeColor(v.mid)}" aria-label="Overall rating ${v.hi>v.lo?'between '+v.lo+' and '+v.hi:v.lo}">${rng}</b><span class="v1812t-track" aria-hidden="true"><i style="left:${pctL.toFixed(1)}%;width:${pctW.toFixed(1)}%;background:${badgeColor(v.mid)}"></i></span><small>${day>=3?'final read':day===0?'wide open':`narrowing (${gaps})`}</small>${now}${sugg}</div>
    <div class="v1812t-drills">${tile('spr','40-yd sprint',0)}${tile('jug','Juggling',1)}${tile('beep','Beep test',2)}${tile('scr','Scrimmage',3)}</div>
    ${pd?`<div class="v1812t-pd ${hot&&V1812T_UI.freshDay===2?'new':''}"><span>${esc(pd.lab)}</span><i class="bar"><u style="width:${(pd.bar*100).toFixed(0)}%;background:${badgeColor(35+pd.bar*60)}"></u></i><b class="mono">${pd.txt}</b></div>`:''}
    <div class="v1812t-seg" role="group" aria-label="Place ${esc(pname(p))}">${seg}</div></article>`; }
@@ -139,7 +139,7 @@ function v1812tHero(C){ const st=v1812tSt(C); const T=C.tryout; const s=Sx(C.use
   if((st==='posted'||st==='auto')&&C.phase==='preseason'&&C.pre.rd===0&&T.posted){ const sm=T.posted;
     return `<section class="v1812t-hero done" style="--c1:${s.c1};--c2:${s.c2}"><div class="v1812t-hero-art" aria-hidden="true">${icon('tryouts',38)}</div><div class="grow"><span class="eyebrow">Roster posted</span><h2>${sm.n.V} Varsity · ${sm.n.JV} JV · ${sm.n.MOD} Modified</h2><p class="small">${sm.n.X} cut${sm.newV.length?` · ${sm.newV.length} new on Varsity`:''}. They will remember it.</p></div><div class="v1812t-hero-acts"><button class="btn" data-a="v1812tOpen">View the list</button></div></section>`; }
   return ''; }
-{ const _ov=v15Overview; v15Overview=function(){ let h=''; try{ v1812tEnsure(App.C); h=v1812tHero(App.C); }catch(e){ console.error(e); } return h+_ov.apply(this,arguments); }; }
+{ const _ov=VIEWS.office; VIEWS.office=function(){ let h=''; try{ v1812tEnsure(App.C); h=v1812tHero(App.C); }catch(e){ console.error(e); } return h+_ov.apply(this,arguments); }; }
 { const _ps=VIEWS.presched; if(_ps) VIEWS.presched=function(){ const h=_ps.apply(this,arguments); try{ const C=App.C; if(v1812tIsOpen(C)) return `<div class="notice warn small v1812t-note"><b>Tryouts are still open.</b> Your Varsity XI changes when the roster is posted, so hold tryouts before you lock the schedule. <button class="btn sm" data-a="v1812tOpen">Open tryouts</button></div>`+h; }catch(e){} return h; }; }
 
 /* ---------- actions ---------- */
@@ -176,7 +176,7 @@ function v1812tStageShow(C,day,i){ const el=document.getElementById('v1812t-stag
   return dur*1000+900; }
 function v1812tStageEnd(gen){ if(!V1812T_UI.running||V1812T_UI.running.gen!==gen) return; const day=V1812T_UI.running.day; V1812T_UI.running=null; V1812T.dayO=null; V1812T_UI.freshDay=day; V1812T_UI.freshUntil=performance.now()+2600;
   const el=document.getElementById('v1812t-stage'); if(el){ el.hidden=true; el.classList.remove('on'); el.innerHTML=''; }
-  if(App.route==='tryouts'&&v1812tIsOpen(App.C)){ App.keepScroll=true; render(); try{ Sound.ui('success'); }catch(e){} if(day===3) toast('The final scrimmage is graded. Set the levels, then post the roster.'); } }
+  if(App.route==='tryouts'&&v1812tIsOpen(App.C)){ App.keepScroll=true; render(); try{ const f=document.querySelector('[data-a="v1812tRun"]')||document.querySelector('[data-a="v1812tPostAsk"]'); if(f) f.focus({preventScroll:true}); Sound.ui('success'); }catch(e){} if(day===3) toast('The final scrimmage is graded. Set the levels, then post the roster.'); } }
 function v1812tStageRun(day,i,gen){ if(!V1812T_UI.running||V1812T_UI.running.gen!==gen) return; const C=App.C; const list=V1812T_SCN[day]; if(i>=list.length||App.route!=='tryouts'){ v1812tStageEnd(gen); return; } const ms=v1812tStageShow(C,day,i); V1812T_UI.running.timer=setTimeout(()=>v1812tStageRun(day,i+1,gen),ms||2800); }
 A.v1812tRun=()=>{ const C=App.C; if(!v1812tIsOpen(C)||C.tryout.day>=3||V1812T_UI.running) return; const day=v1812tRunDay(C); v1812tSave(); const rm=reducedMotion();
   if(rm){ V1812T_UI.freshDay=day; V1812T_UI.freshUntil=performance.now()+10; App.keepScroll=true; render(); toast(`Day ${day} is in the books: ${V1812T_DAYTAG[day].toLowerCase()}.`); return; }
@@ -241,3 +241,10 @@ A.v1812tGateGo=()=>{ const C=App.C; const fn=V1812T_UI.then; V1812T_UI.then=null
         const lines=rv.slice(0,3).map(x=>{ let extra=''; if(done&&lg&&lg.box){ const opp=f.h===C.userSid?f.a:f.h; const rows=lg.box[f.h===opp?0:1]||[]; const r=rows.find(q=>q.pid===x.p.id); extra=r&&r.gp!==0?` He ${r.g?'scored '+r.g:'played'}${r.a?' and set up '+r.a:''}.`:''; }
           return `<div class="v1812t-rvline"><span class="f">${portraitSVG(x.p,38)}</span><div><b>${esc(pname(x.p))}</b> was cut by ${esc(Sx(C.userSid).town)} in ${x.cm.yr}${x.cm.lvl?' from '+V1812T_LVL[x.cm.lvl]:''}. ${x.xi?'He starts for':'He is on the roster at'} ${esc(Sx(x.p.sid).town)}.${extra}</div></div>`; }).join('');
         h=h.replace('<div class="mbody">',`<div class="mbody"><div class="v1812t-rv"><span class="eyebrow">Revenge game</span>${lines}</div>`); } }catch(e){ console.error(e); } return h; }; }
+/* ---------- the Courier: the first edition of a season carries Cut Day ---------- */
+{ const _cf=courierFront; courierFront=function(C,is,ix,issues){ let h=_cf.apply(this,arguments);
+    try{ const H=C.tryout&&C.tryout.hist&&C.tryout.hist[is.yr]; if(H&&is.comp==='pre'&&is.rd===0&&typeof h==='string'&&h.includes('<div class="np-body">')){
+        const names=(H.newV||[]).map(id=>Px(id)).filter(Boolean).slice(0,2).map(pname); const top=(H.cut||[]).slice().sort((a,b)=>b.ovr-a.ovr)[0];
+        const box=`<aside class="v1812t-np"><b>Cut Day at the gym door</b><span>${H.n.V} make Varsity, ${H.n.JV} JV and ${H.n.MOD} Modified; ${H.n.X} are cut.${names.length?` New on the Varsity list: ${esc(names.join(' and '))}.`:''}${top?` The toughest cut: ${esc(top.name)}.`:''} ${H.auto?'The coaching staff posted the list.':'The coach posted it Friday at 3:15 pm.'}</span></aside>`;
+        h=h.replace('<div class="np-body">',box+'<div class="np-body">'); } }catch(e){ console.error(e); }
+    return h; }; }

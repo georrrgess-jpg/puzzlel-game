@@ -225,8 +225,11 @@
   .v1812t-week{padding:16px 14px 14px} .v1812t-week-r{flex-direction:row;flex-wrap:wrap;width:100%;min-width:0} .v1812t-week-r .v1812t-run{flex:1 1 100%}
   .v1812t-bar{--top:var(--v1812t-top,0px)} .v1812t-cts{gap:4px;flex:1 1 100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))} .v1812t-ct{min-width:0;padding:5px 6px 8px} .v1812t-ct .lab{font-size:.55rem;letter-spacing:.03em} .v1812t-ct b{font-size:1.05rem} .v1812t-bar-acts{width:100%} .v1812t-bar-acts .btn{flex:1}
   .v1812t-grid{grid-template-columns:minmax(0,1fr)} .v1812t-expl{grid-template-columns:minmax(0,1fr)}
-  .v1812t-scene .s-gym,.v1812t-scene .s-trainer{padding-top:96px} .v1812t-leaf{height:min(68vh,620px)} .v1812t-leaf.l .v1812t-sheet{left:4%;right:4%}
+  .v1812t-scene .s-gym,.v1812t-scene .s-trainer{padding-top:118px} .v1812t-leaf{height:min(68vh,620px)} .v1812t-leaf.l{overflow:auto} .v1812t-leaf.l .v1812t-sheet{position:relative;left:auto;right:auto;top:auto;margin:3% 4% 4%}
+  .v1812t-scene.final .s-gym,.v1812t-scene.final .s-trainer{padding-bottom:196px} .v1812t-scene.final .v1812t-leaf{height:max(230px,calc(100vh - 330px))}
+  .v1812t-fin-in{padding:12px 12px 12px} .v1812t-fin-in .v1812t-fin-tiles{flex-wrap:nowrap;gap:6px} .v1812t-fin-in .v1812t-fin-tiles span{flex:1 1 0;min-width:0;padding:6px 8px} .v1812t-fin-in .v1812t-fin-tiles span b{font-size:1.2rem} .v1812t-fin-in p{margin:8px 0 10px;font-size:.88rem}
   .v1812t-hero{padding:14px} .v1812t-hero-acts{width:100%} .v1812t-hero-acts .btn.pri{flex:1}
+  .v1812t-fin-tiles{gap:6px} .v1812t-fin-tiles span{min-width:0;flex:1 1 70px;padding:6px 8px}
 }
 @media (max-width:420px){ .v1812t-drills{grid-template-columns:repeat(2,minmax(0,1fr))} .v1812t-cutlist ul{columns:1} }
 @media (prefers-reduced-motion:reduce){
@@ -234,3 +237,6 @@
   .v1812t-scene{transition:none}
 }
 body.rm .v1812t *,body.rm .v1812t-scene *{animation:none!important;transition:none!important}
+/* the Courier's Cut Day box */
+.v1812t-np{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:10px 20px 0;padding:7px 12px;border-top:2px solid currentColor;border-bottom:1px solid currentColor;font-size:.86rem;line-height:1.3}
+.v1812t-np b{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-size:1rem}

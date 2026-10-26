@@ -26,6 +26,7 @@ if(!process.env.SKIP_A){
   X.v1812tEnsure(A); X.v1812tEnsure(B); X.v1812tEnsure(Z);
   const idsA=X.v1812tPoolIds(A), idsB=X.v1812tPoolIds(B), idsZ=X.v1812tPoolIds(Z);
   ok(idsA.length>62&&A.tryout.pool.length>=8&&A.tryout.pool.length<=14, `pool: ${idsA.length} candidates (${A.tryout.pool.length} newcomers) for 62 spots`);
+  { const eng=fs.readFileSync(path.join(SRC,'engine.js'),'utf8'); ok(!/tryout|cutMem|v1812t/i.test(eng), 'engine.js is untouched by this feature: no match-simulation code reads tryouts or cut memories (no revenge penalty)'); }
   ok(A.tryout.pool.every(id=>A.tryout.cands[id]&&A.tryout.info[id].story), 'every newcomer has a story tag');
   ok(['move','walk'].every(k=>A.tryout.pool.some(id=>A.tryout.info[id].kind===k)), 'both move-ins and walk-ons are in the pool');
   ok(A.tryout.pool.some(id=>A.tryout.cands[id].pos==='GK'), 'a keeper is among the newcomers');
@@ -243,6 +244,23 @@ const watch=page=>{ page.on('pageerror',e=>errs.push('PAGEERR '+e.message)); pag
   ok(await page.evaluate(()=>{ const s=document.getElementById('v1812t-scene'); return !!s&&s.classList.contains('final')&&s.classList.contains('inst'); }), 'reduced motion: the door scene appears already finished (no timers, no motion)');
   ok(await page.evaluate(()=>{ const el=document.querySelector('#v1812t-scene .s-gym .v1812t-sheet'); const cs=getComputedStyle(el); return cs.opacity==='1'&&cs.transitionDuration.split(',').every(x=>parseFloat(x)===0); }), 'reduced motion: the sheet has no transition');
   await ctx.close(); }
+/* manager mode, skipping the drill animation, leaving the screen while a day runs */
+{ const page=await b.newPage({viewport:{width:1280,height:900}}); watch(page); await career(page,'tryouts-ui8');
+  await page.evaluate(()=>{ App.C.settings.manager=true; App.route='tryouts'; render(); }); await page.waitForTimeout(300);
+  ok(await page.evaluate(()=>document.querySelectorAll('.v1812t-card').length>0&&v1812tIsOpen(App.C)), 'manager mode: the tryouts screen draws and works');
+  await page.evaluate(()=>{ A.v1812tRun(); }); await page.waitForTimeout(900); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
+  ok(await page.evaluate(()=>!V1812T_UI.running&&V1812T.dayO==null&&App.C.tryout.day===1&&document.querySelector('#v1812t-stage').hidden&&document.querySelectorAll('.v1812t-dt:not(.pend)').length>0), 'Escape skips the drill animation; the results are in');
+  await page.evaluate(()=>{ A.v1812tRun(); }); await page.waitForTimeout(600); await page.evaluate(()=>{ App.route='office'; render(); });
+  await page.waitForFunction(()=>!V1812T_UI.running,null,{timeout:20000});
+  ok(await page.evaluate(()=>V1812T.dayO==null&&App.C.tryout.day===2&&App.route==='office'), 'leaving the screen while a day runs still finishes the day cleanly');
+  await page.close(); }
+/* the Courier's first edition carries Cut Day; the player profile and the cut player's profile */
+{ const page=await b.newPage({viewport:{width:1280,height:900}}); watch(page); await career(page,'tryouts-ui9');
+  const r=await page.evaluate(()=>{ const C=App.C; v1812tAutoResolve(C); const rl=simRound(C); advance(C); const is=courierIssues(C)[0]; const html=is?courierFront(C,is,0,courierIssues(C)):'';
+    const cutId=Object.keys(C.tryout.cut)[0]; App.modal={type:'player',id:cutId}; renderModal(); const cutModal=document.querySelector('#modal-root .modal').innerText;
+    const made=Object.values(C.players).find(p=>p.cutMem); return {np:/v1812t-np/.test(html)&&/Cut Day at the gym door/.test(html),cutModal:/Cut at tryouts/i.test(cutModal),found:!!findPerson(C,cutId),made:!!made}; });
+  ok(r.np, 'the first Courier edition of the season has the Cut Day box'); ok(r.cutModal&&r.found, 'a cut player has a profile ("Cut at tryouts") and is findable');
+  await page.close(); }
 /* phone layout */
 { const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true}); const page=await ctx.newPage(); watch(page); await career(page,'tryouts-ui7');
   await page.evaluate(()=>{ App.route='tryouts'; render(); }); await page.waitForTimeout(400);
