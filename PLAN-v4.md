@@ -266,3 +266,23 @@ All of these are small, self-contained and safe to build. Each one lists where i
 ---
 
 ## Results (filled in by the builder)
+
+### Phase 0: baseline (commit 20afc42, Pixel 5 viewport, CPU 4× throttle)
+- matrix: clean on all 6 devices (without the overlap check); solve-all: all solvable; drag, migration, economy-sim: pass.
+- Prebuilt transitions, popup fade and map unlock verified on iPhone 13 and iPhone SE (screenshots and video frames).
+
+| Scenario | high: avg / p5 / long tasks | low: avg / p5 / long tasks |
+|---|---|---|
+| home | 60.0 / 59.9 / 0 | 60.0 / 59.5 / 0 |
+| map | 59.7 / 59.5 / 0 | 60.0 / 59.9 / 0 |
+| **lights** | **43–48 / 20–30 / 3–9** | 54.3 / 30.0 / 2 |
+| tubes | 59.6 / 59.9 / 0 | 59.4 / 59.9 / 0 |
+| threads | 60.0 / 59.9 / 0 | 59.8 / 59.5 / 0 |
+| merge | 57.0 / 59.5 / 0 | 59.6 / 59.5 / 0 |
+| blocks | 56.8 / 30.1 / 0 | 58.6 / 59.5 / 0 |
+| win | 55.0 / 30.0 / 1 | 57.0 / 59.5 / 1 |
+| modal | 59.7 / 59.9 / 1 | 60.0 / 59.9 / 1 |
+
+**Finding:** Lights Out on `high` misses the budget (avg ≥ 55). The same numbers appear on commit 52b680d, so the transition work did not cause it. It will be diagnosed and fixed at the start of Phase 6, before the Lights Out animations (B1, B2) are added.
+
+**Small finding:** on 320 px the map world banner wraps "WORLD 1 · LEVELS 1–12" and truncates the world name ("Twilight Gr..."); handled with M4/M5 in Phase 4.
