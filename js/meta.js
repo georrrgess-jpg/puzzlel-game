@@ -4,9 +4,11 @@ const RANKS=['Novice','Apprentice','Puzzler','Thinker','Solver','Strategist','Ta
 const rankOf=L=>RANKS[Math.min(RANKS.length-1,Math.floor((L-1)/3))];
 function addXP(n){
   const from={lv:S.plv,xp:S.xp},ups=[];S.xp+=n;
-  while(S.xp>=xpNeed(S.plv)){S.xp-=xpNeed(S.plv);S.plv++;const r={lv:S.plv,coins:levelUpReward(S.plv),skip:S.plv%ECON.lvlup.skipEvery===0};S.coins+=r.coins;if(r.skip)S.skips++;ups.push(r)}
+  while(S.xp>=xpNeed(S.plv)){S.xp-=xpNeed(S.plv);S.plv++;const r={lv:S.plv,coins:levelUpReward(S.plv),skip:S.plv%ECON.lvlup.skipEvery===0};S.coins+=r.coins;earned(r.coins);if(r.skip)S.skips++;ups.push(r)}
   return{from,ups};
 }
+/* coins from any source (not purchases) count towards the "Collect N coins" quest and the lifetime stat */
+const earned=n=>{if(n>0){S.stats.coinsEarned+=n;questEvent('coins',n)}};
 function xpBanner(res){for(const u of res.ups){banner('🆙','LEVEL UP!',`Player level ${u.lv} · ${rankOf(u.lv)}`,`+${u.coins} coins${u.skip?' · +1 skip':''}`);sfx.levelup()}}
 
 /* ====================== events → stats, quests, trophies ====================== */
@@ -58,7 +60,7 @@ function showQuests(still){
     const k=b.dataset.q;let coins;
     if(k==='bonus'){S.quests.bonus=true;coins=ECON.quest.bonus;S.hints+=ECON.quest.bonusHints}
     else{const q=L[+k];if(q.claimed)return;q.claimed=true;coins=q.r;S.stats.quests++;xpBanner(addXP(ECON.quest.xp))}
-    S.coins+=coins;sfx.chest();const[x,y]=centerOf(b);burst(x,y,'#ffd166',30,1.2);flyCoins(b,8);save();checkAch();showQuests(true);
+    S.coins+=coins;earned(coins);sfx.chest();const[x,y]=centerOf(b);burst(x,y,'#ffd166',30,1.2);flyCoins(b,8);save();checkAch();showQuests(true);
   });
 }
 
@@ -92,9 +94,9 @@ const ACH=[
   {id:'pl10',ic:'🏅',name:'Rising Star',desc:'Reach player level 10',t:()=>S.plv>=10,r:90}
 ];
 function checkAch(){
-  let n=0;
-  for(const a of ACH){if(S.ach[a.id]||!a.t())continue;S.ach[a.id]=Date.now();S.coins+=a.r;if(n++<3)banner(a.ic,'TROPHY UNLOCKED',a.name,`${a.desc} · +${a.r} coins`)}
-  if(n){sfx.unlock();save();refreshCoins()}
+  let n=0,sum=0;
+  for(const a of ACH){if(S.ach[a.id]||!a.t())continue;S.ach[a.id]=Date.now();S.coins+=a.r;sum+=a.r;if(n++<3)banner(a.ic,'TROPHY UNLOCKED',a.name,`${a.desc} · +${a.r} coins`)}
+  if(n){earned(sum);sfx.unlock();save();refreshCoins()}
 }
 const achCount=()=>ACH.filter(a=>S.ach[a.id]).length;
 function showTrophies(){
@@ -123,8 +125,9 @@ function showLogin(){
   openModal(`<h2>Daily Reward</h2><p>${streak?`🔥 <b>${streak}-day streak!</b> Come back tomorrow for more.`:'Log in every day for bigger rewards!'}</p>
     <div class="days">${LOGIN.map((r,i)=>`<div class="day ${i<idx?'got':i===idx?'now':''} ${i===6?'big':''}" style="--i:${i}"><small>Day ${i+1}</small><i>${r.ic}</i><b>${txt(r)}</b></div>`).join('')}</div>`,
     [{label:'Claim!',cls:'big',fn:b=>{
+      if(S.login.last===d){closeModal();return}   // already claimed (a second tap, a key repeat, or another tab)
       const r=LOGIN[idx];S.login={last:d,streak:streak+1};S.stats.bestLogin=Math.max(S.stats.bestLogin,streak+1);
-      S.coins+=r.c||0;S.hints+=r.h||0;S.skips+=r.s||0;save();
+      S.coins+=r.c||0;earned(r.c||0);S.hints+=r.h||0;S.skips+=r.s||0;save();
       sfx.chest();const now_=$('.day.now');if(now_){const[x,y]=centerOf(now_);burst(x,y,'#ffd166',40,1.4)}flyCoins(now_,10);
       now_&&now_.classList.add('dayclaim');setTimeout(()=>{closeModal();checkAch();renderHome()},700);
     }}],{icon:'🎁',cls:'login'});
@@ -155,12 +158,14 @@ function showSpin(){
      {label:free?'SPIN! 🎡':`Spin · <i class="coin"></i> ${SPIN_COST}`,cls:free?'big':'',fn:()=>doSpin()}],{cls:'spin'});
 }
 function doSpin(){
-  if(spinning)return;
+  if(spinning)return false;
   const free=spinReady();
-  if(!free){if(S.coins<SPIN_COST){toast('Not enough coins');sfx.bad();return}S.coins-=SPIN_COST;refreshCoins()}
+  if(!free){if(S.coins<SPIN_COST){toast('Not enough coins');sfx.bad();return false}S.coins-=SPIN_COST}
   else S.spinAt=Date.now()+SPIN_CD;
-  save();spinning=true;$$('#modal .mbtns .btn').forEach(b=>b.disabled=true);const ww=$('.wheelwrap');if(ww)ww.classList.add('going');
+  /* the prize is chosen and paid (and saved) right now; the animation only reveals it, so closing the app mid-spin loses nothing */
   const tot=WHEEL.reduce((a,w)=>a+w.w,0);let r=Math.random()*tot,i=0;while(r>=WHEEL[i].w){r-=WHEEL[i].w;i++}
+  const w=WHEEL[i];S.coins+=w.c||0;S.hints+=w.h||0;S.skips+=w.s||0;S.stats.spins++;save();
+  spinning=true;$$('#modal .mbtns .btn').forEach(b=>b.disabled=true);const ww=$('.wheelwrap');if(ww)ww.classList.add('going');
   const seg=360/WHEEL.length,start=wheelAng,base=((-(i+.5)*seg-start)%360+360)%360;
   const end=start+360*6+base+(Math.random()-.5)*seg*.6,T=4600,t0=performance.now(),wh=$('#wheel'),ptr=$('#ptr');
   let lastSeg=Math.floor(start/seg);sfx.whoosh();
@@ -170,7 +175,7 @@ function doSpin(){
     const sNow=Math.floor(wheelAng/seg);if(sNow!==lastSeg){lastSeg=sNow;sfx.wheel();if(ptr){ptr.classList.remove('tick');void ptr.offsetWidth;ptr.classList.add('tick')}}
     if(k<1)return requestAnimationFrame(step);
     spinning=false;wheelAng%=360;
-    const w=WHEEL[i];S.coins+=w.c||0;S.hints+=w.h||0;S.skips+=w.s||0;emit('spin',1);save();
+    questEvent('spin',1);earned(w.c||0);checkAch();save();if(!w.c)refreshCoins();
     sfx.chest();const hub=$('.wheelwrap .hub');if(hub){const[x,y]=centerOf(hub);burst(x,y,w.col,46,1.6);ring(x,y,w.col,260,800)}
     if(w.c){flyCoins(hub,Math.min(14,4+w.c/20|0));if(w.c>=150)confetti()}
     toast(`You won ${w.c?`<i class="coin"></i> ${w.c} coins`:w.h?`💡 ${w.h} hint${w.h>1?'s':''}`:'⏭️ a skip token'}!`);
@@ -194,7 +199,7 @@ function showSettings(){
   $$('#modal input[type=range]').forEach(r=>r.oninput=()=>{S[r.dataset.v]=+r.value;r.style.setProperty('--p',r.value*100+'%');applyVolumes();save()});
   $$('#modal input[type=range]').forEach(r=>r.onchange=()=>sfx.good());
   $('#resetBtn').onclick=()=>openModal('<h2>Erase everything?</h2><p>All levels, stars, coins, themes and trophies will be lost. This cannot be undone.</p>',
-    [{label:'Cancel',cls:'sec',fn:showSettings},{label:'Erase',cls:'pink',fn:()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}],{icon:'⚠️',cls:'fail'});
+    [{label:'Cancel',cls:'sec',fn:showSettings},{label:'Erase',cls:'pink',fn:()=>{try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}],{icon:'⚠️',cls:'fail',noEnter:true});
 }
 
 /* ---------- one-time welcome card for players who had v1/v2 progress ---------- */
@@ -205,5 +210,5 @@ function showWelcome(){
     <p>The game now has ${TYPES.length} calm, easy-to-learn puzzle modes. Your levels start fresh, and everything else came with you: coins, level, themes and trophies.</p>
     <div class="wmodes">${list}</div>
     <div class="reward"><i class="coin"></i><b>+200</b></div><div class="extra gold">🎁 Welcome gift: 200 coins and 3 hints</div>`,
-    [{label:"Let's go! ▶",cls:'big',fn:()=>{closeModal();renderHome();if(loginDue())setTimeout(showLogin,300)}}],{icon:'🌟',cls:'welcome'});
+    [{label:"Let's go! ▶",cls:'big',fn:()=>{closeModal();renderHome();if(loginDue())queueModal(()=>{if(loginDue())showLogin()},400)}}],{icon:'🌟',cls:'welcome'});
 }

@@ -23,6 +23,8 @@ const api={
   win(stars){onWin(stars)},
   fail(t,m){onFail(t,m)},
   over:()=>!cur||cur.over,
+  /* a win is certain but still playing out its animation: no hint, skip, restart, undo or back may throw it away */
+  lock(){if(cur)cur.locked=true},
   shake(){board.classList.remove('shake');void board.offsetWidth;board.classList.add('shake')},
   coach(t){const c=$('#coach');if(c._t===t)return;c._t=t;c.innerHTML=t;if(t&&!REDUCED&&c.animate)c.animate([{transform:'scale(.9)',opacity:.4},{transform:'scale(1.06)',opacity:1,offset:.6},{transform:'none'}],{duration:340,easing:'cubic-bezier(.3,1.6,.5,1)'})},
   setTip(h){$('#instr').innerHTML=h},
@@ -38,6 +40,7 @@ const api={
     const end=ev=>{if(ev.target!==e)return;e.classList.remove('popin');e.style.animationDelay='';e.removeEventListener('animationend',end)};e.addEventListener('animationend',end)})}
 };
 function startLevel(n,opts={}){
+  if(opts.daily&&dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}
   if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();
   const daily=!!opts.daily;let type,tier,seed;
   if(daily){const c=dailyCfg();type=c.type;tier=c.tier;seed=c.seed}
@@ -49,7 +52,7 @@ function startLevel(n,opts={}){
   $('.ptitle').classList.toggle('bonus',bonus||daily);
   $('#psub').textContent=INFO[type].icon+' '+INFO[type].name+(bonus?' · BONUS 2× coins':daily?' · big reward!':'');
   $('#instr').textContent=INFO[type].tip;api.coach('');
-  cur={level:n,type,daily,bonus,over:false,history:[],puz:null,combo:0,hinted:false,last:null};
+  cur={level:n,type,daily,bonus,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
   $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;
@@ -80,6 +83,9 @@ function resetNudge(full){
   },cur.level<=6&&!cur.daily?12000:24000);
 }
 $('#play').addEventListener('pointerdown',()=>resetNudge());
+addEventListener('keydown',()=>resetNudge());
+/* the board ignores taps in the first 250 ms of a level: the second tap of a double-tap on Next / Replay lands there */
+['pointerdown','click'].forEach(t=>board.addEventListener(t,e=>{if(cur&&performance.now()<cur.t0+250){e.stopPropagation();e.preventDefault()}},true));
 function showHowTo(type,done){
   const h=HOWTO[type],i=INFO[type];
   openModal(`<div class="kicker">How to play</div><h2>${i.name}</h2><p class="goal"><b>Goal</b> ${h.goal}</p><div class="demo">${h.demo()}</div><ol class="steps">${h.steps.map(t=>`<li>${t}</li>`).join('')}</ol>`,
@@ -87,24 +93,26 @@ function showHowTo(type,done){
 }
 function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null;clearTimeout(nudgeT)}
 function undo(){
-  if(!cur||cur.over||cur.puz.noUndo)return;
+  if(!cur||cur.over||cur.locked||cur.puz.noUndo)return;
   if(cur.history.length<2){sfx.bad();return}
   cur.history.pop();cur.puz.restore(cur.history[cur.history.length-1]);sfx.swish();cur.combo=0;
 }
 const HINT_COST=ECON.hint.cost,SKIP_COST=ECON.skip.cost;
 function useHint(){
-  if(!cur||cur.over)return;
-  if(S.hints>0)S.hints--;
-  else if(S.coins>=HINT_COST)S.coins-=HINT_COST;
-  else{toast('Not enough coins for a hint');sfx.bad();return}
-  cur.hinted=true;emit('hint',1);save();refreshHUD();sfx.good();cur.puz.hint();
+  if(!cur||cur.over||cur.locked)return;
+  const free=S.hints>0;
+  if(!free&&S.coins<HINT_COST){toast('Not enough coins for a hint');sfx.bad();return}
+  if(cur.puz.hint()===false)return;   // the mode had nothing to show (it says why): no charge, and no "used a hint" mark
+  if(free)S.hints--;else S.coins-=HINT_COST;
+  cur.hinted=true;emit('hint',1);save();refreshHUD();sfx.good();
 }
 function skipLevel(){
-  if(!cur||cur.over||cur.daily)return;
+  if(!cur||cur.over||cur.locked||cur.daily)return;
   const n=cur.level,hasToken=S.skips>0;
   openModal(`<h2>Skip level?</h2><p>Move on to the next level. This level stays unstarred so you can come back for stars later.</p>
     <div class="reward cost">${hasToken?'<span>Use 1 skip token</span>':`<i class="coin"></i><b>${SKIP_COST}</b>`}</div>`,
     [{label:'Cancel',cls:'sec',fn:closeModal},{label:'Skip ⏭️',fn:()=>{
+      if(!cur||cur.over||cur.locked||cur.level!==n){closeModal();return}   // the level was won (or changed) while this was open
       if(hasToken)S.skips--;else if(S.coins>=SKIP_COST)S.coins-=SKIP_COST;else{closeModal();toast('Not enough coins');sfx.bad();return}
       if(S.unlocked<=n)S.unlocked=n+1;S.streak=0;save();refreshHUD();playLevel(n+1,{},$('#modal .mbtns .btn:last-child'));
     }}],{icon:'⏭️'});
@@ -113,24 +121,30 @@ function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);
   const me=cur,n=cur.level,daily=cur.daily;
   let coins,prev=0,streakBonus=0,chest=0,dstreak=0;
-  if(stars===3)S.streak++;else S.streak=0;
+  /* a daily is booked to the day it was STARTED (a win after midnight still counts for that day) and only once; a
+     replay of a 3-star level earns little XP, no streak bonus and doesn't extend the streak */
+  const dd=cur.dday,booked=daily&&S.dchal.last>=dd,replay3=!daily&&(S.stars[n]||0)===3;
+  if(!booked&&!replay3){if(stars===3)S.streak++;else S.streak=0}
   if(daily){
-    const d=today();dstreak=S.dchal.last===d-1?S.dchal.streak+1:1;S.dchal.last=d;S.dchal.streak=dstreak;
-    coins=dailyReward(stars,dstreak);
-    if(stars===3&&S.streak>=2){streakBonus=levelReward(3,3,false,S.streak).streakBonus}
+    dstreak=S.dchal.streak;coins=0;
+    if(!booked){
+      dstreak=S.dchal.last===dd-1?S.dchal.streak+1:1;S.dchal.last=dd;S.dchal.streak=dstreak;
+      coins=dailyReward(stars,dstreak);
+      if(stars===3&&S.streak>=2){streakBonus=levelReward(3,3,false,S.streak).streakBonus}
+    }
   }else{
     prev=S.stars[n]||0;
-    const r=levelReward(prev,stars,cur.bonus,S.streak);coins=r.coins-r.streakBonus;streakBonus=r.streakBonus;
+    const r=levelReward(prev,stars,cur.bonus,S.streak);coins=r.coins-r.streakBonus;streakBonus=replay3?0:r.streakBonus;
     if(stars>prev)S.stars[n]=stars;
     if(S.unlocked<=n){S.unlocked=n+1;pendingUnlock={n,stars}}
   }
   coins+=streakBonus;S.coins+=coins;
   while(totalStars()>=msThreshold(S.milestone)){chest+=chestReward(S.milestone);S.milestone++}
   S.coins+=chest;
-  const xpGain=xpForWin(stars,daily,cur.bonus),xr=addXP(xpGain);
+  const xpGain=booked?0:Math.round(xpForWin(stars,daily,cur.bonus)*(replay3?.2:1)),xr=addXP(xpGain);
   save();
-  emit('win',{stars,type:cur.type,hinted:cur.hinted,daily});
-  if(daily)emit('daily',1);
+  emit('win',{stars,type:cur.type,hinted:cur.hinted,daily:daily&&!booked});
+  if(daily&&!booked)emit('daily',1);
   emit('coins',coins+chest);
   sfx.win();buzz([30,40,60]);confetti();
   const[bx,by]=centerOf(board);burst(bx,by,'#ffd166',50,1.8);ring(bx,by,'#fff',420,900);
@@ -194,15 +208,30 @@ function onFail(title,msg){
 function openModal(html,btns,o={}){
   const m=$('#modal'),st=o.still?' style="animation:none"':'';
   clearTimeout(closeModal.t);m.classList.remove('closing');
-  m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}"${st}>${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}<div class="mbtns"></div></div>`;
+  if(!m.classList.contains('on')){const a=document.activeElement;m._prevFocus=a&&a!==document.body?a:null}
+  m.dataset.noenter=o.noEnter?'1':'';
+  m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}" role="dialog" aria-modal="true"${st}>${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}<div class="mbtns"></div></div>`;
   const row=$('.mbtns',m);
-  btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);x.onclick=()=>{sfx.click();b.fn(x)};row.appendChild(x)});
+  btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);
+    /* a button works once per tap (no double-charge on a double tap); a handler that returns false declines and re-arms it */
+    x.onclick=()=>{if(x.disabled)return;x.disabled=true;sfx.click();if(b.fn(x)===false)x.disabled=false};row.appendChild(x)});
   m.classList.add('on');Q.setModal(true);
+  const fb=o.noEnter?row.firstChild:row.lastChild;if(fb)try{fb.focus({preventScroll:true})}catch(_){}
+}
+/* popups that appear on their own (welcome, daily reward) wait until the player is on the home screen with nothing open */
+const modalQ=[];
+function queueModal(fn,delay=0){modalQ.push(fn);setTimeout(drainModalQ,delay)}
+function drainModalQ(){
+  if(!modalQ.length)return;const m=$('#modal');
+  if(m.classList.contains('on')||m.classList.contains('closing')||Trans.busy||!$('#home').classList.contains('active'))return;
+  modalQ.shift()();
 }
 /* closing is instant for the game (state flips now); the card just plays a short exit while it fades */
 function closeModal(){
   const m=$('#modal');if(!m.classList.contains('on'))return;
   m.classList.remove('on');Q.setModal(false);
+  const pf=m._prevFocus;m._prevFocus=null;if(pf&&pf.isConnected)try{pf.focus({preventScroll:true})}catch(_){}
+  setTimeout(drainModalQ,450);
   if(REDUCED||Q.tier==='low')return;
   m.classList.add('closing');clearTimeout(closeModal.t);closeModal.t=setTimeout(()=>m.classList.remove('closing'),200);
 }
@@ -212,6 +241,7 @@ function show(id,o={}){
     if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
     refreshHUD();
+    if(id==='home')setTimeout(drainModalQ,700);
   });
 }
 /* enter a level through the iris, growing from the button or map node that was tapped */
@@ -241,17 +271,21 @@ $('#tSpin').onclick=()=>{sfx.click();showSpin()};
 $('#tQuests').onclick=()=>{sfx.click();showQuests()};
 $('#tTrophy').onclick=()=>{sfx.click();showTrophies()};
 $$('[data-go]').forEach(b=>b.onclick=()=>{sfx.click();show(b.dataset.go)});
-$('#backBtn').onclick=()=>{sfx.click();if(Trans.busy)return;playExit(cur&&cur.daily?'home':'map')};
+$('#backBtn').onclick=()=>{if(Trans.busy||(cur&&cur.locked&&!cur.over))return;sfx.click();playExit(cur&&cur.daily?'home':'map')};
 $('#undoBtn').onclick=undo;
 $('#hintBtn').onclick=useHint;
 $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};
-$('#restartBtn').onclick=()=>{if(cur){sfx.click();startLevel(cur.level,{daily:cur.daily})}};
+$('#restartBtn').onclick=()=>{if(cur&&!cur.over&&!cur.locked){sfx.click();startLevel(cur.level,{daily:cur.daily})}};
 $('#skipBtn').onclick=skipLevel;
 // desktop shortcuts: U/Z undo, H hint, R restart, Enter or Space presses the main popup button, Esc goes back
 addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input'))return;
   const m=$('#modal.on'),k=e.key.toLowerCase();
-  if(m&&(k==='enter'||k===' ')){const b=$('.mbtns .btn:last-child',m);if(b&&!b.disabled){e.preventDefault();b.click()}return}
+  if(m&&(k==='enter'||k===' ')){
+    const ae=document.activeElement;
+    if(ae&&m.contains(ae)&&ae.matches('button,input,a'))return;   // the browser presses the focused control itself
+    if(m.dataset.noenter)return;                                  // destructive popups are never answered by a bare key
+    const b=$('.mbtns .btn:last-child',m);if(b&&!b.disabled){e.preventDefault();b.click()}return}
   if(m||!$('#play').classList.contains('active'))return;
   if(k==='u'||(k==='z'&&(e.ctrlKey||e.metaKey))){e.preventDefault();undo()}
   else if(k==='h')useHint();
@@ -262,9 +296,17 @@ const wake=()=>{audio();Music.start()};
 // iOS Safari only unlocks audio inside certain gestures (touchend/click), so keep trying until it's running
 const WAKE_EVENTS=['pointerdown','touchend','click','keydown'];
 WAKE_EVENTS.forEach(ev=>addEventListener(ev,wakeUntilRunning,{passive:true}));
-function wakeUntilRunning(){wake();if(AU.ctx&&AU.ctx.state==='running')WAKE_EVENTS.forEach(ev=>removeEventListener(ev,wakeUntilRunning))}
+/* these stay for good: iOS suspends the audio context after a call or a trip to another app, and only a tap revives it */
+function wakeUntilRunning(){if(!AU.ctx||AU.ctx.state!=='running')wake()}
 
 buildLogo();applyTheme();BG.start();ensureQuests();checkAch();refreshHUD();renderHome();
-if(S.welcome3)setTimeout(showWelcome,700);else if(loginDue())setTimeout(()=>{if(!$('#modal').classList.contains('on'))showLogin()},800);
+if(S.welcome3)queueModal(()=>{if(S.welcome3)showWelcome()},700);else if(loginDue())queueModal(()=>{if(loginDue())showLogin()},800);
 setInterval(()=>{if($('#home').classList.contains('active')&&!document.hidden&&!Q.modal)tickHome()},1000);
+/* another tab saved: take its progress instead of overwriting it with this tab's older copy on the next save */
+addEventListener('storage',e=>{
+  if(e.key!==KEY||!e.newValue)return;
+  const fresh=load();Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,fresh);
+  applyTheme();refreshHUD();const a=$('.screen.active');if(a&&a.id!=='play')show(a.id);
+  toast('Progress updated from another tab');
+});
 window.__game={S,TYPES,typeFor,startLevel,get cur(){return cur},show,api,closeModal};

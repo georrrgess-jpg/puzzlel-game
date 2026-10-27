@@ -21,6 +21,7 @@
 | `tools/solve-all.cjs` | Every mode at many tiers is solvable by its own bot |
 | `tools/drag.cjs [W H]` | Real CDP finger drags for threads, merge and blocks |
 | `GFX=high\|med\|low tools/perf.cjs 4 <scenarios>` | Frame rate under 4× CPU throttle. Budget: avg ≥ 55 fps, p5 ≥ 50 fps on `high`, no long task > 100 ms. Run 2–3 times; the p5 figure is noisy. |
+| `tools/regress.cjs [filter]` | **Pass/fail regression checks for every fixed bug (B1–B18).** Added in Phase 1; it replaces the old `tools/repro/` scripts. Each check runs in a fresh page. |
 | `tools/economy-sim.cjs` | Economy balance (must stay green; this plan does not touch ECON) |
 | `tools/migration.cjs` | Save migration |
 | `tools/shot.cjs <out> <scenario>` | Ad-hoc screenshots (`W`/`H` env for the viewport) |
@@ -286,3 +287,18 @@ All of these are small, self-contained and safe to build. Each one lists where i
 **Finding:** Lights Out on `high` misses the budget (avg ≥ 55). The same numbers appear on commit 52b680d, so the transition work did not cause it. It will be diagnosed and fixed at the start of Phase 6, before the Lights Out animations (B1, B2) are added.
 
 **Small finding:** on 320 px the map world banner wraps "WORLD 1 · LEVELS 1–12" and truncates the world name ("Twilight Gr..."); handled with M4/M5 in Phase 4.
+
+### Phase 1: bug fixes (done)
+All of B1–B18 are fixed; B19 and B20 belong to Phases 2 and 3. `tools/regress.cjs` has 28 checks; it fails 22 of them on the old code and passes all on the new. The old `tools/repro/` scripts were folded into it and deleted.
+
+Notes on how each was fixed, for whoever touches this next:
+- **Popup buttons are one-press.** `openModal` disables a button the moment it is tapped; a handler that returns `false` re-arms it (the spin button does this when you can't afford a spin). This is the general fix behind B1, B11 and double-charged Skip.
+- **`api.lock()`** (new): a mode calls it when a win is certain but still animating. It blocks Hint, Skip, Restart, Undo and Back. Block Garden uses it; the other modes win instantly.
+- **`hint()` contract:** returns `false` when it shows nothing (then `useHint` charges nothing and doesn't mark the level as hinted). Any other return value, including `undefined`, counts as shown.
+- **Dailies** are booked to `cur.dday`, the day they were started, and only once. `startLevel` refuses a daily that is already done.
+- **Popup queue:** `queueModal(fn, delay)` (in `js/ui.js`) is how popups that open by themselves must be shown. It waits for the home screen with no popup open.
+- **Keyboard:** the popup focuses its main button (Cancel for popups made with `noEnter:true`). Enter or Space on a focused control works natively; with nothing focused, Enter presses the main button unless the popup is `noEnter`.
+- **Service worker (`pop-v12`):** installs with `cache:'reload'`; page loads are network-first (3.5 s timeout, then cache); other files are cache-first with a background refresh kept alive by `waitUntil`. Verified offline in headless Chromium. An update shows a "New version ready" toast.
+- **Sand Tubes hints** follow the solution found at level generation (free), and only search again after the player deviates (6k nodes, then 25k). Even at tier 40 a search took under 10 ms in headless Chromium.
+- **Not testable here:** B10 on a real iPhone (the headless check only covers suspend → tap → running); B9's two-deploy staleness case.
+- Replaying a 3-star level now gives 20% XP and no streak bonus, and doesn't extend the streak (B13). `economy-sim` still passes (it doesn't model such replays).

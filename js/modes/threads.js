@@ -232,6 +232,7 @@ MAKERS.threads=function({R,tier,board,api}){
       thr[eKey[p.from+','+p.to]].c.classList.add('next');
       hintTO=setTimeout(clearHint,3200);
       api.coach('💡 Slide from the bright star along the glowing thread');
+      return true;
     },
     _info:{stars:N,threads:E.length,odd:odd.length,fallback:!!gen.fallback},
     _bot(){if(over)return false;const p=fixAndPlan();addSeg(p.to);return true},

@@ -25,7 +25,7 @@ function audio(){
       applyVolumes();
     }catch(e){AU.ctx=null}
   }
-  if(AU.ctx&&AU.ctx.state==='suspended')AU.ctx.resume();
+  if(AU.ctx&&(AU.ctx.state==='suspended'||AU.ctx.state==='interrupted')){const p=AU.ctx.resume();if(p&&p.catch)p.catch(()=>{})}   // iOS reports 'interrupted' after a call or app switch
   return AU.ctx;
 }
 function applyVolumes(){

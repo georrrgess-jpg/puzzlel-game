@@ -86,7 +86,11 @@ function load(){
   }
   return s;
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let saveWarned=false;
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S))}
+  catch(e){if(!saveWarned){saveWarned=true;if(typeof toast==='function')toast("Can't save progress on this device (private mode?)")}}
+}
 const totalStars=()=>Object.values(S.stars).reduce((a,b)=>a+b,0);
 const msThreshold=m=>12*(m+1)+3*m*m;
 const msReward=m=>chestReward(m);

@@ -131,7 +131,11 @@
 <script src="js/ui.js"></script>
 <script>
 // installable + offline when served over http(s) (e.g. GitHub Pages); silently skipped elsewhere
-if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol))addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}});
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  const had=!!navigator.serviceWorker.controller;   // a new worker taking over a page that already had one = an update arrived
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&typeof toast==='function')toast('New version ready ✨ Close and reopen the game to update')});
+  addEventListener('load',()=>{try{navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}});
+}
 </script>
 </body>
 </html>

@@ -151,7 +151,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
       setTimeout(()=>{if(my===gen&&grid.isConnected)bloom(a,bx+(s.w-1)/2,by+(s.h-1)/2,my)},150);
     }else{combo=0;api.meh();vis=G.slice();vlines=lines}
     if(won){
-      finished=true;
+      finished=true;api.lock();   // the win plays out for up to 1.25 s: nothing may throw it away meanwhile
       setTimeout(()=>{if(my!==gen)return;sfx.sparkle();fountain(ox+N*cp/2,oy+N*cp/2,40);vis=G.slice();vlines=lines;render();api.win(starsFor(moves,s3,s2))},a.lines?1250:350);
     }else{
       setTimeout(()=>{if(my===gen)checkStuck()},a.lines?1150:150);
@@ -287,11 +287,12 @@ MAKERS.blocks=function({R,tier,level,board,api}){
     snap:()=>JSON.stringify({G,tray,nextK,lines,moves}),
     restore:restoreState,
     hint(){
-      const m=bestMove(G,tray);if(!m){toast('No room left: try Undo ↩️');return}
+      const m=bestMove(G,tray);if(!m){toast('No room left: try Undo ↩️');return false}
       clearHint();const s=BG_SHAPES[tray[m.slot]];
       s.c.forEach(([x,y])=>cells[(m.y+y)*N+m.x+x].classList.add('ht'));
       slots[m.slot].dataset.h=1;api.flash(slots[m.slot],3200);cells[m.y*N+m.x].dataset.h=2;hintT=setTimeout(clearHint,3300);
       api.coach('💡 Drag the glowing block to the highlighted spot');
+      return true;
     },
     _bot(){const m=bestMove(G,tray);if(!m)return false;return place(m.slot,m.x,m.y)},
     destroy(){gen++;if(ro)ro.disconnect();if(ghost)ghost.remove();clearHint()}

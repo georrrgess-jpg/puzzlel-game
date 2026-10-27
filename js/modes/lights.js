@@ -26,11 +26,11 @@ MAKERS.lights=function({R,tier,board,api}){
   const cells=grid.map((_,i)=>{
     const c=el('button','cell light','<u></u><i><b></b></i><em></em>');
     c.style.setProperty('--fl',(2.4+((i*7)%5)*.35)+'s');c.style.setProperty('--fo',-((i*13)%9)*.3+'s');
-    c.onclick=()=>press(i);gfx.tidy(c);wrap.appendChild(c);return c});
+    c.setAttribute('aria-label',`Light, row ${(i/n|0)+1} column ${i%n+1}`);c.onclick=()=>press(i);gfx.tidy(c);wrap.appendChild(c);return c});
   board.appendChild(wrap);api.stagger(cells);
   const clearPv=gfx.preview(cells,i=>gfx.hits(i,n,offs),api.over);
   function render(){
-    cells.forEach((c,i)=>{clearTimeout(c._lt);c.classList.toggle('on',!!grid[i])});
+    cells.forEach((c,i)=>{clearTimeout(c._lt);c.classList.toggle('on',!!grid[i]);c.setAttribute('aria-pressed',grid[i]?'true':'false')});
     glow();api.moves(moves,s3,s2)}
   function glow(){
     const lit=grid.filter(v=>v).length;
@@ -51,7 +51,7 @@ MAKERS.lights=function({R,tier,board,api}){
     changed.forEach((j,k)=>{const c=cells[j],d=Math.abs(j%n-x0)+Math.abs(((j/n)|0)-y0),ms=d*65;
       c.style.setProperty('--d',ms+'ms');c.classList.add('flip');
       clearTimeout(c._lt);
-      const set=()=>{c.classList.toggle('on',!!grid[j]);
+      const set=()=>{c.classList.toggle('on',!!grid[j]);c.setAttribute('aria-pressed',grid[j]?'true':'false');
         if(before[j]&&!grid[j]&&gfx.live(c)){gfx.pulse(c,'out');burst(pos[k][0],pos[k][1],gfx.acc(),8,.55)}};
       ms?c._lt=setTimeout(set,ms+60):set();
     });

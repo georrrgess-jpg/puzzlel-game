@@ -144,7 +144,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
       if(!FL_RM)setTimeout(()=>{if(my===fgen&&grid.isConnected){const[x,y,w]=cellPos(i);burst(x,y+w*.3,'#c8a46a',4,.35)}},FLY+540);
     }});
     api.good(null,{silent:true});
-    if(won){api.win(starsFor(moves,s3,s2));setTimeout(()=>finish(b),FLY)}
+    if(won){api.win(starsFor(moves,s3,s2));setTimeout(()=>{if(grid.isConnected)finish(b)},FLY)}
     else if(!pick(G)&&!hasPair(G)){toast('The garden is full: Undo ↩️ and try another order')}
     return true;
   }
@@ -202,10 +202,11 @@ MAKERS.merge=function({R,tier,level,board,api}){
     snap:()=>JSON.stringify({G,moves}),
     restore(s){({G,moves}=JSON.parse(s));sel=-1;fgen++;shown.fill(-1);cells.forEach(c=>c.classList.remove('glow','hint','lifted','tg','mgup'));render()},
     hint(){
-      const p=pick(G);if(!p){toast('No pairs left: try Undo ↩️');return}
+      const p=pick(G);if(!p){toast('No pairs left: try Undo ↩️');return false}
       cells.forEach(c=>{c.removeAttribute('data-h');c.classList.remove('hint')});
       [0,1].forEach(k=>{cells[p[k]].dataset.h=k+1;api.flash(cells[p[k]],3200)});
       api.coach('💡 Drag the first glowing plant onto the second');
+      return true;
     },
     _bot(){const p=pick(G);if(!p)return false;return merge(p[0],p[1])},
     destroy(){if(ghost)ghost.remove()}

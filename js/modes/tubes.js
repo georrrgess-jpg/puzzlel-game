@@ -53,6 +53,7 @@ MAKERS.tubes=function({R,tier,board,api}){
     return null;
   }
   const t0sol=solve(tubes);
+  let plan=t0sol?t0sol.slice():null,hintT=0;   // the generation-time solution: hints follow it for free while the player does
   const par=t0sol?t0sol.length:nc*3;
   const s3=par+2+Math.floor(par*.2),s2=Math.ceil(par*1.7)+5;
   let moves=0,sel=-1,hintPair=null,lastNew=null,lastFrom=-1,lastGhost=null;
@@ -77,6 +78,7 @@ MAKERS.tubes=function({R,tier,board,api}){
     const segs=e.querySelectorAll('.seg');segs.forEach((x,j)=>x.classList.toggle('top',j===segs.length-1));
   }
   function render(){
+    if(!wrap.isConnected)return;
     tEls.forEach(e=>{e.querySelectorAll('.hn').forEach(x=>x.remove())});
     tubes.forEach((t,i)=>{
       const e=tEls[i];
@@ -111,12 +113,13 @@ MAKERS.tubes=function({R,tier,board,api}){
     }
     const from=sel,col=tubes[from][tubes[from].length-1],stacking=tubes[i].length>0;
     const mv=tubes[from].splice(tubes[from].length-cnt,cnt),oldLen=tubes[i].length;
+    if(plan&&plan.length&&plan[0][0]===from&&plan[0][1]===i)plan.shift();else plan=null;
     lastNew={i,from:oldLen};tubes[i].push(...mv);lastFrom=from;lastGhost={i:from,segs:mv};
     sel=-1;moves++;sfx.sand(cnt);buzz(10);
     render();api.commit();lastFrom=-1;lastNew=null;lastGhost=null;
     pourAnim(from,i,COLORS[col],cnt,oldLen);
     const finished=tubes[i].length===cap&&uniform(tubes[i]);
-    if(finished){const T=tEls[i],cc=COLORS[tubes[i][0]];setTimeout(()=>{sfx.done();if(!T.isConnected)return;const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
+    if(finished){const T=tEls[i],cc=COLORS[tubes[i][0]];setTimeout(()=>{if(!T.isConnected)return;sfx.done();const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
       if(!FL_RM)T.animate([{filter:'brightness(1)'},{filter:'brightness(1.7)',offset:.25},{filter:'brightness(1)'}],{duration:700})},FL_RM?0:520)}
     if(stacking||finished)api.good(tEls[i],{silent:true});
     if(solved(tubes))api.win(starsFor(moves,s3,s2));
@@ -156,12 +159,15 @@ MAKERS.tubes=function({R,tier,board,api}){
   render();
   return{
     snap:()=>JSON.stringify({tubes,moves}),
-    restore(s){({tubes}=JSON.parse(s));moves=JSON.parse(s).moves;sel=-1;hintPair=null;lastNew=null;lastFrom=-1;render()},
+    restore(s){({tubes}=JSON.parse(s));moves=JSON.parse(s).moves;sel=-1;hintPair=null;plan=null;lastNew=null;lastFrom=-1;render()},
     hint(){
-      const path=solve(tubes,25000);
-      if(!path||!path.length){toast('No way forward from here — try Undo!');return}
-      const m=path[0];sel=-1;hintPair=m;render();setTimeout(()=>{if(hintPair===m){hintPair=null;render()}},3200);
-    }
+      let m=plan&&plan.length?plan[0]:null;
+      if(!m){const path=solve(tubes,6000)||solve(tubes,25000);if(path&&path.length){plan=path;m=path[0]}}   // small search first: it keeps big boards from freezing
+      if(!m){toast('No way forward from here — try Undo!');return false}
+      sel=-1;hintPair=m;render();clearTimeout(hintT);hintT=setTimeout(()=>{if(hintPair===m&&wrap.isConnected){hintPair=null;render()}},3200);
+      return true;
+    },
+    destroy(){clearTimeout(hintT)}
   };
 };
 
