@@ -137,7 +137,7 @@ function dailyCfg(){
   if(S.dchal.tday!==d){S.dchal.tday=d;S.dchal.tier=clamp(tierFor(S.unlocked)+2,2,14);save()}
   return{type:TYPES[hashSeed(d,5)%TYPES.length],tier:S.dchal.tier,seed:hashSeed(d,777)};
 }
-function startDaily(){if(dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}startLevel(0,{daily:true})}
+function startDaily(){if(dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}playLevel(0,{daily:true},$('#tDaily'))}
 
 /* ---------- lucky spin ---------- */
 const WHEEL=ECON.wheel,SPIN_CD=ECON.spin.cd,SPIN_COST=ECON.spin.cost;

@@ -43,7 +43,7 @@ function startLevel(n,opts={}){
   if(daily){const c=dailyCfg();type=c.type;tier=c.tier;seed=c.seed}
   else{type=typeFor(n);tier=tierFor(n);seed=hashSeed(n,TYPES.indexOf(type)+1)}
   const bonus=!daily&&isBonus(n);
-  board.innerHTML='';closeModal();
+  board.innerHTML='';closeModal();pendingUnlock=null;
   $('#hudStars').innerHTML=STAR+STAR+STAR;meterKey='';$('#hudInfo').innerHTML='';
   $('#ptitle').textContent=daily?'📅 Daily Challenge':bonus?`👑 Level ${n}`:'Level '+n;
   $('.ptitle').classList.toggle('bonus',bonus||daily);
@@ -106,7 +106,7 @@ function skipLevel(){
     <div class="reward cost">${hasToken?'<span>Use 1 skip token</span>':`<i class="coin"></i><b>${SKIP_COST}</b>`}</div>`,
     [{label:'Cancel',cls:'sec',fn:closeModal},{label:'Skip ⏭️',fn:()=>{
       if(hasToken)S.skips--;else if(S.coins>=SKIP_COST)S.coins-=SKIP_COST;else{closeModal();toast('Not enough coins');sfx.bad();return}
-      if(S.unlocked<=n)S.unlocked=n+1;S.streak=0;save();refreshHUD();startLevel(n+1);
+      if(S.unlocked<=n)S.unlocked=n+1;S.streak=0;save();refreshHUD();playLevel(n+1,{},$('#modal .mbtns .btn:last-child'));
     }}],{icon:'⏭️'});
 }
 function onWin(stars){
@@ -122,7 +122,7 @@ function onWin(stars){
     prev=S.stars[n]||0;
     const r=levelReward(prev,stars,cur.bonus,S.streak);coins=r.coins-r.streakBonus;streakBonus=r.streakBonus;
     if(stars>prev)S.stars[n]=stars;
-    if(S.unlocked<=n)S.unlocked=n+1;
+    if(S.unlocked<=n){S.unlocked=n+1;pendingUnlock={n,stars}}
   }
   coins+=streakBonus;S.coins+=coins;
   while(totalStars()>=msThreshold(S.milestone)){chest+=chestReward(S.milestone);S.milestone++}
@@ -153,10 +153,10 @@ function onWin(stars){
       ${stars>prev&&prev>0?`<div class="extra">🏅 New best!</div>`:''}
       ${chest?`<div class="extra gold">🎁 Star chest opened: +${chest} coins!</div>`:''}
       ${stars===3?'':near>0?`<p class="nearmiss">So close! Just ${near} move${near>1?'s':''} from ${stars===2?'★★★':'★★'}. Replay?</p>`:'<p>Replay to chase 3 stars!</p>'}`,
-      daily?[{label:'Home',cls:'sec',fn:()=>{closeModal();exitLevel();show('home')}},{label:'Keep playing ▶',cls:'big',fn:()=>startLevel(S.unlocked)}]
-      :[{label:'Levels',cls:'sec sm',fn:()=>{closeModal();exitLevel();show('map')}},
-       {label:'Replay',cls:'sec sm',fn:()=>startLevel(n)},
-       {label:'Next ▶',cls:'big',fn:()=>startLevel(n+1)}],{cls:'win'});
+      daily?[{label:'Home',cls:'sec',fn:b=>playExit('home',b)},{label:'Keep playing ▶',cls:'big',fn:b=>playLevel(S.unlocked,{},b)}]
+      :[{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
+       {label:'Replay',cls:'sec sm',fn:b=>playLevel(n,{},b)},
+       {label:'Next ▶',cls:'big',fn:b=>playLevel(n+1,{},b)}],{cls:'win'});
     for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',26+i*8,1.1+i*.15);ring(x,y,'#ffd166',150+i*30);ring(x,y,'#fff',90,420);
       const c=$('#modal .card');if(c&&c.animate)c.animate([{transform:'none'},{transform:`translateY(${5+i*2}px) scale(.985)`},{transform:'none'}],{duration:220,easing:'ease-out'})}},(i*.38+.58)*1000);
     // coin count-up
@@ -186,24 +186,43 @@ function onFail(title,msg){
   if(cur.over)return;cur.over=true;sfx.fail();buzz(200);api.meh();
   const me=cur;
   setTimeout(()=>cur===me&&openModal(`<div class="kicker">${me.daily?'Daily challenge':'Level '+me.level}</div><h2>${title}</h2><p>${msg}</p><div class="failtip">💡 Stuck? A hint shows the best next move</div>`,[
-    me.daily?{label:'Home',cls:'sec sm',fn:()=>{closeModal();exitLevel();show('home')}}:{label:'Levels',cls:'sec sm',fn:()=>{closeModal();exitLevel();show('map')}},
-    {label:'Try again 🔄',cls:'big',fn:()=>startLevel(me.level,{daily:me.daily})}],{icon:'😵‍💫',cls:'fail'}),700);
+    me.daily?{label:'Home',cls:'sec sm',fn:b=>playExit('home',b)}:{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
+    {label:'Try again 🔄',cls:'big',fn:b=>playLevel(me.level,{daily:me.daily},b)}],{icon:'😵‍💫',cls:'fail'}),700);
 }
 
 /* ====================== modal / screens ====================== */
 function openModal(html,btns,o={}){
   const m=$('#modal'),st=o.still?' style="animation:none"':'';
+  clearTimeout(closeModal.t);m.classList.remove('closing');
   m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}"${st}>${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}<div class="mbtns"></div></div>`;
   const row=$('.mbtns',m);
   btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);x.onclick=()=>{sfx.click();b.fn(x)};row.appendChild(x)});
   m.classList.add('on');Q.setModal(true);
 }
-function closeModal(){$('#modal').classList.remove('on');Q.setModal(false)}
-function show(id){
-  $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
-  if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
-  Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
-  refreshHUD();
+/* closing is instant for the game (state flips now); the card just plays a short exit while it fades */
+function closeModal(){
+  const m=$('#modal');if(!m.classList.contains('on'))return;
+  m.classList.remove('on');Q.setModal(false);
+  if(REDUCED||Q.tier==='low')return;
+  m.classList.add('closing');clearTimeout(closeModal.t);closeModal.t=setTimeout(()=>m.classList.remove('closing'),200);
+}
+function show(id,o={}){
+  Trans.go(id,o,()=>{
+    $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+    if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
+    Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
+    refreshHUD();
+  });
+}
+/* enter a level through the iris, growing from the button or map node that was tapped */
+function playLevel(n,opts={},from){
+  const type=opts.daily?dailyCfg().type:typeFor(n);
+  Trans.iris({from,color:INFO[type].col},()=>startLevel(n,opts));
+}
+/* leave the level: the iris closes from the back button and reopens on the level's map node (or the Play button) */
+function playExit(to='map',from){
+  const n=cur&&cur.level,col=cur?INFO[cur.type].col:'#7c6bff';
+  Trans.iris({from:from||$('#backBtn'),color:col,to:()=>to==='map'?$(`.node[data-n="${n}"]`)||$('.node.cur'):$('#playBtn')},()=>{closeModal();exitLevel();show(to)});
 }
 function refreshCoins(){$$('.coinval').forEach(e=>e.textContent=S.coins)}
 function refreshHUD(){
@@ -212,7 +231,7 @@ function refreshHUD(){
   $('#skipBadge').innerHTML=S.skips>0?S.skips:`<i class="coin" style="width:11px;height:11px"></i>${SKIP_COST}`;
 }
 /* ====================== wiring ====================== */
-$('#playBtn').onclick=()=>{sfx.good();startLevel(S.unlocked)};
+$('#playBtn').onclick=()=>{sfx.good();playLevel(S.unlocked,{},$('#playBtn'))};
 $('#homeMap').onclick=()=>{sfx.click();show('map')};
 $('#homeShop').onclick=()=>{sfx.click();show('shop')};
 $('#settingsBtn').onclick=()=>{sfx.click();showSettings()};
@@ -222,7 +241,7 @@ $('#tSpin').onclick=()=>{sfx.click();showSpin()};
 $('#tQuests').onclick=()=>{sfx.click();showQuests()};
 $('#tTrophy').onclick=()=>{sfx.click();showTrophies()};
 $$('[data-go]').forEach(b=>b.onclick=()=>{sfx.click();show(b.dataset.go)});
-$('#backBtn').onclick=()=>{sfx.click();const d=cur&&cur.daily;exitLevel();show(d?'home':'map')};
+$('#backBtn').onclick=()=>{sfx.click();if(Trans.busy)return;playExit(cur&&cur.daily?'home':'map')};
 $('#undoBtn').onclick=undo;
 $('#hintBtn').onclick=useHint;
 $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};

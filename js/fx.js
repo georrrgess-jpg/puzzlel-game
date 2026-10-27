@@ -220,3 +220,60 @@ const BG=(()=>{
   addEventListener('deviceorientation',e=>{if(e.gamma!=null){tx=clamp(e.gamma/45,-.5,.5);ty=clamp((e.beta-40)/45,-.5,.5)}},{passive:true});
   return{start(){init();wake()},retheme,wake,setCalm(v){calmT=v;wake()}};
 })();
+
+/* ====================== screen transitions ======================
+   Trans.go(id,o,apply): apply() switches screens (toggles .active and renders). Between menus the old screen slides out
+   while the new one slides in (back = reverse). Trans.iris(o,work): a circle in o.color grows from o.from and covers the
+   screen, work() runs underneath (start or leave a level), then the new screen is revealed by a circle growing from o.to
+   (an element, a point, or a function returning one, read after layout). Reduced motion / battery saver: plain swap.
+   The newest call always wins, the overlay blocks taps while it is up, and a safety timer always clears it. */
+const Trans=(()=>{
+  const DEPTH={home:0,map:1,shop:1,play:2};
+  let tok=0,anims=[],safety=0,covering=false;
+  const iris=el('div','iris');document.body.appendChild(iris);
+  const cheap=()=>REDUCED||Q.tier==='low';
+  const ptOf=e=>{if(typeof e==='function')e=e();if(Array.isArray(e))return e;if(e&&e.getBoundingClientRect){const r=e.getBoundingClientRect();if(r.width&&r.bottom>0&&r.top<innerHeight)return[r.left+r.width/2,r.top+r.height/2]}return[innerWidth/2,innerHeight/2]};
+  const reach=([x,y])=>Math.ceil(Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y)))+2;
+  function stop(){
+    anims.forEach(a=>{try{a.cancel()}catch(_){}});anims=[];clearTimeout(safety);covering=false;
+    iris.classList.remove('on');iris.style.cssText='';
+    // the active screen keeps its in-* class: removing it would restart the screen's default entrance animation (a blink)
+    $$('.screen').forEach(s=>{s.classList.remove('leaving');if(!s.classList.contains('active'))s.classList.remove('in-fwd','in-back','in-iris','in-fade');s.style.clipPath='';s.style.zIndex=''});
+  }
+  const enter=(scr,cls)=>{scr.classList.remove('in-fwd','in-back','in-iris','in-fade');void scr.offsetWidth;scr.classList.add(cls)};
+  const arm=my=>{clearTimeout(safety);safety=setTimeout(()=>{if(my===tok)stop()},2400)};
+  function go(id,o,apply){
+    const from=$('.screen.active');
+    if(covering){apply();return}                          // inside an iris: just swap underneath it
+    const my=++tok;stop();
+    if(!from||from.id===id){apply();return}
+    if(cheap()||id==='play'||from.id==='play'){apply();if(!REDUCED)enter($('#'+id),'in-fade');return}
+    arm(my);
+    const back=o.back!=null?o.back:DEPTH[id]<DEPTH[from.id];
+    from.classList.add('leaving');apply();enter($('#'+id),back?'in-back':'in-fwd');
+    const a=from.animate([{opacity:1,transform:'none'},{opacity:0,transform:`translateX(${back?7:-7}%) scale(.985)`}],{duration:170,easing:'cubic-bezier(.4,0,.7,.4)',fill:'forwards'});
+    anims.push(a);a.onfinish=()=>{if(my===tok)stop()};
+  }
+  function irisGo(o,work){
+    const my=++tok;stop();
+    if(cheap()){work();return}
+    arm(my);
+    const p=ptOf(o.from),r=reach(p);
+    iris.style.cssText=`left:${p[0]-r}px;top:${p[1]-r}px;width:${2*r}px;height:${2*r}px;--ic:${o.color||'#7c6bff'}`;iris.classList.add('on');
+    const c=iris.animate([{transform:'scale(.02)'},{transform:'scale(1)'}],{duration:280,easing:'cubic-bezier(.6,0,.8,.3)',fill:'forwards'});anims.push(c);
+    c.onfinish=()=>{
+      if(my!==tok)return;
+      covering=true;try{work()}finally{covering=false}
+      // wait two frames so the new screen has laid out (and the map has scrolled to its node) before measuring o.to
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(my!==tok)return;
+        const to=$('.screen.active');if(!to){stop();return}
+        const q=ptOf(o.to),R=reach(q),at=`at ${q[0].toFixed(1)}px ${q[1].toFixed(1)}px`;
+        enter(to,'in-iris');to.style.zIndex=59;to.style.clipPath=`circle(0px ${at})`;
+        const v=to.animate([{clipPath:`circle(0px ${at})`},{clipPath:`circle(${R}px ${at})`}],{duration:420,easing:'cubic-bezier(.2,.7,.3,1)',fill:'forwards'});anims.push(v);
+        v.onfinish=()=>{if(my===tok)stop()};
+      }));
+    };
+  }
+  return{go,iris:irisGo,get busy(){return iris.classList.contains('on')},stop};
+})();

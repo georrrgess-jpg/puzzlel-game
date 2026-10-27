@@ -38,40 +38,90 @@ function tickHome(){
 let mapCount=48;
 const PADLOCK='<svg class="pad" viewBox="0 0 24 28"><path d="M6 12V8a6 6 0 0 1 12 0v4" fill="none" stroke="#cfd3e6" stroke-width="3.2" stroke-linecap="round"/><rect x="2.5" y="11" width="19" height="15" rx="4" fill="#f2c94c" stroke="#8a6200" stroke-width="1.4"/><rect x="2.5" y="11" width="19" height="5" rx="3" fill="#ffffff55"/><circle cx="12" cy="18.5" r="2.3" fill="#6b4a00"/><rect x="11" y="19" width="2" height="4.2" rx="1" fill="#6b4a00"/></svg>';
 const WCOL=['#5b6cff','#22b8c9','#e45bc4','#2ecc8f','#8b5cf6','#ff7a45','#3a86ff','#d9a21b','#14b8a6','#7b61ff','#ff5d73','#a855f7'];
+/* set by onWin on the first clear of the newest level; the next map visit celebrates it (not saved: a reload just skips it) */
+let pendingUnlock=null;
 function renderMap(more){
+  const pu=pendingUnlock&&pendingUnlock.n<S.unlocked?pendingUnlock:null;pendingUnlock=null;
+  const lim=pu?pu.n:S.unlocked;   // during the unlock sequence the map is first drawn as it was before the win
   const g=$('#mapgrid');g.innerHTML='';
   const count=Math.ceil(Math.max(mapCount,S.unlocked+13)/12)*12;
   for(let c=0;c*12<count;c++){
-    const lv=[...Array(12)].map((_,k)=>c*12+k+1),cs=lv.reduce((a,n)=>a+(S.stars[n]||0),0),open=lv[0]<=S.unlocked,done=lv[11]<S.unlocked;
+    const lv=[...Array(12)].map((_,k)=>c*12+k+1),cs=lv.reduce((a,n)=>a+(pu&&n===pu.n?0:S.stars[n]||0),0),open=lv[0]<=lim,done=lv[11]<lim;
     const ch=el('div','chapter'+(open?'':' locked')+(done?' done':''));ch.style.setProperty('--wc',WCOL[c%WCOL.length]);
     ch.innerHTML=`<h3 class="wbanner"><span class="wnum">${open?c+1:PADLOCK}</span><span class="wtx"><small>World ${c+1} · Levels ${lv[0]}–${lv[11]}</small><b>${worldName(c)}</b></span><span class="wprog"><span><svg viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg>${cs}/36</span><span class="bar"><span style="width:${Math.round(cs/36*100)}%"></span></span></span></h3>`;
     const grid=el('div','mapgrid');
-    for(let r=0;r<3;r++){const row=lv.slice(r*4,r*4+4);if(r%2)row.reverse();row.forEach(n=>grid.appendChild(mapNode(n)))}
+    for(let r=0;r<3;r++){const row=lv.slice(r*4,r*4+4);if(r%2)row.reverse();row.forEach(n=>grid.appendChild(mapNode(n,lim,pu&&n===pu.n)))}
     ch.appendChild(grid);g.appendChild(ch);
   }
   const mb=el('button','btn sec sm more','Show more worlds ⬇️');mb.onclick=()=>{sfx.click();mapCount+=36;renderMap(true)};g.appendChild(mb);
-  requestAnimationFrame(()=>{drawPaths();if(!more){const c=$('.node.cur');if(c)c.scrollIntoView({block:'center'})}});
+  requestAnimationFrame(()=>{drawPaths(lim);if(!more){const c=pu?$(`.node[data-n="${pu.n}"]`):$('.node.cur');if(c)c.scrollIntoView({block:'center'})}});
+  if(pu)setTimeout(()=>playUnlock(pu),REDUCED?0:780);
 }
-function mapNode(n){
-  const st=S.stars[n]||0,locked=n>S.unlocked,ty=typeFor(n),cur=n===S.unlocked;
+/* lim: highest unlocked level to draw; bare: draw the node without its stars (they stamp in during playUnlock) */
+function mapNode(n,lim=S.unlocked,bare=false){
+  const st=bare?0:S.stars[n]||0,locked=n>lim,ty=typeFor(n),cur=n===lim;
   const b=el('button','node'+(cur?' cur':'')+(isBonus(n)?' bonus':'')+(st===3?' perfect':''));
   b.style.setProperty('--tc',INFO[ty].col);b.dataset.n=n;b.disabled=locked;b.style.animationDelay=((n-1)%12)*30+'ms';
   b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${cur&&((n-1)%12)<4?'<span class="pin">▼</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
-  b.onclick=()=>{sfx.click();startLevel(n)};
+  b.onclick=()=>{sfx.click();playLevel(n,{},b)};
   return b;
 }
-function drawPaths(){
+/* the path between two node centres (grid-local px): straight on a row, an S-curve round the end of a row */
+const mapSeg=(a,b,W)=>{const o=a[0]>W/2?62:-62;return Math.abs(a[1]-b[1])<2?`M${a[0]},${a[1]}L${b[0]},${b[1]}`:`M${a[0]},${a[1]}C${a[0]+o},${a[1]} ${b[0]+o},${b[1]} ${b[0]},${b[1]}`};
+const nodePt=(grid,nd)=>{const gr=grid.getBoundingClientRect(),k=gr.width/grid.offsetWidth||1,r=nd.getBoundingClientRect();return[(r.left-gr.left+r.width/2)/k,(r.top-gr.top+r.height/2)/k,+nd.dataset.n]};
+function drawPaths(lim=S.unlocked){
   $$('#mapgrid .mapgrid').forEach(grid=>{
-    const gr=grid.getBoundingClientRect(),k=gr.width/grid.offsetWidth||1,W=grid.offsetWidth;
-    const pts=[...grid.querySelectorAll('.node')].sort((a,b)=>a.dataset.n-b.dataset.n).map(nd=>{const r=nd.getBoundingClientRect();return[(r.left-gr.left+r.width/2)/k,(r.top-gr.top+r.height/2)/k,+nd.dataset.n]});
+    const W=grid.offsetWidth;
+    const pts=[...grid.querySelectorAll('.node')].sort((a,b)=>a.dataset.n-b.dataset.n).map(nd=>nodePt(grid,nd));
     let lit='',dim='';
-    for(let i=1;i<pts.length;i++){
-      const a=pts[i-1],b=pts[i],o=a[0]>W/2?62:-62;
-      const seg=Math.abs(a[1]-b[1])<2?`M${a[0]},${a[1]}L${b[0]},${b[1]}`:`M${a[0]},${a[1]}C${a[0]+o},${a[1]} ${b[0]+o},${b[1]} ${b[0]},${b[1]}`;
-      if(b[2]<=S.unlocked)lit+=seg;else dim+=seg;
-    }
+    for(let i=1;i<pts.length;i++){const seg=mapSeg(pts[i-1],pts[i],W);if(pts[i][2]<=lim)lit+=seg;else dim+=seg}
     grid.insertAdjacentHTML('afterbegin',`<svg class="path" width="${W}" height="${grid.offsetHeight}"><path class="road" d="${dim}${lit}"/><path class="dim" d="${dim}"/><path class="glow" d="${lit}"/><path class="lit" d="${lit}"/><path class="spark" d="${lit}"/></svg>`);
   });
+}
+/* First clear of the newest level, seen on the map: its stars stamp in, the path to the next level draws itself, the
+   padlock shakes and bursts, and the next node pops open as the new current level. A tap anywhere skips to the end. */
+function playUnlock(pu){
+  const map=$('#map');if(!map.classList.contains('active'))return;
+  const n=pu.n,nd=$(`.node[data-n="${n}"]`);if(!nd){renderMap(true);return}
+  let over=false;const timers=[];
+  const at=(ms,f)=>timers.push(setTimeout(()=>{if(!over&&map.classList.contains('active'))f()},ms));
+  const finish=()=>{if(over)return;over=true;timers.forEach(clearTimeout);map.removeEventListener('pointerdown',finish,true);if(map.classList.contains('active'))renderMap(true)};
+  if(REDUCED){finish();return}
+  map.addEventListener('pointerdown',finish,true);
+  const ctr=e=>{const r=e.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+  // 1. stars stamp in
+  const svs=nd.querySelectorAll('.st svg');
+  for(let i=0;i<pu.stars;i++)at(i*240,()=>{const v=svs[i];if(!v)return;v.classList.add('on');
+    wa(v,[{transform:`${i===1?'translateY(5px) ':''}scale(2.6) rotate(-35deg)`,opacity:0},{transform:`${i===1?'translateY(5px) ':''}scale(1.15)`,opacity:1,offset:.7},{transform:`${i===1?'translateY(5px) ':''}scale(${i===1?1.15:1})`}],{duration:360,easing:'cubic-bezier(.3,1.4,.5,1)'});
+    sfx.star(i);const[x,y]=ctr(v);burst(x,y,'#ffd23f',8,.55)});
+  let t=pu.stars*240+260;
+  const nx=$(`.node[data-n="${n+1}"]`),grid=nd.parentElement,same=nx&&nx.parentElement===grid;
+  // 2. the path to the next level draws itself
+  if(same)at(t,()=>{
+    const svg=grid.querySelector('svg.path');if(!svg)return;
+    const d=mapSeg(nodePt(grid,nd),nodePt(grid,nx),grid.offsetWidth),NS='http://www.w3.org/2000/svg';
+    for(const cls of['glow','lit']){const p=document.createElementNS(NS,'path');p.setAttribute('class',cls);p.setAttribute('d',d);svg.appendChild(p);
+      const L=p.getTotalLength();p.style.strokeDasharray=L;wa(p,[{strokeDashoffset:L},{strokeDashoffset:0}],{duration:520,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'})}
+    sfx.swish();
+  });
+  if(same)t+=560;
+  // 3. padlock shakes, then bursts; the node pops open as the new current level
+  if(nx){
+    at(t,()=>wa(nx,[{transform:'rotate(0)'},{transform:'rotate(-12deg)'},{transform:'rotate(10deg)'},{transform:'rotate(-7deg)'},{transform:'rotate(4deg)'},{transform:'rotate(0)'}],{duration:420,easing:'ease-in-out'}));
+    at(t+440,()=>{
+      const[x,y]=ctr(nx),pad=nx.querySelector('.pad');
+      if(pad){const fly=pad.cloneNode(true);fly.classList.add('padfly');fly.style.left=x-12+'px';fly.style.top=y-18+'px';document.body.appendChild(fly);
+        const a=wa(fly,[{transform:'none',opacity:1},{transform:'translate(18px,-46px) rotate(38deg) scale(1.2)',opacity:1,offset:.45},{transform:'translate(34px,30px) rotate(110deg) scale(.7)',opacity:0}],{duration:700,easing:'cubic-bezier(.3,.6,.6,1)'});
+        if(a)a.onfinish=()=>fly.remove();else fly.remove()}
+      burst(x,y,'#f2c94c',16,.9);ring(x,y,'#fff',120,520);sfx.chest();buzz([15,30,20]);
+      const fresh=mapNode(n+1),prev=mapNode(n);nx.replaceWith(fresh);nd.replaceWith(prev);
+      fresh.style.animation='none';prev.style.animation='none';
+      wa(fresh,[{transform:'scale(.3)',opacity:.4},{transform:'scale(1.22)',opacity:1,offset:.55},{transform:'scale(.94)',offset:.8},{transform:'none'}],{duration:560,easing:'cubic-bezier(.3,1.4,.5,1)'});
+      setTimeout(()=>{fresh.style.animation='';prev.style.animation=''},600);
+      if(!same){finish();const f=$(`.node[data-n="${n+1}"]`);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
+      else{over=true;map.removeEventListener('pointerdown',finish,true);timers.forEach(clearTimeout)}
+    });
+  }else at(t,finish);
 }
 const DEALS=[{ic:'💡',name:'Hint ×5',give:()=>S.hints+=5,was:ECON.hint.cost*5},{ic:'⏭️',name:'Skip ×2',give:()=>S.skips+=2,was:ECON.skip.token*2},{ic:'💡',name:'Hint ×10',give:()=>S.hints+=10,was:ECON.hint.p10},{ic:'🎁',name:'Hint ×3 + Skip',give:()=>{S.hints+=3;S.skips+=1},was:ECON.hint.p3+ECON.skip.token}];
 const RARITY=c=>c>=500?['legend','Legendary']:c>=350?['epic','Epic']:c>=200?['rare','Rare']:['common','Classic'];

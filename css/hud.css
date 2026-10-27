@@ -412,3 +412,8 @@
 .seg3 button{flex:1;padding:9px 4px;border-radius:12px;font-size:13px;font-weight:600;color:var(--dim);white-space:nowrap}
 .seg3 button.on{background:linear-gradient(180deg,#fff3b8 -30%,var(--acc) 40%,color-mix(in srgb,var(--acc) 70%,#ff8a00));color:#2a1a00;box-shadow:0 2px 0 color-mix(in srgb,var(--acc) 55%,#5a3500)}
 .gfxset small{display:block}
+/* popup exit (closeModal adds .closing for 200 ms after the game state has already moved on) */
+#modal.closing{display:flex;pointer-events:none;animation:mFadeOut .2s ease-in forwards}
+#modal.closing .card{animation:mCardOut .2s cubic-bezier(.5,0,.75,0) forwards}
+@keyframes mFadeOut{to{opacity:0}}
+@keyframes mCardOut{to{opacity:0;transform:translateY(10px) scale(.92)}}
