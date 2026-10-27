@@ -93,6 +93,15 @@ const ACH=[
   {id:'th4',ic:'🖼️',name:'Collector',desc:'Own 4 colour themes',t:()=>S.owned.length>=4,r:60},
   {id:'pl10',ic:'🏅',name:'Rising Star',desc:'Reach player level 10',t:()=>S.plv>=10,r:90}
 ];
+/* [current, target] for every trophy, shown as a progress bar while it is locked */
+const ACH_PROG={
+  w1:()=>[st().wins,1],w10:()=>[st().wins,10],w50:()=>[st().wins,50],w100:()=>[st().wins,100],w250:()=>[st().wins,250],
+  s25:()=>[totalStars(),25],s100:()=>[totalStars(),100],s300:()=>[totalStars(),300],
+  p10:()=>[st().perfect,10],p50:()=>[st().perfect,50],k5:()=>[st().bestStreak,5],k12:()=>[st().bestStreak,12],
+  all:()=>[TYPES.filter(x=>st().types[x]).length,TYPES.length],spec:()=>[Math.max(0,...Object.values(st().types)),15],
+  c6:()=>[st().maxCombo,6],c12:()=>[st().maxCombo,12],d1:()=>[st().daily,1],d7:()=>[st().daily,7],l7:()=>[st().bestLogin,7],
+  sp5:()=>[st().spins,5],nh20:()=>[st().nohint,20],q10:()=>[st().quests,10],th:()=>[S.owned.length-1,1],th4:()=>[S.owned.length,4],pl10:()=>[S.plv,10]
+};
 function checkAch(){
   let n=0,sum=0;
   for(const a of ACH){if(S.ach[a.id]||!a.t())continue;S.ach[a.id]=Date.now();S.coins+=a.r;sum+=a.r;if(n++<3)banner(a.ic,'TROPHY UNLOCKED',a.name,`${a.desc} · +${a.r} coins`)}
@@ -102,7 +111,7 @@ const achCount=()=>ACH.filter(a=>S.ach[a.id]).length;
 function showTrophies(){
   const n=achCount();
   openModal(`<h2>Trophies</h2><div class="achprog"><div class="bar"><div style="width:${n/ACH.length*100}%"></div></div><span><b>${n}</b> / ${ACH.length}</span></div><div class="achgrid">${ACH.map((a,i)=>{const got=S.ach[a.id],tier=a.r>=150?'gold':a.r>=60?'silver':'bronze';
-    return`<div class="ach ${got?'got':''} ${tier}" style="--i:${i}"><div class="am"><i>${a.ic}</i>${got?'':'<em>🔒</em>'}</div><b>${a.name}</b><small>${a.desc}</small><span class="rc"><i class="coin"></i>${a.r}</span></div>`}).join('')}</div>`,
+    return`<div class="ach ${got?'got':''} ${tier}" style="--i:${i}"><div class="am"><i>${a.ic}</i>${got?'':'<em>🔒</em>'}</div><b>${a.name}</b><small>${a.desc}</small>${got||!ACH_PROG[a.id]?'':(([v,n])=>`<div class="apw"><div class="apb"><i style="width:${Math.min(1,v/n)*100}%"></i></div><em>${Math.min(v,n)}/${n}</em></div>`)(ACH_PROG[a.id]())}<span class="rc"><i class="coin"></i>${a.r}</span></div>`}).join('')}</div>`,
     [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,icon:'🏆',cls:'trophies',dismiss:()=>{closeModal();renderHome()}});
 }
 function showProfile(){
@@ -110,8 +119,8 @@ function showProfile(){
   const sd=(ic,v,l)=>`<div><i>${ic}</i><b>${v}</b><small>${l}</small></div>`;
   openModal(`<div class="kicker">Player level ${S.plv}</div><h2>${rankOf(S.plv)}</h2>
     <div class="xpline prof"><div class="bar"><div style="width:${S.xp/xpNeed(S.plv)*100}%"></div></div><span class="xpg">${S.xp} / ${xpNeed(S.plv)} XP</span></div>
-    <div class="stats">${sd('🧩',s.wins,'Levels cleared')}${sd('⭐',totalStars(),'Stars')}${sd('✨',s.perfect,'Perfect clears')}${sd('🔥',s.bestStreak,'Best 3★ streak')}
-    ${sd('⚡','×'+s.maxCombo,'Best combo')}${sd('📅',s.daily,'Daily challenges')}${sd('🏆',achCount()+'/'+ACH.length,'Trophies')}${sd('🎁',S.login.streak,'Login streak')}</div>
+    <div class="stats">${sd('🧩',s.wins,'Levels cleared')}${sd('⭐',totalStars(),'Stars')}${sd('✨',s.perfect,'Perfect clears')}${sd('🔥',s.bestStreak,'Best streak')}
+    ${sd('⚡','×'+s.maxCombo,'Best combo')}${sd('📅',s.daily,'Dailies')}${sd('🏆',achCount()+'/'+ACH.length,'Trophies')}${sd('🎁',S.login.streak,'Login streak')}</div>
     <p class="nextrank">Next rank: <b>${RANKS[Math.min(RANKS.length-1,Math.floor((S.plv-1)/3)+1)]}</b> at level ${(Math.floor((S.plv-1)/3)+1)*3+1}</p>`,
     [{label:'Close',cls:'sec',fn:closeModal}],{icon:`<b class="plv">${S.plv}</b>`,cls:'profcard',dismiss:closeModal});
 }
@@ -188,10 +197,10 @@ function showSettings(){
   const sw=(k,ic,label,sub)=>`<div class="set"><span class="si">${ic}</span><b>${label}${sub?`<small>${sub}</small>`:''}</b><button class="sw ${S[k]?'on':''}" data-k="${k}" aria-label="${label}"></button></div>`;
   const rg=(k,label)=>`<div class="set rng"><span class="si"></span><b>${label}</b><input type="range" min="0" max="1" step=".05" value="${S[k]}" data-v="${k}" style="--p:${S[k]*100}%"></div>`;
   openModal(`<h2>Settings</h2>
-    <div class="sgroup"><div class="sgh">Sound</div>${sw('music','🎵','Music','Relaxing generative soundtrack')}${rg('musVol','Volume')}${sw('sfx','🔊','Sound effects')}${rg('sfxVol','Volume')}</div>
-    <div class="sgroup"><div class="sgh">Gameplay</div>${sw('haptics','📳','Vibration')}${sw('symbols','🔣','Colour symbols','Shapes on colours, helps colour-blind players')}</div>
-    <div class="sgroup"><div class="sgh">Graphics</div><div class="set gfxset"><span class="si">✨</span><b>Quality<small id="gfxNote"></small></b></div><div class="seg3" id="gfxSeg">${[['auto','Auto'],['high','High'],['med','Medium'],['low','Battery saver']].map(([v,l])=>`<button data-g="${v}" class="${(S.gfx||'auto')===v?'on':''}">${l}</button>`).join('')}</div></div>
-    <div class="sgroup danger"><div class="sgh">Danger zone</div><div class="set"><span class="si">🗑️</span><b>Reset progress<small>Erases all levels, coins and trophies</small></b><button class="btn sm sec" id="resetBtn">Reset</button></div></div>`,
+    <details class="sgroup" open><summary class="sgh">Sound</summary>${sw('music','🎵','Music','Relaxing generative soundtrack')}${rg('musVol','Volume')}${sw('sfx','🔊','Sound effects')}${rg('sfxVol','Volume')}</details>
+    <details class="sgroup"><summary class="sgh">Gameplay</summary>${sw('haptics','📳','Vibration')}${sw('symbols','🔣','Colour symbols','Shapes on colours, helps colour-blind players')}</details>
+    <details class="sgroup"><summary class="sgh">Graphics</summary><div class="set gfxset"><span class="si">✨</span><b>Quality<small id="gfxNote"></small></b></div><div class="seg3" id="gfxSeg">${[['auto','Auto'],['high','High'],['med','Medium'],['low','Battery saver']].map(([v,l])=>`<button data-g="${v}" class="${(S.gfx||'auto')===v?'on':''}">${l}</button>`).join('')}</div></details>
+    <details class="sgroup danger"><summary class="sgh">Danger zone</summary><div class="set"><span class="si">🗑️</span><b>Reset progress<small>Erases all levels, coins and trophies</small></b><button class="btn sm sec" id="resetBtn">Reset</button></div></details>`,
     [{label:'Done',fn:()=>{closeModal();refreshHUD()}}],{icon:'⚙️',cls:'settings',dismiss:()=>{closeModal();refreshHUD()}});
   const gfxNote=()=>{$('#gfxNote').textContent=(S.gfx||'auto')==='auto'?`Auto picked: ${{high:'High',med:'Medium',low:'Battery saver'}[Q.tier]}`:'Smoother on older phones if you lower it'};gfxNote();
   $$('#gfxSeg button').forEach(b=>b.onclick=()=>{S.gfx=b.dataset.g;save();Q.apply();$$('#gfxSeg button').forEach(x=>x.classList.toggle('on',x===b));gfxNote();sfx.click()});

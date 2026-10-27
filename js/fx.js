@@ -89,6 +89,15 @@ function flyCoins(fromEl,n=8){
     a.onfinish=()=>{c.remove();sfx.coin();refreshCoins();target.parentElement.animate([{transform:'scale(1.25)'},{transform:'scale(1)'}],{duration:220});if(i===n-1&&!REDUCED){const[cx,cy]=centerOf(target);burst(cx,cy,'#ffd166',6,.5)}};
   }
 }
+/* the reverse: coins leave the balance chip and land on the thing you just bought */
+function flyCoinsTo(fromEl,toEl,n=5){
+  const[x0,y0]=centerOf(fromEl),[x1,y1]=centerOf(toEl);
+  for(let i=0;i<n;i++){
+    const c=el('i','coin flycoin');c.style.left=x0-12+'px';c.style.top=y0-12+'px';document.body.appendChild(c);
+    const a=c.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${(x1-x0)*.5+(Math.random()-.5)*60}px,${(y1-y0)*.5-30-Math.random()*30}px) scale(1.1)`,opacity:1,offset:.5},{transform:`translate(${x1-x0}px,${y1-y0}px) scale(.5)`,opacity:.2}],{duration:520+i*40,delay:i*45,easing:'cubic-bezier(.45,0,.6,1)',fill:'both'});
+    a.onfinish=()=>c.remove();
+  }
+}
 /* coloured droplets arcing from one element to another (tube pours) */
 function flyDrops(fromEl,toEl,color,n=6){
   const a=fromEl.getBoundingClientRect(),b=toEl.getBoundingClientRect();
@@ -98,7 +107,12 @@ function flyDrops(fromEl,toEl,color,n=6){
     d.animate([{transform:'translate(0,0) scale(.6)'},{transform:`translate(${mx-x0}px,${my-y0}px) scale(1)`,offset:.45},{transform:`translate(${x1-x0}px,${y1-y0}px) scale(.5)`}],{duration:380,delay:i*35,easing:'cubic-bezier(.4,0,.6,1)',fill:'backwards'}).onfinish=()=>d.remove();
   }
 }
-function toast(msg){const t=$('#toast');t.innerHTML=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1900)}
+/* in a level the toast sits just above the toolbar (it used to cover the coach pill at the top) */
+function toast(msg){
+  const t=$('#toast');t.innerHTML=msg;t.style.top='';
+  if($('#play').classList.contains('active')){const tb=$('#play .toolbar').getBoundingClientRect();if(tb.height)t.style.top=Math.max(80,tb.top-t.offsetHeight-12)+'px'}
+  t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1900);
+}
 /* stacked slide-in banners (achievements, quest done, level up) */
 function banner(icon,kicker,title,sub){
   const b=el('div','banner',`<i>${icon}</i><div><small>${kicker}</small><b>${title}</b>${sub?`<em>${sub}</em>`:''}</div>`);

@@ -273,6 +273,7 @@ function closeModal(){
 }
 function show(id,o={}){
   Trans.go(id,o,()=>{
+    if($('#map').classList.contains('active'))mapTop=$('#mapwrap').scrollTop;   // a hidden screen forgets its scroll: remember it for the next visit
     $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
     if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);

@@ -6,7 +6,8 @@ function buildLogo(){
 }
 function renderHome(){
   const stars=totalStars(),m=S.milestone,prevT=m?msThreshold(m-1):0,t=msThreshold(m),pct=clamp((stars-prevT)/(t-prevT)*100,4,100);
-  $('#garden').innerHTML=S.deco.map(id=>{const d=ECON.deco.find(x=>x.id===id);return d?`<i title="${d.name}" style="--k:${(hashSeed(id.length*7+id.charCodeAt(0),3)%100)/100}">${d.ic}</i>`:''}).join('');
+  /* the garden: your decorations on a bed of soil (tall phones show the bed even when it is empty, as a nudge towards the shop) */
+  $('#garden').innerHTML=S.deco.map(id=>{const d=ECON.deco.find(x=>x.id===id);return d?`<i title="${d.name}" style="--k:${(hashSeed(id.length*7+id.charCodeAt(0),3)%100)/100}">${d.ic}</i>`:''}).join('')||'<em class="gempty">🌱 Your garden grows with Shop decorations</em>';
   $('#homeStars').textContent=stars;
   $('#homeBar').style.width=pct+'%';
   $('#homeNext').textContent=`🎁 chest at ${t} ⭐`;
@@ -35,29 +36,50 @@ function tickHome(){
   setTxt('#spinSub',sr?'Free spin!':fmtTime(S.spinAt-Date.now()));
   if(dd+'|'+sr!==renderHome._k)renderHome();   // a state flipped (spin ready, daily reset): full refresh
 }
-let mapCount=48;
+let mapCount=48,mapSig='',mapTop=0;
 const PADLOCK='<svg class="pad" viewBox="0 0 24 28"><path d="M6 12V8a6 6 0 0 1 12 0v4" fill="none" stroke="#cfd3e6" stroke-width="3.2" stroke-linecap="round"/><rect x="2.5" y="11" width="19" height="15" rx="4" fill="#f2c94c" stroke="#8a6200" stroke-width="1.4"/><rect x="2.5" y="11" width="19" height="5" rx="3" fill="#ffffff55"/><circle cx="12" cy="18.5" r="2.3" fill="#6b4a00"/><rect x="11" y="19" width="2" height="4.2" rx="1" fill="#6b4a00"/></svg>';
 const WCOL=['#5b6cff','#22b8c9','#e45bc4','#2ecc8f','#8b5cf6','#ff7a45','#3a86ff','#d9a21b','#14b8a6','#7b61ff','#ff5d73','#a855f7'];
+const starSig=()=>{let h=0;for(const k in S.stars)h=(h*31+(+k)*4+S.stars[k])|0;return h};
 /* set by onWin on the first clear of the newest level; the next map visit celebrates it (not saved: a reload just skips it) */
 let pendingUnlock=null;
 function renderMap(more){
   const pu=pendingUnlock&&pendingUnlock.n<S.unlocked?pendingUnlock:null;pendingUnlock=null;
-  const lim=pu?pu.n:S.unlocked;   // during the unlock sequence the map is first drawn as it was before the win
-  const g=$('#mapgrid');g.innerHTML='';
+  const lim=pu?pu.n:S.unlocked,g=$('#mapgrid'),wrap=$('#mapwrap'),sig=lim+'|'+mapCount+'|'+starSig();
+  /* nothing changed since the last visit: keep the DOM (the map is the heaviest screen) and the scroll position */
+  if(!pu&&!more&&g.children.length&&mapSig===sig){requestAnimationFrame(()=>{wrap.scrollTop=mapTop;watchCur()});return}
+  mapSig=pu?'':sig;
+  g.innerHTML='';
   const count=Math.ceil(Math.max(mapCount,S.unlocked+13)/12)*12;
   for(let c=0;c*12<count;c++){
     const lv=[...Array(12)].map((_,k)=>c*12+k+1),cs=lv.reduce((a,n)=>a+(pu&&n===pu.n?0:S.stars[n]||0),0),open=lv[0]<=lim,done=lv[11]<lim;
     const ch=el('div','chapter'+(open?'':' locked')+(done?' done':''));ch.style.setProperty('--wc',WCOL[c%WCOL.length]);
-    ch.innerHTML=`<h3 class="wbanner"><span class="wnum">${open?c+1:PADLOCK}</span><span class="wtx"><small>World ${c+1} · Levels ${lv[0]}–${lv[11]}</small><b>${worldName(c)}</b></span><span class="wprog"><span><svg viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg>${cs}/36</span><span class="bar"><span style="width:${Math.round(cs/36*100)}%"></span></span></span></h3>`;
-    const grid=el('div','mapgrid');
-    for(let r=0;r<3;r++){const row=lv.slice(r*4,r*4+4);if(r%2)row.reverse();row.forEach(n=>grid.appendChild(mapNode(n,lim,pu&&n===pu.n)))}
-    ch.appendChild(grid);g.appendChild(ch);
+    ch.innerHTML=`<h3 class="wbanner"><span class="wnum">${open?c+1:PADLOCK}</span><span class="wtx"><small>World ${c+1} · <span class="lw">Levels </span>${lv[0]}–${lv[11]}</small><b>${worldName(c)}</b></span><span class="wprog"><span><svg viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg>${cs}/36</span><span class="bar"><span style="width:${Math.round(cs/36*100)}%"></span></span></span></h3>`;
+    if(open){
+      const grid=el('div','mapgrid');
+      for(let r=0;r<3;r++){const row=lv.slice(r*4,r*4+4);if(r%2)row.reverse();row.forEach(n=>grid.appendChild(mapNode(n,lim,pu&&n===pu.n)))}
+      ch.appendChild(grid);
+    }else ch.appendChild(el('div','lockcard',`<i>${PADLOCK}</i><b>Clear level ${c*12} to unlock</b><small>12 new levels</small>`));   // a locked world is one card, not 12 padlocks
+    g.appendChild(ch);
   }
   const mb=el('button','btn sec sm more','Show more worlds ⬇️');mb.onclick=()=>{sfx.click();mapCount+=36;renderMap(true)};g.appendChild(mb);
-  requestAnimationFrame(()=>{drawPaths(lim);if(!more){const c=pu?$(`.node[data-n="${pu.n}"]`):$('.node.cur');if(c)c.scrollIntoView({block:'center'})}});
+  requestAnimationFrame(()=>{drawPaths(lim);if(!more){const c=pu?$(`.node[data-n="${pu.n}"]`):$('.node.cur');if(c)c.scrollIntoView({block:'center'})}mapTop=wrap.scrollTop;watchCur()});
   if(pu)setTimeout(()=>playUnlock(pu),REDUCED?0:780);
 }
-/* lim: highest unlocked level to draw; bare: draw the node without its stars (they stamp in during playUnlock) */
+/* a floating "▼ Level N" pill when the current level is scrolled out of view; tap it to jump back */
+let curIO=null;
+function watchCur(){
+  const pill=$('#curPill'),node=$('.node.cur');
+  if(curIO){curIO.disconnect();curIO=null}
+  pill.classList.remove('on');
+  if(!node||!window.IntersectionObserver)return;
+  curIO=new IntersectionObserver(es=>{
+    const e=es[es.length-1];if(!e)return;
+    const above=e.boundingClientRect.top<(e.rootBounds?e.rootBounds.top:0);
+    pill.firstElementChild.textContent=`${above?'▲':'▼'} Level ${S.unlocked}`;pill.classList.toggle('on',!e.isIntersecting);
+  },{root:$('#mapwrap'),threshold:.15});
+  curIO.observe(node);
+}
+$('#curPill').onclick=()=>{const n=$('.node.cur');if(n){sfx.click();n.scrollIntoView({block:'center',behavior:'smooth'})}};
 function mapNode(n,lim=S.unlocked,bare=false){
   const st=bare?0:S.stars[n]||0,locked=n>lim,ty=typeFor(n),cur=n===lim;
   const b=el('button','node'+(cur?' cur':'')+(isBonus(n)?' bonus':'')+(st===3?' perfect':''));
@@ -96,6 +118,7 @@ function playUnlock(pu){
     sfx.star(i);const[x,y]=ctr(v);burst(x,y,'#ffd23f',8,.55)});
   let t=pu.stars*240+260;
   const nx=$(`.node[data-n="${n+1}"]`),grid=nd.parentElement,same=nx&&nx.parentElement===grid;
+  const lockCard=!nx&&$('.lockcard');   // the last level of a world: the next world's lock card breaks open instead
   // 2. the path to the next level draws itself
   if(same)at(t,()=>{
     const svg=grid.querySelector('svg.path');if(!svg)return;
@@ -119,8 +142,11 @@ function playUnlock(pu){
       wa(fresh,[{transform:'scale(.3)',opacity:.4},{transform:'scale(1.22)',opacity:1,offset:.55},{transform:'scale(.94)',offset:.8},{transform:'none'}],{duration:560,easing:'cubic-bezier(.3,1.4,.5,1)'});
       setTimeout(()=>{fresh.style.animation='';prev.style.animation=''},600);
       if(!same){finish();const f=$(`.node[data-n="${n+1}"]`);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
-      else{over=true;map.removeEventListener('pointerdown',finish,true);timers.forEach(clearTimeout)}
+      else{over=true;map.removeEventListener('pointerdown',finish,true);timers.forEach(clearTimeout);mapSig=S.unlocked+'|'+mapCount+'|'+starSig();watchCur()}
     });
+  }else if(lockCard){
+    at(t,()=>wa(lockCard,[{transform:'rotate(0)'},{transform:'rotate(-2deg) scale(1.02)'},{transform:'rotate(2deg) scale(1.02)'},{transform:'rotate(-1.5deg)'},{transform:'rotate(0)'}],{duration:420,easing:'ease-in-out'}));
+    at(t+440,()=>{const[x,y]=ctr(lockCard);burst(x,y,'#f2c94c',22,1.1);ring(x,y,'#fff',160,560);sfx.chest();buzz([15,30,20]);finish();const f=$(`.node[data-n="${n+1}"]`);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})});
   }else at(t,finish);
 }
 const DEALS=[{ic:'💡',name:'Hint ×5',give:()=>S.hints+=5,was:ECON.hint.cost*5},{ic:'⏭️',name:'Skip ×2',give:()=>S.skips+=2,was:ECON.skip.token*2},{ic:'💡',name:'Hint ×10',give:()=>S.hints+=10,was:ECON.hint.p10},{ic:'🎁',name:'Hint ×3 + Skip',give:()=>{S.hints+=3;S.skips+=1},was:ECON.hint.p3+ECON.skip.token}];
@@ -129,8 +155,8 @@ function themePreview(t){
   const v=t.v,on=[1,0,1,0,1,1,0,1,0];
   return `<div class="swatch" style="--b1:${v['--bg1']};--b2:${v['--bg2']};--a:${v['--acc']};--a2:${v['--acc2']}">${on.map((o,i)=>`<i class="${o?(i%3?'a':'b'):''}"></i>`).join('')}</div>`;
 }
-function renderShop(){
-  const l=$('#shoplist');l.innerHTML='';
+function renderShop(keep){
+  const l=$('#shoplist'),top=keep?l.scrollTop:0;l.innerHTML='';l.classList.toggle('still',!!keep);   // after a purchase: same scroll position, no pop-in replay
   const head=(ic,txt,extra='')=>l.appendChild(el('h3','shead',`<i>${ic}</i><span>${txt}</span>${extra}`));
   const addItem=(ic,name,desc,cost,fn,cls='',tc='#4d8dff')=>{
     const d=el('div','item '+cls);d.style.animationDelay=l.children.length*40+'ms';d.style.setProperty('--tc',tc);
@@ -138,20 +164,24 @@ function renderShop(){
     const b=el('button','btn sm buy'+(S.coins<cost?' poor':''),`<i class="coin"></i>${cost}`);
     b.onclick=()=>fn(b);d.appendChild(b);l.appendChild(d);
   };
+  const boost=(...a)=>addItem(...a.slice(0,5),'boost'+(a[5]?' '+a[5]:''),a[6]);
   const buy=(cost,give,msg,b)=>{
+    if(performance.now()-(buy.t||-1e9)<600)return false;   // a double tap buys once
     if(S.coins<cost){toast('Not enough coins');sfx.bad();b.parentElement.animate([{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'none'}],{duration:250});return false}
-    S.coins-=cost;give();save();sfx.coin();sfx.chest();toast(msg);const[x,y]=centerOf(b);burst(x,y,'#ffd166',24,1.1);ring(x,y,'#ffd166',110);renderShop();refreshCoins();return true;
+    buy.t=performance.now();
+    const chip=$('#shop .chip .coin');if(chip&&!REDUCED)flyCoinsTo(chip,b,Math.min(8,3+cost/60|0));   // the coins travel from your balance to the item
+    S.coins-=cost;give();save();sfx.coin();sfx.chest();toast(msg);const[x,y]=centerOf(b);burst(x,y,'#ffd166',24,1.1);ring(x,y,'#ffd166',110);renderShop(true);refreshCoins();return true;
   };
   const d=today();if(S.deal.day!==d)S.deal={day:d,bought:false};
   const deal=DEALS[hashSeed(d,9)%DEALS.length],dc=Math.round(deal.was/2);
   head('⚡','Deal of the day',`<em class="timer">⏱ ${fmtTime(untilMidnight())}</em>`);
   if(S.deal.bought){const x=el('div','item claimed','<div class="ic">✅</div><div class="tx"><b>Deal claimed!</b><small>A new deal arrives tomorrow.</small></div>');x.style.setProperty('--tc','#2ecc8f');l.appendChild(x)}
-  else addItem(deal.ic,deal.name,`<s><i class="coin"></i>${deal.was}</s> 50% off today only!`,dc,b=>buy(dc,()=>{deal.give();S.deal.bought=true},'Deal claimed! 🎉',b),'deal','#ff9f43');
+  else addItem(deal.ic,deal.name,`<s><i class="coin"></i>${deal.was}</s> 50% off today`,dc,b=>buy(dc,()=>{deal.give();S.deal.bought=true},'Deal claimed! 🎉',b),'deal','#ff9f43');
   head('🚀','Boosts');
-  addItem('💡','Hint ×3','Highlights a helpful move.',ECON.hint.p3,b=>buy(ECON.hint.p3,()=>S.hints+=3,'+3 hints',b),'','#f5b82e');
-  addItem('💡','Hint ×10','<span class="tag">Best value</span>',ECON.hint.p10,b=>buy(ECON.hint.p10,()=>S.hints+=10,'+10 hints',b),'best','#f5b82e');
-  addItem('⏭️','Skip token','Skip any level without paying later.',ECON.skip.token,b=>buy(ECON.skip.token,()=>S.skips+=1,'+1 skip token',b),'','#4d8dff');
-  addItem('🎟️','Skip ×3',`Save ${ECON.skip.token*3-ECON.skip.p3} coins.`,ECON.skip.p3,b=>buy(ECON.skip.p3,()=>S.skips+=3,'+3 skip tokens',b),'','#9b6bff');
+  boost('💡','Hint ×3','Shows the next move',ECON.hint.p3,b=>buy(ECON.hint.p3,()=>S.hints+=3,'+3 hints',b),'','#f5b82e');
+  boost('💡','Hint ×10','<span class="tag">Best value</span>',ECON.hint.p10,b=>buy(ECON.hint.p10,()=>S.hints+=10,'+10 hints',b),'best','#f5b82e');
+  boost('⏭️','Skip token','Skip any level',ECON.skip.token,b=>buy(ECON.skip.token,()=>S.skips+=1,'+1 skip token',b),'','#4d8dff');
+  boost('🎟️','Skip ×3',`Save ${ECON.skip.token*3-ECON.skip.p3} coins`,ECON.skip.p3,b=>buy(ECON.skip.p3,()=>S.skips+=3,'+3 skip tokens',b),'','#9b6bff');
   head('🎨','Themes','<em>recolour everything</em>');
   for(const k in THEMES){
     const t=THEMES[k],owned=S.owned.includes(k),eq=S.theme===k,[rc,rn]=RARITY(t.cost);
@@ -169,6 +199,7 @@ function renderShop(){
   for(const dc of ECON.deco){
     const owned=S.deco.includes(dc.id);
     if(owned){const x=el('div','item claimed',`<div class="ic">${dc.ic}</div><div class="tx"><b>${dc.name}</b><small>In your garden ✓</small></div>`);x.style.setProperty('--tc','#2ecc8f');x.style.animationDelay=l.children.length*40+'ms';l.appendChild(x);continue}
-    addItem(dc.ic,dc.name,'A little something for your garden.',dc.cost,b=>buy(dc.cost,()=>{S.deco.push(dc.id);checkAch()},`${dc.name} planted! ${dc.ic}`,b),'','#4fb35a');
+    addItem(dc.ic,dc.name,'For your garden',dc.cost,b=>buy(dc.cost,()=>{S.deco.push(dc.id);checkAch()},`${dc.name} planted! ${dc.ic}`,b),'','#4fb35a');
   }
+  if(keep)l.scrollTop=top;
 }

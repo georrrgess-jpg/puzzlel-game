@@ -323,3 +323,20 @@ Notes on how each was fixed, for whoever touches this next:
 - **P8:** the full intro banner is shown the first time a level is played; replays and restarts get a slim 0.9 s chip.
 - **Tools:** `matrix.cjs` now checks the play screens for a truncated or wrapping mode label, colliding HUD text and a cut-off coach text (clean on all 6 devices); `regress.cjs` has 9 more checks (45 in total).
 - The Lights Out `high` frame-rate problem is still open (Phase 6, as planned).
+
+### Phase 4: menus (done)
+- **M1:** on phones ≥ 760 px tall the garden is a strip of soil with a grass line, with decorations at 32 px that sway; with none owned it shows "🌱 Your garden grows with Shop decorations". Shorter phones keep the compact row (hidden when empty). `.homemain` already used `space-evenly`.
+- **M2:** the red "ready" dots pulse twice when home appears, then rest. (The ring around ready tiles was kept.)
+- **M3:** a floating "▼ Level N" (or "▲") pill appears on the map while the current level is out of view (`IntersectionObserver`); tapping scrolls back.
+- **M4:** a locked world is its banner plus one "Clear level N to unlock" card. The unlock sequence handles the world boundary: winning level 12 shakes and bursts the next world's lock card, then opens the world.
+- **M5 (deviation):** instead of patching individual nodes, the map is rebuilt only when its signature (unlocked level, world count, a hash of all stars) changes. An unchanged map keeps its DOM and scroll position, which makes repeat visits free. A changed map is rebuilt (cheap now that locked worlds are single cards) and re-centres on the current level.
+- **M6:** shorter shop copy ("50% off today", "Shows the next move"); at ≤ 340 px the description of Boost items is hidden (the "Best value" tag stays).
+- **M7:** buying no longer replays the pop-in or jumps the scroll (`renderShop(true)`), coins fly from the balance chip to the item (`flyCoinsTo` in `js/fx.js`), and a double tap buys once.
+- **M8:** locked trophies show a progress bar and `v/n` (`ACH_PROG`).
+- **M9:** profile labels "Best streak" and "Dailies".
+- **M10:** settings groups are native `<details>`: Sound open, Gameplay, Graphics and Danger zone closed.
+- **M11:** inside a level, toasts sit just above the toolbar instead of over the coach pill.
+- **Also fixed:** on 320 px the world banner keeps one line ("World 6 · 61–72", the word "Levels" is dropped) and the name has room; the matrix now checks world captions and names.
+- **Bug found by the matrix:** the map pill's hidden slide-down offset created scrollable overflow in the map screen, so `scrollIntoView` nudged the whole screen up by 8 px (back button at y = −2). The offset is now inside the screen.
+- **Perf:** `map` 58.6 fps, `modal` 59.6. `home` measured 44–55 fps on both this commit and the Phase 0 commit at the same time, so the dip is machine noise, not a regression. A/B against the Phase 0 commit when judging a menu change.
+- `tools/regress.cjs` now has 12 more checks (57 in total).

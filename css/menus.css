@@ -240,3 +240,38 @@
 @media (max-height:700px){.garden i{font-size:18px}}
 /* map unlock sequence: the padlock that flies off a newly opened node */
 .padfly{position:fixed;width:24px;height:28px;z-index:64;pointer-events:none}
+
+/* ===================== menus (v4) ===================== */
+/* home: a "ready" red dot pulses twice when the screen appears, then rests */
+.dot{animation:dotpulse .7s ease-in-out 2}
+/* home: the garden is a bed of soil with your decorations in it (tall phones show the bed even when it is empty) */
+.garden .gempty{display:none;font-style:normal}
+@media (min-height:760px){
+  .garden,.garden:empty{display:flex;flex-wrap:nowrap;align-items:flex-end;justify-content:center;gap:0 14px;width:min(100%,340px);max-width:none;min-height:68px;
+    padding:6px 14px 12px;border-radius:22px;position:relative;isolation:isolate;
+    background:linear-gradient(180deg,transparent 0 54%,#7b5433 54%,#5a3b20 78%,#46301b);box-shadow:inset 0 -2px 0 #ffffff12,0 8px 14px -8px #0008}
+  .garden::before{content:'';position:absolute;left:0;right:0;top:54%;height:6px;z-index:-1;border-radius:3px;background:linear-gradient(180deg,#7fd35a,#3f9e3a)}
+  .garden i{font-size:32px;line-height:1}
+  .garden .gempty{display:block;align-self:center;padding:0 0 4px;font-size:13px;font-weight:600;color:var(--dim)}
+}
+/* map: jump back to the current level; a locked world is one card */
+.curpill{position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;padding:10px 20px;border-radius:99px;font-weight:700;font-size:15px;color:#2a1a00;
+  background:linear-gradient(180deg,#fff3b8,var(--acc) 40%,color-mix(in srgb,var(--acc) 70%,#ff8a00));box-shadow:0 4px 0 color-mix(in srgb,var(--acc) 45%,#4a2500),0 10px 22px #0007;
+  opacity:0;pointer-events:none;transform:translate(-50%,8px) scale(.9);transition:transform .3s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+.curpill.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.lockcard{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:20px;background:#00000040;box-shadow:inset 0 0 0 1px #ffffff14;text-align:left}
+.lockcard i{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a4f6e,#1f2133);box-shadow:inset 0 2px 0 #ffffff26,0 3px 8px #0006}
+.lockcard i svg{width:24px;height:28px}
+.lockcard b{display:block;font-size:16px}
+.lockcard small{display:block;color:var(--dim);font-size:13px}
+/* shop: no pop-in replay after a purchase; the short boost items drop their description on 320 px phones */
+.shoplist.still .item{animation:none}
+@media (max-width:340px){.item.boost .tx small:not(:has(.tag)){display:none}}
+/* 320 px: the world banner keeps "WORLD 6 · LEVELS 61–72" on one line and gives the world name the room */
+@media (max-width:340px){
+  .wtx small{white-space:nowrap;font-size:10px;letter-spacing:.4px}
+  .wtx .lw{display:none}
+  .wprog{width:54px}
+  .wnum{width:38px;height:38px;font-size:19px}
+  .wbanner{gap:8px}
+}

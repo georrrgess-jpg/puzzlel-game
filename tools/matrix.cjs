@@ -56,6 +56,11 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
           const hd = document.querySelector('#play .hud');
           if (hd && hd.getBoundingClientRect().right > vw + 1) bad.push('HUD wider than the screen');
         }
+        if (screen === 'map') {
+          // world banners: the one-line caption and the name must not be cut off
+          document.querySelectorAll('.wbanner .wtx small').forEach(e => { if (e.scrollWidth > e.clientWidth + 1 || e.getBoundingClientRect().height > 14) bad.push('world caption wraps or is cut: "' + e.textContent.trim() + '"') });
+          document.querySelectorAll('.wbanner .wtx b').forEach(e => { if (e.scrollWidth > e.clientWidth + 1) bad.push('world name is cut off: "' + e.textContent.trim() + '"') });
+        }
         const modal = document.querySelector('#modal.on .card');
         if (modal) { const b = modal.querySelector('.mbtns .btn:last-child'); if (b) { const r = b.getBoundingClientRect(); if (r.bottom > vh + 1) bad.push('popup main button below the fold (bottom ' + Math.round(r.bottom) + ' > ' + vh + ')') } }
         // popups: nothing may sit on top of a footer button, and body content must stay clear of the footer

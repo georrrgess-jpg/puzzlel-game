@@ -62,7 +62,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
 
   await test('B4 Enter never presses a destructive default', async p => {
     await prep(p); await p.evaluate(() => { __game.S.coins = 1234 });
-    await p.click('#settingsBtn'); await sleep(300); await p.click('#resetBtn'); await sleep(300);
+    await p.click('#settingsBtn'); await sleep(300); await p.evaluate(() => { document.querySelector('details.danger').open = true }); await p.click('#resetBtn'); await sleep(300);
     ck('B4 reset popup focuses Cancel', await p.evaluate(() => /Cancel/.test(document.activeElement.textContent)));
     await p.evaluate(() => document.activeElement.blur());   // focus on the page: a bare Enter must do nothing here
     await p.keyboard.press('Enter'); await sleep(600);
@@ -227,6 +227,45 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     const bb = await p.evaluate(() => { const r = document.querySelector('#restartBtn').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] });
     await p.mouse.move(bb[0], bb[1]); await p.mouse.down(); await sleep(900); await p.mouse.up(); await sleep(500);
     ck('P7 holding Restart restarts without asking', await p.evaluate(() => !document.querySelector('#modal.on') && document.querySelector('#hudInfo .mv').textContent === '0'));
+  });
+
+  await test('M map: cached DOM, lock cards, current-level pill', async p => {
+    await prep(p); await p.evaluate(() => { __game.S.unlocked = 30; __game.S.stars[3] = 2; __game.show('map') }); await sleep(900);
+    ck('M4 locked worlds are single cards', await p.evaluate(() => document.querySelectorAll('.chapter.locked .node').length === 0 && document.querySelectorAll('.lockcard').length >= 1));
+    await p.evaluate(() => { document.querySelector('#mapwrap').scrollTop = 0; document.querySelector('.node').__mark = 1 }); await sleep(200);
+    await p.evaluate(() => { document.querySelector('#mapwrap').scrollTop = 140 }); await sleep(200);
+    await p.evaluate(() => { __game.show('home') }); await sleep(600);
+    await p.evaluate(() => { __game.show('map') }); await sleep(700);
+    const r = await p.evaluate(() => ({ same: !!document.querySelector('.node').__mark, top: document.querySelector('#mapwrap').scrollTop }));
+    ck('M5 an unchanged map keeps its DOM and scroll position', r.same && Math.abs(r.top - 140) < 8, JSON.stringify(r));
+    await p.evaluate(() => { document.querySelector('#mapwrap').scrollTop = 0 }); await sleep(500);
+    ck('M3 the pill shows when the current level is out of view', await p.evaluate(() => document.querySelector('#curPill').classList.contains('on') && /Level 30/.test(document.querySelector('#curPill').textContent)));
+    await p.evaluate(() => document.querySelector('#curPill').click()); await sleep(1300);
+    ck('M3 tapping the pill brings the level back and hides it', await p.evaluate(() => !document.querySelector('#curPill').classList.contains('on')));
+    await p.evaluate(() => { __game.S.stars[4] = 3; __game.show('home'); __game.show('map') }); await sleep(700);
+    ck('M5 a changed map is rebuilt with the new stars', await p.evaluate(() => document.querySelectorAll('.node[data-n="4"] .st svg.on').length) === 3);
+  });
+
+  await test('M shop, trophies, profile, settings, toasts, garden', async p => {
+    await prep(p); await p.evaluate(() => { __game.S.coins = 2000; __game.show('shop') }); await sleep(900);
+    await p.evaluate(() => { document.querySelector('#shoplist').scrollTop = 220 }); await sleep(200);
+    const h0 = await p.evaluate(() => __game.S.hints);
+    await p.evaluate(() => { const b = [...document.querySelectorAll('#shoplist .item.boost .buy')][0]; b.click(); b.click() }); await sleep(900);
+    const r = await p.evaluate(() => ({ h: __game.S.hints, top: document.querySelector('#shoplist').scrollTop }));
+    ck('M7 a double tap buys once', r.h - h0 === 3, JSON.stringify(r));
+    ck('M7 the shop keeps its scroll position after a purchase', Math.abs(r.top - 220) < 8, JSON.stringify(r));
+    await p.evaluate(() => { __game.show('home'); showTrophies() }); await sleep(500);
+    ck('M8 locked trophies show progress', await p.evaluate(() => document.querySelectorAll('.ach:not(.got) .apw').length) > 5);
+    await p.evaluate(() => { closeModal(); showProfile() }); await sleep(500);
+    ck('M9 profile labels are short', await p.evaluate(() => /Best streak/.test(document.querySelector('#modal').textContent) && /Dailies/.test(document.querySelector('#modal').textContent)));
+    await p.evaluate(() => { closeModal(); showSettings() }); await sleep(500);
+    ck('M10 settings: Sound open, the other three groups closed', await p.evaluate(() => [...document.querySelectorAll('#modal details.sgroup')].map(d => d.open).join()) === 'true,false,false,false');
+    await p.evaluate(() => { closeModal(); __game.S.deco = [] ; renderHome() }); await sleep(300);
+    ck('M1 an empty garden shows its hint text', await p.evaluate(() => /garden grows/i.test(document.querySelector('#garden').textContent)));
+    const lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(1500);
+    await p.evaluate(() => toast('hello')); await sleep(700);
+    const tr = await p.evaluate(() => { const t = document.querySelector('#toast').getBoundingClientRect(), b = document.querySelector('#play .toolbar').getBoundingClientRect(); return { toast: [Math.round(t.top), Math.round(t.bottom)], toolbar: [Math.round(b.top), Math.round(b.bottom)], screen: document.querySelector('.screen.active').id, modal: !!document.querySelector('#modal.on') } });
+    ck('M11 a toast in a level sits above the toolbar', tr.toast[1] <= tr.toolbar[0] + 2 && tr.toast[0] > 100, JSON.stringify(tr));
   });
 
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');
