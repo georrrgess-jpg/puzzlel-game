@@ -3662,6 +3662,161 @@ body.locked .v1815-top{display:none}
 @media (max-width:420px){ .ov-card .ot .ot-s{display:flex;align-items:center;gap:6px;min-width:0} .ov-card .ot .ot-s .link{display:block;max-width:calc(100vw - 222px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left} }
 @media (max-width:360px){ .ov-card{padding:14px} .ov-card table.ot th,.ov-card table.ot td{padding-left:4px;padding-right:4px} }
 
+/* v18.16 Family Ties */
+.v1816-tree{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.v1816-tree+.v1816-tree{border-top:1px dashed var(--line);padding-top:14px;margin-top:4px}
+.v1816-fc{position:relative;flex:0 0 220px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:16px 14px 14px;border-radius:16px;border:1px solid var(--line);
+  background:radial-gradient(90% 60% at 50% 0%,color-mix(in srgb,var(--c1) 22%,transparent),transparent 70%),var(--surface);box-shadow:0 10px 26px rgba(0,0,0,.22)}
+.v1816-fc.hi{border:2px solid var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 14%,transparent),0 16px 36px rgba(0,0,0,.35)}
+.v1816-num{position:absolute;left:14px;top:8px;font-family:var(--f-display);font-size:2.6rem;font-weight:900;line-height:1;color:color-mix(in srgb,var(--text) 88%,var(--bg))}
+.v1816-new{position:absolute;right:10px;top:10px;padding:3px 9px;border-radius:999px;background:var(--accent);color:#16110a;font-weight:800;font-size:.7rem;letter-spacing:.06em}
+.v1816-face{display:block;line-height:0;margin-top:22px;border-radius:50%;cursor:pointer}
+.v1816-face svg{border-radius:50%;background:color-mix(in srgb,var(--bg) 70%,#000);box-shadow:0 0 0 3px color-mix(in srgb,var(--c1) 55%,transparent)}
+.v1816-fc.hi .v1816-face svg{box-shadow:0 0 0 3px var(--accent)}
+.v1816-fc.el .v1816-face{cursor:default}
+.v1816-role{font-size:.78rem;color:var(--muted);margin-top:4px}
+.v1816-nm{font-family:var(--f-display);font-size:1.5rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em;line-height:1}
+.v1816-cls{font-size:.8rem;color:color-mix(in srgb,var(--text) 80%,var(--bg))}
+.v1816-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:6px}
+.v1816-tags i{font-style:normal;font-size:.72rem;font-weight:700;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 80%,transparent)}
+.v1816-note{font-family:'Crimson Pro',Georgia,serif;font-size:.98rem;color:color-mix(in srgb,var(--text) 82%,var(--bg));margin-top:6px}
+.v1816-link{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--accent);font-size:.78rem;font-weight:800}
+.v1816-link i{display:block;width:100%;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 4px,transparent 4px 9px);position:relative}
+.v1816-link i::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--accent)}
+.v1816-tree.sm .v1816-fc{flex-basis:168px;padding:12px 10px}
+.v1816-tree.sm .v1816-num{font-size:1.9rem}
+.v1816-tree.sm .v1816-face{margin-top:16px}
+.v1816-tree.sm .v1816-nm{font-size:1.15rem}
+.v1816-tree.sm .v1816-link{flex-basis:48px}
+/* the mailbox */
+.v1816-modal{width:min(1240px,100%)}
+.v1816-mail{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px}
+.v1816-ml,.v1816-mr{min-width:0;display:flex;flex-direction:column;gap:12px}
+.v1816-paper{position:relative;padding:18px 20px 16px;border-radius:6px;background:#f3efe4;color:#1d1a14;box-shadow:0 18px 40px rgba(0,0,0,.4);transform:rotate(.6deg);font-family:'Crimson Pro',Georgia,serif}
+.v1816-ph{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.v1816-ph b{display:block;font-size:1.3rem;font-family:'Gloock','Crimson Pro',serif;font-weight:400}
+.v1816-ph small{font-style:italic;color:#5b5446}
+.v1816-paper p{font-size:1.28rem;line-height:1.5;margin:10px 0 0}
+.v1816-jer{flex:none;display:flex;flex-direction:column;align-items:center;padding:6px 10px;border:1px solid #d6cfbd;border-radius:6px;background:#ece6d6}
+.v1816-jer small{font-family:var(--f-mono);font-size:.62rem;letter-spacing:.12em;color:#3a352a}
+.v1816-opts{display:flex;flex-direction:column;gap:8px}
+.v1816-opt{appearance:none;text-align:left;font:inherit;color:inherit;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,background .15s,transform .15s}
+.v1816-opt:hover:not([disabled]){border-color:color-mix(in srgb,var(--accent) 55%,var(--line));transform:translateY(-1px)}
+.v1816-opt.warm{background:color-mix(in srgb,#7a1d22 26%,var(--surface));border-color:color-mix(in srgb,#c0392b 45%,var(--line))}
+.v1816-opt.on{outline:2px solid var(--accent)}
+.v1816-opt[disabled]{cursor:default;opacity:.65}.v1816-opt.on[disabled]{opacity:1}
+.v1816-opt>b{font-family:var(--f-display);font-size:1.3rem;text-transform:uppercase;letter-spacing:.02em}
+.v1816-opt>span:not(.v1816-otags){grid-column:1;font-size:.86rem;color:color-mix(in srgb,var(--text) 80%,var(--bg))}
+.v1816-otags{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:5px;align-items:flex-end;justify-content:center}
+.v1816-otags i{font-style:normal;font-size:.72rem;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.v1816-otags i.good{color:#5fd38d;background:rgba(46,160,90,.14);border:1px solid rgba(46,160,90,.35)}
+.v1816-otags i.bad{color:#ff8a7a;background:rgba(200,60,50,.14);border:1px solid rgba(200,60,50,.35)}
+.v1816-opt em{grid-column:1/-1;font-style:normal;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.v1816-meters{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.v1816-meters h4{font-family:var(--f-display);font-size:1.25rem;text-transform:uppercase;margin:0 0 8px}
+.v1816-meters h4 small{font-family:var(--f-body);text-transform:none;font-size:.78rem;color:var(--muted);margin-left:6px}
+.v1816-mt{display:grid;grid-template-columns:110px minmax(0,1fr) 30px;align-items:center;gap:10px;font-size:.84rem;margin:5px 0}
+.v1816-mt i{height:6px;border-radius:6px;background:color-mix(in srgb,var(--surface2) 90%,transparent);overflow:hidden}
+.v1816-mt b{display:block;height:100%;border-radius:6px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.v1816-mt b.r{background:#e2574c}.v1816-mt b.y{background:#e8b84a}.v1816-mt b.g{background:#3fbf73}
+.v1816-mt em{font-style:normal;font-family:var(--f-mono);text-align:right}
+.v1816-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v1816-mini{appearance:none;font:inherit;color:inherit;text-align:left;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);min-width:0}
+button.v1816-mini{cursor:pointer}
+.v1816-mini small{display:block;color:var(--muted);font-size:.8rem}
+.v1816-faces{display:flex;flex:none}.v1816-faces svg{border-radius:50%;background:color-mix(in srgb,var(--bg) 70%,#000)}.v1816-faces svg+svg{margin-left:-10px}
+.v1816-ic{font-size:1.6rem}
+/* overview + page */
+.v1816-ovmail{display:flex;align-items:center;gap:14px;cursor:pointer;margin-bottom:16px;border-color:color-mix(in srgb,#e8d9a8 40%,var(--line));background:linear-gradient(90deg,color-mix(in srgb,#e8d9a8 10%,var(--surface)),var(--surface))}
+.v1816-ovmail>div{flex:1;min-width:0;display:flex;flex-direction:column}.v1816-ovmail b{font-size:1.1rem}.v1816-ovmail small{color:var(--muted)}
+.v1816-env{font-size:1.8rem}
+.v1816-page{display:flex;flex-direction:column;gap:16px}
+.v1816-hero h2{font-family:var(--f-display);font-size:clamp(2rem,5vw,3.2rem);text-transform:uppercase;margin:4px 0;line-height:.95}
+.v1816-hero p{max-width:760px;color:color-mix(in srgb,var(--text) 82%,var(--bg))}
+.v1816-banner{appearance:none;font:inherit;color:inherit;cursor:pointer;display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.v1816-banner>span:nth-child(2){flex:1}.v1816-banner small{display:block;color:var(--muted)}
+.v1816-pair{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.v1816-pair.mine{background:color-mix(in srgb,var(--accent) 6%,transparent);border-radius:10px;padding:10px}
+.v1816-pair>span:nth-child(2){flex:1;min-width:0}.v1816-pair small{display:block;color:var(--muted);font-size:.8rem}
+.v1816-pair em{font-style:normal;font-weight:800;font-size:.8rem;color:#5fd38d;white-space:nowrap}
+.v1816-leg{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}
+.v1816-leg>span{display:flex;flex-direction:column;align-items:flex-start;gap:2px}.v1816-leg>span svg{border-radius:50%}.v1816-leg small{color:var(--muted)}
+.v1816-h4{margin:14px 0 6px}
+.v1816-hist{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.9rem}
+.v1816-around{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v1816-around li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--line)}
+.v1816-around small{color:var(--muted)} .v1816-mem{font-size:.86rem}
+/* player profile strip */
+.v1816-pstrip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px;margin:-4px 0 12px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 55%,transparent)}
+.v1816-pk{font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.v1816-chip{appearance:none;font:inherit;color:inherit;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:.84rem}
+button.v1816-chip{cursor:pointer}.v1816-chip i{font-style:normal;font-weight:800;color:var(--accent);text-transform:capitalize}.v1816-chip small{color:var(--muted)}
+.v1816-chip.more{margin-left:auto}
+.v1816-wall{margin-top:16px}
+.v1816-retnote{margin-top:8px}
+
+.v1816-ml .v1816-fc{flex:1 1 0;min-width:150px}.v1816-ml .v1816-link{flex-basis:46px}.v1816-ml .v1816-nm{font-size:1.25rem}.v1816-ml .v1816-face svg{width:84px;height:84px}
+@media (max-width:980px){ .v1816-mail{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:640px){ .v1816-fc{flex-basis:180px} .v1816-strip,.v1816-around{grid-template-columns:1fr} .v1816-leg{grid-template-columns:1fr} .v1816-otags{grid-column:1;grid-row:auto;flex-direction:row;flex-wrap:wrap;align-items:flex-start} .v1816-paper p{font-size:1.1rem} }
+@media (max-width:640px){
+  .v1816-tree{flex-direction:column;align-items:stretch;overflow:visible}
+  .v1816-tree .v1816-fc,.v1816-tree.sm .v1816-fc,.v1816-ml .v1816-fc{flex:none;min-width:0}
+  .v1816-link,.v1816-tree.sm .v1816-link,.v1816-ml .v1816-link{flex:none;flex-direction:row;gap:10px;height:34px}
+  .v1816-link i{width:2px;height:100%;background:repeating-linear-gradient(180deg,var(--accent) 0 4px,transparent 4px 9px)}
+}
+
+/* v18.16 Quick Jump & Pins */
+body.v1816q-on{overflow:hidden}
+.v1816q-scrim{position:fixed;inset:0;z-index:310;background:rgba(3,5,9,.62);backdrop-filter:blur(4px);animation:v1815fade .18s ease both}
+.v1816q-wrap{position:fixed;z-index:311;left:50%;top:9vh;transform:translateX(-50%);width:min(1360px,calc(100vw - 32px));display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px;align-items:start;animation:v1816qin .24s cubic-bezier(.2,.9,.25,1) both}
+@keyframes v1816qin{from{opacity:0;transform:translate(-50%,-8px) scale(.985)}to{opacity:1;transform:translateX(-50%)}}
+.v1816q-box,.v1816q-side{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.6);overflow:hidden}
+.v1816q-in{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.v1816q-mag{color:var(--muted);line-height:0}
+.v1816q-in input{flex:1;min-width:0;border:0;background:none;outline:none;color:var(--text);font:inherit;font-size:1.35rem;font-weight:650;padding:4px 0}
+.v1816q-in input::placeholder{color:var(--muted);font-weight:500}
+.v1816q-box kbd,.v1816q-foot kbd{font-family:var(--f-mono);font-size:.74rem;padding:3px 8px;border-radius:8px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 80%,transparent);color:var(--text)}
+.v1816q-cats{display:flex;gap:8px;padding:12px 20px 6px;flex-wrap:wrap}
+.v1816q-cats button{appearance:none;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 70%,transparent);color:var(--text);transition:background .15s,color .15s}
+.v1816q-cats button.on{background:var(--accent);border-color:var(--accent);color:#16110a}
+.v1816q-list{max-height:min(58vh,560px);overflow-y:auto;padding:4px 0 8px;scrollbar-width:thin}
+.v1816q-h{padding:10px 20px 4px;font-family:var(--f-display);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:.84rem;color:var(--muted)}
+.v1816q-r{appearance:none;font:inherit;color:inherit;width:100%;display:flex;align-items:center;gap:14px;padding:9px 20px;border:0;border-left:3px solid transparent;background:none;cursor:pointer;text-align:left;transition:background .1s}
+.v1816q-r.on{background:color-mix(in srgb,#8a1f26 40%,var(--surface));border-left-color:var(--accent)}
+.v1816q-r>svg{flex:none;border-radius:50%;background:color-mix(in srgb,var(--bg) 70%,#000)}
+.v1816q-t{flex:1;min-width:0;display:flex;flex-direction:column}
+.v1816q-t b{font-size:1.04rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1816q-t b mark{background:none;color:var(--accent);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}
+.v1816q-t small{color:color-mix(in srgb,var(--text) 72%,var(--bg));font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1816q-pi{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:color-mix(in srgb,var(--surface2) 85%,transparent);flex:none;font-size:1.1rem}
+.v1816q-b{flex:none;font-size:.78rem;font-weight:700;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 80%,transparent);white-space:nowrap}
+.v1816q-b.hot{background:var(--accent);border-color:var(--accent);color:#16110a}
+.v1816q-b.key{font-family:var(--f-mono);letter-spacing:.08em}
+.v1816q-r:not(.on) .v1816q-b:not(.key){opacity:0;transition:opacity .12s}.v1816q-r:hover .v1816q-b{opacity:1}
+.v1816q-pd{font-style:normal;font-size:.9rem}
+.v1816q-empty{padding:28px 20px;color:var(--muted);text-align:center}
+.v1816q-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 20px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+.v1816q-foot .grow{flex:1}
+.v1816q-side{padding:16px}
+.v1816q-pins h3{font-family:var(--f-display);font-size:1.6rem;text-transform:uppercase;margin:0 0 10px;line-height:1}
+.v1816q-pins h3 small{font-family:var(--f-body);text-transform:none;font-size:.82rem;color:var(--muted);margin-left:8px}
+.v1816q-pin{display:flex;align-items:center;gap:6px;margin-bottom:8px;border-radius:14px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 55%,transparent);transition:border-color .15s}
+.v1816q-pin:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.v1816q-pmain{appearance:none;font:inherit;color:inherit;flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;background:none;cursor:pointer;text-align:left}
+.v1816q-pmain>svg{flex:none;border-radius:50%;background:color-mix(in srgb,var(--bg) 70%,#000)}
+.v1816q-pmain span{min-width:0;display:flex;flex-direction:column}.v1816q-pmain b{font-size:1rem}.v1816q-pmain small{font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1816q-unpin{appearance:none;border:0;background:none;cursor:pointer;font-size:1rem;padding:8px 12px;opacity:.85;transition:transform .15s}.v1816q-unpin:hover{transform:scale(1.15) rotate(-12deg)}
+.v1816q-none{color:var(--muted);font-size:.9rem;margin:4px 0 12px}
+.v1816q-note{display:block;width:100%;margin-top:12px;resize:vertical;min-height:62px;border:0;border-radius:4px;padding:12px 14px;background:#efe39a;color:#2a2410;font-family:'Crimson Pro',Georgia,serif;font-size:1.1rem;line-height:1.35;box-shadow:0 10px 24px rgba(0,0,0,.35);transform:rotate(-.6deg)}
+.v1816q-note::placeholder{color:#6d6237}
+.v1816q-gear{min-width:360px}
+.v1816q-ddpins{border-top:1px solid var(--line);margin-top:6px;padding:10px 4px 2px}
+.v1816q-ddpins .v1816q-pins h3{font-size:1.15rem}
+.v1816q-ddpins .v1816q-note{font-size:1rem;min-height:48px}
+@media (max-width:1100px){ .v1816q-wrap{grid-template-columns:minmax(0,1fr);top:5vh;max-height:90vh;overflow-y:auto} .v1816q-side{display:block} }
+@media (max-width:640px){ .v1816q-wrap{top:0;left:0;transform:none;width:100vw;max-height:100vh;height:100vh;gap:10px;padding:10px;animation:v1815fade .18s ease both} .v1816q-in input{font-size:1.1rem} .v1816q-foot span:not(:last-child){display:none} .v1816q-list{max-height:52vh} .v1816q-b.key{display:none} }
+@media (prefers-reduced-motion:reduce){ .v1816q-wrap,.v1816q-scrim{animation:none} }
+
 </style>
 <div id="app"></div>
 <script>
@@ -13266,6 +13421,8 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['👨‍👦','Family Ties','Little brothers, cousins and the kids of alumni now arrive at every school in the league, sometimes while their brother is still on the roster. Families share a surname and a look, hand down numbers, and show as a family tree on player profiles, the new Family Ties page (Squad menu) and the Hall of Fame family wall. Your program starts with a legend: a Hall of Famer whose number is retired, and his little brother on your roster with a letter in the coach\'s mailbox. Keep it retired, let him wear it, or give him a legacy patch; each choice moves his legacy pressure and his growth. Brothers who start together build chemistry.'],
+  ['⌨️','Quick Jump & Pins','Press Ctrl K (Cmd K on a Mac) anywhere to find any player, team, page or action. Arrow keys move, Enter opens, Tab pins, > shows actions only. Pinned items sit beside the search and in the Settings menu on every screen with a live line each, plus a coach\'s note. G then a letter jumps to a page (G O Overview, G L Lineup, G T Table, G P State Poll). On a phone, the search icon opens it.'],
   ['✨','Smoother menus and screens','A polish pass across the game. The top bar now fits every screen size (no more sideways scrolling on laptops), and on phones it is a single row. Search tucks into an icon: press / to search, Escape to clear. Pages glide in when you open them but no longer flash when you change a tab or filter. Menus close after you pick something, modals and messages slide away instead of vanishing, the phone menu closes when you tap outside it, long pages get a back-to-top button, empty pages say so clearly, and the league table keeps the points column on screen on phones.'],
   ['🏅','One state: the State Awards and a top 50','The State Poll now ranks a top 50 from 120 schools, and the teams in it are the teams you play. Every Preseason Cup opponent is a poll school (the last one is one of the state\'s best programs), your Regional opponent is the Section 6 champion and the State Tournament is the seven best-ranked section champions, so a summer opponent can be waiting at States. After the final, the State Awards: Player, Offensive and Defensive Player, Goalkeeper, Underclassman and Coach of the Year plus the All-State First and Second Teams, voted from every player\'s numbers in the state. New leaderboards for tackles, interceptions, clearances, shots on target, xG and save percentage, and award races to follow all season (State Poll → Awards).'],
   ['⚖️','A balanced league','The other schools no longer fade year after year. Every season they start between 65 and 70, with one or two at 70 to 72, and your school starts a new career at 70 to 72. Every third season one rival has a golden senior class rated around 85, a state contender for one year only; when those seniors graduate the school drops back into the pack.'],
@@ -25090,5 +25247,334 @@ function v1815TopEl(){ let el=document.getElementById('v1815-top'); if(!el&&docu
   el.addEventListener('click',()=>window.scrollTo({top:0,behavior:v1815RM()?'auto':'smooth'})); document.body.appendChild(el); } return el; }
 function v1815TopSync(){ const el=v1815TopEl(); if(!el) return; el.classList.toggle('on',!!(App.C&&!App.live&&window.scrollY>900)); }
 window.addEventListener('scroll',()=>{ if(V1815.raf) return; V1815.raf=requestAnimationFrame(()=>{ V1815.raf=0; v1815TopSync(); }); },{passive:true});
+
+/* ===================== v18.16 FAMILY TIES =====================
+   Little brothers, cousins and the kids of alumni arrive with a name to live up to, at every school in the league.
+   - Families share a surname and a look (skin, hair colour), hand down numbers when they are free, and show as a tree
+     (father -> sons -> younger brothers) on player profiles, the Family Ties page and the Hall of Fame family wall.
+   - A new career seeds families everywhere (brothers on the same roster, kids of alumni from before the career) and, at your
+     school, a program legend: an older brother in the Hall of Fame with his number retired and his little brother on the roster.
+   - Every off-season new middle schoolers can be younger brothers of current players (so brothers play together), of recent
+     graduates, cousins, or sons of alumni. Free numbers are handed down; at your school a retired family number becomes a
+     letter in the coach's mailbox with three choices (keep it retired / let him wear it / patch and ceremony) that move his
+     legacy pressure (expectations, your support, teammates) and his development.
+   - Brothers who start together build chemistry; the younger one grows from it at the end of the season.
+   State lives on C.fam (saved with the career). Identifiers v1816 / V1816. */
+const V1816={ v:1, NOTE_F:['Taught both boys to juggle in the driveway.','Still runs the clock at home games.','Drives the bus to every away game.','Has not missed a home game in twenty years.','Coached the rec league for a decade.','Keeps the program scrapbook.'],
+  NOTE_P:['Practices against the garage door.','Wears his brother’s old shin guards.','First on the field, last off it.','Studies film of his brother’s senior year.','Juggles to school every morning.','Wants his own banner in the gym.'],
+  HON_F:['All-League','2× All-League','Section champion','Team captain','Boosters president','Program record holder','Assistant coach'] };
+
+/* ---------- state ---------- */
+function v1816S(C){ let F=C.fam; if(!F||F.v!==1) F=C.fam={v:1,elders:{},links:{},fams:{},mail:[],meters:{},fx:{},patch:{},chem:{},n:0,seeded:false,yr:{}}; for(const k of ['elders','links','fams','meters','fx','patch','chem','yr']) if(!F[k]) F[k]={}; if(!F.mail) F.mail=[]; return F; }
+function v1816R(C,...k){ return rngFrom(hashStr([C.seed,'v1816',...k].join('|'))); }
+function v1816Person(C,id){ const F=v1816S(C); if(F.elders[id]) return {...F.elders[id],elder:true}; return findPerson(C,id)||null; }
+function v1816Name(C,id){ const p=v1816Person(C,id); return p?p.fn+' '+p.ln:'Unknown'; }
+function v1816Fam(C,id){ const F=v1816S(C); const L=F.links[id]||(F.elders[id]?{f:F.elders[id].f}:null); return L&&F.fams[L.f]||null; }
+function v1816Gen(C,id){ const F=v1816S(C); if(F.elders[id]) return F.elders[id].gen; const L=F.links[id]; return L?L.gen:1; }
+function v1816NewFam(C,ln,sid,first,gen){ const F=v1816S(C); const id='f'+(++F.n); F.fams[id]={id,ln,sid,mem:[first]}; if(F.elders[first]){ F.elders[first].f=id; } else F.links[first]={f:id,rel:null,of:null,gen:gen==null?1:gen}; return F.fams[id]; }
+/* make `kid` (a player) related to `rel` (player or elder id): rel = 'brother' (younger brother), 'cousin', 'son' */
+function v1816Join(C,kid,relId,rel,r){
+  const F=v1816S(C); if(F.links[kid.id]&&F.links[kid.id].f) return null; const R=v1816Person(C,relId); if(!R) return null;
+  let fam=v1816Fam(C,relId); if(!fam) fam=v1816NewFam(C,R.ln,R.sid,relId,R.elder?R.gen:1);
+  const gen=rel==='son'?v1816Gen(C,relId)+1:v1816Gen(C,relId);
+  F.links[kid.id]={f:fam.id,rel,of:relId,gen}; fam.mem.push(kid.id);
+  const taken=new Set(fam.mem.filter(id=>id!==kid.id).map(id=>{ const q=v1816Person(C,id); return q&&q.fn; })); for(let i=0;i<12&&taken.has(kid.fn);i++) kid.fn=genName(r)[0];
+  if(rel!=='cousin'||r()<0.6) kid.ln=fam.ln;
+  const L=lookOf(R.elder?{id:relId,grade:12,look:R.look}:R); const mine=lookOf(kid); kid.look={...mine,skin:L.skin,hairCol:rel==='cousin'&&r()<0.5?mine.hairCol:L.hairCol};
+  return fam;
+}
+function v1816Elder(C,r,o){ const F=v1816S(C); const id='el'+(++F.n); const [fn]=genName(r);
+  const e={id,fn,ln:o.ln,sid:o.sid,cls:o.cls,pos:o.pos||pick(r,['DEF','MID','FWD','DEF','MID','GK']),num:o.num||rint(r,2,24),gen:o.gen==null?0:o.gen,honors:o.honors||shuffle(r,V1816.HON_F.slice()).slice(0,r()<0.5?1:2),note:o.note||pick(r,V1816.NOTE_F),role:o.role||'father',legend:!!o.legend,look:o.look||null};
+  F.elders[id]=e; return e; }
+function v1816Cls(C,p){ return C.year+(12-p.grade); }
+
+/* ---------- a new world: families everywhere, a legend at your school ---------- */
+function v1816Seed(C){
+  const F=v1816S(C); if(F.seeded) return; F.seeded=true; const r=v1816R(C,'seed');
+  for(const sid of C.league){ const user=sid===C.userSid; const all=schoolPlayers(C,sid).filter(p=>!F.links[p.id]);
+    /* brothers on the same roster */
+    if(user||r()<0.6){ const old=shuffle(r,all.filter(p=>p.grade>=9&&p.grade<=11)); for(const o of old){ const y=all.find(p=>p.id!==o.id&&!F.links[p.id]&&p.grade<o.grade&&o.grade-p.grade<=3&&p.grade>=8); if(y){ v1816Join(C,y,o.id,'brother',r); break; } } }
+    /* the son of an alumnus from before the career */
+    const nk=user?1:(r()<0.5?1:0); for(let i=0;i<nk;i++){ const k=pick(r,all.filter(p=>!F.links[p.id]&&p.grade<=10)); if(!k) break; const e=v1816Elder(C,r,{ln:k.ln,sid,cls:v1816Cls(C,k)-28+rint(r,-3,3)}); v1816Join(C,k,e.id,'son',r); }
+    if(!user&&r()<0.3){ const a=pick(r,all.filter(p=>!F.links[p.id]&&p.grade>=10)), b=a&&pick(r,all.filter(p=>!F.links[p.id]&&p.id!==a.id&&p.grade<a.grade)); if(a&&b) v1816Join(C,b,a.id,'cousin',r); } }
+  /* your program legend: a Hall of Famer with his number retired, his father, and his little brother on your roster */
+  const u=C.userSid; const kid=pick(r,schoolPlayers(C,u).filter(p=>!F.links[p.id]&&p.grade>=7&&p.grade<=9&&p.pos!=='GK'))||pick(r,schoolPlayers(C,u).filter(p=>!F.links[p.id]&&p.grade<=10));
+  if(kid){ const num=pick(r,[9,10,7,11]); const pos={9:'FWD',10:'MID',7:'FWD',11:'FWD'}[num]; const [,ln]=[0,kid.ln]; const yr=C.year-rint(r,2,4);
+    const dad=v1816Elder(C,r,{ln,sid:u,cls:yr-27+rint(r,-2,2),pos:pick(r,['FWD','MID','DEF']),honors:[pick(r,['2× All-League','All-League','Section champion']),'Boosters president'],note:pick(r,V1816.NOTE_F),gen:0,look:lookOf(kid)});
+    const leg=v1816Elder(C,r,{ln,sid:u,cls:yr,pos,num,gen:1,role:'brother',legend:true,honors:['Hall of Fame','#'+num+' retired',(rint(r,34,58))+' career goals'],note:pick(r,['Scored the sectional winner as a senior.','Still holds the single-season goals record.','Captained three Varsity seasons.']),look:lookOf(kid)});
+    const fam=v1816NewFam(C,ln,u,dad.id,0); leg.f=fam.id; fam.mem.push(leg.id); kid.look={...lookOf(kid)}; v1816Join(C,kid,leg.id,'brother',r);
+    const R=C.retired||(C.retired={}); const list=R[u]||(R[u]=[]); if(!list.some(x=>x.num===num)) list.push({num,pid:leg.id,yr,name:leg.fn+' '+leg.ln,legacy:true});
+    for(const p of schoolPlayers(C,u)) if(p.num===num){ const used=new Set([...retiredSet(C,u),...squad(C,u,p.lvl).filter(x=>x.id!==p.id).map(x=>x.num)]); p.num=assignNum(rngFrom(hashStr(p.id+'v1816')),used,p.pos); }
+    v1816Mail(C,kid,leg.id,num,'retired'); }
+}
+{ const _nc=newCareer; newCareer=function(){ const C=_nc.apply(this,arguments); try{ v1816Seed(C); }catch(e){ console.warn('v1816 seed',e); } return C; }; }
+
+/* ---------- each off-season: new family arrivals at every school ---------- */
+function v1816Arrivals(C){
+  const F=v1816S(C); if(F.yr[C.year]) return; F.yr[C.year]=1; const r=v1816R(C,'arr',C.year); let news=0;
+  for(const sid of C.league){ const user=sid===C.userSid; const fresh=shuffle(r,squad(C,sid,'MOD').filter(p=>p.joined===C.year&&p.grade===7&&!F.links[p.id])); let made=0;
+    for(const kid of fresh){ if(made>=(user?2:1)) break; const x=r();
+      const cur=schoolPlayers(C,sid).filter(p=>p.id!==kid.id&&p.grade>=8&&p.grade<=11);
+      const alum=Object.values(C.alumni).filter(a=>a.sid===sid&&a.gradYr>=C.year-3);
+      let relId=null, rel=null;
+      if(x<(user?0.32:0.22)&&cur.length){ relId=pick(r,cur).id; rel='brother'; }
+      else if(x<(user?0.42:0.30)&&alum.length){ relId=pick(r,alum).id; rel='brother'; }
+      else if(x<(user?0.54:0.40)){ const e=v1816Elder(C,r,{ln:kid.ln,sid,cls:C.year-22-rint(r,0,8)}); relId=e.id; rel='son'; }
+      else if(x<(user?0.6:0.45)&&cur.length){ relId=pick(r,cur).id; rel='cousin'; }
+      if(!relId) continue; if(!v1816Join(C,kid,relId,rel,r)) continue; made++;
+      const R=v1816Person(C,relId); const num=R&&R.num; const ret=num!=null&&retiredSet(C,sid).has(num);
+      const handed=num!=null&&!ret&&rel!=='cousin'&&!squad(C,sid,'MOD').some(p=>p.id!==kid.id&&p.num===num); if(handed) kid.num=num;
+      if(ret&&user) v1816Mail(C,kid,relId,num,'retired');
+      const town=C.schools[sid].town; const who=rel==='son'?`son of ${R.fn} ${R.ln} (Class of ${R.cls})`:rel==='cousin'?`cousin of ${pname(R)}`:R.gradYr?`younger brother of ${pname(R)} (Class of ${R.gradYr})`:`younger brother of ${pname(R)}`;
+      if(user||news<3){ if(!user) news++; addNews(C,'family',`${rel==='brother'&&!R.gradYr?'Another '+kid.ln+': ':''}${pname(kid)} joins ${town}'s Modified squad, ${who}${handed?`, and takes his #${num}`:''}`,sid,{pid:kid.id}); } } }
+}
+{ const _ro=rollover; rollover=function(C){ const F=v1816S(C); const pend=F.mail.filter(m=>m.status==='open'); const chem=v1816ChemAll(C); const res=_ro.apply(this,arguments);
+  try{ if(res&&res.ok){ for(const m of pend) if(m.status==='open') v1816Choose(C,m.id,'keep',true);
+      for(const [pid,num] of Object.entries(F.patch)){ const p=C.players[pid]; if(!p){ delete F.patch[pid]; continue; } if(p.num!==num){ const mate=squad(C,p.sid,p.lvl).find(x=>x.id!==pid&&x.num===num); if(mate) mate.num=p.num; p.num=num; } }
+      for(const pr of chem){ const y=C.players[pr.y]; if(y&&pr.n>0){ const b=Math.min(1.2,pr.n*0.12); shiftOvr(y,b,'balanced'); y.pot=Math.max(y.pot,Math.ceil(ovr(y))); } }
+      F.chem={}; v1816Arrivals(C); } }catch(e){ console.warn('v1816 rollover',e); } return res; }; }
+
+/* ---------- brothers together, chemistry ---------- */
+function v1816Pairs(C,sid){ const F=v1816S(C); const out=[]; for(const fam of Object.values(F.fams)){ const ps=fam.mem.map(id=>C.players[id]).filter(p=>p&&(!sid||p.sid===sid)); const bySid={}; ps.forEach(p=>(bySid[p.sid]||(bySid[p.sid]=[])).push(p));
+  for(const arr of Object.values(bySid)){ if(arr.length<2) continue; arr.sort((a,b)=>b.grade-a.grade); for(let i=1;i<arr.length;i++){ const o=arr[0], y=arr[i]; const L=F.links[y.id]; out.push({fam:fam.id,o:o.id,y:y.id,rel:L&&L.rel==='cousin'?'cousins':'brothers',key:o.id+'|'+y.id,n:F.chem[o.id+'|'+y.id]||0}); } } } return out; }
+function v1816ChemAll(C){ return v1816Pairs(C).map(x=>({...x})); }
+{ const _fm=finishMatch; finishMatch=function(C,M){ const r=_fm.apply(this,arguments); try{ const F=C.fam; if(F&&F.v===1&&M&&M.sides){ const f=C.fixtures[M.fid];
+    for(const S of M.sides){ const on=new Set((S.slots||[]).map(s=>s.pid).filter(Boolean)); if(on.size<2) continue; for(const pr of v1816Pairs(C,S.sid)) if(on.has(pr.o)&&on.has(pr.y)) F.chem[pr.key]=Math.min(10,(F.chem[pr.key]||0)+1); }
+    for(const [pid,fx] of Object.entries(F.fx)){ if(!fx.shaky) continue; const p=C.players[pid]; if(!p){ delete fx.shaky; continue; } if(f&&f.lvl===p.lvl&&(f.h===p.sid||f.a===p.sid)){ fx.shaky.left--; if(fx.shaky.left<=0){ shiftOvr(p,fx.shaky.amt,'balanced'); delete fx.shaky; if(p.sid===C.userSid) addNews(C,'family',`${pname(p)} settles into his famous number after a shaky start`,p.sid,{pid}); } } } } }catch(e){ console.warn('v1816 match',e); } return r; }; }
+
+/* ---------- the coach's mailbox: a retired family number ---------- */
+function v1816Mail(C,kid,relId,num,kind){ const F=v1816S(C); if(F.mail.some(m=>m.pid===kid.id&&m.status==='open')) return; const R=v1816Person(C,relId); const L=F.links[kid.id];
+  const exp=R&&R.legend?88:R&&(R.honors||[]).length?74:62; F.meters[kid.id]=F.meters[kid.id]||{exp,sup:54,team:71};
+  const id='m'+(++F.n); F.mail.push({id,pid:kid.id,of:relId,num,kind,yr:C.year,status:'open',rel:L?L.rel:'brother'});
+  addNews(C,'family',`Coach's mailbox: a note from ${pname(kid)} about #${num}`,C.userSid,{pid:kid.id}); return id; }
+const V1816_CH={
+  keep:{t:'Keep it retired',d:n=>`He wears his own number and the banner stays. He takes it well, mostly.`,tags:[['good','Fans respect tradition (prestige +2)'],['bad','Loyalty dips at first: slower growth this season']],m:{exp:-6,sup:-12,team:6}},
+  wear:{t:n=>`Let him wear ${n}`,d:n=>`Un-retire the number. He carries the spotlight, and the old guard grumbles.`,tags:[['good','Develops faster while he wears it'],['bad','Pressure: shaky first 3 games']],m:{exp:6,sup:18,team:-12}},
+  patch:{t:'Patch and ceremony',d:n=>`He wears ${n} with a legacy patch; the number stays retired. Family night at the next home game.`,tags:[['good','Crowd behind him: +1 rating'],['bad','Costs a home date (prestige −2)']],m:{exp:4,sup:12,team:4}} };
+function v1816Choose(C,mid,ch,auto){
+  const F=v1816S(C); const m=F.mail.find(x=>x.id===mid); if(!m||m.status!=='open') return false; const p=C.players[m.pid]; m.status='done'; m.choice=ch; m.cy=C.year; if(!p) return true;
+  const M=F.meters[p.id]||(F.meters[p.id]={exp:70,sup:54,team:71}); const d=V1816_CH[ch].m; M.exp=clamp(M.exp+d.exp,0,100); M.sup=clamp(M.sup+d.sup,0,100); M.team=clamp(M.team+d.team,0,100);
+  const sch=C.schools[p.sid]; const fx=F.fx[p.id]||(F.fx[p.id]={});
+  const take=()=>{ const mate=squad(C,p.sid,p.lvl).find(x=>x.id!==p.id&&x.num===m.num); if(mate){ const used=new Set([...retiredSet(C,p.sid),...squad(C,p.sid,p.lvl).map(x=>x.num)]); mate.num=assignNum(rngFrom(hashStr(mate.id+'v1816swap')),used,mate.pos); } p.num=m.num; };
+  if(ch==='keep'){ sch.prestige=Math.min(99,sch.prestige+2); if(p.plan) p.plan.gain*=0.92; }
+  if(ch==='wear'){ const R=C.retired&&C.retired[p.sid]; const e=R&&R.find(x=>x.num===m.num); if(e){ e.unret={pid:p.id,yr:C.year,name:pname(p)}; C.retired[p.sid]=R.filter(x=>x!==e); (F.unretired||(F.unretired=[])).push(e); } take(); fx.wear=m.num; if(p.plan) p.plan.gain*=1.25; shiftOvr(p,-3,'balanced'); fx.shaky={left:3,amt:3}; }
+  if(ch==='patch'){ take(); F.patch[p.id]=m.num; sch.prestige=Math.max(5,sch.prestige-2); shiftOvr(p,1,'balanced'); p.pot=Math.max(p.pot,Math.ceil(ovr(p))); }
+  addNews(C,'family',auto?`${pname(p)} keeps his own number: #${m.num} stays retired`:ch==='keep'?`#${m.num} stays retired; ${pname(p)} picks his own number`:ch==='wear'?`${pname(p)} will wear #${m.num}, un-retired for his family`:`${pname(p)} wears #${m.num} with a legacy patch; family night set for the next home game`,p.sid,{pid:p.id});
+  return true; }
+/* the meters lean on his growth every season */
+function v1816DevMult(C,pid){ const F=v1816S(C); const M=F.meters[pid]; let k=1; if(M) k*=1+(M.sup-50)/400+(M.team-50)/500-Math.max(0,M.exp-80)/300; const fx=F.fx[pid]; if(fx&&fx.wear!=null){ const p=C.players[pid]; if(p&&p.num===fx.wear) k*=1.25; } return k; }
+{ const _ss=seasonStart; seasonStart=function(C){ const r=_ss.apply(this,arguments); try{ const F=C.fam; if(F&&F.v===1) for(const pid of new Set([...Object.keys(F.meters),...Object.keys(F.fx)])){ const p=C.players[pid]; if(p&&p.plan) p.plan.gain*=v1816DevMult(C,pid); } }catch(e){} return r; }; }
+{ const _mg=migrate; migrate=function(raw){ const C=_mg.apply(this,arguments); try{ if(C&&C.league&&!(C.fam&&C.fam.seeded)) { v1816S(C).seeded=true; v1816S(C).yr[C.year]=1; } }catch(e){} return C; }; }
+
+/* ---------- reading a family ---------- */
+function v1816Rel(C,a,b){ /* how b is related to a, in words */ const F=v1816S(C); const ga=v1816Gen(C,a), gb=v1816Gen(C,b); const La=F.links[a], Lb=F.links[b];
+  if(gb<ga) return ga-gb>1?'grandfather':'father'; if(gb>ga) return ga===gb-1?'son':'grandson';
+  if((La&&La.rel==='cousin'&&La.of===b)||(Lb&&Lb.rel==='cousin'&&Lb.of===a)) return 'cousin'; return 'brother'; }
+function v1816Tree(C,famId){ const F=v1816S(C); const fam=F.fams[famId]; if(!fam) return []; const gens={}; for(const id of fam.mem){ const g=v1816Gen(C,id); (gens[g]||(gens[g]=[])).push(id); } return Object.keys(gens).map(Number).sort((a,b)=>a-b).map(g=>({g,ids:gens[g]})); }
+function v1816Card(C,id){ const F=v1816S(C); const e=F.elders[id]; const p=e?null:findPerson(C,id); if(!e&&!p) return null; const cur=!!C.players[id];
+  if(e) return {id,elder:true,fn:e.fn,ln:e.ln,sid:e.sid,num:e.num,cls:e.cls,pos:e.pos,tags:e.honors,note:e.note,role:e.legend?'Hall of Fame':e.role==='father'?'Father':'Alumnus',face:{id,grade:12,sid:e.sid,look:e.look}};
+  const t=typeof careerTotals==='function'?careerTotals(p):{g:0}; const tags=[]; const hof=(C.hof||[]).find(h=>h.pid===id); if(hof) tags.push('Hall of Fame'); const ret=Object.values(C.retired||{}).flat().find(x=>x.pid===id); if(ret) tags.push('#'+ret.num+' retired');
+  (p.awards||[]).slice(0,2).forEach(a=>tags.push((typeof AWARD_NAME!=='undefined'&&AWARD_NAME[a.k])||a.k)); if(t.g>=10) tags.push(t.g+' career goals');
+  return {id,elder:false,fn:p.fn,ln:p.ln,sid:p.sid,num:p.num,cls:cur?v1816Cls(C,p):(p.gradYr||C.year),pos:p.pos,tags:tags.slice(0,3),note:cur?(p.grade<=8?pick(v1816R(C,'note',id),V1816.NOTE_P):''):(p.outcome||''),role:cur?(p.lvl==='V'?'Varsity':p.lvl==='JV'?'JV':'Modified')+' · Grade '+p.grade:'Alumnus',face:p,cur};
+}
+
+/* ===================== v18.16 FAMILY TIES, the screens: mailbox letter, family trees, Family Ties page, profile strip, HoF wall ===================== */
+const V1816_POS={GK:'Goalkeeper',DEF:'Defender',MID:'Midfielder',FWD:'Forward'};
+function v1816CardHtml(C,c,o){ o=o||{}; const sc=Sx(c.sid)||{c1:'#345',c2:'#fff'};
+  return `<article class="v1816-fc ${o.hi?'hi':''} ${c.elder?'el':''}" style="--c1:${sc.c1};--c2:${sc.c2}">${o.isNew?'<span class="v1816-new">NEW</span>':''}
+   <b class="v1816-num">${o.q?'?':esc(String(c.num==null?'':c.num))}</b><span class="v1816-face" ${!c.elder?`data-a="openPlayer" data-id="${esc(c.id)}" role="button" tabindex="0"`:''}>${portraitSVG(c.face,o.sm?64:96)}</span>
+   <span class="v1816-role">${esc(c.role)}</span><b class="v1816-nm">${esc(c.fn+' '+c.ln)}</b><span class="v1816-cls">Class of ${c.cls} · ${V1816_POS[c.pos]||c.pos}</span>
+   ${c.tags&&c.tags.length?`<span class="v1816-tags">${c.tags.map(t=>`<i>${esc(t)}</i>`).join('')}</span>`:''}${c.note&&!o.sm?`<em class="v1816-note">${esc(c.note)}</em>`:''}</article>`; }
+function v1816TreeHtml(C,famId,o){ o=o||{}; const tree=v1816Tree(C,famId); const ids=[]; for(const g of tree){ const arr=g.ids.map(id=>v1816Card(C,id)).filter(Boolean).sort((a,b)=>a.cls-b.cls); arr.forEach(c=>ids.push(c)); }
+  const cards=o.focus?ids.slice(0,4):ids; let h=''; cards.forEach((c,i)=>{ if(i){ const rel=v1816Rel(C,c.id,cards[i-1].id); h+=`<span class="v1816-link"><b>${rel}</b><i></i></span>`; } h+=v1816CardHtml(C,c,{hi:o.focus===c.id,isNew:o.focus===c.id,q:o.q&&o.focus===c.id,sm:o.sm}); });
+  return `<div class="v1816-tree ${o.sm?'sm':''}">${h}</div>`; }
+function v1816Letter(C,m){ const p=C.players[m.pid]; const R=v1816Person(C,m.of); const who=m.rel==='son'?'dad':'brother'; const fn=p?p.fn:'';
+  return `Coach,\nMy ${who} wore ${m.num}. I know it’s up in the gym. Can I wear it anyway?\n${fn}`; }
+function v1816Meters(M){ const row=(l,v,c)=>`<div class="v1816-mt"><span>${l}</span><i><b class="${c}" style="width:${v}%"></b></i><em>${v}</em></div>`;
+  return `<section class="v1816-meters"><h4>Legacy pressure <small>your choice moves these</small></h4>${row('Expectations',M.exp,'r')}${row('Your support',M.sup,'y')}${row('Teammates',M.team,'g')}</section>`; }
+
+/* ---------- the letter ---------- */
+MODALS.v1816mail=m=>{ const C=App.C; const F=v1816S(C); const L=F.mail.find(x=>x.id===m.id); if(!L) return modalShell('Coach’s mailbox','<div class="empty">That letter is gone.</div>');
+  const p=C.players[L.pid]; const fam=v1816Fam(C,L.pid); const me=Sx(C.userSid); const M=F.meters[L.pid]||{exp:70,sup:54,team:71}; const R=v1816Person(C,L.of);
+  const opts=['keep','wear','patch'].map(k=>{ const o=V1816_CH[k]; const t=typeof o.t==='function'?o.t(L.num):o.t; const on=L.choice===k;
+    return `<button class="v1816-opt ${on?'on':''} ${k==='wear'?'warm':''}" ${L.status==='open'?`data-a="v1816Pick" data-m="${L.id}" data-c="${k}"`:'disabled'}><b>${esc(t)}</b><span>${esc(o.d(L.num))}</span><span class="v1816-otags">${o.tags.map(([c,x])=>`<i class="${c}">${esc(x)}</i>`).join('')}</span>${on?'<em>Your call</em>':''}</button>`; }).join('');
+  const pairs=v1816Pairs(C,C.userSid).filter(x=>x.rel==='brothers'&&!(fam&&x.fam===fam.id)).slice(0,1);
+  const extra=`<div class="v1816-strip">${pairs.map(x=>{ const o=C.players[x.o], y=C.players[x.y]; return `<div class="v1816-mini"><span class="v1816-faces">${portraitSVG(o,40)}${portraitSVG(y,40)}</span><span><b>${esc(o.ln)} brothers</b><small>${esc(o.fn)} (Gr ${o.grade}) and ${esc(y.fn)} (Gr ${y.grade}) · ${x.n?'start together: +'+x.n+' chemistry':'on the same roster'}</small></span></div>`; }).join('')}
+    <button class="v1816-mini" data-a="go" data-r="hof"><span class="v1816-ic">🏛️</span><span><b>Hall of Fame family wall</b><small>Fathers, sons and brothers hang side by side</small></span></button></div>`;
+  const body=`<div class="v1816-mail"><div class="v1816-ml">${fam?v1816TreeHtml(C,fam.id,{focus:L.pid,q:L.status==='open'}):''}${extra}</div>
+    <div class="v1816-mr"><div class="v1816-paper"><div class="v1816-ph"><div><b>${esc(me.town)} Soccer · coach’s mailbox</b><small>Handwritten · left on your desk</small></div><span class="v1816-jer">${shirtSVG(me.c1,me.c2,String(L.num),64)}<small>RETIRED ${R&&R.cls?R.cls:''}</small></span></div><p>${esc(v1816Letter(C,L)).replace(/\n/g,'<br>')}</p></div>
+    <div class="v1816-opts">${opts}</div>${v1816Meters(M)}</div></div>`;
+  return modalShell('Coach’s mailbox',body,'','v1816-modal'); };
+A.v1816Pick=el=>{ const C=App.C; if(v1816Choose(C,el.dataset.m,el.dataset.c)){ queueSave(); try{ Sound.ui('pop'); }catch(e){} renderModal(); if(App.route==='office'||App.route==='families'){ App.keepScroll=true; render(); } } };
+A.v1816Open=el=>{ App.modal={type:'v1816mail',id:el.dataset.m}; renderModal(); };
+function v1816Open(C){ return v1816S(C).mail.filter(m=>m.status==='open'&&C.players[m.pid]); }
+
+/* ---------- Overview: a letter on the desk ---------- */
+{ const _ov=v15Overview; v15Overview=function(){ let h=_ov.apply(this,arguments); try{ const C=App.C; const o=v1816Open(C)[0]; if(o){ const p=C.players[o.pid];
+    const card=`<section class="ov-card v1816-ovmail" data-a="v1816Open" data-m="${o.id}" role="button" tabindex="0"><span class="v1816-env">✉️</span><div><span class="v1812p-kick">Coach’s mailbox · 1 letter</span><b>${esc(pname(p))} wants #${o.num}</b><small>${esc(v1816Name(C,o.of))}’s number is retired. Your call.</small></div><span class="btn sm pri">Read it</span></section>`;
+    const i=h.indexOf('<div class="ov-grid'); h=i>=0?h.slice(0,i)+card+h.slice(i):card+h; } }catch(e){ console.warn('v1816 ov',e); } return h; }; }
+
+/* ---------- the Family Ties page ---------- */
+VIEWS.families=()=>{ const C=App.C; const F=v1816S(C); const u=C.userSid; const mine=Object.values(F.fams).filter(f=>f.sid===u&&f.mem.length>1);
+  const others=Object.values(F.fams).filter(f=>f.sid!==u&&C.league.includes(f.sid)&&f.mem.length>1);
+  const open=v1816Open(C);
+  const mail=open.map(o=>{ const p=C.players[o.pid]; return `<button class="v1816-banner" data-a="v1816Open" data-m="${o.id}"><span class="v1816-env">✉️</span><span><b>A letter from ${esc(pname(p))}</b><small>He wants #${o.num}, his ${o.rel==='son'?'dad':'brother'}’s retired number</small></span><span class="btn sm pri">Read it</span></button>`; }).join('');
+  const pairs=v1816Pairs(C).filter(x=>C.league.includes(C.players[x.o].sid)).sort((a,b)=>(C.players[b.o].sid===u)-(C.players[a.o].sid===u)||b.n-a.n);
+  const pairHtml=pairs.map(x=>{ const o=C.players[x.o], y=C.players[x.y]; const s=Sx(o.sid); return `<div class="v1816-pair ${o.sid===u?'mine':''}"><span class="v1816-faces">${portraitSVG(o,44)}${portraitSVG(y,44)}</span><span><b>${esc(o.ln)} ${x.rel}</b><small>${crest(s,14)} ${esc(s.town)} · ${esc(o.fn)} (${LVL_NAME[o.lvl]}, Gr ${o.grade}) and ${esc(y.fn)} (${LVL_NAME[y.lvl]}, Gr ${y.grade})</small></span><em>${x.n?'+'+x.n+' chemistry':'not started together yet'}</em></div>`; }).join('');
+  const legacy=Object.entries(F.meters).map(([pid,M])=>{ const p=C.players[pid]; if(!p||p.sid!==u) return ''; return `<div class="v1816-leg"><span>${portraitSVG(p,40)}<b>${esc(pname(p))}</b><small>#${p.num} · ${LVL_NAME[p.lvl]}</small></span>${v1816Meters(M)}</div>`; }).join('');
+  const hist=F.mail.filter(m=>m.status==='done').map(m=>`<li><b>${m.cy||m.yr}</b> ${esc(v1816Name(C,m.pid))} asked for #${m.num}: <i>${esc(typeof V1816_CH[m.choice].t==='function'?V1816_CH[m.choice].t(m.num):V1816_CH[m.choice].t)}</i></li>`).join('');
+  const around=others.slice(0,24).map(f=>{ const s=Sx(f.sid); const names=f.mem.map(id=>{ const c=v1816Person(C,id); return c?`${esc(c.fn)}${c.elder?' <small>(Class of '+c.cls+')</small>':C.players[id]?' <small>(Gr '+C.players[id].grade+')</small>':' <small>(alum)</small>'}`:''; }).join(' · '); return `<li>${crest(s,18)}<span><b>The ${esc(f.ln)}s</b> <small>${esc(s.town)}</small><br><span class="v1816-mem">${names}</span></span></li>`; }).join('');
+  return `<div class="v1816-page"><section class="v1816-hero"><span class="v1812p-kick">Players · New</span><h2>Family Ties</h2><p>Little brothers, cousins and the kids of alumni arrive with a name to live up to. Families share a surname, hand down numbers, and hang in the Hall of Fame as a tree.</p></section>
+   ${mail}
+   <section class="card"><h3>Your program’s families</h3>${mine.length?mine.map(f=>v1816TreeHtml(C,f.id,{sm:true})).join(''):'<div class="empty">No families at your school yet. New middle schoolers arrive every summer, and some will be somebody’s little brother.</div>'}</section>
+   <div class="grid g2"><section class="card"><h3>Brothers together</h3>${pairHtml||'<div class="empty">No brothers share a roster right now.</div>'}<p class="tiny muted">Every game two relatives start together adds chemistry; at the end of the season the younger one grows from it.</p></section>
+   <section class="card"><h3>Legacy pressure</h3>${legacy||'<div class="empty">Nobody at your school is carrying a famous number yet.</div>'}${hist?`<h4 class="v1816-h4">The mailbox</h4><ul class="v1816-hist">${hist}</ul>`:''}</section></div>
+   <section class="card"><h3>Around the league</h3>${around?`<ul class="v1816-around">${around}</ul>`:'<div class="empty">No families elsewhere yet.</div>'}</section></div>`; };
+TITLES.families='Family Ties'; NAV_ICON.families='users'; NAV_DESC.families='Brothers, legacies and the coach’s mailbox';
+{ const i=NAV.findIndex(n=>n[0]==='dev'); if(i>=0&&!NAV.some(n=>n[0]==='families')) NAV.splice(i+1,0,['families','Family Ties']); }
+{ const g=TOPNAV.find(t=>t[0]==='squads'); if(g&&!g[3].includes('families')) g[3].push('families'); }
+if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('families');
+{ const _nb=navBadges; navBadges=function(C){ const b=_nb.apply(this,arguments); try{ const n=v1816Open(C).length; if(n) b.families=n; }catch(e){} return b; }; }
+
+/* ---------- player profile: the family strip ---------- */
+{ const _mp=MODALS.player; MODALS.player=function(m){ let h=_mp.apply(this,arguments); try{ const C=App.C; const fam=v1816Fam(C,m.id); if(!fam||fam.mem.length<2) return h;
+    const rel=fam.mem.filter(id=>id!==m.id).map(id=>{ const c=v1816Person(C,id); if(!c) return ''; const r=v1816Rel(C,m.id,id); const cur=!!C.players[id]; const lab=c.elder?(c.legend?'Hall of Fame':'Class of '+c.cls):cur?Sx(c.sid).town+' · Gr '+c.grade:'Class of '+c.gradYr;
+      return c.elder?`<span class="v1816-chip" title="${esc((c.honors||[]).join(' · '))}"><i>${r}</i> ${esc(c.fn+' '+c.ln)} <small>${esc(lab)}</small></span>`:`<button class="v1816-chip" data-a="openPlayer" data-id="${esc(id)}"><i>${r}</i> ${esc(c.fn+' '+c.ln)} <small>${esc(lab)}</small></button>`; }).join('');
+    const strip=`<div class="v1816-pstrip"><span class="v1816-pk">The ${esc(fam.ln)} family</span>${rel}<button class="v1816-chip more" data-a="go" data-r="families">Family Ties</button></div>`;
+    const i=h.indexOf('<div class="mbody">'); if(i>=0){ const j=i+'<div class="mbody">'.length; h=h.slice(0,j)+strip+h.slice(j); } }catch(e){ console.warn('v1816 player',e); } return h; }; }
+
+/* ---------- Hall of Fame: the family wall ---------- */
+{ const _hof=VIEWS.hof; VIEWS.hof=function(){ let h=_hof.apply(this,arguments); try{ const C=App.C; const F=v1816S(C); const fams=Object.values(F.fams).filter(f=>f.sid===C.userSid&&f.mem.length>1&&f.mem.some(id=>{ const e=F.elders[id]; return (e&&(e.legend||(e.honors||[]).length))||(C.hof||[]).some(x=>x.pid===id); }));
+    if(fams.length) h+=`<section class="card v1816-wall"><h3>The family wall</h3><p class="muted small">Fathers, sons and brothers of the program, side by side.</p>${fams.map(f=>v1816TreeHtml(C,f.id,{sm:true})).join('')}</section>`;
+    const un=(F.unretired||[]).filter(x=>x.unret&&C.players[x.unret.pid]); const pat=Object.entries(F.patch).map(([pid,num])=>C.players[pid]?`${esc(pname(C.players[pid]))} wears #${num} with a legacy patch`:'').filter(Boolean);
+    if(un.length||pat.length) h+=`<p class="tiny muted v1816-retnote">${[...un.map(x=>`#${x.num} (${esc(x.name)}) was un-retired in ${x.unret.yr} for ${esc(x.unret.name)}`),...pat].join(' · ')}</p>`; }catch(e){ console.warn('v1816 hof',e); } return h; }; }
+
+/* ===================== v18.16 QUICK JUMP & PINS =====================
+   Ctrl K (Cmd K on a Mac) anywhere in a career opens Quick Jump: one search across players, teams (your league and every
+   school in the State Poll), pages (and their tabs) and actions. Arrow keys move, Enter opens, Tab pins, ">" shows actions
+   only, Esc closes. Pinned items sit beside the search and in the Settings menu on every screen, with a live line each
+   (form, next meeting, readiness), plus a coach's note. "G" then a letter jumps to a page (G O Overview, G L Lineup ...).
+   On a phone the search icon opens Quick Jump. Pins and the note are saved with the career (C.qj). Identifiers v1816q. */
+const V1816Q={ open:false, q:'', cat:'all', act:0, items:[], g:0 };
+const V1816Q_GO={o:['office'],l:['squads',{tab:'lineup'}],s:['schedule'],m:['matchday'],t:['league'],p:['statepoll'],n:['news'],f:['families'],h:['hof'],d:['dev'],c:['school'],r:['records']};
+const V1816Q_CATS=[['all','All'],['player','Players'],['team','Teams'],['page','Pages'],['action','Actions']];
+function v1816qS(C){ const Q=C.qj||(C.qj={pins:[],note:''}); if(!Q.pins) Q.pins=[]; return Q; }
+const v1816qEl=d=>({dataset:d,closest:()=>null,getAttribute:k=>d[k]});
+function v1816qGrade(g){ return g>=9?['Fr','So','Jr','Sr'][g-9]:g+'th'; }
+
+/* ---------- what can be found ---------- */
+function v1816qPlayers(C){ const u=C.userSid; const out=[]; for(const p of Object.values(C.players)){ if(!C.league.includes(p.sid)) continue; const mine=p.sid===u;
+  out.push({k:'player',id:p.id,title:pname(p),sub:`${LVL_NAME[p.lvl]} · ${v1816qGrade(p.grade)} · ${V1816_POS[p.pos]||p.pos} · OVR ${Math.round(ovr(p))}${mine?'':' · '+Sx(p.sid).town}`,ico:portraitSVG(p,36),rank:(mine?2000:0)+ovr(p),run:()=>A.openPlayer(v1816qEl({id:p.id}))}); } return out; }
+function v1816qTeams(C){ const out=[]; for(const sid of C.league){ const s=Sx(sid); const t=standings(C,'V').find(r=>r.sid===sid); out.push({k:'team',id:sid,title:s.name,sub:`Team page · ${t?t.w+'-'+t.d+'-'+t.l:''} · schedule, roster, history`,ico:crest(s,30),rank:sid===C.userSid?900:500,run:()=>A.openSchool(v1816qEl({id:sid}))}); }
+  try{ const P=v1812pS(C); const last=v1812pLatest(C); for(const t of P.pool.teams){ const rk=last?v1812pRankOf(last,t.id):null; out.push({k:'team',id:t.id,title:t.name,sub:`State Poll · Section ${t.sec}${rk?' · No. '+rk:''} · team analytics`,ico:crest(v1812pSchool(C,t.id),30),rank:rk?300-rk:100,run:()=>A.v1812pTeam(v1816qEl({id:t.id}))}); } }catch(e){}
+  return out; }
+function v1816qPages(C){ const out=[]; const add=(r,title,sub,p,key)=>{ if(!VIEWS[r]) return; out.push({k:'page',id:r+(p?JSON.stringify(p):''),r,p:p||null,title,sub,ico:`<span class="v1816q-pi">${icon(NAV_ICON[r]||r,18)}</span>`,key,rank:p?(p.lvl==='V'?900:p.lvl==='JV'?450:0):10,run:()=>A.go(v1816qEl({r,p:p?JSON.stringify(p):''}))}); };
+  const gk={}; for(const [k,v] of Object.entries(V1816Q_GO)) if(!v[1]) gk[v[0]]='G '+k.toUpperCase();
+  for(const r of Object.keys(TITLES)) add(r,TITLES[r],(typeof NAV_DESC!=='undefined'&&NAV_DESC[r])||'',null,gk[r]);
+  for(const [l,n] of [['V','Varsity'],['JV','JV'],['MOD','Modified']]) add('squads','Lineup · '+n,'Squads → Lineup',{lvl:l,tab:'lineup'},l==='V'?'G L':'');
+  add('squads','Roster','Squads → Roster',{tab:'roster'});
+  for(const [t,n] of [['table','Standings'],['leaders','Leaders'],['rank','Rankings'],['schools','Schools']]) add('league',n,'League & Rankings → '+n,{tab:t});
+  for(const [t,n] of [['poll','Poll'],['teams','Teams'],['players','Players'],['awards','Awards']]) add('statepoll','State Poll · '+n,'State Poll → '+n,{pt:t});
+  for(const [t,n] of [['courier','The Courier'],['tv','TouchlineTV'],['wire','Newswire']]) add('news',n,'Newsroom → '+n,{nv:t});
+  for(const [t,n] of [['results','Results'],['rosters','Rosters'],['yearbook','Yearbooks'],['compare','Compare players'],['alumni','Alumni']]) add('history',n,'History → '+n,{tab:t});
+  return out; }
+function v1816qActions(C){ const out=[]; const add=(id,title,sub,ic,run,ok)=>{ if(ok===false) return; out.push({k:'action',id,title,sub,ico:`<span class="v1816q-pi act">${ic}</span>`,rank:5,run}); };
+  const uf=userFixture(C); const ph=C.phase;
+  add('play',playLabel(C),uf?'Opens the match preview':'Plays the round','\u25b6\ufe0f',()=>A.playNext());
+  add('round','Quick sim this round','Plays your match without watching','⏩',()=>A.simAhead(v1816qEl({k:'round'})),ph!=='offseason');
+  add('regular','Sim to end of regular season','Stops before Sectionals','⏭️',()=>A.simAhead(v1816qEl({k:'regular'})),['preseason','regular'].includes(ph));
+  add('season','Sim to end of season','Plays everything through the State final','🏁',()=>A.simAhead(v1816qEl({k:'season'})),ph!=='offseason');
+  add('preview','Match preview',uf?'Your next game':'','📋',()=>{ App.modal={type:'fixture',id:uf.id}; renderModal(); },!!uf);
+  const mail=typeof v1816Open==='function'?v1816Open(C)[0]:null; add('mail','Read the coach’s mailbox',mail?'A letter from '+pname(C.players[mail.pid]):'','✉️',()=>A.v1816Open(v1816qEl({m:mail.id})),!!mail);
+  add('sound','Toggle sound','Mute or unmute the game','🔈',()=>A.toggleSound&&A.toggleSound(v1816qEl({})));
+  add('theme','Appearance','Theme and colors','🎨',()=>A.openTheme(v1816qEl({})));
+  add('new','What’s new','Every update, newest first','✨',()=>A.whatsNew(v1816qEl({})));
+  add('saves','Switch save','Back to the save slots','💾',()=>A.toSaves(v1816qEl({})));
+  return out; }
+function v1816qAll(C){ return [...v1816qPlayers(C),...v1816qTeams(C),...v1816qPages(C),...v1816qActions(C)]; }
+
+/* ---------- matching ---------- */
+function v1816qMatch(text,q){ const t=text.toLowerCase(); const i=t.indexOf(q); if(i>=0){ const word=i===0||/[\s·\-'(]/.test(t[i-1]); return {s:(word?60:30)+(i===0?20:0)-text.length*0.05,hl:[[i,i+q.length]]}; }
+  let j=0; const hl=[]; for(let k=0;k<t.length&&j<q.length;k++) if(t[k]===q[j]){ hl.push([k,k+1]); j++; } if(j===q.length&&q.length>=2) return {s:10-hl[hl.length-1][0]*0.1,hl,fz:true}; return null; }
+function v1816qHl(text,hl){ if(!hl||!hl.length) return esc(text); let o='',p=0; for(const [a,b] of hl){ o+=esc(text.slice(p,a))+'<mark>'+esc(text.slice(a,b))+'</mark>'; p=b; } return o+esc(text.slice(p)); }
+function v1816qSearch(C){ let q=V1816Q.q.trim().toLowerCase(); let cat=V1816Q.cat; if(q.startsWith('>')){ cat='action'; q=q.slice(1).trim(); }
+  const all=v1816qAll(C).filter(x=>cat==='all'||x.k===cat); let res;
+  if(!q){ res=all.filter(x=>x.k==='action'||(x.k==='page'&&!x.p)||(cat!=='all'&&true)).map(x=>({...x,s:x.rank,hl:null})); }
+  else res=all.map(x=>{ const m=v1816qMatch(x.title,q)||(()=>{ const n=v1816qMatch(x.sub,q); return n?{s:n.s-40,hl:null}:null; })(); return m?{...x,s:m.s+x.rank/1000,hl:m.hl,fz:!!m.fz}:null; }).filter(Boolean);
+  if(q&&res.filter(x=>!x.fz).length>=3) res=res.filter(x=>!x.fz);
+  const lim=cat==='all'?{player:4,team:3,page:4,action:4}:{player:40,team:40,page:40,action:40};
+  const out=[]; for(const k of ['player','team','page','action']){ out.push(...res.filter(x=>x.k===k).sort((a,b)=>b.s-a.s).slice(0,lim[k])); } return out; }
+
+/* ---------- pins ---------- */
+function v1816qPinKey(x){ return x.k+':'+x.id; }
+function v1816qPinned(C,x){ return v1816qS(C).pins.some(p=>p.key===v1816qPinKey(x)); }
+function v1816qTogglePin(C,x){ const Q=v1816qS(C); const key=v1816qPinKey(x); const i=Q.pins.findIndex(p=>p.key===key); if(i>=0) Q.pins.splice(i,1); else { Q.pins.unshift({key,k:x.k,id:x.id,r:x.r||null,p:x.p||null}); Q.pins=Q.pins.slice(0,8); } queueSave(); }
+/* a pin's live line */
+function v1816qLive(C,pin){
+  if(pin.k==='player'){ const p=C.players[pin.id]; if(!p) return null; const yr=p.st&&p.st[C.year]&&p.st[C.year][p.lvl]; const b=yr&&yr.reg; const rt=b&&b.gp?(b.rt/b.gp).toFixed(2):null; let rd='';
+    try{ if(p.sid===C.userSid&&typeof evaluate==='function'){ const ev=evaluate(C,p); if(ev&&ev.grade) rd=' · readiness '+ev.grade; } }catch(e){}
+    return {title:p.ln,sub:`${p.pos} · OVR ${Math.round(ovr(p))}${rt?' · '+rt+' avg, '+b.gp+' GP':' · no games yet'}${rd}`,ico:portraitSVG(p,36),run:()=>A.openPlayer(v1816qEl({id:p.id}))}; }
+  if(pin.k==='team'){ const all=v1816qTeams(C); const x=all.find(t=>t.id===pin.id); if(!x) return null; let sub=x.sub;
+    if(C.league.includes(pin.id)){ const nx=Object.values(C.fixtures).filter(f=>f.yr===C.year&&f.st!=='d'&&f.lvl==='V'&&((f.h===pin.id&&f.a===C.userSid)||(f.a===pin.id&&f.h===C.userSid))).sort((a,b)=>(a.comp==='pre'?-1:0)-(b.comp==='pre'?-1:0)||a.rd-b.rd)[0];
+      sub=pin.id===C.userSid?x.sub.replace('Team page · ','Your program · '):nx?`${pin.id===C.rivals.heated?'Rival · ':''}next meeting: ${nx.comp==='reg'?'Matchday '+(nx.rd+1):'postseason'} (${nx.h===C.userSid?'home':'away'})`:`${pin.id===C.rivals.heated?'Rival · ':''}no meeting left this season`; }
+    return {title:x.title,sub,ico:x.ico,run:x.run}; }
+  if(pin.k==='page'){ const x=v1816qPages(C).find(t=>t.id===pin.id); if(!x) return null; let sub=x.sub; if(pin.r==='squads'&&pin.p&&pin.p.lvl){ try{ const v=validateLineup(C,C.userSid,pin.p.lvl); sub=v&&v.ok===false?'Needs attention':'Ready to go'; }catch(e){} } return {title:x.title,sub,ico:x.ico,run:x.run}; }
+  if(pin.k==='action'){ const x=v1816qActions(C).find(t=>t.id===pin.id); return x?{title:x.title,sub:x.sub,ico:x.ico,run:x.run}:null; }
+  return null; }
+function v1816qPinsHtml(C,o){ o=o||{}; const Q=v1816qS(C); const rows=Q.pins.map((pin,i)=>{ const L=v1816qLive(C,pin); if(!L) return ''; return `<div class="v1816q-pin"><button class="v1816q-pmain" data-a="v1816qPinRun" data-i="${i}">${L.ico}<span><b>${esc(L.title)}</b><small>${esc(L.sub)}</small></span></button><button class="v1816q-unpin" data-a="v1816qUnpin" data-i="${i}" title="Unpin" aria-label="Unpin">📌</button></div>`; }).join('');
+  return `<div class="v1816q-pins"><h3>Pinned <small>on every screen</small></h3>${rows||`<p class="v1816q-none">Nothing pinned yet. In Quick Jump, highlight anything and press Tab to pin it.</p>`}
+    <textarea class="v1816q-note" data-v1816q-note="1" rows="2" placeholder="Coach’s note: write yourself a reminder…" aria-label="Coach's note">${esc(Q.note||'')}</textarea></div>`; }
+A.v1816qPinRun=el=>{ const C=App.C; const pin=v1816qS(C).pins[+el.dataset.i]; const L=pin&&v1816qLive(C,pin); v1816qClose(); if(L) L.run(); };
+A.v1816qUnpin=el=>{ const C=App.C; v1816qS(C).pins.splice(+el.dataset.i,1); queueSave(); if(V1816Q.open) v1816qDraw(true); else { App.keepScroll=true; render(); } };
+
+/* ---------- the palette ---------- */
+function v1816qRoot(){ let el=document.getElementById('v1816q'); if(!el){ el=document.createElement('div'); el.id='v1816q'; document.body.appendChild(el); } return el; }
+function v1816qOpen(cat){ const C=App.C; if(!C||App.live) return; V1816Q.open=true; V1816Q.q=''; V1816Q.cat=cat||'all'; V1816Q.act=0; document.body.classList.add('v1816q-on'); v1816qDraw(true); const i=document.getElementById('v1816q-in'); if(i) i.focus(); }
+function v1816qClose(){ if(!V1816Q.open) return; V1816Q.open=false; document.body.classList.remove('v1816q-on'); const el=v1816qRoot(); el.innerHTML=''; }
+function v1816qRow(C,x,i){ const on=i===V1816Q.act; const pinned=v1816qPinned(C,x); const badge=on?'<span class="v1816q-b hot">Enter · open</span>':x.key?`<span class="v1816q-b key">${esc(x.key)}</span>`:`<span class="v1816q-b">${pinned?'Pinned':'Tab · pin'}</span>`;
+  return `<button class="v1816q-r ${on?'on':''}" data-v1816q-i="${i}" role="option" aria-selected="${on}">${x.ico}<span class="v1816q-t"><b>${v1816qHl(x.title,x.hl)}</b><small>${esc(x.sub)}</small></span>${pinned?'<i class="v1816q-pd" title="Pinned">📌</i>':''}${badge}</button>`; }
+function v1816qList(C){ const items=V1816Q.items=v1816qSearch(C); if(V1816Q.act>=items.length) V1816Q.act=Math.max(0,items.length-1);
+  if(!items.length) return `<div class="v1816q-empty">Nothing matches “${esc(V1816Q.q)}”. Try a surname, a school or a page.</div>`;
+  const lab={player:'Players',team:'Teams',page:'Pages',action:'Actions'}; let h='', last=null; items.forEach((x,i)=>{ if(x.k!==last){ h+=`<div class="v1816q-h">${lab[x.k]}</div>`; last=x.k; } h+=v1816qRow(C,x,i); }); return h; }
+function v1816qDraw(full){ const C=App.C; const el=v1816qRoot(); if(!V1816Q.open||!C) return;
+  if(full||!el.querySelector('.v1816q-box')){ const cat=V1816Q.q.trim().startsWith('>')?'action':V1816Q.cat;
+    el.innerHTML=`<div class="v1816q-scrim" data-v1816q-close="1"></div><div class="v1816q-wrap" role="dialog" aria-modal="true" aria-label="Quick Jump"><section class="v1816q-box"><div class="v1816q-in"><span class="v1816q-mag">${icon('search',20)}</span><input id="v1816q-in" type="text" autocomplete="off" spellcheck="false" placeholder="Jump to a player, team, page or action" value="${esc(V1816Q.q)}" aria-label="Quick Jump"><kbd>${/Mac/.test(navigator.platform)?'⌘ K':'Ctrl K'}</kbd></div>
+      <div class="v1816q-cats">${V1816Q_CATS.map(([k,l])=>`<button class="${cat===k?'on':''}" data-v1816q-cat="${k}">${l}</button>`).join('')}</div>
+      <div class="v1816q-list" role="listbox" id="v1816q-list">${v1816qList(C)}</div>
+      <div class="v1816q-foot"><span><kbd>↑↓</kbd> move</span><span><kbd>Enter</kbd> open</span><span><kbd>Tab</kbd> pin</span><span><kbd>&gt;</kbd> actions only</span><span><kbd>G</kbd> then a letter: go to a page</span><span class="grow"></span><span><kbd>Esc</kbd> close</span></div></section>
+      <aside class="v1816q-side">${v1816qPinsHtml(C)}</aside></div>`;
+    return; }
+  const cat=V1816Q.q.trim().startsWith('>')?'action':V1816Q.cat; el.querySelectorAll('[data-v1816q-cat]').forEach(b=>b.classList.toggle('on',b.dataset.v1816qCat===cat));
+  const L=el.querySelector('#v1816q-list'); if(L){ L.innerHTML=v1816qList(C); const on=L.querySelector('.v1816q-r.on'); if(on) on.scrollIntoView({block:'nearest'}); } }
+function v1816qMove(d){ const n=V1816Q.items.length; if(!n) return; V1816Q.act=(V1816Q.act+d+n)%n; v1816qDraw(); }
+function v1816qRun(i){ const x=V1816Q.items[i]; if(!x) return; v1816qClose(); try{ x.run(); }catch(e){ console.warn('quick jump',e); } }
+function v1816qPin(i){ const C=App.C; const x=V1816Q.items[i]; if(!x) return; v1816qTogglePin(C,x); const side=document.querySelector('.v1816q-side'); if(side) side.innerHTML=v1816qPinsHtml(C); v1816qDraw(); try{ Sound.ui('pop'); }catch(e){} }
+
+document.addEventListener('keydown',e=>{
+  const k=e.key; const mod=e.ctrlKey||e.metaKey;
+  if(mod&&(k==='k'||k==='K')){ if(!App.C||App.live) return; e.preventDefault(); e.stopPropagation(); if(V1816Q.open) v1816qClose(); else v1816qOpen(); return; }
+  if(V1816Q.open){ const inNote=e.target&&e.target.dataset&&e.target.dataset.v1816qNote; if(inNote){ if(k==='Escape'){ e.preventDefault(); e.stopPropagation(); v1816qClose(); } return; }
+    if(k==='Escape'){ e.preventDefault(); e.stopPropagation(); v1816qClose(); return; }
+    if(k==='ArrowDown'){ e.preventDefault(); v1816qMove(1); return; } if(k==='ArrowUp'){ e.preventDefault(); v1816qMove(-1); return; }
+    if(k==='Enter'){ e.preventDefault(); v1816qRun(V1816Q.act); return; } if(k==='Tab'){ e.preventDefault(); v1816qPin(V1816Q.act); return; } return; }
+  /* G then a letter */
+  const tg=e.target, typing=tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'||tg.tagName==='SELECT'||tg.isContentEditable); if(typing||mod||e.altKey||!App.C||App.modal||App.live) return;
+  if(k==='g'||k==='G'){ V1816Q.g=Date.now(); return; }
+  if(V1816Q.g&&Date.now()-V1816Q.g<1200){ V1816Q.g=0; const d=V1816Q_GO[k.toLowerCase()]; if(d&&VIEWS[d[0]]){ e.preventDefault(); A.go(v1816qEl({r:d[0],p:d[1]?JSON.stringify(d[1]):''})); } } },true);
+document.addEventListener('input',e=>{ const t=e.target; if(t&&t.id==='v1816q-in'){ V1816Q.q=t.value; V1816Q.act=0; v1816qDraw(); return; }
+  if(t&&t.dataset&&t.dataset.v1816qNote&&App.C){ v1816qS(App.C).note=t.value.slice(0,400); clearTimeout(V1816Q.nt); V1816Q.nt=setTimeout(()=>{ try{ queueSave(); }catch(x){} },500);
+    document.querySelectorAll('[data-v1816q-note]').forEach(o=>{ if(o!==t) o.value=t.value; }); } });
+document.addEventListener('mousemove',e=>{ if(!V1816Q.open) return; const r=e.target.closest&&e.target.closest('[data-v1816q-i]'); if(!r) return; const i=+r.dataset.v1816qI; if(i!==V1816Q.act){ V1816Q.act=i; document.querySelectorAll('.v1816q-r').forEach((b,j)=>{ const on=j===i; if(b.classList.contains('on')!==on){ b.classList.toggle('on',on); b.setAttribute('aria-selected',on); } }); } },{passive:true});
+document.addEventListener('click',e=>{ if(!V1816Q.open) return; const t=e.target;
+  if(t.closest('[data-v1816q-close]')){ v1816qClose(); return; }
+  const c=t.closest('[data-v1816q-cat]'); if(c){ V1816Q.cat=c.dataset.v1816qCat; if(V1816Q.q.trim().startsWith('>')) V1816Q.q=V1816Q.q.replace(/^\s*>\s*/,''); const inp=document.getElementById('v1816q-in'); if(inp){ inp.value=V1816Q.q; inp.focus(); } V1816Q.act=0; v1816qDraw(); return; }
+  const r=t.closest('[data-v1816q-i]'); if(r){ v1816qRun(+r.dataset.v1816qI); } });
+
+/* ---------- where it lives: the Settings menu (pins + a Quick Jump entry), the phone search icon ---------- */
+{ const _top=v15Top; v15Top=function(C){ let h=_top.apply(this,arguments); try{ const kb=/Mac/.test(navigator.platform)?'⌘K':'Ctrl K';
+    const add=`<button role="menuitem" class="tn-item" data-a="v1816qOpen"><span class="tn-ico">${icon('search',18)}</span><span class="grow"><b>Quick Jump</b><small>Find anything · ${kb}</small></span></button>${v1816qS(C).pins.length?`<div class="v1816q-ddpins">${v1816qPinsHtml(C,{dd:true})}</div>`:''}`;
+    h=h.replace('<div class="tn-dd tn-dd-r" role="menu" aria-label="Settings">','<div class="tn-dd tn-dd-r v1816q-gear" role="menu" aria-label="Settings">'+add); }catch(e){ console.warn('quick jump top',e); } return h; }; }
+A.v1816qOpen=()=>v1816qOpen();
+document.addEventListener('focusin',e=>{ if(e.target&&e.target.id==='q'&&window.matchMedia('(max-width:900px)').matches&&App.C){ e.target.blur(); v1816qOpen(); } });
 
 </script>

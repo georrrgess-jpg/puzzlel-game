@@ -76,8 +76,8 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   await ph.mouse.click(370,420); await ph.waitForTimeout(350); const D1=await ph.evaluate(()=>document.body.classList.contains('navopen'));
   await ph.click('[data-a="burger"]'); await ph.waitForTimeout(300); await ph.keyboard.press('Escape'); await ph.waitForTimeout(300); const D2=await ph.evaluate(()=>document.body.classList.contains('navopen'));
   ok(D0&&!D1&&!D2, 'the phone side menu closes on a tap outside it and on Escape');
-  await ph.click('#q'); await ph.waitForTimeout(350); const Q=await ph.evaluate(()=>{ const r=document.querySelector('#q').getBoundingClientRect(); return {l:Math.round(r.left),w:Math.round(r.width)}; });
-  ok(Q.w>=340&&Q.l>=0, `phone search opens across the top bar (${Q.w} px)`);
+  await ph.click('#q'); await ph.waitForTimeout(350); const Q=await ph.evaluate(()=>({open:V1816Q.open,focus:document.activeElement&&document.activeElement.id}));
+  ok(Q.open&&Q.focus==='v1816q-in', 'on a phone the search icon opens Quick Jump (v18.16)'); await ph.keyboard.press('Escape'); await ph.waitForTimeout(200);
   const routes=await ph.evaluate(()=>Object.keys(VIEWS).filter(r=>!/lab|sandbox|anim|test|wrapped/.test(r))); const wide=[];
   for(const r of routes){ const sw=await ph.evaluate(r=>{ App.route=r; App.params={}; App.modal=null; render(); return document.documentElement.scrollWidth; },r); if(sw>390) wide.push(r+':'+sw); }
   ok(wide.length===0, `no page scrolls sideways on a phone (${routes.length} pages)`+(wide.length?': '+wide.join(', '):''));

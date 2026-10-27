@@ -2,6 +2,68 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.16 (Family Ties, Quick Jump & Pins)
+
+**Family Ties** (`src/v17/9a_family.js`, `9a_family_ui.js`, `9a_family.css`)
+
+*State:* `C.fam = {elders, links, fams, mail, meters, fx, patch, chem, unretired}`.
+- `links[pid] = {f, rel: 'brother'|'cousin'|'son', of, gen}`; elders are pre-career alumni (`el*` ids, with honors, note and look).
+- Links live outside the player objects, so they survive graduation (`compactAlum` drops unknown fields).
+
+*Joining a family:* `v1816Join` copies the surname (cousins only 60%) and skin/hair colour (`p.look`), and re-rolls a duplicate first name. Names and looks never touch the match engine.
+
+*Seeding:* a `newCareer` wrapper, `v1816Seed`, adds at every league school:
+- brothers on the same roster (user school always, others 60%);
+- sons of elders;
+- cousins (30%).
+
+At the user school it also seeds a legend:
+- a father elder;
+- a Hall of Fame brother elder with `C.retired[u]` = `{num, pid: elId, legacy: true}`. Anyone wearing that number is renumbered. The HoF jersey wall reads only `num`, `name` and `yr`.
+- a little brother on the roster, with a mailbox letter.
+
+*Each rollover* (wrapper, after the engine): `v1816Arrivals` turns new grade-7 Modified recruits into relatives.
+- Odds per kid: brother of a current player (22%; 32% at the user school), brother of a recent alum, son of a new elder, or cousin.
+- At most 1 per school, 2 at the user school.
+- A free number is handed down. A retired number at the user school becomes a mailbox letter.
+- Unanswered letters resolve to "keep" at the next rollover.
+- Legacy-patch numbers are restored after the engine's retired-number sweep (`engine.js:1124`).
+
+*Letter choices* (`v1816Choose`), each moving the meters (expectations / support / teammates):
+- `keep`: prestige +2, plan.gain ×0.92.
+- `wear`: un-retire (the entry moves to `F.unretired`; the HoF shows a note), take the number (a teammate at that level is renumbered), plan.gain ×1.25, −3 rating for his level's next 3 games, restored in a `finishMatch` wrapper.
+- `patch`: take the number, it stays retired, `F.patch[pid] = num`, +1 rating, prestige −2.
+
+*Development:* a `seasonStart` wrapper multiplies plan.gain by `v1816DevMult` (meters, plus ×1.25 while wearing an un-retired number).
+
+*Chemistry:* +1 per match where two relatives are both in a side's slots (`finishMatch` wrapper), capped at 10. At rollover the younger gets +0.12 per point (max +1.2).
+
+*Old saves:* `migrate` marks them seeded (no retro-seed); arrivals start at the next off-season.
+
+*Screens:*
+- `MODALS.v1816mail` (tree, letter, choices, meters);
+- an Overview letter card;
+- `VIEWS.families` (Squad menu: your families, brothers together, legacy pressure, mailbox history, around the league);
+- a player-profile family strip;
+- the HoF family wall;
+- a nav badge for open letters.
+
+**Quick Jump & Pins** (`src/v17/9b_quickjump.js`, `.css`)
+- Opens with Ctrl/Cmd K (capture-phase keydown).
+- Sources: league players, league + State Poll teams, every `TITLES` route plus their tabs, and actions (play / sim round / sim regular / sim season / preview / mailbox / sound / theme / what's new / saves).
+- Matching: word-start > substring > subsequence. Subsequence (fuzzy) results are dropped once there are 3 substring hits. Highlights use `<mark>`.
+- Keys: ↑↓ move, Enter opens, Tab pins, `>` shows actions only, chips pick a category.
+- `G` + letter page shortcuts (`V1816Q_GO`).
+- Pins: `C.qj.pins` (max 8) with live lines (player form/OVR/readiness, rival's next meeting, lineup validity) and `C.qj.note`.
+- They are shown in the palette side panel and at the top of the Settings (gear) menu.
+- On ≤900 px, focusing the search icon opens Quick Jump (so `ui1815.js` now checks that).
+
+**Tests:** `test/family.js` (in `run_all.sh`).
+
+**Not covered:**
+- The poll's simulated schools (outside your league) have no families.
+- Chemistry is a development bonus, not an in-match effect.
+
 ## Version 18.15 (UI polish pass)
 
 All in `src/v17/99_ui.js` + `99_ui.css`, presentation only; before/after shots in `test/shots/ui19/`.
