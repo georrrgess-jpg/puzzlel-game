@@ -17,8 +17,10 @@
 .bz.f.pv{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px var(--acc)}
 .bz.clr::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,#fff6,#fff2);box-shadow:inset 0 0 0 2px var(--acc),0 0 12px var(--acc);pointer-events:none}
 .bz.w.clr::after{content:'🌿';display:grid;place-items:center;background:#fff3;font-size:calc(var(--bw)/var(--n)*.56)}
-.bz.land{animation:bgDrop .34s cubic-bezier(.3,1.7,.5,1)}
-@keyframes bgDrop{0%{transform:scale(1.35)}55%{transform:scale(.92)}100%{transform:none}}
+.bz.la{animation:bgDropA .34s cubic-bezier(.3,1.7,.5,1)}
+.bz.lb{animation:bgDropB .34s cubic-bezier(.3,1.7,.5,1)}   /* twin keyframes: see again() in common.js */
+@keyframes bgDropA{0%{transform:scale(1.35)}55%{transform:scale(.92)}100%{transform:none}}
+@keyframes bgDropB{0%{transform:scale(1.35)}55%{transform:scale(.92)}100%{transform:none}}
 /* line bloom: each block flashes white, swells, then shrinks away as its flower rises (js/modes/blocks.js bloom()) */
 .bgb{position:relative}
 .bz.bloom{z-index:1;animation:bgBloom .62s cubic-bezier(.5,0,.6,1) var(--d,0ms) both}
@@ -55,6 +57,7 @@ html.q-low .bz.bloom{animation-name:bgBloomLite}
   background:radial-gradient(circle at 50% 0,#ffffff12,#0000003f);box-shadow:inset 0 3px 8px #0008,inset 0 0 0 1px #ffffff12;transition:opacity .2s,transform .15s}
 .bgs.used{opacity:.35}
 .bgs.lifted .bpc{opacity:.25}
+.bgs.lifted{box-shadow:inset 0 3px 8px #0008,inset 0 0 0 2px #ffffff38}   /* B5: the empty slot keeps a faint outline while its block is in your hand */
 .bgs.hint{animation:hint .6s ease-in-out infinite alternate}
 .bpc{display:grid;pointer-events:none;transition:opacity .15s}
 .bpc i{display:block}

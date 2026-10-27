@@ -27,6 +27,7 @@ MAKERS.lights=function({R,tier,board,api}){
     const c=el('button','cell light','<u></u><i><b></b></i><em></em>');
     c.style.setProperty('--fl',(2.4+((i*7)%5)*.35)+'s');c.style.setProperty('--fo',-((i*13)%9)*.3+'s');
     c.setAttribute('aria-label',`Light, row ${(i/n|0)+1} column ${i%n+1}`);c.onclick=()=>press(i);gfx.tidy(c);wrap.appendChild(c);return c});
+  const glowEl=el('i','lglow');wrap.prepend(glowEl);   // the board glow is its own element: its opacity (not a custom property on the grid) follows the number of lit bulbs
   board.appendChild(wrap);api.stagger(cells);
   const clearPv=gfx.preview(cells,i=>gfx.hits(i,n,offs),api.over);
   function render(){
@@ -34,7 +35,7 @@ MAKERS.lights=function({R,tier,board,api}){
     glow();api.moves(moves,s3,s2)}
   function glow(){
     const lit=grid.filter(v=>v).length;
-    wrap.style.setProperty('--lit',(lit/(n*n)).toFixed(3));
+    glowEl.style.opacity=Math.min(1,.15+lit/(n*n)*1.6).toFixed(3);
     api.coach(lit?`💡 ${lit} light${lit>1?'s':''} on`:'🌙 All dark!');
     return lit}
   api.setTip(`Tap a square: it and its pattern ${patIcon(offs)} flip. Turn every light off. Hold a square to preview.`);
@@ -46,13 +47,13 @@ MAKERS.lights=function({R,tier,board,api}){
     /* read phase first, then one write phase: a forced reflow per cell is what made big boards stutter */
     const changed=[];cells.forEach((c,j)=>{if(before[j]!==grid[j])changed.push(j)});
     const pos=changed.map(j=>centerOf(cells[j])),[cx,cy]=centerOf(cells[i]),cw=cells[i].offsetWidth;
-    changed.forEach(j=>cells[j].classList.remove('flip'));
-    void wrap.offsetWidth;
+    const acc=gfx.acc(),offN=changed.filter(j=>before[j]&&!grid[j]).length;
     changed.forEach((j,k)=>{const c=cells[j],d=Math.abs(j%n-x0)+Math.abs(((j/n)|0)-y0),ms=d*65;
-      c.style.setProperty('--d',ms+'ms');c.classList.add('flip');
+      /* restart the squash and flash by switching to the twin keyframes (see lights.css): no forced reflow */
+      if(!FL_RM){c.style.setProperty('--d',ms+'ms');again(c,'f')}
       clearTimeout(c._lt);
       const set=()=>{c.classList.toggle('on',!!grid[j]);c.setAttribute('aria-pressed',grid[j]?'true':'false');
-        if(before[j]&&!grid[j]&&gfx.live(c)){gfx.pulse(c,'out');burst(pos[k][0],pos[k][1],gfx.acc(),8,.55)}};
+        if(before[j]&&!grid[j]&&gfx.live(c)){if(!FL_RM)again(c,'p');burst(pos[k][0],pos[k][1],acc,offN>2?4:6,.5)}};
       ms?c._lt=setTimeout(set,ms+60):set();
     });
     ring(cx,cy,'var(--acc)',cw*2.4);
@@ -61,6 +62,9 @@ MAKERS.lights=function({R,tier,board,api}){
     api.moves(moves,s3,s2);api.commit();
     if(!lit){
       clearPv();wrap.classList.add('dark');
+      /* B2: a diagonal wave of light sweeps the board as it goes dark, then a moon bursts from the middle */
+      if(!FL_RM){cells.forEach((c,j)=>{c.style.setProperty('--d',((j%n)+((j/n)|0))*50+'ms');again(c,'w')});
+        setTimeout(()=>{if(!wrap.isConnected||Q.modal)return;const[mx,my]=centerOf(wrap);burst(mx,my,'#9fb4ff',14,1.1);ring(mx,my,'#9fb4ff',wrap.offsetWidth*.9,800);floatText(mx,my-wrap.offsetHeight*.12,'🌙',true)},300+n*100)}
       cells.forEach((c,j)=>{const d=Math.abs(j%n-x0)+Math.abs(((j/n)|0)-y0);
         setTimeout(()=>{if(!gfx.live(c))return;const[x,y]=centerOf(c);burst(x,y,'#ffffff',5,.45);c.classList.add('twk')},150+d*60)});
       api.win(starsFor(moves,s3,s2));

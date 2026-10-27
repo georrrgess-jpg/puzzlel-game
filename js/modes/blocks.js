@@ -104,7 +104,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
 
   function pieceHTML(s,size,gap){return `<div class="bpc" style="grid-template-columns:repeat(${s.w},${size}px);grid-template-rows:repeat(${s.h},${size}px);gap:${gap}px">${
     [...Array(s.w*s.h)].map((_,i)=>{const x=i%s.w,y=(i/s.w)|0,on=s.c.some(p=>p[0]===x&&p[1]===y);return on?`<i class="bp" style="--c:${COLORS[BG_COL[s.base]]}"></i>`:'<i></i>'}).join('')}</div>`}
-  function renderTray(){
+  function renderTray(refill){
     const slotW=slots[0].clientWidth||80,slotH=slots[0].clientHeight||70;
     slots.forEach((el_,i)=>{
       const si=tray[i];
@@ -112,6 +112,8 @@ MAKERS.blocks=function({R,tier,level,board,api}){
       el_.classList.remove('used');const s=BG_SHAPES[si];
       const size=Math.max(10,Math.min(cs*.62,(slotW-14)/s.w-2,(slotH-14)/s.h-2));
       el_.innerHTML=pieceHTML(s,size,2);
+      /* B7: a fresh set of three slides in from the right, one after another */
+      if(refill)wa(el_.firstElementChild,[{transform:'translateX(70px) scale(.8)',opacity:0},{transform:'none',opacity:1}],{duration:420,delay:i*70,easing:'cubic-bezier(.3,1.5,.5,1)',fill:'backwards'});
     });
   }
   function render(){
@@ -139,10 +141,10 @@ MAKERS.blocks=function({R,tier,level,board,api}){
     // visual step 1: the block lands
     vis=G.slice();mine.forEach(i=>vis[i]=col);
     G=a.g2;lines+=a.lines;moves++;tray[slot]=null;
-    if(tray.every(v=>v==null)){tray=trayAt(nextK);nextK+=3}
+    let refilled=false;if(tray.every(v=>v==null)){tray=trayAt(nextK);nextK+=3;refilled=true}
     const my=++gen;
-    render();renderTray();
-    mine.forEach(i=>{const c=cells[i];c.classList.remove('land');void c.offsetWidth;c.classList.add('land')});
+    render();renderTray(refilled);
+    mine.forEach(i=>again(cells[i],'l'));
     sfx.tok();buzz(10);
     api.commit();
     const won=goalMet(lines,G);
@@ -260,7 +262,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
     move(x,y,e){
       if(!ghost)return;
       const w=ghost.offsetWidth,h=ghost.offsetHeight,ly=y-LIFT(e);
-      ghost.style.transform=`translate3d(${x-w/2}px,${ly-h/2}px,0) scale(1.05)`;
+      ghost.style.transform=`translate3d(${x-w/2}px,${ly-h/2}px,0) scale(1.08)`;
       const t=snapTo(x,y,e),same=(t&&target&&t[0]===target[0]&&t[1]===target[1])||(!t&&!target);
       if(!same){target=t;showPreview(t);if(t)sfx.tick(1.5)}
     },
@@ -271,7 +273,9 @@ MAKERS.blocks=function({R,tier,level,board,api}){
       if(moved){sfx.bonk();api.meh()}
       const r=slots[i].getBoundingClientRect(),w=g.offsetWidth,h=g.offsetHeight;
       const a=wa(g,[{transform:g.style.transform},{transform:`translate3d(${r.left+r.width/2-w/2}px,${r.top+r.height/2-h/2}px,0) scale(.7)`,opacity:.3}],{duration:190,easing:'ease-out'});
-      if(a)a.onfinish=()=>g.remove();else g.remove();
+      /* B6: the block lands back in its slot and the slot gives a little shake */
+      const back=()=>{g.remove();if(moved)wa(slots[i],[{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'translateX(-2px)'},{transform:'none'}],{duration:170})};
+      if(a)a.onfinish=back;else g.remove();
     },
     cancel(){if(ghost){ghost.remove();ghost=null}if(slotI>=0)slots[slotI].classList.remove('lifted');slotI=-1;target=null;clearPv()}
   });
@@ -281,7 +285,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   function clearHint(){clearTimeout(hintT);cells.forEach(c=>c.classList.remove('ht'));slots.forEach(s=>{s.classList.remove('hint');s.removeAttribute('data-h')})}
   function restoreState(s){
     ({G,tray,nextK,lines,moves}=JSON.parse(s));gen++;finished=false;vis=G.slice();vlines=lines;combo=0;clearHint();clearPv();
-    fxL.innerHTML='';cells.forEach(c=>{c.classList.remove('land','bloom');c.style.removeProperty('--d');c._v=null});measure();render();renderTray();requestAnimationFrame(checkStuck);
+    fxL.innerHTML='';cells.forEach(c=>{c.classList.remove('la','lb','bloom');c.style.removeProperty('--d');c._v=null});measure();render();renderTray();requestAnimationFrame(checkStuck);
   }
   return{
     snap:()=>JSON.stringify({G,tray,nextK,lines,moves}),

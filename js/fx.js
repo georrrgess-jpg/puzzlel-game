@@ -2,7 +2,7 @@
 /* ====================== particles ====================== */
 const fxc=$('#fx'),fctx=fxc.getContext('2d');let parts=[],raf=0,dpr=1,dirtyBox=null;
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resizeFx(){dirtyBox=null;dpr=Math.min(Q.tier==='high'?1.75:1.25,window.devicePixelRatio||1);fxc.width=innerWidth*dpr;fxc.height=innerHeight*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
+function resizeFx(){dirtyBox=null;dpr=Math.min(Q.tier==='high'?1.25:1,window.devicePixelRatio||1);/* particles are soft glows: a smaller canvas costs far less to commit every frame */fxc.width=innerWidth*dpr;fxc.height=innerHeight*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
 addEventListener('resize',resizeFx);Q.on(resizeFx);resizeFx();
 /* every effect goes through add() so the live-particle count never exceeds the tier's cap */
 const add=p=>{if(parts.length<Q.pcap||p.sh==='flash')parts.push(p)};
@@ -43,19 +43,24 @@ function loop(){
   if(dirtyBox){fctx.setTransform(1,0,0,1,0,0);fctx.clearRect(dirtyBox[0]*D-2,dirtyBox[1]*D-2,(dirtyBox[2]-dirtyBox[0])*D+4,(dirtyBox[3]-dirtyBox[1])*D+4)}
   if(Q.modal&&Q.tier==='low')parts.length=Math.min(parts.length,30);
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];if(!(p.life>0&&p.y<innerHeight+40)){parts[i]=parts[parts.length-1];parts.pop()}}
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const glows=[],sparks=[];
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,lastC='',plain=false;const glows=[],sparks=[];
   for(const p of parts){p.x+=p.vx+(p.wob?Math.sin(p.life*20+p.wob)*.8:0);p.y+=p.vy;p.vy+=p.g;p.vx*=.985;p.life-=p.decay;p.rot+=p.vr;
     const m=(p.sh==='glow'||p.sh==='flash'?p.size:p.size*1.6)+8;
     if(p.x-m<x0)x0=p.x-m;if(p.y-m<y0)y0=p.y-m;if(p.x+m>x1)x1=p.x+m;if(p.y+m>y1)y1=p.y+m;
     if(p.sh==='glow'||p.sh==='flash'){glows.push(p);continue}
     if(p.sh==='spark'){sparks.push(p);continue}
     const al=Math.max(0,Math.min(1,p.life*1.6));if(al<.03)continue;
-    fctx.globalAlpha=al;fctx.fillStyle=p.color;
-    const c=Math.cos(p.rot)*D,s=Math.sin(p.rot)*D;fctx.setTransform(c,s,-s,c,p.x*D,p.y*D);
-    if(p.sh==='sq'){const h=Math.cos(p.rot*2);fctx.fillRect(-p.size/2,-p.size/3*h,p.size,p.size*.66*h);fctx.fillStyle='#ffffff55';fctx.fillRect(-p.size/2,-p.size/3*h,p.size,p.size*.2*h)}
-    else if(p.sh==='rib'){const h=Math.cos(p.rot*1.7);fctx.fillRect(-p.size*.18*h,-p.size*.8,p.size*.36*h,p.size*1.6)}
-    else if(p.sh==='star'){starPath(fctx,p.size*.8);fctx.fill();fctx.fillStyle='#ffffff70';starPath(fctx,p.size*.32);fctx.fill()}
-    else{fctx.beginPath();fctx.arc(0,0,p.size/2,0,7);fctx.fill();fctx.fillStyle='#ffffff80';fctx.beginPath();fctx.arc(-p.size*.15,-p.size*.15,p.size*.17,0,7);fctx.fill()}}
+    fctx.globalAlpha=al;if(p.color!==lastC){fctx.fillStyle=p.color;lastC=p.color}
+    if(p.sh==='sq'||p.sh==='rib'||p.sh==='star'){   // rotated shapes need their own transform
+      const c=Math.cos(p.rot)*D,s=Math.sin(p.rot)*D;fctx.setTransform(c,s,-s,c,p.x*D,p.y*D);plain=false;
+      if(p.sh==='sq'){const h=Math.cos(p.rot*2);fctx.fillRect(-p.size/2,-p.size/3*h,p.size,p.size*.66*h);fctx.fillStyle='#ffffff55';fctx.fillRect(-p.size/2,-p.size/3*h,p.size,p.size*.2*h);lastC=''}
+      else if(p.sh==='rib'){const h=Math.cos(p.rot*1.7);fctx.fillRect(-p.size*.18*h,-p.size*.8,p.size*.36*h,p.size*1.6)}
+      else{starPath(fctx,p.size*.8);fctx.fill();fctx.fillStyle='#ffffff70';starPath(fctx,p.size*.32);fctx.fill();lastC=''}
+    }else{   // round dots: no rotation, so no per-particle transform; the highlight only where it can be seen (6 px and up)
+      if(!plain){fctx.setTransform(D,0,0,D,0,0);plain=true}
+      fctx.beginPath();fctx.arc(p.x,p.y,p.size/2,0,7);fctx.fill();
+      if(p.size>=6){fctx.fillStyle='#ffffff80';fctx.beginPath();fctx.arc(p.x-p.size*.15,p.y-p.size*.15,p.size*.17,0,7);fctx.fill();lastC=''}
+    }}
   fctx.setTransform(D,0,0,D,0,0);
   if(sparks.length){fctx.strokeStyle='#fff';fctx.lineWidth=2;fctx.lineCap='round';fctx.globalAlpha=.8;fctx.beginPath();for(const p of sparks){fctx.moveTo(p.x,p.y);fctx.lineTo(p.x-p.vx*3,p.y-p.vy*3)}fctx.stroke()}
   if(glows.length){

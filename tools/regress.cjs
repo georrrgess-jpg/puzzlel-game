@@ -294,6 +294,38 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('A5 the spin finishes and the wheel rests on its prize', await p.evaluate(() => !document.querySelector('.wheelwrap.going') || /won/i.test(document.querySelector('#toast').textContent)));
   });
 
+  await test('B mode animations', async p => {
+    await prep(p);
+    // B3: tapping a tube the sand cannot go into wobbles the picked-up tube and flashes the target
+    let lv = await typeLevel(p, 'tubes'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    await p.evaluate(() => { const s = JSON.parse(__game.cur.puz.snap()); s.tubes = s.tubes.map(() => []); s.tubes[0] = [0, 0]; s.tubes[1] = [1]; s.tubes[2] = [2, 3]; __game.cur.puz.restore(JSON.stringify(s)) }); await sleep(300);
+    await p.evaluate(() => { const t = document.querySelectorAll('#board .tube'); t[0].click(); t[1].click() }); await sleep(100);
+    const d = await p.evaluate(() => { const t = document.querySelectorAll('#board .tube'); return { wobble: t[0].getAnimations().length > 0, flash: !!t[1].querySelector('.gf-no') && t[1].querySelector('.gf-no').getAnimations().length > 0, sel: t[1].classList.contains('sel') } });
+    ck('B3 a denied pour wobbles, flashes and re-selects', d.wobble && d.flash && d.sel, JSON.stringify(d));
+    // B7 + B12 on Block Garden
+    lv = await typeLevel(p, 'blocks'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    for (let k = 0; k < 3; k++) { await p.evaluate(() => __game.cur.puz._bot()); await sleep(500) }
+    ck('B7 a new tray slides in after the third block', await p.evaluate(() => [...document.querySelectorAll('.bgs')].filter(s => s.firstElementChild && s.firstElementChild.getAnimations().length > 0).length) >= 1);
+    await p.evaluate(() => { let k = 0; while (__game.cur.puz._bot() && k++ < 300); }); await sleep(4500);
+    ck('B12 the win sweep reaches Block Garden cells', await p.evaluate(() => document.querySelectorAll('#board .bz.f.celebrate').length) > 0);
+  });
+
+  await test('B merge and threads and lights animations', async p => {
+    await prep(p);
+    await p.evaluate(() => { __game.S.gfx = 'high'; Q.apply() });
+    let lv = await typeLevel(p, 'merge'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    await p.evaluate(() => { window.__sway = 0; const o = Element.prototype.animate; Element.prototype.animate = function (k, op) { if (Array.isArray(k) && k[1] && k[1].transform === 'rotate(5deg)') window.__sway++; return o.call(this, k, op) } });
+    await sleep(3200);
+    ck('B8 a plant sways while the garden is idle', await p.evaluate(() => window.__sway) > 0);
+    // (B9, the red pulse when the garden is full, cannot be reached in a test: a board full of 7s has already met the goal. Checked by hand.)
+    lv = await p.evaluate(() => { let n = 11; while (__game.typeFor(n) !== 'threads') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(7600);
+    ck('B10 the start stars pulse after 6 s of nothing', await p.evaluate(() => document.querySelectorAll('.st.cue').length) >= 1);
+    lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    for (let k = 0; k < 40 && !(await p.evaluate(() => __game.cur.over)); k++) { await p.evaluate(() => { const q = __game.cur.puz; q.hint(); const h = document.querySelector('#board .hint'); if (h) h.click() }); await sleep(200) }
+    await sleep(600);
+    ck('B2 the finish sends a wave and a moon', await p.evaluate(() => document.querySelectorAll('.cell.light.wa em,.cell.light.wb em').length > 0 && [...document.querySelectorAll('.ftxt')].some(e => e.textContent.includes('🌙'))));
+  });
+
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');
   await browser.close(); srv.close(); process.exit(fails ? 1 : 0);
 })();

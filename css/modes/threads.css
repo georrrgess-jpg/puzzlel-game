@@ -36,6 +36,8 @@
 .st.end .ring{opacity:1;animation:thRing 1.1s ease-out infinite}
 @keyframes thRing{0%{transform:scale(.7);opacity:.95}100%{transform:scale(1.5);opacity:0}}
 .st.stuck .ring{stroke:#ff7a8a}
+.st.cue .ring{opacity:1;animation:thCue 1.3s ease-out 2}
+@keyframes thCue{0%{transform:scale(.7);opacity:.95}100%{transform:scale(1.9);opacity:0}}
 .st.stuck .core{fill:#ffb3bd}
 /* first levels: the start star is marked */
 .st.start .ring{opacity:1;stroke:#7dffb0;stroke-dasharray:1.6 1.2;animation:thSpin 3s linear infinite}

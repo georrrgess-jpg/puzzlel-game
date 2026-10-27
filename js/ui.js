@@ -163,7 +163,7 @@ function onWin(stars){
   emit('coins',coins+chest);
   sfx.win();buzz([30,40,60]);confetti();
   const[bx,by]=centerOf(board);burst(bx,by,'#ffd166',50,1.8);ring(bx,by,'#fff',420,900);
-  const els=$$('#board .cell,#board .tube,#board .cel'),step=Math.min(28,700/Math.max(1,els.length));
+  const els=$$('#board .cell,#board .tube,#board .cel,#board .bz.f,#board .mg.full'),step=Math.min(28,700/Math.max(1,els.length));
   els.forEach((c,i)=>{c.style.animationDelay=i*step+'ms';c.classList.add('celebrate')});
   const L=cur.last,near=!daily&&stars<3&&L?L.m-(stars===2?L.s3:L.s2):0;
   setTimeout(()=>{

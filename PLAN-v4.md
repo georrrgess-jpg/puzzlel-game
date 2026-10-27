@@ -352,3 +352,27 @@ Notes on how each was fixed, for whoever touches this next:
 - **A8:** the level-up line is a full-width shimmering ribbon that springs in; the home XP ring animates from its old value (all the way round, then from empty, after a level-up).
 - `tools/regress.cjs` has 6 more checks (63 in total).
 - **Perf (4× throttle, same machine state):** map 59.7, modal 59.6; home and win 53 on `high` (win plays Lights Out; see Phase 6); all scenarios ≥ 54 on `low` except Lights Out based ones.
+
+### Phase 6: mode animations and the Lights Out frame rate (done, with one open item)
+
+**Lights Out frame rate.** Idle is a perfect 60 fps; the drops happen only while taps are processed. Findings from a trace and a CPU profile (4× throttle):
+- No single feature explains it (removing any one of halos, sockets, infinite animations, glow shadows, particles or rings gains only 3–5 fps). The cost is spread over style recalculation of ~9 layers per bulb, particle drawing, and committing the full-screen particle canvas every frame.
+- **Done:** (1) the Lights colours are mixed once on `:root` as registered `@property` colours instead of per bulb per recalculation; (2) the board glow is its own element (its opacity follows the lit count) instead of a custom property on the grid that restyled every bulb; (3) the per-tap animations restart with twin keyframes (`again(c,'f')`, see below) instead of "remove class, read `offsetWidth`, add class"; (4) the always-running halo flicker and core flicker are gone; (5) fewer particles per bulb that goes out; (6) the particle canvas is 1.25× on `high` (1× on `med`/`low`) instead of 1.75×/1.25×; (7) the shared particle loop makes about half as many canvas calls per dot.
+- **Result (A/B against the Phase 5 commit, run at the same time):** `lights` high **~42 → ~49 fps** average, slowest-5% frames 20 → 30 fps. **This is still below the 55 fps budget on this headless, 4×-throttled setup**; the remaining cost is native style/paint/compositor work that CSS tweaks do not move. A real phone has a GPU-backed canvas, where most of this cost does not exist; check it on a device. Ideas not tried: drop `.cell.light::before/::after` (socket ring, screws) into one pre-rendered board background; render halos as a single board-level layer.
+- Lesson for later work: `Element.animate()` forces a style recalculation each call on a dirty tree, and a permanently present invisible overlay above `will-change` layers (the first version of the tube's red flash) cost Sand Tubes 12 fps (59 → 46, found by an A/B run). Create overlays only when needed and A/B any visual addition.
+
+**Animations**
+- **B1:** Lights Out already had the tap ring and an outward 65 ms stagger; kept as is.
+- **B2:** when the last light goes out a diagonal wave of light sweeps the board (50 ms stagger), then a pale-blue burst, ring and 🌙 rise from the middle.
+- **B3:** tapping a tube the picked-up sand cannot go into: the held tube shakes its head (±6°, 260 ms, using the independent `rotate` property so its lift is kept), the target flashes red (a short-lived overlay), a "no" sound plays, then the tapped tube is picked up.
+- **B4:** at level start every layer of sand drops 6 px into place, bottom to top, tube by tube (Web Animations).
+- **B5:** the lifted block is scaled 1.08 with its shadow, and the emptied tray slot keeps a faint outline.
+- **B6:** a block dropped nowhere flies back and its slot gives a small shake as it lands.
+- **B7:** when the tray is used up the three new pieces slide in from the right, 70 ms apart.
+- **B8:** on `high`, one random plant sways every 2.5 s (paused while dragging, hidden, or under a popup).
+- **B9:** when the garden is full the board pulses red and Undo glows (not covered by an automated test: a board full of 7s has already met the goal; checked by hand).
+- **B10:** after the first levels, 6 s without touching the board makes the stars a path can start from pulse a ring twice.
+- **B11:** checked: blocks, merge and threads all play a short sound and a haptic when a drop lands.
+- **B12:** the win sweep (`.celebrate`) now also reaches Block Garden cells and Merge Bloom plants. Star Threads keeps its own finish.
+- **Also:** Block Garden's landing animation uses twin keyframes too (no forced reflow). `again(el, key)` now lives in `js/modes/common.js`.
+- `tools/regress.cjs` has 6 more checks (69 in total).

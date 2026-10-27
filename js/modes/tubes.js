@@ -101,6 +101,13 @@ MAKERS.tubes=function({R,tier,board,api}){
     if(!hintPair&&sel<0&&done)api.coach(`🧪 ${done}/${nc} tubes sorted`);
     api.moves(moves,s3,s2);
   }
+  function denied(a,b){
+    sfx.bad();
+    wa(tEls[a],[{rotate:'0deg'},{rotate:'-6deg'},{rotate:'6deg'},{rotate:'-3deg'},{rotate:'0deg'}],{duration:260,easing:'ease-in-out'});
+    /* the red flash is created only when needed: a permanent invisible overlay above the sand forced every tube onto extra compositor layers */
+    if(FL_RM)return;const f=el('i','gf-no');tEls[b].appendChild(f);
+    const an=wa(f,[{opacity:0},{opacity:1,offset:.25},{opacity:0}],{duration:420,easing:'ease-out'});if(an)an.onfinish=()=>f.remove();else f.remove();
+  }
   function tapTube(i){
     if(api.over())return;
     if(!(hintPair&&sel<0&&i===hintPair[0]))hintPair=null;
@@ -108,7 +115,7 @@ MAKERS.tubes=function({R,tier,board,api}){
     if(sel===i){sel=-1;sfx.pop(.8);render();return}
     const cnt=canPour(tubes,sel,i);
     if(!cnt){
-      if(tubes[i].length){sel=i;sfx.pop(1.2)}else{sel=-1;sfx.bad()}
+      if(tubes[i].length){denied(sel,i);sel=i}else{sel=-1;sfx.bad()}   // B3: the sand can't go there: the tube shakes its head, the target flashes red, then the tapped tube is picked up instead
       render();return;
     }
     const from=sel,col=tubes[from][tubes[from].length-1],stacking=tubes[i].length>0;
@@ -157,6 +164,8 @@ MAKERS.tubes=function({R,tier,board,api}){
     setTimeout(()=>{if(B.isConnected)flBurst(sx,Math.min(ey,b.bottom)-4,color,4,.3)},460);
   }
   render();
+  /* B4: at the start of a level every layer of sand drops 6 px into place, bottom to top, tube by tube */
+  tEls.forEach((e,ti)=>e.querySelectorAll('.seg').forEach((sg,j)=>wa(sg,[{transform:'translateY(-6px)',opacity:0},{transform:'none',opacity:1}],{duration:320,delay:ti*50+280+j*30,easing:'cubic-bezier(.3,1.4,.5,1)',fill:'backwards'})));
   return{
     snap:()=>JSON.stringify({tubes,moves}),
     restore(s){({tubes}=JSON.parse(s));moves=JSON.parse(s).moves;sel=-1;hintPair=null;plan=null;lastNew=null;lastFrom=-1;render()},

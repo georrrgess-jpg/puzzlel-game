@@ -76,3 +76,5 @@ function dragify(host,h){
 const LIFT=e=>e&&e.pointerType==='touch'?56:0;
 /* animate with the Web Animations API unless the player asked for reduced motion; returns the animation or null */
 const wa=(e,k,o)=>gfx.anim(e,k,o);
+/* restart a CSS animation by swapping a class pair (kA <-> kB, identical keyframes under two names): it replays with no forced reflow */
+const again=(c,k)=>{const on=c['_'+k]^=1;c.classList.remove(k+(on?'b':'a'));c.classList.add(k+(on?'a':'b'))};

@@ -1,29 +1,46 @@
+/* Lights Out colour tokens: each colour is mixed ONCE (on :root, as a registered colour) instead of in every bulb's gradients on every
+   style recalculation; that recalculation was the main cost of a tap on a slow phone. Browsers without @property still work (they just mix per use). */
+@property --lg-on{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-h1{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-h2{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-g1{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-g2{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-g3{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-sh{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-in{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-b1{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-b2{syntax:'<color>';inherits:true;initial-value:transparent}
+@property --lg-pv{syntax:'<color>';inherits:true;initial-value:transparent}
+:root{--lg-on:color-mix(in srgb,var(--acc) 40%,transparent);--lg-h1:color-mix(in srgb,var(--acc) 62%,transparent);--lg-h2:color-mix(in srgb,var(--acc) 22%,transparent);
+  --lg-g1:color-mix(in srgb,var(--acc) 35%,#fff);--lg-g2:color-mix(in srgb,var(--acc) 55%,var(--acc2));--lg-g3:color-mix(in srgb,var(--acc2) 55%,#000);
+  --lg-sh:color-mix(in srgb,var(--acc) 70%,transparent);--lg-in:color-mix(in srgb,var(--acc2) 45%,#0006);
+  --lg-b1:color-mix(in srgb,var(--acc) 50%,transparent);--lg-b2:color-mix(in srgb,var(--acc) 18%,transparent);--lg-pv:color-mix(in srgb,var(--acc) 75%,#fff)}
 /* Lights Out board */
 .grid{display:grid;gap:7px;width:var(--bs)}
 .cell{aspect-ratio:1;border-radius:18%;background:linear-gradient(180deg,#ffffff1e,#ffffff0a);box-shadow:inset 0 2px 0 #ffffff22,inset 0 -5px 0 #0004,0 3px 8px #0003;transition:background .35s,transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .35s;position:relative;padding:0}
 .cell:active{transform:scale(.88)}
 /* press/hover preview for Lights Out */
-.cell.pv{outline:2.5px solid color-mix(in srgb,var(--acc) 75%,#fff);outline-offset:2px}
+.cell.pv{outline:2.5px solid var(--lg-pv);outline-offset:2px}
 .cell.pv0{outline-width:4px;outline-color:#fff;outline-offset:3px}
 
 .grid{gap:clamp(6px,2.2vw,11px);position:relative}
 
 /* ================= Lights Out: glass bulbs on socket plates ================= */
-.grid.lo::before{content:'';position:absolute;inset:-14%;border-radius:50%;pointer-events:none;z-index:-1;
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--acc) 50%,transparent),color-mix(in srgb,var(--acc) 18%,transparent) 55%,transparent);
-  opacity:calc(.15 + var(--lit,0) * 1.6);transition:opacity .7s ease}
+.grid.lo .lglow{position:absolute;inset:-14%;border-radius:50%;pointer-events:none;z-index:-1;opacity:.15;
+  background:radial-gradient(closest-side,var(--lg-b1),var(--lg-b2) 55%,transparent);transition:opacity .7s ease}
 .grid.lo.dark{background:linear-gradient(165deg,#1a1d4a66,#06071a99);transition:background 1s}
-.grid.lo.dark::before{opacity:0;transition-duration:1.4s}
+.grid.lo.dark .lglow{opacity:0 !important;transition-duration:1.4s}
 .cell.light{overflow:visible;transform-style:flat;border-radius:24%;
   background:linear-gradient(180deg,#ffffff16,#ffffff05 60%,#0000001a);
   box-shadow:inset 0 2px 0 #ffffff22,inset 0 -5px 0 #00000038,0 4px 8px #0004}
-.cell.light.on{background:radial-gradient(circle at 50% 55%,color-mix(in srgb,var(--acc) 40%,transparent),transparent 72%),linear-gradient(180deg,#ffffff1c,#ffffff08 60%,#0000001a);
+.cell.light.on{background:radial-gradient(circle at 50% 55%,var(--lg-on),transparent 72%),linear-gradient(180deg,#ffffff1c,#ffffff08 60%,#0000001a);
   box-shadow:inset 0 2px 0 #ffffff30,inset 0 -5px 0 #00000030,0 4px 8px #0004}
 /* halo: spills light over the neighbouring plates (below every bulb) */
 .cell.light u{position:absolute;inset:-46%;border-radius:50%;pointer-events:none;z-index:1;opacity:0;transform:scale(.6);
-  background:radial-gradient(closest-side,color-mix(in srgb,var(--acc) 62%,transparent),color-mix(in srgb,var(--acc) 22%,transparent) 50%,transparent);
+  background:radial-gradient(closest-side,var(--lg-h1),var(--lg-h2) 50%,transparent);
   transition:opacity .35s ease,transform .45s cubic-bezier(.3,1.5,.5,1)}
-.cell.light.on u{opacity:1;transform:scale(1);animation:gg-halo var(--fl,2.8s) ease-in-out var(--fo,0s) infinite}
+/* (the halo and the white-hot core used to flicker forever on every lit bulb: dozens of always-running animations, now still) */
+.cell.light.on u{opacity:1;transform:scale(1)}
 @keyframes gg-halo{0%,100%{opacity:1;transform:scale(1)}48%{opacity:.78;transform:scale(.94)}52%{opacity:1;transform:scale(1.03)}}
 /* bulb: dark glass sphere */
 .cell.light i{position:absolute;inset:13%;border-radius:50%;z-index:2;pointer-events:none;transition:none;animation:none;
@@ -31,8 +48,8 @@
   box-shadow:inset 0 -4px 8px #000a,inset 0 2px 3px #ffffff26,0 0 0 2px #ffffff12,0 5px 10px #0007}
 /* lit glass layer */
 .cell.light i::before{content:'';position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .28s ease;
-  background:radial-gradient(circle at 50% 46%,#fff 0 9%,color-mix(in srgb,var(--acc) 35%,#fff) 22%,var(--acc) 50%,color-mix(in srgb,var(--acc) 55%,var(--acc2)) 78%,color-mix(in srgb,var(--acc2) 55%,#000) 100%);
-  box-shadow:0 0 18px 3px color-mix(in srgb,var(--acc) 70%,transparent),inset 0 -5px 9px color-mix(in srgb,var(--acc2) 45%,#0006)}
+  background:radial-gradient(circle at 50% 46%,#fff 0 9%,var(--lg-g1) 22%,var(--acc) 50%,var(--lg-g2) 78%,var(--lg-g3) 100%);
+  box-shadow:0 0 18px 3px var(--lg-sh),inset 0 -5px 9px var(--lg-in)}
 /* gloss */
 .cell.light i::after{content:'';position:absolute;left:17%;top:9%;width:44%;height:30%;border-radius:50%;z-index:2;
   background:radial-gradient(ellipse at 50% 40%,#ffffffc0,#ffffff30 55%,transparent 72%);transform:rotate(-18deg)}
@@ -43,20 +60,30 @@
   background:radial-gradient(circle,#fff 0 30%,#fffbe0b0 45%,transparent 70%)}
 .cell.light.on i::before{opacity:1}
 .cell.light.on b{border-top-color:#fff;border-bottom-color:#fff8}
-.cell.light.on b::before{opacity:1;animation:core 1.6s ease-in-out infinite alternate}
+.cell.light.on b::before{opacity:1}
 @keyframes core{to{transform:scale(.82);opacity:.85}}
 /* flash on toggle */
 .cell.light em{position:absolute;inset:-8%;border-radius:50%;z-index:3;pointer-events:none;opacity:0;
   background:radial-gradient(circle,#fff,#ffffffa0 30%,transparent 68%)}
 /* toggle: squash & stretch rippling out from the tapped square (delay set from JS) */
-.cell.light.flip{animation:none}
-.cell.light.flip i{animation:squash .55s cubic-bezier(.3,1.4,.5,1) var(--d,0ms) both}
-.cell.light.flip em{animation:lflash .5s ease-out var(--d,0ms) both}
-@keyframes squash{0%{transform:none}28%{transform:scale(1.2,.8)}52%{transform:scale(.88,1.14)}74%{transform:scale(1.05,.96)}100%{transform:none}}
-@keyframes lflash{0%{opacity:0;transform:scale(.4)}30%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+/* Every animation exists twice (…A / …B, identical keyframes) and a class switch picks the other one: that restarts it with no forced
+   reflow (the usual "remove class, read offsetWidth, add class" trick forced a style recalculation per bulb on every tap). */
+.cell.light.fa i{animation:squashA .55s cubic-bezier(.3,1.4,.5,1) var(--d,0ms) both}
+.cell.light.fb i{animation:squashB .55s cubic-bezier(.3,1.4,.5,1) var(--d,0ms) both}
+.cell.light.fa em{animation:lflashA .5s ease-out var(--d,0ms) both}
+.cell.light.fb em{animation:lflashB .5s ease-out var(--d,0ms) both}
+@keyframes squashA{0%{transform:none}28%{transform:scale(1.2,.8)}52%{transform:scale(.88,1.14)}74%{transform:scale(1.05,.96)}100%{transform:none}}
+@keyframes squashB{0%{transform:none}28%{transform:scale(1.2,.8)}52%{transform:scale(.88,1.14)}74%{transform:scale(1.05,.96)}100%{transform:none}}
+@keyframes lflashA{0%{opacity:0;transform:scale(.4)}30%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+@keyframes lflashB{0%{opacity:0;transform:scale(.4)}30%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+/* the finishing wave (B2) reuses the flash with a per-cell diagonal delay */
+.cell.light.wa em{animation:lflashA .6s ease-out var(--d,0ms) both}
+.cell.light.wb em{animation:lflashB .6s ease-out var(--d,0ms) both}
 /* a light going out leaves a soft puff */
-.cell.light.out u{animation:puff .6s ease-out both}
-@keyframes puff{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+.cell.light.pa u{animation:puffA .6s ease-out both}
+.cell.light.pb u{animation:puffB .6s ease-out both}
+@keyframes puffA{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+@keyframes puffB{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
 /* preview: will light up → faint glow, will turn off → dimmed */
 .cell.light.pv:not(.on) u{opacity:.45;transform:scale(.85)}
 .cell.light.pv:not(.on) b{border-top-color:#ffffffa0}

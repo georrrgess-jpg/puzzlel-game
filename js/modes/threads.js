@@ -163,7 +163,7 @@ MAKERS.threads=function({R,tier,board,api}){
     else if(!freeFrom(to)){sfx.bonk();buzz([20,40,20]);api.meh();nudgeEnd();const u=$('#undoBtn');u.classList.add('glow');setTimeout(()=>u.classList.remove('glow'),3000)}
     else if(doneTo)api.good(null,{silent:true});   // a star fully lit keeps the combo going
   }
-  function startAt(v){path=[v];used=new Uint8Array(E.length);clearHint();render();sfx.lift();
+  function startAt(v){clearTimeout(cueT);sg.forEach(g=>g.classList.remove('cue'));path=[v];used=new Uint8Array(E.length);clearHint();render();sfx.lift();
     wa(sg[v].querySelector('.core'),[{transform:'scale(1.35)'},{transform:'scale(2.1)',offset:.4},{transform:'scale(1.35)'}],{duration:340,easing:'cubic-bezier(.3,1.6,.5,1)'})}
   function finish(){
     over=true;box.classList.add('solved');band.classList.remove('on');render();
@@ -223,6 +223,8 @@ MAKERS.threads=function({R,tier,board,api}){
   function restore(s){({path,moves}=JSON.parse(s));used=usedOf(path);over=false;box.classList.remove('solved');clearHint();
     thr.forEach(t=>{t.c.style.animationDelay=t.g.style.animationDelay=''});render()}
   render();
+  /* B10: after the first levels, if nothing has been touched for 6 s the stars a path can start from (the odd ones) pulse once */
+  let cueT=0;const armCue=()=>{clearTimeout(cueT);if(tier>=2&&!path.length&&!over&&odd.length)cueT=setTimeout(()=>{if(!box.isConnected||path.length||over||Q.modal)return;odd.forEach(v=>sg[v].classList.add('cue'));setTimeout(()=>sg.forEach(g=>g.classList.remove('cue')),2600)},6000)};armCue();
   return{
     snap:()=>JSON.stringify({path,moves}),
     restore,
@@ -236,6 +238,6 @@ MAKERS.threads=function({R,tier,board,api}){
     },
     _info:{stars:N,threads:E.length,odd:odd.length,fallback:!!gen.fallback},
     _bot(){if(over)return false;const p=fixAndPlan();addSeg(p.to);return true},
-    destroy(){clearHint()}
+    destroy(){clearHint();clearTimeout(cueT)}
   };
 };

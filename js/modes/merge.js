@@ -92,6 +92,14 @@ MAKERS.merge=function({R,tier,level,board,api}){
   }
   api.setTip('Drag a plant onto a matching plant to merge them. Tap one, then tap its twin, works too.');
   render();
+  /* B8: on capable phones one plant every 2.5 s sways a little: the garden feels alive (paused while dragging or under a popup) */
+  const idleT=setInterval(()=>{
+    if(!grid.isConnected){clearInterval(idleT);return}
+    if(Q.tier!=='high'||FL_RM||ghost||document.hidden||Q.modal||api.over())return;
+    const full=cells.filter((c,i)=>G[i]&&c.firstElementChild);if(!full.length)return;
+    const t=full[Math.floor(Math.random()*full.length)].firstElementChild;
+    wa(t,[{transform:'rotate(0)'},{transform:'rotate(5deg)',offset:.3},{transform:'rotate(-4deg)',offset:.65},{transform:'rotate(0)'}],{duration:600,easing:'ease-in-out'});
+  },2500);
 
   /* ---- merging ---- */
   function cellPos(i){const c=cells[i].getBoundingClientRect();return[c.left+c.width/2,c.top+c.height/2,c.width]}
@@ -145,7 +153,12 @@ MAKERS.merge=function({R,tier,level,board,api}){
     }});
     api.good(null,{silent:true});
     if(won){api.win(starsFor(moves,s3,s2));setTimeout(()=>{if(grid.isConnected)finish(b)},FLY)}
-    else if(!pick(G)&&!hasPair(G)){toast('The garden is full: Undo ↩️ and try another order')}
+    else if(!pick(G)&&!hasPair(G)){
+      toast('The garden is full: Undo ↩️ and try another order');
+      /* B9: a soft red pulse over the garden and the Undo button glows */
+      const rd=el('i','mgred');grid.appendChild(rd);wa(rd,[{opacity:0},{opacity:.8,offset:.25},{opacity:.2,offset:.5},{opacity:.7,offset:.75},{opacity:0}],{duration:1100,delay:FLY+300,easing:'ease-in-out'});setTimeout(()=>rd.remove(),1700);
+      const u=$('#undoBtn');u.classList.add('glow');setTimeout(()=>u.classList.remove('glow'),3200);
+    }
     return true;
   }
   function finish(b){
@@ -209,6 +222,6 @@ MAKERS.merge=function({R,tier,level,board,api}){
       return true;
     },
     _bot(){const p=pick(G);if(!p)return false;return merge(p[0],p[1])},
-    destroy(){if(ghost)ghost.remove()}
+    destroy(){if(ghost)ghost.remove();clearInterval(idleT)}
   };
 };
