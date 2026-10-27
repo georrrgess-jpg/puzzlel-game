@@ -376,3 +376,37 @@ Notes on how each was fixed, for whoever touches this next:
 - **B12:** the win sweep (`.celebrate`) now also reaches Block Garden cells and Merge Bloom plants. Star Threads keeps its own finish.
 - **Also:** Block Garden's landing animation uses twin keyframes too (no forced reflow). `again(el, key)` now lives in `js/modes/common.js`.
 - `tools/regress.cjs` has 6 more checks (69 in total).
+
+### Phase 7: final QA, README and publish (done)
+
+**Full tool run on the final code**
+
+| Tool | Result |
+|---|---|
+| `tools/regress.cjs` | 71 checks, all pass (it failed 22 of them on the pre-v4 code) |
+| `tools/matrix.cjs` | clean on all 6 devices (SE 320x568, 8, 13, Pro Max 430x932, Galaxy 360, Pixel 5), now including popup-text-under-footer, play header/HUD/coach and world-banner checks |
+| `tools/solve-all.cjs` | every generated level of all 5 modes solvable; no page errors |
+| `tools/drag.cjs` | finger drags count as moves in merge and blocks; stray touches harmless; undo works |
+| `tools/migration.cjs` | old saves load; welcome card once; no page errors |
+| `tools/economy-sim.cjs` | all economy checks pass (hint 1.25 levels of income, skip 4.7, first theme at level 16, all themes around level 296, no coin pile-up) |
+| Reduced motion | all five modes played to a win with `reducedMotion: reduce`: no iris, no page errors |
+| Screenshots | iPhone SE (320x568) and Pro Max (430x932): home, map, play, win card all fit; nothing clipped or overlapping |
+
+**Frame rate (4x CPU throttle, Pixel 5 viewport, headless)**
+
+| Scenario | `high` | `low` |
+|---|---|---|
+| home / map / modal | 58-60 | 60 |
+| Sand Tubes / Star Threads | 59 | 59-60 |
+| Merge Bloom / Block Garden | 56 | 57-60 |
+| Win card (plays Lights Out) | 50 | 56 |
+| **Lights Out** | **46-49** | **50** |
+
+**Open item (not met): Lights Out on `high` is below the 55 fps budget.** Three repeat runs gave 48, 47 and 46 fps (one earlier full-suite run read 39.5, which was machine noise: the same build read 46-49 straight after). The slowest 5% of frames sit at 20-30 fps. Phase 6 explains what was done and what is left (a one-image socket/screw background and a single board-level halo layer were not tried). Battery saver (`low`) gets 50 fps. A real phone has a GPU-backed canvas, so this headless number is probably pessimistic, but it has not been measured on a device.
+
+**Definition of done**
+- 🔴/🟠 bugs: all fixed, each with a regression check.
+- Popups: no overlap on any device size (checked automatically).
+- Animations: every item in the plan is in, except where a phase notes a deviation (M5 rebuilds on change instead of patching nodes; A2 no row collapse; the medal scrolls with the body; B9 not auto-tested).
+- Frame rate: met everywhere except Lights Out on `high` (above).
+- Service worker is `pop-v18`; README has a "What's new in v4" section.

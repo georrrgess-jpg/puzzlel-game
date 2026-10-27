@@ -32,10 +32,32 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 
 - **Smooth on modest hardware**: graphics quality tiers (High / Medium / Battery saver, chosen automatically from the device
   and changeable in Settings), a cheap animated background that freezes during play, capped particles, no blur effects.
-  Measured under 4x CPU throttling: every screen and mode averages 52-60 fps (it was 12-20 before the v3 work).
+  Measured under 4x CPU throttling on the High tier: every screen and mode averages 50-60 fps except Lights Out (about 46-49;
+  it was 12-20 everywhere before the v3 work). Battery saver is faster still.
 - **Fits every phone**: boards size themselves from the free space; verified clean on iPhone SE (320x568), iPhone 8, iPhone 13,
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
+
+## What's new in v4
+
+- **Bug fixes**: a hint is only charged when it is actually shown; Replay and Daily levels can no longer be farmed for rewards;
+  the Lucky Spin pays when it starts (closing the popup mid-spin no longer loses the prize); the login bonus cannot be
+  claimed twice; the Back button closes a popup instead of leaving the page; sand picked up in a tube no longer detaches,
+  and every piece of the same colour lifts together; Star Threads is now a one-stroke constellation puzzle (press a star
+  and slide along the threads).
+- **Popups**: one layout where the buttons never cover the content (checked on six phone sizes), one-press buttons,
+  Escape and a tap outside close it, queued popups wait their turn, the level-up and chest popups carry their own animation.
+- **Play screen**: calmer header with a live star meter, a coach line that explains the next step, the toast moves out of
+  the way of the toolbar, Restart asks first once 3 or more moves would be lost (hold the button to restart without asking), Undo dims when there is nothing to undo.
+- **Menus**: the home screen shows your garden, the level map keeps its place and shows a "jump to current level" pill,
+  locked worlds explain what unlocks them, the shop keeps its scroll position, settings are grouped.
+- **Animations**: screen transitions and an iris into every level, a popup that fades out instead of vanishing, the world
+  unlock sequence, coins that fly to the coin chip, an XP ring that fills, a spinning wheel that overshoots and settles,
+  a calendar tile flip, achievement progress bars, a Lights Out wave and a moon when the last light goes out,
+  Sand Tubes that drop in at level start and shake their head at an illegal pour, a lifted block that grows a little,
+  plants that sway in Block Garden, and a Star Threads cue that shows where to start.
+- **Offline updates**: the service worker fetches fresh files and shows "New version ready" when an update arrives.
+- Details of every change, with what was measured, are in `PLAN-v4.md`.
 
 ## Play on your phone
 
