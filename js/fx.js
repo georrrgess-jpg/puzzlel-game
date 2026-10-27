@@ -114,10 +114,17 @@ function toast(msg){
   t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),1900);
 }
 /* stacked slide-in banners (achievements, quest done, level up) */
-function banner(icon,kicker,title,sub){
+/* banners (trophies, quests, level-ups) queue: at most two on screen, each starting 0.4 s after the last, so they never pile up on the HUD */
+const bannerQ=[];let bannersUp=0;
+function banner(icon,kicker,title,sub){bannerQ.push([icon,kicker,title,sub]);pumpBanners()}
+function pumpBanners(){
+  if(pumpBanners.t||!bannerQ.length||bannersUp>=2)return;
+  const[icon,kicker,title,sub]=bannerQ.shift();bannersUp++;
   const b=el('div','banner',`<i>${icon}</i><div><small>${kicker}</small><b>${title}</b>${sub?`<em>${sub}</em>`:''}</div>`);
   $('#banners').appendChild(b);
-  setTimeout(()=>{b.classList.add('out');setTimeout(()=>b.remove(),420)},2800);
+  setTimeout(()=>{const m=b.querySelector('i');if(m&&!REDUCED&&b.isConnected){const[x,y]=centerOf(m);ring(x,y,'#ffd166',80,520)}},200);
+  setTimeout(()=>{b.classList.add('out');setTimeout(()=>{b.remove();bannersUp--;pumpBanners()},420)},2800);
+  pumpBanners.t=setTimeout(()=>{pumpBanners.t=0;pumpBanners()},400);
 }
 
 /* ====================== living background ======================

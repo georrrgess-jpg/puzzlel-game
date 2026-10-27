@@ -473,3 +473,21 @@
 .sgroup>summary::after{content:'';width:8px;height:8px;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .2s;opacity:.8}
 .sgroup[open]>summary::after{transform:rotate(-135deg) translate(-1px,-1px)}
 .sgroup:not([open]){padding-bottom:0}
+
+/* ===================== meta animations (v4) ===================== */
+/* banners: the medal flips in, then goes back to its gentle wiggle */
+.banner i{animation:bmedal .6s cubic-bezier(.3,1.5,.5,1) both,tilewig 1.4s ease-in-out .6s infinite}
+@keyframes bmedal{from{transform:rotateY(-180deg) scale(.4)}to{transform:none}}
+/* daily reward: tomorrow's tile glows */
+.day.tomorrow{border-color:color-mix(in srgb,var(--acc) 60%,#fff);box-shadow:0 0 14px color-mix(in srgb,var(--acc) 55%,transparent);animation:tmrGlow 1s ease-in-out infinite alternate}
+.day.tomorrow small{color:var(--acc)}
+@keyframes tmrGlow{to{box-shadow:0 0 22px color-mix(in srgb,var(--acc) 85%,transparent)}}
+/* win card: the star chest line and the level-up ribbon */
+.chestline{display:flex !important;align-items:center;justify-content:center;gap:8px;width:fit-content}
+.mchest{display:inline-block;width:38px;height:34px;flex:none}
+.mchest svg{width:38px;height:34px;overflow:visible;display:block;filter:drop-shadow(0 3px 2px #0006)}
+.mchest .clid{transform-origin:10% 80%;transform-box:fill-box}
+.lvup{display:block;width:100%;margin:8px 0 2px;padding:9px 12px;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:.5px;color:#2a0a4a;text-shadow:0 1px 0 #fff8;
+  background:linear-gradient(90deg,#c9a4ff,#fff,#c9a4ff);background-size:200% 100%;box-shadow:0 4px 0 #5a2aa0,0 8px 18px #0006,inset 0 2px 0 #fffa;
+  animation:lvupIn .6s cubic-bezier(.3,1.7,.5,1) both,goldsh 2s linear infinite}
+@keyframes lvupIn{from{transform:scale(.6);opacity:0}}

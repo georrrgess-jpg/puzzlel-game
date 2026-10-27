@@ -340,3 +340,15 @@ Notes on how each was fixed, for whoever touches this next:
 - **Bug found by the matrix:** the map pill's hidden slide-down offset created scrollable overflow in the map screen, so `scrollIntoView` nudged the whole screen up by 8 px (back button at y = −2). The offset is now inside the screen.
 - **Perf:** `map` 58.6 fps, `modal` 59.6. `home` measured 44–55 fps on both this commit and the Phase 0 commit at the same time, so the dip is machine noise, not a regression. A/B against the Phase 0 commit when judging a menu change.
 - `tools/regress.cjs` now has 12 more checks (57 in total).
+
+### Phase 5: meta animations (done)
+- **A1:** visible coin chips count to the new balance (0.4 s up with a 260 ms coin bump, 0.3 s down); hidden chips update at once. `refreshCoins()` in `js/ui.js` does it; `flyCoins` still calls it per arriving coin, and the same target is ignored.
+- **A2 (deviation):** a claimed quest row pops (scale 1.045), its pip on the "Finish all 3" row pulses, and the coins fly to the chip. The row is not collapsed away: hiding finished quests would stop the player seeing what they have done.
+- **A3:** banners queue: at most two on screen, each starting 0.4 s after the previous, with a medal flip and a ring burst; they stack vertically and never overlap.
+- **A4:** the claimed day tile flips to a ✓ (rotateY, 420 ms), tomorrow's tile glows and reads "Tomorrow", and the popup stays up 1.1 s.
+- **A5:** the wheel eases out for 3.2 s to 4° past its prize, then settles back onto it in 0.5 s (the pointer tick and sound per segment already existed).
+- **A6:** ready home tiles wiggle once each (staggered 80 ms) when you arrive at home.
+- **A7:** the win card's "Star chest opened" line carries a copy of the chest drawing (ids renamed `…w`); its lid swings open with a coin fountain.
+- **A8:** the level-up line is a full-width shimmering ribbon that springs in; the home XP ring animates from its old value (all the way round, then from empty, after a level-up).
+- `tools/regress.cjs` has 6 more checks (63 in total).
+- **Perf (4× throttle, same machine state):** map 59.7, modal 59.6; home and win 53 on `high` (win plays Lights Out; see Phase 6); all scenarios ≥ 54 on `low` except Lights Out based ones.

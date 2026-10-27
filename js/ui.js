@@ -180,7 +180,7 @@ function onWin(stars){
       ${daily?`<div class="extra gold">📅 Daily streak: ${dstreak} day${dstreak>1?'s':''}! Come back tomorrow</div>`:''}
       ${streakBonus?`<div class="extra">🔥 3-star streak ×${S.streak}: +${streakBonus}</div>`:''}
       ${stars>prev&&prev>0?`<div class="extra">🏅 New best!</div>`:''}
-      ${chest?`<div class="extra gold">🎁 Star chest opened: +${chest} coins!</div>`:''}
+      ${chest?`<div class="extra gold chestline"><span class="mchest">${chestSvg()}</span> Star chest opened: +${chest} coins!</div>`:''}
       ${stars===3?'':near>0?`<p class="nearmiss">So close! Just ${near} move${near>1?'s':''} from ${stars===2?'★★★':'★★'}. Replay?</p>`:'<p>Replay to chase 3 stars!</p>'}`,
       daily?[{label:'Home',cls:'sec',fn:b=>playExit('home',b)},{label:'Keep playing ▶',cls:'big',fn:b=>playLevel(S.unlocked,{},b)}]
       :[{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
@@ -188,6 +188,12 @@ function onWin(stars){
        {label:'Next ▶',cls:'big',fn:b=>playLevel(n+1,{},b)}],{cls:'win',back:()=>playExit(daily?'home':'map')});
     for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',26+i*8,1.1+i*.15);ring(x,y,'#ffd166',150+i*30);ring(x,y,'#fff',90,420);
       const c=$('#modal .card');if(c&&c.animate)c.animate([{transform:'none'},{transform:`translateY(${5+i*2}px) scale(.985)`},{transform:'none'}],{duration:220,easing:'ease-out'})}},(i*.38+.58)*1000);
+    // the star chest lid swings open with a coin fountain
+    if(chest)setTimeout(()=>{
+      if(cur!==me)return;const lid=$('.mchest .clid');if(!lid)return;
+      wa(lid,[{transform:'rotate(0)'},{transform:'rotate(-14deg)',offset:.2},{transform:'rotate(-108deg)'}],{duration:520,easing:'cubic-bezier(.3,1.5,.5,1)',fill:'forwards'});
+      const m=$('.mchest');if(m){const[x,y]=centerOf(m);sfx.chest();burst(x,y,'#ffd166',18,.9);fountain(x,y,22)}
+    },1500+stars*300);
     // coin count-up
     const total=coins,t0=performance.now()+300,dur=900;let lt=0;
     const countUp=t=>{const e=$('#cntUp');if(!e||cur!==me)return;const k=clamp((t-t0)/dur,0,1);e.textContent=Math.round(total*(1-Math.pow(1-k,3)));
@@ -211,6 +217,8 @@ function onWin(stars){
     refreshHUD();
   },1000);
 }
+/* a copy of the home screen's chest drawing for the win card (ids renamed: the original lives in a hidden screen) */
+function chestSvg(){const s=$('#chestIco svg');return s?s.outerHTML.replace(/cwood/g,'cwoodw').replace(/cgold/g,'cgoldw'):'🎁'}
 function onFail(title,msg){
   if(cur.over)return;cur.over=true;refreshUndo();sfx.fail();buzz(200);api.meh();
   const me=cur;
@@ -278,8 +286,13 @@ function show(id,o={}){
     if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
     refreshHUD();syncGuard();
-    if(id==='home')setTimeout(drainModalQ,700);
+    if(id==='home'){setTimeout(drainModalQ,700);setTimeout(wiggleTiles,520)}
   });
+}
+/* the home tiles that have something ready give one little wiggle each time you arrive */
+function wiggleTiles(){
+  if(!$('#home').classList.contains('active')||$('#modal').classList.contains('on'))return;
+  $$('#home .mtile.on').forEach((t,i)=>wa(t,[{transform:'rotate(0)'},{transform:'rotate(-4deg)'},{transform:'rotate(4deg)'},{transform:'rotate(-2deg)'},{transform:'rotate(0)'}],{duration:400,delay:i*80,easing:'ease-in-out'}));
 }
 /* enter a level through the iris, growing from the button or map node that was tapped */
 function playLevel(n,opts={},from){
@@ -291,7 +304,19 @@ function playExit(to='map',from){
   const n=cur&&cur.level,col=cur?INFO[cur.type].col:'#7c6bff';
   Trans.iris({from:from||$('#backBtn'),color:col,to:()=>to==='map'?$(`.node[data-n="${n}"]`)||$('.node.cur'):$('#playBtn')},()=>{closeModal();exitLevel();show(to)});
 }
-function refreshCoins(){$$('.coinval').forEach(e=>e.textContent=S.coins)}
+/* visible coin chips count to the new balance (up: 0.4 s with a bump; down: 0.3 s); hidden ones just update */
+function refreshCoins(){
+  const to=S.coins;
+  $$('.coinval').forEach(e=>{
+    if(e._to===to)return;
+    const from=e._v!=null?e._v:to;e._to=to;cancelAnimationFrame(e._raf);
+    if(REDUCED||from===to||e.offsetParent===null){e._v=to;e.textContent=to;return}
+    const up=to>from,dur=up?400:300,t0=performance.now();
+    if(up&&performance.now()-(e._bump||0)>250){e._bump=performance.now();const c=e.parentElement.querySelector('.coin');if(c)wa(c,[{transform:'scale(1)'},{transform:'scale(1.3)'},{transform:'scale(1)'}],{duration:260,easing:'cubic-bezier(.3,1.6,.5,1)'})}
+    const step=t=>{const k=clamp((t-t0)/dur,0,1);e._v=Math.round(from+(to-from)*(1-Math.pow(1-k,3)));e.textContent=e._v;if(k<1)e._raf=requestAnimationFrame(step);else e._v=to};
+    e._raf=requestAnimationFrame(step);
+  });
+}
 function refreshHUD(){
   refreshCoins();
   $('#hintBadge').innerHTML=S.hints>0?S.hints:`<i class="coin" style="width:11px;height:11px"></i>${HINT_COST}`;

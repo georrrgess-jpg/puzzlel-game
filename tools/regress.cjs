@@ -268,6 +268,32 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('M11 a toast in a level sits above the toolbar', tr.toast[1] <= tr.toolbar[0] + 2 && tr.toast[0] > 100, JSON.stringify(tr));
   });
 
+  await test('A meta animations: counter, banner queue, login tile, spin', async p => {
+    await prep(p); await sleep(300);
+    await p.evaluate(() => { __game.S.coins = 100; refreshCoins() }); await sleep(500);
+    await p.evaluate(() => { __game.S.coins = 400; refreshCoins() }); await sleep(120);
+    const mid = +(await p.evaluate(() => document.querySelector('#home .coinval').textContent));
+    await sleep(600);
+    const fin = +(await p.evaluate(() => document.querySelector('#home .coinval').textContent));
+    ck('A1 the coin chip counts up to the new balance', mid > 100 && mid < 400 && fin === 400, `(mid ${mid}, final ${fin})`);
+    await p.evaluate(() => { banner('🏆', 'TROPHY', 'One', 'a'); banner('🏆', 'TROPHY', 'Two', 'b'); banner('🏆', 'TROPHY', 'Three', 'c') });
+    await sleep(150); const n1 = await p.evaluate(() => document.querySelectorAll('.banner').length);
+    await sleep(600); const n2 = await p.evaluate(() => document.querySelectorAll('.banner').length);
+    const rects = await p.evaluate(() => [...document.querySelectorAll('.banner')].map(b => { const r = b.getBoundingClientRect(); return [r.top, r.bottom] }));
+    ck('A3 banners arrive one after another, at most two at once', n1 === 1 && n2 === 2, `(${n1} then ${n2})`);
+    ck('A3 stacked banners do not overlap', rects.length < 2 || rects[0][1] <= rects[1][0] + 1, JSON.stringify(rects));
+    await sleep(3600); ck('A3 the third banner shows once one leaves', await p.evaluate(() => [...document.querySelectorAll('.banner b')].some(b => b.textContent === 'Three')));
+    await sleep(3500);
+    await p.evaluate(() => { __game.S.login.last = -1; showLogin() }); await sleep(400);
+    await p.evaluate(() => document.querySelector('#modal .mbtns .btn:last-child').click()); await sleep(700);
+    ck('A4 the claimed day is ticked and tomorrow is marked', await p.evaluate(() => !!document.querySelector('.day.got') && !!document.querySelector('.day.tomorrow')));
+    await sleep(800);
+    await p.evaluate(() => { __game.S.spinAt = 0; showSpin() }); await sleep(300);
+    await p.evaluate(() => document.querySelector('#modal .mbtns .btn:last-child').click());
+    await sleep(4500);
+    ck('A5 the spin finishes and the wheel rests on its prize', await p.evaluate(() => !document.querySelector('.wheelwrap.going') || /won/i.test(document.querySelector('#toast').textContent)));
+  });
+
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');
   await browser.close(); srv.close(); process.exit(fails ? 1 : 0);
 })();

@@ -49,18 +49,24 @@ function questEvent(ev,d){
 }
 const allQuestsClaimed=()=>S.quests.list.every(q=>q.claimed);
 function questsReady(){ensureQuests();return S.quests.list.filter(q=>q.v>=q.n&&!q.claimed).length+(allQuestsClaimed()&&!S.quests.bonus?1:0)}
-function showQuests(still){
+function showQuests(still,hit){
   ensureQuests();const L=S.quests.list,allC=allQuestsClaimed();
   const nDone=L.filter(q=>q.v>=q.n).length;
   openModal(`<h2>Daily Quests</h2><p class="qtimer">⏱ Fresh quests in <b>${fmtTime(untilMidnight())}</b></p><div class="qlist">${L.map((q,i)=>{const T=QT[q.k],done=q.v>=q.n;
     return`<div class="quest ${q.claimed?'claimed':done?'ready':''}" style="--i:${i}"><div class="qi">${T.ic}</div><div class="qt"><b>${T.txt(q.n,q.p)}</b><div class="qbar"><div class="bar"><div style="width:${q.v/q.n*100}%"></div></div><em>${q.v}/${q.n}</em></div><div class="rchips"><span class="rc"><i class="coin"></i>${q.r}</span><span class="rc xp">+${ECON.quest.xp} XP</span></div></div>${q.claimed?'<div class="qdone">✓</div>':done?`<button class="btn sm" data-q="${i}">Claim</button>`:''}</div>`}).join('')}
     <div class="quest bonusq ${allC?(S.quests.bonus?'claimed':'ready'):''}" style="--i:3"><div class="qi">🎁</div><div class="qt"><b>Finish all 3 quests</b><div class="qpips">${L.map((q,i)=>`<i class="${i<nDone?'on':''}"></i>`).join('')}</div><div class="rchips"><span class="rc"><i class="coin"></i>${ECON.quest.bonus}</span><span class="rc">💡 ${ECON.quest.bonusHints}</span></div></div>${allC&&!S.quests.bonus?'<button class="btn sm pink" data-q="bonus">Open!</button>':S.quests.bonus?'<div class="qdone">✓</div>':'<div class="qlock">🔒</div>'}</div></div>`,
     [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,still,icon:'📜',cls:'quests',dismiss:()=>{closeModal();renderHome()}});
+  /* a just-claimed quest pops and its pip on the "finish all 3" row pulses */
+  if(hit!=null){
+    const rows=$$('#modal .quest'),row=hit==='bonus'?rows[rows.length-1]:rows[hit],pip=hit==='bonus'?null:$$('#modal .qpips i')[hit];
+    if(row)wa(row,[{transform:'scale(1)'},{transform:'scale(1.045)',offset:.4},{transform:'scale(1)'}],{duration:420,easing:'cubic-bezier(.3,1.7,.5,1)'});
+    if(pip)wa(pip,[{transform:'scale(1)'},{transform:'scale(1.9)',offset:.4},{transform:'scale(1)'}],{duration:520,delay:200,easing:'cubic-bezier(.3,1.7,.5,1)'});
+  }
   $$('#modal [data-q]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.q;let coins;
     if(k==='bonus'){S.quests.bonus=true;coins=ECON.quest.bonus;S.hints+=ECON.quest.bonusHints}
     else{const q=L[+k];if(q.claimed)return;q.claimed=true;coins=q.r;S.stats.quests++;xpBanner(addXP(ECON.quest.xp))}
-    S.coins+=coins;earned(coins);sfx.chest();const[x,y]=centerOf(b);burst(x,y,'#ffd166',30,1.2);flyCoins(b,8);save();checkAch();showQuests(true);
+    S.coins+=coins;earned(coins);sfx.chest();const[x,y]=centerOf(b);burst(x,y,'#ffd166',30,1.2);flyCoins(b,8);save();checkAch();showQuests(true,k==='bonus'?'bonus':+k);
   });
 }
 
@@ -138,7 +144,13 @@ function showLogin(){
       const r=LOGIN[idx];S.login={last:d,streak:streak+1};S.stats.bestLogin=Math.max(S.stats.bestLogin,streak+1);
       S.coins+=r.c||0;earned(r.c||0);S.hints+=r.h||0;S.skips+=r.s||0;save();
       sfx.chest();const now_=$('.day.now');if(now_){const[x,y]=centerOf(now_);burst(x,y,'#ffd166',40,1.4)}flyCoins(now_,10);
-      now_&&now_.classList.add('dayclaim');setTimeout(()=>{closeModal();checkAch();renderHome()},700);
+      if(now_){
+        const nxt=now_.nextElementSibling;
+        wa(now_,[{transform:'rotateY(0)'},{transform:'rotateY(90deg)',offset:.5},{transform:'rotateY(0)'}],{duration:420,easing:'ease-in-out'});
+        setTimeout(()=>{now_.classList.remove('now');now_.classList.add('got','dayclaim')},210);
+        if(nxt){nxt.classList.add('tomorrow');const sm=nxt.querySelector('small');if(sm)sm.textContent='Tomorrow'}
+      }
+      setTimeout(()=>{closeModal();checkAch();renderHome()},1100);
     }}],{icon:'🎁',cls:'login'});
 }
 
@@ -176,14 +188,15 @@ function doSpin(){
   const w=WHEEL[i];S.coins+=w.c||0;S.hints+=w.h||0;S.skips+=w.s||0;S.stats.spins++;save();
   spinning=true;$$('#modal .mbtns .btn').forEach(b=>b.disabled=true);const ww=$('.wheelwrap');if(ww)ww.classList.add('going');
   const seg=360/WHEEL.length,start=wheelAng,base=((-(i+.5)*seg-start)%360+360)%360;
-  const end=start+360*6+base+(Math.random()-.5)*seg*.6,T=4600,t0=performance.now(),wh=$('#wheel'),ptr=$('#ptr');
+  const end=start+360*6+base+(Math.random()-.5)*seg*.6,T1=3200,T2=520,t0=performance.now(),wh=$('#wheel'),ptr=$('#ptr'),over=4;   // 3.2 s ease-out to 4° past the prize, then a 0.5 s settle back onto it
   let lastSeg=Math.floor(start/seg);sfx.whoosh();
   (function step(t){
-    const k=Math.min(1,(t-t0)/T),e=1-Math.pow(1-k,4);wheelAng=start+(end-start)*e;
+    const el_=t-t0,k=Math.min(1,el_/T1);
+    wheelAng=el_<T1?start+(end+over-start)*(1-Math.pow(1-k,4)):end+over*(1-clamp((el_-T1)/T2,0,1)*clamp((el_-T1)/T2,0,1)*(3-2*clamp((el_-T1)/T2,0,1)));
     if(wh)wh.style.transform=`rotate(${wheelAng}deg)`;
     const sNow=Math.floor(wheelAng/seg);if(sNow!==lastSeg){lastSeg=sNow;sfx.wheel();if(ptr){ptr.classList.remove('tick');void ptr.offsetWidth;ptr.classList.add('tick')}}
-    if(k<1)return requestAnimationFrame(step);
-    spinning=false;wheelAng%=360;
+    if(el_<T1+T2)return requestAnimationFrame(step);
+    spinning=false;wheelAng=end%360;
     questEvent('spin',1);earned(w.c||0);checkAch();save();if(!w.c)refreshCoins();
     sfx.chest();const hub=$('.wheelwrap .hub');if(hub){const[x,y]=centerOf(hub);burst(x,y,w.col,46,1.6);ring(x,y,w.col,260,800)}
     if(w.c){flyCoins(hub,Math.min(14,4+w.c/20|0));if(w.c>=150)confetti()}

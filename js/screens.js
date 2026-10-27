@@ -18,7 +18,15 @@ function renderHome(){
   $('#playLvl').textContent='Level '+n+(isBonus(n)?' · 2× BONUS':'');
   const sp=$('#streakPill');sp.textContent='🔥 '+S.streak;sp.classList.toggle('hot',S.streak>=2);
   $('#plv').textContent=S.plv;$('#prank').textContent=rankOf(S.plv);$('#pxp').textContent=`${S.xp} / ${xpNeed(S.plv)} XP`;
-  $('#xpArc').style.strokeDashoffset=119.4*(1-S.xp/xpNeed(S.plv));
+  /* the XP ring runs from where it was when you last looked to where it is now (all the way round first after a level-up) */
+  const arc=$('#xpArc'),ratio=S.xp/xpNeed(S.plv),off=119.4*(1-ratio),was=renderHome._xp;
+  if(was&&!REDUCED&&(was.plv!==S.plv||was.ratio!==ratio)&&$('#home').classList.contains('active')){
+    const jump=v=>{arc.style.transition='none';arc.style.strokeDashoffset=v;void arc.getBoundingClientRect();arc.style.transition=''};
+    jump(119.4*(1-was.ratio));
+    if(was.plv!==S.plv){requestAnimationFrame(()=>{arc.style.strokeDashoffset=0});setTimeout(()=>{jump(119.4);arc.style.strokeDashoffset=off},1050)}
+    else requestAnimationFrame(()=>{arc.style.strokeDashoffset=off});
+  }else arc.style.strokeDashoffset=off;
+  renderHome._xp={plv:S.plv,ratio};
   const ringP=(id,p)=>$(id).style.setProperty('--p',Math.round(clamp(p,0,1)*100));
   const dd=dailyDone();ringP('#tDaily',dd?1:0);ringP('#tSpin',spinReady()?1:typeof SPIN_CD!=='undefined'?1-(S.spinAt-Date.now())/SPIN_CD:0);
   ringP('#tQuests',S.quests.list.filter(q=>q.claimed).length/3);ringP('#tTrophy',achCount()/ACH.length);
