@@ -87,9 +87,9 @@ addEventListener('keydown',()=>resetNudge());
 /* the board ignores taps in the first 250 ms of a level: the second tap of a double-tap on Next / Replay lands there */
 ['pointerdown','click'].forEach(t=>board.addEventListener(t,e=>{if(cur&&performance.now()<cur.t0+250){e.stopPropagation();e.preventDefault()}},true));
 function showHowTo(type,done){
-  const h=HOWTO[type],i=INFO[type];
+  const h=HOWTO[type],i=INFO[type],gotIt=()=>{S.seen[type]=true;save();closeModal();if(done)done()};
   openModal(`<div class="kicker">How to play</div><h2>${i.name}</h2><p class="goal"><b>Goal</b> ${h.goal}</p><div class="demo">${h.demo()}</div><ol class="steps">${h.steps.map(t=>`<li>${t}</li>`).join('')}</ol>`,
-    [{label:'Got it! ▶',cls:'big',fn:()=>{S.seen[type]=true;save();closeModal();if(done)done()}}],{icon:i.icon,cls:'howto'});
+    [{label:'Got it! ▶',cls:'big',fn:gotIt}],{icon:i.icon,cls:'howto',dismiss:gotIt});
 }
 function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null;clearTimeout(nudgeT)}
 function undo(){
@@ -115,7 +115,7 @@ function skipLevel(){
       if(!cur||cur.over||cur.locked||cur.level!==n){closeModal();return}   // the level was won (or changed) while this was open
       if(hasToken)S.skips--;else if(S.coins>=SKIP_COST)S.coins-=SKIP_COST;else{closeModal();toast('Not enough coins');sfx.bad();return}
       if(S.unlocked<=n)S.unlocked=n+1;S.streak=0;save();refreshHUD();playLevel(n+1,{},$('#modal .mbtns .btn:last-child'));
-    }}],{icon:'⏭️'});
+    }}],{icon:'⏭️',back:closeModal});
 }
 function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);
@@ -170,7 +170,7 @@ function onWin(stars){
       daily?[{label:'Home',cls:'sec',fn:b=>playExit('home',b)},{label:'Keep playing ▶',cls:'big',fn:b=>playLevel(S.unlocked,{},b)}]
       :[{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
        {label:'Replay',cls:'sec sm',fn:b=>playLevel(n,{},b)},
-       {label:'Next ▶',cls:'big',fn:b=>playLevel(n+1,{},b)}],{cls:'win'});
+       {label:'Next ▶',cls:'big',fn:b=>playLevel(n+1,{},b)}],{cls:'win',back:()=>playExit(daily?'home':'map')});
     for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',26+i*8,1.1+i*.15);ring(x,y,'#ffd166',150+i*30);ring(x,y,'#fff',90,420);
       const c=$('#modal .card');if(c&&c.animate)c.animate([{transform:'none'},{transform:`translateY(${5+i*2}px) scale(.985)`},{transform:'none'}],{duration:220,easing:'ease-out'})}},(i*.38+.58)*1000);
     // coin count-up
@@ -201,7 +201,7 @@ function onFail(title,msg){
   const me=cur;
   setTimeout(()=>cur===me&&openModal(`<div class="kicker">${me.daily?'Daily challenge':'Level '+me.level}</div><h2>${title}</h2><p>${msg}</p><div class="failtip">💡 Stuck? A hint shows the best next move</div>`,[
     me.daily?{label:'Home',cls:'sec sm',fn:b=>playExit('home',b)}:{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
-    {label:'Try again 🔄',cls:'big',fn:b=>playLevel(me.level,{daily:me.daily},b)}],{icon:'😵‍💫',cls:'fail'}),700);
+    {label:'Try again 🔄',cls:'big',fn:b=>playLevel(me.level,{daily:me.daily},b)}],{icon:'😵‍💫',cls:'fail',back:()=>playExit(me.daily?'home':'map')}),700);
 }
 
 /* ====================== modal / screens ====================== */
@@ -210,12 +210,17 @@ function openModal(html,btns,o={}){
   clearTimeout(closeModal.t);m.classList.remove('closing');
   if(!m.classList.contains('on')){const a=document.activeElement;m._prevFocus=a&&a!==document.body?a:null}
   m.dataset.noenter=o.noEnter?'1':'';
-  m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}" role="dialog" aria-modal="true"${st}>${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}<div class="mbtns"></div></div>`;
-  const row=$('.mbtns',m);
+  m._dismiss=o.dismiss||null;m._back=o.back||o.dismiss||null;   // dismiss: tap on the dimmed backdrop; back: Escape / the phone's Back button
+  /* .mbody scrolls (medal and content); .mbtns is a separate footer, so buttons are never on top of content */
+  m.innerHTML=`<div class="card ${o.wide?'wide':''} ${o.cls||''}${o.still?' still':''}" role="dialog" aria-modal="true"${st}><div class="mbody">${o.icon?`<div class="medal"${st}><span>${o.icon}</span></div>`:''}${html}</div><div class="mfade"></div><div class="mbtns"></div></div>`;
+  const card=$('.card',m),body=$('.mbody',m),row=$('.mbtns',m);
+  $$('.rays,.wglow',body).forEach(e=>card.prepend(e));   // the win card's light show is clipped by the card, not by the scrolling body
+  const more=()=>card.classList.toggle('canscroll',body.scrollHeight-body.scrollTop-body.clientHeight>6);   // soft fade at the bottom while there is more to scroll
+  body.addEventListener('scroll',more,{passive:true});requestAnimationFrame(more);setTimeout(more,600);
   btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);
     /* a button works once per tap (no double-charge on a double tap); a handler that returns false declines and re-arms it */
     x.onclick=()=>{if(x.disabled)return;x.disabled=true;sfx.click();if(b.fn(x)===false)x.disabled=false};row.appendChild(x)});
-  m.classList.add('on');Q.setModal(true);
+  m.classList.add('on');Q.setModal(true);syncGuard();
   const fb=o.noEnter?row.firstChild:row.lastChild;if(fb)try{fb.focus({preventScroll:true})}catch(_){}
 }
 /* popups that appear on their own (welcome, daily reward) wait until the player is on the home screen with nothing open */
@@ -226,6 +231,22 @@ function drainModalQ(){
   if(m.classList.contains('on')||m.classList.contains('closing')||Trans.busy||!$('#home').classList.contains('active'))return;
   modalQ.shift()();
 }
+/* ---- the phone's Back button ----
+   While anything is open (a popup, a level, the map or shop) one extra history entry stands guard: Back consumes it and
+   we close the popup, leave the level or go home instead. With nothing open we pass the Back on, so the game still exits. */
+let guard=false;
+function syncGuard(){
+  const need=$('#modal').classList.contains('on')||!$('#home').classList.contains('active');
+  if(need&&!guard){try{history.pushState({g:1},'');guard=true}catch(_){}}
+}
+addEventListener('popstate',()=>{
+  guard=false;const m=$('#modal');
+  if(m.classList.contains('on')){const f=m._back;if(f&&!Trans.busy)f();syncGuard();return}
+  if(Trans.busy){syncGuard();return}
+  if($('#play').classList.contains('active')){$('#backBtn').click();syncGuard();return}
+  if($('#map').classList.contains('active')||$('#shop').classList.contains('active')){show('home');return}
+  history.back();   // the home screen: let the Back button really leave
+});
 /* closing is instant for the game (state flips now); the card just plays a short exit while it fades */
 function closeModal(){
   const m=$('#modal');if(!m.classList.contains('on'))return;
@@ -240,7 +261,7 @@ function show(id,o={}){
     $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
     if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
-    refreshHUD();
+    refreshHUD();syncGuard();
     if(id==='home')setTimeout(drainModalQ,700);
   });
 }
@@ -278,9 +299,11 @@ $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};
 $('#restartBtn').onclick=()=>{if(cur&&!cur.over&&!cur.locked){sfx.click();startLevel(cur.level,{daily:cur.daily})}};
 $('#skipBtn').onclick=skipLevel;
 // desktop shortcuts: U/Z undo, H hint, R restart, Enter or Space presses the main popup button, Esc goes back
+$('#modal').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget&&e.currentTarget._dismiss&&!Trans.busy)e.currentTarget._dismiss()});
 addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input'))return;
   const m=$('#modal.on'),k=e.key.toLowerCase();
+  if(m&&k==='escape'){if(m._back)m._back();return}
   if(m&&(k==='enter'||k===' ')){
     const ae=document.activeElement;
     if(ae&&m.contains(ae)&&ae.matches('button,input,a'))return;   // the browser presses the focused control itself

@@ -44,6 +44,29 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
         });
         const modal = document.querySelector('#modal.on .card');
         if (modal) { const b = modal.querySelector('.mbtns .btn:last-child'); if (b) { const r = b.getBoundingClientRect(); if (r.bottom > vh + 1) bad.push('popup main button below the fold (bottom ' + Math.round(r.bottom) + ' > ' + vh + ')') } }
+        // popups: nothing may sit on top of a footer button, and body content must stay clear of the footer
+        if (modal) {
+          const foot = modal.querySelector('.mbtns'), body = modal.querySelector('.mbody');
+          modal.querySelectorAll('.mbtns .btn').forEach(b => {
+            const r = b.getBoundingClientRect(), top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+            if (top && top !== b && !b.contains(top)) bad.push('button covered by another element: "' + b.textContent.trim().slice(0, 14) + '" under <' + top.tagName.toLowerCase() + ' class="' + String(top.className).slice(0, 24) + '">');
+          });
+          // visible text (clipped to the scrolling body when there is one) must not reach into the footer band
+          if (foot) {
+            const fr = foot.getBoundingClientRect(), clip = (body || modal).getBoundingClientRect();
+            const tw = document.createTreeWalker(modal, NodeFilter.SHOW_TEXT);
+            let n, hit = null;
+            while ((n = tw.nextNode()) && !hit) {
+              if (!n.textContent.trim() || foot.contains(n) || !n.parentElement || getComputedStyle(n.parentElement).visibility === 'hidden') continue;
+              const rg = document.createRange(); rg.selectNodeContents(n); const r = rg.getBoundingClientRect();
+              const x0 = Math.max(r.left, clip.left, fr.left), x1 = Math.min(r.right, clip.right, fr.right), y0 = Math.max(r.top, clip.top, fr.top), y1 = Math.min(r.bottom, clip.bottom, fr.bottom);
+              if (x1 - x0 > 2 && y1 - y0 > 2) hit = n.textContent.trim().slice(0, 24);
+            }
+            if (hit) bad.push('popup text runs under its buttons: "' + hit + '"');
+            const c = modal.getBoundingClientRect();
+            if (c.bottom > vh + 1 || c.top < -1) bad.push('popup does not fit the screen [' + Math.round(c.top) + ',' + Math.round(c.bottom) + ']');
+          }
+        }
         return bad;
       }, [screen]);
       for (const m of r) issues.push(`  [${screen}] ${m}`);

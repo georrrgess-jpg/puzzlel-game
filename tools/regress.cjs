@@ -173,6 +173,32 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('B18 lights cells are labelled switches', await p.evaluate(() => { const c = document.querySelector('#board .cell'); return /row 1 column 1/.test(c.getAttribute('aria-label')) && c.hasAttribute('aria-pressed') }));
   });
 
+  await test('P2 popups: backdrop tap, Escape and the Back button', async p => {
+    await prep(p);
+    await p.evaluate(() => showSettings()); await sleep(400);
+    await p.mouse.click(6, 6); await sleep(500);
+    ck('P2 tapping the dimmed backdrop closes Settings', await p.evaluate(() => !document.querySelector('#modal.on')));
+    await p.evaluate(() => { __game.S.coins = 500; showSpin() }); await sleep(400);
+    await p.keyboard.press('Escape'); await sleep(400);
+    ck('P2 Escape closes the spin popup', await p.evaluate(() => !document.querySelector('#modal.on')));
+    await p.evaluate(() => { __game.S.hints = 2; showSettings() }); await sleep(300);
+    await p.evaluate(() => document.querySelector('#resetBtn').click()); await sleep(300);
+    await p.mouse.click(6, 6); await sleep(300);
+    ck('P2 the reset-confirm popup ignores backdrop taps', await p.evaluate(() => document.querySelector('#modal h2').textContent) === 'Erase everything?');
+    await p.goBack().catch(() => {}); await sleep(500);
+    ck('P2 Back on the reset-confirm goes back to Settings (page still here)', await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('#modal h2').textContent) === 'Settings');
+    await p.goBack().catch(() => {}); await sleep(500);
+    ck('P2 Back closes Settings', await p.evaluate(() => typeof __game !== 'undefined' && !document.querySelector('#modal.on')));
+    // a level: Back leaves it for the map, then Back goes home
+    const lv = await typeLevel(p, 'lights'); await p.evaluate(n => { __game.show('map'); __game.startLevel(n) }, lv); await sleep(1200);
+    await p.goBack().catch(() => {}); await sleep(1500);
+    ck('P2 Back in a level leaves it', await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('.screen.active').id) !== 'play');
+    for (let k = 0; k < 3 && await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('.screen.active').id) !== 'home'; k++) { await p.goBack().catch(() => {}); await sleep(900) }
+    ck('P2 Back from the map reaches home', await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('.screen.active').id) === 'home');
+    await p.goBack().catch(() => {}); await sleep(800);
+    ck('P2 Back on home really leaves the page', await p.evaluate(() => typeof __game === 'undefined').catch(() => true));
+  });
+
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');
   await browser.close(); srv.close(); process.exit(fails ? 1 : 0);
 })();

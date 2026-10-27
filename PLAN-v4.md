@@ -302,3 +302,12 @@ Notes on how each was fixed, for whoever touches this next:
 - **Sand Tubes hints** follow the solution found at level generation (free), and only search again after the player deviates (6k nodes, then 25k). Even at tier 40 a search took under 10 ms in headless Chromium.
 - **Not testable here:** B10 on a real iPhone (the headless check only covers suspend → tap → running); B9's two-deploy staleness case.
 - Replaying a 3-star level now gives 20% XP and no streak bonus, and doesn't extend the streak (B13). `economy-sim` still passes (it doesn't model such replays).
+
+### Phase 2: popup layout (done)
+- **Structure:** `.card` is a flex column: `.mbody` (medal and content, the only part that scrolls), `.mfade` (the "more below" gradient, shown while the body can scroll) and `.mbtns` (a fixed footer). Padding comes from the `--cpx/--cpt/--cpb` variables so it can shrink on short screens. Deviation from the plan: the medal, kicker and title scroll with the content instead of being pinned (simpler and robust; the medal is hidden on short screens anyway).
+- **Win card:** its rays and glow are moved out of the scrolling body into the card. On phones ≤ 400 px wide, Levels · Replay · Next share one row (Levels and Replay at 42 px, Next takes the rest).
+- **Dismissing:** `openModal` options `dismiss` (tap on the dimmed backdrop) and `back` (Escape and the phone's Back button, which defaults to `dismiss`). Settings, profile, quests, trophies, spin and how-to dismiss; the win and fail popups use `back` to leave the level; the skip-confirm popup uses `back` to cancel; the reset-confirm popup uses `back` to return to Settings. None of those four ignore a backdrop tap.
+- **Back button:** while a popup, a level, the map or the shop is open, one extra history entry stands guard (`syncGuard`). Back closes the popup, leaves the level or goes up to home; on the home screen it is passed on and really leaves. Verified with real `page.goBack()` navigation.
+- **`tools/matrix.cjs`:** new popup checks: visible text must not run under the footer, buttons must not be covered, the card must fit the screen. On the previous commit it reports 7 problems on iPhone SE; now it reports none on all 6 devices.
+- `tools/regress.cjs` gained 8 popup checks (36 in total).
+- Perf: `modal` 60 fps. `win` measured 46–52 fps avg (baseline 55) because it plays a Lights Out level; the Lights Out frame-rate fix is scheduled for the start of Phase 6.

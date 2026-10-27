@@ -4,9 +4,10 @@
 #modal{background:radial-gradient(120% 80% at 50% 35%,color-mix(in srgb,var(--bg2) 40%,#0009),#000d)}
 #modal.on{animation:fadein .3s ease-out}
 .card{
+  --cpx:18px;--cpt:22px;--cpb:20px;   /* popup padding, used by .mbody / .mbtns (smaller on short screens, see below) */
   --cardbg:linear-gradient(180deg,color-mix(in srgb,var(--bg2) 82%,#fff 10%),color-mix(in srgb,var(--bg1) 92%,#000));
   background:radial-gradient(120% 55% at 50% 0%,color-mix(in srgb,var(--acc) 15%,transparent),transparent 62%),var(--cardbg);
-  border-radius:32px;padding:22px 18px 20px;
+  border-radius:32px;
   box-shadow:0 30px 80px #000d,0 0 0 1.5px color-mix(in srgb,var(--acc) 32%,#ffffff1a),inset 0 2px 0 #ffffff38,inset 0 -6px 0 #0000002e;
   animation:hudCardIn .6s cubic-bezier(.25,1.4,.45,1) both;scrollbar-width:thin
 }
@@ -50,7 +51,7 @@
 .rc.xp{padding-left:9px;color:#dcc2ff}
 
 /* ===================== win card ===================== */
-.card.win{padding-top:18px;background:radial-gradient(90% 45% at 50% 26%,color-mix(in srgb,var(--acc) 26%,transparent),transparent 70%),var(--cardbg);
+.card.win{--cpt:18px;background:radial-gradient(90% 45% at 50% 26%,color-mix(in srgb,var(--acc) 26%,transparent),transparent 70%),var(--cardbg);
   box-shadow:0 30px 80px #000d,0 0 0 2px color-mix(in srgb,var(--acc) 55%,transparent),0 0 60px color-mix(in srgb,var(--acc) 30%,transparent),inset 0 2px 0 #ffffff40}
 .sdefs{position:absolute !important;width:0;height:0;overflow:hidden}
 .rays{top:142px;width:720px;height:720px;margin:-360px 0 0 -360px;opacity:.7;
@@ -313,7 +314,7 @@
   .card.howto .medal{width:52px;height:52px}.card.howto .medal span{width:40px;height:40px;font-size:21px}
   .card .steps li{padding:6px 8px 6px 38px;font-size:13px;margin:4px 0}.card .steps li::before{left:7px;top:5px;width:22px;height:22px}
   .demo{padding:10px 6px 8px;margin:8px 0 2px}
-  .card{padding:18px 14px 16px}
+  .card{--cpx:14px;--cpt:18px;--cpb:16px}
   .sock{width:72px;height:72px}.sock:nth-child(2){width:88px;height:88px}
 }
 
@@ -371,8 +372,26 @@
 .ftxt{font-size:24px;text-shadow:0 3px 0 #000a,0 0 14px var(--acc)}
 .ftxt.big{font-size:34px;text-shadow:0 3px 0 #000a,0 0 18px var(--acc2)}
 
-/* review fixes: the button row is a sticky footer so it never falls below the fold on small phones */
-.card>.mbtns{position:sticky;bottom:-16px;z-index:3;margin:14px -14px -16px;padding:12px 14px 16px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg1) 92%,#000) 40%)}
+/* ===================== popup layout (v4) =====================
+   .card = flex column: .mbody (medal + content) scrolls, .mfade is the "more below" hint, .mbtns is a fixed footer.
+   The footer is a normal flex item, so it can never sit on top of the content (it used to be position:sticky). */
+.card{display:flex;flex-direction:column;overflow:hidden;padding:0;
+  max-height:calc(100dvh - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+.mbody{flex:1 1 auto;min-height:0;position:relative;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding:var(--cpt) var(--cpx) 10px;scrollbar-width:thin}
+.mbody::-webkit-scrollbar{width:4px}.mbody::-webkit-scrollbar-thumb{background:#ffffff40;border-radius:4px}
+.card>.mbtns{flex:none;position:relative;z-index:3;margin:0;padding:12px var(--cpx) var(--cpb);border-top:1px solid #ffffff16;
+  background:linear-gradient(180deg,#0000001c,#00000040)}
+.mfade{flex:none;position:relative;height:0;z-index:2;pointer-events:none}
+.mfade::before{content:'';position:absolute;left:0;right:0;bottom:0;height:28px;opacity:0;transition:opacity .2s;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg1) 78%,#000))}
+.card.canscroll .mfade::before{opacity:1}
+/* win card: Levels · Replay · Next always share one row */
+@media (max-width:400px){
+  .card.win .mbtns{flex-wrap:nowrap;gap:8px}
+  .card.win .mbtns .btn.sm{flex:0 0 auto;min-height:42px;padding:9px 12px;font-size:14px}
+  .card.win .mbtns .btn.big{flex:1 1 0;min-width:0;padding:12px 8px;font-size:18px}
+}
 @media (max-height:700px){
   .card.howto .medal,.card.settings .medal,.card.quests .medal{display:none}
   .quest{padding:8px 10px}.quest .qi{width:42px;height:42px;font-size:22px}
