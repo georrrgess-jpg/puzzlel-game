@@ -28,7 +28,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(S.same&&S.look&&S.names, 'relatives share a surname (cousins sometimes not) and a look, and never a first name');
 
   /* screens */
-  const U=await page.evaluate(mid=>{ const C=App.C; App.route='office'; App.params={}; render(); const ov=!!document.querySelector('.v1816-ovmail');
+  const U=await page.evaluate(mid=>{ const C=App.C; App.route='office'; App.params={}; render(); const ov=!!document.querySelector('.v1816-ovmail, .v1817o-mail[data-a="v1816Open"]');
     App.modal={type:'v1816mail',id:mid}; renderModal(); const md={cards:document.querySelectorAll('.modal .v1816-fc').length,opts:document.querySelectorAll('.modal .v1816-opt').length,paper:/wore \d+/.test((document.querySelector('.v1816-paper')||{}).textContent||''),meters:document.querySelectorAll('.modal .v1816-mt').length};
     App.modal=null; renderModal(); App.route='families'; render(); const pg={trees:document.querySelectorAll('.v1816-tree').length,pairs:document.querySelectorAll('.v1816-pair').length,around:document.querySelectorAll('.v1816-around li').length};
     App.route='hof'; render(); const wall=!!document.querySelector('.v1816-wall .v1816-fc');
