@@ -2,6 +2,47 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.17 (update 46: Crest Studio, Growth Chart, Overview cleanup)
+
+**Crest Studio** (`src/v17/9c_crest.js`, `9c_crest_ui.js`, `9c_crest.css`)
+- A design is `{sh, fd, em, rb}`: 6 shapes and 6 fields (classic = the old dark field), an emblem (any mascot key) and a ribbon (≤14 chars).
+- `crest()` is wrapped at the end of the chain.
+  - Your school without `s.crest` returns the old renderer unchanged (byte-identical).
+  - Every other school (league, external, State Poll via `v1812pSchool`) gets a seeded design from (career seed, `s.vid||s.id`).
+  - Markup is cached per design, colours, size and mode.
+  - IDs: the mascot filter uses `V17_ID` (re-minted by `v17Mint`); the field clip uses its own placeholder (`\u0002`), minted per call so ids never collide.
+  - The emblem is dropped under 28 px; the ribbon shows from 64 px.
+- Screen: `VIEWS.crest` (Club → Identity).
+  - Previews: scoreboard / jersey chest / stadium sign.
+  - PNG via SVG → canvas → `toBlob`.
+  - Undo stack, Classic shield, Surprise me, Trim (A–Z 0–9 & ' . - only, upper case, max 12).
+  - Typing the ribbon updates the previews without a re-render.
+- The live scoreboard bug now uses `crest()` (`ui_live.js`). School & Stadium shows a "Home of the ..." sign.
+
+**Growth Chart** (`src/v17/9d_growth.js`, `.css`)
+- `VIEWS.growth` (Squad → Development).
+- Heights use the engine's own `growthLeft(age, mat)`: `ah - growthLeft(age)`. Past ages are capped at today's height and future ages floored at it.
+- Measured from 7th grade, projected to 21, the age at which late bloomers finish. The x axis is 12–21.
+- Display is whole inches only (`Math.round`): now, projected and to-go come from the same rounding, so they add up.
+- Growth Watch is sorted by inches to go and has a level filter. Up to 5 curves can be picked; the default is the top 5.
+- "Why it matters" reads `OVR_W` (GK 15%, DEF/FWD 10%).
+- Player Development links in.
+- At rollover, a player who grew 3 or more whole inches makes the Newswire.
+
+**Overview cleanup** (`src/v17/9e_overview.js`, `.css`)
+- A last `VIEWS.office` wrapper regroups the finished markup in a `<template>`; every card is still built by its own feature.
+  - `.tc-dec` buttons and the mailbox card become the "This week" strip (`grid-area: week`, under the hero row).
+  - The State Poll card and `.v1812g-off` move to `.v1817o-spot` (side by side ≥1181 px).
+  - `.ov-more` becomes `.v1817o-feed`: tabs named from each card's heading, panels hidden in place, the tab kept in `V1817O.tab`.
+- The new grid areas are defined for every breakpoint. The school card is compact now.
+- Menus: `TOPNAV` items are reordered into groups (`V1817O_MENU`), the `v15Top` output gets `.tn-sec` labels, and "More" is renamed "Stories".
+
+**Tests:** `test/crest_growth.js` and `test/overview1817.js` (both in `run_all.sh`).
+
+**Not done:**
+- The crest is not drawn on the 2-D match/Kit Lab figures or the 3-D jersey. The chest badge there is part of the figure art; the Studio shows a jersey-chest preview.
+- Preseason still shows the Tryouts and Schedule Builder banners above the Overview (time-limited, unchanged).
+
 ## Version 18.16 (Family Ties, Quick Jump & Pins)
 
 **Family Ties** (`src/v17/9a_family.js`, `9a_family_ui.js`, `9a_family.css`)

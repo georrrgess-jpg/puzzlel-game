@@ -3900,6 +3900,59 @@ body.v1816q-on{overflow:hidden}
 .v1817g-cta>span:nth-child(2){flex:1}.v1817g-cta small{display:block;color:var(--muted)}.v1817g-ci{font-size:1.6rem}
 @media (max-width:1100px){ .v1817g{grid-template-columns:minmax(0,1fr)} }
 
+/* v18.17 the Overview, decluttered */
+.view-office .ov-grid.v1817o-grid{grid-template-columns:270px minmax(0,1fr) minmax(0,1fr) minmax(0,1.25fr);grid-template-areas:"team xi xi match" "week week week week" "youth train table table";align-items:stretch;gap:16px}
+.view-office .v1817o-grid .ov-team{grid-area:team}
+.v1817o-week{grid-area:week;padding:14px 16px}
+.v1817o-wh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.v1817o-wh h3{margin:0;font-family:var(--f-display);font-size:1.2rem;text-transform:uppercase;letter-spacing:.03em}
+.v1817o-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.v1817o-items .dec{margin:0;height:100%}
+.v1817o-mail{border-color:color-mix(in srgb,#e8d9a8 45%,var(--line))!important;background:linear-gradient(90deg,color-mix(in srgb,#e8d9a8 10%,var(--surface2)),var(--surface2))!important}
+.v1817o-clear{margin:0;color:var(--muted)}
+/* the school card: compact now that the decisions moved out */
+.v1817o-grid .ov-team{padding:16px 14px}
+.v1817o-grid .ov-team .tc-crest svg{width:92px;height:92px}
+.v1817o-grid .ov-team .tc-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.v1817o-grid .ov-team .tc-stat{display:block}
+.v1817o-grid .ov-team .tc-stat>div{display:block}
+.v1817o-grid .ov-team .tc-stat>div span{display:block;font-size:.72rem}
+/* the spotlight */
+.v1817o-spot{display:grid;gap:16px;margin-top:16px}
+.v1817o-spot.two{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+.v1817o-spot>*{margin:0!important;min-width:0}
+.v1817o-spot.two .v1812p-ovcard{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr)}
+.v1817o-spot.two .v1812p-ovcard .v1812p-ovs{display:none}
+.v1817o-spot.two .v1812g-off .v1812g-offrow{flex-wrap:nowrap;overflow:hidden}
+.v1817o-spot.two .v1812g-off .v1812g-offrow>p,.v1817o-spot.two .v1812g-off .v1812g-offrow>.muted{display:none}
+/* around the program */
+.v1817o-feed{margin-top:22px;border-radius:18px;border:1px solid var(--line);background:var(--surface);box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
+.v1817o-fh{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px 0;border-bottom:1px solid var(--line)}
+.v1817o-fh h2{margin:0 6px 10px 0;font-family:var(--f-display);font-size:1.4rem;text-transform:uppercase}
+.v1817o-fh>.btn{margin:0 0 10px auto}
+.v1817o-tabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-self:flex-end}
+.v1817o-tabs::-webkit-scrollbar{display:none}
+.v1817o-tabs button{appearance:none;font:inherit;font-weight:650;font-size:.92rem;cursor:pointer;white-space:nowrap;padding:9px 12px 11px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);transition:color .15s,border-color .2s}
+.v1817o-tabs button:hover{color:var(--text)}
+.v1817o-tabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+.v1817o-panels{padding:16px 18px 18px}
+.v1817o-panel>.card,.v1817o-panel>.ov-card{border:0!important;background:none!important;box-shadow:none!important;padding:0!important;margin:0!important}
+.v1817o-panel>.card>.hd>h3,.v1817o-panel>.card>h3,.v1817o-panel>.ov-card>.hd>h3,.v1817o-panel>.card>.row>h3{display:none}
+@media (max-width:1300px) and (min-width:1181px){ .view-office .ov-grid.v1817o-grid{grid-template-columns:250px minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"team xi match" "week week week" "youth train table"} }
+@media (max-width:1180px){ .view-office .ov-grid.v1817o-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"match team" "week week" "xi xi" "youth train" "table table"} .v1817o-spot.two{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:760px){ .view-office .ov-grid.v1817o-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"match" "week" "xi" "team" "youth" "train" "table"} .v1817o-items{grid-template-columns:1fr} .v1817o-fh{padding:12px 12px 0} .v1817o-panels{padding:12px} .v1817o-fh>.btn{display:none} }
+.v1817o-spot{grid-template-columns:minmax(0,1fr)}
+.v1817o-spot>*{grid-column:auto!important;grid-row:auto!important}
+.v1817o-spot .v1812p-ovcard>*{min-width:0}
+.v1817o-spot .v1812p-ovt li{min-width:0}
+.v1817o-spot .v1812p-ovt li .trunc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:760px){ .v1817o-spot .v1812p-ovcard{overflow:hidden} .v1817o-spot .v1812p-ovt li{display:grid;grid-template-columns:28px 26px 22px minmax(0,1fr) auto;align-items:center;gap:6px} }
+/* menus: small group labels */
+.tn-dd .tn-sec{padding:10px 10px 4px;font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.tn-dd .tn-sec:first-child{padding-top:4px}
+.tn-dd .tn-sec+.tn-item{margin-top:0}
+.tn-dd .tn-item+.tn-sec{margin-top:4px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -13504,6 +13557,9 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['🛡️','Crest Studio','Club → Crest Studio. Build your crest from six shapes, six fields, any of the mascots as the emblem and a ribbon (EST 1962). A big live preview, five quick variants, and how it reads on the scoreboard, a jersey chest and the stadium sign. Save it as a PNG with a clear background. Every other school in the state now wears its own crest too, on the schedule, the State Poll, the match scoreboard and everywhere else crests appear.'],
+  ['📏','Growth Chart','Squad → Growth Chart. Height curves for your players, measured and projected, against reference curves for early, average and late bloomers, with the biggest growth years marked. Growth Watch sorts everyone by growth still to come. Every height is a whole inch, and now plus to-go always equals projected.'],
+  ['🧭','A calmer Overview','The Coach\'s Office keeps its top row (your school, Starting XI, next match). Your decisions and any letter in the mailbox now sit in one This week row, the State Poll and Gameday Graphics share a row, and everything around the program is one card with tabs instead of seven. The page is about a third shorter. The menus are grouped with small labels, and More is now Stories.'],
   ['👨‍👦','Family Ties','Little brothers, cousins and the kids of alumni now arrive at every school in the league, sometimes while their brother is still on the roster. Families share a surname and a look, hand down numbers, and show as a family tree on player profiles, the new Family Ties page (Squad menu) and the Hall of Fame family wall. Your program starts with a legend: a Hall of Famer whose number is retired, and his little brother on your roster with a letter in the coach\'s mailbox. Keep it retired, let him wear it, or give him a legacy patch; each choice moves his legacy pressure and his growth. Brothers who start together build chemistry.'],
   ['⌨️','Quick Jump & Pins','Press Ctrl K (Cmd K on a Mac) anywhere to find any player, team, page or action. Arrow keys move, Enter opens, Tab pins, > shows actions only. Pinned items sit beside the search and in the Settings menu on every screen with a live line each, plus a coach\'s note. G then a letter jumps to a page (G O Overview, G L Lineup, G T Table, G P State Poll). On a phone, the search icon opens it.'],
   ['✨','Smoother menus and screens','A polish pass across the game. The top bar now fits every screen size (no more sideways scrolling on laptops), and on phones it is a single row. Search tucks into an icon: press / to search, Escape to clear. Pages glide in when you open them but no longer flash when you change a tab or filter. Menus close after you pick something, modals and messages slide away instead of vanishing, the phone menu closes when you tap outside it, long pages get a back-to-top button, empty pages say so clearly, and the league table keeps the points column on screen on phones.'],
@@ -25816,6 +25872,66 @@ if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('growth');
 { const _ro=rollover; rollover=function(C){ const before={}; try{ for(const p of schoolPlayers(C,C.userSid)) before[p.id]=v1817gIn(p.h); }catch(e){} const r=_ro.apply(this,arguments);
   try{ if(r&&r.ok){ const gr=Object.keys(before).map(id=>C.players[id]).filter(p=>p&&v1817gIn(p.h)-before[p.id]>=3).sort((a,b)=>(v1817gIn(b.h)-before[b.id])-(v1817gIn(a.h)-before[a.id])).slice(0,2);
     for(const p of gr) addNews(C,'program',`${pname(p)} shot up ${v1817gIn(p.h)-before[p.id]} inches over the summer: now ${v1817gFt(p.h)}${p.mat==='late'?', a late bloomer arriving':''}`,C.userSid,{pid:p.id}); } }catch(e){} return r; }; }
+
+/* ===================== v18.17 phase 2: THE OVERVIEW, DECLUTTERED =====================
+   Same layout up top (your school, the Starting XI, the next match), then:
+     "This week": the coach's decisions and any letter in the mailbox, as one row of one-tap items (they used to make the
+       school card twice as tall, and the letter sat above everything);
+     Youth watch, Training focus and the Section table, as before;
+     the spotlight: the State Poll and the Gameday Graphics side by side;
+     "Around the program": the County Map, results, development, leaders, milestones, the Press box and school news become one
+       card with tabs (it was seven stacked cards). The tab you pick is remembered; "Customize overview" still decides what is in it.
+   A last wrapper on VIEWS.office regroups the finished markup (every card is still built by its own feature), so nothing else
+   changes and every button keeps its action. Identifiers v1817o / V1817O. */
+const V1817O={ tab:null };
+function v1817oKey(t){ return String(t||'').toLowerCase().replace(/[^a-z]+/g,'-').replace(/^-|-$/g,'')||'panel'; }
+function v1817oRestructure(h){
+  const t=document.createElement('template'); t.innerHTML=h; const root=t.content; const grid=root.querySelector('.ov-grid'); if(!grid) return h;
+  grid.classList.add('v1817o-grid');
+  /* this week */
+  const items=[]; const dec=grid.querySelector('.ov-team .tc-dec'); let done='';
+  if(dec){ const chip=dec.querySelector('.hd .chip'); done=chip?chip.textContent:''; dec.querySelectorAll('.dec').forEach(b=>items.push(b)); dec.remove(); }
+  const mail=root.querySelector('.v1816-ovmail'); if(mail){ const b=document.createElement('button'); b.className='dec v1817o-mail'; b.dataset.a='v1816Open'; b.dataset.m=mail.dataset.m;
+    b.innerHTML=`<span class="dec-ico">✉️</span><span class="grow"><b>${mail.querySelector('b')?mail.querySelector('b').innerHTML:'A letter'}</b><small>Coach’s mailbox · your call</small></span><span class="dec-go"></span>`; items.unshift(b); mail.remove(); }
+  const week=document.createElement('section'); week.className='ov-card v1817o-week';
+  week.innerHTML=`<div class="v1817o-wh"><h3>This week</h3>${done?`<span class="chip">${done}</span>`:''}</div><div class="v1817o-items"></div>`;
+  const box=week.querySelector('.v1817o-items'); if(items.length) items.forEach(b=>box.appendChild(b)); else box.innerHTML='<p class="v1817o-clear">All set for this week. Nothing waiting on you.</p>';
+  const match=grid.querySelector('.ov-match'); if(match) match.after(week); else grid.appendChild(week);
+  /* the spotlight */
+  const poll=grid.querySelector('.v1812p-ovcard'); const gd=root.querySelector('.v1812g-off');
+  if(poll||gd){ const spot=document.createElement('div'); spot.className='v1817o-spot'+(poll&&gd?' two':''); grid.after(spot); if(poll) spot.appendChild(poll); if(gd) spot.appendChild(gd); }
+  /* around the program: one card with tabs */
+  const more=root.querySelector('.ov-more'), mh=root.querySelector('.ov-more-h');
+  if(more&&more.children.length){ const cards=[...more.children]; const tabs=cards.map(c=>{ const hh=c.querySelector('h2,h3'); const title=hh?hh.textContent.trim():'More'; return {c,title,key:v1817oKey(title)}; });
+    const want=V1817O.tab&&tabs.some(x=>x.key===V1817O.tab)?V1817O.tab:tabs[0].key;
+    const feed=document.createElement('section'); feed.className='v1817o-feed';
+    const cust=mh&&mh.querySelector('[data-a="panelsOpen"]');
+    feed.innerHTML=`<div class="v1817o-fh"><h2>Around the program</h2><div class="v1817o-tabs" role="tablist">${tabs.map(x=>`<button role="tab" class="${x.key===want?'on':''}" aria-selected="${x.key===want}" data-a="v1817oTab" data-k="${x.key}">${esc(x.title)}</button>`).join('')}</div></div><div class="v1817o-panels"></div>`;
+    if(cust) feed.querySelector('.v1817o-fh').appendChild(cust);
+    const P=feed.querySelector('.v1817o-panels'); for(const x of tabs){ const w=document.createElement('div'); w.className='v1817o-panel'; w.dataset.k=x.key; w.setAttribute('role','tabpanel'); if(x.key!==want) w.hidden=true; w.appendChild(x.c); P.appendChild(w); }
+    if(mh) mh.remove(); more.replaceWith(feed); }
+  return t.innerHTML;
+}
+{ const _of=VIEWS.office; VIEWS.office=function(){ const h=_of.apply(this,arguments); try{ return v1817oRestructure(h); }catch(e){ console.warn('overview',e); return h; } }; }
+A.v1817oTab=el=>{ const k=el.dataset.k; V1817O.tab=k; const f=el.closest('.v1817o-feed'); if(!f) return;
+  f.querySelectorAll('.v1817o-tabs button').forEach(b=>{ const on=b.dataset.k===k; b.classList.toggle('on',on); b.setAttribute('aria-selected',on); });
+  f.querySelectorAll('.v1817o-panel').forEach(p=>{ const on=p.dataset.k===k; p.hidden=!on; if(on&&!reducedMotion()) p.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:220,easing:'cubic-bezier(.2,.8,.2,1)'}); });
+  try{ tabIndicators(f); }catch(e){} };
+
+/* ---------- menus: ordered and labelled in small groups; "More" is "Stories" ---------- */
+const V1817O_MENU={
+  squads:[['Roster',['squads','tryouts']],['Development',['dev','growth','camp']],['People',['families','cards']]],
+  schedule:[['',['schedule','matchday','presched']]],
+  league:[['Standings',['league','statepoll','countymap']],['Postseason & honors',['post','awards','records']]],
+  school:[['Identity',['school','crest','kits']],['Media',['gameday']],['',['settings']]],
+  _more:[['News',['news','capsule']],['Archive',['history','tourneys','hof']]] };
+for(const t of TOPNAV){ const key=t[0]||'_more'; const G=V1817O_MENU[key]; if(!G) continue; if(!t[0]) t[1]='Stories';
+  const order=G.flatMap(g=>g[1]); const rest=t[3].filter(k=>!order.includes(k)); t[3].splice(0,t[3].length,...order.filter(k=>t[3].includes(k)||VIEWS[k]),...rest); }
+{ const _top=v15Top; v15Top=function(C){ let h=_top.apply(this,arguments); try{ const tp=document.createElement('template'); tp.innerHTML=h;
+    tp.content.querySelectorAll('.tn-tab.has-dd:not(.tn-gear)').forEach(tab=>{ const dd=tab.querySelector('.tn-dd'); if(!dd) return; const first=dd.querySelector('[data-r]'); if(!first) return;
+      const t=TOPNAV.find(x=>x[3].includes(first.dataset.r)); const G=t&&V1817O_MENU[t[0]||'_more']; if(!G) return;
+      for(const [lab,ks] of G){ if(!lab) continue; const it=[...dd.querySelectorAll('.tn-item[data-r]')].find(b=>ks.includes(b.dataset.r)); if(it){ const s=document.createElement('div'); s.className='tn-sec'; s.textContent=lab; it.before(s); } } });
+    h=tp.innerHTML; }catch(e){ console.warn('menus',e); } return h; }; }
 
 </script>
 </body></html>

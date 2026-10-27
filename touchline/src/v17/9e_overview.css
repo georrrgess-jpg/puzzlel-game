@@ -1,0 +1,52 @@
+/* v18.17 the Overview, decluttered */
+.view-office .ov-grid.v1817o-grid{grid-template-columns:270px minmax(0,1fr) minmax(0,1fr) minmax(0,1.25fr);grid-template-areas:"team xi xi match" "week week week week" "youth train table table";align-items:stretch;gap:16px}
+.view-office .v1817o-grid .ov-team{grid-area:team}
+.v1817o-week{grid-area:week;padding:14px 16px}
+.v1817o-wh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.v1817o-wh h3{margin:0;font-family:var(--f-display);font-size:1.2rem;text-transform:uppercase;letter-spacing:.03em}
+.v1817o-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.v1817o-items .dec{margin:0;height:100%}
+.v1817o-mail{border-color:color-mix(in srgb,#e8d9a8 45%,var(--line))!important;background:linear-gradient(90deg,color-mix(in srgb,#e8d9a8 10%,var(--surface2)),var(--surface2))!important}
+.v1817o-clear{margin:0;color:var(--muted)}
+/* the school card: compact now that the decisions moved out */
+.v1817o-grid .ov-team{padding:16px 14px}
+.v1817o-grid .ov-team .tc-crest svg{width:92px;height:92px}
+.v1817o-grid .ov-team .tc-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
+.v1817o-grid .ov-team .tc-stat{display:block}
+.v1817o-grid .ov-team .tc-stat>div{display:block}
+.v1817o-grid .ov-team .tc-stat>div span{display:block;font-size:.72rem}
+/* the spotlight */
+.v1817o-spot{display:grid;gap:16px;margin-top:16px}
+.v1817o-spot.two{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+.v1817o-spot>*{margin:0!important;min-width:0}
+.v1817o-spot.two .v1812p-ovcard{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr)}
+.v1817o-spot.two .v1812p-ovcard .v1812p-ovs{display:none}
+.v1817o-spot.two .v1812g-off .v1812g-offrow{flex-wrap:nowrap;overflow:hidden}
+.v1817o-spot.two .v1812g-off .v1812g-offrow>p,.v1817o-spot.two .v1812g-off .v1812g-offrow>.muted{display:none}
+/* around the program */
+.v1817o-feed{margin-top:22px;border-radius:18px;border:1px solid var(--line);background:var(--surface);box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden}
+.v1817o-fh{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 18px 0;border-bottom:1px solid var(--line)}
+.v1817o-fh h2{margin:0 6px 10px 0;font-family:var(--f-display);font-size:1.4rem;text-transform:uppercase}
+.v1817o-fh>.btn{margin:0 0 10px auto}
+.v1817o-tabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-self:flex-end}
+.v1817o-tabs::-webkit-scrollbar{display:none}
+.v1817o-tabs button{appearance:none;font:inherit;font-weight:650;font-size:.92rem;cursor:pointer;white-space:nowrap;padding:9px 12px 11px;border:0;border-bottom:3px solid transparent;background:none;color:var(--muted);transition:color .15s,border-color .2s}
+.v1817o-tabs button:hover{color:var(--text)}
+.v1817o-tabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+.v1817o-panels{padding:16px 18px 18px}
+.v1817o-panel>.card,.v1817o-panel>.ov-card{border:0!important;background:none!important;box-shadow:none!important;padding:0!important;margin:0!important}
+.v1817o-panel>.card>.hd>h3,.v1817o-panel>.card>h3,.v1817o-panel>.ov-card>.hd>h3,.v1817o-panel>.card>.row>h3{display:none}
+@media (max-width:1300px) and (min-width:1181px){ .view-office .ov-grid.v1817o-grid{grid-template-columns:250px minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"team xi match" "week week week" "youth train table"} }
+@media (max-width:1180px){ .view-office .ov-grid.v1817o-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"match team" "week week" "xi xi" "youth train" "table table"} .v1817o-spot.two{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:760px){ .view-office .ov-grid.v1817o-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"match" "week" "xi" "team" "youth" "train" "table"} .v1817o-items{grid-template-columns:1fr} .v1817o-fh{padding:12px 12px 0} .v1817o-panels{padding:12px} .v1817o-fh>.btn{display:none} }
+.v1817o-spot{grid-template-columns:minmax(0,1fr)}
+.v1817o-spot>*{grid-column:auto!important;grid-row:auto!important}
+.v1817o-spot .v1812p-ovcard>*{min-width:0}
+.v1817o-spot .v1812p-ovt li{min-width:0}
+.v1817o-spot .v1812p-ovt li .trunc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:760px){ .v1817o-spot .v1812p-ovcard{overflow:hidden} .v1817o-spot .v1812p-ovt li{display:grid;grid-template-columns:28px 26px 22px minmax(0,1fr) auto;align-items:center;gap:6px} }
+/* menus: small group labels */
+.tn-dd .tn-sec{padding:10px 10px 4px;font-size:.66rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.tn-dd .tn-sec:first-child{padding-top:4px}
+.tn-dd .tn-sec+.tn-item{margin-top:0}
+.tn-dd .tn-item+.tn-sec{margin-top:4px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
