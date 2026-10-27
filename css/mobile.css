@@ -37,3 +37,21 @@
 /* no pull-to-refresh / rubber-banding mid-drag, no long-press callouts, no auto text inflation */
 html,body{overscroll-behavior:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .mapwrap,.shoplist,.card{overscroll-behavior:contain}
+
+/* v4: narrow phones. Shorter HUD text and a smaller mode label so nothing wraps or collides at 320 px. */
+@media (max-width:380px){
+  .meter .mtx .nx .w{display:none}
+  .meter .mtx .nx .le{display:inline}
+  .meter .mtx{gap:6px}
+  #play .ptitle small{font-size:11px;padding:1px 7px}
+}
+@media (max-width:360px){
+  #play .ptitle .sx{display:none}
+}
+@media (max-width:340px){
+  /* 320 px: the mode label drops its emoji and the coin chip its slack, so "Block Garden" fits next to a 4-digit balance */
+  #play .ptitle .si{display:none}
+  #play .topbar{gap:6px}
+  #play .chip{min-width:0;padding:5px 10px 5px 5px;gap:5px;font-size:16px}
+  #play .chip .coin{width:22px;height:22px}
+}

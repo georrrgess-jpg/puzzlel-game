@@ -89,7 +89,8 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     const lv = await typeLevel(p, 'tubes'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2500);
     for (let k = 0; k < 3; k++) { await p.evaluate(() => __game.cur.puz.hint()); await sleep(100); await p.evaluate(() => { const t = [...document.querySelectorAll('#board .tube')]; t.find(x => x.dataset.h === '1').click(); t.find(x => x.dataset.h === '2').click() }); await sleep(250) }
     await p.evaluate(() => __game.cur.puz.hint()); await sleep(200);
-    await p.evaluate(() => document.querySelector('#restartBtn').click()); await sleep(3600);
+    await p.evaluate(() => document.querySelector('#restartBtn').click()); await sleep(300);
+    await p.evaluate(() => { const m = document.querySelector('#modal.on'); if (m && /Restart/.test(m.textContent)) m.querySelector('.mbtns .btn:last-child').click() }); await sleep(3300);
     ck('B6 the fresh level still shows 0 moves', await p.evaluate(() => document.querySelector('#hudInfo .mv').textContent) === '0');
   });
 
@@ -197,6 +198,35 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('P2 Back from the map reaches home', await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('.screen.active').id) === 'home');
     await p.goBack().catch(() => {}); await sleep(800);
     ck('P2 Back on home really leaves the page', await p.evaluate(() => typeof __game === 'undefined').catch(() => true));
+  });
+
+  await test('P3-P8 play screen behaviour', async p => {
+    await prep(p);
+    // P3: the written instruction shows for the first 3 levels of a mode only
+    const tl = await p.evaluate(() => { const out = []; for (let n = 1; out.length < 4; n++) if (__game.typeFor(n) === 'tubes') out.push(n); return out });
+    const off = [];
+    for (const n of tl) { await p.evaluate(n => __game.startLevel(n), n); await sleep(250); off.push(await p.evaluate(() => document.querySelector('#instr').classList.contains('off'))) }
+    ck('P3 instruction shown for 3 levels, then hidden', JSON.stringify(off) === '[false,false,false,true]', JSON.stringify(off));
+    // P5 / P7 / P8 on Block Garden
+    const lv = await typeLevel(p, 'blocks'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(500);
+    ck('P8 the first play of a level gets the full intro banner', await p.evaluate(() => !!document.querySelector('.lvintro:not(.slim)')));
+    await sleep(2200);
+    ck('P5 Undo looks idle before the first move', await p.evaluate(() => document.querySelector('#undoBtn').classList.contains('idle')));
+    await p.evaluate(() => { for (let k = 0; k < 2; k++) __game.cur.puz._bot() }); await sleep(1700);
+    ck('P5 Undo comes alive after a move', await p.evaluate(() => !document.querySelector('#undoBtn').classList.contains('idle')));
+    await p.evaluate(() => document.querySelector('#restartBtn').click()); await sleep(300);
+    ck('P7 restart with fewer than 3 moves restarts at once', await p.evaluate(() => !document.querySelector('#modal.on') && document.querySelector('#hudInfo .mv').textContent === '0'));
+    ck('P8 a restart shows the slim chip, not the banner', await p.evaluate(() => !!document.querySelector('.lvintro.slim') && !document.querySelector('.lvintro:not(.slim)')));
+    await sleep(2400);
+    await p.evaluate(() => { for (let k = 0; k < 3; k++) { __game.cur.puz._bot() } }); await sleep(1700);
+    const mv = await p.evaluate(() => +document.querySelector('#hudInfo .mv').textContent);
+    await p.evaluate(() => document.querySelector('#restartBtn').click()); await sleep(300);
+    ck('P7 restart with 3+ moves asks first', await p.evaluate(() => /Restart this level/.test(document.querySelector('#modal.on h2')?.textContent || '')), `(moves ${mv})`);
+    await p.evaluate(() => document.querySelector('#modal .mbtns .btn:first-child').click()); await sleep(400);
+    ck('P7 Keep playing keeps the board', await p.evaluate(() => +document.querySelector('#hudInfo .mv').textContent) === mv);
+    const bb = await p.evaluate(() => { const r = document.querySelector('#restartBtn').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] });
+    await p.mouse.move(bb[0], bb[1]); await p.mouse.down(); await sleep(900); await p.mouse.up(); await sleep(500);
+    ck('P7 holding Restart restarts without asking', await p.evaluate(() => !document.querySelector('#modal.on') && document.querySelector('#hudInfo .mv').textContent === '0'));
   });
 
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');

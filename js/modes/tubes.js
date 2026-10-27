@@ -95,10 +95,10 @@ MAKERS.tubes=function({R,tier,board,api}){
       const can=sel>=0&&i!==sel&&canPour(tubes,sel,i)>0;
       e.classList.toggle('ok',can);e.classList.toggle('no',sel>=0&&i!==sel&&!can);
     });
-    api.coach(hintPair?'💡 Tap tube 1, then tube 2':sel<0?'👆 Tap a tube to scoop up its top sand':tubes.some((_,i)=>i!==sel&&canPour(tubes,sel,i)>0)?'✨ Now tap a glowing tube to pour into':'🚫 Nowhere to pour that sand. Tap it again to put it down');
+    api.coach(hintPair?'💡 Follow the glow':sel<0?'👆 Tap a tube to scoop sand':tubes.some((_,i)=>i!==sel&&canPour(tubes,sel,i)>0)?'✨ Tap a glowing tube':'🚫 No room. Tap to put it down');
     if(hintPair){hintPair.forEach((i,k)=>{tEls[i].classList.add('hint');tEls[i].dataset.h=k+1;tEls[i].appendChild(el('div','hn',k+1))})}
     const done=tubes.filter(t=>t.length===cap&&uniform(t)).length;
-    if(!hintPair&&sel<0&&done)api.coach(`🧪 ${done} of ${nc} tubes sorted · tap a tube to scoop up its top sand`);
+    if(!hintPair&&sel<0&&done)api.coach(`🧪 ${done}/${nc} tubes sorted`);
     api.moves(moves,s3,s2);
   }
   function tapTube(i){

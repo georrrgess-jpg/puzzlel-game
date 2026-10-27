@@ -311,3 +311,15 @@ Notes on how each was fixed, for whoever touches this next:
 - **`tools/matrix.cjs`:** new popup checks: visible text must not run under the footer, buttons must not be covered, the card must fit the screen. On the previous commit it reports 7 problems on iPhone SE; now it reports none on all 6 devices.
 - `tools/regress.cjs` gained 8 popup checks (36 in total).
 - Perf: `modal` 60 fps. `win` measured 46–52 fps avg (baseline 55) because it plays a Lights Out level; the Lights Out frame-rate fix is scheduled for the start of Phase 6.
+
+### Phase 3: play screen (done)
+- **P1:** the mode label under "Level N" is one line (`white-space:nowrap` plus ellipsis). Under 360 px the "BONUS 2×" suffix is dropped; at ≤ 340 px the label also drops its emoji and the coin chip loses its slack, so "Block Garden" fits next to a 4-digit balance on a 320 px phone.
+- **P2:** under 380 px the star target reads "★★★ ≤14" instead of "★★★ within 14", so "Moves N" and the target no longer collide.
+- **P3:** `#instr` (the written instruction) is shown for the first 3 levels of each mode, then hidden (`S.seenN`, saved; restarts don't count). The ? button still opens the how-to.
+- **P4:** every coach text is now ≤ 34 characters and the pill never wraps (`nowrap` plus ellipsis). The Lights Out tip was reworded.
+- **P5:** Undo looks switched off (40% opacity, no press bounce) when there's nothing to undo; it stays tappable (a tap plays the "nothing to undo" sound).
+- **P6:** the hint badge already showed a number or a price. New: after 8 s without a touch, the Hint button pulses gently if a free hint is available.
+- **P7:** Restart asks "Restart this level?" when 3 or more moves would be lost. Holding the button for 0.65 s restarts without asking.
+- **P8:** the full intro banner is shown the first time a level is played; replays and restarts get a slim 0.9 s chip.
+- **Tools:** `matrix.cjs` now checks the play screens for a truncated or wrapping mode label, colliding HUD text and a cut-off coach text (clean on all 6 devices); `regress.cjs` has 9 more checks (45 in total).
+- The Lights Out `high` frame-rate problem is still open (Phase 6, as planned).

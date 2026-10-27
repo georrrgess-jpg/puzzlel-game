@@ -7,7 +7,7 @@ const board=$('#board');
 (()=>{let w=0,h=0;const set=()=>{const nw=board.clientWidth,nh=board.clientHeight;if(nw===w&&nh===h||!nw)return;w=nw;h=nh;board.style.setProperty('--bw0',w+'px');board.style.setProperty('--bh0',h+'px')};
   if(window.ResizeObserver)new ResizeObserver(set).observe(board);addEventListener('resize',set);addEventListener('orientationchange',()=>setTimeout(set,200))})();
 const api={
-  commit(){cur.history.push(cur.puz.snap())},
+  commit(){cur.history.push(cur.puz.snap());refreshUndo()},
   setInfo(h){$('#hudInfo').innerHTML=h;meterKey=''},
   setStars(n){$$('#hudStars svg').forEach((s,i)=>{const on=i<n;if(!on&&s.classList.contains('on')){s.classList.remove('lose');void s.offsetWidth;s.classList.add('lose');sfx.pop(.5)}s.classList.toggle('on',on)})},
   /* star meter: green ★★★ zone, yellow ★★ zone, red ★ zone and a marker for moves used */
@@ -15,7 +15,8 @@ const api={
     const max=limit||s2+Math.max(2,Math.ceil(s2*.4)),pct=v=>clamp(v/max*100,0,100),n=m<=s3?3:m<=s2?2:1,info=$('#hudInfo'),key=[s3,s2,limit].join();
     if(meterKey!==key){meterKey=key;info.innerHTML=`<div class="meter"><div class="mtx"><span>Moves <b class="mv"></b>${limit?` / ${limit}`:''}</span><span class="nx"></span></div><div class="mbar"><i class="z3" style="width:${pct(s3)}%"></i><i class="z2" style="width:${pct(s2)-pct(s3)}%"></i><i class="z1" style="width:${100-pct(s2)}%"></i><div class="mk"></div></div></div>`}
     $('.mv',info).textContent=m;
-    $('.nx',info).textContent=n===3?`★★★ within ${s3}`:n===2?`★★ within ${s2}`:limit?`${limit-m} left`:'★ finish it!';
+    /* "within" is dropped on narrow phones (css): ★★★ ≤14 fits where ★★★ within 14 does not */
+    $('.nx',info).innerHTML=n===3?`★★★ <span class="w">within </span><span class="le">≤</span>${s3}`:n===2?`★★ <span class="w">within </span><span class="le">≤</span>${s2}`:limit?`${limit-m} left`:'★ finish it!';
     $('.mk',info).style.left=pct(m)+'%';
     if(cur){if(cur.last&&cur.last.m<=s3&&m===s3+1&&!cur.warned&&!cur.over){cur.warned=true;toast('★★★ slipped away! Tap ↩️ Undo or 🔄 Restart to get it back')}cur.last={m,s3,s2}}
     api.setStars(n);
@@ -50,12 +51,16 @@ function startLevel(n,opts={}){
   $('#hudStars').innerHTML=STAR+STAR+STAR;meterKey='';$('#hudInfo').innerHTML='';
   $('#ptitle').textContent=daily?'📅 Daily Challenge':bonus?`👑 Level ${n}`:'Level '+n;
   $('.ptitle').classList.toggle('bonus',bonus||daily);
-  $('#psub').textContent=INFO[type].icon+' '+INFO[type].name+(bonus?' · BONUS 2× coins':daily?' · big reward!':'');
-  $('#instr').textContent=INFO[type].tip;api.coach('');
-  cur={level:n,type,daily,bonus,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
+  $('#psub').innerHTML=`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(bonus?'<span class="sx"> · BONUS 2× coins</span>':daily?'<span class="sx"> · big reward!</span>':'');
+  /* the written instruction is for the first 3 levels of each mode; after that the coach pill is the only guidance (? still opens the how-to) */
+  const again=!!cur&&cur.level===n&&cur.daily===daily;   // a restart is not a new level
+  S.seenN=S.seenN||{};const seenN=S.seenN[type]||0;if(!again&&seenN<3){S.seenN[type]=seenN+1;save()}
+  $('#instr').textContent=INFO[type].tip;$('#instr').classList.toggle('off',seenN>=3);api.coach('');
+  const replay=again||(!daily&&(S.stars[n]||0)>0);
+  cur={replay,level:n,type,daily,bonus,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
-  $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;
+  $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;refreshUndo();
   refreshHUD();show('play');sfx.whoosh();
   const me=cur,go=()=>{if(cur===me&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
   if(!S.seen[type])showHowTo(type,go);else{go();showIntro()}
@@ -64,6 +69,10 @@ function startLevel(n,opts={}){
 function showIntro(){
   if(!cur)return;$$('.lvintro').forEach(e=>e.remove());
   const c=cur,i=INFO[c.type],L=c.last,best=c.daily?0:S.stars[c.level]||0;
+  if(c.replay){   // a level you have played before: a slim chip for 0.9 s instead of the full banner
+    const b=el('div','lvintro slim',`<div class="lvi-chip" style="--tc:${i.col}"><i>${i.icon}</i><b>${i.name}</b>${L?`<em>★★★ ≤${L.s3}</em>`:''}</div>`);
+    $('#play').appendChild(b);setTimeout(()=>b.classList.add('out'),900);setTimeout(()=>b.remove(),1400);return;
+  }
   const goal=L?`★★★ in ${L.s3} moves or fewer`:'';
   const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
     <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':'LEVEL '+c.level}</small><b>${i.name}</b>
@@ -72,8 +81,12 @@ function showIntro(){
   setTimeout(()=>b.classList.add('out'),1500);setTimeout(()=>b.remove(),2100);
 }
 let nudgeT=0,nudges=0;
+let pulseT=0;
 function resetNudge(full){
   clearTimeout(nudgeT);if(full)nudges=0;
+  /* a free hint gently pulses after 8 s without a touch, as a reminder it is there */
+  clearTimeout(pulseT);$('#hintBtn').classList.remove('pulse');
+  if(cur&&!cur.over)pulseT=setTimeout(()=>{if(cur&&!cur.over&&S.hints>0&&!$('#modal').classList.contains('on'))$('#hintBtn').classList.add('pulse')},8000);
   if(!cur||cur.over||cur.puz.noNudge)return;
   /* a quiet helping hand after a long pause: the hint just appears (no toast, no sound), at most twice per level */
   nudgeT=setTimeout(()=>{
@@ -95,8 +108,10 @@ function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null
 function undo(){
   if(!cur||cur.over||cur.locked||cur.puz.noUndo)return;
   if(cur.history.length<2){sfx.bad();return}
-  cur.history.pop();cur.puz.restore(cur.history[cur.history.length-1]);sfx.swish();cur.combo=0;
+  cur.history.pop();cur.puz.restore(cur.history[cur.history.length-1]);sfx.swish();cur.combo=0;refreshUndo();
 }
+/* Undo looks switched off whenever it has nothing to undo (it stays tappable: a tap says "nothing to undo") */
+function refreshUndo(){$('#undoBtn').classList.toggle('idle',!cur||cur.over||cur.locked||cur.history.length<2||!!(cur.puz&&cur.puz.noUndo))}
 const HINT_COST=ECON.hint.cost,SKIP_COST=ECON.skip.cost;
 function useHint(){
   if(!cur||cur.over||cur.locked)return;
@@ -104,7 +119,7 @@ function useHint(){
   if(!free&&S.coins<HINT_COST){toast('Not enough coins for a hint');sfx.bad();return}
   if(cur.puz.hint()===false)return;   // the mode had nothing to show (it says why): no charge, and no "used a hint" mark
   if(free)S.hints--;else S.coins-=HINT_COST;
-  cur.hinted=true;emit('hint',1);save();refreshHUD();sfx.good();
+  cur.hinted=true;emit('hint',1);save();refreshHUD();sfx.good();$('#hintBtn').classList.remove('pulse');
 }
 function skipLevel(){
   if(!cur||cur.over||cur.locked||cur.daily)return;
@@ -118,7 +133,7 @@ function skipLevel(){
     }}],{icon:'⏭️',back:closeModal});
 }
 function onWin(stars){
-  if(cur.over)return;cur.over=true;clearTimeout(nudgeT);
+  if(cur.over)return;cur.over=true;clearTimeout(nudgeT);clearTimeout(pulseT);$('#hintBtn').classList.remove('pulse');refreshUndo();
   const me=cur,n=cur.level,daily=cur.daily;
   let coins,prev=0,streakBonus=0,chest=0,dstreak=0;
   /* a daily is booked to the day it was STARTED (a win after midnight still counts for that day) and only once; a
@@ -197,7 +212,7 @@ function onWin(stars){
   },1000);
 }
 function onFail(title,msg){
-  if(cur.over)return;cur.over=true;sfx.fail();buzz(200);api.meh();
+  if(cur.over)return;cur.over=true;refreshUndo();sfx.fail();buzz(200);api.meh();
   const me=cur;
   setTimeout(()=>cur===me&&openModal(`<div class="kicker">${me.daily?'Daily challenge':'Level '+me.level}</div><h2>${title}</h2><p>${msg}</p><div class="failtip">💡 Stuck? A hint shows the best next move</div>`,[
     me.daily?{label:'Home',cls:'sec sm',fn:b=>playExit('home',b)}:{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
@@ -296,7 +311,20 @@ $('#backBtn').onclick=()=>{if(Trans.busy||(cur&&cur.locked&&!cur.over))return;sf
 $('#undoBtn').onclick=undo;
 $('#hintBtn').onclick=useHint;
 $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};
-$('#restartBtn').onclick=()=>{if(cur&&!cur.over&&!cur.locked){sfx.click();startLevel(cur.level,{daily:cur.daily})}};
+/* Restart asks first when 3 or more moves would be lost; holding the button restarts at once */
+const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:cur.daily})};
+(()=>{
+  const rb=$('#restartBtn');let t=0,long=false;
+  rb.addEventListener('pointerdown',()=>{long=false;clearTimeout(t);t=setTimeout(()=>{long=true;if(cur&&!cur.over&&!cur.locked){sfx.click();buzz(15);doRestart()}},650)});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>rb.addEventListener(ev,()=>clearTimeout(t)));
+  rb.onclick=()=>{
+    if(long){long=false;return}
+    if(!cur||cur.over||cur.locked)return;sfx.click();
+    if(cur.last&&cur.last.m>=3&&!$('#modal').classList.contains('on'))
+      openModal(`<h2>Restart this level?</h2><p>Your ${cur.last.m} moves so far will be lost.</p><p class="hold">Tip: hold 🔄 to restart without asking.</p>`,[{label:'Keep playing',cls:'sec',fn:closeModal},{label:'Restart 🔄',fn:()=>{closeModal();doRestart()}}],{icon:'🔄',back:closeModal});
+    else doRestart();
+  };
+})();
 $('#skipBtn').onclick=skipLevel;
 // desktop shortcuts: U/Z undo, H hint, R restart, Enter or Space presses the main popup button, Esc goes back
 $('#modal').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget&&e.currentTarget._dismiss&&!Trans.busy)e.currentTarget._dismiss()});

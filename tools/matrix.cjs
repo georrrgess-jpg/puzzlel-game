@@ -42,6 +42,20 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
           }
           if ((r.width < 40 || r.height < 36) && !e.matches('.chip,.dot,.more')) bad.push('small target ' + Math.round(r.width) + 'x' + Math.round(r.height) + ': ' + id);
         });
+        if (screen.startsWith('play-')) {
+          // the play header and HUD: one-line mode label, nothing colliding or truncated
+          const ps = document.querySelector('#play .ptitle small');
+          if (ps && (ps.scrollWidth > ps.clientWidth + 1 || ps.getBoundingClientRect().height > 26)) bad.push('mode label is truncated or wraps: "' + ps.textContent.trim() + '" (' + ps.scrollWidth + '/' + ps.clientWidth + ', h ' + Math.round(ps.getBoundingClientRect().height) + ')');
+          const mt = document.querySelector('#hudInfo .mtx');
+          if (mt && mt.children.length > 1) {
+            const a = mt.children[0].getBoundingClientRect(), b2 = mt.children[1].getBoundingClientRect();
+            if (a.right > b2.left - 1 && a.bottom > b2.top + 2 && b2.bottom > a.top + 2) bad.push('HUD text collides: "' + mt.textContent.trim() + '"');
+          }
+          const co = document.querySelector('#coach');
+          if (co && co.textContent.trim() && co.scrollWidth > co.clientWidth + 1) bad.push('coach text is cut off: "' + co.textContent.trim() + '"');
+          const hd = document.querySelector('#play .hud');
+          if (hd && hd.getBoundingClientRect().right > vw + 1) bad.push('HUD wider than the screen');
+        }
         const modal = document.querySelector('#modal.on .card');
         if (modal) { const b = modal.querySelector('.mbtns .btn:last-child'); if (b) { const r = b.getBoundingClientRect(); if (r.bottom > vh + 1) bad.push('popup main button below the fold (bottom ' + Math.round(r.bottom) + ' > ' + vh + ')') } }
         // popups: nothing may sit on top of a footer button, and body content must stay clear of the footer

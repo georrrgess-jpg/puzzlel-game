@@ -291,7 +291,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
       clearHint();const s=BG_SHAPES[tray[m.slot]];
       s.c.forEach(([x,y])=>cells[(m.y+y)*N+m.x+x].classList.add('ht'));
       slots[m.slot].dataset.h=1;api.flash(slots[m.slot],3200);cells[m.y*N+m.x].dataset.h=2;hintT=setTimeout(clearHint,3300);
-      api.coach('💡 Drag the glowing block to the highlighted spot');
+      api.coach('💡 Follow the glow');
       return true;
     },
     _bot(){const m=bestMove(G,tray);if(!m)return false;return place(m.slot,m.x,m.y)},

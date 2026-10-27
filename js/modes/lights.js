@@ -35,9 +35,9 @@ MAKERS.lights=function({R,tier,board,api}){
   function glow(){
     const lit=grid.filter(v=>v).length;
     wrap.style.setProperty('--lit',(lit/(n*n)).toFixed(3));
-    api.coach(lit?`💡 ${lit} light${lit>1?'s':''} still on`:'🌙 All dark!');
+    api.coach(lit?`💡 ${lit} light${lit>1?'s':''} on`:'🌙 All dark!');
     return lit}
-  api.setTip(`Tap a square to flip it and ${patIcon(offs)} the squares shown. Turn every light off. Hold a square to preview it.`);
+  api.setTip(`Tap a square: it and its pattern ${patIcon(offs)} flip. Turn every light off. Hold a square to preview.`);
   function press(i){
     if(api.over())return;
     const need=sol[i]^U[i],before=grid.slice();apply(grid,i);U[i]^=1;moves++;

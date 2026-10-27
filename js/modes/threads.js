@@ -123,9 +123,9 @@ MAKERS.threads=function({R,tier,board,api}){
       g.classList.toggle('start',!path.length&&tier<2&&i===goodStart())});
     const n=left();
     if(over)api.coach(`🌟 ${name}`);
-    else if(stuck)api.coach(`🌑 Dead end: ${n} thread${n>1?'s':''} still dark. Undo ↩️ or tap a star to start over`);
-    else if(!path.length)api.coach(tier<2?'👆 Press the glowing star and slide along a thread':'👆 Press any star and slide along a thread');
-    else api.coach(`✨ ${n} thread${n>1?'s':''} left · keep going from the bright star`);
+    else if(stuck)api.coach('🌑 Dead end: Undo or tap a star');
+    else if(!path.length)api.coach(tier<2?'👆 Start at the green ring':'👆 Press a star, slide a thread');
+    else api.coach(`✨ ${n} thread${n>1?'s':''} left`);
     api.moves(moves,s3,s2);
   }
   api.setTip('Light every thread once, in one continuous path: press a star and slide to a linked star. You can lift your finger and carry on from the bright star.');
@@ -231,7 +231,7 @@ MAKERS.threads=function({R,tier,board,api}){
       sg[p.from].dataset.h=1;sg[p.to].dataset.h=2;api.flash(sg[p.to],3200);sg[p.to].classList.add('hint');
       thr[eKey[p.from+','+p.to]].c.classList.add('next');
       hintTO=setTimeout(clearHint,3200);
-      api.coach('💡 Slide from the bright star along the glowing thread');
+      api.coach('💡 Follow the glow');
       return true;
     },
     _info:{stars:N,threads:E.length,odd:odd.length,fallback:!!gen.fallback},

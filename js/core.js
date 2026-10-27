@@ -57,7 +57,7 @@ const xpForWin=(stars,daily,bonus)=>ECON.xp.clear+stars*ECON.xp.perStar+(daily?E
 
 /* ====================== save data ====================== */
 const KEY='endless-puzzle-pop-v1';
-const DEFAULTS={ver:3,deco:[],unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},
+const DEFAULTS={ver:3,deco:[],unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:'midnight',owned:['midnight'],muted:false,milestone:0,streak:0,seen:{},seenN:{},
   // big update
   xp:0,plv:1,music:true,sfx:true,musVol:.55,sfxVol:.85,haptics:true,symbols:false,gfx:'auto',
   login:{last:-1,streak:0},spinAt:0,quests:{day:-1,list:[],bonus:false},ach:{},

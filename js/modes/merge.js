@@ -205,7 +205,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
       const p=pick(G);if(!p){toast('No pairs left: try Undo ↩️');return false}
       cells.forEach(c=>{c.removeAttribute('data-h');c.classList.remove('hint')});
       [0,1].forEach(k=>{cells[p[k]].dataset.h=k+1;api.flash(cells[p[k]],3200)});
-      api.coach('💡 Drag the first glowing plant onto the second');
+      api.coach('💡 Follow the glow');
       return true;
     },
     _bot(){const p=pick(G);if(!p)return false;return merge(p[0],p[1])},
