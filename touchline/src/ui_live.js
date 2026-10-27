@@ -59,9 +59,9 @@ function stadiumOf(s){ return s&&s.stadium&&s.stadium.name? s.stadium.name : '';
 function buildLive(){
   const L=App.live, M=L.M, C=App.C; const f=C.fixtures[L.fid]; const h=Sx(f.h), a=Sx(f.a); const k=kitsFor(f);
   liveRoot().innerHTML=`<div class="live" role="dialog" aria-modal="true" aria-label="Live match">
-   <header class="bug"><div class="bug-team">${logo(h,46)}<div class="bug-name"><b>${esc(h.town)}</b><span>${esc(h.mascot)}</span></div><i class="kitbar" style="background:${k.team[0].shirt}"></i></div>
+   <header class="bug"><div class="bug-team">${crest(h,40)}<div class="bug-name"><b>${esc(h.town)}</b><span>${esc(h.mascot)}</span></div><i class="kitbar" style="background:${k.team[0].shirt}"></i></div>
      <div class="bug-mid"><div class="bug-score" id="lv-score" aria-live="polite"><span>0</span><em>–</em><span>0</span></div><div class="bug-clock" id="lv-clock">KICKOFF</div></div>
-     <div class="bug-team r"><i class="kitbar" style="background:${k.team[1].shirt}"></i><div class="bug-name"><b>${esc(a.town)}</b><span>${esc(a.mascot)}</span></div>${logo(a,46)}</div></header>
+     <div class="bug-team r"><i class="kitbar" style="background:${k.team[1].shirt}"></i><div class="bug-name"><b>${esc(a.town)}</b><span>${esc(a.mascot)}</span></div>${crest(a,40)}</div></header>
    <div class="possbar" title="Possession"><i id="lv-ph" style="background:${k.team[0].shirt}"></i><i id="lv-pa" style="background:${k.team[1].shirt}"></i><span id="lv-pt"></span></div>
    <div class="lv-main"><div class="lv-stage" id="lv-stage"><canvas id="lv-canvas" aria-label="Match animation"></canvas><div id="lv-cap" class="lv-cap" aria-live="polite"></div><div id="lv-banner"></div><div id="lv-ftc"></div><button class="lv-paused" data-a="livePause" aria-label="Resume match"><span>❚❚</span><b>Paused</b><small>Press Space or tap to resume</small></button></div>
      <aside class="lv-panel"><div class="tabs" role="tablist">${[['feed','Commentary'],['stats','Stats'],['mom','Momentum'],['lu','Lineups']].map(([k2,l])=>`<button class="tab ${L.tab===k2?'on':''}" role="tab" data-a="liveTab" data-v="${k2}">${l}</button>`).join('')}</div><div id="lv-pbody" class="lv-pbody"></div></aside></div>
