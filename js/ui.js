@@ -70,10 +70,10 @@ function showIntro(){
   if(!cur)return;$$('.lvintro').forEach(e=>e.remove());
   const c=cur,i=INFO[c.type],L=c.last,best=c.daily?0:S.stars[c.level]||0;
   if(c.replay){   // a level you have played before: a slim chip for 0.9 s instead of the full banner
-    const b=el('div','lvintro slim',`<div class="lvi-chip" style="--tc:${i.col}"><i>${i.icon}</i><b>${i.name}</b>${L?`<em>★★★ ≤${L.s3}</em>`:''}</div>`);
+    const b=el('div','lvintro slim',`<div class="lvi-chip" style="--tc:${i.col}"><i>${i.icon}</i><b>${i.name}</b>${c.puz.goalShort?`<em>${c.puz.goalShort}</em>`:L?`<em>★★★ ≤${L.s3}</em>`:''}</div>`);
     $('#play').appendChild(b);setTimeout(()=>b.classList.add('out'),900);setTimeout(()=>b.remove(),1400);return;
   }
-  const goal=L?`★★★ in ${L.s3} moves or fewer`:'';
+  const goal=c.puz.goal||(L?`★★★ in ${L.s3} moves or fewer`:'');
   const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
     <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':'LEVEL '+c.level}</small><b>${i.name}</b>
     ${goal?`<em>${goal}</em>`:''}${best?`<span class="lvi-best">Your best: ${'★'.repeat(best)}${'☆'.repeat(3-best)}</span>`:''}</div>`);
@@ -346,8 +346,9 @@ const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:
   rb.onclick=()=>{
     if(long){long=false;return}
     if(!cur||cur.over||cur.locked)return;sfx.click();
-    if(cur.last&&cur.last.m>=3&&!$('#modal').classList.contains('on'))
-      openModal(`<h2>Restart this level?</h2><p>Your ${cur.last.m} moves so far will be lost.</p><p class="hold">Tip: hold 🔄 to restart without asking.</p>`,[{label:'Keep playing',cls:'sec',fn:closeModal},{label:'Restart 🔄',fn:()=>{closeModal();doRestart()}}],{icon:'🔄',back:closeModal});
+    const mv=cur.last?cur.last.m:cur.history.length-1;   // modes without a move meter: count the undo steps
+    if(mv>=3&&!$('#modal').classList.contains('on'))
+      openModal(`<h2>Restart this level?</h2><p>Your ${mv} moves so far will be lost.</p><p class="hold">Tip: hold 🔄 to restart without asking.</p>`,[{label:'Keep playing',cls:'sec',fn:closeModal},{label:'Restart 🔄',fn:()=>{closeModal();doRestart()}}],{icon:'🔄',back:closeModal});
     else doRestart();
   };
 })();

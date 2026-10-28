@@ -3,7 +3,7 @@
 An endless, relaxing puzzle game for phones. It runs in the browser: open `index.html` (no build step), or host the folder
 (see "Play on your phone").
 
-## The five modes
+## The six modes
 
 | Mode | What you do |
 |---|---|
@@ -12,6 +12,7 @@ An endless, relaxing puzzle game for phones. It runs in the browser: open `index
 | ✨ **Star Threads** | Light up every thread of a constellation in one continuous path: press a star and slide along the threads. Each thread lights only once. |
 | 🌸 **Merge Bloom** | Drag a plant onto its twin to grow the next stage. Seed → sprout → sapling → bud → flower → blossom → golden tree. |
 | 🌱 **Block Garden** | Drag blocks from the tray onto the bed. Full rows and columns bloom away. Some levels are weed-pulling levels. |
+| 🏺 **Vase Blast** | Picture cards lie in solitaire piles. Tap the front card of a pile to put it on the 7-slot shelf; three alike blast away. Clear the table, and keep the shelf low for 3 stars. Deeper piles are dealt face down and turn over as you dig. |
 
 Every level is generated from its number, so levels never run out and always play the same. Every mode has hints, Undo,
 a how-to card, and a built-in solver that guarantees each level can be finished. There are no timers and no game over.
@@ -37,6 +38,17 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Fits every phone**: boards size themselves from the free space; verified clean on iPhone SE (320x568), iPhone 8, iPhone 13,
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
+
+## What's new in v4.1
+
+- **Vase Blast**, a sixth mode: a picture-card solitaire. Ten hand-drawn vases, a felt table and a wooden shelf. The cards are
+  dealt in from above and turn over in a wave, a tapped card flies along an arc to its slot next to its twins, three alike
+  jump together and blast, face-down cards flip over when you dig down to them. Stars come from how full the shelf gets
+  (the slots are coloured like the star meter). Every level is checked by an exact search at level start: it sets the
+  star target, gives hints from any position, and tells you at once when a position can no longer be cleared.
+- **Sand Tubes fix**: on a selected tube the sand's top surface no longer lifts off the sand under it; it stays in place
+  and glows together with the rest of the colour, and after a pour it settles flat.
+- With six modes the level rotation changed: a level number may now be a different mode than before (stars already won are kept).
 
 ## What's new in v4
 
@@ -77,15 +89,16 @@ The game is a mobile-first web app. Once it is hosted it can be installed to the
 - `js/core.js`: helpers, saves + migration, **ECON (economy)**, themes, level rotation and `registerMode()`.
 - `js/perf.js`: quality tiers. `js/audio.js`, `js/fx.js`: sound, particles, animated background.
 - `js/meta.js`: XP, quests, trophies, daily, spin, settings. `js/howto.js`: how-to demo helpers.
-- `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `lights`, `tubes`, `threads`, `merge`, `blocks`.
+- `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `lights`, `tubes`, `threads`, `merge`, `blocks`, `vases`.
 - `js/screens.js`: home, map, shop. `js/ui.js`: game flow, popups, HUD.
 
 ## Adding a mode
 
 Create `js/modes/<id>.js` that calls `registerMode(id, {name, icon, col, tip}, {goal, steps, demo})` and assigns
-`MAKERS[id] = function({R, tier, level, board, api}) { ... return {snap, restore, hint, _bot, destroy?}; }`, add its CSS and
+`MAKERS[id] = function({R, tier, level, board, api}) { ... return {snap, restore, hint, _bot, destroy?, begin?, goal?}; }`, add its CSS and
 script tags (and the service worker file list). The level rotation, map, quests and daily challenge pick it up automatically.
-Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier.
+Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier. A mode whose stars are not move-based sets its own HUD with
+`api.setInfo()`/`api.setStars()` and returns `goal`/`goalShort` text for the level banner.
 
 ## Test tools (`tools/`, need Playwright: `NODE_PATH=$(npm root -g) node tools/<name>.cjs`)
 
@@ -98,5 +111,6 @@ Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier.
 | `perf.cjs [rate]` | fps and long tasks under CPU throttling (`GFX=high|med|low`) |
 | `economy-sim.cjs` | Economy targets for three player types |
 | `migration.cjs` | An old save upgrades correctly |
+| `regress.cjs [filter]` | Pass/fail checks for every fixed bug and the Vase Blast rules |
 
 See `PLAN.md` (v2) and `PLAN-v3.md` (this update).

@@ -318,12 +318,89 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     await sleep(3200);
     ck('B8 a plant sways while the garden is idle', await p.evaluate(() => window.__sway) > 0);
     // (B9, the red pulse when the garden is full, cannot be reached in a test: a board full of 7s has already met the goal. Checked by hand.)
-    lv = await p.evaluate(() => { let n = 11; while (__game.typeFor(n) !== 'threads') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(7600);
-    ck('B10 the start stars pulse after 6 s of nothing', await p.evaluate(() => document.querySelectorAll('.st.cue').length) >= 1);
+    // the cue starts at tier 2 and only on constellations with odd stars (a closed loop can start anywhere): try a few levels
+    let cued = false;
+    for (let n = 2 * (await p.evaluate(() => __game.TYPES.length)) + 1, tries = 0; tries < 4 && !cued; n++) {
+      if (await p.evaluate(n => __game.typeFor(n), n) !== 'threads') continue;
+      tries++; await p.evaluate(n => __game.startLevel(n), n); await sleep(7600);
+      cued = await p.evaluate(() => document.querySelectorAll('.st.cue').length) >= 1;
+    }
+    ck('B10 the start stars pulse after 6 s of nothing', cued);
     lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
     for (let k = 0; k < 40 && !(await p.evaluate(() => __game.cur.over)); k++) { await p.evaluate(() => { const q = __game.cur.puz; q.hint(); const h = document.querySelector('#board .hint'); if (h) h.click() }); await sleep(200) }
     await sleep(600);
     ck('B2 the finish sends a wave and a moon', await p.evaluate(() => document.querySelectorAll('.cell.light.wa em,.cell.light.wb em').length > 0 && [...document.querySelectorAll('.ftxt')].some(e => e.textContent.includes('🌙'))));
+  });
+
+  /* ---- Sand Tubes: the selected tube's sand stays one piece (the mound on top never moves on its own) ---- */
+  await test('T1 the sand mound stays attached on a selected tube', async p => {
+    await prep(p);
+    const lv = await typeLevel(p, 'tubes'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    await p.evaluate(() => document.querySelector('.tube').click()); await sleep(300);
+    const r = await p.evaluate(() => { const top = document.querySelector('.tube.sel .seg.top'), b = getComputedStyle(top, '::before'), a = getComputedStyle(top, '::after');
+      return { moundAnim: b.animationName, moundT: b.transform, glowTop: parseFloat(a.top), glowZ: a.zIndex } });
+    ck('T1 the mound does not heave or tilt while selected', r.moundAnim === 'none' && (r.moundT === 'none' || r.moundT === 'matrix(1, 0, 0, 1, 0, 0)'), JSON.stringify(r));
+    ck('T1 the selection glow also covers the mound', r.glowTop < 0 && +r.glowZ >= 2, JSON.stringify(r));
+  });
+
+  /* ---- Vase Blast ---- */
+  const vstate = p => p.evaluate(() => { const q = __game.cur.puz, s = JSON.parse(q.snap()); return { left: s.h.reduce((a, b) => a + b, 0), shelf: s.shelf.length, dom: document.querySelectorAll('.vs:not(.boom)').length, peak: s.peak } });
+  await test('V1 a front card goes to the shelf, a covered one is refused', async p => {
+    await prep(p);
+    const lv = await typeLevel(p, 'vases'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2800);
+    const s0 = await vstate(p);
+    const cov = await p.evaluate(() => { const e = [...document.querySelectorAll('.vc:not(.free):not(.gone)')][0]; e.click(); return !!e });
+    await sleep(80);
+    const s1 = await vstate(p);
+    ck('V1 a covered card is refused (nothing moves, it shakes)', cov && s1.left === s0.left && s1.shelf === 0 && await p.evaluate(() => !!document.querySelector('.vc.nudge')));
+    await p.evaluate(() => document.querySelector('.vc.free').click()); await sleep(700);
+    const s2 = await vstate(p);
+    ck('V1 the front card moves to the shelf', s2.left === s0.left - 1 && s2.shelf === 1 && s2.dom === 1, JSON.stringify(s2));
+    ck('V1 no flying card is left over', await p.evaluate(() => !document.querySelector('.vg')));
+    await p.evaluate(() => document.querySelector('#undoBtn').click()); await sleep(300);
+    const s3 = await vstate(p);
+    ck('V1 Undo puts it back on the table', s3.left === s0.left && s3.shelf === 0 && s3.dom === 0 && await p.evaluate(() => document.querySelectorAll('.vc:not(.gone)').length) === s0.left, JSON.stringify(s3));
+  });
+  await test('V2 three alike blast and the shelf shows what the game holds', async p => {
+    await prep(p);
+    const lv = await p.evaluate(() => { let n = 13; while (__game.typeFor(n) !== 'vases') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2800);
+    let blasted = false, sync = true;
+    for (let k = 0; k < 12; k++) {
+      const before = await vstate(p); await p.evaluate(() => __game.cur.puz._bot()); await sleep(900);
+      const s = await vstate(p); if (s.shelf < before.shelf + 1) blasted = true; if (s.dom !== s.shelf) sync = false;
+    }
+    ck('V2 a triple blasts off the shelf', blasted);
+    ck('V2 after every animation the shelf cards match the game state', sync);
+  });
+  await test('V3 a full shelf stops play and points to Undo', async p => {
+    await prep(p);
+    const lv = await p.evaluate(() => { let n = 31; while (__game.typeFor(n) !== 'vases') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(3400);
+    for (let k = 0; k < 14; k++) {
+      const full = await p.evaluate(() => { const q = __game.cur.puz, s = JSON.parse(q.snap()); if (s.shelf.length >= 7) return true;
+        const cnt = {}; s.shelf.forEach(x => cnt[x.t] = (cnt[x.t] || 0) + 1);
+        // take the front card whose picture is least on the shelf, so a triple is completed only when unavoidable
+        let best = null, bn = 9; for (const e of document.querySelectorAll('.vc.free')) { const n = cnt[q._t(+e.dataset.c, +e.dataset.k)] || 0; if (n < bn) { bn = n; best = e } }
+        best.click(); return false });
+      if (full) break; await sleep(120);
+    }
+    await sleep(900);
+    const st = await vstate(p);
+    if (st.shelf < 7) { ck('V3 (could not fill the shelf on this deal)', true); return }
+    ck('V3 the coach says the shelf is full', await p.evaluate(() => /Shelf full/.test(document.querySelector('#coach').textContent)));
+    await p.evaluate(() => document.querySelector('.vc.free').click()); await sleep(200);
+    ck('V3 no more cards can be taken', (await vstate(p)).left === st.left);
+    const h0 = await p.evaluate(() => __game.S.hints + '/' + __game.S.coins); await p.evaluate(() => document.querySelector('#hintBtn').click()); await sleep(200);
+    ck('V3 a hint is not charged when nothing can be shown', (await p.evaluate(() => __game.S.hints + '/' + __game.S.coins)) === h0);
+    await p.evaluate(() => document.querySelector('#undoBtn').click()); await sleep(300);
+    ck('V3 Undo frees a slot', (await vstate(p)).shelf === 6);
+  });
+  await test('V4 the best play clears the table for 3 stars', async p => {
+    await prep(p);
+    const lv = await p.evaluate(() => { let n = 25; while (__game.typeFor(n) !== 'vases') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(3000);
+    for (let k = 0; k < 60 && !(await p.evaluate(() => __game.cur.over)); k++) { await p.evaluate(() => __game.cur.puz._bot()); await sleep(260) }
+    await sleep(1500);
+    ck('V4 won with 3 stars', await p.evaluate(() => __game.cur.over && document.querySelectorAll('#hudStars svg.on').length === 3), await p.evaluate(() => JSON.stringify({ over: __game.cur.over, stars: document.querySelectorAll('#hudStars svg.on').length })));
+    ck('V4 the win card opened', await p.evaluate(() => document.querySelector('#modal.on') !== null));
   });
 
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');

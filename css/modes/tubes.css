@@ -6,10 +6,12 @@
 .tube.sel{transform:translateY(-22px);box-shadow:inset 0 0 14px #ffffff18,0 0 0 2px var(--acc),0 18px 26px #0006}
 /* selected tube: the whole same-colour run that will pour glows together and its mound heaves; no layer moves,
    so the sand never separates (js/modes/tubes.js marks the run with .run) */
-.seg.run::after{content:'';position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;pointer-events:none;will-change:opacity;animation:runglow .55s ease-in-out infinite alternate}
+.seg.run::after{content:'';position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;pointer-events:none;z-index:2;will-change:opacity;animation:runglow .55s ease-in-out infinite alternate}
 @keyframes runglow{to{opacity:.3}}
-.seg.run.top::before{transform-origin:50% 100%;animation:runheave .55s ease-in-out infinite alternate}
-@keyframes runheave{to{transform:translateY(-3px) scaleY(1.35)}}
+/* on the top layer the glow also covers the mound (same shape: the top half of its ellipse on the layer's box), so the surface
+   and the sand under it brighten as one piece; the mound itself never moves while selected */
+.seg.run.top::after{top:calc(var(--seg)*-.15);border-radius:50% 50% 0 0/calc(var(--seg)*.16) calc(var(--seg)*.16) 0 0}
+.seg.run.top:first-of-type::after{border-radius:50% 50% calc(var(--seg)*.56) calc(var(--seg)*.56)/calc(var(--seg)*.16) calc(var(--seg)*.16) calc(var(--seg)*.56) calc(var(--seg)*.56)}
 .tube.done{border-color:var(--good);box-shadow:0 0 22px #6be58599,inset 0 0 14px #ffffff18}
 .tube.done::before{top:-14px;left:8%;right:8%;height:15px;border-radius:5px 5px 3px 3px;background:linear-gradient(90deg,#8a5a2b,#d49a5c 40%,#a86d36);animation:cork .5s cubic-bezier(.3,1.8,.5,1) both;box-shadow:0 3px 0 #0005}
 @keyframes cork{from{transform:translateY(-40px) rotate(-30deg);opacity:0}}
@@ -84,8 +86,9 @@
     repeating-linear-gradient(180deg,transparent 0 calc(var(--seg)/2 - 1px),#ffffff50 calc(var(--seg)/2 - 1px) calc(var(--seg)/2)) right top/55% 100% no-repeat;
   opacity:.8;mix-blend-mode:screen}
 /* Tubes: liquid settles with a decaying wobble after a pour */
-.seg.new.top::before{animation:gf-settle .8s ease-out .5s both}
-@keyframes gf-settle{0%{transform:rotate(-14deg) scaleX(.9) translateY(-2px)}25%{transform:rotate(10deg) scaleX(.95)}50%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}100%{transform:rotate(-4deg) scaleX(.97)}}
+/* a skew about the mound's centre: the surface sloshes while its ends stay on the tube walls, and it comes to rest flat (no leftover tilt) */
+.seg.new.top::before{animation:gf-settle .8s ease-out .5s backwards}
+@keyframes gf-settle{0%{transform:skewX(-16deg) scaleY(1.2)}25%{transform:skewX(11deg) scaleY(.92)}50%{transform:skewX(-6deg)}75%{transform:skewX(3deg)}100%{transform:none}}
 /* Tubes: a completed tube gets one glint sweeping down the glass */
 .gf-gl{position:absolute;inset:4px;border-radius:0 0 calc(var(--seg)*.56) calc(var(--seg)*.56);overflow:hidden;pointer-events:none;z-index:3;opacity:0}
 .tube.done .gf-gl{opacity:1}
