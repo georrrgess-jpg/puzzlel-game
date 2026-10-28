@@ -275,3 +275,59 @@
   .wnum{width:38px;height:38px;font-size:19px}
   .wbanner{gap:8px}
 }
+
+/* ================= v4.2: a brighter, more colourful home screen =================
+   Static colour washes (no animation cost), candy-coloured tiles and buttons with a solid 3D edge, frosted-white chips. */
+#home{background:
+  radial-gradient(55% 32% at 8% 6%,#ff4fa866,transparent 70%),
+  radial-gradient(50% 30% at 96% 18%,#2ad4ff55,transparent 70%),
+  radial-gradient(60% 34% at 50% 52%,#ffd23d33,transparent 70%),
+  radial-gradient(70% 34% at 0% 92%,#8a5bff55,transparent 70%),
+  radial-gradient(60% 30% at 100% 96%,#2fe0a044,transparent 70%)}
+/* frosted chips */
+#home .profile,#home .chip{background:linear-gradient(180deg,#ffffff38,#ffffff1a);box-shadow:inset 0 1.5px 0 #ffffff70,inset 0 0 0 1px #ffffff40,0 6px 16px #0004}
+#home .pinfo small{color:#fff;opacity:.85}
+#settingsBtn{background:linear-gradient(180deg,#b98bff,#7a4ae0);border-color:#ffffff60;box-shadow:inset 0 2px 0 #ffffff80,0 4px 0 #4a2a9a,0 8px 16px #0004}
+/* logo: a soft white glow so the colours pop off the background */
+#home .logo .word{filter:drop-shadow(0 0 18px #ffffff40)}
+#home .logo small{color:#fff}
+#home .logo em{color:#fff3b0}
+/* next up: a bright card in the colour of the mode that is next */
+#home .nextcard{cursor:pointer;border:2px solid #ffffff70;
+  background:radial-gradient(120% 140% at 0% 0%,#ffffff55,transparent 50%),linear-gradient(120deg,color-mix(in srgb,var(--tcn,#7c5cff) 92%,#fff),color-mix(in srgb,var(--tcn,#7c5cff) 70%,#3a1a7a));
+  box-shadow:inset 0 2px 0 #ffffff80,0 5px 0 color-mix(in srgb,var(--tcn,#7c5cff) 50%,#1a0a3a),0 12px 26px #0005}
+#home .nextcard:active{transform:translateY(3px)}
+#home .nexttx small{color:#fff;opacity:.85;letter-spacing:1.5px}
+#home .nexttx b{color:#fff;text-shadow:0 2px 0 #0004}
+#home .nexticon{box-shadow:inset 0 -4px 0 #0003,inset 0 2px 0 #ffffff90,0 0 0 3px #ffffffb0,0 6px 14px #0004}
+#home .streakpill{background:linear-gradient(180deg,#ffffffd0,#ffe6d0);color:#c2410c;text-shadow:none;box-shadow:0 3px 0 #0003}
+#home .nextgo{margin-left:auto;font-size:13px;font-weight:700;color:#fff;background:#00000030;border-radius:99px;padding:4px 10px;white-space:nowrap}
+/* PLAY: a rainbow rim around the gold button */
+#home .playbtn{border:5px solid transparent;
+  background:linear-gradient(180deg,#fffbe0 -30%,color-mix(in srgb,var(--acc) 85%,#fff) 18%,var(--acc) 50%,color-mix(in srgb,var(--acc) 62%,#ff6a00)) padding-box,
+    conic-gradient(from 0deg,#ff4f9a,#ffb02e,#ffe84a,#3fe08a,#2ad4ff,#8a5bff,#ff4f9a) border-box;
+  box-shadow:0 7px 0 color-mix(in srgb,var(--acc) 50%,#4a2a00),0 14px 30px #0007,0 0 50px color-mix(in srgb,var(--acc) 65%,transparent),inset 0 3px 0 #ffffffc0,inset 0 -4px 0 #0002}
+#home .playbtn.resume small{color:#7a2a00}
+/* feature tiles: solid candy colours with a 3D edge */
+#home .mtile{border:2px solid #ffffff80;
+  background:radial-gradient(130% 90% at 30% 0%,#ffffff70,transparent 45%),linear-gradient(170deg,color-mix(in srgb,var(--tc) 78%,#fff),var(--tc) 55%,color-mix(in srgb,var(--tc) 78%,#000));
+  box-shadow:inset 0 -3px 0 #0002,0 5px 0 color-mix(in srgb,var(--tc) 55%,#1a0a2a),0 10px 18px #0004}
+#home .mtile i{background:radial-gradient(circle at 32% 26%,#fff,#fff7e6 60%,#ffe2c8);box-shadow:inset 0 -3px 0 #0001,0 3px 6px #0003}
+#home .mtile i::before{background:conic-gradient(color-mix(in srgb,var(--tc) 85%,#000) calc(var(--p,0)*3.6deg),#ffffff66 0)}
+#home .mtile b{color:#fff;text-shadow:0 2px 0 color-mix(in srgb,var(--tc) 50%,#000)}
+#home .mtile small{color:#fff;opacity:.95;text-shadow:0 1px 0 color-mix(in srgb,var(--tc) 50%,#000)}
+#home .mtile.on{box-shadow:inset 0 -3px 0 #0002,0 5px 0 color-mix(in srgb,var(--tc) 55%,#1a0a2a),0 0 24px color-mix(in srgb,var(--tc) 80%,#fff)}
+#home .mtile.on::after{border-color:#fff}
+#tDaily{--tc:#3a8bff}#tSpin{--tc:#ff8a1f}#tQuests{--tc:#16c47f}#tTrophy{--tc:#e8a800}
+/* Levels and Shop: two candy buttons */
+#home .row .btn.sec{color:#fff;border:2px solid #ffffff80}
+#homeMap{background:radial-gradient(130% 90% at 30% 0%,#ffffff70,transparent 45%),linear-gradient(170deg,#4fe0ff,#14a8e0 55%,#0a78b8)!important;box-shadow:0 5px 0 #075a8a,0 10px 18px #0004!important}
+#homeShop{background:radial-gradient(130% 90% at 30% 0%,#ffffff70,transparent 45%),linear-gradient(170deg,#ff8ad0,#ff4fa0 55%,#d81f78)!important;box-shadow:0 5px 0 #9a1050,0 10px 18px #0004!important}
+#home .row .btn.sec .bi{background:#ffffffd0;box-shadow:0 2px 0 #0002}
+#home .row .btn.sec:active{transform:translateY(4px)}
+/* star bar: a bright violet strip with a gold meter */
+#home .starbar{border:2px solid #ffffff60;background:linear-gradient(120deg,#8a5bffd0,#d84fd0c8);box-shadow:inset 0 2px 0 #ffffff60,0 5px 0 #4a1a8a,0 10px 18px #0004}
+#home .starbar .lbl{color:#fff}
+#home .starbar .bar{background:#2a0a4a80}
+#home .starbar .bar>div{background:linear-gradient(90deg,#fff3a0,#ffc83a 50%,#ff9a1a)}
+#home .gempty{color:#fff}

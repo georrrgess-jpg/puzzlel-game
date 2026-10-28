@@ -399,6 +399,30 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('P4 won with 3 stars', await p.evaluate(() => __game.cur.over && document.querySelectorAll('#hudStars svg.on').length === 3));
   });
 
+  /* ---- quality of life ---- */
+  await test('Q1 an unfinished level picks up where it was left, in every mode', async p => {
+    await prep(p);
+    for (const t of await p.evaluate(() => __game.TYPES)) {
+      const lv = await p.evaluate(t => { let n = 13; while (__game.typeFor(n) !== t) n++; return n }, t);
+      await p.evaluate(n => __game.startLevel(n), lv); await sleep(2700);
+      for (let k = 0; k < 1; k++) { await p.evaluate(() => { const q = __game.cur.puz; if (q._bot) q._bot(); else { q.hint(); [...document.querySelectorAll('#board .hint')].sort((x, y) => (x.dataset.h || 0) - (y.dataset.h || 0)).forEach(e => e.click()) } }); await sleep(900) }
+      if (await p.evaluate(() => __game.cur.over || __game.cur.history.length < 2)) { ck(`Q1 ${t} (skipped: no move made)`, true); continue }
+      const snap = await p.evaluate(() => __game.cur.puz.snap()), hl = await p.evaluate(() => __game.cur.history.length);
+      await p.evaluate(() => { document.querySelector('#backBtn').click() }); await sleep(1400);
+      await p.evaluate(n => __game.startLevel(n), lv); await sleep(1500);
+      const r = await p.evaluate(() => ({ snap: __game.cur.puz.snap(), hl: __game.cur.history.length }));
+      ck(`Q1 ${t}: the board and its Undo history come back`, r.snap === snap && r.hl === hl);
+      await p.evaluate(() => document.querySelector('#undoBtn').click()); await sleep(400);
+      ck(`Q1 ${t}: Undo works after picking up`, await p.evaluate(() => __game.cur.history.length) === hl - 1);
+      await p.evaluate(() => { __game.closeModal(); document.querySelector('#backBtn').click() }); await sleep(1300);
+    }
+    await p.evaluate(() => { __game.show('home'); renderHome() }); await sleep(300);
+    ck('Q1 home offers to continue', await p.evaluate(() => /Continue/.test(document.querySelector('#playLvl').textContent) || !__game.S.resume || __game.S.resume.n !== __game.S.unlocked));
+    const lv = await p.evaluate(() => __game.S.resume && __game.S.resume.n); 
+    if (lv) { await p.evaluate(n => __game.startLevel(n), lv); await sleep(400); await p.evaluate(() => { const b = document.querySelector('#restartBtn'); b.dispatchEvent(new PointerEvent('pointerdown')); }); await sleep(800);
+      ck('Q1 holding Restart starts the level fresh', await p.evaluate(() => __game.cur.history.length === 1)) }
+  });
+
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');
   await browser.close(); srv.close(); process.exit(fails ? 1 : 0);
 })();

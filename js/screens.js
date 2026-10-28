@@ -15,7 +15,8 @@ function renderHome(){
   const n=S.unlocked,ty=typeFor(n),ni=$('#nextIcon');
   ni.textContent=INFO[ty].icon;ni.style.setProperty('--tc',INFO[ty].col);ni.parentElement.style.setProperty('--tcn',INFO[ty].col);
   $('#nextName').textContent=(isBonus(n)?'👑 ':'')+INFO[ty].name;
-  $('#playLvl').textContent='Level '+n+(isBonus(n)?' · 2× BONUS':'');
+  const res=S.resume&&S.resume.n===n;$('#playBtn').classList.toggle('resume',!!res);
+  $('#playLvl').textContent=res?`Continue level ${n}`:'Level '+n+(isBonus(n)?' · 2× BONUS':'');
   const sp=$('#streakPill');sp.textContent='🔥 '+S.streak;sp.classList.toggle('hot',S.streak>=2);
   $('#plv').textContent=S.plv;$('#prank').textContent=rankOf(S.plv);$('#pxp').textContent=`${S.xp} / ${xpNeed(S.plv)} XP`;
   /* the XP ring runs from where it was when you last looked to where it is now (all the way round first after a level-up) */

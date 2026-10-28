@@ -39,6 +39,15 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v4.2
+
+- **A brighter home screen**: colourful light washes behind the menu, candy-coloured Daily / Spin / Quests / Trophies tiles
+  and Levels / Shop buttons with a solid 3D edge, a Next up card in the colour of the coming mode, a rainbow rim on PLAY,
+  frosted chips and a violet star bar.
+- **Pick up where you left off**: leaving a level (or closing the app) keeps it, Undo history included; PLAY then says
+  "Continue level N". Restart still starts fresh.
+- **The Next up card plays** the next level when tapped.
+
 ## What's new in v4.1
 
 - **Picture Pop**, a sixth mode (it replaces the Vase Blast prototype): swap tiles on a grid to put pictures back together.

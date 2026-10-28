@@ -60,6 +60,12 @@ function startLevel(n,opts={}){
   cur={replay,level:n,type,daily,bonus,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
+  /* pick an unfinished level up where it was left (a restart starts it fresh) */
+  if(S.resume&&S.resume.n===n&&!daily){
+    if(again)S.resume=null;
+    else{try{const h=S.resume.h;cur.puz.restore(h[h.length-1]);cur.history=h.slice();refreshUndo();const me=cur;setTimeout(()=>{if(cur===me)toast('↩️ Picked up where you left off')},900)}catch(e){cur.history=[cur.puz.snap()]}}
+    S.resume=null;save();
+  }
   $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;refreshUndo();
   refreshHUD();show('play');sfx.whoosh();
   const me=cur,go=()=>{if(cur===me&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
@@ -104,7 +110,14 @@ function showHowTo(type,done){
   openModal(`<div class="kicker">How to play</div><h2>${i.name}</h2><p class="goal"><b>Goal</b> ${h.goal}</p><div class="demo">${h.demo()}</div><ol class="steps">${h.steps.map(t=>`<li>${t}</li>`).join('')}</ol>`,
     [{label:'Got it! ▶',cls:'big',fn:gotIt}],{icon:i.icon,cls:'howto',dismiss:gotIt});
 }
-function exitLevel(){if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null;clearTimeout(nudgeT)}
+/* an unfinished (non-daily) level is kept, so leaving it, or closing the app, never loses progress */
+function keepResume(){
+  if(!cur||cur.over||cur.daily||cur.puz.noUndo)return;
+  if(cur.history.length>1){S.resume={n:cur.level,h:cur.history.slice(-40)};save()}
+  else if(S.resume&&S.resume.n===cur.level){S.resume=null;save()}
+}
+addEventListener('pagehide',keepResume);document.addEventListener('visibilitychange',()=>{if(document.hidden)keepResume()});
+function exitLevel(){keepResume();if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();cur=null;clearTimeout(nudgeT)}
 function undo(){
   if(!cur||cur.over||cur.locked||cur.puz.noUndo)return;
   if(cur.history.length<2){sfx.bad();return}
@@ -324,6 +337,7 @@ function refreshHUD(){
 }
 /* ====================== wiring ====================== */
 $('#playBtn').onclick=()=>{sfx.good();playLevel(S.unlocked,{},$('#playBtn'))};
+$('.nextcard').onclick=()=>$('#playBtn').click();   // the Next up card plays the next level too
 $('#homeMap').onclick=()=>{sfx.click();show('map')};
 $('#homeShop').onclick=()=>{sfx.click();show('shop')};
 $('#settingsBtn').onclick=()=>{sfx.click();showSettings()};
