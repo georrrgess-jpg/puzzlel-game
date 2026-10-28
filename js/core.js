@@ -74,6 +74,10 @@ function load(){
   // migrate older saves: count existing clears so trophies make sense
   if(!raw.stats&&raw.stars){const v=Object.values(raw.stars);s.stats.wins=v.length;s.stats.perfect=v.filter(x=>x===3).length}
   if(raw.muted&&raw.music===undefined){s.music=false;s.sfx=false}
+  // the picture-card mode 'vases' became 'pics' (new rules, so its how-to shows again); quests and stats follow it
+  if(s.seen.vases!==undefined)delete s.seen.vases;
+  if(s.stats.types.vases!==undefined){s.stats.types.pics=(s.stats.types.pics||0)+s.stats.types.vases;delete s.stats.types.vases}
+  if(s.quests&&s.quests.list)s.quests.list.forEach(q=>{if(q.p==='vases')q.p='pics'});
   if(!(raw.ver>=3)){
     // v3 replaced four puzzle modes, so level N is a different puzzle now: per-level progress restarts,
     // everything else (coins, XP, themes, trophies, hints, login/daily streaks) is kept.

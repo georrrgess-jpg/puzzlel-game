@@ -12,7 +12,7 @@ An endless, relaxing puzzle game for phones. It runs in the browser: open `index
 | ✨ **Star Threads** | Light up every thread of a constellation in one continuous path: press a star and slide along the threads. Each thread lights only once. |
 | 🌸 **Merge Bloom** | Drag a plant onto its twin to grow the next stage. Seed → sprout → sapling → bud → flower → blossom → golden tree. |
 | 🌱 **Block Garden** | Drag blocks from the tray onto the bed. Full rows and columns bloom away. Some levels are weed-pulling levels. |
-| 🏺 **Vase Blast** | Picture cards lie in solitaire piles. Tap the front card of a pile to put it on the 7-slot shelf; three alike blast away. Clear the table, and keep the shelf low for 3 stars. Deeper piles are dealt face down and turn over as you dig. |
+| 🖼️ **Picture Pop** | Pictures are cut into tiles and shuffled on a grid. Swap tiles until a picture is whole: two halves side by side, or on harder levels four quarters as a 2×2 square. A finished picture pops into your gallery and new tiles drop in from the deck. 31 hand-made scenes: landscapes, animals, space, underwater, still life, architecture and abstract art. |
 
 Every level is generated from its number, so levels never run out and always play the same. Every mode has hints, Undo,
 a how-to card, and a built-in solver that guarantees each level can be finished. There are no timers and no game over.
@@ -41,11 +41,13 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 
 ## What's new in v4.1
 
-- **Vase Blast**, a sixth mode: a picture-card solitaire. Ten hand-drawn vases, a felt table and a wooden shelf. The cards are
-  dealt in from above and turn over in a wave, a tapped card flies along an arc to its slot next to its twins, three alike
-  jump together and blast, face-down cards flip over when you dig down to them. Stars come from how full the shelf gets
-  (the slots are coloured like the star meter). Every level is checked by an exact search at level start: it sets the
-  star target, gives hints from any position, and tells you at once when a position can no longer be cleared.
+- **Picture Pop**, a sixth mode (it replaces the Vase Blast prototype): swap tiles on a grid to put pictures back together.
+  Two-piece pictures first, four-piece (2×2) pictures on harder levels. 31 detailed SVG scenes in many styles, drawn in
+  code at two sizes so every picture looks right as halves or quarters. Pieces of a 4-piece picture that already fit close
+  the gap between them. A finished picture joins into one gold-framed image with a shine (and light rays on the High
+  tier), sparkles and its name, then flies into the gallery while new tiles drop in from the deck; chains count as combos.
+  The deck always deals whole pictures in order, so a level can always be finished, and a built-in solver sets the
+  3-star move target and gives hints.
 - **Sand Tubes fix**: on a selected tube the sand's top surface no longer lifts off the sand under it; it stays in place
   and glows together with the rest of the colour, and after a pour it settles flat.
 - With six modes the level rotation changed: a level number may now be a different mode than before (stars already won are kept).
@@ -89,7 +91,7 @@ The game is a mobile-first web app. Once it is hosted it can be installed to the
 - `js/core.js`: helpers, saves + migration, **ECON (economy)**, themes, level rotation and `registerMode()`.
 - `js/perf.js`: quality tiers. `js/audio.js`, `js/fx.js`: sound, particles, animated background.
 - `js/meta.js`: XP, quests, trophies, daily, spin, settings. `js/howto.js`: how-to demo helpers.
-- `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `lights`, `tubes`, `threads`, `merge`, `blocks`, `vases`.
+- `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `lights`, `tubes`, `threads`, `merge`, `blocks`, `pics` (its art is in `pics-art.js`).
 - `js/screens.js`: home, map, shop. `js/ui.js`: game flow, popups, HUD.
 
 ## Adding a mode
@@ -111,6 +113,6 @@ Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier. A mode whose 
 | `perf.cjs [rate]` | fps and long tasks under CPU throttling (`GFX=high|med|low`) |
 | `economy-sim.cjs` | Economy targets for three player types |
 | `migration.cjs` | An old save upgrades correctly |
-| `regress.cjs [filter]` | Pass/fail checks for every fixed bug and the Vase Blast rules |
+| `regress.cjs [filter]` | Pass/fail checks for every fixed bug and the Picture Pop rules |
 
 See `PLAN.md` (v2) and `PLAN-v3.md` (this update).

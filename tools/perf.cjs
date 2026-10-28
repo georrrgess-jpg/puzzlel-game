@@ -1,6 +1,6 @@
 // Frame-rate / long-task benchmark under CPU throttling (a stand-in for a mid-range phone).
 // Usage: NODE_PATH=$(npm root -g) node tools/perf.cjs [throttle=4] [scenario ...]
-// Starts its own static server on :8766. Scenarios: home map lights tubes threads merge blocks vases win modal   (default: all)
+// Starts its own static server on :8766. Scenarios: home map lights tubes threads merge blocks pics win modal   (default: all)
 // Output: one row per scenario: avg fps, p5 fps (slowest 5% of frames), long tasks (>50ms), worst frame ms.
 const { chromium, devices } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -15,7 +15,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const args = process.argv.slice(2);
 const throttle = /^\d+$/.test(args[0] || '') ? +args.shift() : 4;
 const GFX = process.env.GFX || 'auto';   // auto | high | med | low
-const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'threads', 'merge', 'blocks', 'vases', 'win', 'modal'];
+const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'threads', 'merge', 'blocks', 'pics', 'win', 'modal'];
 (async () => {
   await new Promise(r => srv.listen(8766, r));
   const browser = await chromium.launch();
@@ -42,6 +42,7 @@ const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'threads', 
     console.log(name.padEnd(8), '[' + await page.evaluate(() => Q.tier) + ']', 'avg', (1000 * f.length / tot).toFixed(1).padStart(5), 'fps | p5', (1000 / p5).toFixed(1).padStart(5), 'fps | long tasks', String(r.long).padStart(2), '| worst', sorted[0].toFixed(0) + 'ms');
   };
   const tapHint = async () => {
+    if (await page.evaluate(() => !!(__game.cur && __game.cur.puz._play))) { await page.evaluate(() => __game.cur.puz._play()); return }   // the solver's move with its animations
     if (await page.evaluate(() => !!(__game.cur && __game.cur.puz._bot))) { await page.evaluate(() => __game.cur.puz._bot()); return }
     await page.evaluate(() => { document.querySelectorAll('.hint').forEach(e => e.classList.remove('hint')); __game.cur.puz.hint() }); await sleep(60);
     await page.evaluate(() => { const h = document.querySelector('#board .hint'); if (h) h.click() });
@@ -51,11 +52,11 @@ const want = args.length ? args : ['home', 'map', 'lights', 'tubes', 'threads', 
     try {
       if (s === 'home') { await page.evaluate(() => __game.show('home')); await sleep(800); await measure('home', async () => { }, 5000) }
       if (s === 'map') { await page.evaluate(() => __game.show('map')); await sleep(900); await measure('map', async () => { for (let i = 0; i < 10; i++) { await page.evaluate(y => document.querySelector('#mapwrap').scrollBy(0, y), 160); await sleep(250) } }, 3500) }
-      if (['lights', 'tubes', 'threads', 'merge', 'blocks', 'vases'].includes(s)) {
+      if (['lights', 'tubes', 'threads', 'merge', 'blocks', 'pics'].includes(s)) {
         // a mid-difficulty level of that mode (tier 4), so the board is busy enough to matter
         const lvl = await page.evaluate(t => { let n = 21; while (__game.typeFor(n) !== t) n++; return n }, s);
         await page.evaluate(n => __game.startLevel(n), lvl); await sleep(2500);
-        await measure(s, async () => { for (let i = 0; i < 8; i++) { if (await page.evaluate(() => __game.cur.over)) break; await tapHint(); await sleep(s === 'tubes' ? 500 : s === 'vases' ? 420 : 280) } }, 5000);
+        await measure(s, async () => { for (let i = 0; i < 8; i++) { if (await page.evaluate(() => __game.cur.over)) break; await tapHint(); await sleep(s === 'tubes' ? 500 : s === 'pics' ? 1100 : 280) } }, 5000);
       }
       if (s === 'win') { await page.evaluate(() => __game.startLevel(1)); await sleep(2500); await measure('win', async () => { for (let i = 0; i < 20; i++) { if (await page.evaluate(() => __game.cur.over)) break; await tapHint(); await sleep(150) } }, 6000) }
       if (s === 'modal') { await page.evaluate(() => { __game.closeModal(); __game.show('home') }); await sleep(500); await measure('modal', async () => { await page.evaluate(() => document.querySelector('#tQuests').click()) }, 3000) }

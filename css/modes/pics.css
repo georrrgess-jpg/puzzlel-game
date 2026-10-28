@@ -1,0 +1,65 @@
+/* Picture Pop: a felt board of picture tiles (3:4), with the gallery counter and the deck above it */
+.ppw{--gap:5px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  --tw:min(calc((min(var(--bw0,92vw),470px) - 30px - (var(--C) - 1)*var(--gap)) / var(--C)),
+    calc(((var(--bh0,60vh) - 78px) / var(--R) - var(--gap))*.75),84px);
+  --th:calc(var(--tw)*4/3)}
+.pptop{display:flex;justify-content:space-between;align-items:center;width:calc(var(--C)*var(--tw) + (var(--C) - 1)*var(--gap) + 20px)}
+.ppgal{display:flex;align-items:baseline;gap:4px;padding:4px 12px 4px 8px;border-radius:99px;background:#0b3a22c0;box-shadow:inset 0 0 0 1.5px #ffffff30,0 3px 8px #0005;font-weight:700}
+.ppgal i{font-style:normal;font-size:16px;align-self:center}.ppgal b{font-size:17px;color:#fff}.ppgal small{font-size:12px;color:#cfe9da}
+.ppgal.gba,.ppgal.gbb{animation:ppgba .42s cubic-bezier(.3,1.6,.5,1)}.ppgal.gbb{animation-name:ppgbb}
+@keyframes ppgba{40%{scale:1.22}}@keyframes ppgbb{40%{scale:1.22}}
+/* the deck: a little stack of card backs and how many tiles are left in it */
+.ppdeck{position:relative;display:flex;align-items:center;height:30px;padding-left:4px}
+.ppcb{width:20px;height:27px;margin-left:-13px;border-radius:4px;box-shadow:0 0 0 1.5px #fff,0 2px 4px #0006;
+  background:repeating-linear-gradient(45deg,#ffffff38 0 2px,transparent 2px 6px),repeating-linear-gradient(-45deg,#ffffff38 0 2px,transparent 2px 6px),linear-gradient(160deg,#5ad0ff,#1a7ae0)}
+.ppcb:first-child{margin-left:0;rotate:-8deg}.ppcb:nth-child(2){rotate:-2deg}.ppcb:nth-child(3){rotate:5deg}
+.ppdeck b{margin-left:8px;font-size:16px;color:#fff;text-shadow:0 2px 0 #0006}
+.pptop.empty .ppdeck{opacity:.35;filter:grayscale(1)}
+
+.ppg{position:relative;padding:10px;border-radius:20px;background:radial-gradient(120% 90% at 50% 15%,#36a060,#22804a 55%,#165c35);
+  box-shadow:inset 0 0 0 2px #ffffff26,inset 0 0 26px #0006,0 16px 32px #0007;transition:box-shadow .6s}
+.ppg.won{box-shadow:inset 0 0 0 2px #ffe08a,inset 0 0 36px #ffd16650,0 0 40px #ffd16670,0 16px 32px #0007}
+.ppb{position:relative;width:calc(var(--C)*var(--tw) + (var(--C) - 1)*var(--gap));height:calc(var(--R)*var(--th) + (var(--R) - 1)*var(--gap));touch-action:none}
+.pps,.pt,.ppf{position:absolute;left:calc(var(--c)*(var(--tw) + var(--gap)));top:calc(var(--r)*(var(--th) + var(--gap)));width:var(--tw);height:var(--th)}
+.pps{border-radius:9px;background:#0f4a2a90;box-shadow:inset 0 2px 6px #0007}
+.pps.tg{box-shadow:inset 0 0 0 2px #fff,inset 0 2px 6px #0007}
+.pps.hint{animation:hint .6s ease-in-out infinite alternate}
+
+/* a tile: the picture piece in a white frame; corners that meet a matching piece lose their rounding and the gap closes */
+.pt{--rd:9px;border-radius:var(--rd);background:#fff;padding:2px;box-shadow:0 2px 4px #0006;cursor:grab;
+  transform:translate(calc(var(--jx,0)*var(--gap)/2),calc(var(--jy,0)*var(--gap)/2));transition:transform .25s cubic-bezier(.3,1.3,.5,1),box-shadow .2s,border-radius .2s;
+  -webkit-tap-highlight-color:transparent}
+.pt .pim{display:block;width:100%;height:100%;border-radius:calc(var(--rd) - 2px);pointer-events:none}
+.pt.jr{border-top-right-radius:0;border-bottom-right-radius:0;padding-right:0}.pt.jl{border-top-left-radius:0;border-bottom-left-radius:0;padding-left:0}
+.pt.jb{border-bottom-left-radius:0;border-bottom-right-radius:0;padding-bottom:0}.pt.jt{border-top-left-radius:0;border-top-right-radius:0;padding-top:0}
+.pt.jr .pim,.pt.jl .pim,.pt.jt .pim,.pt.jb .pim{border-radius:0}
+.pt.sel{z-index:5;transform:translate(0,-4px) scale(1.06);box-shadow:0 0 0 3px var(--acc),0 10px 18px #0007}
+.pt.drag{z-index:30;cursor:grabbing;transform:scale(1.12) rotate(5deg);box-shadow:0 18px 30px #0009;transition:transform .15s,box-shadow .15s}
+.pt.tg{box-shadow:0 0 0 3px #fff,0 0 16px #fff9}
+.pt.gone{opacity:0;transition:opacity .12s}
+.pt.hint{z-index:6;animation:hint .6s ease-in-out infinite alternate}
+.pt.hint::after{content:attr(data-h);position:absolute;top:-10px;left:50%;translate:-50% 0;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  font-size:13px;font-weight:700;color:#2a1a00;background:radial-gradient(circle at 35% 30%,#fff,var(--acc) 60%);box-shadow:0 0 0 2px #fff,0 0 10px var(--acc);z-index:3}
+
+/* a finished picture: whole, framed in gold, with a shine across it (and light rays behind on the High tier) */
+.ppf{z-index:40;width:calc(var(--tw)*2 + var(--gap));border-radius:10px;padding:3px;pointer-events:none;
+  background:linear-gradient(135deg,#fff6c0,#ffc83a 40%,#fff0a0 60%,#e8a020);box-shadow:0 0 0 2px #fff,0 0 26px #ffd166,0 12px 26px #0008}
+.ppf.f4{height:calc(var(--th)*2 + var(--gap))}
+.ppf svg{display:block;width:100%;height:100%;border-radius:7px;position:relative;z-index:1}
+.ppsh{position:absolute;inset:3px;border-radius:7px;overflow:hidden;z-index:2}
+.ppsh::before{content:'';position:absolute;top:-20%;bottom:-20%;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffffd0,transparent);
+  transform:skewX(-18deg);animation:ppshine .7s ease-out .12s both}
+@keyframes ppshine{to{left:130%}}
+.pprays{position:absolute;left:50%;top:50%;width:260%;aspect-ratio:1;translate:-50% -50%;z-index:0;border-radius:50%;
+  background:repeating-conic-gradient(from 0deg,#fff6c055 0 8deg,transparent 8deg 22deg);
+  -webkit-mask:radial-gradient(circle,#000 20%,transparent 68%);mask:radial-gradient(circle,#000 20%,transparent 68%);animation:pprays .95s ease-out both}
+@keyframes pprays{from{rotate:0deg;scale:.4;opacity:0}30%{opacity:1}to{rotate:70deg;scale:1.1;opacity:0}}
+
+/* how-to demo */
+.ppd{position:relative;display:flex;gap:4px;align-items:center;padding:6px;border-radius:12px;background:#22804a}
+.ppdt{display:block;width:40px;height:53px;border-radius:6px;background:#fff;padding:1.5px;position:relative}
+.ppdt svg{display:block;width:100%;height:100%;border-radius:4.5px}
+.ppdw{display:flex;border-radius:7px;box-shadow:0 0 0 2.5px #ffd166,0 0 14px #ffd166;animation:ppdw 4.4s ease-out infinite}
+.ppdw .ppdt{border-radius:0}.ppdw .ppdt:first-child{border-radius:6px 0 0 6px}.ppdw .ppdt:last-child{border-radius:0 6px 6px 0}
+@keyframes ppdw{0%,52%{scale:1}62%{scale:1.12}75%,100%{scale:1}}
+.ppd .fing{left:78%;top:58%}
