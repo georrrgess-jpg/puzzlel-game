@@ -78,6 +78,11 @@ function load(){
   if(s.seen.vases!==undefined)delete s.seen.vases;
   if(s.stats.types.vases!==undefined){s.stats.types.pics=(s.stats.types.pics||0)+s.stats.types.vases;delete s.stats.types.vases}
   if(s.quests&&s.quests.list)s.quests.list.forEach(q=>{if(q.p==='vases')q.p='pics'});
+  // Lights Out was replaced by Arrow Escape (same place in the level rotation): quests and stats follow it
+  if(s.seen.lights!==undefined)delete s.seen.lights;
+  if(s.stats.types.lights!==undefined){s.stats.types.arrows=(s.stats.types.arrows||0)+s.stats.types.lights;delete s.stats.types.lights}
+  if(s.quests&&s.quests.list)s.quests.list.forEach(q=>{if(q.p==='lights')q.p='arrows'});
+  if(s.resume&&!s.resume.t)s.resume=null;   // a kept level from before levels recorded their mode
   if(!(raw.ver>=3)){
     // v3 replaced four puzzle modes, so level N is a different puzzle now: per-level progress restarts,
     // everything else (coins, XP, themes, trophies, hints, login/daily streaks) is kept.

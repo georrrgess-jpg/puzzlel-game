@@ -7,7 +7,7 @@ An endless, relaxing puzzle game for phones. It runs in the browser: open `index
 
 | Mode | What you do |
 |---|---|
-| 💡 **Lights Out** | Tap a square to flip it and its neighbours. Turn every light off. |
+| 🏹 **Arrow Escape** | Tap a tile and it zips off the board the way its arrow points, unless another tile is in the way (then it bumps and comes back, costing a move). Clear the board in the right order. Boards come in shapes: squares, hearts, circles, diamonds and crosses. |
 | ⏳ **Sand Tubes** | Scoop the top sand from a tube and pour it into another. Make every tube one colour. |
 | ✨ **Star Threads** | Light up every thread of a constellation in one continuous path: press a star and slide along the threads. Each thread lights only once. |
 | 🌸 **Merge Bloom** | Drag a plant onto its twin to grow the next stage. Seed → sprout → sapling → bud → flower → blossom → golden tree. |
@@ -33,11 +33,26 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 
 - **Smooth on modest hardware**: graphics quality tiers (High / Medium / Battery saver, chosen automatically from the device
   and changeable in Settings), a cheap animated background that freezes during play, capped particles, no blur effects.
-  Measured under 4x CPU throttling on the High tier: every screen and mode averages 50-60 fps except Lights Out (about 46-49;
-  it was 12-20 everywhere before the v3 work). Battery saver is faster still.
+  Measured under 4x CPU throttling on the High tier: every screen and mode averages 50-60 fps (it was 12-20 before
+  the v3 work). Battery saver is faster still.
 - **Fits every phone**: boards size themselves from the free space; verified clean on iPhone SE (320x568), iPhone 8, iPhone 13,
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
+
+## What's new in v4.3
+
+- **Arrow Escape** replaces Lights Out (same place in the level rotation, so every other level keeps its mode). One tap per
+  tile: a free tile squashes, then shoots off the board with a colour streak and a puff of particles; a blocked one slides
+  up to the tile in its way, flashes and springs back while the other flinches. Quick clears chain into combos. Levels
+  are built by placing each tile pointing somewhere clear at that moment, so every board can be cleared without a bump.
+- **No more coloured circle** when a level opens or closes: the screen zooms in and fades instead.
+- **Lucky Spin** is a detailed SVG carnival wheel: shaded segments, a gold rim with 24 chasing bulbs and studs, coin and
+  prize icons, a stand. The spin winds up, blurs at speed, ticks the pointer and settles; the win flashes every bulb in
+  the prize colour, lights the winning wedge and bursts a prize badge out of the hub.
+- **Trophies**: a header medallion with a completion ring and the coins earned, a "closest to unlock" card, tabs by kind
+  (Levels, Stars, Skill, Daily, Collect), unlocked trophies first with a shine and a NEW tag, then the nearest ones.
+- **Brighter everywhere**: colour washes on every screen, frosted top bars, a violet popup card, tinted shop cards, lilac
+  locked map levels, a gold coach pill and four candy toolbar buttons.
 
 ## What's new in v4.2
 
@@ -100,7 +115,7 @@ The game is a mobile-first web app. Once it is hosted it can be installed to the
 - `js/core.js`: helpers, saves + migration, **ECON (economy)**, themes, level rotation and `registerMode()`.
 - `js/perf.js`: quality tiers. `js/audio.js`, `js/fx.js`: sound, particles, animated background.
 - `js/meta.js`: XP, quests, trophies, daily, spin, settings. `js/howto.js`: how-to demo helpers.
-- `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `lights`, `tubes`, `threads`, `merge`, `blocks`, `pics` (its art is in `pics-art.js`).
+- `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `arrows`, `tubes`, `threads`, `merge`, `blocks`, `pics` (its art is in `pics-art.js`).
 - `js/screens.js`: home, map, shop. `js/ui.js`: game flow, popups, HUD.
 
 ## Adding a mode

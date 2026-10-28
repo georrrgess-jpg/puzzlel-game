@@ -114,11 +114,25 @@ function checkAch(){
   if(n){earned(sum);sfx.unlock();save();refreshCoins()}
 }
 const achCount=()=>ACH.filter(a=>S.ach[a.id]).length;
+/* trophies by kind, for the tabs */
+const ACH_CAT=id=>/^w\d/.test(id)?'levels':/^s\d/.test(id)?'stars':/^(p|k|c|nh)\d|^spec/.test(id)?'skill':/^(d|l|sp|q)\d/.test(id)?'daily':'collect';
+const ACH_TABS=[['all','All'],['levels','🧩 Levels'],['stars','⭐ Stars'],['skill','🔥 Skill'],['daily','📅 Daily'],['collect','🎨 Collect']];
 function showTrophies(){
-  const n=achCount();
-  openModal(`<h2>Trophies</h2><div class="achprog"><div class="bar"><div style="width:${n/ACH.length*100}%"></div></div><span><b>${n}</b> / ${ACH.length}</span></div><div class="achgrid">${ACH.map((a,i)=>{const got=S.ach[a.id],tier=a.r>=150?'gold':a.r>=60?'silver':'bronze';
-    return`<div class="ach ${got?'got':''} ${tier}" style="--i:${i}"><div class="am"><i>${a.ic}</i>${got?'':'<em>🔒</em>'}</div><b>${a.name}</b><small>${a.desc}</small>${got||!ACH_PROG[a.id]?'':(([v,n])=>`<div class="apw"><div class="apb"><i style="width:${Math.min(1,v/n)*100}%"></i></div><em>${Math.min(v,n)}/${n}</em></div>`)(ACH_PROG[a.id]())}<span class="rc"><i class="coin"></i>${a.r}</span></div>`}).join('')}</div>`,
-    [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,icon:'🏆',cls:'trophies',dismiss:()=>{closeModal();renderHome()}});
+  const n=achCount(),pct=n/ACH.length,earnedC=ACH.filter(a=>S.ach[a.id]).reduce((t,a)=>t+a.r,0),now=Date.now();
+  const prog=a=>{const f=ACH_PROG[a.id];if(!f)return 0;const[v,m]=f();return Math.min(1,v/m)};
+  /* unlocked first (newest first), then the locked ones closest to done */
+  const list=ACH.map((a,i)=>({a,i,got:S.ach[a.id],p:prog(a)})).sort((x,y)=>(!!y.got-!!x.got)||(x.got&&y.got?y.got-x.got:y.p-x.p));
+  const next=list.find(x=>!x.got);
+  const card=({a,got,p},k)=>{const tier=a.r>=150?'gold':a.r>=60?'silver':'bronze',isNew=got&&now-got<864e5;
+    const pr=got||!ACH_PROG[a.id]?'':(([v,m])=>`<div class="apw"><div class="apb"><i style="width:${p*100}%"></i></div><em>${Math.min(v,m)}/${m}</em></div>`)(ACH_PROG[a.id]());
+    return`<div class="ach ${got?'got':''} ${tier}" data-c="${ACH_CAT(a.id)}" style="--i:${k}">${isNew?'<span class="anew">NEW</span>':''}<div class="am"><i>${a.ic}</i>${got?'':'<em>🔒</em>'}</div><b>${a.name}</b><small>${a.desc}</small>${pr}<span class="rc chip"><i class="coin"></i>${a.r}</span></div>`};
+  openModal(`<div class="trhead" style="--p:${pct}"><div class="trcup"><span>🏆</span></div><div class="trtx"><b>${n}<small> / ${ACH.length}</small></b><span>trophies unlocked</span><em><i class="coin"></i>${earnedC} coins earned</em></div></div>
+    ${next?`<div class="trnext"><small>CLOSEST TO UNLOCK</small><div class="trnc"><i>${next.a.ic}</i><div><b>${next.a.name}</b><span>${next.a.desc}</span>${ACH_PROG[next.a.id]?`<div class="apb"><i style="width:${next.p*100}%"></i></div>`:''}</div><span class="rc chip"><i class="coin"></i>${next.a.r}</span></div></div>`:'<div class="trnext all">🎉 Every trophy unlocked!</div>'}
+    <div class="trtabs">${ACH_TABS.map(([k,l],i)=>`<button class="trt ${i?'':'on'}" data-f="${k}">${l}</button>`).join('')}</div>
+    <div class="achgrid" data-f="all">${list.map(card).join('')}</div>`,
+    [{label:'Close',cls:'sec',fn:()=>{closeModal();renderHome()}}],{wide:true,cls:'trophies',dismiss:()=>{closeModal();renderHome()}});
+  $$('#modal .trt').forEach(b=>b.onclick=()=>{sfx.tick(1.2);$$('#modal .trt').forEach(x=>x.classList.toggle('on',x===b));const g=$('#modal .achgrid');g.dataset.f=b.dataset.f;
+    g.querySelectorAll('.ach').forEach(e=>{const show=b.dataset.f==='all'||e.dataset.c===b.dataset.f;e.hidden=!show})});
 }
 function showProfile(){
   const s=S.stats;
@@ -167,42 +181,77 @@ function startDaily(){if(dailyDone()){toast(`✅ Done for today! New challenge i
 const WHEEL=ECON.wheel,SPIN_CD=ECON.spin.cd,SPIN_COST=ECON.spin.cost;
 const spinReady=()=>Date.now()>=S.spinAt;
 let wheelAng=0,spinning=false;
+/* the wheel is one SVG: shaded segments, gold separators with studs, a gold rim with 24 chasing bulbs and the prizes */
+function wheelSVG(){
+  const n=WHEEL.length,seg=360/n,P=(r,a)=>[+(r*Math.sin(a*Math.PI/180)).toFixed(2),+(-r*Math.cos(a*Math.PI/180)).toFixed(2)];
+  const mix=(c,o,t)=>{const h=x=>[1,3,5].map(k=>parseInt(x.slice(k,k+2),16)),A=h(c),B=h(o);return'#'+A.map((v,k)=>Math.round(v+(B[k]-v)*t).toString(16).padStart(2,'0')).join('')};
+  const defs=WHEEL.map((w,i)=>`<radialGradient id="wg${i}" cx="0" cy="0" r="100" gradientUnits="userSpaceOnUse"><stop offset=".2" stop-color="${mix(w.col,'#ffffff',.5)}"/><stop offset=".72" stop-color="${w.col}"/><stop offset="1" stop-color="${mix(w.col,'#000000',.32)}"/></radialGradient>`).join('');
+  const segs=WHEEL.map((w,i)=>{const a0=i*seg,a1=(i+1)*seg,[x0,y0]=P(96,a0),[x1,y1]=P(96,a1);return`<path class="wseg" data-i="${i}" d="M0 0L${x0} ${y0}A96 96 0 0 1 ${x1} ${y1}Z" fill="url(#wg${i})"/>`}).join('');
+  const shine=WHEEL.map((w,i)=>{const a0=i*seg+2,a1=(i+.5)*seg,[x0,y0]=P(92,a0),[x1,y1]=P(92,a1),[x2,y2]=P(30,a1);return`<path d="M${x2} ${y2}L${x0} ${y0}A92 92 0 0 1 ${x1} ${y1}Z" fill="#fff" opacity=".1"/>`}).join('');
+  const lines=WHEEL.map((w,i)=>{const[x,y]=P(96,i*seg),[sx,sy]=P(88,i*seg);return`<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="url(#wgold)" stroke-width="2.6"/><circle cx="${sx}" cy="${sy}" r="3.2" fill="url(#wgoldr)" stroke="#8a5a00" stroke-width=".6"/>`}).join('');
+  const coin=(y)=>`<circle cy="${y}" r="7.5" fill="url(#wgoldr)" stroke="#a86a00" stroke-width="1"/><circle cy="${y}" r="4.6" fill="none" stroke="#fff6c0" stroke-width="1"/>`;
+  const labels=WHEEL.map((w,i)=>{const big=w.c?w.c:'',ic=w.c?'':w.h?'💡':'⏭️',mult=w.h>1?'×2':'';
+    return`<g transform="rotate(${(i+.5)*seg})">${w.c?`<text y="-62" class="wnum">${big}</text>${coin(-40)}`:`<text y="-56" class="wic">${ic}</text>${mult?`<text y="-36" class="wsm">${mult}</text>`:''}`}</g>`}).join('');
+  const bulbs=[...Array(24)].map((_,i)=>{const[x,y]=P(104,i*15+7.5);return`<circle class="wb ${i%2?'b':'a'}" cx="${x}" cy="${y}" r="3.6"/>`}).join('');
+  return`<svg viewBox="-112 -112 224 224" class="wsvg"><defs>${defs}
+    <linearGradient id="wgold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c0"/><stop offset=".45" stop-color="#ffc83a"/><stop offset=".7" stop-color="#e09a00"/><stop offset="1" stop-color="#fff0a0"/></linearGradient>
+    <radialGradient id="wgoldr" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fffbe0"/><stop offset=".5" stop-color="#ffc83a"/><stop offset="1" stop-color="#b87400"/></radialGradient></defs>
+    <circle r="110" fill="#5a1f6a"/><circle r="108" fill="url(#wgold)"/><circle r="99" fill="#3a1050"/>${bulbs}
+    <g id="wheel" class="wrot">${segs}${shine}${lines}${labels}<path id="wwin" d="" fill="#fff" opacity="0"/></g>
+    <circle r="97" fill="none" stroke="#2a0a3a" stroke-width="2.5" opacity=".6"/></svg>`;
+}
 function showSpin(){
-  const seg=360/WHEEL.length;
-  const grad=`radial-gradient(circle,transparent 58%,#00000030 59%,transparent 61%),conic-gradient(${WHEEL.map((w,i)=>`${w.col} ${i*seg}deg ${(i+1)*seg-.6}deg,#fff8 ${(i+1)*seg-.6}deg ${(i+1)*seg}deg`).join(',')})`;
   const free=spinReady();
   openModal(`<h2>🎡 Lucky Spin</h2><p id="spinTxt">${free?'Your free spin is ready!':`Next free spin in ${fmtTime(S.spinAt-Date.now())}`}</p>
-    <div class="wheelwrap"><div class="rim"></div><div class="bulbs">${[...Array(20)].map((_,i)=>{const a=i/20*Math.PI*2;return`<i style="left:${50+50*Math.sin(a)}%;top:${50-50*Math.cos(a)}%;animation-delay:${(-i/20*1.2).toFixed(2)}s"></i>`}).join('')}</div>
-    <div class="wheel" id="wheel" style="background:${grad};transform:rotate(${wheelAng}deg)">${WHEEL.map((w,i)=>`<div class="lb" style="transform:rotate(${(i+.5)*seg}deg)"><span>${w.c?'<i class="coin"></i>':''}${w.t}</span></div>`).join('')}</div>
-    <div class="gloss"></div><div class="hub"><span>⭐</span></div><svg class="ptr" id="ptr" viewBox="0 0 32 40"><defs><linearGradient id="ptrg" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#ffe9a8"/><stop offset="1" stop-color="#d9a400"/></linearGradient></defs><path d="M16 40L2 8a14 14 0 1 1 28 0z" fill="url(#ptrg)" stroke="#7a4b00" stroke-width="1.5"/><circle cx="16" cy="12" r="5" fill="var(--acc2)" stroke="#fff" stroke-width="1.5"/></svg></div>`,
+    <div class="wheelwrap"><div class="wstand"></div>${wheelSVG()}<div class="wblur"></div>
+    <div class="hub"><span>⭐</span></div><svg class="ptr" id="ptr" viewBox="0 0 32 40"><defs><linearGradient id="ptrg" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#ffe9a8"/><stop offset="1" stop-color="#d9a400"/></linearGradient></defs><path d="M16 40L2 8a14 14 0 1 1 28 0z" fill="url(#ptrg)" stroke="#7a4b00" stroke-width="1.5"/><circle cx="16" cy="12" r="5" fill="#ff4f8b" stroke="#fff" stroke-width="1.5"/></svg>
+    <div class="wprize"></div></div>`,
     [{label:'Close',cls:'sec',fn:()=>{if(!spinning){closeModal();renderHome()}}},
      {label:free?'SPIN! 🎡':`Spin · <i class="coin"></i> ${SPIN_COST}`,cls:free?'big':'',fn:()=>doSpin()}],{cls:'spin',dismiss:()=>{if(!spinning){closeModal();renderHome()}}});
+  const wh=$('#wheel');if(wh)wh.style.transform=`rotate(${wheelAng}deg)`;
 }
 function doSpin(){
   if(spinning)return false;
   const free=spinReady();
-  if(!free){if(S.coins<SPIN_COST){toast('Not enough coins');sfx.bad();return false}S.coins-=SPIN_COST}
+  if(!free){if(S.coins<SPIN_COST){toast('Not enough coins');sfx.bad();return false}S.coins-=SPIN_COST;refreshCoins()}
   else S.spinAt=Date.now()+SPIN_CD;
   /* the prize is chosen and paid (and saved) right now; the animation only reveals it, so closing the app mid-spin loses nothing */
   const tot=WHEEL.reduce((a,w)=>a+w.w,0);let r=Math.random()*tot,i=0;while(r>=WHEEL[i].w){r-=WHEEL[i].w;i++}
   const w=WHEEL[i];S.coins+=w.c||0;S.hints+=w.h||0;S.skips+=w.s||0;S.stats.spins++;save();
   spinning=true;$$('#modal .mbtns .btn').forEach(b=>b.disabled=true);const ww=$('.wheelwrap');if(ww)ww.classList.add('going');
+  $('#spinTxt')&&($('#spinTxt').textContent='Good luck! 🍀');
+  /* wind-up (a small pull back), a long ease-out over 6+ turns to just past the prize, then a settle back onto it */
   const seg=360/WHEEL.length,start=wheelAng,base=((-(i+.5)*seg-start)%360+360)%360;
-  const end=start+360*6+base+(Math.random()-.5)*seg*.6,T1=3200,T2=520,t0=performance.now(),wh=$('#wheel'),ptr=$('#ptr'),over=4;   // 3.2 s ease-out to 4° past the prize, then a 0.5 s settle back onto it
-  let lastSeg=Math.floor(start/seg);sfx.whoosh();
+  const end=start+360*6+base+(Math.random()-.5)*seg*.6,TW=260,T1=3600,T2=560,t0=performance.now(),wh=$('#wheel'),ptr=$('#ptr'),blur=$('.wblur'),over=4,back=10;
+  let lastSeg=Math.floor(start/seg),prev=start;sfx.whoosh();
+  const fast=REDUCED||Q.tier==='low';
   (function step(t){
-    const el_=t-t0,k=Math.min(1,el_/T1);
-    wheelAng=el_<T1?start+(end+over-start)*(1-Math.pow(1-k,4)):end+over*(1-clamp((el_-T1)/T2,0,1)*clamp((el_-T1)/T2,0,1)*(3-2*clamp((el_-T1)/T2,0,1)));
+    const e=t-t0;
+    if(e<TW){const k=e/TW;wheelAng=start-back*Math.sin(k*Math.PI/2)}
+    else if(e<TW+T1){const k=(e-TW)/T1;wheelAng=start-back+(end+over-start+back)*(1-Math.pow(1-k,4))}
+    else{const k=clamp((e-TW-T1)/T2,0,1);wheelAng=end+over*(1-k*k*(3-2*k))}
     if(wh)wh.style.transform=`rotate(${wheelAng}deg)`;
-    const sNow=Math.floor(wheelAng/seg);if(sNow!==lastSeg){lastSeg=sNow;sfx.wheel();if(ptr){ptr.classList.remove('tick');void ptr.offsetWidth;ptr.classList.add('tick')}}
-    if(el_<T1+T2)return requestAnimationFrame(step);
-    spinning=false;wheelAng=end%360;
+    const v=Math.abs(wheelAng-prev);prev=wheelAng;if(blur&&!fast)blur.style.opacity=clamp((v-4)/14,0,.85);
+    const sNow=Math.floor(wheelAng/seg);if(sNow!==lastSeg){lastSeg=sNow;if(v<20)sfx.wheel();if(ptr){ptr.classList.remove('tick');void ptr.offsetWidth;ptr.classList.add('tick')}}
+    if(e<TW+T1+T2)return requestAnimationFrame(step);
+    spinning=false;wheelAng=end%360;if(blur)blur.style.opacity=0;
     questEvent('spin',1);earned(w.c||0);checkAch();save();if(!w.c)refreshCoins();
-    sfx.chest();const hub=$('.wheelwrap .hub');if(hub){const[x,y]=centerOf(hub);burst(x,y,w.col,46,1.6);ring(x,y,w.col,260,800)}
-    if(w.c){flyCoins(hub,Math.min(14,4+w.c/20|0));if(w.c>=150)confetti()}
-    toast(`You won ${w.c?`<i class="coin"></i> ${w.c} coins`:w.h?`💡 ${w.h} hint${w.h>1?'s':''}`:'⏭️ a skip token'}!`);
-    setTimeout(()=>{if($('#wheel'))showSpin()},1400);
+    reveal(w,i);
   })(t0);
+}
+/* the win: every bulb flashes in the prize colour, the winning wedge glows, and a prize badge bursts out of the hub */
+function reveal(w,i){
+  const ww=$('.wheelwrap');if(!ww)return;
+  ww.classList.remove('going');ww.classList.add('won');ww.style.setProperty('--wc',w.col);
+  const seg=360/WHEEL.length,P=(r,a)=>[(r*Math.sin(a*Math.PI/180)).toFixed(2),(-r*Math.cos(a*Math.PI/180)).toFixed(2)],[x0,y0]=P(96,i*seg),[x1,y1]=P(96,(i+1)*seg);
+  const ws=$('#wwin');if(ws){ws.setAttribute('d',`M0 0L${x0} ${y0}A96 96 0 0 1 ${x1} ${y1}Z`);ws.classList.add('on')}
+  const label=w.c?`<i class="coin"></i><b>+${w.c}</b><small>coins</small>`:w.h?`<span class="pic">💡</span><b>+${w.h}</b><small>hint${w.h>1?'s':''}</small>`:`<span class="pic">⏭️</span><b>+1</b><small>skip token</small>`;
+  const pz=$('.wprize');if(pz){pz.innerHTML=`<i class="prays"></i><div class="pcard">${label}</div>`;pz.classList.add('on')}
+  sfx.chest();setTimeout(()=>sfx.levelup&&w.c>=40&&sfx.levelup(),120);buzz([20,40,20]);
+  const hub=$('.wheelwrap .hub');if(hub){const[x,y]=centerOf(hub);burst(x,y,w.col,Q.tier==='low'?16:40,1.5);burst(x,y,'#ffd166',Q.tier==='low'?6:18,1.1);ring(x,y,w.col,280,800)}
+  if(w.c){flyCoins(hub,Math.min(14,4+w.c/20|0));if(w.c>=40)confetti()}
+  $('#spinTxt')&&($('#spinTxt').innerHTML=`You won ${w.c?`<b>${w.c} coins</b>`:w.h?`<b>${w.h} hint${w.h>1?'s':''}</b>`:'<b>a skip token</b>'}! 🎉`);
+  setTimeout(()=>{if($('#wheel'))showSpin()},2600);
 }
 
 /* ---------- settings ---------- */

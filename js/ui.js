@@ -61,7 +61,7 @@ function startLevel(n,opts={}){
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
   /* pick an unfinished level up where it was left (a restart starts it fresh) */
-  if(S.resume&&S.resume.n===n&&!daily){
+  if(S.resume&&S.resume.n===n&&S.resume.t===type&&!daily){
     if(again)S.resume=null;
     else{try{const h=S.resume.h;cur.puz.restore(h[h.length-1]);cur.history=h.slice();refreshUndo();const me=cur;setTimeout(()=>{if(cur===me)toast('↩️ Picked up where you left off')},900)}catch(e){cur.history=[cur.puz.snap()]}}
     S.resume=null;save();
@@ -113,7 +113,7 @@ function showHowTo(type,done){
 /* an unfinished (non-daily) level is kept, so leaving it, or closing the app, never loses progress */
 function keepResume(){
   if(!cur||cur.over||cur.daily||cur.puz.noUndo)return;
-  if(cur.history.length>1){S.resume={n:cur.level,h:cur.history.slice(-40)};save()}
+  if(cur.history.length>1){S.resume={n:cur.level,t:cur.type,h:cur.history.slice(-40)};save()}
   else if(S.resume&&S.resume.n===cur.level){S.resume=null;save()}
 }
 addEventListener('pagehide',keepResume);document.addEventListener('visibilitychange',()=>{if(document.hidden)keepResume()});
@@ -307,16 +307,9 @@ function wiggleTiles(){
   if(!$('#home').classList.contains('active')||$('#modal').classList.contains('on'))return;
   $$('#home .mtile.on').forEach((t,i)=>wa(t,[{transform:'rotate(0)'},{transform:'rotate(-4deg)'},{transform:'rotate(4deg)'},{transform:'rotate(-2deg)'},{transform:'rotate(0)'}],{duration:400,delay:i*80,easing:'ease-in-out'}));
 }
-/* enter a level through the iris, growing from the button or map node that was tapped */
-function playLevel(n,opts={},from){
-  const type=opts.daily?dailyCfg().type:typeFor(n);
-  Trans.iris({from,color:INFO[type].col},()=>startLevel(n,opts));
-}
-/* leave the level: the iris closes from the back button and reopens on the level's map node (or the Play button) */
-function playExit(to='map',from){
-  const n=cur&&cur.level,col=cur?INFO[cur.type].col:'#7c6bff';
-  Trans.iris({from:from||$('#backBtn'),color:col,to:()=>to==='map'?$(`.node[data-n="${n}"]`)||$('.node.cur'):$('#playBtn')},()=>{closeModal();exitLevel();show(to)});
-}
+/* enter / leave a level: a quick zoom-and-fade of the screen itself (no coloured cover) */
+function playLevel(n,opts={},from){Trans.stop();startLevel(n,opts)}
+function playExit(to='map',from){Trans.stop();closeModal();exitLevel();show(to)}
 /* visible coin chips count to the new balance (up: 0.4 s with a bump; down: 0.3 s); hidden ones just update */
 function refreshCoins(){
   const to=S.coins;

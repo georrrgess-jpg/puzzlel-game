@@ -306,6 +306,8 @@ input[type=range]{width:110px;accent-color:var(--acc)}
 .screen.active.in-back{animation:scrInB .34s cubic-bezier(.2,.9,.3,1) both}
 .screen.active.in-iris{animation:none}
 .screen.active.in-fade{animation:fadein .16s ease-out}
+.screen.active.in-zoom{animation:scrZoom .26s cubic-bezier(.2,.9,.3,1) both}
+@keyframes scrZoom{from{opacity:0;transform:scale(.94)}}
 @keyframes scrInF{0%,15%{opacity:0;transform:translateX(8%) scale(.985)}to{opacity:1;transform:none}}
 @keyframes scrInB{0%,15%{opacity:0;transform:translateX(-8%) scale(.985)}to{opacity:1;transform:none}}
 .iris{position:fixed;z-index:58;border-radius:50%;pointer-events:none;display:none;transform:scale(0);will-change:transform;

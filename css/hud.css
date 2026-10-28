@@ -491,3 +491,115 @@
   background:linear-gradient(90deg,#c9a4ff,#fff,#c9a4ff);background-size:200% 100%;box-shadow:0 4px 0 #5a2aa0,0 8px 18px #0006,inset 0 2px 0 #fffa;
   animation:lvupIn .6s cubic-bezier(.3,1.7,.5,1) both,goldsh 2s linear infinite}
 @keyframes lvupIn{from{transform:scale(.6);opacity:0}}
+
+/* ================= v4.3 Lucky Spin: an SVG carnival wheel on a stand ================= */
+.card.spin .wheelwrap{width:min(72vw,290px);margin:40px auto 48px}
+.wheelwrap .wsvg{position:absolute;inset:-6%;width:112%;height:112%;overflow:visible;filter:drop-shadow(0 12px 18px #0008)}
+.wsvg .wrot{will-change:transform}
+.wsvg .wnum{font:700 21px var(--font,'Fredoka',sans-serif);fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#0006;stroke-width:3px;dominant-baseline:middle}
+.wsvg .wic{font-size:24px;text-anchor:middle;dominant-baseline:middle}
+.wsvg .wsm{font:700 13px var(--font,'Fredoka',sans-serif);fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#0006;stroke-width:3px;dominant-baseline:middle}
+/* bulbs: two sets that take turns; faster while spinning; all flash in the prize colour on a win */
+.wsvg .wb{fill:#fff6c0;stroke:#b87400;stroke-width:.8;animation:wbul 1s steps(1) infinite}
+.wsvg .wb.b{animation-delay:-.5s}
+@keyframes wbul{0%{fill:#fffbe8;filter:drop-shadow(0 0 3px #fff)}50%{fill:#8a6a3a;filter:none}}
+.wheelwrap.going .wsvg .wb{animation-duration:.24s}
+.wheelwrap.won .wsvg .wb{animation:wbwin .3s steps(1) 6}
+@keyframes wbwin{0%{fill:#fff;filter:drop-shadow(0 0 5px var(--wc))}50%{fill:var(--wc);filter:drop-shadow(0 0 6px var(--wc))}}
+.wsvg #wwin.on{animation:wwin .6s ease-in-out 4 alternate}
+@keyframes wwin{from{opacity:0}to{opacity:.45}}
+/* the blur ring: a soft spinning smear that shows only at speed (its opacity follows the wheel's speed) */
+.wblur{position:absolute;inset:4%;border-radius:50%;pointer-events:none;opacity:0;z-index:1;
+  background:repeating-conic-gradient(#ffffff30 0 6deg,transparent 6deg 22deg),radial-gradient(circle,transparent 30%,#ffffff20 70%,transparent 72%)}
+/* the stand */
+.wstand{position:absolute;left:50%;bottom:-40px;width:46%;height:56px;translate:-50% 0;z-index:-1;
+  background:linear-gradient(90deg,#7a2a8a,#c44ad0 45%,#7a2a8a);clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);border-radius:6px}
+.wstand::after{content:'';position:absolute;left:-12%;right:-12%;bottom:0;height:12px;border-radius:6px;background:linear-gradient(180deg,#ffc83a,#c47a00)}
+.wheelwrap .hub{z-index:3;width:64px;height:64px;margin:-32px;background:radial-gradient(circle at 35% 30%,#fffbe0,#ffc83a 55%,#b87400);box-shadow:0 0 0 4px #7a2a8a,0 0 0 7px #ffc83a,0 6px 14px #0008}
+.wheelwrap .ptr{z-index:4;top:-30px}
+.wheelwrap .ptr.tick{animation:wptick .14s ease-out}
+@keyframes wptick{40%{rotate:-16deg}}
+/* the prize badge */
+.wprize{position:absolute;left:50%;top:50%;z-index:6;pointer-events:none;translate:-50% -50%;display:grid;place-items:center;opacity:0}
+.wprize.on{animation:wpz 2.4s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes wpz{0%{opacity:0;scale:.2}14%{opacity:1;scale:1.15}22%{scale:1}82%{opacity:1;scale:1}100%{opacity:0;scale:.9}}
+.wprize .pcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;padding:12px 22px 10px;border-radius:22px;
+  background:linear-gradient(180deg,#fffbe8,#ffe38a);box-shadow:0 0 0 4px var(--wc,#ffc83a),0 0 0 7px #fff,0 14px 30px #0009,0 0 40px var(--wc,#ffc83a);color:#3a1a00}
+.wprize .pcard b{font-size:34px;line-height:1}.wprize .pcard small{font-size:13px;font-weight:700;opacity:.75}
+.wprize .pcard .coin{width:38px;height:38px}.wprize .pic{font-size:34px;line-height:1}
+.wprize .prays{position:absolute;width:300px;height:300px;border-radius:50%;background:repeating-conic-gradient(#fff6c070 0 9deg,transparent 9deg 24deg);
+  -webkit-mask:radial-gradient(circle,#000 25%,transparent 68%);mask:radial-gradient(circle,#000 25%,transparent 68%);animation:spinrays 6s linear infinite}
+html.q-low .wsvg .wb{animation:none}
+html.q-low .wprize .prays{display:none}
+
+/* ================= v4.3 trophies ================= */
+.trhead{display:flex;align-items:center;gap:14px;margin:2px 4px 10px;padding:12px 14px;border-radius:20px;
+  background:linear-gradient(120deg,#ffb52e,#ff6f3c 60%,#e8407a);box-shadow:inset 0 2px 0 #ffffff70,0 5px 0 #8a2a3a,0 10px 20px #0005;text-align:left}
+.trcup{position:relative;flex:none;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(#fff calc(var(--p)*360deg),#ffffff40 0);box-shadow:0 3px 0 #0003}
+.trcup span{width:60px;height:60px;border-radius:50%;display:grid;place-items:center;font-size:32px;background:radial-gradient(circle at 35% 30%,#fff7d8,#ffd04a 55%,#e08a00);box-shadow:inset 0 -3px 0 #0002}
+.trtx{display:flex;flex-direction:column;color:#fff;text-shadow:0 2px 0 #0003}
+.trtx b{font-size:30px;line-height:1}.trtx b small{font-size:16px;opacity:.85}
+.trtx span{font-size:13px;font-weight:600;opacity:.95}
+.trtx em{display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-style:normal;font-size:12.5px;font-weight:700;padding:2px 9px 2px 4px;border-radius:99px;background:#00000030;width:fit-content}
+.trtx em .coin{width:16px;height:16px}
+.trnext{margin:0 4px 10px;text-align:left}
+.trnext>small{display:block;font-size:10.5px;letter-spacing:1.5px;font-weight:700;color:var(--acc);margin:0 0 4px 6px}
+.trnext.all{padding:12px;border-radius:16px;background:#2ecc8f40;text-align:center;font-weight:700}
+.trnc{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;background:linear-gradient(120deg,#5a3fd6,#8a4fd8);box-shadow:inset 0 0 0 1.5px #ffffff40,0 4px 0 #2a1a6a}
+.trnc>i{font-style:normal;font-size:30px;width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:50%;background:#ffffff26}
+.trnc>div{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.trnc b{font-size:15px}.trnc span{font-size:12px;color:#e6dcff}
+.trnc .apb{margin-top:4px;height:8px}
+.trnc .apb i{background:linear-gradient(90deg,#fff3a0,#ffc83a)}
+.trtabs{display:flex;gap:6px;overflow-x:auto;margin:0 2px 8px;padding:2px 2px 4px;scrollbar-width:none}
+.trtabs::-webkit-scrollbar{display:none}
+.trt{flex:none;padding:6px 12px;border-radius:99px;border:0;font:inherit;font-size:13px;font-weight:700;color:#fff;background:#ffffff1c;box-shadow:inset 0 0 0 1px #ffffff26;cursor:pointer}
+.trt.on{background:linear-gradient(180deg,#ffd04a,#ff9a1f);color:#3a1a00;box-shadow:0 3px 0 #a85a00}
+.ach[hidden]{display:none!important}
+.ach{position:relative}
+.ach.got.bronze{background:linear-gradient(180deg,#ffb07a55,#c8643a30)}
+.ach.got.silver{background:linear-gradient(180deg,#d8e4ff55,#8aa0c830)}
+.ach.got.gold{background:linear-gradient(180deg,#ffe07a66,#d8a00030)}
+.ach.got .am{overflow:hidden}
+.ach.got .am::after{content:'';position:absolute;inset:0;border-radius:50%;background:linear-gradient(115deg,transparent 35%,#ffffffb0 50%,transparent 65%);transform:translateX(-120%);animation:amshine 3.6s ease-in-out calc(var(--i)*.15s + .6s) infinite}
+@keyframes amshine{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.anew{position:absolute;top:6px;right:-4px;z-index:2;font-size:9.5px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:6px;background:#ff3d6e;color:#fff;box-shadow:0 2px 0 #8a1030;rotate:8deg}
+html.q-low .ach.got .am::after{display:none}
+.ach .apw{align-self:stretch;margin:4px 6px 0}
+.trnc .apb{flex:none;align-self:stretch}
+
+/* ================= v4.3 vibrant pass: every screen, popup and the play toolbar ================= */
+/* the same bright colour washes as home, softer during play so the board stays the focus */
+#map,#shop{background:radial-gradient(55% 30% at 0% 8%,#ff4fa855,transparent 70%),radial-gradient(50% 28% at 100% 30%,#2ad4ff44,transparent 70%),radial-gradient(60% 30% at 20% 100%,#8a5bff55,transparent 70%),radial-gradient(50% 26% at 100% 92%,#2fe0a03a,transparent 70%)}
+#play{background:radial-gradient(60% 26% at 0% 0%,#ff4fa82e,transparent 70%),radial-gradient(60% 26% at 100% 4%,#2ad4ff2a,transparent 70%),radial-gradient(70% 30% at 50% 104%,#8a5bff38,transparent 70%)}
+/* top bar buttons and chips: frosted white */
+.topbar .iconbtn{background:linear-gradient(180deg,#ffffff4a,#ffffff20);border-color:#ffffff70;box-shadow:inset 0 2px 0 #ffffff90,0 4px 0 #00000040,0 8px 16px #0003}
+.topbar .chip{background:linear-gradient(180deg,#ffffff38,#ffffff18);box-shadow:inset 0 1.5px 0 #ffffff70,inset 0 0 0 1px #ffffff40,0 6px 16px #0004}
+#helpBtn{background:linear-gradient(180deg,#5ad8ff,#1a8ae0);border-color:#ffffff80;box-shadow:inset 0 2px 0 #ffffff90,0 4px 0 #0a4a8a,0 8px 16px #0003}
+/* popups: a brighter violet card with a white rim */
+.card{--cardbg:linear-gradient(180deg,#5a3cc8,#3a2290 55%,#2a1870);box-shadow:0 30px 80px #000c,0 0 0 2px #ffffff60,inset 0 2px 0 #ffffff50,inset 0 -6px 0 #0000002e}
+.card::before{background:linear-gradient(180deg,#ffffff22,#ffffff00)}
+/* quest rows: tinted by their icon colour, with bright bars */
+.quest{background:linear-gradient(120deg,#ffffff2a,#ffffff10);border:1.5px solid #ffffff38}
+.quest.ready{background:linear-gradient(120deg,#ffd04a55,#ff8a3a30);border-color:#ffe08a}
+.card .bar>div,.quest .bar>div{background:linear-gradient(90deg,#5affc0,#2ad4ff 50%,#8a7bff)}
+/* map: open levels in their mode's colour (already); locked ones as soft lilac candy instead of dark grey */
+.node:disabled{background:radial-gradient(circle at 34% 24%,#ffffffa0,transparent 46%),linear-gradient(180deg,#c9b8ff,#9a86e8 60%,#7a64d0);color:#fff;
+  box-shadow:inset 0 -5px 0 #0002,inset 0 2px 0 #ffffff80,0 0 0 3px #ffffff60,0 5px 0 3px #4a3a9a}
+.node:disabled .num{color:#fff;text-shadow:0 1px 0 #4a3a9a}
+.lockcard{background:linear-gradient(120deg,#ffffff2e,#ffffff12)!important;border:1.5px dashed #ffffff60!important}
+/* shop: bright tinted cards with a solid edge */
+.item{background:linear-gradient(120deg,color-mix(in srgb,var(--tc,#8a5bff) 45%,#ffffff20),color-mix(in srgb,var(--tc,#8a5bff) 18%,#ffffff10) 75%);border:1.5px solid #ffffff50;
+  box-shadow:inset 0 2px 0 #ffffff50,0 5px 0 color-mix(in srgb,var(--tc,#8a5bff) 40%,#1a0a3a),0 10px 18px #0003}
+/* play toolbar: four candy buttons, one colour each */
+.tool span{border:2px solid #ffffff90!important}
+#undoBtn span{background:linear-gradient(180deg,#7ad0ff,#2a8ae8 55%,#1a5ab8);box-shadow:0 5px 0 #0a3a7a,0 8px 14px #0005}
+#restartBtn span{background:linear-gradient(180deg,#7af0b0,#1fbf7a 55%,#0f8a52);box-shadow:0 5px 0 #0a5a34,0 8px 14px #0005}
+#skipBtn span{background:linear-gradient(180deg,#d0a8ff,#9a5af0 55%,#6a30c8);box-shadow:0 5px 0 #3a1a7a,0 8px 14px #0005}
+#undoBtn.idle span{filter:saturate(.35) brightness(.8)}
+.tool{color:#fff}
+/* the HUD pill and the coach line */
+#play .hud{background:linear-gradient(180deg,#ffffff30,#ffffff14);box-shadow:inset 0 1.5px 0 #ffffff60,inset 0 0 0 1px #ffffff38,0 6px 14px #0004}
+.coach{background:linear-gradient(180deg,#ffd04a,#ff9f1c)!important;color:#3a1a00!important;border-color:#fff6!important;text-shadow:none!important;box-shadow:0 3px 0 #a85a00,0 6px 12px #0004!important}
+.trt{min-height:44px;padding:8px 14px}

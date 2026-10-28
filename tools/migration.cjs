@@ -21,7 +21,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ck('XP level, theme and owned themes kept', st.plv === 7 && st.theme === 'ocean' && st.owned.length === 2);
   ck('welcome gift (3 hints) granted', st.hints === 7, `(hints ${st.hints})`);
   ck('removed-mode stats cleared', st.types.length === 0);
-  ck('quests regenerated without removed modes', st.quests.every(t => t == null || ['lights', 'tubes', 'threads', 'merge', 'blocks', 'pics'].includes(t)), JSON.stringify(st.quests));
+  ck('quests regenerated without removed modes', st.quests.every(t => t == null || ['arrows', 'tubes', 'threads', 'merge', 'blocks', 'pics'].includes(t)), JSON.stringify(st.quests));
   ck('welcome card shown', st.welcome);
   await p.evaluate(() => document.querySelector('#modal .mbtns .btn').click()); await sleep(900);
   await p.reload(); await sleep(1300);

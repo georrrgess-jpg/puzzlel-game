@@ -264,16 +264,16 @@ const Trans=(()=>{
     anims.forEach(a=>{try{a.cancel()}catch(_){}});anims=[];clearTimeout(safety);covering=false;
     iris.classList.remove('on');iris.style.cssText='';
     // the active screen keeps its in-* class: removing it would restart the screen's default entrance animation (a blink)
-    $$('.screen').forEach(s=>{s.classList.remove('leaving');if(!s.classList.contains('active'))s.classList.remove('in-fwd','in-back','in-iris','in-fade');s.style.clipPath='';s.style.zIndex=''});
+    $$('.screen').forEach(s=>{s.classList.remove('leaving');if(!s.classList.contains('active'))s.classList.remove('in-fwd','in-back','in-iris','in-fade','in-zoom');s.style.clipPath='';s.style.zIndex=''});
   }
-  const enter=(scr,cls)=>{scr.classList.remove('in-fwd','in-back','in-iris','in-fade');void scr.offsetWidth;scr.classList.add(cls)};
+  const enter=(scr,cls)=>{scr.classList.remove('in-fwd','in-back','in-iris','in-fade','in-zoom');void scr.offsetWidth;scr.classList.add(cls)};
   const arm=my=>{clearTimeout(safety);safety=setTimeout(()=>{if(my===tok)stop()},2400)};
   function go(id,o,apply){
     const from=$('.screen.active');
     if(covering){apply();return}                          // inside an iris: just swap underneath it
     const my=++tok;stop();
     if(!from||from.id===id){apply();return}
-    if(cheap()||id==='play'||from.id==='play'){apply();if(!REDUCED)enter($('#'+id),'in-fade');return}
+    if(cheap()||id==='play'||from.id==='play'){apply();if(!REDUCED)enter($('#'+id),id==='play'?'in-zoom':'in-fade');return}
     arm(my);
     const back=o.back!=null?o.back:DEPTH[id]<DEPTH[from.id];
     from.classList.add('leaving');apply();enter($('#'+id),back?'in-back':'in-fwd');

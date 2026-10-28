@@ -129,8 +129,8 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
 
   await test('B11 the board ignores taps right after a level starts', async p => {
     await prep(p);
-    const lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv);
-    await p.evaluate(() => { const t = performance.now(); const c = () => { const el = document.querySelector('#board .cell'); if (el) { el.click(); document.__tapped = performance.now() - t } else requestAnimationFrame(c) }; c() });
+    const lv = await typeLevel(p, 'arrows'); await p.evaluate(n => __game.startLevel(n), lv);
+    await p.evaluate(() => { const t = performance.now(); const c = () => { const el = document.querySelector('#board .art'); if (el) { el.click(); document.__tapped = performance.now() - t } else requestAnimationFrame(c) }; c() });
     await sleep(1500);
     ck('B11 an immediate tap did not count as a move', await p.evaluate(() => document.querySelector('#hudInfo .mv').textContent) === '0');
   });
@@ -170,8 +170,8 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('B18 focus moved into the popup', await p.evaluate(() => !!document.activeElement.closest('#modal')));
     await p.evaluate(() => closeModal()); await sleep(200);
     ck('B18 focus returned afterwards', await p.evaluate(() => document.activeElement.id) === 'profileBtn');
-    const lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(1500);
-    ck('B18 lights cells are labelled switches', await p.evaluate(() => { const c = document.querySelector('#board .cell'); return /row 1 column 1/.test(c.getAttribute('aria-label')) && c.hasAttribute('aria-pressed') }));
+    const lv = await typeLevel(p, 'arrows'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(1500);
+    ck('B18 arrow tiles are labelled buttons', await p.evaluate(() => { const c = document.querySelector('#board .art'); return /arrow/.test(c.getAttribute('aria-label')) && c.getAttribute('role') === 'button' }));
   });
 
   await test('P2 popups: backdrop tap, Escape and the Back button', async p => {
@@ -191,7 +191,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     await p.goBack().catch(() => {}); await sleep(500);
     ck('P2 Back closes Settings', await p.evaluate(() => typeof __game !== 'undefined' && !document.querySelector('#modal.on')));
     // a level: Back leaves it for the map, then Back goes home
-    const lv = await typeLevel(p, 'lights'); await p.evaluate(n => { __game.show('map'); __game.startLevel(n) }, lv); await sleep(1200);
+    const lv = await typeLevel(p, 'arrows'); await p.evaluate(n => { __game.show('map'); __game.startLevel(n) }, lv); await sleep(1200);
     await p.goBack().catch(() => {}); await sleep(1500);
     ck('P2 Back in a level leaves it', await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('.screen.active').id) !== 'play');
     for (let k = 0; k < 3 && await p.evaluate(() => typeof __game !== 'undefined' && document.querySelector('.screen.active').id) !== 'home'; k++) { await p.goBack().catch(() => {}); await sleep(900) }
@@ -262,7 +262,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('M10 settings: Sound open, the other three groups closed', await p.evaluate(() => [...document.querySelectorAll('#modal details.sgroup')].map(d => d.open).join()) === 'true,false,false,false');
     await p.evaluate(() => { closeModal(); __game.S.deco = [] ; renderHome() }); await sleep(300);
     ck('M1 an empty garden shows its hint text', await p.evaluate(() => /garden grows/i.test(document.querySelector('#garden').textContent)));
-    const lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(1500);
+    const lv = await typeLevel(p, 'arrows'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(1500);
     await p.evaluate(() => toast('hello')); await sleep(700);
     const tr = await p.evaluate(() => { const t = document.querySelector('#toast').getBoundingClientRect(), b = document.querySelector('#play .toolbar').getBoundingClientRect(); return { toast: [Math.round(t.top), Math.round(t.bottom)], toolbar: [Math.round(b.top), Math.round(b.bottom)], screen: document.querySelector('.screen.active').id, modal: !!document.querySelector('#modal.on') } });
     ck('M11 a toast in a level sits above the toolbar', tr.toast[1] <= tr.toolbar[0] + 2 && tr.toast[0] > 100, JSON.stringify(tr));
@@ -310,7 +310,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('B12 the win sweep reaches Block Garden cells', await p.evaluate(() => document.querySelectorAll('#board .bz.f.celebrate').length) > 0);
   });
 
-  await test('B merge and threads and lights animations', async p => {
+  await test('B merge and threads animations', async p => {
     await prep(p);
     await p.evaluate(() => { __game.S.gfx = 'high'; Q.apply() });
     let lv = await typeLevel(p, 'merge'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
@@ -326,10 +326,6 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
       cued = await p.evaluate(() => document.querySelectorAll('.st.cue').length) >= 1;
     }
     ck('B10 the start stars pulse after 6 s of nothing', cued);
-    lv = await typeLevel(p, 'lights'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
-    for (let k = 0; k < 40 && !(await p.evaluate(() => __game.cur.over)); k++) { await p.evaluate(() => { const q = __game.cur.puz; q.hint(); const h = document.querySelector('#board .hint'); if (h) h.click() }); await sleep(200) }
-    await sleep(600);
-    ck('B2 the finish sends a wave and a moon', await p.evaluate(() => document.querySelectorAll('.cell.light.wa em,.cell.light.wb em').length > 0 && [...document.querySelectorAll('.ftxt')].some(e => e.textContent.includes('🌙'))));
   });
 
   /* ---- Sand Tubes: the selected tube's sand stays one piece (the mound on top never moves on its own) ---- */
@@ -397,6 +393,28 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     for (let k = 0; k < 80 && !(await p.evaluate(() => __game.cur.over)); k++) await p.evaluate(() => __game.cur.puz._bot());
     await sleep(900);
     ck('P4 won with 3 stars', await p.evaluate(() => __game.cur.over && document.querySelectorAll('#hudStars svg.on').length === 3));
+  });
+
+  /* ---- Arrow Escape ---- */
+  await test('E1 a free tile escapes, a blocked one bumps and stays', async p => {
+    await prep(p);
+    const lv = await p.evaluate(() => { let n = 13; while (__game.typeFor(n) !== 'arrows') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    const st = () => p.evaluate(() => { const s = JSON.parse(__game.cur.puz.snap()); return { left: s.g.filter(d => d >= 0).length, moves: s.moves, dom: document.querySelectorAll('.art:not(.argo)').length } });
+    const s0 = await st();
+    const blocked = await p.evaluate(() => { const g = JSON.parse(__game.cur.puz.snap()).g; for (const e of document.querySelectorAll('.art')) { const i = +e.dataset.i; __game.cur.puz.hint(); const h = document.querySelector('.art.hint'); if (h && +h.dataset.i !== i) { e.click(); return i } } return -1 });
+    await sleep(500); const s1 = await st();
+    ck('E1 a blocked tile stays on the board and costs a move', blocked >= 0 && s1.left === s0.left && s1.moves === 1, JSON.stringify([s0, s1]));
+    await p.evaluate(() => { __game.cur.puz.hint(); document.querySelector('.art.hint').click() }); await sleep(700);
+    const s2 = await st();
+    ck('E1 a free tile leaves the board', s2.left === s0.left - 1 && s2.dom === s2.left, JSON.stringify(s2));
+    await p.evaluate(() => document.querySelector('#undoBtn').click()); await sleep(300);
+    ck('E1 Undo brings it back', (await st()).left === s0.left);
+  });
+  await test('E2 every tier can be cleared without a single bump', async p => {
+    await prep(p);
+    const r = await p.evaluate(() => { const out = []; const N = __game.TYPES.length; for (let t = 0; t < 10; t++) { let n = t * N + 1; while (__game.typeFor(n) !== 'arrows') n++; __game.startLevel(n); const q = __game.cur.puz; let k = 0; while (!__game.cur.over && k < 200) { if (!q._bot()) break; k++ } const s = JSON.parse(q.snap()); out.push({ t, left: s.g.filter(d => d >= 0).length, moves: s.moves, bumps: s.moves - k }) } return out });
+    ck('E2 the board empties at every tier', r.every(x => x.left === 0), JSON.stringify(r.map(x => x.left)));
+    ck('E2 the solver never bumps', r.every(x => x.bumps === 0));
   });
 
   /* ---- quality of life ---- */

@@ -6,7 +6,7 @@
 //   home         home screen (login claimed)
 //   map | shop   menu screens (shop with 1000 coins)
 //   spin | spinning | quests | trophies | settings | profile   modals
-//   howto:<type> how-to card for any mode id (lights|tubes|threads|merge|blocks)
+//   howto:<type> how-to card for any mode id (arrows|tubes|threads|merge|blocks|pics)
 //   level:<n>    level n: shots at start (+600ms), after 1 hinted move, and after 2 more
 //   win:<n>      solve level n with hints, shot win card at +1.2s and +3.5s
 //   daily        daily challenge board
