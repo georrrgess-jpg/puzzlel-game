@@ -2,6 +2,16 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.18 (school logos redrawn)
+
+`src/v17/9f_mascots.js` replaces `MASCOT_ART` (and clears `MASCOT_DETAIL`) for **rams, dragons, gators, coyotes, mustangs, rhinos**.
+
+- Construction is the same as the rest: 0–100 box, palette tones (P/Pd/Pl/S/Sd/Sl/W/O), the 3 px keyline from `mascotInner`, and the shared ring/gloss filter.
+  - The ram horns are thick strokes along one spiral centre line (outline 16, horn 11, dashed ridges, highlight), mirrored.
+  - Mouths use a fixed dark red (`#4a0a12`) with a pink tongue, so they read in every school palette.
+- Checked in 4 palettes and at the 30 px lite size, next to all 36 marks.
+- Not redrawn: the other 30 marks. Phoenix, cyclones, falcons and mantas are the next weakest.
+
 ## Version 18.17 (update 46: Crest Studio, Growth Chart, Overview cleanup)
 
 **Crest Studio** (`src/v17/9c_crest.js`, `9c_crest_ui.js`, `9c_crest.css`)

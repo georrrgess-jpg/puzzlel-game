@@ -4,7 +4,7 @@
    Undo, reset to the classic shield, surprise me. Saved on the school (s.crest). */
 const V1817S={ undo:[] };
 function v1817sMe(){ const C=App.C; return C&&C.schools[C.userSid]; }
-function v1817sSet(patch,noUndo){ const s=v1817sMe(); if(!s) return; const cur=v1817cDef(s); if(!noUndo){ V1817S.undo.push(s.crest?{...s.crest}:null); if(V1817S.undo.length>40) V1817S.undo.shift(); } s.crest={...cur,...patch}; try{ queueSave(); }catch(e){} }
+function v1817sSet(patch,noUndo){ const s=v1817sMe(); if(!s) return; V1817S.typing=false; clearTimeout(V1817S.t); /* a click ends a typing run: the next keystrokes are their own undo step */ const cur=v1817cDef(s); if(!noUndo){ V1817S.undo.push(s.crest?{...s.crest}:null); if(V1817S.undo.length>40) V1817S.undo.shift(); } s.crest={...cur,...patch}; try{ queueSave(); }catch(e){} }
 function v1817sAbbr(s){ const w=String(s.town||s.name||'').replace(/[^A-Za-z ]/g,'').trim().split(/\s+/); return (w.length>1&&w[0].length<4?w[0][0]+w[1].slice(0,2):w[0].slice(0,3)).toUpperCase(); }
 const V1817S_VAR=[['round','split'],['hex','bend'],['banner','pales'],['heater','chevron'],['diamond','bend']];
 function v1817sLive(C){ const s=v1817sMe(); const d=v1817cDef(s); const opp=Sx(C.rivals.heated)||Sx(C.league.find(x=>x!==C.userSid));
