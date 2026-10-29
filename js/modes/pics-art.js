@@ -273,6 +273,8 @@ const PIC_ART=(()=>{
   {n:'Sweet Cupcake',k:'still life',d:(H,p,R)=>{const m=H/80,s=S(H);
     return `<defs>${lin(p+'b',[[0,'#ffd6e6'],[1,'#ffb0cc']])}${lin(p+'c',[[0,'#ffe0b8'],[1,'#e8a868']],1,0)}${lin(p+'f',[[0,'#fff0f6'],[1,'#ff9ac4']])}${rad(p+'r',[[0,'#ff8a9a'],[.6,'#e8203a'],[1,'#9a0a1a']],.35,.35,.7)}</defs>
     ${box(`url(#${p}b)`,0,H)}${Array.from({length:30},(_,i)=>`<circle cx="${(i%6)*22+(Math.floor(i/6)%2)*11}" cy="${f(Math.floor(i/6)*H/4.5+6)}" r="${f(1.8*m)}" fill="#fff" opacity=".55"/>`).join('')}
+    <path d="M-2 ${f(4*m)}Q60 ${f(18*m)} 122 ${f(4*m)}" fill="none" stroke="#fff" stroke-width="${f(.8*m)}"/>${[0,1,2,3,4,5,6,7].map(i=>{const x=6+i*15,y=4*m+Math.sin((i+.5)/8*Math.PI)*12*m;return`<path d="M${f(x-4)} ${f(y-1)}L${f(x+4)} ${f(y-1)}L${x} ${f(y+7*Math.min(m,1.4))}Z" fill="${['#ff4f8b','#ffb020','#2bc4ff','#8c5bff','#3ad67a','#ff7a3d','#ff5ad8','#18c7b4'][i]}"/>`}).join('')}
+    ${[[14,.45,'#ff4f8b'],[104,.4,'#8c5bff'],[18,.78,'#2bc4ff'],[100,.8,'#ffb020']].map(([x,y,c])=>`<path transform="translate(${x} ${f(H*y)}) scale(${f(Math.min(m,1.4)*.9)})" d="M0 3C-6 -1 -4 -6 0 -3C4 -6 6 -1 0 3Z" fill="${c}"/>`).join('')}
     <ellipse cx="60" cy="${f(H*.92)}" rx="${f(28*Math.min(s,1.4))}" ry="${f(3*m)}" fill="#d87a9a" opacity=".5"/>
     <g transform="translate(60 ${f(H*.9)}) scale(${f(s*1.1)})">
       <path d="M-14 -16L-10 0H10L14 -16Z" fill="url(#${p}c)"/>${[-10,-5,0,5,10].map(x=>`<path d="M${x*1.25} -16L${x} 0" stroke="#c8884a" stroke-width=".8"/>`).join('')}
@@ -283,6 +285,9 @@ const PIC_ART=(()=>{
   {n:'Tea Time',k:'still life',d:(H,p,R)=>{const m=H/80,s=S(H);
     return `<defs>${lin(p+'w',[[0,'#d8f0e6'],[1,'#a8d8c8']])}${lin(p+'t',[[0,'#ffffff'],[.6,'#e8f0ff'],[1,'#b8c8e8']],1,0)}${lin(p+'tb',[[0,'#c8844a'],[1,'#8a4a22']])}</defs>
     ${box(`url(#${p}w)`,0,H*.7)}${Array.from({length:8},(_,i)=>`<path d="M${i*16} 0V${f(H*.7)}" stroke="#fff" stroke-width="4" opacity=".25"/>`).join('')}
+    <g transform="translate(22 ${f(H*.24)}) scale(${f(Math.min(m,1.4))})"><circle r="9" fill="#fff" stroke="#c8844a" stroke-width="2"/>${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<rect x="-.4" y="-8" width=".8" height="${i%3?1.2:2.2}" fill="#7a4a22" transform="rotate(${i*30})"/>`).join('')}<path d="M0 0V-5.6M0 0L4 2" stroke="#3a2010" stroke-width="1" stroke-linecap="round"/><circle r="1" fill="#e84a5a"/></g>
+    <g transform="translate(94 ${f(H*.2)}) scale(${f(Math.min(m,1.4))})"><rect x="-12" y="-9" width="24" height="18" rx="1.5" fill="#c8844a"/><rect x="-10" y="-7" width="20" height="14" fill="#9ad8ff"/><path d="M-10 7L-3 -1L2 4L5 1L10 7Z" fill="#3fae5a"/><circle cx="5" cy="-3" r="2" fill="#fff3a0"/></g>
+    <g transform="translate(97 ${f(H*.48)}) scale(${f(Math.min(m,1.3))})"><rect x="-14" y="0" width="28" height="2" rx="1" fill="#8a5a32"/><path d="M-9 0h6l-1 -5h-4z" fill="#e8704a"/><path d="M-6 -5q-4 -6 -1 -9M-6 -5q3 -6 6 -7M-6 -5q-1 -5 -5 -6" fill="none" stroke="#3fae5a" stroke-width="1.4" stroke-linecap="round"/><rect x="3" y="-7" width="3" height="7" fill="#4a7dff"/><rect x="6.4" y="-6" width="3" height="6" fill="#ff4f8b"/><rect x="9.8" y="-8" width="2.6" height="8" fill="#ffb020"/></g>
     ${box(`url(#${p}tb)`,H*.7,H)}<rect x="0" y="${f(H*.7)}" width="120" height="${f(1.6*m)}" fill="#e8b07a"/>
     <g transform="translate(52 ${f(H*.74)}) scale(${f(s)})">
       <ellipse cx="0" cy="0" rx="20" ry="3" fill="#000" opacity=".15"/><path d="M14 -16C26 -20 28 -12 16 -6" fill="none" stroke="#b8c8e8" stroke-width="2.6"/><path d="M-14 -12L-26 -22L-24 -18L-15 -6Z" fill="url(#${p}t)"/>
@@ -294,7 +299,7 @@ const PIC_ART=(()=>{
     <g transform="translate(18 ${f(H*.78)}) scale(${f(m)})"><circle cx="0" cy="-3" r="4" fill="#e8a858"/><circle cx="-1.2" cy="-3.6" r=".6" fill="#7a4a22"/><circle cx="1.4" cy="-2.4" r=".6" fill="#7a4a22"/></g>`}},
 
   /* ---------- abstract art ---------- */
-  {n:'Rose Window',k:'abstract',d:(H,p,R)=>{const m=H/80,cx=60,cy=H/2,r=Math.min(56,H*.46);
+  {n:'Rose Window',k:'abstract',no4:true,d:(H,p,R)=>{const m=H/80,cx=60,cy=H/2,r=Math.min(56,H*.46);
     const cols=['#e8203a','#1a5ae0','#ffc81a','#1aa85a','#9a2ae0','#ff7a1a'];
     let seg='';const n=12;
     for(let i=0;i<n;i++){const a0=i/n*Math.PI*2,a1=(i+1)/n*Math.PI*2;
@@ -312,7 +317,7 @@ const PIC_ART=(()=>{
     ${[0,1,2,3,4].map(i=>`<rect x="${8+i*6}" y="${f(H*.7)}" width="3" height="${f(H*.24)}" fill="#f4ead6"/>`).join('')}
     <circle cx="94" cy="${f(H*.8)}" r="${f(9*m*.8)}" fill="none" stroke="#e8402a" stroke-width="${f(3*m*.8)}"/><path d="M50 ${f(H*.94)}A14 14 0 0 1 78 ${f(H*.94)}Z" fill="#ffc81a"/>
     <path d="M0 ${f(H*.08)}H54" stroke="#1a1a2a" stroke-width="${f(2*m)}"/><circle cx="108" cy="${f(H*.1)}" r="${f(4*m)}" fill="#1a3a6a"/>`}},
-  {n:'Mosaic Fish',k:'abstract',d:(H,p,R)=>{const m=H/80,s=Math.min(S(H),1.15);
+  {n:'Mosaic Fish',k:'abstract',no4:true,d:(H,p,R)=>{const m=H/80,s=Math.min(S(H),1.15);
     const cell=4;let tiles='';
     for(let y=0;y<H;y+=cell)for(let x=0;x<120;x+=cell){const dx=(x-60)/(46*s),dy=(y-H/2)/(20*s);const inF=dx*dx+dy*dy<1,tail=x<60-38*s&&x>60-56*s&&Math.abs(y-H/2)<(60-38*s-x)*-.9;
       const c=inF?(['#ff7a1a','#ffa23a','#ff5a1a'][Math.floor(R()*3)]):tail?'#ff8a2a':(['#1a8ad0','#2a9ae0','#1a7ac0','#3aaae6'][Math.floor(R()*4)]);
@@ -320,7 +325,7 @@ const PIC_ART=(()=>{
     return `${box('#0a3a6a',0,H)}${tiles}<circle cx="${f(60+30*s)}" cy="${f(H/2-4*s)}" r="${f(3.4*s)}" fill="#fff"/><circle cx="${f(60+30.6*s)}" cy="${f(H/2-4*s)}" r="${f(1.6*s)}" fill="#111"/>
     ${[0,1,2].map(i=>`<path d="M${f(60-8*s+i*10*s)} ${f(H/2-17*s)}q${f(3*s)} ${f(17*s)} 0 ${f(34*s)}" fill="none" stroke="#fff6e0" stroke-width="${f(1.6*s)}" opacity=".85"/>`).join('')}
     ${[0,1,2].map(i=>`<circle cx="${f(60+50*s+i*2)}" cy="${f(H/2-10*s-i*7*s)}" r="${f((1.4+i*.6)*s)}" fill="none" stroke="#e0f6ff" stroke-width="${f(.6*s)}"/>`).join('')}`}},
-  {n:'Paper Mountains',k:'abstract',d:(H,p,R)=>{const m=H/80;
+  {n:'Paper Mountains',k:'abstract',no4:true,d:(H,p,R)=>{const m=H/80;
     const cols=['#ffd6a0','#ffb08a','#f0807a','#c85a7a','#8a3a7a','#4a2a6a'];
     return `${box('#fff2dc',0,H)}<circle cx="86" cy="${f(H*.26)}" r="${f(12*m)}" fill="#ff7a5a"/>
     ${cols.map((c,i)=>{const b=H*(.36+i*.11),a=(6+i)*m;let d=`M0 ${f(H)}V${f(b)}`;for(let x=0;x<=120;x+=10)d+=`L${x} ${f(b-Math.abs(Math.sin(x/17+i*1.3))*a)}`;return`<path d="${d}V${H}Z" fill="${c}"/><path d="${d.replace(`M0 ${f(H)}V`,'M0 ')}" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="${f(1.2*m)}" transform="translate(0 ${f(1.2*m)})"/>`}).join('')}

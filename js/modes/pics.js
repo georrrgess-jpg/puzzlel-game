@@ -26,15 +26,19 @@ registerMode('pics',{name:'Picture Pop',icon:'🖼️',col:'#2fae6a',tip:'Swap t
       'Swap the right half into place','The picture is whole: pop!')}
 });
 
+/* frame colours, one per picture in a level (bright and far apart) */
+const PP_FRAME=['#ff4f8b','#ffb020','#2bc4ff','#8c5bff','#3ad67a','#ff7a3d','#ff5ad8','#18c7b4','#ffe14a','#4a7dff','#c0ff4a','#ff3d4d','#b47aff'];
 /* grid size and picture mix by difficulty tier */
 const PP_T=[{C:4,R:3,two:8,four:0},{C:4,R:4,two:11,four:0},{C:4,R:4,two:9,four:1},{C:5,R:4,two:9,four:2},{C:5,R:5,two:10,four:3},{C:5,R:5,two:9,four:4},{C:5,R:5,two:8,four:5}];
 MAKERS.pics=function({R,tier,board,api}){
   const T=PP_T[Math.min(tier,PP_T.length-1)],C=T.C,RW=T.R,G=C*RW;
   /* ---- pictures and pieces ---- */
-  const art=shuffle([...PIC_ART.keys()],R);
+  /* scenes that look alike in every corner (a round window, a mosaic, layered hills) are only used as two halves */
+  const art=shuffle([...PIC_ART.keys()],R),art4=art.filter(i=>!PIC_ART[i].no4),art2=art.filter(i=>!art4.slice(0,T.four).includes(i));
   const kinds=shuffle([...Array(T.two).fill(2),...Array(T.four).fill(4)],R);
   if(kinds[0]===4&&T.two){const i=kinds.indexOf(2);[kinds[0],kinds[i]]=[kinds[i],kinds[0]]}   // the first picture dealt is an easy one
-  const pics=kinds.map((k,j)=>({k,a:art[j%art.length],ids:[]})),pcs=[];
+  let n2=0,n4=0;
+  const pics=kinds.map((k,j)=>({k,a:k===4?art4[n4++%art4.length]:art2[n2++%art2.length],fc:PP_FRAME[j%PP_FRAME.length],ids:[]})),pcs=[];
   pics.forEach((P,j)=>{for(let q=0;q<P.k;q++){P.ids.push(pcs.length);pcs.push({pic:j,q})}});
   const NP=pics.length;
   const deck=[];pics.forEach(P=>deck.push(...shuffle(P.ids.slice(),R)));
@@ -107,12 +111,13 @@ MAKERS.pics=function({R,tier,board,api}){
 
   /* ---- DOM ---- */
   const wrap=el('div','ppw');wrap.style.setProperty('--C',C);wrap.style.setProperty('--R',RW);
-  const top=el('div','pptop',`<div class="ppgal"><i>🖼️</i><b class="ppdn">0</b><small>/${NP}</small></div><div class="ppdeck"><span class="ppcb"></span><span class="ppcb"></span><span class="ppcb"></span><b class="ppdk">0</b></div>`);
+  const top=el('div','pptop',`<div class="ppgal"><i>🖼️</i><b class="ppdn">0</b><small>/${NP}</small></div><div class="pppeek"><span class="ppph">👆 Tap a tile to peek at its picture</span></div><div class="ppdeck"><span class="ppcb"></span><span class="ppcb"></span><span class="ppcb"></span><b class="ppdk">0</b></div>`);
   const felt=el('div','ppg'),inner=el('div','ppb');felt.appendChild(inner);wrap.append(top,felt);board.appendChild(wrap);
   const slots=[...Array(G)].map((_,i)=>{const s=el('div','pps');s.style.setProperty('--r',Math.floor(i/C));s.style.setProperty('--c',i%C);s.dataset.i=i;inner.appendChild(s);return s});
   const els=new Map();   // piece id -> tile element (pieces on the board)
   function tileEl(a){
     const P=pics[pcs[a].pic],e=el('div','pt',ppPiece(ppArt(P.a,H4(pcs[a].pic)),H4(pcs[a].pic),pcs[a].q));
+    e.style.setProperty('--pc',P.fc);   // every picture has its own frame colour, so its pieces are easy to group
     e.dataset.a=a;inner.appendChild(e);els.set(a,e);return e;
   }
   const place=(e,i)=>{e.style.setProperty('--r',Math.floor(i/C));e.style.setProperty('--c',i%C);e.dataset.i=i};
@@ -208,7 +213,14 @@ MAKERS.pics=function({R,tier,board,api}){
   /* ---- selecting, dragging ---- */
   function setSel(i){
     if(sel>=0&&g[sel]>=0){const e=els.get(g[sel]);if(e)e.classList.remove('sel')}
-    sel=i;if(i>=0&&g[i]>=0)els.get(g[i]).classList.add('sel');
+    sel=i;if(i>=0&&g[i]>=0){els.get(g[i]).classList.add('sel');peek(g[i])}
+  }
+  /* the peek: the whole picture a tile belongs to, with that tile's place in it outlined */
+  function peek(a){
+    const pk=$('.pppeek',top);if(a<0||!pk)return;
+    const j=pcs[a].pic,P=pics[j],H=H4(j),q=pcs[a].q;
+    pk.innerHTML=`<svg class="${P.k===4?'p4':'p2'}" viewBox="0 0 120 ${H}" preserveAspectRatio="none"><use href="#${ppArt(P.a,H)}"/><rect x="${q%2?61:1}" y="${q>1?81:1}" width="58" height="78" rx="5" fill="none" stroke="#fff" stroke-width="4"/><rect x="${q%2?61:1}" y="${q>1?81:1}" width="58" height="78" rx="5" fill="none" stroke="${P.fc}" stroke-width="2"/></svg>`;
+    pk.style.setProperty('--pc',P.fc);again(pk,'pk');
   }
   let drag=null;
   const cellAt=(x,y)=>{const b=inner.getBoundingClientRect(),s=slots[0].getBoundingClientRect(),gp=slots[1].getBoundingClientRect().left-s.right;
@@ -222,7 +234,7 @@ MAKERS.pics=function({R,tier,board,api}){
     },
     move(x,y,e){
       if(!drag||!drag.el)return;
-      if(!drag.on&&Math.hypot(x-drag.x,y-drag.y)>7){drag.on=true;drag.el.classList.add('drag');setSel(-1);sfx.lift()}
+      if(!drag.on&&Math.hypot(x-drag.x,y-drag.y)>7){drag.on=true;drag.el.classList.add('drag');setSel(-1);peek(+drag.el.dataset.a);sfx.lift()}
       if(!drag.on)return;
       const ly=y-LIFT(e)*.5;drag.el.style.translate=`${x-drag.x}px ${ly-drag.y}px`;
       const c=cellAt(x,ly);target(c>=0&&c!==drag.i?(g[c]>=0?els.get(g[c]):slots[c]):null);

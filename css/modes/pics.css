@@ -1,7 +1,7 @@
 /* Picture Pop: a felt board of picture tiles (3:4), with the gallery counter and the deck above it */
 .ppw{--gap:5px;display:flex;flex-direction:column;align-items:center;gap:8px;
   --tw:min(calc((min(var(--bw0,92vw),470px) - 30px - (var(--C) - 1)*var(--gap)) / var(--C)),
-    calc(((var(--bh0,60vh) - 78px) / var(--R) - var(--gap))*.75),84px);
+    calc(((var(--bh0,60vh) - 104px) / var(--R) - var(--gap))*.75),84px);
   --th:calc(var(--tw)*4/3)}
 .pptop{display:flex;justify-content:space-between;align-items:center;width:calc(var(--C)*var(--tw) + (var(--C) - 1)*var(--gap) + 20px)}
 .ppgal{display:flex;align-items:baseline;gap:4px;padding:4px 12px 4px 8px;border-radius:99px;background:#0b3a22c0;box-shadow:inset 0 0 0 1.5px #ffffff30,0 3px 8px #0005;font-weight:700}
@@ -26,7 +26,7 @@
 .pps.hint{animation:hint .6s ease-in-out infinite alternate}
 
 /* a tile: the picture piece in a white frame; corners that meet a matching piece lose their rounding and the gap closes */
-.pt{--rd:9px;border-radius:var(--rd);background:#fff;padding:2px;box-shadow:0 2px 4px #0006;cursor:grab;
+.pt{--rd:9px;border-radius:var(--rd);background:var(--pc,#fff);padding:3px;box-shadow:0 2px 4px #0006;cursor:grab;
   transform:translate(calc(var(--jx,0)*var(--gap)/2),calc(var(--jy,0)*var(--gap)/2));transition:transform .25s cubic-bezier(.3,1.3,.5,1),box-shadow .2s,border-radius .2s;
   -webkit-tap-highlight-color:transparent}
 .pt .pim{display:block;width:100%;height:100%;border-radius:calc(var(--rd) - 2px);pointer-events:none}
@@ -63,3 +63,12 @@
 .ppdw .ppdt{border-radius:0}.ppdw .ppdt:first-child{border-radius:6px 0 0 6px}.ppdw .ppdt:last-child{border-radius:0 6px 6px 0}
 @keyframes ppdw{0%,52%{scale:1}62%{scale:1.12}75%,100%{scale:1}}
 .ppd .fing{left:78%;top:58%}
+
+/* the peek: the selected tile's whole picture, its place outlined */
+.pptop{min-height:56px}
+.pppeek{flex:1;display:grid;place-items:center;height:54px;margin:0 8px}
+.pppeek svg{height:52px;border-radius:7px;box-shadow:0 0 0 2.5px var(--pc,#fff),0 6px 14px #0006;background:#000}
+.pppeek svg.p2{width:78px}.pppeek svg.p4{width:39px}
+.ppph{font-size:11.5px;font-weight:600;line-height:1.25;text-align:center;color:#ffffffc0;max-width:150px}
+.pppeek.pka svg,.pppeek.pkb svg{animation:pkin .3s cubic-bezier(.3,1.5,.5,1)}.pppeek.pkb svg{animation-name:pkin2}
+@keyframes pkin{from{scale:.6;opacity:.3}}@keyframes pkin2{from{scale:.6;opacity:.3}}

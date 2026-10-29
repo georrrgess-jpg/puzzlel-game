@@ -39,6 +39,15 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v4.4
+
+- **Picture Pop is easier to read**: every picture has its own frame colour on all its tiles; tapping (or dragging) a tile
+  shows a peek of its whole picture with that tile's place outlined; scenes that look alike in every corner (Rose Window,
+  Mosaic Fish, Paper Mountains) are only used as two halves; Tea Time and Sweet Cupcake got more detail (a clock, a
+  painting, a shelf; bunting and hearts) so each corner is different.
+- **Map**: a level you left part-way shows a small green ▶ badge.
+- Updates now apply on their own (the service worker fetches fresh files when online and reloads once on an update).
+
 ## What's new in v4.3
 
 - **Arrow Escape** replaces Lights Out (same place in the level rotation, so every other level keeps its mode). One tap per

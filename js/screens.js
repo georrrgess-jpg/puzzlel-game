@@ -53,7 +53,7 @@ const starSig=()=>{let h=0;for(const k in S.stars)h=(h*31+(+k)*4+S.stars[k])|0;r
 let pendingUnlock=null;
 function renderMap(more){
   const pu=pendingUnlock&&pendingUnlock.n<S.unlocked?pendingUnlock:null;pendingUnlock=null;
-  const lim=pu?pu.n:S.unlocked,g=$('#mapgrid'),wrap=$('#mapwrap'),sig=lim+'|'+mapCount+'|'+starSig();
+  const lim=pu?pu.n:S.unlocked,g=$('#mapgrid'),wrap=$('#mapwrap'),sig=lim+'|'+mapCount+'|'+starSig()+'|'+(S.resume?S.resume.n:0);
   /* nothing changed since the last visit: keep the DOM (the map is the heaviest screen) and the scroll position */
   if(!pu&&!more&&g.children.length&&mapSig===sig){requestAnimationFrame(()=>{wrap.scrollTop=mapTop;watchCur()});return}
   mapSig=pu?'':sig;
@@ -93,7 +93,7 @@ function mapNode(n,lim=S.unlocked,bare=false){
   const st=bare?0:S.stars[n]||0,locked=n>lim,ty=typeFor(n),cur=n===lim;
   const b=el('button','node'+(cur?' cur':'')+(isBonus(n)?' bonus':'')+(st===3?' perfect':''));
   b.style.setProperty('--tc',INFO[ty].col);b.dataset.n=n;b.disabled=locked;b.style.animationDelay=((n-1)%12)*30+'ms';
-  b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${cur&&((n-1)%12)<4?'<span class="pin">▼</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
+  b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${cur&&((n-1)%12)<4?'<span class="pin">▼</span>':''}${S.resume&&S.resume.n===n?'<span class="resm" title="In progress">▶</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
   b.onclick=()=>{sfx.click();playLevel(n,{},b)};
   return b;
 }
@@ -151,7 +151,7 @@ function playUnlock(pu){
       wa(fresh,[{transform:'scale(.3)',opacity:.4},{transform:'scale(1.22)',opacity:1,offset:.55},{transform:'scale(.94)',offset:.8},{transform:'none'}],{duration:560,easing:'cubic-bezier(.3,1.4,.5,1)'});
       setTimeout(()=>{fresh.style.animation='';prev.style.animation=''},600);
       if(!same){finish();const f=$(`.node[data-n="${n+1}"]`);if(f)f.scrollIntoView({block:'center',behavior:'smooth'})}
-      else{over=true;map.removeEventListener('pointerdown',finish,true);timers.forEach(clearTimeout);mapSig=S.unlocked+'|'+mapCount+'|'+starSig();watchCur()}
+      else{over=true;map.removeEventListener('pointerdown',finish,true);timers.forEach(clearTimeout);mapSig=S.unlocked+'|'+mapCount+'|'+starSig()+'|'+(S.resume?S.resume.n:0);watchCur()}
     });
   }else if(lockCard){
     at(t,()=>wa(lockCard,[{transform:'rotate(0)'},{transform:'rotate(-2deg) scale(1.02)'},{transform:'rotate(2deg) scale(1.02)'},{transform:'rotate(-1.5deg)'},{transform:'rotate(0)'}],{duration:420,easing:'ease-in-out'}));
