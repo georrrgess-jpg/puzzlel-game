@@ -426,6 +426,17 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('E2 the solver never bumps', r.every(x => x.bumps === 0));
   });
 
+  await test('R1 every mode puts a full board on screen, on a phone and on a desktop', async p => {
+    await prep(p);
+    for (const [w, h] of [[390, 844], [1280, 800]]) {
+      await p.setViewportSize({ width: w, height: h }); await sleep(200);
+      const bad = await p.evaluate(() => { const out = []; const N = __game.TYPES.length;
+        for (const tier of [0, 3, 9]) for (let k = 1; k <= N; k++) { const n = tier * N + k; __game.startLevel(n); const b = document.querySelector('#board'), r = b.firstElementChild && b.firstElementChild.getBoundingClientRect();
+          if (!r || r.width < 120 || r.height < 120 || b.querySelectorAll('*').length < 12) out.push(__game.cur.type + '@' + n) } return out });
+      ck(`R1 boards render at ${w}x${h}`, bad.length === 0, JSON.stringify(bad));
+    }
+  });
+
   /* ---- quality of life ---- */
   await test('Q1 an unfinished level picks up where it was left, in every mode', async p => {
     await prep(p);

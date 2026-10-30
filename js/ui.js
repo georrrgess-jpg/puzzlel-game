@@ -192,7 +192,7 @@ function onWin(stars){
       ${me.bonus?'<div class="extra gold">👑 Bonus level: double coins!</div>':''}
       ${daily?`<div class="extra gold">📅 Daily streak: ${dstreak} day${dstreak>1?'s':''}! Come back tomorrow</div>`:''}
       ${streakBonus?`<div class="extra">🔥 3-star streak ×${S.streak}: +${streakBonus}</div>`:''}
-      ${stars>prev&&prev>0?`<div class="extra">🏅 New best!</div>`:''}
+      ${stars>prev&&prev>0?`<div class="extra newbest">🏅 New best!</div>`:prev>0&&!daily?`<div class="extra">Your best stays ${'★'.repeat(prev)}${'☆'.repeat(3-prev)}</div>`:''}
       ${chest?`<div class="extra gold chestline"><span class="mchest">${chestSvg()}</span> Star chest opened: +${chest} coins!</div>`:''}
       ${stars===3?'':near>0?`<p class="nearmiss">So close! Just ${near} move${near>1?'s':''} from ${stars===2?'★★★':'★★'}. Replay?</p>`:'<p>Replay to chase 3 stars!</p>'}`,
       daily?[{label:'Home',cls:'sec',fn:b=>playExit('home',b)},{label:'Keep playing ▶',cls:'big',fn:b=>playLevel(S.unlocked,{},b)}]

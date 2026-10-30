@@ -6,6 +6,7 @@
 .mgb{--ms:min(calc(var(--bw0,92vw) - 8px),calc(var(--bh0,60vh) - 64px),440px)}
 .bgw{--bw:min(calc(var(--bw0,92vw) - 8px),calc((var(--bh0,60vh) - 58px) / 1.3),430px)}
 .tubes{--seg:clamp(20px,min(8vw,calc((var(--bh0,500px) - 76px) / 8.7)),38px)}
+.tubes.row1{--seg:clamp(28px,min(11vw,calc((var(--bh0,500px) - 52px) / 4.7)),48px)}
 
 @media (max-width:380px){
   .hud{gap:8px;padding-right:10px}
@@ -54,4 +55,13 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none;-webkit-text-size-
   #play .topbar{gap:6px}
   #play .chip{min-width:0;padding:5px 10px 5px 5px;gap:5px;font-size:16px}
   #play .chip .coin{width:22px;height:22px}
+}
+
+/* big screens (desktop, tablets): the phone-sized caps would leave small boards in a lot of empty space */
+@media (min-width:700px) and (min-height:700px){
+  .tubes{--seg:clamp(20px,min(8vw,calc((var(--bh0,500px) - 76px) / 8.7)),52px)}
+  .tubes.row1{--seg:clamp(28px,min(11vw,calc((var(--bh0,500px) - 52px) / 4.7)),62px)}
+  .tubes{max-width:min(94vw,680px)}
+  .arw{--cs:min(calc((min(var(--bw0,92vw),600px) - 34px - (var(--W) - 1)*var(--gap)) / var(--W)),calc((var(--bh0,60vh) - 34px - (var(--H) - 1)*var(--gap)) / var(--H)),80px)}
+  .ppw{--tw:min(calc((min(var(--bw0,92vw),600px) - 30px - (var(--C) - 1)*var(--gap)) / var(--C)),calc(((var(--bh0,60vh) - 104px) / var(--R) - var(--gap))*.75),104px)}
 }

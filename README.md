@@ -39,6 +39,16 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v4.7 (polish and bug fixes)
+
+- Audit: a 60-level bot session (memory, DOM and save size stay flat), random-input fuzzing of every mode (no errors, no
+  stuck states), puzzle generation at levels up to 20,000, a duplicate-puzzle scan, and a save/reload round trip.
+- Sand Tubes: a smooth first tube selection (no layer is built or repainted on the tap).
+- Picture Pop: the solver scores each swap from the cells it touches, so hints and level setup do less work.
+- Bigger boards on desktops and tablets (Sand Tubes, Arrow Escape, Picture Pop) and hover feedback for mouse users.
+- The win card says "Your best stays ★★☆" on a replay that does not beat it; "New best!" gets its own little pop.
+- New regression check: every mode puts a full board on screen on a phone and on a desktop.
+
 ## What's new in v4.5
 
 - **Arrow Escape**: pressing a tile previews its path; the lane lights green to the edge, or red up to the tile in the

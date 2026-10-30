@@ -74,11 +74,22 @@ MAKERS.pics=function({R,tier,board,api}){
   /* the solver: finish a picture if one swap can; else keep building the picture it is focused on; else the swap that adds
      the most correct neighbours; else focus on the picture closest to done. Every branch makes progress, so it ends. */
   function choose(g,dp,F){
-    let best=null,bs=-1e9;const base=adj(g);
+    /* each swap is scored from the few cells it touches (the correct-neighbour links around a and b, and whether the one or
+       two pictures involved are now whole) instead of re-simulating the board: the same choice, a fraction of the work */
+    let best=null,bs=-1e9;const base=adj(g),h=g.slice();
+    const rel=(x,y,down)=>{const A=h[x],B=h[y];if(A<0||B<0)return 0;const P=pcs[A],Q=pcs[B];if(P.pic!==Q.pic)return 0;
+      return down?(pics[P.pic].k===4&&P.q<2&&Q.q===P.q+2?1:0):(P.q%2===0&&Q.q===P.q+1?1:0)};
+    const links=(a,b)=>{let n=0;const seen=new Set();for(const c of[a,b]){
+      for(const[x,y,d]of[[c,c+1,0],[c-1,c,0],[c,c+C,1],[c-C,c,1]]){if(x<0||y>=G||(!d&&(x%C===C-1)))continue;const k=x*64+y;if(seen.has(k))continue;seen.add(k);n+=rel(x,y,d)}}return n};
+    const whole=j=>{const P=pics[j];let c0=-1;for(let i=0;i<G;i++)if(h[i]===P.ids[0]){c0=i;break}
+      if(c0<0||!fits(c0,P.k))return false;for(let q=1;q<P.k;q++)if(h[c0+off(q)]!==P.ids[q])return false;return true};
     for(let a=0;a<G;a++)for(let b=a+1;b<G;b++){
       if(g[a]<0&&g[b]<0)continue;
-      const h=g.slice();[h[a],h[b]]=[h[b],h[a]];const r=resolve(h,dp),n=r.steps.reduce((s,x)=>s+x.done.length,0);
-      const sc=n*1000+adj(h);if(sc>bs){bs=sc;best=[a,b]}
+      const before=links(a,b);[h[a],h[b]]=[h[b],h[a]];
+      const after=links(a,b);let n=0;const ja=h[a]>=0?pcs[h[a]].pic:-1,jb=h[b]>=0?pcs[h[b]].pic:-1;
+      if(ja>=0&&whole(ja))n++;if(jb>=0&&jb!==ja&&whole(jb))n++;
+      [h[a],h[b]]=[h[b],h[a]];
+      const sc=n*1000+base+after-before;if(sc>bs){bs=sc;best=[a,b]}
     }
     if(bs>=1000)return best;
     const pos=new Int16Array(pcs.length).fill(-1);g.forEach((a,i)=>{if(a>=0)pos[a]=i});

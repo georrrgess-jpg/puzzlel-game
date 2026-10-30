@@ -613,3 +613,15 @@ html.q-low .ach.got .am::after{display:none}
 .trt:active,.chip:active{transform:scale(.94)}
 .item:active{transform:scale(.985)}
 .node:not(:disabled):active{transform:scale(.92)}
+
+/* ================= v4.7 polish ================= */
+/* a new best on a replay gets a little celebration of its own */
+.extra.newbest{color:#3a1a00;background:linear-gradient(180deg,#fff3a0,#ffc83a);box-shadow:0 3px 0 #a86a00,0 0 18px #ffd16688;animation:nbest .6s cubic-bezier(.3,1.7,.5,1) 1.4s backwards}
+@keyframes nbest{from{scale:.3;opacity:0}}
+/* mouse users see what they are about to click (touch screens never get a stuck hover) */
+@media (hover:hover) and (pointer:fine){
+  .tube:not(.sel):not(.done):hover{translate:0 -5px}
+  .tube{transition:transform .3s cubic-bezier(.3,1.6,.5,1),translate .18s ease-out,box-shadow .3s,border-color .3s,opacity .3s}
+  .art:hover,.ppb .pt:hover,.mg.full:hover,.bgs:not(.used):hover,.node:not(:disabled):hover,.mtile:hover,.item:hover,.tool:hover span,.btn:hover,.iconbtn:hover{filter:brightness(1.08)}
+  .art:hover{translate:0 -2px}
+}
