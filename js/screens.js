@@ -15,11 +15,12 @@ function renderHome(){
   const n=S.unlocked,ty=typeFor(n),ni=$('#nextIcon');
   ni.textContent=INFO[ty].icon;ni.style.setProperty('--tc',INFO[ty].col);ni.parentElement.style.setProperty('--tcn',INFO[ty].col);
   const wn=Math.floor((n-1)/12);$('#heroWorld').textContent=`WORLD ${wn+1}`;$('#heroName').textContent=worldName(wn);
-  $('.nextcard').style.setProperty('--wc',WCOL[wn%WCOL.length]);
+  $('#home .hero').style.setProperty('--wc',WCOL[wn%WCOL.length]);
   $('#nextName').textContent=`${isBonus(n)?'👑 ':''}Level ${n} · ${INFO[ty].name}`;
   const res=S.resume&&S.resume.n===n;$('#playBtn').classList.toggle('resume',!!res);
-  $('#playLvl').textContent=res?`Continue level ${n}`:'Level '+n+(isBonus(n)?' · 2× BONUS':'');
-  const sp=$('#streakPill');sp.textContent='🔥 '+S.streak;sp.classList.toggle('hot',S.streak>=2);
+  /* the card already names the level, so PLAY only adds a line when there is something new to say */
+  const pl=res?`Continue level ${n}`:isBonus(n)?'2× coins bonus level':'';$('#playLvl').textContent=pl;$('#playLvl').hidden=!pl;
+  const sp=$('#streakPill');sp.innerHTML=`🔥 ${S.streak}<small>streak</small>`;sp.hidden=!S.streak;sp.classList.toggle('hot',S.streak>=2);
   $('#plv').textContent=S.plv;$('#prank').textContent=rankOf(S.plv);$('#pxp').textContent=`${S.xp} / ${xpNeed(S.plv)} XP`;$('#pxpFill').style.width=Math.min(100,S.xp/xpNeed(S.plv)*100)+'%';
   /* the XP ring runs from where it was when you last looked to where it is now (all the way round first after a level-up) */
   const arc=$('#xpArc'),ratio=S.xp/xpNeed(S.plv),off=119.4*(1-ratio),was=renderHome._xp;

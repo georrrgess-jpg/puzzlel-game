@@ -58,20 +58,27 @@ body[data-scr="play"] .bnav{display:none}
 .iedit:active{transform:translateY(2px)}
 /* the hero card: where you are and what is next, with PLAY overlapping its bottom edge */
 .hero{width:100%;max-width:460px;margin:0 auto;gap:0}
-#home .nextcard{--wc:#5b6cff;width:100%;flex-direction:row;align-items:center;gap:12px;padding:14px 14px 58px;border-radius:24px;border:2.5px solid #7fe0ff;
-  background:radial-gradient(70% 90% at 92% 30%,#ffffff30,transparent 60%),
+/* the hero card: what is next (world, level, mode) on top and the PLAY button inside it, below; nothing overlaps */
+#home .hero{--wc:#5b6cff;position:relative;padding:14px 14px 16px;border-radius:24px;border:2.5px solid #7fe0ff;display:flex;flex-direction:column;gap:12px;
+  background:radial-gradient(70% 90% at 92% 20%,#ffffff30,transparent 60%),
     linear-gradient(115deg,color-mix(in srgb,var(--wc) 75%,#1a1050) 0%,color-mix(in srgb,var(--wc) 50%,#2a1860) 60%,#2a1a6a);
   box-shadow:inset 0 2px 0 #ffffff60,0 0 0 2px #2a8ad080,0 0 22px #4fc8ff55,0 10px 24px #0007}
-#home .nextcard::before{content:'';position:absolute;right:14px;top:10px;width:70px;height:70px;opacity:.55;pointer-events:none;
+#home .hero::before{content:'';position:absolute;right:14px;top:10px;width:70px;height:70px;opacity:.5;pointer-events:none;
   background:conic-gradient(from 200deg at 50% 100%,transparent 0 20deg,#bff4ff 22deg 30deg,transparent 32deg 60deg,#d6a6ff 62deg 70deg,transparent 72deg);clip-path:polygon(50% 0,70% 60%,100% 100%,0 100%,30% 55%)}
+#home .nextcard{width:100%;flex-direction:row;align-items:center;gap:12px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible}
+#home .nextcard::before,#home .nextcard::after{content:none}
 #home .nexticon{width:62px;height:62px;font-size:32px;flex:none;border-radius:18px;box-shadow:inset 0 -4px 0 #0003,inset 0 2px 0 #ffffff90,0 0 0 3px #bff0ff,0 6px 12px #0006}
 #home .nexttx{display:flex;flex-direction:column;min-width:0}
 #home .nexttx small{font-size:12px;letter-spacing:2px;font-weight:700;color:#9ff0ff;opacity:1}
 #home .nexttx b{font-size:26px;line-height:1.05;color:#fff;text-shadow:0 2px 0 #0006;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #home .nexttx span{font-size:14.5px;font-weight:600;color:#fff;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#home .streakpill{position:absolute;top:10px;right:10px}
-#home .playwrap{margin-top:-30px;padding:0 0 6px}
-#home .stage .rays{opacity:.35}
+#home .streakpill{margin-left:auto;align-self:flex-start;display:flex;flex-direction:column;align-items:center;line-height:1.05;padding:5px 10px}
+#home .streakpill small{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;opacity:.8}
+#home .streakpill[hidden]{display:none}
+#home .playwrap{margin:0;padding:0}
+#home .playwrap .stage{display:none}   /* no glow rays behind PLAY: the card frames it */
+#home .playbtn{width:100%;padding:12px 20px 11px}
+#home .playbtn small[hidden]{display:none}
 /* star chest bar */
 #home .starbar{width:100%;max-width:460px;margin:2px auto 0}
 #home #homeNext{color:#ffd166;font-weight:600}
@@ -192,8 +199,8 @@ body[data-scr="play"] .bnav{display:none}
   :root{--nav-h:58px}
   .bn i{font-size:21px}.bn span{font-size:11px}
   #home .logo{display:none}
-  #home .nextcard{padding:10px 12px 50px}
-  #home .playwrap{margin-top:-26px}
+  #home .hero{padding:10px 12px 12px;gap:8px}
+  #home .playbtn{padding:8px 20px 7px}
   #home .nexticon{width:50px;height:50px;font-size:26px}
   #home .nexttx b{font-size:21px}
   .wtab{min-height:44px;padding:5px 10px 5px 6px}.wtab i{width:26px;height:26px}
