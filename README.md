@@ -39,6 +39,22 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v5 (menu redesign)
+
+- **Scenery**: each menu has its own static illustrated backdrop (twilight floating islands, crystal caves, a sunset
+  lake), drawn once in SVG (`js/scenes.js`); the animated canvas background stands still behind them.
+- **Bottom bar** for Home / Levels / Shop on every menu; coin chips have a + that opens the shop.
+- **Home**: XP bar in the profile, a garden island with a "My Garden" sign and an Edit button (opens the shop's garden),
+  a hero card with the world, level and mode of what is next and PLAY overlapping it, a star-chest bar.
+- **Levels**: world tabs (done / here / locked) that jump to each world, big world titles with star counts, a
+  "YOU ARE HERE" tag, and a level panel: tap a level to see it, tap again or press PLAY to play.
+- **Shop**: Boosts / Themes / Garden tabs, the deal of the day as a hero card, two-column cards (three on wide screens)
+  with full-width price buttons and a ringed Equipped theme.
+- **Win card**: "LEVEL N COMPLETE", a coins | XP row (or "Coins already collected"), the XP bar with from → to, the
+  star-chest progress, and a full-width "Continue to Level N+1".
+- Styles live in `css/redesign.css` (loaded last). New regression checks N1-N3 cover the bar, the coin +, the garden
+  Edit button, picking and playing levels, the world tabs, and the still background.
+
 ## What's new in v4.7 (polish and bug fixes)
 
 - Audit: a 60-level bot session (memory, DOM and save size stay flat), random-input fuzzing of every mode (no errors, no

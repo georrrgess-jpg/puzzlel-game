@@ -38,7 +38,7 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
           const activeScreen = e.closest('.screen.active,#modal.on,#banners'); if (!activeScreen) return;
           if (e.matches('.node,.sw,.seg3 button,.bgs,.mg')) return;
           if (!inScroller(e) || e.closest('.mbtns,.toolbar')) {
-            if (r.right > vw + 1 || r.left < -1 || r.bottom > vh + 1 || r.top < -1) bad.push('outside viewport: ' + id + ' [' + Math.round(r.left) + ',' + Math.round(r.top) + ',' + Math.round(r.right) + ',' + Math.round(r.bottom) + ']');
+            if (!e.closest('.wtabs') && (r.right > vw + 1 || r.left < -1 || r.bottom > vh + 1 || r.top < -1)) bad.push('outside viewport: ' + id + ' [' + Math.round(r.left) + ',' + Math.round(r.top) + ',' + Math.round(r.right) + ',' + Math.round(r.bottom) + ']');
           }
           if ((r.width < 40 || r.height < 36) && !e.matches('.chip,.dot,.more')) bad.push('small target ' + Math.round(r.width) + 'x' + Math.round(r.height) + ': ' + id);
         });

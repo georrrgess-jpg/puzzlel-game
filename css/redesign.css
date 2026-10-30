@@ -1,0 +1,245 @@
+/* ================= v5 menu redesign (after the concept art) =================
+   Loaded last. Static scenery behind the menus (js/scenes.js), a bottom bar for Home / Levels / Shop, and one panel
+   language for every menu: deep violet glass with a light rim, gold for the main action, a colour per world or mode.
+   Nothing here runs continuously except the small "you are here" marker on the map, and only while the map is shown. */
+:root{--nav-h:66px;--nav-gap:max(8px,env(safe-area-inset-bottom));--panel:linear-gradient(180deg,#3b2a78e6,#26185ae6);--rim:#ffffff3a}
+
+/* ---------- scenery ---------- */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;display:none;background:#1c1240}
+#scene.on{display:block}
+#scene .scn{position:absolute;inset:0;display:none}
+#scene .scn.on{display:block}
+#scene svg{width:100%;height:100%;display:block}
+#home,#map,#shop{background:none}
+/* soft top shade so the top bars always read */
+#home::before,#map::before,#shop::before{content:'';position:fixed;left:0;right:0;top:0;height:120px;pointer-events:none;z-index:-1;background:linear-gradient(180deg,#0e0826a0,transparent)}
+#home,#map,#shop{isolation:isolate}
+
+/* ---------- bottom bar ---------- */
+.bnav{position:fixed;left:50%;bottom:var(--nav-gap);translate:-50% 0;z-index:40;width:min(calc(100% - 20px),520px);height:var(--nav-h);display:flex;gap:6px;padding:6px;border-radius:24px;
+  background:linear-gradient(180deg,#3a2a78f2,#22164ef2);box-shadow:inset 0 1.5px 0 #ffffff40,inset 0 0 0 1px #ffffff26,0 10px 28px #0008}
+body[data-scr="play"] .bnav{display:none}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:18px;background:none;color:#d8ccff;font:inherit;font-weight:700;font-size:12.5px;cursor:pointer;
+  transition:background .2s,transform .12s cubic-bezier(.3,1.5,.5,1),color .2s;-webkit-tap-highlight-color:transparent}
+.bn i{font-style:normal;font-size:24px;line-height:1;filter:drop-shadow(0 2px 0 #0005);transition:transform .2s cubic-bezier(.3,1.6,.5,1)}
+.bn:active{transform:scale(.93)}
+.bn.on{color:#fff;background:linear-gradient(180deg,#8a5bff,#5a32d6);box-shadow:inset 0 1.5px 0 #ffffff70,0 4px 0 #2e1a7a,0 0 18px #8a5bff90}
+.bn.on i{transform:translateY(-2px) scale(1.12)}
+/* menu screens leave room for the bar */
+#home,#map,#shop{padding-bottom:calc(var(--nav-h) + var(--nav-gap) + 10px)}
+
+/* ---------- shared: titles, coin chip with a + ---------- */
+.topbar h2{font-size:28px;letter-spacing:.5px;background:linear-gradient(180deg,#fff,#e6dcff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #2a1460)}
+.topbar h2 .h2i{-webkit-text-fill-color:initial;color:initial;filter:none}
+.coinbtn{border:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 6px !important}
+.coinbtn .cplus{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:17px;font-weight:800;line-height:1;color:#fff;
+  background:linear-gradient(180deg,#5ae08a,#1fae5a);box-shadow:inset 0 1px 0 #ffffff80,0 2px 0 #0a5a2a}
+.coinbtn:active{transform:scale(.95)}
+
+/* ---------- home ---------- */
+.homemain{justify-content:flex-start;gap:10px}
+.profile .pinfo{min-width:0}
+.pxpb{display:block;width:100%;min-width:90px;height:7px;margin:3px 0 1px;border-radius:99px;background:#0006;overflow:hidden;box-shadow:inset 0 1px 2px #0008}
+.pxpb i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ffd166,#ff9a3c);transition:width .6s cubic-bezier(.3,1.2,.5,1)}
+/* the garden island */
+.island{position:relative;width:min(100%,330px);height:150px;margin:0 auto;flex:none}
+.iland{position:absolute;left:8%;right:8%;top:42%;bottom:0;pointer-events:none}
+.iland::before{content:'';position:absolute;left:0;right:0;top:0;height:46%;border-radius:50%;
+  background:radial-gradient(60% 70% at 50% 30%,#8ce08a,#3f9a4a 70%,#2f7a3a);box-shadow:inset 0 -4px 0 #26603080,0 4px 0 #2a1a3a80}
+.iland::after{content:'';position:absolute;left:4%;right:4%;top:22%;bottom:0;z-index:-1;clip-path:polygon(0 0,100% 0,88% 40%,72% 70%,55% 100%,38% 74%,20% 46%);
+  background:linear-gradient(180deg,#7a5a9a,#4a3070 60%,#2e1d4e)}
+.island .garden{position:absolute;left:12%;right:12%;top:12%;height:58%;display:flex;flex-wrap:nowrap;align-items:flex-end;justify-content:center;gap:2px;max-width:none;z-index:1}
+.island .garden i{font-size:30px;filter:drop-shadow(0 3px 2px #0006)}
+.island .gempty{font-style:normal;font-size:12px;font-weight:600;color:#fff;text-align:center;align-self:center;padding:4px 10px;border-radius:99px;background:#0004}
+.isign{position:absolute;left:50%;bottom:6px;translate:-50% 0;z-index:2;padding:5px 14px;border-radius:10px;font-weight:700;font-size:14px;white-space:nowrap;color:#fff;
+  background:linear-gradient(180deg,#a8683a,#7a4520);box-shadow:inset 0 1.5px 0 #ffffff50,0 3px 0 #4a2810,0 6px 10px #0006;text-shadow:0 1px 0 #0006}
+.iedit{position:absolute;right:2%;bottom:6px;z-index:2;border:0;font:inherit;font-weight:700;font-size:13.5px;color:#fff;padding:7px 12px;border-radius:12px;cursor:pointer;min-height:36px;
+  background:linear-gradient(180deg,#5ab8ff,#2a7ae0);box-shadow:inset 0 1.5px 0 #ffffff70,0 3px 0 #164a9a,0 6px 10px #0005}
+.iedit:active{transform:translateY(2px)}
+/* the hero card: where you are and what is next, with PLAY overlapping its bottom edge */
+.hero{width:100%;max-width:460px;margin:0 auto;gap:0}
+#home .nextcard{--wc:#5b6cff;width:100%;flex-direction:row;align-items:center;gap:12px;padding:14px 14px 40px;border-radius:24px;border:2.5px solid #7fe0ff;
+  background:radial-gradient(70% 90% at 92% 30%,#ffffff30,transparent 60%),
+    linear-gradient(115deg,color-mix(in srgb,var(--wc) 75%,#1a1050) 0%,color-mix(in srgb,var(--wc) 50%,#2a1860) 60%,#2a1a6a);
+  box-shadow:inset 0 2px 0 #ffffff60,0 0 0 2px #2a8ad080,0 0 22px #4fc8ff55,0 10px 24px #0007}
+#home .nextcard::before{content:'';position:absolute;right:14px;top:10px;width:70px;height:70px;opacity:.55;pointer-events:none;
+  background:conic-gradient(from 200deg at 50% 100%,transparent 0 20deg,#bff4ff 22deg 30deg,transparent 32deg 60deg,#d6a6ff 62deg 70deg,transparent 72deg);clip-path:polygon(50% 0,70% 60%,100% 100%,0 100%,30% 55%)}
+#home .nexticon{width:62px;height:62px;font-size:32px;flex:none;border-radius:18px;box-shadow:inset 0 -4px 0 #0003,inset 0 2px 0 #ffffff90,0 0 0 3px #bff0ff,0 6px 12px #0006}
+#home .nexttx{display:flex;flex-direction:column;min-width:0}
+#home .nexttx small{font-size:12px;letter-spacing:2px;font-weight:700;color:#9ff0ff;opacity:1}
+#home .nexttx b{font-size:26px;line-height:1.05;color:#fff;text-shadow:0 2px 0 #0006;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#home .nexttx span{font-size:14.5px;font-weight:600;color:#fff;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#home .streakpill{position:absolute;top:10px;right:10px}
+#home .playwrap{margin-top:-34px;padding:0 0 6px}
+#home .stage .rays{opacity:.35}
+/* star chest bar */
+#home .starbar{width:100%;max-width:460px;margin:2px auto 0}
+#home #homeNext{color:#ffd166;font-weight:600}
+/* tiles: the same candy colours, a touch larger */
+#home .tiles4{width:100%;max-width:460px;margin:0 auto}
+
+/* ---------- levels map ---------- */
+#map{gap:6px}
+.wtabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;flex:none;scroll-snap-type:x proximity}
+.wtabs::-webkit-scrollbar{display:none}
+.wtab{flex:none;scroll-snap-align:center;display:flex;align-items:center;gap:8px;padding:7px 12px 7px 8px;min-height:50px;border-radius:16px;border:0;font:inherit;color:#fff;text-align:left;cursor:pointer;
+  background:linear-gradient(180deg,#3a2a78e0,#22164ee0);box-shadow:inset 0 0 0 1.5px #ffffff2a,0 4px 10px #0005;transition:box-shadow .2s,transform .12s}
+.wtab i{font-style:normal;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-size:15px;font-weight:800;background:color-mix(in srgb,var(--wc) 70%,#1a1050);box-shadow:inset 0 1px 0 #ffffff50}
+.wtab span{display:flex;flex-direction:column;line-height:1.1}
+.wtab small{font-size:11px;color:#c8bcff;font-weight:600}.wtab b{font-size:14.5px;white-space:nowrap}
+.wtab.done i{background:linear-gradient(180deg,#5ae08a,#1fae5a);color:#fff}
+.wtab.locked{opacity:.62}.wtab.locked i{background:#ffffff1c}
+.wtab.on{box-shadow:inset 0 0 0 2px #7fe0ff,0 0 16px #4fc8ff70,0 4px 10px #0005}
+.wtab:active{transform:scale(.96)}
+/* world headings: a centred title with its star count */
+.wbanner{display:flex !important;flex-direction:column;align-items:center;gap:6px;background:none !important;box-shadow:none !important;padding:10px 4px 4px !important;text-align:center}
+.wbanner .wtx{display:flex;flex-direction:column;align-items:center}
+.wbanner .wtx small{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9ff0ff;font-weight:700}
+.wbanner .wtx b{font-size:clamp(26px,8vw,38px);line-height:1.05;color:#fff;text-shadow:0 3px 0 color-mix(in srgb,var(--wc) 55%,#100830),0 0 18px color-mix(in srgb,var(--wc) 60%,transparent)}
+.wbanner .wprog{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:99px;font-weight:700;font-size:15px;background:#1a1044c0;box-shadow:inset 0 0 0 1.5px #ffffff2a}
+.wbanner .wprog svg{width:18px;height:18px;fill:#ffd23f;filter:drop-shadow(0 0 4px #ffd23f99)}
+.wbanner .wprog .pad{width:15px;height:18px}
+.chapter{background:none !important;box-shadow:none !important;border:0 !important}
+.chapter .mapgrid{border-radius:24px;background:#1a1044a0;box-shadow:inset 0 0 0 1.5px #ffffff20}
+.chapter.locked .wbanner{opacity:.7}
+/* nodes: locked lilac, played in their mode colour, the current one ringed in gold with a "you are here" tag */
+.node .here{position:absolute;bottom:calc(100% + 8px);left:50%;translate:-50% 0;white-space:nowrap;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.5px;
+  color:#3a1a00;background:linear-gradient(180deg,#fff3a0,#ffc83a);box-shadow:0 3px 0 #a86a00,0 4px 8px #0006;z-index:4;pointer-events:none}
+.node .here::after{content:'';position:absolute;left:50%;top:100%;margin-left:-5px;border:5px solid transparent;border-top-color:#ffc83a}
+.node.cur{box-shadow:inset 0 -6px 0 #0003,inset 0 3px 0 #ffffff80,0 0 0 4px #ffd23f,0 6px 0 4px #a86a00,0 12px 18px #0006,0 0 22px #ffd23f88}
+.node.pick:not(.cur){box-shadow:inset 0 -6px 0 #0003,inset 0 3px 0 #ffffff80,0 0 0 4px #fff,0 0 18px #ffffffa0,0 6px 0 4px #0005}
+.path .lit{stroke:#fff;stroke-width:6;stroke-dasharray:.1 13;stroke-linecap:round}
+.path .glow{stroke:#c8a8ff;stroke-width:16;stroke-opacity:.28}
+.path .road{stroke:#2a1a5a;stroke-width:18}
+/* the level panel above the bar */
+.mapwrap{padding-bottom:96px}
+.mappanel{position:absolute;left:50%;translate:-50% 0;bottom:calc(var(--nav-h) + var(--nav-gap) + 10px);z-index:20;width:min(calc(100% - 20px),520px);display:flex;align-items:center;gap:12px;padding:10px 10px 10px 12px;border-radius:22px;
+  background:var(--panel);box-shadow:inset 0 1.5px 0 #ffffff40,inset 0 0 0 1.5px #ffffff26,0 10px 26px #0008}
+.mpic{flex:none;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:30px;
+  background:radial-gradient(circle at 32% 26%,#ffffff90,transparent 50%),linear-gradient(165deg,color-mix(in srgb,var(--tc,#5b6cff) 75%,#fff),var(--tc,#5b6cff) 55%,color-mix(in srgb,var(--tc,#5b6cff) 65%,#000));box-shadow:inset 0 -3px 0 #0003,0 0 0 2.5px #ffffff90}
+.mptx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
+.mptx small{font-size:11.5px;letter-spacing:1.5px;font-weight:800;color:#c8bcff}
+.mptx b{font-size:19px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpst{display:flex;gap:2px;margin-top:3px}.mpst svg{width:17px;height:17px;fill:#ffffff20;stroke:#ffffff80;stroke-width:1.6}.mpst svg.on{fill:#ffd23f;stroke:#a86a00}
+.mpplay{flex:none;padding:12px 22px !important;font-size:20px;border-radius:18px;min-height:52px}
+.mpplay b::before{content:'';display:inline-block;border-style:solid;border-width:.36em 0 .36em .56em;border-color:transparent transparent transparent currentColor;margin-right:.3em;vertical-align:.02em}
+.curpill{bottom:calc(var(--nav-h) + var(--nav-gap) + 96px) !important}
+
+/* ---------- shop ---------- */
+.stabs{display:flex;gap:8px;flex:none;padding:2px 0 8px}
+.stab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;border:0;border-radius:16px;font:inherit;font-weight:700;font-size:15.5px;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,#3a2a78e0,#22164ee0);box-shadow:inset 0 0 0 1.5px #ffffff26,0 4px 10px #0005;transition:transform .12s}
+.stab i{font-style:normal;font-size:18px}
+.stab.on{color:#3a1a00;background:linear-gradient(180deg,#fff0a0,#ffc83a 55%,#f0a020);box-shadow:inset 0 1.5px 0 #ffffffb0,0 4px 0 #a86a00,0 0 16px #ffc83a70}
+.stab:active{transform:scale(.96)}
+.shoplist{display:grid !important;grid-template-columns:1fr 1fr;align-content:start;gap:10px !important}
+.shoplist>*{grid-column:span 1;min-width:0}
+.shoplist .shead,.shoplist .item.deal,.shoplist .item.claimed:not(.deco),.shoplist .more{grid-column:1/-1}
+.shoplist[data-tab="boosts"]>[data-t]:not([data-t="boosts"]),.shoplist[data-tab="themes"]>[data-t]:not([data-t="themes"]),.shoplist[data-tab="garden"]>[data-t]:not([data-t="garden"]){display:none !important}
+/* cards: icon and words on top, the price button across the bottom */
+.shoplist .item:not(.deal){display:grid !important;grid-template-columns:auto 1fr;grid-template-areas:"ic tx" "bt bt";align-items:center;gap:8px 10px;padding:12px !important;border-radius:22px;
+  background:var(--panel);border:1.5px solid var(--rim);box-shadow:inset 0 1.5px 0 #ffffff30,0 6px 14px #0005}
+.shoplist .item:not(.deal) .ic,.shoplist .item:not(.deal) .swatch{grid-area:ic}
+.shoplist .item:not(.deal) .tx{grid-area:tx;min-width:0}
+.shoplist .item:not(.deal) .tx b{display:block;font-size:16px;line-height:1.15}
+.shoplist .item:not(.deal) .tx small{font-size:12px;line-height:1.25}
+.shoplist .item:not(.deal)>.btn{grid-area:bt;width:100%;min-height:44px;font-size:17px;justify-content:center}
+.shoplist .item .ic{width:58px;height:58px;font-size:32px}
+.shoplist .item.claimed{grid-template-areas:"ic tx" !important;opacity:.85}
+.shoplist .item.claimed.deco,.shoplist .item.claimed{grid-column:auto}
+/* the deal of the day: a wide hero card */
+.shoplist .item.deal{display:flex;align-items:center;gap:12px;padding:16px 14px !important;border-radius:24px;border:2px solid #ff8ab0;
+  background:radial-gradient(60% 120% at 12% 50%,#ffb36a40,transparent 60%),linear-gradient(120deg,#6a2a6af2,#3a1a5af2);box-shadow:inset 0 2px 0 #ffffff40,0 0 20px #ff6ab055,0 8px 20px #0006}
+.shoplist .item.deal .ic{width:68px;height:68px;font-size:38px}
+.shoplist .item.deal .tx b{font-size:22px}
+.shoplist .item.deal .tx small{color:#ffd166;font-weight:700;font-size:14px}
+.shoplist .item.deal>.btn{min-width:110px;min-height:50px;font-size:20px}
+/* themes: a bigger preview, the equipped one ringed in green */
+.shoplist .item.theme .swatch{width:62px;height:62px}
+.shoplist .item.theme.eq{border-color:#5ae08a;box-shadow:inset 0 1.5px 0 #ffffff30,0 0 0 2px #5ae08a80,0 0 18px #5ae08a50}
+.shoplist .item.theme .eqb{color:#fff !important}
+
+/* ---------- win card ---------- */
+.card.win .ribbon span{font-size:clamp(17px,5.4vw,22px)}
+.wrows{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px;text-align:left}
+.wrow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:16px;background:#1a1044b0;box-shadow:inset 0 0 0 1.5px #ffffff1c}
+.wrow .reward{margin:0 !important;padding:0 !important;background:none !important;box-shadow:none !important;font-size:24px;flex:1;justify-content:flex-start}
+.wrow .reward.none{font-size:13.5px;font-weight:600;color:#e6dcff;gap:8px}
+.wrow .reward.none .coin{width:28px;height:28px;filter:saturate(.6)}
+.wsep{width:1.5px;align-self:stretch;background:#ffffff26;font-style:normal}
+.wxp{display:flex;align-items:center;gap:6px;flex:none;padding-right:4px}
+.wxp i{font-style:normal;font-size:22px}.wxp b{font-size:20px;color:#9fe8ff}
+.xpw{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.xpw small{font-size:12px;font-weight:700;color:#9fe8ff}
+.xpw .bar{height:11px}
+.wrow.xpline{margin:0}
+.wrow .lvb{flex:none}
+.chrow .wchest svg{width:38px;height:34px;display:block}
+.chrow .xpw small{color:#ffd166}
+.chrow .bar>div{background:linear-gradient(90deg,#fff3a0,#ffc83a 50%,#ff9a1a) !important}
+.chn{flex:none;font-size:15px;color:#fff}
+/* buttons: the way on across the top, replay and levels below */
+.card.win .mbtns{display:grid !important;grid-template-columns:1fr 1fr;gap:8px !important}
+.card.win .mbtns .btn.next,.card.win .mbtns .btn.big{grid-column:1/-1;order:-1;font-size:19px;min-height:54px}
+.card.win .mbtns .btn.sm{min-height:46px;font-size:16px}
+
+/* ---------- sizes ---------- */
+@media (max-height:820px){
+  .island{display:none}
+  #home .logo .word{font-size:46px}
+}
+@media (max-height:640px){
+  :root{--nav-h:58px}
+  .bn i{font-size:21px}.bn span{font-size:11px}
+  #home .logo{display:none}
+  #home .nextcard{padding:10px 12px 34px}
+  #home .nexticon{width:50px;height:50px;font-size:26px}
+  #home .nexttx b{font-size:21px}
+  .wtab{min-height:44px;padding:5px 10px 5px 6px}.wtab i{width:26px;height:26px}
+  .mappanel{padding:7px 8px 7px 10px}.mpic{width:46px;height:46px;font-size:24px}.mptx b{font-size:16px}
+  .mpplay{padding:9px 16px !important;font-size:17px;min-height:46px}
+  .mapwrap{padding-bottom:80px}
+  .stab{min-height:44px;font-size:14px}
+}
+@media (max-width:360px){
+  .shoplist{grid-template-columns:1fr}
+  /* one card per row: icon, words and price side by side */
+  .shoplist .item:not(.deal){grid-template-columns:auto 1fr auto;grid-template-areas:"ic tx bt"}
+  .shoplist .item:not(.deal)>.btn{width:auto;min-width:86px;padding:8px 10px;font-size:15px}
+  .shoplist .item .ic,.shoplist .item.theme .swatch{width:48px;height:48px;font-size:26px}
+  .wtab b{font-size:13px}
+  .stab i{display:none}
+}
+/* desktop and tablets: same layout, a little more room */
+@media (min-width:700px){
+  .shoplist{grid-template-columns:repeat(3,1fr)}
+  .shoplist .item.deal{grid-column:1/-1}
+}
+@media (hover:hover) and (pointer:fine){
+  .bn:not(.on):hover,.wtab:hover,.stab:not(.on):hover{filter:brightness(1.12)}
+}
+
+/* ---------- overrides of older rules ---------- */
+.island .garden,.island .garden:empty{position:absolute;left:12%;right:12%;top:8%;height:52%;width:auto;min-height:0;padding:0;margin:0;border-radius:0;background:none;box-shadow:none;display:flex;gap:4px 10px}
+.island .garden::before{content:none}
+.island .garden .gempty{display:block;color:#fff}
+.wbanner::before,.wbanner::after{content:none !important}
+.wbanner .wprog{flex-direction:row !important;width:auto !important;align-items:center}
+.xpw .bar{flex:none !important}
+.iland{isolation:isolate}
+.iland::before{z-index:2}
+.iland::after{z-index:1}
+.island::after{content:'';position:absolute;left:30%;top:66%;width:7px;height:34%;border-radius:4px;background:linear-gradient(180deg,#cfefff,#7fd0ff00);opacity:.8;pointer-events:none}
+.island .garden .gempty{align-self:flex-end;margin-bottom:6px}
+
+/* the deal card wraps its price under the words on narrow phones */
+@media (max-width:420px){
+  .shoplist .item.deal{display:grid !important;grid-template-columns:auto 1fr;grid-template-areas:"ic tx" "bt bt";gap:8px 12px}
+  .shoplist .item.deal .ic{grid-area:ic}.shoplist .item.deal .tx{grid-area:tx;min-width:0}
+  .shoplist .item.deal>.btn{grid-area:bt;width:100%;margin:0 !important}
+}
+
+/* the shop's tabs and cards share one centred column on wide screens */
+.stabs,.shoplist{width:100%;max-width:660px;margin-left:auto !important;margin-right:auto !important}
+.wtabs,.mapwrap{width:100%;max-width:640px;margin-left:auto;margin-right:auto}
+.shoplist{grid-auto-rows:max-content}

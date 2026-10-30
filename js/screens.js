@@ -8,17 +8,19 @@ function renderHome(){
   const stars=totalStars(),m=S.milestone,prevT=m?msThreshold(m-1):0,t=msThreshold(m),pct=clamp((stars-prevT)/(t-prevT)*100,4,100);
   /* the garden: your decorations on a bed of soil (tall phones show the bed even when it is empty, as a nudge towards the shop) */
   $('#garden').innerHTML=S.deco.map(id=>{const d=ECON.deco.find(x=>x.id===id);return d?`<i title="${d.name}" style="--k:${(hashSeed(id.length*7+id.charCodeAt(0),3)%100)/100}">${d.ic}</i>`:''}).join('')||'<em class="gempty">🌱 Your garden grows with Shop decorations</em>';
-  $('#homeStars').textContent=stars;
+  $('#homeStars').textContent=`${stars} / ${t}`;
   $('#homeBar').style.width=pct+'%';
-  $('#homeNext').textContent=`🎁 chest at ${t} ⭐`;
+  $('#homeNext').textContent=`${t-stars} star${t-stars===1?'':'s'} to next chest`;
   $('#chestIco').classList.toggle('near',pct>=70);
   const n=S.unlocked,ty=typeFor(n),ni=$('#nextIcon');
   ni.textContent=INFO[ty].icon;ni.style.setProperty('--tc',INFO[ty].col);ni.parentElement.style.setProperty('--tcn',INFO[ty].col);
-  $('#nextName').textContent=(isBonus(n)?'👑 ':'')+INFO[ty].name;
+  const wn=Math.floor((n-1)/12);$('#heroWorld').textContent=`WORLD ${wn+1}`;$('#heroName').textContent=worldName(wn);
+  $('.nextcard').style.setProperty('--wc',WCOL[wn%WCOL.length]);
+  $('#nextName').textContent=`${isBonus(n)?'👑 ':''}Level ${n} · ${INFO[ty].name}`;
   const res=S.resume&&S.resume.n===n;$('#playBtn').classList.toggle('resume',!!res);
   $('#playLvl').textContent=res?`Continue level ${n}`:'Level '+n+(isBonus(n)?' · 2× BONUS':'');
   const sp=$('#streakPill');sp.textContent='🔥 '+S.streak;sp.classList.toggle('hot',S.streak>=2);
-  $('#plv').textContent=S.plv;$('#prank').textContent=rankOf(S.plv);$('#pxp').textContent=`${S.xp} / ${xpNeed(S.plv)} XP`;
+  $('#plv').textContent=S.plv;$('#prank').textContent=rankOf(S.plv);$('#pxp').textContent=`${S.xp} / ${xpNeed(S.plv)} XP`;$('#pxpFill').style.width=Math.min(100,S.xp/xpNeed(S.plv)*100)+'%';
   /* the XP ring runs from where it was when you last looked to where it is now (all the way round first after a level-up) */
   const arc=$('#xpArc'),ratio=S.xp/xpNeed(S.plv),off=119.4*(1-ratio),was=renderHome._xp;
   if(was&&!REDUCED&&(was.plv!==S.plv||was.ratio!==ratio)&&$('#home').classList.contains('active')){
@@ -62,7 +64,8 @@ function renderMap(more){
   for(let c=0;c*12<count;c++){
     const lv=[...Array(12)].map((_,k)=>c*12+k+1),cs=lv.reduce((a,n)=>a+(pu&&n===pu.n?0:S.stars[n]||0),0),open=lv[0]<=lim,done=lv[11]<lim;
     const ch=el('div','chapter'+(open?'':' locked')+(done?' done':''));ch.style.setProperty('--wc',WCOL[c%WCOL.length]);
-    ch.innerHTML=`<h3 class="wbanner"><span class="wnum">${open?c+1:PADLOCK}</span><span class="wtx"><small>World ${c+1} · <span class="lw">Levels </span>${lv[0]}–${lv[11]}</small><b>${worldName(c)}</b></span><span class="wprog"><span><svg viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg>${cs}/36</span><span class="bar"><span style="width:${Math.round(cs/36*100)}%"></span></span></span></h3>`;
+    ch.dataset.w=c;
+    ch.innerHTML=`<h3 class="wbanner"><span class="wtx"><small>World ${c+1} · <span class="lw">Levels </span>${lv[0]}–${lv[11]}</small><b>${worldName(c)}</b></span><span class="wprog">${open?'':PADLOCK}<svg viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg>${cs}/36</span></h3>`;
     if(open){
       const grid=el('div','mapgrid');
       for(let r=0;r<3;r++){const row=lv.slice(r*4,r*4+4);if(r%2)row.reverse();row.forEach(n=>grid.appendChild(mapNode(n,lim,pu&&n===pu.n)))}
@@ -71,9 +74,33 @@ function renderMap(more){
     g.appendChild(ch);
   }
   const mb=el('button','btn sec sm more','Show more worlds ⬇️');mb.onclick=()=>{sfx.click();mapCount+=36;renderMap(true)};g.appendChild(mb);
+  worldTabs(count/12,lim);pickLevel(mapPick&&mapPick<=lim&&pickLim===lim?mapPick:lim);pickLim=lim;   // after progress the panel returns to the new current level
   requestAnimationFrame(()=>{drawPaths(lim);if(!more){const c=pu?$(`.node[data-n="${pu.n}"]`):$('.node.cur');if(c)c.scrollIntoView({block:'center'})}mapTop=wrap.scrollTop;watchCur()});
   if(pu)setTimeout(()=>playUnlock(pu),REDUCED?0:780);
 }
+/* world tabs: one chip per world (done ✓ / here / locked); a tap scrolls to it, and the tab of the world in view lights up */
+let tabIO=null;
+function worldTabs(nw,lim){
+  const box=$('#wtabs'),cw=Math.floor((lim-1)/12);
+  box.innerHTML=[...Array(nw)].map((_,c)=>{const st=c<cw?'done':c===cw?'here':'locked';
+    return`<button class="wtab ${st}" data-w="${c}" role="tab" style="--wc:${WCOL[c%WCOL.length]}"><i>${st==='locked'?'🔒':st==='done'?'✓':c+1}</i><span><small>World ${c+1}</small><b>${worldName(c)}</b></span></button>`}).join('');
+  box.querySelectorAll('.wtab').forEach(b=>b.onclick=()=>{sfx.click();const ch=$(`.chapter[data-w="${b.dataset.w}"]`);if(ch)$('#mapwrap').scrollTo({top:ch.offsetTop-6,behavior:REDUCED?'auto':'smooth'})});
+  if(tabIO)tabIO.disconnect();
+  if(window.IntersectionObserver){tabIO=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){const w=e.target.dataset.w;
+    box.querySelectorAll('.wtab').forEach(b=>b.classList.toggle('on',b.dataset.w===w));const t=box.querySelector(`.wtab[data-w="${w}"]`);if(t)box.scrollTo({left:t.offsetLeft-box.clientWidth/2+t.offsetWidth/2,behavior:'smooth'})}},
+    {root:$('#mapwrap'),rootMargin:'-35% 0px -55% 0px'});$$('#mapgrid .chapter').forEach(c=>tabIO.observe(c))}
+}
+/* the level panel: the picked level (the current one by default); tap a level to pick it, tap it again or PLAY to play */
+let mapPick=0,pickLim=0;
+function pickLevel(n){
+  mapPick=n;const ty=typeFor(n),st=S.stars[n]||0,i=INFO[ty];
+  $$('#mapgrid .node.pick').forEach(e=>e.classList.remove('pick'));const nd=$(`#mapgrid .node[data-n="${n}"]`);if(nd)nd.classList.add('pick');
+  $('#mpIcon').textContent=i.icon;$('#mpIcon').style.setProperty('--tc',i.col);
+  $('#mpLv').textContent=`${isBonus(n)?'👑 BONUS · ':''}LEVEL ${n}`;$('#mpName').textContent=i.name;
+  $('#mpStars').innerHTML=[0,1,2].map(k=>STAR.replace('<svg','<svg class="'+(k<st?'on':'')+'"')).join('');
+  const pb=$('#mpPlay b');pb.textContent=S.resume&&S.resume.n===n?'CONTINUE':st?'REPLAY':'PLAY';
+}
+$('#mpPlay').onclick=()=>{sfx.good();playLevel(mapPick||S.unlocked,{},$('#mpPlay'))};
 /* a floating "▼ Level N" pill when the current level is scrolled out of view; tap it to jump back */
 let curIO=null;
 function watchCur(){
@@ -93,8 +120,8 @@ function mapNode(n,lim=S.unlocked,bare=false){
   const st=bare?0:S.stars[n]||0,locked=n>lim,ty=typeFor(n),cur=n===lim;
   const b=el('button','node'+(cur?' cur':'')+(isBonus(n)?' bonus':'')+(st===3?' perfect':''));
   b.style.setProperty('--tc',INFO[ty].col);b.dataset.n=n;b.disabled=locked;b.style.animationDelay=((n-1)%12)*30+'ms';
-  b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${cur&&((n-1)%12)<4?'<span class="pin">▼</span>':''}${S.resume&&S.resume.n===n?'<span class="resm" title="In progress">▶</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
-  b.onclick=()=>{sfx.click();playLevel(n,{},b)};
+  b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${cur?'<span class="here">YOU ARE HERE</span>':''}${S.resume&&S.resume.n===n?'<span class="resm" title="In progress">▶</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
+  b.onclick=()=>{if(mapPick===n){sfx.good();playLevel(n,{},b)}else{sfx.click();pickLevel(n);wa(b,[{scale:1},{scale:1.12},{scale:1}],{duration:260,easing:'cubic-bezier(.3,1.6,.5,1)'})}};
   return b;
 }
 /* the path between two node centres (grid-local px): straight on a row, an S-curve round the end of a row */
@@ -210,5 +237,14 @@ function renderShop(keep){
     if(owned){const x=el('div','item claimed',`<div class="ic">${dc.ic}</div><div class="tx"><b>${dc.name}</b><small>In your garden ✓</small></div>`);x.style.setProperty('--tc','#2ecc8f');x.style.animationDelay=l.children.length*40+'ms';l.appendChild(x);continue}
     addItem(dc.ic,dc.name,'For your garden',dc.cost,b=>buy(dc.cost,()=>{S.deco.push(dc.id);checkAch()},`${dc.name} planted! ${dc.ic}`,b),'','#4fb35a');
   }
+  /* tabs: each card belongs to the section whose heading came before it; CSS shows the open tab's cards only */
+  let t='boosts';[...l.children].forEach(c=>{if(c.matches('h3.shead'))t=/Theme/.test(c.textContent)?'themes':/Garden/.test(c.textContent)?'garden':'boosts';c.dataset.t=t});
+  l.dataset.tab=shopTab;
   if(keep)l.scrollTop=top;
 }
+let shopTab='boosts';
+function setShopTab(t){
+  shopTab=t;const l=$('#shoplist');if(l.dataset.tab!==t){l.dataset.tab=t;l.scrollTop=0}
+  $$('#stabs .stab').forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});
+}
+$$('#stabs .stab').forEach(b=>b.onclick=()=>{if(b.classList.contains('on'))return;sfx.click();setShopTab(b.dataset.t)});

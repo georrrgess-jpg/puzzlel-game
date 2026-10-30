@@ -248,12 +248,16 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
 
   await test('M shop, trophies, profile, settings, toasts, garden', async p => {
     await prep(p); await p.evaluate(() => { __game.S.coins = 2000; __game.show('shop') }); await sleep(900);
-    await p.evaluate(() => { document.querySelector('#shoplist').scrollTop = 220 }); await sleep(200);
+    ck('M7 the shop opens on Boosts and the tabs switch sections', await p.evaluate(() => { const vis = () => [...document.querySelectorAll('#shoplist .item')].filter(e => e.offsetParent).length;
+      const b = vis(), boostOnly = [...document.querySelectorAll('#shoplist .item')].filter(e => e.offsetParent).every(e => e.dataset.t === 'boosts');
+      document.querySelector('#stabs .stab[data-t="themes"]').click(); const th = [...document.querySelectorAll('#shoplist .item')].filter(e => e.offsetParent).every(e => e.dataset.t === 'themes') && vis() >= 10;
+      document.querySelector('#stabs .stab[data-t="boosts"]').click(); return b >= 5 && boostOnly && th }));
+    const want = await p.evaluate(() => { const l = document.querySelector('#shoplist'); l.style.maxHeight = '300px'; l.scrollTop = 220; return l.scrollTop }); await sleep(200);
     const h0 = await p.evaluate(() => __game.S.hints);
     await p.evaluate(() => { const b = [...document.querySelectorAll('#shoplist .item.boost .buy')][0]; b.click(); b.click() }); await sleep(900);
     const r = await p.evaluate(() => ({ h: __game.S.hints, top: document.querySelector('#shoplist').scrollTop }));
     ck('M7 a double tap buys once', r.h - h0 === 3, JSON.stringify(r));
-    ck('M7 the shop keeps its scroll position after a purchase', Math.abs(r.top - 220) < 8, JSON.stringify(r));
+    ck('M7 the shop keeps its scroll position after a purchase', want > 40 && Math.abs(r.top - want) < 8, JSON.stringify({ ...r, want }));
     await p.evaluate(() => { __game.show('home'); showTrophies() }); await sleep(500);
     ck('M8 locked trophies show progress', await p.evaluate(() => document.querySelectorAll('.ach:not(.got) .apw').length) > 5);
     await p.evaluate(() => { closeModal(); showProfile() }); await sleep(500);
@@ -435,6 +439,42 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
           if (!r || r.width < 120 || r.height < 120 || b.querySelectorAll('*').length < 12) out.push(__game.cur.type + '@' + n) } return out });
       ck(`R1 boards render at ${w}x${h}`, bad.length === 0, JSON.stringify(bad));
     }
+  });
+
+  /* ---- v5 menus ---- */
+  await test('N1 bottom bar, coin +, garden Edit, scenery', async p => {
+    await prep(p);
+    const scr = () => p.evaluate(() => ({ s: document.querySelector('.screen.active').id, nav: [...document.querySelectorAll('#nav .bn.on')].map(b => b.dataset.nav).join(), scene: [...document.querySelectorAll('#scene .scn.on')].length, sceneOn: document.querySelector('#scene').classList.contains('on') }));
+    ck('N1 home starts with Home lit and its scene', JSON.stringify(await scr()) === JSON.stringify({ s: 'home', nav: 'home', scene: 1, sceneOn: true }));
+    await p.evaluate(() => document.querySelector('#nav .bn[data-nav="map"]').click()); await sleep(600);
+    ck('N1 the bar opens Levels', (await scr()).s === 'map' && (await scr()).nav === 'map');
+    await p.evaluate(() => document.querySelector('#map .coinbtn').click()); await sleep(600);
+    ck('N1 the coin + opens the shop on Boosts', await p.evaluate(() => document.querySelector('.screen.active').id === 'shop' && document.querySelector('#shoplist').dataset.tab === 'boosts'));
+    await p.evaluate(() => document.querySelector('#nav .bn[data-nav="home"]').click()); await sleep(600);
+    await p.evaluate(() => document.querySelector('#gardenEdit').click()); await sleep(600);
+    ck('N1 garden Edit opens the shop on Garden', await p.evaluate(() => document.querySelector('.screen.active').id === 'shop' && document.querySelector('#shoplist').dataset.tab === 'garden' && document.querySelector('#stabs .stab.on').dataset.t === 'garden'));
+    await p.evaluate(n => __game.startLevel(1), 0); await sleep(500);
+    ck('N1 in a level the bar and the scenery are hidden', await p.evaluate(() => getComputedStyle(document.querySelector('#nav')).display === 'none' && !document.querySelector('#scene').classList.contains('on')));
+  });
+  await test('N2 levels map: pick a level, play it; world tabs', async p => {
+    await prep(p); await p.evaluate(() => { __game.S.unlocked = 20; for (let n = 1; n < 20; n++) __game.S.stars[n] = 2; __game.show('map') }); await sleep(900);
+    ck('N2 the panel starts on the current level', await p.evaluate(() => /LEVEL 20/.test(document.querySelector('#mpLv').textContent) && !!document.querySelector('.node.cur .here')));
+    await p.evaluate(() => document.querySelector('.node[data-n="5"]').click()); await sleep(300);
+    ck('N2 a tap picks a level without starting it', await p.evaluate(() => document.querySelector('.screen.active').id === 'map' && /LEVEL 5/.test(document.querySelector('#mpLv').textContent) && document.querySelectorAll('#mpStars svg.on').length === 2 && /REPLAY/.test(document.querySelector('#mpPlay').textContent)));
+    await p.evaluate(() => document.querySelector('.node[data-n="5"]').click()); await sleep(700);
+    ck('N2 a second tap plays it', await p.evaluate(() => document.querySelector('.screen.active').id === 'play' && __game.cur.level === 5));
+    await p.evaluate(() => { __game.show('map') }); await sleep(800);
+    await p.evaluate(() => document.querySelector('#mpPlay').click()); await sleep(700);
+    ck('N2 PLAY plays the picked level', await p.evaluate(() => __game.cur && __game.cur.level === 5));
+    await p.evaluate(() => { __game.show('map') }); await sleep(800);
+    ck('N2 world tabs: done, here, locked', await p.evaluate(() => { const t = [...document.querySelectorAll('#wtabs .wtab')]; return t[0].classList.contains('done') && t[1].classList.contains('here') && t[2].classList.contains('locked') }));
+    await p.evaluate(() => { document.querySelector('#mapwrap').scrollTop = 0; document.querySelector('#wtabs .wtab[data-w="1"]').click() }); await sleep(1200);
+    ck('N2 a world tab scrolls to its world', await p.evaluate(() => { const ch = document.querySelector('.chapter[data-w="1"]'), w = document.querySelector('#mapwrap'); return Math.abs(w.scrollTop - (ch.offsetTop - 6)) < 30 }));
+  });
+  await test('N3 the animated background stands still behind menus', async p => {
+    await prep(p); await sleep(400);
+    const frames = await p.evaluate(async () => { let n = 0; const orig = CanvasRenderingContext2D.prototype.drawImage; const c = document.querySelector('#bg').getContext('2d'); c.drawImage = function () { n++; return orig.apply(this, arguments) }; await new Promise(r => setTimeout(r, 1500)); return n });
+    ck('N3 no background frames are drawn on the home screen', frames === 0, String(frames));
   });
 
   /* ---- quality of life ---- */

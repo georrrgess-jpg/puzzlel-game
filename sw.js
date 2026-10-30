@@ -1,11 +1,11 @@
 // Offline support: game files are cached on install and refreshed whenever they are fetched online.
 // Bump VERSION whenever any file below changes so phones pick up the update.
-const VERSION='pop-v27';
+const VERSION='pop-v28';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
-  'css/font.css', 'fonts/fredoka-latin.woff2', 'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/arrows.css', 'css/modes/tubes.css', 'css/modes/threads.css', 'css/modes/merge.css', 'css/modes/blocks.css', 'css/modes/pics.css', 'css/perf.css', 'css/mobile.css',
+  'css/font.css', 'fonts/fredoka-latin.woff2', 'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/arrows.css', 'css/modes/tubes.css', 'css/modes/threads.css', 'css/modes/merge.css', 'css/modes/blocks.css', 'css/modes/pics.css', 'css/perf.css', 'css/mobile.css', 'css/redesign.css',
   'js/core.js', 'js/perf.js', 'js/audio.js', 'js/fx.js', 'js/meta.js', 'js/howto.js',
-  'js/modes/common.js', 'js/modes/arrows.js', 'js/modes/tubes.js', 'js/modes/threads.js', 'js/modes/merge.js', 'js/modes/blocks.js', 'js/modes/pics-art.js', 'js/modes/pics.js', 'js/screens.js', 'js/ui.js',
+  'js/modes/common.js', 'js/modes/arrows.js', 'js/modes/tubes.js', 'js/modes/threads.js', 'js/modes/merge.js', 'js/modes/blocks.js', 'js/modes/pics-art.js', 'js/modes/pics.js', 'js/scenes.js', 'js/screens.js', 'js/ui.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'
 ];
 // cache:'reload' skips the browser's HTTP cache (GitHub Pages sends max-age=600), so a new version never installs stale files

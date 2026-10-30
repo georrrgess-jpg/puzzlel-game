@@ -183,11 +183,14 @@ function onWin(stars){
     if(cur!==me)return;
     const lvFrom=xr.from,needFrom=xpNeed(lvFrom.lv);
     openModal(`<svg class="sdefs" width="0" height="0" aria-hidden="true"><defs><linearGradient id="hudSG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb,var(--acc) 30%,#fff)"/><stop offset=".5" style="stop-color:var(--acc)"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--acc) 65%,#e05a00)"/></linearGradient></defs></svg><div class="rays"></div><div class="rays r2"></div><div class="wglow"></div>
-      <div class="ribbon ${daily||me.bonus?'gold':''}"><span>${daily?'DAILY CLEAR!':me.bonus?'BONUS CLEAR!':`LEVEL ${n} CLEAR!`}</span></div>
+      <div class="ribbon ${daily||me.bonus?'gold':''}"><span>${daily?'DAILY COMPLETE':me.bonus?'BONUS COMPLETE':`LEVEL ${n} COMPLETE`}</span></div>
       <div class="bigstars">${[0,1,2].map(i=>`<div class="sock ${i<stars?'on':''}" style="--d:${i*.38+.25}s">${STAR}</div>`).join('')}</div>
       <div class="verdict" style="--d:${stars*.38+.35}s">${stars===3?'PERFECT!':stars===2?'GREAT JOB!':'CLEARED!'}</div>
-      <div class="reward"><i class="coin"></i><b>+<span id="cntUp">0</span></b></div>
-      <div class="xpline"><span class="lvb" id="xpLv">Lv ${lvFrom.lv}</span><div class="bar"><div id="xpFill" style="width:${lvFrom.xp/needFrom*100}%"></div></div><span class="xpg">+${xpGain} XP</span></div>
+      <div class="wrows">
+        <div class="wrow wrw">${coins||chest?`<div class="reward"><i class="coin"></i><b>+<span id="cntUp">0</span></b></div>`:`<div class="reward none"><i class="coin"></i><span>Coins already collected</span></div>`}<i class="wsep"></i><div class="wxp"><i>⭐</i><b>+${xpGain} XP</b></div></div>
+        <div class="wrow xpline"><span class="lvb" id="xpLv">Lv ${lvFrom.lv}</span><div class="xpw"><small id="xpTxt">${xr.ups.length?`Level up! → Lv ${S.plv}`:`${lvFrom.xp} → ${S.xp} / ${needFrom} XP`}</small><div class="bar"><div id="xpFill" style="width:${lvFrom.xp/needFrom*100}%"></div></div></div></div>
+        ${(()=>{const ts=totalStars(),t=msThreshold(S.milestone),pt=S.milestone?msThreshold(S.milestone-1):0;return`<div class="wrow chrow"><span class="wchest">${chestSvg()}</span><div class="xpw"><small>${t-ts} star${t-ts===1?'':'s'} to next chest</small><div class="bar"><div style="width:${clamp((ts-pt)/(t-pt)*100,3,100)}%"></div></div></div><b class="chn">${ts}/${t} ⭐</b></div>`})()}
+      </div>
       <div id="lvSlot"></div>
       ${me.bonus?'<div class="extra gold">👑 Bonus level: double coins!</div>':''}
       ${daily?`<div class="extra gold">📅 Daily streak: ${dstreak} day${dstreak>1?'s':''}! Come back tomorrow</div>`:''}
@@ -198,7 +201,7 @@ function onWin(stars){
       daily?[{label:'Home',cls:'sec',fn:b=>playExit('home',b)},{label:'Keep playing ▶',cls:'big',fn:b=>playLevel(S.unlocked,{},b)}]
       :[{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
        {label:'Replay',cls:'sec sm',fn:b=>playLevel(n,{},b)},
-       {label:'Next ▶',cls:'big',fn:b=>playLevel(n+1,{},b)}],{cls:'win',back:()=>playExit(daily?'home':'map')});
+       {label:`Continue to Level ${n+1} ▶`,cls:'big next',fn:b=>playLevel(n+1,{},b)}],{cls:'win',back:()=>playExit(daily?'home':'map')});
     for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',26+i*8,1.1+i*.15);ring(x,y,'#ffd166',150+i*30);ring(x,y,'#fff',90,420);
       const c=$('#modal .card');if(c&&c.animate)c.animate([{transform:'none'},{transform:`translateY(${5+i*2}px) scale(.985)`},{transform:'none'}],{duration:220,easing:'ease-out'})}},(i*.38+.58)*1000);
     // the star chest lid swings open with a coin fountain
@@ -212,7 +215,7 @@ function onWin(stars){
     const countUp=t=>{const e=$('#cntUp');if(!e||cur!==me)return;const k=clamp((t-t0)/dur,0,1);e.textContent=Math.round(total*(1-Math.pow(1-k,3)));
       if(k>0&&k<1&&t-lt>70){lt=t;sfx.tick(1.5+k)}if(k<1)requestAnimationFrame(countUp);else{const r=$('#modal .reward');if(r)r.classList.add('done')}};
     requestAnimationFrame(countUp);
-    setTimeout(()=>{if(cur===me)flyCoins($('.reward .coin'),Math.min(12,4+total/4|0))},600+stars*380);
+    if(total>0)setTimeout(()=>{if(cur===me)flyCoins($('.reward .coin'),Math.min(12,4+total/4|0))},600+stars*380);
     // XP bar (with level-up flourish)
     setTimeout(()=>{
       const f=$('#xpFill');if(!f||cur!==me)return;
@@ -296,6 +299,7 @@ function show(id,o={}){
   Trans.go(id,o,()=>{
     if($('#map').classList.contains('active'))mapTop=$('#mapwrap').scrollTop;   // a hidden screen forgets its scroll: remember it for the next visit
     $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+    Scene.show(id);document.body.dataset.scr=id;$$('#nav .bn').forEach(b=>b.classList.toggle('on',b.dataset.nav===id));
     if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
     refreshHUD();syncGuard();
@@ -331,8 +335,10 @@ function refreshHUD(){
 /* ====================== wiring ====================== */
 $('#playBtn').onclick=()=>{sfx.good();playLevel(S.unlocked,{},$('#playBtn'))};
 $('.nextcard').onclick=()=>$('#playBtn').click();   // the Next up card plays the next level too
-$('#homeMap').onclick=()=>{sfx.click();show('map')};
-$('#homeShop').onclick=()=>{sfx.click();show('shop')};
+/* the bottom bar, the coin chips (+ opens the shop's boosts) and the garden's Edit button */
+$$('#nav .bn').forEach(b=>b.onclick=()=>{if(b.classList.contains('on'))return;sfx.click();show(b.dataset.nav)});
+$$('.coinbtn').forEach(b=>b.onclick=()=>{sfx.click();setShopTab('boosts');if(!$('#shop').classList.contains('active'))show('shop')});
+$('#gardenEdit').onclick=()=>{sfx.click();setShopTab('garden');show('shop')};
 $('#settingsBtn').onclick=()=>{sfx.click();showSettings()};
 $('#profileBtn').onclick=()=>{sfx.click();showProfile()};
 $('#tDaily').onclick=()=>{sfx.click();startDaily()};
@@ -384,7 +390,7 @@ WAKE_EVENTS.forEach(ev=>addEventListener(ev,wakeUntilRunning,{passive:true}));
 /* these stay for good: iOS suspends the audio context after a call or a trip to another app, and only a tap revives it */
 function wakeUntilRunning(){if(!AU.ctx||AU.ctx.state!=='running')wake()}
 
-buildLogo();applyTheme();BG.start();ensureQuests();checkAch();refreshHUD();renderHome();
+buildLogo();applyTheme();BG.start();Scene.show('home');document.body.dataset.scr='home';$('#nav .bn[data-nav="home"]').classList.add('on');ensureQuests();checkAch();refreshHUD();renderHome();
 if(S.welcome3)queueModal(()=>{if(S.welcome3)showWelcome()},700);else if(loginDue())queueModal(()=>{if(loginDue())showLogin()},800);
 setInterval(()=>{if($('#home').classList.contains('active')&&!document.hidden&&!Q.modal)tickHome()},1000);
 /* another tab saved: take its progress instead of overwriting it with this tab's older copy on the next save */

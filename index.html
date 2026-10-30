@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="css/modes/pics.css">
 <link rel="stylesheet" href="css/perf.css">
 <link rel="stylesheet" href="css/mobile.css">
+<link rel="stylesheet" href="css/redesign.css">
 </head>
 <body>
 <canvas id="bg"></canvas>
@@ -35,23 +36,31 @@
   <header class="hometop">
     <button class="profile" id="profileBtn" aria-label="Profile">
       <div class="lvring"><svg viewBox="0 0 44 44"><defs><linearGradient id="xpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0"/><stop offset="1"/></linearGradient></defs><circle class="trk" cx="22" cy="22" r="19"/><circle class="val" id="xpArc" cx="22" cy="22" r="19"/></svg><b id="plv">1</b></div>
-      <div class="pinfo"><b id="prank">Novice</b><small id="pxp">0 / 90 XP</small></div>
+      <div class="pinfo"><b id="prank">Novice</b><span class="pxpb"><i id="pxpFill"></i></span><small id="pxp">0 / 90 XP</small></div>
     </button>
-    <div class="chip"><i class="coin"></i><b class="coinval">0</b></div>
+    <button class="chip coinbtn" aria-label="Coins: open the shop"><i class="coin"></i><b class="coinval">0</b><i class="cplus" aria-hidden="true">+</i></button>
     <button class="iconbtn" id="settingsBtn" aria-label="Settings">⚙️</button>
   </header>
   <div class="homemain">
     <h1 class="logo"><small>ENDLESS</small><span class="word" id="logoWord"></span><em>∞ infinite levels ∞</em><i class="spk s1"></i><i class="spk s2"></i><i class="spk s3"></i><i class="spk s4"></i></h1>
-    <div class="garden" id="garden" aria-label="Your garden"></div>
+    <div class="island" id="island"><div class="iland" aria-hidden="true"></div><div class="garden" id="garden" aria-label="Your garden"></div>
+      <span class="isign">🌱 My Garden</span><button class="iedit" id="gardenEdit" aria-label="Decorate your garden in the shop">✏️ Edit</button></div>
     <div class="hero">
-      <div class="nextcard">
+      <div class="nextcard" role="button" tabindex="-1">
         <div class="nexticon" id="nextIcon">🏹</div>
-        <div class="nexttx"><small>NEXT UP</small><b id="nextName">Arrow Escape</b></div>
+        <div class="nexttx"><small id="heroWorld">WORLD 1</small><b id="heroName">Twilight Grove</b><span id="nextName">Level 1 · Arrow Escape</span></div>
         <div class="streakpill" id="streakPill" title="3-star streak">🔥 0</div>
       </div>
       <div class="playwrap">
         <div class="stage" aria-hidden="true"><i class="rays"></i><i class="halo"></i><i class="plat"></i></div>
         <button class="btn playbtn" id="playBtn"><span class="shine"></span><b>PLAY</b><small id="playLvl">Level 1</small></button>
+      </div>
+    </div>
+    <div class="starbar">
+      <div class="chest" id="chestIco"><i class="cglow"></i><svg viewBox="0 0 64 56" aria-hidden="true"><defs><linearGradient id="cwood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9773a"/><stop offset="1" stop-color="#7a3b16"/></linearGradient><linearGradient id="cgold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ffc83d"/><stop offset="1" stop-color="#c98a00"/></linearGradient></defs><g class="cbox"><rect x="6" y="26" width="52" height="27" rx="5" fill="url(#cwood)" stroke="#4a2008" stroke-width="2"/><rect x="6" y="26" width="52" height="6" fill="#00000030"/><rect x="14" y="26" width="6" height="27" fill="url(#cgold)"/><rect x="44" y="26" width="6" height="27" fill="url(#cgold)"/></g><g class="clid"><path d="M6 27V18Q6 6 32 6T58 18v9z" fill="url(#cwood)" stroke="#4a2008" stroke-width="2"/><path d="M10 14Q20 9 32 9" stroke="#ffffff60" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="14" y="8" width="6" height="19" fill="url(#cgold)"/><rect x="44" y="8" width="6" height="19" fill="url(#cgold)"/><rect x="5" y="23" width="54" height="5" rx="2" fill="url(#cgold)" stroke="#8a5a00" stroke-width="1"/></g><rect class="clock" x="27" y="22" width="10" height="13" rx="3" fill="url(#cgold)" stroke="#8a5a00" stroke-width="1.5"/><circle cx="32" cy="28" r="1.8" fill="#5a3200"/></svg></div>
+      <div class="sbwrap">
+        <div class="lbl"><span><svg class="sbstar" viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg><b id="homeStars">0</b></span><span id="homeNext"></span></div>
+        <div class="bar"><div id="homeBar" style="width:0"></div></div>
       </div>
     </div>
     <div class="tiles4">
@@ -60,17 +69,6 @@
       <button class="mtile" id="tQuests"><i>📜</i><b>Quests</b><small id="questSub">0/3</small><span class="dot"></span></button>
       <button class="mtile" id="tTrophy"><i>🏆</i><b>Trophies</b><small id="achSub">0</small><span class="dot"></span></button>
     </div>
-    <div class="row">
-      <button class="btn sec" id="homeMap"><i class="bi">🗺️</i>Levels</button>
-      <button class="btn sec" id="homeShop"><i class="bi">🛍️</i>Shop</button>
-    </div>
-    <div class="starbar">
-      <div class="chest" id="chestIco"><i class="cglow"></i><svg viewBox="0 0 64 56" aria-hidden="true"><defs><linearGradient id="cwood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9773a"/><stop offset="1" stop-color="#7a3b16"/></linearGradient><linearGradient id="cgold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ffc83d"/><stop offset="1" stop-color="#c98a00"/></linearGradient></defs><g class="cbox"><rect x="6" y="26" width="52" height="27" rx="5" fill="url(#cwood)" stroke="#4a2008" stroke-width="2"/><rect x="6" y="26" width="52" height="6" fill="#00000030"/><rect x="14" y="26" width="6" height="27" fill="url(#cgold)"/><rect x="44" y="26" width="6" height="27" fill="url(#cgold)"/></g><g class="clid"><path d="M6 27V18Q6 6 32 6T58 18v9z" fill="url(#cwood)" stroke="#4a2008" stroke-width="2"/><path d="M10 14Q20 9 32 9" stroke="#ffffff60" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="14" y="8" width="6" height="19" fill="url(#cgold)"/><rect x="44" y="8" width="6" height="19" fill="url(#cgold)"/><rect x="5" y="23" width="54" height="5" rx="2" fill="url(#cgold)" stroke="#8a5a00" stroke-width="1"/></g><rect class="clock" x="27" y="22" width="10" height="13" rx="3" fill="url(#cgold)" stroke="#8a5a00" stroke-width="1.5"/><circle cx="32" cy="28" r="1.8" fill="#5a3200"/></svg></div>
-      <div class="sbwrap">
-        <div class="lbl"><span><svg class="sbstar" viewBox="0 0 24 24"><path d="M12 2l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.8 5.6 21.6 7 14.5 1.7 9.5l7.2-.9z"/></svg><b id="homeStars">0</b> stars</span><span id="homeNext"></span></div>
-        <div class="bar"><div id="homeBar" style="width:0"></div></div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -78,19 +76,28 @@
   <div class="topbar">
     <button class="iconbtn" data-go="home" aria-label="Back">←</button>
     <h2><i class="h2i">🗺️</i>Levels</h2>
-    <div class="chip"><i class="coin"></i><b class="coinval">0</b></div>
+    <button class="chip coinbtn" aria-label="Coins: open the shop"><i class="coin"></i><b class="coinval">0</b><i class="cplus" aria-hidden="true">+</i></button>
   </div>
+  <div class="wtabs" id="wtabs" role="tablist" aria-label="Worlds"></div>
   <div class="mapwrap" id="mapwrap"><div class="mapinner" id="mapgrid"></div></div>
   <button class="curpill" id="curPill" aria-label="Jump to your current level"><span></span></button>
+  <div class="mappanel" id="mapPanel">
+    <div class="mpic" id="mpIcon"></div>
+    <div class="mptx"><small id="mpLv">LEVEL 1</small><b id="mpName">Arrow Escape</b><span class="mpst" id="mpStars"></span></div>
+    <button class="btn mpplay" id="mpPlay"><b>PLAY</b></button>
+  </div>
 </section>
 
 <section id="shop" class="screen">
   <div class="topbar">
     <button class="iconbtn" data-go="home" aria-label="Back">←</button>
     <h2><i class="h2i">🛍️</i>Shop</h2>
-    <div class="chip"><i class="coin"></i><b class="coinval">0</b></div>
+    <button class="chip coinbtn" aria-label="Coins: open the shop"><i class="coin"></i><b class="coinval">0</b><i class="cplus" aria-hidden="true">+</i></button>
   </div>
-  <div class="shoplist" id="shoplist"></div>
+  <div class="stabs" id="stabs" role="tablist" aria-label="Shop sections">
+    <button class="stab on" data-t="boosts" role="tab"><i>⚡</i>Boosts</button><button class="stab" data-t="themes" role="tab"><i>🎨</i>Themes</button><button class="stab" data-t="garden" role="tab"><i>🌿</i>Garden</button>
+  </div>
+  <div class="shoplist" id="shoplist" data-tab="boosts"></div>
 </section>
 
 <section id="play" class="screen">
@@ -112,6 +119,11 @@
   </div>
 </section>
 
+<nav class="bnav" id="nav" aria-label="Main">
+  <button class="bn" data-nav="home"><i>🏠</i><span>Home</span></button>
+  <button class="bn" data-nav="map"><i>🗺️</i><span>Levels</span></button>
+  <button class="bn" data-nav="shop"><i>🛍️</i><span>Shop</span></button>
+</nav>
 <div id="modal"></div>
 <div id="toast"></div>
 <div id="banners"></div>
@@ -131,6 +143,7 @@
 <script src="js/modes/blocks.js"></script>
 <script src="js/modes/pics-art.js"></script>
 <script src="js/modes/pics.js"></script>
+<script src="js/scenes.js"></script>
 <script src="js/screens.js"></script>
 <script src="js/ui.js"></script>
 <script>

@@ -219,7 +219,9 @@ const BG=(()=>{
     c.globalAlpha=1;
   }
   /* target fps for right now; 0 means "static: draw once and stop" */
+  let still=false;   // a static menu scene covers the canvas: draw once and stop
   function want(){
+    if(still)return 0;
     if(REDUCED||Q.tier==='low'||Q.modal||document.hidden)return 0;
     if(calmT>.5)return Q.tier==='high'?12:0;
     return Q.bgFps;
@@ -244,7 +246,7 @@ const BG=(()=>{
   Q.on(()=>{if(Math.abs(Q.bgScale-S_)>.01)size();else wake()});
   addEventListener('pointermove',e=>{tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5},{passive:true});
   addEventListener('deviceorientation',e=>{if(e.gamma!=null){tx=clamp(e.gamma/45,-.5,.5);ty=clamp((e.beta-40)/45,-.5,.5)}},{passive:true});
-  return{start(){init();wake()},retheme,wake,setCalm(v){calmT=v;wake()}};
+  return{start(){init();wake()},retheme,wake,setCalm(v){calmT=v;wake()},setStill(v){if(still!==v){still=v;wake()}}};
 })();
 
 /* ====================== screen transitions ======================
