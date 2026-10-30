@@ -61,7 +61,10 @@ MAKERS.tubes=function({R,tier,board,api}){
   const tEls=tubes.map((_,i)=>{const t=el('div','tube');t.onclick=()=>tapTube(i);wrap.appendChild(t);return t});
   api.stagger(tEls,50);
   /* static decoration is created once per tube; only the sand layers are rebuilt, and only when a tube's contents changed */
-  tEls.forEach(e=>{e.appendChild(el('i','gf-tk'));e.appendChild(el('i','gf-sh'));e.appendChild(el('i','gf-gl'))});
+  tEls.forEach(e=>{e.appendChild(el('i','gf-tk'));e.appendChild(el('i','gf-sh'));e.appendChild(el('i','gf-gl'));
+    /* the selection glows live in their own little layers made once here, and only fade (opacity): selecting a tube never
+       repaints its sand or creates layers on the spot, which is what made the first selection stutter on phones */
+    e.appendChild(el('i','gf-run'));e.appendChild(el('i','gf-ok'))});
   function buildSand(e,t,i){
     e.querySelectorAll('.seg').forEach(x=>x.remove());
     const isNew=j=>lastNew&&lastNew.i===i&&j>=lastNew.from,ghost=lastGhost&&lastGhost.i===i?lastGhost.segs:[];
@@ -87,9 +90,9 @@ MAKERS.tubes=function({R,tier,board,api}){
       if(e._k!==key||fresh){e._k=key;buildSand(e,t,i);clearTimeout(e._st);if(fresh)e._st=setTimeout(()=>settle(e),FL_RM?0:fresh)}
       e.classList.toggle('sel',i===sel);
       /* mark the top run of one colour (what a pour would move) on the selected tube */
-      const segs=e.querySelectorAll('.seg:not(.gone)');let run=0;
+      let run=0;
       if(i===sel)while(run<t.length&&t[t.length-1-run]===t[t.length-1])run++;
-      segs.forEach((x,j)=>x.classList.toggle('run',j>=segs.length-run));
+      e.style.setProperty('--rn',run);e.style.setProperty('--rb',t.length-run);e.classList.toggle('full1',run>0&&run===t.length);
       e.classList.toggle('done',t.length===cap&&uniform(t));
       e.classList.remove('hint');e.removeAttribute('data-h');
       const can=sel>=0&&i!==sel&&canPour(tubes,sel,i)>0;

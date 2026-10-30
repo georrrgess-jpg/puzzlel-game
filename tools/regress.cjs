@@ -333,10 +333,11 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     await prep(p);
     const lv = await typeLevel(p, 'tubes'); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
     await p.evaluate(() => document.querySelector('.tube').click()); await sleep(300);
-    const r = await p.evaluate(() => { const top = document.querySelector('.tube.sel .seg.top'), b = getComputedStyle(top, '::before'), a = getComputedStyle(top, '::after');
-      return { moundAnim: b.animationName, moundT: b.transform, glowTop: parseFloat(a.top), glowZ: a.zIndex } });
+    const r = await p.evaluate(() => { const top = document.querySelector('.tube.sel .seg.top'), b = getComputedStyle(top, '::before'), w = document.querySelector('.tube.sel .gf-run'), wr = w.getBoundingClientRect(), tr = top.getBoundingClientRect();
+      return { moundAnim: b.animationName, moundT: b.transform, washTop: Math.round(wr.top - tr.top), washAnim: getComputedStyle(w).animationName, washZ: getComputedStyle(w).zIndex } });
     ck('T1 the mound does not heave or tilt while selected', r.moundAnim === 'none' && (r.moundT === 'none' || r.moundT === 'matrix(1, 0, 0, 1, 0, 0)'), JSON.stringify(r));
-    ck('T1 the selection glow also covers the mound', r.glowTop < 0 && +r.glowZ >= 2, JSON.stringify(r));
+    ck('T1 the selection glow also covers the mound', r.washTop < 0 && r.washAnim === 'gfrun' && +r.washZ >= 2, JSON.stringify(r));
+    ck('T1 tubes are layered from the start (no layer is created on a tap)', await p.evaluate(() => [...document.querySelectorAll('.tube')].every(t => getComputedStyle(t).willChange === 'transform')));
   });
 
   /* ---- Picture Pop ---- */
