@@ -603,3 +603,13 @@ html.q-low .ach.got .am::after{display:none}
 #play .hud{background:linear-gradient(180deg,#ffffff30,#ffffff14);box-shadow:inset 0 1.5px 0 #ffffff60,inset 0 0 0 1px #ffffff38,0 6px 14px #0004}
 .coach{background:linear-gradient(180deg,#ffd04a,#ff9f1c)!important;color:#3a1a00!important;border-color:#fff6!important;text-shadow:none!important;box-shadow:0 3px 0 #a85a00,0 6px 12px #0004!important}
 .trt{min-height:44px;padding:8px 14px}
+
+/* ================= v4.5 polish ================= */
+/* toasts: a bright frosted pill instead of a black one */
+#toast{background:linear-gradient(180deg,#ffffffee,#f1e8ffe8);color:#2a1650;text-shadow:none;box-shadow:0 0 0 2px #ffffff,0 8px 24px #0006,0 2px 0 #c8b8ff}
+#toast b{color:#6a3ad8}
+/* every tappable thing answers a press the same quick way */
+.iconbtn,.mtile,.node:not(:disabled),.item,.quest,.trt,.chip{transition:transform .12s cubic-bezier(.3,1.5,.5,1),filter .12s}
+.trt:active,.chip:active{transform:scale(.94)}
+.item:active{transform:scale(.985)}
+.node:not(:disabled):active{transform:scale(.92)}

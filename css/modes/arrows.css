@@ -37,3 +37,9 @@
 .hst.sa .ard.go2{animation:ardgo 4.4s ease-in infinite}
 @keyframes ardgo{0%,50%{translate:0 0;opacity:1}75%,100%{translate:110px 0;opacity:0}}
 .ardr .fing{left:72%;top:55%}
+
+/* press preview: the lane a tile would travel */
+.ardot.arl{background:#3ad67a40;box-shadow:inset 0 0 0 2px #3ad67aa0}
+.ardot.arl::after{background:#bfffd8}
+.ardot.arlx{background:#ff4f6b38;box-shadow:inset 0 0 0 2px #ff4f6b90}
+.art.arbk{box-shadow:inset 0 -4px 0 #0002,inset 0 2px 0 #ffffff90,0 0 0 3px #ff4f6b,0 4px 0 color-mix(in srgb,var(--ac) 55%,#1a0a2a)}

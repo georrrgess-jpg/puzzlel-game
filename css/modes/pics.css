@@ -27,7 +27,7 @@
 
 /* a tile: the picture piece in a white frame; corners that meet a matching piece lose their rounding and the gap closes */
 .pt{--rd:9px;border-radius:var(--rd);background:var(--pc,#fff);padding:3px;box-shadow:0 2px 4px #0006;cursor:grab;
-  transform:translate(calc(var(--jx,0)*var(--gap)/2),calc(var(--jy,0)*var(--gap)/2));transition:transform .25s cubic-bezier(.3,1.3,.5,1),box-shadow .2s,border-radius .2s;
+  transform:translate(calc(var(--jx,0)*var(--gap)/2),calc(var(--jy,0)*var(--gap)/2));transition:transform .25s cubic-bezier(.3,1.3,.5,1),translate .2s cubic-bezier(.3,1.3,.5,1),box-shadow .2s,border-radius .2s;
   -webkit-tap-highlight-color:transparent}
 .pt .pim{display:block;width:100%;height:100%;border-radius:calc(var(--rd) - 2px);pointer-events:none}
 .pt.jr{border-top-right-radius:0;border-bottom-right-radius:0;padding-right:0}.pt.jl{border-top-left-radius:0;border-bottom-left-radius:0;padding-left:0}
@@ -72,3 +72,4 @@
 .ppph{font-size:11.5px;font-weight:600;line-height:1.25;text-align:center;color:#ffffffc0;max-width:150px}
 .pppeek.pka svg,.pppeek.pkb svg{animation:pkin .3s cubic-bezier(.3,1.5,.5,1)}.pppeek.pkb svg{animation-name:pkin2}
 @keyframes pkin{from{scale:.6;opacity:.3}}@keyframes pkin2{from{scale:.6;opacity:.3}}
+.pt.tg{translate:calc(var(--sx,0)*18%) calc(var(--sy,0)*14%)}

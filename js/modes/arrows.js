@@ -52,7 +52,8 @@ MAKERS.arrows=function({R,tier,board,api}){
   /* ---- DOM ---- */
   const wrap=el('div','arw');wrap.style.setProperty('--W',W);wrap.style.setProperty('--H',H);
   const bd=el('div','arb');wrap.appendChild(bd);board.appendChild(wrap);
-  for(let i=0;i<W*H;i++)if(inShape(i%W,(i/W)|0)){const d=el('i','ardot');d.style.setProperty('--x',i%W);d.style.setProperty('--y',(i/W)|0);bd.appendChild(d)}
+  const dots={};
+  for(let i=0;i<W*H;i++)if(inShape(i%W,(i/W)|0)){const d=el('i','ardot');dots[i]=d;d.style.setProperty('--x',i%W);d.style.setProperty('--y',(i/W)|0);bd.appendChild(d)}
   const tiles=new Map();
   function tileEl(i){
     const d=g[i],e=el('div','art',`<span class="arf" style="rotate:${d*90}deg">${AR_ARROW}</span>`);
@@ -122,6 +123,19 @@ MAKERS.arrows=function({R,tier,board,api}){
     if(!FL_RM){fountain(r.left+r.width/2,r.top+r.height/2,Q.tier==='low'?14:30);flRing(r.left+r.width/2,r.top+r.height/2,'#ffd166',r.width,700)}
     sfx.sparkle();api.win(starsFor(moves,s3,s2));
   }
+  /* press preview: while a finger is on a tile, the lane it would travel lights up (green to the edge, or red up to the tile
+     in the way, which shakes a little). Only a handful of cells change class, so it costs nothing. */
+  let lane=[];
+  const unlane=()=>{lane.forEach(e=>e.classList.remove('arl','arlx','arbk'));lane=[]};
+  bd.addEventListener('pointerdown',ev=>{
+    const t=ev.target.closest('.art');unlane();if(!t||t.classList.contains('argo')||api.over())return;
+    const i=+t.dataset.i,d=g[i];if(d<0)return;
+    const ok=free(i),cls=ok?'arl':'arlx';
+    for(let X=i%W+AR_D[d][0],Y=((i/W)|0)+AR_D[d][1];X>=0&&Y>=0&&X<W&&Y<H;X+=AR_D[d][0],Y+=AR_D[d][1]){const j=Y*W+X;
+      if(g[j]>=0){const b=tiles.get(j);if(b){b.classList.add('arbk');lane.push(b)}break}
+      if(dots[j]){dots[j].classList.add(cls);lane.push(dots[j])}}
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(n=>bd.addEventListener(n,unlane));
   bd.addEventListener('click',ev=>{const t=ev.target.closest('.art');if(!t||t.classList.contains('argo'))return;tap(+t.dataset.i)});
   function clearHint(){bd.querySelectorAll('.hint').forEach(e=>e.classList.remove('hint'))}
 

@@ -83,6 +83,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
     cells.forEach((c,i)=>{
       if(shown[i]!==G[i]){shown[i]=G[i];c.innerHTML=G[i]?`<div class="mgi">${mbIcon(G[i])}</div>`:'';c.classList.toggle('full',!!G[i]);c.dataset.s=G[i]||''}
       c.classList.toggle('sel',i===sel);
+      c.classList.toggle('twin',sel>=0&&i!==sel&&G[i]===G[sel]&&G[i]<MB_MAX);   // a picked plant's twins glow: where it can go
     });
     const best=Math.max(0,...G),cnt=G.filter(v=>v>=goal.G).length;
     stageEls.forEach((s,k)=>s.classList.toggle('on',best>=k+1));
@@ -139,7 +140,8 @@ MAKERS.merge=function({R,tier,level,board,api}){
       // the neighbours ripple outward from the merge
       const n0=b%n,m0=(b/n)|0;
       cells.forEach((c,i)=>{if(i===b)return;const dx=i%n-n0,dy=((i/n)|0)-m0,d=Math.hypot(dx,dy);if(d>2.3)return;
-        const k=(2.6-d)*2.2;wa(c,[{transform:'none'},{transform:`translate(${dx/d*k}px,${dy/d*k}px) scale(.97)`,offset:.4},{transform:'none'}],{duration:340,delay:d*55,easing:'ease-out'})});
+        /* one CSS animation per cell (twin keyframes, see merge.css): no Element.animate call, so no forced style recalculation each */
+        const k=(2.6-d)*2.2;if(!FL_RM){c.style.setProperty('--rx',(dx/d*k).toFixed(1)+'px');c.style.setProperty('--ry',(dy/d*k).toFixed(1)+'px');c.style.setProperty('--rd',Math.round(d*55)+'ms');again(c,'rp')}});
       // name the stage that just grew; a brand-new best stage gets a big callout and its ladder icon pops
       if(nv>bestBefore){
         floatText(bx,by-cw*.55,`${MB_NAMES[nv]}! ${nv>=5?'🌸':'🌱'}`,true);
@@ -183,7 +185,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
       const i=+c.dataset.i;if(!G[i])return false;
       const a=cells[0].getBoundingClientRect(),z=cells[CELLS-1].getBoundingClientRect();
       rect={left:a.left,top:a.top,right:z.right,bottom:z.bottom,width:z.right-a.left,height:z.bottom-a.top};
-      from=i;tgt=-1;mkGhost(i);sfx.lift();return true;
+      from=i;tgt=-1;mkGhost(i);sfx.lift();cells.forEach((c,j)=>c.classList.toggle('twin',j!==i&&G[j]===G[i]&&G[i]<MB_MAX));return true;
     },
     move(x,y,e){
       if(!ghost)return;const w=ghost.offsetWidth,ly=y-LIFT(e);
@@ -194,7 +196,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
     end(x,y,e,moved){
       const i=from;if(!ghost)return;
       const t=tgt;if(t>=0)cells[t].classList.remove('tg');tgt=-1;
-      const g=ghost;ghost=null;from=-1;cells[i].classList.remove('lifted');
+      const g=ghost;ghost=null;from=-1;cells[i].classList.remove('lifted');cells.forEach(c=>c.classList.remove('twin'));
       const drop=()=>g.remove();
       if(moved&&t>=0){drop();merge(i,t,[x,y-LIFT(e)]);return}
       if(!moved){ // tap: pick up / merge with the picked-up twin
@@ -208,7 +210,7 @@ MAKERS.merge=function({R,tier,level,board,api}){
       const a=wa(g,[{transform:g.style.transform},{transform:`translate3d(${hx-w*.47}px,${hy-w*.47}px,0) scale(1)`}],{duration:200,easing:'cubic-bezier(.3,1.4,.5,1)'});
       if(a)a.onfinish=drop;else drop();
     },
-    cancel(){if(ghost){ghost.remove();ghost=null}if(from>=0)cells[from].classList.remove('lifted');if(tgt>=0)cells[tgt].classList.remove('tg');from=-1;tgt=-1}
+    cancel(){cells.forEach(c=>c.classList.remove('twin'));if(ghost){ghost.remove();ghost=null}if(from>=0)cells[from].classList.remove('lifted');if(tgt>=0)cells[tgt].classList.remove('tg');from=-1;tgt=-1}
   });
 
   return{

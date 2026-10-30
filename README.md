@@ -39,6 +39,17 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v4.5
+
+- **Arrow Escape**: pressing a tile previews its path; the lane lights green to the edge, or red up to the tile in the
+  way (which gets a red ring), before you let go.
+- **Picture Pop**: while you drag a tile over another, that tile leans towards your tile's cell, previewing the swap;
+  the pop sequence is shorter, so you can play on sooner.
+- **Merge Bloom**: picking up or selecting a plant makes its matching twins glow.
+- **Polish**: bright frosted toasts, the same quick press feedback on every tappable card, chip, tab and map level.
+- **Lighter effects**: particles render at 1× (they are soft glows), Block Garden puts a flower on every other cleared
+  cell, and Merge Bloom's neighbour ripple is one CSS animation per cell instead of a script call.
+
 ## What's new in v4.4
 
 - **Picture Pop is easier to read**: every picture has its own frame colour on all its tiles; tapping (or dragging) a tile

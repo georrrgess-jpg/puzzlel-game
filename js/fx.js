@@ -2,7 +2,7 @@
 /* ====================== particles ====================== */
 const fxc=$('#fx'),fctx=fxc.getContext('2d');let parts=[],raf=0,dpr=1,dirtyBox=null;
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resizeFx(){dirtyBox=null;dpr=Math.min(Q.tier==='high'?1.25:1,window.devicePixelRatio||1);/* particles are soft glows: a smaller canvas costs far less to commit every frame */fxc.width=innerWidth*dpr;fxc.height=innerHeight*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
+function resizeFx(){dirtyBox=null;dpr=1;/* particles are soft glows: a smaller canvas costs far less to commit every frame */fxc.width=innerWidth*dpr;fxc.height=innerHeight*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
 addEventListener('resize',resizeFx);Q.on(resizeFx);resizeFx();
 /* every effect goes through add() so the live-particle count never exceeds the tier's cap */
 const add=p=>{if(parts.length<Q.pcap||p.sh==='flash')parts.push(p)};

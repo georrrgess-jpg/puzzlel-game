@@ -42,3 +42,9 @@
 .mgdc.pop .mbi{animation:mgDemoPop .7s cubic-bezier(.3,1.7,.5,1) both}
 @keyframes mgDemoPop{from{transform:scale(.3)}}
 @media (max-height:700px){.mgb{--ms:min(92vw,calc(100dvh - 350px),440px)}}
+
+/* neighbours ripple away from a merge (js/modes/merge.js sets --rx/--ry/--rd and swaps rpa/rpb) */
+.mg.rpa{animation:mgrpa .34s ease-out var(--rd,0ms)}.mg.rpb{animation:mgrpb .34s ease-out var(--rd,0ms)}
+@keyframes mgrpa{40%{translate:var(--rx) var(--ry);scale:.97}}@keyframes mgrpb{40%{translate:var(--rx) var(--ry);scale:.97}}
+.mg.twin{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px #fff8;animation:mgtwin .7s ease-in-out infinite alternate}
+@keyframes mgtwin{to{box-shadow:inset 0 0 0 3px #fff,0 0 22px var(--acc)}}

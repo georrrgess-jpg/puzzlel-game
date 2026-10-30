@@ -165,7 +165,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   const BLOOM_LABEL=['','Bloom!','Double bloom!','Triple bloom!'];
   /* one flower template (petal colour from --fc), cloned per block: far cheaper than parsing SVG markup each time */
   const FLOWER=el('i','bgfl',`<svg viewBox="0 0 40 40">${[0,72,144,216,288].map(r=>`<g transform="rotate(${r} 20 20)"><ellipse class="pt" cx="20" cy="10.5" rx="7.2" ry="10"/><ellipse cx="20" cy="9" rx="3" ry="5.4" fill="#ffffff70"/></g>`).join('')}<circle cx="20" cy="20" r="6.6" fill="#ffd23d" stroke="#e09a00" stroke-width="1.2"/><circle cx="18" cy="18" r="2.1" fill="#fffc"/></svg>`);
-  const FLOWER_EVERY={high:1,med:1,low:2};
+  const FLOWER_EVERY={high:2,med:2,low:3};   // a flower on every other cleared cell reads just as full and halves the animations
   const cellXY=(x,y)=>[ox+x*cp+cs/2,oy+y*cp+cs/2];   // client centre of a cell
   function bloom(a,cx,cy,my){
     // every layout read happens up front; after this point the function only writes (no forced re-layouts)

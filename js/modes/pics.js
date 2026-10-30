@@ -169,7 +169,7 @@ MAKERS.pics=function({R,tier,board,api}){
   }
   /* a chain of finished pictures, one link at a time; input waits until it has played */
   function play(steps){
-    busy=true;const my=gen,BL=Q.tier==='low'?700:950;
+    busy=true;const my=gen,BL=Q.tier==='low'?640:820;
     steps.forEach((st,k)=>{
       const t=240+k*(BL+80);
       later(()=>{if(my!==gen)return;st.done.forEach((j,x)=>pop(j,k+x));},t);
@@ -186,7 +186,7 @@ MAKERS.pics=function({R,tier,board,api}){
     ov.style.setProperty('--r',Math.floor(c0/C));ov.style.setProperty('--c',c0%C);inner.appendChild(ov);fx.add(ov);
     const or=ov.getBoundingClientRect(),gr=$('.ppgal',top).getBoundingClientRect();
     const cx=or.left+or.width/2,cy=or.top+or.height/2,dx=gr.left+gr.width/2-cx,dy=gr.top+gr.height/2-cy;
-    const low=Q.tier==='low',BL=low?700:950;
+    const low=Q.tier==='low',BL=low?640:820;
     const a=ov.animate([
       {opacity:0,scale:.96,translate:'0 0'},{opacity:1,scale:1,offset:.1},{scale:1.1,offset:.3},{scale:1.06,offset:.62,translate:'0 0',opacity:1},
       {scale:.12,translate:`${dx}px ${dy}px`,opacity:.4}],{duration:BL,easing:'cubic-bezier(.4,0,.3,1)',fill:'forwards'});
@@ -225,7 +225,9 @@ MAKERS.pics=function({R,tier,board,api}){
   let drag=null;
   const cellAt=(x,y)=>{const b=inner.getBoundingClientRect(),s=slots[0].getBoundingClientRect(),gp=slots[1].getBoundingClientRect().left-s.right;
     const c=Math.floor((x-b.left+gp/2)/(s.width+gp)),r=Math.floor((y-b.top+gp/2)/(s.height+gp));return c>=0&&c<C&&r>=0&&r<RW?r*C+c:-1};
-  let tgEl=null;const target=e=>{if(tgEl===e)return;if(tgEl)tgEl.classList.remove('tg');tgEl=e;if(e){e.classList.add('tg');sfx.tick(1.5)}};
+  /* the tile under a dragged tile leans towards the dragged tile's cell: a preview of the swap */
+  let tgEl=null;const target=(e,from)=>{if(tgEl===e)return;if(tgEl){tgEl.classList.remove('tg');tgEl.style.removeProperty('--sx');tgEl.style.removeProperty('--sy')}tgEl=e;
+    if(e){if(from>=0&&e.classList.contains('pt')){const t=+e.dataset.i;e.style.setProperty('--sx',Math.sign(from%C-t%C));e.style.setProperty('--sy',Math.sign(Math.floor(from/C)-Math.floor(t/C)))}e.classList.add('tg');sfx.tick(1.5)}};
   dragify(inner,{
     start(e){
       if(busy||api.over())return false;
@@ -237,7 +239,7 @@ MAKERS.pics=function({R,tier,board,api}){
       if(!drag.on&&Math.hypot(x-drag.x,y-drag.y)>7){drag.on=true;drag.el.classList.add('drag');setSel(-1);peek(+drag.el.dataset.a);sfx.lift()}
       if(!drag.on)return;
       const ly=y-LIFT(e)*.5;drag.el.style.translate=`${x-drag.x}px ${ly-drag.y}px`;
-      const c=cellAt(x,ly);target(c>=0&&c!==drag.i?(g[c]>=0?els.get(g[c]):slots[c]):null);
+      const c=cellAt(x,ly);target(c>=0&&c!==drag.i?(g[c]>=0?els.get(g[c]):slots[c]):null,drag.i);
     },
     end(x,y,e,moved){
       const d=drag;drag=null;target(null);if(!d)return;
