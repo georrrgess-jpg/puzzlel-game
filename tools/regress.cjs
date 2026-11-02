@@ -381,7 +381,9 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
       if (await p.evaluate(() => !!document.querySelector('.ppf'))) frame = true;
       await sleep(1300); const s1 = await pstate(p);
       if (s1.done > s0.done) { popped = true; ck('P2 the freed cells refill from the deck', s1.dp > s0.dp, JSON.stringify([s0.dp, s1.dp])) }
-      if (s1.dom !== s1.tiles) sync = false;
+      // a chain (two pictures from one move) refills twice, so allow the second refill to land before comparing
+      let s2 = s1; for (let w = 0; w < 20 && s2.dom !== s2.tiles; w++) { await sleep(100); s2 = await pstate(p) }
+      if (s2.dom !== s2.tiles) sync = false;
     }
     ck('P2 a picture popped', popped);
     ck('P2 the whole framed picture is shown as it pops', frame);
