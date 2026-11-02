@@ -48,6 +48,7 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   - clearing one the first time shows a **World complete** banner with a coin and hint reward.
 - **The win card shows what's next.** The Continue button shows the next level's mode icon.
 - **Economy rebalanced** around the new rewards (economy-sim passes).
+- **New animated Levels background:** a moonlit enchanted valley with a castle, floating islands, a lake and glowing crystals. It moves with northern lights, twinkling and shooting stars, drifting clouds and mist, flowing waterfalls, lake shimmer and fireflies. Everything runs on cheap transform and opacity animations, and it goes still in low-graphics or reduced-motion mode.
 
 ## What's new in v5 (menu redesign)
 

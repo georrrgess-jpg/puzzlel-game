@@ -271,3 +271,44 @@ body[data-scr="play"] .bnav{display:none}
 .wdone .wd-r .coin{width:13px;height:13px}
 @keyframes wdIn{from{opacity:0;transform:scale(.6) rotate(-4deg)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.wdone{animation:none}}
+
+/* ---------- v6.1: the animated Levels scene (layers from SCENES.fx.map; transform + opacity only) ---------- */
+#scene .fx{position:absolute;inset:0;overflow:hidden;container-type:size}
+#scene .sfx{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:max(100vw,133.333vh);height:max(75vw,100vh)}
+@supports (width:1cqw){#scene .sfx{width:max(100cqw,133.333cqh);height:max(75cqw,100cqh)}}
+#scene .sfx>*{position:absolute;display:block}
+#scene .sfx svg{width:100%;height:100%;display:block}
+#scene .aur{left:0;width:100%;height:33.33%;animation:sv-aur 16s ease-in-out infinite alternate}
+#scene .aur.a2{animation-duration:23s;animation-direction:alternate-reverse}
+@keyframes sv-aur{0%{transform:translateX(-4%) scaleY(.85);opacity:.3}50%{opacity:.7}100%{transform:translateX(4%) scaleY(1.15);opacity:.45}}
+#scene .tw{left:0;top:0;width:100%;height:62.2%;animation:sv-tw 3.2s ease-in-out infinite alternate}
+#scene .tw.t2{animation-duration:4.6s;animation-delay:-2s}
+@keyframes sv-tw{from{opacity:.1}to{opacity:.95}}
+#scene .moon{aspect-ratio:1;filter:drop-shadow(0 0 18px #ffe7b380)}
+#scene .halo{width:38.33%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffe9c840 0,#ffb8e01a 40%,transparent 68%);animation:sv-halo 6s ease-in-out infinite alternate}
+@keyframes sv-halo{from{transform:scale(.94);opacity:.6}to{transform:scale(1.06);opacity:1}}
+#scene .shoot{width:9%;height:2px;border-radius:2px;background:linear-gradient(90deg,#fff,#c8e6ff80 30%,transparent);transform-origin:0 50%;opacity:0;animation:sv-shoot 9s linear infinite}
+#scene .shoot::before{content:'';position:absolute;left:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 10px 3px #bfe4ff}
+#scene .shoot.s2{animation-duration:14s;animation-delay:-6s}
+@keyframes sv-shoot{0%,88%{opacity:0;transform:translate(0,0) rotate(-24deg)}90%{opacity:1}97%{opacity:0;transform:translate(-30vmin,13vmin) rotate(-24deg)}100%{opacity:0}}
+#scene .cl{width:25%;opacity:.2;animation:sv-drift 70s ease-in-out infinite alternate}
+#scene .cl.c2{opacity:.16;animation-duration:90s;animation-direction:alternate-reverse}
+#scene .cl.c3{width:18%;opacity:.12;animation-duration:110s}
+@keyframes sv-drift{from{transform:translateX(-35%)}to{transform:translateX(35%)}}
+#scene .fall{overflow:hidden;border-radius:4px;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+#scene .fall b{position:absolute;left:0;right:0;top:-52px;bottom:0;background:repeating-linear-gradient(180deg,#bfeaff30 0 7px,#f2fbffb0 9px 12px,#bfeaff40 15px,#bfeaff22 26px);animation:sv-fall .8s linear infinite}
+@keyframes sv-fall{from{transform:translateY(0)}to{transform:translateY(52px)}}
+#scene .glint{height:.45%;border-radius:4px;background:#ffe6c0;animation:sv-glint 2.6s ease-in-out infinite alternate}
+@keyframes sv-glint{from{transform:scaleX(.55);opacity:.15}to{transform:scaleX(1.1);opacity:.75}}
+#scene .cglow{width:calc(var(--s)*15%);aspect-ratio:1;margin-left:calc(var(--s)*-7.5%);margin-top:calc(var(--s)*-11%);border-radius:50%;background:radial-gradient(circle,#c9a6ff60 0,#7fd8ff26 38%,transparent 66%);animation:sv-cglow 4s ease-in-out infinite alternate}
+@keyframes sv-cglow{from{opacity:.25;transform:scale(.9)}to{opacity:1;transform:scale(1.05)}}
+#scene .mist{left:-50%;width:200%;height:16%;bottom:5%;background:radial-gradient(ellipse 30% 50% at 25% 50%,#b9a3ff38,transparent),radial-gradient(ellipse 25% 45% at 70% 55%,#ff9ad02c,transparent);animation:sv-mist 40s ease-in-out infinite alternate}
+#scene .mist.m2{bottom:14%;opacity:.7;animation-duration:56s;animation-direction:alternate-reverse}
+@keyframes sv-mist{from{transform:translateX(-10%)}to{transform:translateX(10%)}}
+#scene .ff{width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff8c8;box-shadow:0 0 6px 2px #ffe970aa,0 0 16px 6px #ffd23a40;animation-name:sv-ffm,sv-ffb;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:normal,alternate}
+@keyframes sv-ffm{0%,100%{transform:translate(0,0)}25%{transform:translate(var(--dx),calc(var(--dy)*-1))}50%{transform:translate(calc(var(--dx)*.4),calc(var(--dy)*-1.6))}75%{transform:translate(calc(var(--dx)*-.7),calc(var(--dy)*-.4))}}
+@keyframes sv-ffb{0%,30%{opacity:.12}75%,100%{opacity:1}}
+/* low graphics and reduced motion: the picture stays, the motion goes (a few fireflies remain lit) */
+html.q-low #scene .fx *{animation:none !important}
+html.q-low #scene .shoot,html.q-low #scene .ff:nth-of-type(2n){display:none}
+@media (prefers-reduced-motion:reduce){#scene .fx *{animation:none !important}#scene .shoot{display:none}}
