@@ -42,6 +42,7 @@ function simulate(name, P, maxLevels = 1500) {
       const r = R(), stars = r < P.p3 ? 3 : r < P.p3 + P.p2 ? 2 : 1, bonus = level % 10 === 0;
       streak = stars === 3 ? streak + 1 : 0;
       const rw = E.levelReward(0, stars, bonus, streak); add(rw.coins - rw.streakBonus, 'levels'); add(rw.streakBonus, 'streak');
+      if (level % 12 === 0) { add(Math.round((rw.coins - rw.streakBonus) * (ECON.clear.challengeMult - 1)), 'levels'); add(ECON.world.bonus, 'worlds'); hints += ECON.world.hints }   // challenge levels and world completion
       totalStars += stars;
       while (totalStars >= E.msThreshold(milestone)) { add(E.chestReward(milestone), 'chests'); milestone++ }
       xp += E.xpForWin(stars, false, bonus);

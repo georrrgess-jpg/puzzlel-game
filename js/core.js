@@ -24,13 +24,14 @@ function fmtTime(ms){ms=Math.max(0,ms);const h=Math.floor(ms/36e5),m=Math.floor(
    a one-file change. Targets: about 20-30 coins per level on average from all sources; a hint costs about 1.5 levels
    of earnings, a skip about 4; the first colour theme lands around level 15-25 and the whole shop takes 250+ levels. */
 const ECON={
-  clear:{base:6,perStar:4,improve:2,bonusMult:2,streakStep:1,streakCap:5},   // first clear = base + perStar per star; replays only pay for new stars
+  clear:{base:6,perStar:4,improve:2,bonusMult:2,streakStep:1,streakCap:5,challengeMult:1.25},   // first clear = base + perStar per star; replays only pay for new stars
+  world:{bonus:5,hints:1},   // one-off reward for finishing a world (its challenge level) the first time
   daily:{base:20,perStar:4,streakStep:4,streakMax:7},
-  hint:{cost:40,p3:100,p10:300},
+  hint:{cost:42,p3:100,p10:300},
   skip:{cost:150,token:120,p3:330},
   spin:{cd:4*3600e3,cost:40},
-  quest:{rewards:[8,12,16],bonus:20,bonusHints:1,xp:15},
-  lvlup:{base:10,per:2,cap:60,skipEvery:5},
+  quest:{rewards:[8,12,16],bonus:15,bonusHints:1,xp:15},
+  lvlup:{base:10,per:1,cap:50,skipEvery:5},
   chest:{base:12,per:5},
   xp:{need:L=>60+L*30,clear:10,perStar:5,daily:30,bonus:10},
   login:[{c:15,ic:'🪙'},{c:20,ic:'🪙'},{c:20,h:1,ic:'💡'},{c:30,ic:'💰'},{c:25,h:2,ic:'💡'},{c:40,ic:'💰'},{c:60,h:2,s:1,ic:'🎁'}],
@@ -132,7 +133,12 @@ function bagOrder(b){
   return a;
 }
 function typeFor(n){const N=TYPES.length,b=Math.floor((n-1)/N);return bagOrder(b)[(n-1)%N]}
-const tierFor=n=>Math.floor((n-1)/TYPES.length);
+/* difficulty: a curve that climbs quickly at first and keeps rising slowly until about level 300 (instead of a step every
+   6 levels that reached every mode's hardest boards by level 50), with a wave inside each 12-level world: two easy openers,
+   a build-up, and a challenge level to finish. The wave grows in as the base difficulty can carry it, so world 1 is gentle. */
+const WAVE=[-1,-1,0,0,0,1,0,1,0,1,1,2];
+const tierFor=n=>{const t=13*(1-Math.exp(-n/140));return Math.max(0,Math.round(t+WAVE[(n-1)%12]*Math.min(1,t/4)))};
+const isChallenge=n=>n%12===0;   // the last level of every world
 const isBonus=n=>n%10===0;
 const starsFor=(v,s3,s2)=>v<=s3?3:v<=s2?2:1;
 const WORLDS=['Twilight Grove','Crystal Caves','Neon Harbor','Sunken Temple','Cloud Citadel','Ember Peaks','Starfall Bay','Clockwork City','Aurora Fields','Moonlit Maze','Prism Desert','Cosmic Garden'];

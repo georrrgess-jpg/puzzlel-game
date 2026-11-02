@@ -46,18 +46,18 @@ function startLevel(n,opts={}){
   const daily=!!opts.daily;let type,tier,seed;
   if(daily){const c=dailyCfg();type=c.type;tier=c.tier;seed=c.seed}
   else{type=typeFor(n);tier=tierFor(n);seed=hashSeed(n,TYPES.indexOf(type)+1)}
-  const bonus=!daily&&isBonus(n);
+  const bonus=!daily&&isBonus(n),chal=!daily&&isChallenge(n);
   board.innerHTML='';closeModal();pendingUnlock=null;
   $('#hudStars').innerHTML=STAR+STAR+STAR;meterKey='';$('#hudInfo').innerHTML='';
-  $('#ptitle').textContent=daily?'📅 Daily Challenge':bonus?`👑 Level ${n}`:'Level '+n;
-  $('.ptitle').classList.toggle('bonus',bonus||daily);
-  $('#psub').innerHTML=`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(bonus?'<span class="sx"> · BONUS 2× coins</span>':daily?'<span class="sx"> · big reward!</span>':'');
+  $('#ptitle').textContent=daily?'📅 Daily Challenge':bonus?`👑 Level ${n}`:chal?`🔥 Level ${n}`:'Level '+n;
+  $('.ptitle').classList.toggle('bonus',bonus||daily);$('.ptitle').classList.toggle('chal',chal&&!bonus);
+  $('#psub').innerHTML=`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(bonus?'<span class="sx"> · BONUS 2× coins</span>':chal?'<span class="sx"> · Finale</span>':daily?'<span class="sx"> · big reward!</span>':'');
   /* the written instruction is for the first 3 levels of each mode; after that the coach pill is the only guidance (? still opens the how-to) */
   const again=!!cur&&cur.level===n&&cur.daily===daily;   // a restart is not a new level
   S.seenN=S.seenN||{};const seenN=S.seenN[type]||0;if(!again&&seenN<3){S.seenN[type]=seenN+1;save()}
   $('#instr').textContent=INFO[type].tip;$('#instr').classList.toggle('off',seenN>=3);api.coach('');
   const replay=again||(!daily&&(S.stars[n]||0)>0);
-  cur={replay,level:n,type,daily,bonus,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
+  cur={replay,level:n,type,daily,bonus,chal,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
   /* pick an unfinished level up where it was left (a restart starts it fresh) */
@@ -81,7 +81,7 @@ function showIntro(){
   }
   const goal=c.puz.goal||(L?`★★★ in ${L.s3} moves or fewer`:'');
   const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
-    <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':'LEVEL '+c.level}</small><b>${i.name}</b>
+    <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':c.chal?`🔥 WORLD FINALE · LEVEL ${c.level}`:'LEVEL '+c.level}</small><b>${i.name}</b>
     ${goal?`<em>${goal}</em>`:''}${best?`<span class="lvi-best">Your best: ${'★'.repeat(best)}${'☆'.repeat(3-best)}</span>`:''}</div>`);
   $('#play').appendChild(b);
   setTimeout(()=>b.classList.add('out'),1500);setTimeout(()=>b.remove(),2100);
@@ -148,7 +148,7 @@ function skipLevel(){
 function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);clearTimeout(pulseT);$('#hintBtn').classList.remove('pulse');refreshUndo();
   const me=cur,n=cur.level,daily=cur.daily;
-  let coins,prev=0,streakBonus=0,chest=0,dstreak=0;
+  let coins,prev=0,streakBonus=0,chest=0,dstreak=0,chalBonus=0,world=null;
   /* a daily is booked to the day it was STARTED (a win after midnight still counts for that day) and only once; a
      replay of a 3-star level earns little XP, no streak bonus and doesn't extend the streak */
   const dd=cur.dday,booked=daily&&S.dchal.last>=dd,replay3=!daily&&(S.stars[n]||0)===3;
@@ -163,8 +163,13 @@ function onWin(stars){
   }else{
     prev=S.stars[n]||0;
     const r=levelReward(prev,stars,cur.bonus,S.streak);coins=r.coins-r.streakBonus;streakBonus=replay3?0:r.streakBonus;
+    /* a world finale pays extra on the coins it earns, and clearing it the first time completes the world */
+    if(cur.chal){chalBonus=Math.round(coins*(ECON.clear.challengeMult-1));coins+=chalBonus}
     if(stars>prev)S.stars[n]=stars;
-    if(S.unlocked<=n){S.unlocked=n+1;pendingUnlock={n,stars}}
+    if(S.unlocked<=n){
+      S.unlocked=n+1;pendingUnlock={n,stars};
+      if(cur.chal){const w=Math.floor((n-1)/12);world={name:worldName(w),next:worldName(w+1),coins:ECON.world.bonus,hints:ECON.world.hints};coins+=world.coins;S.hints+=world.hints}
+    }
   }
   coins+=streakBonus;S.coins+=coins;
   while(totalStars()>=msThreshold(S.milestone)){chest+=chestReward(S.milestone);S.milestone++}
@@ -186,6 +191,7 @@ function onWin(stars){
       <div class="ribbon ${daily||me.bonus?'gold':''}"><span>${daily?'DAILY COMPLETE':me.bonus?'BONUS COMPLETE':`LEVEL ${n} COMPLETE`}</span></div>
       <div class="bigstars">${[0,1,2].map(i=>`<div class="sock ${i<stars?'on':''}" style="--d:${i*.38+.25}s">${STAR}</div>`).join('')}</div>
       <div class="verdict" style="--d:${stars*.38+.35}s">${stars===3?'PERFECT!':stars===2?'GREAT JOB!':'CLEARED!'}</div>
+      ${world?`<div class="wdone"><span class="wd-g">🌍</span><span class="wd-x"><small>WORLD COMPLETE</small><b>${world.name}</b></span><span class="wd-r"><span class="rc"><i class="coin"></i>+${world.coins}</span><span class="rc">💡+${world.hints}</span></span></div>`:''}
       <div class="wrows">
         <div class="wrow wrw">${coins||chest?`<div class="reward"><i class="coin"></i><b>+<span id="cntUp">0</span></b></div>`:`<div class="reward none"><i class="coin"></i><span>Coins already collected</span></div>`}<i class="wsep"></i><div class="wxp"><i>⭐</i><b>+${xpGain} XP</b></div></div>
         <div class="wrow xpline"><span class="lvb" id="xpLv">Lv ${lvFrom.lv}</span><div class="xpw"><small id="xpTxt">${xr.ups.length?`Level up! → Lv ${S.plv}`:`${lvFrom.xp} → ${S.xp} / ${needFrom} XP`}</small><div class="bar"><div id="xpFill" style="width:${lvFrom.xp/needFrom*100}%"></div></div></div></div>
@@ -193,6 +199,7 @@ function onWin(stars){
       </div>
       <div id="lvSlot"></div>
       ${me.bonus?'<div class="extra gold">👑 Bonus level: double coins!</div>':''}
+      ${chalBonus?`<div class="extra gold">🔥 World finale bonus: +${chalBonus}</div>`:''}
       ${daily?`<div class="extra gold">📅 Daily streak: ${dstreak} day${dstreak>1?'s':''}! Come back tomorrow</div>`:''}
       ${streakBonus?`<div class="extra">🔥 3-star streak ×${S.streak}: +${streakBonus}</div>`:''}
       ${stars>prev&&prev>0?`<div class="extra newbest">🏅 New best!</div>`:prev>0&&!daily?`<div class="extra">Your best stays ${'★'.repeat(prev)}${'☆'.repeat(3-prev)}</div>`:''}
@@ -201,7 +208,7 @@ function onWin(stars){
       daily?[{label:'Home',cls:'sec',fn:b=>playExit('home',b)},{label:'Keep playing ▶',cls:'big',fn:b=>playLevel(S.unlocked,{},b)}]
       :[{label:'Levels',cls:'sec sm',fn:b=>playExit('map',b)},
        {label:'Replay',cls:'sec sm',fn:b=>playLevel(n,{},b)},
-       {label:`Continue to Level ${n+1} ▶`,cls:'big next',fn:b=>playLevel(n+1,{},b)}],{cls:'win',back:()=>playExit(daily?'home':'map')});
+       {label:`<span class="nx">${INFO[typeFor(n+1)].icon}</span>Level ${n+1} ▶`,cls:'big next',fn:b=>playLevel(n+1,{},b)}],{cls:'win',back:()=>playExit(daily?'home':'map')});
     for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);buzz(20);const s=$$('.bigstars .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',26+i*8,1.1+i*.15);ring(x,y,'#ffd166',150+i*30);ring(x,y,'#fff',90,420);
       const c=$('#modal .card');if(c&&c.animate)c.animate([{transform:'none'},{transform:`translateY(${5+i*2}px) scale(.985)`},{transform:'none'}],{duration:220,easing:'ease-out'})}},(i*.38+.58)*1000);
     // the star chest lid swings open with a coin fountain
@@ -210,6 +217,8 @@ function onWin(stars){
       wa(lid,[{transform:'rotate(0)'},{transform:'rotate(-14deg)',offset:.2},{transform:'rotate(-108deg)'}],{duration:520,easing:'cubic-bezier(.3,1.5,.5,1)',fill:'forwards'});
       const m=$('.mchest');if(m){const[x,y]=centerOf(m);sfx.chest();burst(x,y,'#ffd166',18,.9);fountain(x,y,22)}
     },1500+stars*300);
+    // world complete: a fanfare as the world card lands
+    if(world)setTimeout(()=>{if(cur!==me)return;const w=$('#modal .wdone');if(!w)return;const[x,y]=centerOf(w);sfx.chest();buzz([20,30,40]);burst(x,y,'#ff9a3d',30,1.3);burst(x,y,'#ffd166',20,1);ring(x,y,'#fff',200,600)},1250);
     // coin count-up
     const total=coins,t0=performance.now()+300,dur=900;let lt=0;
     const countUp=t=>{const e=$('#cntUp');if(!e||cur!==me)return;const k=clamp((t-t0)/dur,0,1);e.textContent=Math.round(total*(1-Math.pow(1-k,3)));
@@ -400,4 +409,4 @@ addEventListener('storage',e=>{
   applyTheme();refreshHUD();const a=$('.screen.active');if(a&&a.id!=='play')show(a.id);
   toast('Progress updated from another tab');
 });
-window.__game={S,TYPES,typeFor,startLevel,get cur(){return cur},show,api,closeModal};
+window.__game={S,TYPES,typeFor,tierFor,levelFor:(t,tier)=>{for(let n=1;n<5000;n++)if(typeFor(n)===t&&tierFor(n)>=tier)return n},startLevel,get cur(){return cur},show,api,closeModal};

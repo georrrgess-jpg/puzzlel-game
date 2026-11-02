@@ -39,6 +39,16 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v6 (worlds and difficulty)
+- **Difficulty that keeps rising.** Before, every mode hit its hardest boards by about level 50. Now difficulty climbs smoothly up to about level 300, and new players get a gentler start.
+- **Each 12-level world has a rhythm.** Two easy warm-ups, a steady build, a few breathers, and a 🔥 **World finale** as level 12.
+- **World finales:**
+  - marked with 🔥 on the map, the home card, the level panel and the level intro;
+  - pay bonus coins;
+  - clearing one the first time shows a **World complete** banner with a coin and hint reward.
+- **The win card shows what's next.** The Continue button shows the next level's mode icon.
+- **Economy rebalanced** around the new rewards (economy-sim passes).
+
 ## What's new in v5 (menu redesign)
 
 - **Scenery**: each menu has its own static illustrated backdrop (twilight floating islands, crystal caves, a sunset

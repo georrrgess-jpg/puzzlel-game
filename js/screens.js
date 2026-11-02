@@ -16,10 +16,10 @@ function renderHome(){
   ni.textContent=INFO[ty].icon;ni.style.setProperty('--tc',INFO[ty].col);ni.parentElement.style.setProperty('--tcn',INFO[ty].col);
   const wn=Math.floor((n-1)/12);$('#heroWorld').textContent=`WORLD ${wn+1}`;$('#heroName').textContent=worldName(wn);
   $('#home .hero').style.setProperty('--wc',WCOL[wn%WCOL.length]);
-  $('#nextName').textContent=`${isBonus(n)?'👑 ':''}Level ${n} · ${INFO[ty].name}`;
+  $('#nextName').textContent=`${isBonus(n)?'👑 ':isChallenge(n)?'🔥 ':''}Level ${n} · ${INFO[ty].name}`;
   const res=S.resume&&S.resume.n===n;$('#playBtn').classList.toggle('resume',!!res);
   /* the card already names the level, so PLAY only adds a line when there is something new to say */
-  const pl=res?`Continue level ${n}`:isBonus(n)?'2× coins bonus level':'';$('#playLvl').textContent=pl;$('#playLvl').hidden=!pl;
+  const pl=res?`Continue level ${n}`:isBonus(n)?'2× coins bonus level':isChallenge(n)?'World finale · bonus coins':'';$('#playLvl').textContent=pl;$('#playLvl').hidden=!pl;
   const sp=$('#streakPill');sp.innerHTML=`🔥 ${S.streak}<small>streak</small>`;sp.hidden=!S.streak;sp.classList.toggle('hot',S.streak>=2);
   $('#plv').textContent=S.plv;$('#prank').textContent=rankOf(S.plv);$('#pxp').textContent=`${S.xp} / ${xpNeed(S.plv)} XP`;$('#pxpFill').style.width=Math.min(100,S.xp/xpNeed(S.plv)*100)+'%';
   /* the XP ring runs from where it was when you last looked to where it is now (all the way round first after a level-up) */
@@ -97,7 +97,7 @@ function pickLevel(n){
   mapPick=n;const ty=typeFor(n),st=S.stars[n]||0,i=INFO[ty];
   $$('#mapgrid .node.pick').forEach(e=>e.classList.remove('pick'));const nd=$(`#mapgrid .node[data-n="${n}"]`);if(nd)nd.classList.add('pick');
   $('#mpIcon').textContent=i.icon;$('#mpIcon').style.setProperty('--tc',i.col);
-  $('#mpLv').textContent=`${isBonus(n)?'👑 BONUS · ':''}LEVEL ${n}`;$('#mpName').textContent=i.name;
+  $('#mpLv').textContent=`${isBonus(n)?'👑 BONUS · LEVEL ':isChallenge(n)?'🔥 FINALE · LV ':'LEVEL '}${n}`;$('#mpName').textContent=i.name;
   $('#mpStars').innerHTML=[0,1,2].map(k=>STAR.replace('<svg','<svg class="'+(k<st?'on':'')+'"')).join('');
   const pb=$('#mpPlay b');pb.textContent=S.resume&&S.resume.n===n?'CONTINUE':st?'REPLAY':'PLAY';
 }
@@ -119,9 +119,9 @@ function watchCur(){
 $('#curPill').onclick=()=>{const n=$('.node.cur');if(n){sfx.click();n.scrollIntoView({block:'center',behavior:'smooth'})}};
 function mapNode(n,lim=S.unlocked,bare=false){
   const st=bare?0:S.stars[n]||0,locked=n>lim,ty=typeFor(n),cur=n===lim;
-  const b=el('button','node'+(cur?' cur':'')+(isBonus(n)?' bonus':'')+(st===3?' perfect':''));
+  const b=el('button','node'+(cur?' cur':'')+(isBonus(n)?' bonus':'')+(isChallenge(n)?' chal':'')+(st===3?' perfect':''));
   b.style.setProperty('--tc',INFO[ty].col);b.dataset.n=n;b.disabled=locked;b.style.animationDelay=((n-1)%12)*30+'ms';
-  b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${cur?'<span class="here">YOU ARE HERE</span>':''}${S.resume&&S.resume.n===n?'<span class="resm" title="In progress">▶</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
+  b.innerHTML=locked?`${PADLOCK}<span class="num">${n}</span>${isChallenge(n)?'<span class="fin">🔥</span>':''}`:`<span class="num">${n}</span><span class="ty">${INFO[ty].icon}</span>${isChallenge(n)?'<span class="fin">🔥</span>':''}${cur?'<span class="here">YOU ARE HERE</span>':''}${S.resume&&S.resume.n===n?'<span class="resm" title="In progress">▶</span>':''}<span class="st">${[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<st?'on':'')+'"')).join('')}</span>`;
   b.onclick=()=>{if(mapPick===n){sfx.good();playLevel(n,{},b)}else{sfx.click();pickLevel(n);wa(b,[{scale:1},{scale:1.12},{scale:1}],{duration:260,easing:'cubic-bezier(.3,1.6,.5,1)'})}};
   return b;
 }

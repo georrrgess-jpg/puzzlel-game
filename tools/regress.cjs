@@ -324,7 +324,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     // (B9, the red pulse when the garden is full, cannot be reached in a test: a board full of 7s has already met the goal. Checked by hand.)
     // the cue starts at tier 2 and only on constellations with odd stars (a closed loop can start anywhere): try a few levels
     let cued = false;
-    for (let n = 2 * (await p.evaluate(() => __game.TYPES.length)) + 1, tries = 0; tries < 4 && !cued; n++) {
+    for (let n = await p.evaluate(() => __game.levelFor('threads', 2)), tries = 0; tries < 4 && !cued; n++) {
       if (await p.evaluate(n => __game.typeFor(n), n) !== 'threads') continue;
       tries++; await p.evaluate(n => __game.startLevel(n), n); await sleep(7600);
       cued = await p.evaluate(() => document.querySelectorAll('.st.cue').length) >= 1;
@@ -390,7 +390,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
   });
   await test('P3 4-piece pictures go together as a 2x2 square', async p => {
     await prep(p);
-    const lv = await p.evaluate(() => { let n = 4 * __game.TYPES.length + 1; while (__game.typeFor(n) !== 'pics') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    const lv = await p.evaluate(() => __game.levelFor('pics', 4)); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
     let four = false;
     for (let k = 0; k < 80 && !(await p.evaluate(() => __game.cur.over)); k++) {
       const d0 = (await pstate(p)).done; await p.evaluate(() => __game.cur.puz._bot()); const d1 = (await pstate(p)).done;
@@ -402,7 +402,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
   });
   await test('P4 the solver play earns 3 stars', async p => {
     await prep(p);
-    const lv = await p.evaluate(() => { let n = 2 * __game.TYPES.length + 1; while (__game.typeFor(n) !== 'pics') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
+    const lv = await p.evaluate(() => __game.levelFor('pics', 2)); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
     for (let k = 0; k < 80 && !(await p.evaluate(() => __game.cur.over)); k++) await p.evaluate(() => __game.cur.puz._bot());
     await sleep(900);
     ck('P4 won with 3 stars', await p.evaluate(() => __game.cur.over && document.querySelectorAll('#hudStars svg.on').length === 3));
@@ -423,9 +423,22 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     await p.evaluate(() => document.querySelector('#undoBtn').click()); await sleep(300);
     ck('E1 Undo brings it back', (await st()).left === s0.left);
   });
+  await test('W1 a world finale completes the world once', async p => {
+    await prep(p);
+    const r = await p.evaluate(async () => { const g = __game, w = ms => new Promise(r => setTimeout(r, ms)); g.S.unlocked = 12; const h0 = g.S.hints;
+      g.startLevel(12); const title = document.querySelector('#ptitle').textContent; g.api.win(3); await w(1400); const first = !!document.querySelector('#modal .wdone'), hints = g.S.hints - h0;
+      g.startLevel(12); g.api.win(3); await w(1400); const again = !!document.querySelector('#modal .wdone');
+      g.startLevel(11); g.api.win(3); await w(1400); const other = !!document.querySelector('#modal .wdone'); g.closeModal();
+      return { title, first, hints, again, other } });
+    ck('W1 level 12 is marked as a finale', /🔥/.test(r.title), r.title);
+    ck('W1 the first clear shows World complete and pays a hint', r.first && r.hints === 1, JSON.stringify(r));
+    ck('W1 a replay or a normal level does not', !r.again && !r.other, JSON.stringify(r));
+    ck('W1 each world is harder on average than the last, and its finale is its hardest level', await p.evaluate(() => { const T = __game.tierFor; let prev = -1;
+      for (let w = 0; w < 30; w++) { const t = [...Array(12)].map((_, k) => T(w * 12 + k + 1)), avg = t.reduce((a, b) => a + b) / 12; if (avg < prev || t[11] < Math.max(...t)) return false; prev = avg } return true }));
+  });
   await test('E2 every tier can be cleared without a single bump', async p => {
     await prep(p);
-    const r = await p.evaluate(() => { const out = []; const N = __game.TYPES.length; for (let t = 0; t < 10; t++) { let n = t * N + 1; while (__game.typeFor(n) !== 'arrows') n++; __game.startLevel(n); const q = __game.cur.puz; let k = 0; while (!__game.cur.over && k < 200) { if (!q._bot()) break; k++ } const s = JSON.parse(q.snap()); out.push({ t, left: s.g.filter(d => d >= 0).length, moves: s.moves, bumps: s.moves - k }) } return out });
+    const r = await p.evaluate(() => { const out = []; const N = __game.TYPES.length; for (let t = 0; t < 10; t++) { const n = __game.levelFor('arrows', t); __game.startLevel(n); const q = __game.cur.puz; let k = 0; while (!__game.cur.over && k < 200) { if (!q._bot()) break; k++ } const s = JSON.parse(q.snap()); out.push({ t, left: s.g.filter(d => d >= 0).length, moves: s.moves, bumps: s.moves - k }) } return out });
     ck('E2 the board empties at every tier', r.every(x => x.left === 0), JSON.stringify(r.map(x => x.left)));
     ck('E2 the solver never bumps', r.every(x => x.bumps === 0));
   });
@@ -435,7 +448,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     for (const [w, h] of [[390, 844], [1280, 800]]) {
       await p.setViewportSize({ width: w, height: h }); await sleep(200);
       const bad = await p.evaluate(() => { const out = []; const N = __game.TYPES.length;
-        for (const tier of [0, 3, 9]) for (let k = 1; k <= N; k++) { const n = tier * N + k; __game.startLevel(n); const b = document.querySelector('#board'), r = b.firstElementChild && b.firstElementChild.getBoundingClientRect();
+        for (const tier of [0, 3, 9]) for (const ty of __game.TYPES) { const n = __game.levelFor(ty, tier); __game.startLevel(n); const b = document.querySelector('#board'), r = b.firstElementChild && b.firstElementChild.getBoundingClientRect();
           if (!r || r.width < 120 || r.height < 120 || b.querySelectorAll('*').length < 12) out.push(__game.cur.type + '@' + n) } return out });
       ck(`R1 boards render at ${w}x${h}`, bad.length === 0, JSON.stringify(bad));
     }

@@ -6,7 +6,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const srv = http.createServer((q, r) => { let p = q.url.split('?')[0]; if (p.endsWith('/')) p += 'index.html'; fs.readFile(path.join(ROOT, p), (e, d) => { if (e) { r.writeHead(404); r.end() } else { r.writeHead(200, { 'content-type': { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.woff2': 'font/woff2' }[path.extname(p)] || 'application/octet-stream' }); r.end(d) } }) });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const tiers = (process.argv[2] || '0,1,2,3,5,7,9,12,20,40').split(',').map(Number);
+const tiers = (process.argv[2] || '0,1,2,3,5,7,9,11,13').split(',').map(Number);
 (async () => {
   await new Promise(r => srv.listen(0, r)); const PORT = srv.address().port;
   const browser = await chromium.launch();
@@ -18,7 +18,7 @@ const tiers = (process.argv[2] || '0,1,2,3,5,7,9,12,20,40').split(',').map(Numbe
   let bad = 0;
   console.log('mode'.padEnd(9), 'tier level', 'result');
   for (const type of types) for (const tier of tiers) {
-    const lvl = await page.evaluate(([t, tier]) => { const N = __game.TYPES.length; for (let n = tier * N + 1; n <= tier * N + N; n++) if (__game.typeFor(n) === t) return n; return null }, [type, tier]);
+    const lvl = await page.evaluate(([t, tier]) => __game.levelFor(t, tier), [type, tier]);
     if (!lvl) continue;
     const t0 = Date.now();
     const gen = await page.evaluate(n => { const t = performance.now(); __game.startLevel(n); return performance.now() - t }, lvl);
