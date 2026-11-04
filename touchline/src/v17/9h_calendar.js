@@ -106,7 +106,7 @@ function v1819kResolve(C,why){ const O=v1819kOW(C); if(O.done) return O; const k
   return O; }
 
 /* ---------- homecoming: a Friday home game in weeks 3-8 (not the open week) ---------- */
-function v1819kHomecoming(C,yr){ yr=yr||C.year; const key=C.seed+'|'+yr+'|'+C.userSid+'|hc'; const m=V1819K.memo.get(key); if(m) return m;
+function v1819kHomecoming(C,yr){ yr=yr||C.year; const key=C.seed+'|'+yr+'|'+C.userSid+'|hc'; const m=V1819K.memo.get(key); if(m){ const g=m.fid&&C.fixtures[m.fid]; if(g&&g.yr===yr&&g.comp==='reg'&&g.lvl==='V'&&g.h===C.userSid) return m; } /* a memo from another career with the same seed points at other fixtures */
   const r=rngFrom(hashStr(C.seed+'|v1819khc|'+yr)); const u=C.userSid; const fx=Object.values(C.fixtures).filter(f=>f.yr===yr&&f.comp==='reg'&&f.lvl==='V'&&f.h===u);
   const wks=[6,7,4,3,8]; let best=null; const order=wks.map(w=>({w,k:r()+(w===6||w===7?0:0.6)})).sort((a,b)=>a.k-b.k).map(x=>x.w);
   for(const w of order){ const rd=w<V1819K.OPEN_WK?2*(w-1)+1:2*(w-2)+1; const f=fx.find(x=>x.rd===rd); if(f){ best={wk:w,fid:f.id}; break; } }
@@ -119,11 +119,11 @@ function v1819kEvents(C,yr){ yr=yr||C.year; const r=rngFrom(hashStr(C.seed+'|v18
   const pic=W(2+Math.floor(r()*2))+2+Math.floor(r()*2); ev('picture',pic,'📸','Picture day','Team and individual photos before practice. Wear the home kit. Informational.');
   let bn=W(2+Math.floor(r()*3))+3; if(bn===pic) bn+=7; ev('booster',bn,'🍝','Booster night','The Booster Club pasta dinner in the cafeteria. Parents, players and a raffle. Informational.');
   const hc=v1819kHomecoming(C,yr); const hcf=hc.fid&&C.fixtures[hc.fid];
-  ev('homecoming',W(hc.wk),'👑','Homecoming week',hcf?`Spirit week ends with the Friday home game against ${Sx(hcf.a).town}: a 30% bigger crowd and a little extra home advantage.`:'Spirit week, the dance and the parade. Informational this year (no Friday home game).',{dn2:W(hc.wk)+4,bar:1,fid:hc.fid});
+  ev('homecoming',W(hc.wk),'👑','Homecoming week',hcf?`Spirit week ends with the Friday home game against ${C.schools[hcf.a].town}: a 30% bigger crowd and a little extra home advantage.`:'Spirit week, the dance and the parade. Informational this year (no Friday home game).',{dn2:W(hc.wk)+4,bar:1,fid:hc.fid});
   ev('inservice',W(6+Math.floor(r()*2)),'✏️','In-service day','No classes: teachers are in training. Practice moves to the morning. Informational.');
   ev('halloween',v1819kDn(yr,9,31),'🎃','Halloween','Costumes in the hallways. Informational.');
   ev('report',W(9+Math.floor(r()*2))+3,'📝','Report cards','First-quarter grades go home. Informational.');
-  try{ const sn=seniorNightFixture(C,yr); if(sn&&(yr!==C.year||seniorsOf(C).length)) ev('senior',v1819kFxDn(sn),'🌹','Senior night',`Your seniors are honored before the last home game, against ${Sx(sn.a).town}.`,{fid:sn.id}); }catch(e){}
+  try{ const sn=seniorNightFixture(C,yr); if(sn&&(yr!==C.year||seniorsOf(C).length)) ev('senior',v1819kFxDn(sn),'🌹','Senior night',`Your seniors are honored before the last home game, against ${C.schools[sn.a].town}.`,{fid:sn.id}); }catch(e){}
   { const nov1=v1819kDn(yr,10,1); const th=nov1+((4-v1819kYmd(nov1).dow+7)%7)+21; ev('thanks',th,'🦃','Thanksgiving','No school Thursday and Friday. Informational.'); }
   ev('banquet',v1819kSeasonEnd(yr)+1,'🏆','Awards banquet','End-of-season banquet: letters, captains for next year, the coach\'s speech. Informational.');
   return out.sort((a,b)=>a.dn-b.dn); }
@@ -148,7 +148,7 @@ function v1819kItems(C,yr,lvl){ yr=yr||C.year; lvl=lvl||'V'; const u=C.userSid; 
     return M; }; }
 { const _fm=finishMatch; finishMatch=function(C,M){ const f=C.fixtures[M.fid]; const was=f&&f.st; const out=_fm.apply(this,arguments);
     try{ if(f&&was!=='d'&&f.st==='d'){ v1819kTick(C,f);
-        if(M.v1819kHc&&!M.fast){ const S=v1819kS(C); if(!S.hc[f.yr]){ S.hc[f.yr]=f.id; const u=C.userSid; addNews(C,'program',`Homecoming: ${(f.att||0).toLocaleString()} pack the stands as ${Sx(u).town} ${f.w===u?'beat':f.w?'fall to':'draw with'} ${Sx(f.a).town}, ${f.hg}-${f.ag}`,u,{fid:f.id}); } } } }catch(e){ console.warn('calendar',e); }
+        if(M.v1819kHc&&!M.fast){ const S=v1819kS(C); if(!S.hc[f.yr]){ S.hc[f.yr]=f.id; const u=C.userSid; addNews(C,'program',`Homecoming: ${(f.att||0).toLocaleString()} pack the stands as ${C.schools[u].town} ${f.w===u?'beat':f.w?'fall to':'draw with'} ${C.schools[f.a].town}, ${f.hg}-${f.ag}`,u,{fid:f.id}); } } } }catch(e){ console.warn('calendar',e); }
     return out; }; }
 { const _ad=advance; advance=function(C){ const ev=_ad.apply(this,arguments); try{ if(ev&&C.phase!=='regular'&&C.phase!=='preseason'){ const O=v1819kOW(C); if(!O.done&&!O.legacy) v1819kResolve(C,'auto'); } }catch(e){} return ev; }; }
 { const _ro=rollover; rollover=function(C){ try{ v1819kUndoAll(C); }catch(e){} return _ro.apply(this,arguments); }; }
