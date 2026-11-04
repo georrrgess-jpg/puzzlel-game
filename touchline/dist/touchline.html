@@ -4007,6 +4007,357 @@ tr.z-up .v1819l-z{color:#5fd38d}tr.z-po .v1819l-z,tr.z-pd .v1819l-z{color:#e8b84
 @media (max-width:640px){ .v1819l-bh{flex-direction:column;align-items:stretch} .v1819l-crests{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px} .v1819l-cr{width:auto} .v1819l-cr svg{width:32px;height:auto} .v1819l-bh>.btn{align-self:flex-start} .v1819l-t th:nth-child(7),.v1819l-t td:nth-child(7),.v1819l-t td.v1819l-z,.v1819l-t th:last-child{display:none} .v1819l-lg{grid-template-columns:1fr} .v1819l-bh h2{font-size:1.5rem} }
 @media (max-width:640px){ .v1819l-t th:nth-child(4),.v1819l-t td:nth-child(4){display:none} .v1819l-sn .link{max-width:calc(100vw - 262px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;text-align:left} .v1819l-t td,.v1819l-t th{padding-left:6px;padding-right:6px} }
 
+/* v18.19 Season Calendar */
+.v1819k{--v1819k-w:#5fd38d;--v1819k-l:#ff7f7a;--v1819k-d:#a9b8c9;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;align-items:start}
+.v1819k-main,.v1819k-side{min-width:0}
+.v1819k-side{display:flex;flex-direction:column;gap:14px;position:sticky;top:84px}
+.v1819k-kick{display:block;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.v1819k-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 18px;flex-wrap:wrap;margin-bottom:10px}
+.v1819k-ttl h2{font-family:var(--f-display);font-size:2.6rem;line-height:.95;text-transform:uppercase;margin:4px 0 0;letter-spacing:.01em}
+.v1819k-ttl h2 em{font-style:normal;color:var(--muted);font-weight:500}
+.v1819k-ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.v1819k-nav{display:flex;align-items:center;gap:6px}
+.v1819k-arr{appearance:none;width:36px;height:36px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer}
+.v1819k-arr:hover:not([disabled]){border-color:var(--accent);color:var(--accent)}
+.v1819k-arr[disabled]{opacity:.35;cursor:default}
+.v1819k-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.v1819k-lg{appearance:none;font:inherit;font-size:.8rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.v1819k-lg i{font-style:normal}
+.v1819k-lg.on{color:var(--text);background:var(--surface);border-color:color-mix(in srgb,var(--text) 22%,var(--line))}
+.v1819k-lg:not(.on){text-decoration:line-through;opacity:.7}
+.v1819k-lg.k-open i{color:var(--accent)}
+.v1819k-today-l{margin-left:auto;font-size:.82rem;color:var(--muted)}.v1819k-today-l b{color:var(--accent)}
+.v1819k-card{border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
+/* month */
+.v1819k-dows{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 60%,var(--surface))}
+.v1819k-dows span{padding:8px 10px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.v1819k-dows .we{color:color-mix(in srgb,var(--muted) 70%,var(--bg))}
+.v1819k-row{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.v1819k-row:last-child{border-bottom:0}
+.v1819k-day{position:relative;min-height:112px;padding:6px 6px 28px;border-right:1px solid color-mix(in srgb,var(--line) 70%,transparent);min-width:0;display:flex;flex-direction:column;gap:4px}
+.v1819k-day:last-child{border-right:0}
+.v1819k-day.we{background:color-mix(in srgb,var(--bg) 22%,transparent)}
+.v1819k-day.out>*{opacity:.32}
+.v1819k-day.today{box-shadow:inset 0 0 0 2px var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent);border-radius:4px}
+.v1819k-dh{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.v1819k-dnum{font-family:var(--f-display);font-size:1.15rem;font-weight:700;line-height:1;color:color-mix(in srgb,var(--text) 80%,var(--bg))}
+.v1819k-day.today .v1819k-dnum{color:var(--accent)}
+.v1819k-tag{font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:#111;padding:2px 6px;border-radius:999px}
+.v1819k-dc{display:flex;flex-direction:column;gap:4px;position:relative;z-index:1;min-width:0}
+.v1819k-g{appearance:none;font:inherit;color:inherit;text-align:left;display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:9px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;min-width:0;border-left:3px solid var(--muted);transition:transform .12s,border-color .12s}
+.v1819k-g:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--text) 30%,var(--line))}
+.v1819k-g>svg{flex:none}
+.v1819k-gt{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.v1819k-gt b{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1819k-gt small{font-size:.72rem;color:var(--muted);font-weight:700;white-space:nowrap}
+.v1819k-g.rW{border-left-color:var(--v1819k-w)}.v1819k-g.rW small{color:var(--v1819k-w)}
+.v1819k-g.rL{border-left-color:var(--v1819k-l)}.v1819k-g.rL small{color:var(--v1819k-l)}
+.v1819k-g.rD{border-left-color:var(--v1819k-d)}.v1819k-g.rD small{color:var(--v1819k-d)}
+.v1819k-g.up{border-left-color:var(--team,var(--accent))}
+.v1819k-g.skip{opacity:.5}
+.v1819k-g.riv{background:color-mix(in srgb,#ff5a36 12%,var(--surface2));border-color:color-mix(in srgb,#ff5a36 40%,var(--line))}
+.v1819k-g.fr{cursor:default;border-style:dashed;border-left-style:solid}
+.v1819k-g.c-sec,.v1819k-g.c-rgn,.v1819k-g.c-st{background:color-mix(in srgb,#e8c35a 10%,var(--surface2))}
+.v1819k-fire{font-style:normal;font-size:.75rem}
+.v1819k-gdot{display:none}
+.v1819k-ev{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;color:color-mix(in srgb,var(--text) 78%,var(--bg));padding:2px 6px;border-radius:7px;background:color-mix(in srgb,var(--text) 5%,transparent);min-width:0;cursor:help}
+.v1819k-ev i{font-style:normal;flex:none}.v1819k-ev span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1819k-ev.k-post{color:#e8c35a;background:color-mix(in srgb,#e8c35a 9%,transparent)}
+.v1819k-ev.k-senior{color:#ff9fb4}
+.v1819k-band{position:absolute;top:30px;bottom:6px;z-index:0;border:2px dashed color-mix(in srgb,var(--accent) 70%,transparent);border-radius:12px;background:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--accent) 13%,transparent) 0 8px,transparent 8px 17px);display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;pointer-events:auto}
+.v1819k-band span{font-family:var(--f-display);font-weight:800;font-size:1.05rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--surface);padding:2px 10px;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.v1819k-band.done{border-color:color-mix(in srgb,var(--muted) 60%,transparent);background:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--muted) 10%,transparent) 0 8px,transparent 8px 17px)}
+.v1819k-band.done span{color:var(--text)}
+.v1819k-bar{position:absolute;bottom:5px;height:20px;z-index:2;display:flex;align-items:center;gap:6px;padding:0 10px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--team-ink,#fff);background:linear-gradient(90deg,var(--team,#7c4dff),color-mix(in srgb,var(--team,#7c4dff) 55%,var(--team2,#fff)));box-shadow:0 2px 8px #0004;cursor:help;overflow:hidden;white-space:nowrap}
+.v1819k-bar i{font-style:normal}
+/* week */
+.v1819k-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.v1819k-wcol{border-right:1px solid var(--line);min-width:0;min-height:340px}
+.v1819k-wcol:last-child{border-right:0}
+.v1819k-wcol.today{background:color-mix(in srgb,var(--accent) 6%,transparent);box-shadow:inset 0 3px 0 var(--accent)}
+.v1819k-wh{display:flex;align-items:baseline;gap:6px;padding:10px;border-bottom:1px solid var(--line)}
+.v1819k-wh span{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.v1819k-wh b{font-family:var(--f-display);font-size:1.6rem;line-height:1}
+.v1819k-wh i{font-style:normal;margin-left:auto;font-size:.62rem;font-weight:800;text-transform:uppercase;background:var(--accent);color:#111;padding:2px 6px;border-radius:999px}
+.v1819k-wb{display:flex;flex-direction:column;gap:8px;padding:8px}
+.v1819k-none{color:var(--muted);opacity:.5;padding:4px}
+.v1819k-wg{appearance:none;font:inherit;color:inherit;text-align:left;display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;border:1px solid var(--line);border-top:3px solid var(--team,var(--accent));background:var(--surface2);cursor:pointer;min-width:0}
+.v1819k-wg>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v1819k-wg small{font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.v1819k-wg b{font-size:.95rem;line-height:1.15}
+.v1819k-wg em{font-style:normal;font-size:.72rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.v1819k-wr{font-family:var(--f-mono);font-weight:700;font-size:.85rem;margin-top:2px}
+.v1819k-wr i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;margin-right:4px;color:#111;background:var(--muted)}
+.v1819k-wg.rW{border-top-color:var(--v1819k-w)}.v1819k-wg.rW .v1819k-wr i{background:var(--v1819k-w)}
+.v1819k-wg.rL{border-top-color:var(--v1819k-l)}.v1819k-wg.rL .v1819k-wr i{background:var(--v1819k-l)}
+.v1819k-wg.rD{border-top-color:var(--v1819k-d)}.v1819k-wg.rD .v1819k-wr i{background:var(--v1819k-d)}
+.v1819k-wg.riv{background:color-mix(in srgb,#ff5a36 12%,var(--surface2))}
+.v1819k-wg.fr{cursor:default;border-style:dashed}
+.v1819k-wo{padding:10px;border-radius:12px;border:2px dashed color-mix(in srgb,var(--accent) 70%,transparent);background:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--accent) 12%,transparent) 0 8px,transparent 8px 17px);display:flex;flex-direction:column;gap:2px}
+.v1819k-wo b{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.v1819k-wo small{font-size:.75rem;color:var(--muted)}
+.v1819k-we{display:flex;gap:8px;padding:8px;border-radius:10px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+.v1819k-we>i{font-style:normal}
+.v1819k-we>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v1819k-we b{font-size:.82rem}.v1819k-we small{font-size:.72rem;color:var(--muted);line-height:1.3}
+.v1819k-we.k-homecoming{background:color-mix(in srgb,var(--team,#7c4dff) 20%,transparent)}
+.v1819k-we.k-post b{color:#e8c35a}
+/* list */
+.v1819k-list{padding:6px 14px 14px}
+.v1819k-lm{font-family:var(--f-display);font-size:1.4rem;text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px;color:var(--muted)}
+.v1819k-li{appearance:none;font:inherit;color:inherit;text-align:left;width:100%;display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:12px;border:1px solid transparent;background:transparent;margin-bottom:4px}
+button.v1819k-li{cursor:pointer}button.v1819k-li:hover{background:var(--surface2);border-color:var(--line)}
+.v1819k-li>svg{flex:none}
+.v1819k-ld{flex:none;width:44px;display:flex;flex-direction:column;align-items:center;line-height:1;padding:5px 0;border-radius:9px;background:var(--surface2)}
+.v1819k-ld small{font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.v1819k-ld b{font-family:var(--f-display);font-size:1.35rem}
+.v1819k-ld.today{background:var(--accent);color:#111}.v1819k-ld.today small{color:#111}
+.v1819k-li-ico{flex:none;width:32px;text-align:center;font-size:1.2rem}
+.v1819k-lt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.v1819k-lt b{font-size:.95rem}.v1819k-lt b em{font-style:normal;font-weight:600;font-size:.78rem;color:var(--muted);margin-left:4px}
+.v1819k-lt small{font-size:.78rem;color:var(--muted);line-height:1.3}
+.v1819k-lr{flex:none;font-family:var(--f-mono);font-weight:700;display:flex;align-items:center;gap:6px}
+.v1819k-lr i{font-style:normal;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;color:#111;background:var(--muted)}
+.v1819k-lr em{font-style:normal;font-family:var(--f-body);font-size:.78rem;color:var(--muted)}
+.v1819k-li.rW .v1819k-lr i{background:var(--v1819k-w)}.v1819k-li.rL .v1819k-lr i{background:var(--v1819k-l)}.v1819k-li.rD .v1819k-lr i{background:var(--v1819k-d)}
+.v1819k-li.riv{background:color-mix(in srgb,#ff5a36 9%,transparent)}
+.v1819k-li.open{border:2px dashed color-mix(in srgb,var(--accent) 65%,transparent);background:repeating-linear-gradient(-45deg,color-mix(in srgb,var(--accent) 10%,transparent) 0 8px,transparent 8px 17px)}
+.v1819k-li.open .v1819k-li-ico{color:var(--accent)}
+.v1819k-li.post b{color:#e8c35a}
+.v1819k-li.ev.k-homecoming .v1819k-lt b{color:var(--team-hi,var(--text))}
+.v1819k-lnow{display:flex;align-items:center;gap:10px;margin:8px 0;color:var(--accent);font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.v1819k-lnow::before,.v1819k-lnow::after{content:"";flex:1;height:2px;background:var(--accent);opacity:.6}
+/* side: planner, recap, glance */
+.v1819k-pcard,.v1819k-glance{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:16px}
+.v1819k-pcard{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent)}
+.v1819k-ph h3{font-family:var(--f-display);font-size:1.9rem;text-transform:uppercase;line-height:1;margin:6px 0 4px}
+.v1819k-ph p{margin:0 0 12px;color:color-mix(in srgb,var(--text) 80%,var(--bg))}
+.v1819k-plan .v1819k-kick{color:var(--accent)}
+.v1819k-opts{display:flex;flex-direction:column;gap:8px}
+.v1819k-opt{appearance:none;font:inherit;color:inherit;text-align:left;display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);cursor:pointer;position:relative;transition:border-color .15s,background .15s,transform .15s}
+.v1819k-opt:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--text) 28%,var(--line))}
+.v1819k-opt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface2));box-shadow:0 0 0 1px var(--accent)}
+.v1819k-oi{flex:none;width:40px;height:40px;display:grid;place-items:center;font-size:1.5rem;border-radius:11px;background:color-mix(in srgb,var(--bg) 50%,transparent)}
+.v1819k-ot{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.v1819k-ot b{font-size:1rem}.v1819k-ot small{font-size:.8rem;color:var(--muted);line-height:1.35}
+.v1819k-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.v1819k-tags i{font-style:normal;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:999px;border:1px solid var(--line)}
+.v1819k-tags i.g{color:var(--v1819k-w,#5fd38d);border-color:color-mix(in srgb,#5fd38d 45%,var(--line))}
+.v1819k-tags i.r{color:var(--v1819k-l,#ff7f7a);border-color:color-mix(in srgb,#ff7f7a 40%,var(--line))}
+.v1819k-ck{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:900;font-size:.85rem}
+.v1819k-opt.on .v1819k-ck{background:var(--accent);border-color:var(--accent);color:#111}
+.v1819k-pf{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+.v1819k-pf small{color:var(--muted);font-size:.8rem;flex:1;min-width:160px}
+.v1819k-pf .btn[disabled]{opacity:.45;cursor:default}
+.v1819k-lines{margin:6px 0 10px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.v1819k-lines li{padding-left:18px;position:relative}
+.v1819k-lines li::before{content:"◆";position:absolute;left:0;color:var(--accent);font-size:.7rem;top:3px}
+.v1819k-gains{margin:0 0 10px;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.v1819k-gains li{display:flex;align-items:center;gap:8px}
+.v1819k-gains li svg{border-radius:50%;flex:none;background:color-mix(in srgb,var(--bg) 70%,#000)}
+.v1819k-gains li span{flex:1;min-width:0;font-size:.88rem}.v1819k-gains small{color:var(--muted)}
+.v1819k-gains li b{color:var(--v1819k-w,#5fd38d);font-family:var(--f-mono)}
+.v1819k-still{margin:0;font-size:.82rem;color:var(--accent)}.v1819k-still.done{color:var(--muted)}
+.v1819k-auto{margin:8px 0 0;font-size:.8rem;color:var(--muted)}
+.v1819k-gh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.v1819k-gh h3{font-family:var(--f-display);font-size:1.4rem;text-transform:uppercase;margin:0}
+.v1819k-gh span{font-size:.82rem;font-weight:700;color:var(--muted)}
+.v1819k-pips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.v1819k-pip{appearance:none;font:inherit;width:24px;height:24px;border-radius:6px;border:1.5px solid var(--line);background:transparent;display:grid;place-items:center;font-size:.7rem;font-weight:900;color:#111;cursor:pointer;padding:0}
+.v1819k-pip.rW{background:var(--v1819k-w);border-color:var(--v1819k-w)}.v1819k-pip.rL{background:var(--v1819k-l);border-color:var(--v1819k-l)}.v1819k-pip.rD{background:var(--v1819k-d);border-color:var(--v1819k-d)}
+.v1819k-pip.ow{border:0;color:var(--accent);font-size:1rem;cursor:default}.v1819k-pip.ow.done{color:var(--muted)}
+.v1819k-pc{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;border:1.5px dashed var(--line);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.v1819k-pc.in{border-style:solid;color:var(--text)}.v1819k-pc.won{border-style:solid;border-color:#e8c35a;color:#e8c35a}
+.v1819k-key{display:flex;flex-wrap:wrap;gap:12px;font-size:.72rem;color:var(--muted);margin-top:4px}
+.v1819k-key i{display:inline-grid;place-items:center;width:11px;height:11px;border-radius:3px;border:1.5px solid var(--line);margin-right:5px;vertical-align:-1px;font-style:normal;font-size:.7rem}
+.v1819k-key i.rW{background:var(--v1819k-w);border-color:var(--v1819k-w)}.v1819k-key i.rD{background:var(--v1819k-d);border-color:var(--v1819k-d)}.v1819k-key i.rL{background:var(--v1819k-l);border-color:var(--v1819k-l)}.v1819k-key i.ow{border:0;color:var(--accent)}
+.v1819k-modal{max-width:560px}
+.v1819k-modal .v1819k-recap .v1819k-pf{justify-content:flex-end}
+@media (max-width:1180px){ .v1819k{grid-template-columns:minmax(0,1fr)} .v1819k-side{position:static;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))} }
+@media (max-width:900px){ .v1819k-week{grid-template-columns:1fr} .v1819k-wcol{border-right:0;border-bottom:1px solid var(--line);min-height:0} .v1819k-wb{flex-direction:row;flex-wrap:wrap} .v1819k-wb>*{flex:1 1 220px} }
+@media (max-width:600px){
+  .v1819k-ttl h2{font-size:2rem}
+  .v1819k-ctl{width:100%;justify-content:space-between}
+  .v1819k-ls{width:100%}.v1819k-ls button{flex:1}
+  .v1819k-today-l{margin-left:0;width:100%}
+  .v1819k-side{grid-template-columns:minmax(0,1fr)}
+  .v1819k-dows span{padding:6px 0;text-align:center;font-size:.62rem;letter-spacing:.04em}
+  .v1819k-day{min-height:64px;padding:3px 2px 16px;gap:2px;align-items:center}
+  .v1819k-dh{justify-content:center}.v1819k-dnum{font-size:.9rem}.v1819k-tag{display:none}
+  .v1819k-dc{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:2px}
+  .v1819k-g{padding:2px;border-left-width:1px;border-bottom:3px solid var(--muted);border-radius:7px;position:relative;gap:0}
+  .v1819k-g.rW{border-bottom-color:var(--v1819k-w)}.v1819k-g.rL{border-bottom-color:var(--v1819k-l)}.v1819k-g.rD{border-bottom-color:var(--v1819k-d)}.v1819k-g.up{border-bottom-color:var(--team,var(--accent))}
+  .v1819k-gt{display:none}
+  .v1819k-gdot{display:block;position:absolute;right:-4px;top:-5px;font-size:.55rem;font-weight:900;color:#111;background:var(--muted);border-radius:4px;padding:0 2px;line-height:1.3}
+  .v1819k-gdot:empty{display:none}
+  .v1819k-g.rW .v1819k-gdot{background:var(--v1819k-w)}.v1819k-g.rL .v1819k-gdot{background:var(--v1819k-l)}.v1819k-g.rD .v1819k-gdot{background:var(--v1819k-d)}
+  .v1819k-ev{padding:0;background:none;font-size:.7rem}.v1819k-ev span{display:none}
+  .v1819k-band{top:22px;bottom:3px;border-radius:8px}
+  .v1819k-band span{font-size:.62rem;padding:1px 6px}
+  .v1819k-bar{height:13px;bottom:2px;font-size:.52rem;padding:0 6px;letter-spacing:.02em}
+  .v1819k-list{padding:4px 8px 10px}.v1819k-li{gap:9px;padding:8px 6px}
+  .v1819k-ph h3{font-size:1.6rem}
+}
+
+/* ===================== v18.19 PICK'EM POOL ===================== */
+.v1819p{display:flex;flex-direction:column;gap:16px;min-width:0}
+.v1819p-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:14px 24px;flex-wrap:wrap;padding:6px 2px 2px}
+.v1819p-hero h2{font-size:clamp(2.1rem,4.4vw,3.1rem);line-height:.92;letter-spacing:.03em;margin:.16em 0 .14em;text-transform:uppercase}
+.v1819p-hero p{margin:6px 0 0;color:var(--muted);max-width:600px;font-size:.95rem}
+.v1819p-kick{display:flex;align-items:center;gap:8px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1819p-kick i{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 25%,transparent);flex:none}
+.v1819p-me{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px}
+.v1819p-me>div{display:flex;flex-direction:column;align-items:center;padding:4px 14px;min-width:74px}
+.v1819p-me>div+div{border-left:1px solid var(--line)}
+.v1819p-me small{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.v1819p-me b{font-family:var(--f-display);font-size:1.9rem;line-height:1;font-weight:900}
+.v1819p-card{position:relative;min-width:0;background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 100%,#fff 2.5%),var(--surface));border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.v1819p-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);gap:16px;align-items:start}
+.v1819p-main,.v1819p-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.v1819p-bh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.v1819p-bh h3{font-size:1.3rem;text-transform:uppercase;letter-spacing:.05em}
+
+/* the round */
+.v1819p-rh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.v1819p-title{font-size:clamp(1.8rem,3.4vw,2.5rem);text-transform:uppercase;letter-spacing:.04em;line-height:.95;margin-top:4px}
+.v1819p-ra{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.v1819p-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));color:var(--accent);font-weight:800;font-size:.82rem;letter-spacing:.03em;background:color-mix(in srgb,var(--accent) 10%,transparent);white-space:nowrap}
+.v1819p-pill.done{color:var(--good);border-color:color-mix(in srgb,var(--good) 55%,var(--line));background:color-mix(in srgb,var(--good) 10%,transparent)}
+.v1819p-pill.live{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 55%,var(--line));background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.v1819p-lockbtn[disabled]{opacity:.5;cursor:not-allowed}
+.v1819p-sub{color:var(--muted);margin:8px 0 14px;font-size:.9rem}
+.v1819p-games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.v1819p-game{background:color-mix(in srgb,var(--bg) 55%,var(--surface));border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.v1819p-game.mine{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 50%,var(--line));box-shadow:inset 3px 0 0 var(--team-hi,var(--accent))}
+.v1819p-gtop{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;min-width:0}
+.v1819p-gtop b{color:var(--text)}
+.v1819p-ven{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.v1819p-yours{flex:none;background:var(--team,var(--surface2));color:var(--team-ink,var(--text));border-radius:6px;padding:2px 7px;font-weight:800;font-size:.62rem}
+.v1819p-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px}
+.v1819p-team{display:flex;align-items:center;gap:8px;min-width:0}
+.v1819p-team.a{flex-direction:row-reverse;text-align:right}
+.v1819p-team .crest{flex:none}
+.v1819p-team>div{display:flex;flex-direction:column;min-width:0}
+.v1819p-team b{font-family:var(--f-display);font-weight:900;font-size:1.32rem;line-height:1;text-transform:uppercase;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1819p-team small{font-size:.7rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v1819p-vs{font-family:var(--f-display);color:var(--muted);font-weight:800;text-transform:uppercase;font-size:.9rem}
+.v1819p-score{display:flex;flex-direction:column;align-items:center}
+.v1819p-score b{font-family:var(--f-display);font-size:1.6rem;font-weight:900;line-height:1}
+.v1819p-score small{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.v1819p-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.v1819p-opt{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px 6px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--text);cursor:pointer;font:inherit;min-height:52px;transition:background .15s,border-color .15s,transform .1s}
+.v1819p-opt:hover:not([disabled]){border-color:color-mix(in srgb,var(--accent) 60%,var(--line))}
+.v1819p-opt:active:not([disabled]){transform:scale(.97)}
+.v1819p-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.v1819p-ol{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:4px}
+.v1819p-opt b{font-family:var(--f-display);font-size:1.3rem;font-weight:900;line-height:1}
+.v1819p-dogtag{font-style:normal;font-size:.54rem;letter-spacing:.08em;padding:0 4px;border-radius:4px;background:color-mix(in srgb,var(--bad) 22%,transparent);color:var(--bad)}
+.v1819p-opt.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 35%,transparent)}
+.v1819p-opt.on .v1819p-ol{color:var(--on-accent)}
+.v1819p-opt.on .v1819p-dogtag{background:rgba(0,0,0,.18);color:var(--on-accent)}
+.v1819p-opt[disabled]{cursor:default}
+.v1819p-opt[disabled]:not(.on){opacity:.82}
+.v1819p-opt.won{border-color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.v1819p-opt.on.lost{background:color-mix(in srgb,var(--bad) 30%,var(--surface2));border-color:var(--bad);color:var(--text);box-shadow:none}
+.v1819p-opt.on.lost .v1819p-ol{color:var(--text)}
+.v1819p-tick{position:absolute;top:3px;right:6px;color:var(--good);font-weight:900;font-size:.8rem}
+.v1819p-opt.on .v1819p-tick{color:var(--on-accent)}
+.v1819p-wait{color:var(--muted);animation:v1819p-blink 1s infinite}
+@keyframes v1819p-blink{50%{opacity:.35}}
+.v1819p-pp{display:flex;gap:2px;justify-content:center;min-height:16px;margin-top:3px;flex-wrap:wrap}
+.v1819p-pp i,.v1819p-rpp i{font-style:normal;font-size:.68rem;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--pc) 45%,var(--bg));border:1px solid var(--pc)}
+.v1819p-exact{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 10px;border-radius:10px;border:1px dashed var(--line);background:color-mix(in srgb,var(--surface2) 50%,transparent)}
+.v1819p-exact.set{border-style:solid;border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.v1819p-exact.hit{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,transparent)}
+.v1819p-exl{display:flex;flex-direction:column;flex:1;min-width:110px}
+.v1819p-exl b{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
+.v1819p-exl small{font-size:.7rem;color:var(--muted)}
+.v1819p-exs{display:flex;align-items:center;gap:6px}
+.v1819p-exs>i{font-style:normal;color:var(--muted);font-weight:800}
+.v1819p-step{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+.v1819p-step button{width:30px;height:32px;border:0;background:transparent;color:var(--text);font-size:1.05rem;font-weight:800;cursor:pointer}
+.v1819p-step button:hover:not([disabled]){background:var(--surface2)}
+.v1819p-step button[disabled]{opacity:.4;cursor:default}
+.v1819p-step b{min-width:22px;text-align:center;font-family:var(--f-display);font-size:1.25rem;font-weight:900}
+.v1819p-exact.set .v1819p-step b{color:var(--accent)}
+.v1819p-x{border:0;background:transparent;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:0 4px}
+.v1819p-worth{font-size:.78rem;color:var(--text);border-top:1px solid var(--line);padding-top:8px}
+.v1819p-worth b{color:var(--accent)}
+.v1819p-worth b.good{color:var(--good)}
+.v1819p-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.v1819p-chips span{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 6px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:.76rem;font-weight:700}
+.v1819p-chips b{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);border-radius:999px;padding:1px 7px;font-family:var(--f-display);font-size:.95rem}
+
+/* leaderboard */
+.v1819p-lb{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.v1819p-lb li{display:grid;grid-template-columns:22px 36px minmax(0,1fr) auto 52px;align-items:center;gap:10px;padding:7px 10px;border-radius:12px;background:color-mix(in srgb,var(--surface2) 55%,transparent);border:1px solid transparent}
+.v1819p-lb li.you{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 60%,var(--line));background:color-mix(in srgb,var(--team,var(--accent)) 16%,var(--surface))}
+.v1819p-rk{font-family:var(--f-display);font-weight:900;font-size:1.25rem;color:var(--muted);text-align:center}
+.v1819p-lb li:first-child .v1819p-rk{color:var(--accent)}
+.v1819p-av{display:grid;place-items:center;border-radius:50%;background:color-mix(in srgb,var(--pc) 32%,var(--bg));border:2px solid var(--pc);flex:none;line-height:1}
+.v1819p-av.you{background:var(--surface2);border-color:var(--team-hi,var(--accent))}
+.v1819p-nm{display:flex;flex-direction:column;min-width:0}
+.v1819p-nm b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.92rem}
+.v1819p-nm small{color:var(--muted);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1819p-st{font-size:.78rem;font-weight:800;white-space:nowrap}
+.v1819p-st.off{opacity:.35;filter:grayscale(1)}
+.v1819p-pts{display:flex;align-items:baseline;justify-content:flex-end;gap:3px}
+.v1819p-pts b{font-family:var(--f-display);font-size:1.45rem;font-weight:900}
+.v1819p-pts small{font-size:.66rem;color:var(--muted)}
+.v1819p-gap{margin:12px 0 4px;font-weight:700;font-size:.9rem}
+
+/* chart */
+.v1819p-bars{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;height:130px;align-items:end}
+.v1819p-bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.v1819p-bar i{display:block;width:100%;max-width:22px;border-radius:5px 5px 2px 2px;background:color-mix(in srgb,var(--text) 34%,var(--surface2));min-height:0}
+.v1819p-bar.best i{background:var(--accent)}
+.v1819p-bar.na i{height:3px!important;background:var(--line)}
+.v1819p-bar small{font-size:.6rem;color:var(--muted);margin-top:4px}
+.v1819p-bv{font-size:.66rem;font-weight:800;margin-bottom:2px;min-height:.9em}
+.v1819p-bar.best .v1819p-bv{color:var(--accent)}
+.v1819p-best{background:color-mix(in srgb,var(--accent) 18%,transparent)!important;color:var(--accent)!important}
+
+/* results */
+.v1819p-rsel{display:flex;gap:4px;flex-wrap:wrap}
+.v1819p-rsel button{border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:8px;padding:4px 8px;font-weight:800;font-size:.72rem;cursor:pointer}
+.v1819p-rsel button.on{background:var(--team,var(--accent));color:var(--team-ink,var(--on-accent));border-color:var(--team,var(--accent))}
+.v1819p-rsum{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.88rem;margin-bottom:8px}
+.v1819p-rrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:1px solid var(--line)}
+.v1819p-rm{display:flex;align-items:center;gap:7px;min-width:0;font-family:var(--f-display);text-transform:uppercase;font-size:1.05rem}
+.v1819p-rs{padding:1px 8px;border-radius:6px;background:var(--surface2);font-weight:900}
+.v1819p-rp{display:flex;align-items:center;gap:10px;margin-left:auto}
+.v1819p-rk2{font-size:.78rem;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.v1819p-rk2.ok{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.v1819p-rk2.no{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.v1819p-rk2.none{color:var(--muted)}
+.v1819p-rpp{display:flex;gap:2px}
+.v1819p-rpp i{opacity:.32}
+.v1819p-rpp i.ok{opacity:1}
+.v1819p-rg{font-family:var(--f-display);font-size:1.2rem;min-width:28px;text-align:right}
+
+.v1819p-how ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:.85rem;color:var(--muted)}
+.v1819p-how b{color:var(--text)}
+.v1819p-pens{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.v1819p-pen{padding:4px 10px;border-radius:6px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);font-weight:800;font-size:.78rem}
+.v1819p-hrow{display:flex;gap:12px;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);font-size:.86rem}
+.v1819p-ml{list-style:none;padding:0;margin:10px 0;display:flex;flex-direction:column;gap:4px}
+.v1819p-ml li{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;border-radius:8px;background:var(--surface2);font-size:.88rem}
+
+@media (max-width:1180px){ .v1819p-grid{grid-template-columns:minmax(0,1fr)} .v1819p-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start} }
+@media (max-width:760px){
+  .v1819p-games{grid-template-columns:minmax(0,1fr)}
+  .v1819p-grid{display:flex;flex-direction:column}
+  .v1819p-main,.v1819p-side{display:contents}
+  .v1819p-round{order:1} .v1819p-board{order:2} .v1819p-chart{order:3} .v1819p-res{order:4} .v1819p-how{order:5} .v1819p-hist{order:6}
+  .v1819p-team{gap:6px} .v1819p-team .crest{width:34px!important;height:34px!important}
+  .v1819p-team b{font-size:1.08rem}
+  .v1819p-card{padding:14px;border-radius:16px}
+  .v1819p-me{width:100%;justify-content:space-around}
+  .v1819p-ra{width:100%} .v1819p-lockbtn{margin-left:auto}
+  .v1819p-lb li{grid-template-columns:20px 32px minmax(0,1fr) auto 44px;gap:8px;padding:7px 8px}
+  .v1819p-rp{width:100%;justify-content:space-between}
+}
+
 </style>
 <div id="app"></div>
 <script>
@@ -26339,5 +26690,560 @@ A.v1819lAckGo=()=>{ A.v1819lAck(); App.route='ladder'; App.params={}; render(); 
 { const _lv=VIEWS.league; VIEWS.league=function(){ let h=_lv.apply(this,arguments); try{ const C=App.C; const L=C&&C.lad; const P=App.params; if(!L||(P.tab&&P.tab!=='table')||(P.lvl&&P.lvl!=='V')) return h;
     let i=0; h=h.replace(/<tr class="(me)?">/g,(m,me)=>{ i++; const z=v1819lZone(L.mine,i); return `<tr class="${me||''} v1819l-z-${z||'none'}" title="${esc(v1819lZoneTxt(z))}">`; });
     h=h.replace('<div class="tw"><table>',`<div class="v1819l-chip"><b>${V1819L.NAME[L.mine]}</b> · green moves up, amber plays off, red drops <button class="btn sm ghost" data-a="go" data-r="ladder">The Ladder</button></div><div class="tw"><table>`); }catch(e){} return h; }; }
+
+/* ===================== v18.19 SEASON CALENDAR (core) =====================
+   The season mapped onto real dates for C.year, and the one open week.
+   - Dates: week 1 starts on Labor Day (first Monday of September). Preseason Cup: Saturday two weeks before, then Tuesday and
+     Friday of the week before. League: matchdays on Tuesday and Friday (rd 0 = Tuesday of week 1), with ONE OPEN WEEK after
+     matchday 8 (week 5, late September / early October). Sectionals Tue/Fri of week 9 and Tue of week 10, the Regional final
+     Saturday of week 10, State quarterfinals Thursday and semifinals Saturday of week 11, the State final Saturday of week 12.
+   - seasonDate(C,f) is the single source of truth for a game's date and kickoff: {y,m,d,dow,time,label,dn}. weatherFor()'s kick
+     time and the Gameday Graphics' day/time read it.
+   - School events (picture day, booster night, homecoming week, in-service day, Halloween, senior night, report cards,
+     Thanksgiving, the banquet) are seeded per career + year. Homecoming is real: the Friday home game that week gets a 30%
+     bigger crowd and a little extra home advantage (both inside startMatch, so odds, sims and live games agree).
+   - The open week: C.cal.ow[year] = {pick, locked, done, res}. It resolves exactly once, when the season passes it: the first
+     real (non-odds) match of matchday 9 resolves it with the pick (Rest and Recover if nothing was picked). Play shows the
+     planner first if nothing is locked in. Temporary rating shifts live in C.cal.fx and are undone by a finishMatch wrapper.
+   Identifiers v1819k / V1819K. */
+const V1819K={ OPEN_AFTER:8, OPEN_WK:5,
+  DOW:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], DOWL:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  MON:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  MONL:['January','February','March','April','May','June','July','August','September','October','November','December'],
+  SLOT:{ pre:[[-1,5],[0,1],[0,4]], sec:[[9,1],[9,4],[10,1]], rgn:[[10,5]], st:[[11,3],[11,5],[12,5]] },
+  memo:new Map() };
+/* ---------- day numbers (days since 1970-01-01, UTC) ---------- */
+function v1819kDn(y,m,d){ return Math.round(Date.UTC(y,m,d)/864e5); }
+function v1819kYmd(dn){ const D=new Date(dn*864e5); return {y:D.getUTCFullYear(),m:D.getUTCMonth(),d:D.getUTCDate(),dow:D.getUTCDay()}; }
+function v1819kLabor(y){ const dn=v1819kDn(y,8,1); return dn+((8-v1819kYmd(dn).dow)%7); }
+function v1819kWk(y,k){ return v1819kLabor(y)+7*(k-1); }
+function v1819kRegWk(rd){ return rd<V1819K.OPEN_AFTER?1+Math.floor(rd/2):2+Math.floor(rd/2); }
+function v1819kRegDn(y,rd){ return v1819kWk(y,v1819kRegWk(rd))+(rd%2?4:1); }
+function v1819kOpenDn(y){ return v1819kWk(y,V1819K.OPEN_WK); }
+function v1819kFxDn(f){ if(!f) return null; const y=f.yr; if(f.comp==='reg') return v1819kRegDn(y,f.rd); const T=V1819K.SLOT[f.comp]; if(!T) return null; const s=T[Math.max(0,Math.min(f.rd||0,T.length-1))]; return v1819kWk(y,s[0])+s[1]; }
+function v1819kSeasonEnd(y){ return v1819kWk(y,12)+5; }
+function v1819kFmt(dn,o){ const t=v1819kYmd(dn); o=o||{}; return `${o.long?V1819K.DOWL[t.dow]:V1819K.DOW[t.dow]}, ${V1819K.MON[t.m]} ${t.d}`; }
+const _v1819kWx=weatherFor;
+function v1819kTime(f,dow){
+  if(f.lvl==='JV') return dow===6?'11:00 AM':'4:30 PM'; if(f.lvl==='MOD') return dow===6?'9:30 AM':'3:45 PM';
+  let w={night:true,k:'clear'}; try{ w=_v1819kWx(f)||w; }catch(e){}
+  if(w.night) return dow===2?'6:30 PM':'7:00 PM'; if(w.k==='golden') return '5:30 PM'; return dow===6||dow===0?'1:00 PM':'4:00 PM'; }
+/* THE date of a game. Other features call this when it exists. */
+function seasonDate(C,f){ if(!f||!f.yr) return null; const dn=v1819kFxDn(f); if(dn==null) return null; const t=v1819kYmd(dn); const time=v1819kTime(f,t.dow);
+  return {y:t.y,m:t.m,d:t.d,dow:t.dow,time,dn,label:`${V1819K.DOW[t.dow]}, ${V1819K.MON[t.m]} ${t.d} · ${time}`}; }
+/* keep the existing displays on the same clock */
+weatherFor=function(f){ const w=_v1819kWx.apply(this,arguments); try{ if(w&&f&&f.yr&&App.C){ const sd=seasonDate(App.C,f); if(sd) w.kick=sd.time; } }catch(e){} return w; };
+if(typeof v1812gWhen==='function'){ const _w=v1812gWhen; v1812gWhen=function(f){ try{ const sd=f&&App.C&&seasonDate(App.C,f); if(sd) return [V1819K.DOW[sd.dow].toUpperCase(),sd.time]; }catch(e){} return _w.apply(this,arguments); }; }
+
+/* ---------- state ---------- */
+function v1819kS(C){ let S=C.cal; if(!S||S.v!==1) S=C.cal={v:1,ow:{},fx:[],show:{game:1,open:1,ev:1,riv:1},hc:{}}; for(const k of ['ow','hc']) if(!S[k]) S[k]={}; if(!S.fx) S.fx=[]; if(!S.show) S.show={game:1,open:1,ev:1,riv:1}; return S; }
+function v1819kOW(C,yr){ yr=yr||C.year; const S=v1819kS(C); let O=S.ow[yr];
+  if(!O){ O=S.ow[yr]={pick:null,locked:false,done:false,res:null};
+    /* an old save that is already past the open week: it never happened this year */
+    if(yr===C.year&&(['sectionals','regional','states','awards','offseason'].includes(C.phase)||(C.phase==='regular'&&C.md>V1819K.OPEN_AFTER))){ O.done=true; O.legacy=true; } }
+  return O; }
+function v1819kPending(C){ if(!C||C.phase!=='regular'||C.md<V1819K.OPEN_AFTER) return false; return !v1819kOW(C).done; }
+function v1819kUpcoming(C){ if(!C) return false; if(!(C.phase==='preseason'||C.phase==='regular')) return false; if(C.phase==='regular'&&C.md>V1819K.OPEN_AFTER) return false; return !v1819kOW(C).done; }
+function v1819kToday(C){ const y=C.year; if(C.phase==='offseason'||C.phase==='awards') return v1819kSeasonEnd(y)+1; if(v1819kPending(C)) return v1819kOpenDn(y);
+  const f=userFixture(C)||roundFixtures(C).find(Boolean); const dn=f&&v1819kFxDn(f); if(dn!=null) return dn;
+  if(C.phase==='preseason') return v1819kWk(y,-1)+5; return v1819kWk(y,1); }
+
+/* ---------- the friendly opponent: a real State Poll school from outside the league, close to your level ---------- */
+function v1819kFriendlyOpp(C){ const O=v1819kOW(C); if(O.opp) return O.opp; let o=null;
+  try{ if(typeof v1812pS==='function'){ const P=v1812pS(C); const my=v1812pRating(C,C.userSid,C.year);
+      const L=P.pool.teams.map(t=>({t,d:Math.abs(v1812pRating(C,t.id,C.year)-my)})).sort((a,b)=>a.d-b.d||(a.t.id<b.t.id?-1:1)).slice(0,6);
+      const r=rngFrom(hashStr(C.seed+'|v1819kfr|'+C.year)); const t=L[Math.floor(r()*L.length)].t; o={id:t.id,town:t.town,name:t.name,sec:t.sec,R:v1812pRating(C,t.id,C.year)}; } }catch(e){ o=null; }
+  if(!o) o={id:null,town:'Section 6 Select',name:'a Section 6 select side',sec:6,R:70};
+  O.opp=o; return o; }
+function v1819kOppSchool(C,o){ try{ if(o&&o.id&&typeof v1812pSchool==='function'){ const s=v1812pSchool(C,o.id); if(s) return s; } }catch(e){} return {id:'v1819kx',town:o?o.town:'Friendly',name:o?o.name:'Friendly',mk:'eagles',mascot:'',c1:'#5a6b80',c2:'#d9dee6',virtual:true}; }
+
+/* ---------- the four options ---------- */
+const V1819K_OPTS=[
+  {k:'rest',ico:'🛌',t:'Rest and Recover',d:'Feet up, ice baths, early nights. Fresh legs for the run-in.',tags:[['Fitness ++','g'],['Morale +','g'],['No development this week','r']],fx:'Whole Varsity squad +1.2 for the next 2 games'},
+  {k:'friendly',ico:'⚽',t:'Friendly',d:'A road friendly against a State Poll school from outside the section. Your bench gets real minutes.',tags:[['Bench development +','g'],['Match sharpness','g'],['Small knock risk','r']],fx:'Non-starters develop; one player may pick up a knock'},
+  {k:'clinic',ico:'🎯',t:'Skills Clinic',d:'Three double sessions on your training focus, with the JV and Modified squads joining in.',tags:[['Training ×2','g'],['Every level','g'],['Tired legs','r']],fx:'Your training focus counts double this week'},
+  {k:'dayout',ico:'🎳',t:'Team Day Out',d:'Bowling, pizza and the varsity bus to the lake. Nobody talks about soccer.',tags:[['Team spirit ++','g'],['Boost next 3 games','g'],['No training','r']],fx:'Varsity and JV +0.8 for their next 3 games'} ];
+function v1819kOpt(k){ return V1819K_OPTS.find(o=>o.k===k)||V1819K_OPTS[0]; }
+function v1819kBoost(C,ps,amt,games,why){ const L=v1819kS(C).fx; const out=[];
+  for(const p of ps){ if(!p) continue; const o0=ovr(p); shiftOvr(p,amt,'balanced'); const real=ovr(p)-o0; if(Math.abs(real)<0.01) continue; L.push({pid:p.id,amt:Math.round(real*1000)/1000,left:games,lvl:p.lvl,why}); out.push(p.id); }
+  return out; }
+function v1819kTick(C,f){ const S=v1819kS(C); if(!S.fx.length) return; const u=C.userSid; if(f.h!==u&&f.a!==u) return;
+  for(const e of S.fx){ const p=C.players[e.pid]; const lv=p?p.lvl:e.lvl; if(lv!==f.lvl) continue; e.left--; if(e.left<=0&&p) shiftOvr(p,-e.amt,'balanced'); }
+  S.fx=S.fx.filter(e=>e.left>0&&C.players[e.pid]); }
+function v1819kUndoAll(C){ const S=v1819kS(C); for(const e of S.fx){ const p=C.players[e.pid]; if(p) shiftOvr(p,-e.amt,'balanced'); } S.fx=[]; }
+function v1819kPois(r,m){ const L=Math.exp(-m); let k=0,p=1; do{ k++; p*=r(); }while(p>L&&k<9); return k-1; }
+const V1819K_FX={
+  rest(C,r){ const sq=squad(C,C.userSid,'V'); v1819kBoost(C,sq,1.2,2,'rest'); return {lines:[`Fresh legs: all ${sq.length} Varsity players +1.2 for the next 2 games`,'No development this week'],ps:sq.map(p=>({pid:p.id,d:1.2,tmp:2}))}; },
+  friendly(C,r){ const u=C.userSid; const o=v1819kFriendlyOpp(C); const lu=getLu(C,u,'V'); const xi=new Set((lu&&lu.slots||[]).map(s=>s.pid));
+    const bench=squad(C,u,'V').filter(p=>!xi.has(p.id)).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1)); const ps=[];
+    for(const p of bench){ const gap=p.pot-ovr(p); if(gap<=0) continue; const amt=Math.min(gap,0.35+r()*0.45); const o0=ovr(p); shiftOvr(p,amt,'balanced'); const d=ovr(p)-o0; if(d>0.01) ps.push({pid:p.id,d:Math.round(d*10)/10}); }
+    let my=70; try{ my=xiRating(C,u,'V'); }catch(e){} const lam=x=>clamp(1.35+x*0.07,0.35,3.2); const gf=v1819kPois(r,lam(my-o.R)), ga=v1819kPois(r,lam(o.R-my));
+    let knock=null; if(r()<0.35){ const pool=bench.length?bench:squad(C,u,'V'); const p=pool[Math.floor(r()*pool.length)]; if(p){ v1819kBoost(C,[p],-2,2,'knock'); knock=p.id; } }
+    const res=gf>ga?'W':gf<ga?'L':'D';
+    const lines=[`Friendly at ${o.town}: ${res==='W'?'won':res==='L'?'lost':'drew'} ${gf}-${ga}`,`${ps.length} bench players got 80 minutes and developed`]; if(knock) lines.push(`${pname(C.players[knock])} took a knock: −2 for the next 2 games`);
+    return {lines,ps,opp:o,gf,ga,r:res,knock}; },
+  clinic(C,r){ const u=C.userSid; const focus=C.training||'balanced'; const ps=[];
+    for(const p of schoolPlayers(C,u)){ if(!p.plan) continue; const gap=p.pot-ovr(p); if(gap<=0) continue; let f=focus==='youth'?(p.lvl==='V'?0.85:1.3):1;
+      const amt=Math.min(gap,p.plan.gain*0.136*f*clamp(gap/12,0.15,1)); const o0=ovr(p); shiftOvr(p,amt,focus==='youth'?'balanced':focus); const d=ovr(p)-o0; if(d>0.005) ps.push({pid:p.id,d:Math.round(d*100)/100}); }
+    ps.sort((a,b)=>b.d-a.d); const nm=(typeof TRAINING!=='undefined'&&TRAINING[focus])||focus;
+    return {lines:[`Double sessions on ${nm}: ${ps.length} players improved`,ps[0]?`Biggest jump: ${pname(C.players[ps[0].pid])} +${ps[0].d.toFixed(2)}`:'Nobody had room to grow'],ps,focus}; },
+  dayout(C,r){ const u=C.userSid; const sq=[...squad(C,u,'V'),...squad(C,u,'JV')]; v1819kBoost(C,sq,0.8,3,'dayout');
+    const pl=['bowling','go-karts','the lake','mini golf','laser tag']; const where=pl[Math.floor(r()*pl.length)];
+    return {lines:[`A day at ${where}: team spirit is sky-high`,`Varsity and JV +0.8 for their next 3 games`],ps:sq.filter(p=>p.lvl==='V').map(p=>({pid:p.id,d:0.8,tmp:3})),where}; } };
+function v1819kResolve(C,why){ const O=v1819kOW(C); if(O.done) return O; const k=V1819K_FX[O.pick]?O.pick:'rest'; O.auto=!O.pick; O.pick=k; O.done=true;
+  const r=rngFrom(hashStr(C.seed+'|v1819k|'+C.year+'|'+k)); let res; try{ res=V1819K_FX[k](C,r); }catch(e){ console.warn('open week',e); res={lines:['The week passed quietly'],ps:[]}; }
+  O.res=res; O.when=why||'auto'; const town=(C.schools[C.userSid]||{}).town||'The team';
+  const txt={rest:`Open week: ${town} rest and recover. ${res.lines[0]}.`,friendly:`Open week: ${town} play a friendly at ${res.opp?res.opp.town:'a Section 6 side'} (${res.r} ${res.gf}-${res.ga}). ${res.lines[1]}.`,clinic:`Open week: ${town} run a skills clinic. ${res.lines[0]}.`,dayout:`Open week: ${town} take a team day out. ${res.lines[0]}.`}[k];
+  addNews(C,'program',txt+(O.auto?' (No plan was locked in, so the coaches gave everyone the week off.)':''),C.userSid,{v1819k:k});
+  try{ if(App&&App.odds) App.odds.clear(); }catch(e){}
+  return O; }
+
+/* ---------- homecoming: a Friday home game in weeks 3-8 (not the open week) ---------- */
+function v1819kHomecoming(C,yr){ yr=yr||C.year; const key=C.seed+'|'+yr+'|'+C.userSid+'|hc'; const m=V1819K.memo.get(key); if(m) return m;
+  const r=rngFrom(hashStr(C.seed+'|v1819khc|'+yr)); const u=C.userSid; const fx=Object.values(C.fixtures).filter(f=>f.yr===yr&&f.comp==='reg'&&f.lvl==='V'&&f.h===u);
+  const wks=[6,7,4,3,8]; let best=null; const order=wks.map(w=>({w,k:r()+(w===6||w===7?0:0.6)})).sort((a,b)=>a.k-b.k).map(x=>x.w);
+  for(const w of order){ const rd=w<V1819K.OPEN_WK?2*(w-1)+1:2*(w-2)+1; const f=fx.find(x=>x.rd===rd); if(f){ best={wk:w,fid:f.id}; break; } }
+  if(!best) best={wk:6,fid:null};
+  if(fx.length) V1819K.memo.set(key,best); return best; }
+/* ---------- school events, seeded per career and year ---------- */
+function v1819kEvents(C,yr){ yr=yr||C.year; const r=rngFrom(hashStr(C.seed+'|v1819kev|'+yr)); const W=k=>v1819kWk(yr,k); const out=[];
+  const ev=(k,dn,ico,t,tip,o)=>out.push({kind:'ev',k,dn,ico,t,tip,...(o||{})});
+  ev('school',W(1)+2,'🎒','First day of school','Lockers, schedules and a pep talk in the gym. Informational.');
+  const pic=W(2+Math.floor(r()*2))+2+Math.floor(r()*2); ev('picture',pic,'📸','Picture day','Team and individual photos before practice. Wear the home kit. Informational.');
+  let bn=W(2+Math.floor(r()*3))+3; if(bn===pic) bn+=7; ev('booster',bn,'🍝','Booster night','The Booster Club pasta dinner in the cafeteria. Parents, players and a raffle. Informational.');
+  const hc=v1819kHomecoming(C,yr); const hcf=hc.fid&&C.fixtures[hc.fid];
+  ev('homecoming',W(hc.wk),'👑','Homecoming week',hcf?`Spirit week ends with the Friday home game against ${Sx(hcf.a).town}: a 30% bigger crowd and a little extra home advantage.`:'Spirit week, the dance and the parade. Informational this year (no Friday home game).',{dn2:W(hc.wk)+4,bar:1,fid:hc.fid});
+  ev('inservice',W(6+Math.floor(r()*2)),'✏️','In-service day','No classes: teachers are in training. Practice moves to the morning. Informational.');
+  ev('halloween',v1819kDn(yr,9,31),'🎃','Halloween','Costumes in the hallways. Informational.');
+  ev('report',W(9+Math.floor(r()*2))+3,'📝','Report cards','First-quarter grades go home. Informational.');
+  try{ const sn=seniorNightFixture(C,yr); if(sn&&(yr!==C.year||seniorsOf(C).length)) ev('senior',v1819kFxDn(sn),'🌹','Senior night',`Your seniors are honored before the last home game, against ${Sx(sn.a).town}.`,{fid:sn.id}); }catch(e){}
+  { const nov1=v1819kDn(yr,10,1); const th=nov1+((4-v1819kYmd(nov1).dow+7)%7)+21; ev('thanks',th,'🦃','Thanksgiving','No school Thursday and Friday. Informational.'); }
+  ev('banquet',v1819kSeasonEnd(yr)+1,'🏆','Awards banquet','End-of-season banquet: letters, captains for next year, the coach\'s speech. Informational.');
+  return out.sort((a,b)=>a.dn-b.dn); }
+/* ---------- everything on the calendar for one level ---------- */
+function v1819kItems(C,yr,lvl){ yr=yr||C.year; lvl=lvl||'V'; const u=C.userSid; const out=[];
+  const fx=Object.values(C.fixtures).filter(f=>f.yr===yr&&f.lvl===lvl&&(f.h===u||f.a===u)&&(lvl==='V'||f.comp==='reg'));
+  const days=new Set();
+  for(const f of fx){ const sd=seasonDate(C,f); if(!sd) continue; days.add(sd.dn); out.push({kind:'game',dn:sd.dn,f,sd,riv:f.comp!=='pre'&&!!isRivalry(C,f.h,f.a),heated:f.comp!=='pre'&&isRivalry(C,f.h,f.a)==='heated'}); }
+  if(lvl==='V'){ const P=[['sec',0,'Sectionals begin'],['sec',2,'Section final'],['rgn',0,'Regional final'],['st',0,'State quarterfinals'],['st',1,'State semifinals'],['st',2,'State final']];
+    for(const [c,rd,t] of P){ const dn=v1819kFxDn({yr,comp:c,rd}); if(!days.has(dn)) out.push({kind:'post',dn,comp:c,rd,t}); } }
+  const O=yr===C.year?v1819kOW(C,yr):(v1819kS(C).ow[yr]||{done:true});
+  out.push({kind:'open',dn:v1819kOpenDn(yr),dn2:v1819kOpenDn(yr)+4,O});
+  if(O.pick==='friendly'&&lvl==='V'&&!O.legacy) out.push({kind:'friendly',dn:v1819kOpenDn(yr)+2,O,opp:O.res&&O.res.opp||v1819kFriendlyOpp(C)});
+  for(const e of v1819kEvents(C,yr)) out.push(e);
+  return out.sort((a,b)=>a.dn-b.dn||(a.kind==='game'?-1:1)); }
+
+/* ---------- hooks ---------- */
+{ const _sm=startMatch; startMatch=function(C,fid,opts){
+    try{ const f=C&&C.fixtures[fid]; if(f&&!(opts&&opts.fast)&&f.yr===C.year&&C.phase==='regular'&&f.comp==='reg'&&f.rd>=V1819K.OPEN_AFTER&&!v1819kOW(C).done) v1819kResolve(C,'auto'); }catch(e){ console.warn('open week',e); }
+    const M=_sm.apply(this,arguments);
+    try{ const f=C.fixtures[fid]; if(f&&f.comp==='reg'&&f.lvl==='V'&&f.h===C.userSid&&f.yr===C.year){ const hc=v1819kHomecoming(C,f.yr); if(hc.fid===f.id){ M.att=Math.round((M.att||0)*1.3); if(M.sides[0]) M.sides[0].home=Math.min(0.04,(M.sides[0].home||0)+0.012); M.v1819kHc=true; } } }catch(e){}
+    return M; }; }
+{ const _fm=finishMatch; finishMatch=function(C,M){ const f=C.fixtures[M.fid]; const was=f&&f.st; const out=_fm.apply(this,arguments);
+    try{ if(f&&was!=='d'&&f.st==='d'){ v1819kTick(C,f);
+        if(M.v1819kHc&&!M.fast){ const S=v1819kS(C); if(!S.hc[f.yr]){ S.hc[f.yr]=f.id; const u=C.userSid; addNews(C,'program',`Homecoming: ${(f.att||0).toLocaleString()} pack the stands as ${Sx(u).town} ${f.w===u?'beat':f.w?'fall to':'draw with'} ${Sx(f.a).town}, ${f.hg}-${f.ag}`,u,{fid:f.id}); } } } }catch(e){ console.warn('calendar',e); }
+    return out; }; }
+{ const _ad=advance; advance=function(C){ const ev=_ad.apply(this,arguments); try{ if(ev&&C.phase!=='regular'&&C.phase!=='preseason'){ const O=v1819kOW(C); if(!O.done&&!O.legacy) v1819kResolve(C,'auto'); } }catch(e){} return ev; }; }
+{ const _ro=rollover; rollover=function(C){ try{ v1819kUndoAll(C); }catch(e){} return _ro.apply(this,arguments); }; }
+{ const _mg=migrate; migrate=function(raw){ const C=_mg.apply(this,arguments); try{ if(C&&C.league&&C.fixtures){ v1819kS(C); v1819kOW(C); } }catch(e){} return C; }; }
+
+/* ===================== v18.19 SEASON CALENDAR (screens) =====================
+   VIEWS.calendar (Schedule menu): Month / Week / List, Varsity / JV / Modified, legend chips that filter the grid, the Open
+   Week Planner (or its recap) and Season at a glance on the right. MODALS.v1819kPlan is the planner as a gate before Play.
+   The Overview's "This week" row gets an open-week item. Identifiers v1819k / V1819K. */
+ICON.v1819kcal='<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M12 14h2M16 14h0.5M8 17h2M12 17h2"/>';
+TITLES.calendar='Season Calendar'; NAV_ICON.calendar='v1819kcal'; if(typeof NAV_DESC!=='undefined') NAV_DESC.calendar='Games, open week and school events by date';
+{ const i=NAV.findIndex(n=>n[0]==='schedule'); if(!NAV.some(n=>n[0]==='calendar')) NAV.splice(i>=0?i+1:NAV.length,0,['calendar','Season Calendar']); }
+{ const g=TOPNAV.find(t=>t[0]==='schedule'); if(g&&!g[3].includes('calendar')){ const j=g[3].indexOf('schedule'); g[3].splice(j>=0?j+1:g[3].length,0,'calendar'); } }
+try{ if(typeof V1817O_MENU!=='undefined'&&V1817O_MENU.schedule&&!V1817O_MENU.schedule[0][1].includes('calendar')) V1817O_MENU.schedule[0][1].splice(1,0,'calendar'); }catch(e){}
+if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('calendar');
+
+function v1819kWeekRange(dn){ const a=v1819kYmd(dn), b=v1819kYmd(dn+4); return a.m===b.m?`${V1819K.MON[a.m]} ${a.d}–${b.d}`:`${V1819K.MON[a.m]} ${a.d} – ${V1819K.MON[b.m]} ${b.d}`; }
+function v1819kOpp(C,f){ return Sx(f.h===C.userSid?f.a:f.h); }
+function v1819kRes(C,f){ if(f.st!=='d') return null; const u=C.userSid; const us=f.h===u?f.hg:f.ag, th=f.h===u?f.ag:f.hg; const r=f.w===u?'W':f.w?'L':'D'; return {r,sc:`${us}-${th}`+(f.pk?` (${f.h===u?f.pk[0]:f.pk[1]}-${f.h===u?f.pk[1]:f.pk[0]} p)`:'')}; }
+function v1819kCompName(f){ try{ return fixtureLabel(f); }catch(e){ return ''; } }
+/* one game chip (month cell) */
+function v1819kChip(C,it,show){ const f=it.f; const o=v1819kOpp(C,f); const home=f.h===C.userSid; const res=v1819kRes(C,f); const riv=it.riv&&show.riv;
+  const tag=`${home?'vs':'@'} ${esc(boardName(o))}`; const skip=f.st==='x';
+  const tip=`${v1819kCompName(f)} · ${home?'vs':'at'} ${o.name||o.town} · ${it.sd.label}${res?` · ${res.r} ${res.sc}`:''}${it.heated?' · Rivalry game':''}`;
+  return `<button class="v1819k-g ${res?'r'+res.r:skip?'skip':'up'} ${riv?'riv':''} ${f.comp!=='reg'?'c-'+f.comp:''}" data-a="openFixture" data-id="${f.id}" title="${esc(tip)}">${crest(o,22)}<span class="v1819k-gt"><b>${tag}${riv?' <i class="v1819k-fire" aria-label="Rivalry">🔥</i>':''}</b><small>${res?`${res.r} ${res.sc}`:skip?'Skipped':esc(it.sd.time)}</small></span><span class="v1819k-gdot">${res?res.r:''}</span></button>`; }
+function v1819kFrChip(C,it){ const O=it.O; const s=v1819kOppSchool(C,it.opp); const r=O.done&&O.res&&O.res.r?`${O.res.r} ${O.res.gf}-${O.res.ga}`:'Friendly';
+  return `<span class="v1819k-g fr ${O.done&&O.res?'r'+O.res.r:'up'}" title="${esc(`Open-week friendly at ${s.name||s.town}${O.done?'':' (planned)'}`)}">${crest(s,22)}<span class="v1819k-gt"><b>@ ${esc(boardName(s))}</b><small>${r}</small></span><span class="v1819k-gdot">F</span></span>`; }
+function v1819kEvChip(it){ return `<span class="v1819k-ev k-${it.k}" title="${esc(it.t+': '+it.tip)}" tabindex="0"><i>${it.ico}</i><span>${esc(it.t)}</span></span>`; }
+function v1819kPostChip(it){ return `<span class="v1819k-ev k-post" title="${esc(it.t+' (your school plays only if it gets there)')}" tabindex="0"><i>🏆</i><span>${esc(it.t)}</span></span>`; }
+function v1819kVisible(it,show){ if(it.kind==='game'||it.kind==='friendly') return !!show.game; if(it.kind==='open') return !!show.open; if(it.kind==='ev'||it.kind==='post') return !!show.ev; return true; }
+function v1819kCell(C,items,show){ return items.map(it=>it.kind==='game'?v1819kChip(C,it,show):it.kind==='friendly'?v1819kFrChip(C,it):it.kind==='ev'&&!it.bar?v1819kEvChip(it):it.kind==='post'?v1819kPostChip(it):'').join(''); }
+
+/* ---------- month ---------- */
+function v1819kMonth(C,items,show,m,today){ const y=C.year; const first=v1819kDn(y,m,1), last=v1819kDn(y,m+1,1)-1; let s=first-v1819kYmd(first).dow; const rows=[];
+  const byDay=new Map(); for(const it of items){ if(!v1819kVisible(it,show)) continue; if(it.kind==='open'||it.bar) continue; (byDay.get(it.dn)||byDay.set(it.dn,[]).get(it.dn)).push(it); }
+  const spans=items.filter(it=>v1819kVisible(it,show)&&(it.kind==='open'||it.bar));
+  while(s<=last){ const cells=[]; for(let i=0;i<7;i++){ const dn=s+i; const t=v1819kYmd(dn); const out=t.m!==m; const isT=dn===today; const list=out?[]:(byDay.get(dn)||[]);
+      cells.push(`<div class="v1819k-day ${out?'out':''} ${isT?'today':''} ${i===0||i===6?'we':''}" data-dn="${dn}"><div class="v1819k-dh"><span class="v1819k-dnum">${t.d}</span>${isT?'<span class="v1819k-tag">Today</span>':''}</div><div class="v1819k-dc">${v1819kCell(C,list,show)}</div></div>`); }
+    let ov=''; for(const sp of spans){ const a=Math.max(sp.dn,s,first), b=Math.min(sp.dn2,s+6,last); if(a>b) continue; const c0=a-s, n=b-a+1; const st=`left:calc(${c0}/7*100% + 3px);width:calc(${n}/7*100% - 6px)`;
+      if(sp.kind==='open'){ const O=sp.O; const lab=O.done&&O.res?`Open week · ${v1819kOpt(O.pick).t}`:'Open week · No league games'; ov+=`<div class="v1819k-band ${O.done?'done':''}" style="${st}" title="${esc('The whole league is off this week.'+(O.pick?' Plan: '+v1819kOpt(O.pick).t:''))}"><span>◆ ${esc(lab)}</span></div>`; }
+      else ov+=`<div class="v1819k-bar k-${sp.k}" style="${st}" title="${esc(sp.t+': '+sp.tip)}" tabindex="0"><i>${sp.ico}</i><span>${esc(sp.t)}</span></div>`; }
+    rows.push(`<div class="v1819k-row">${ov}${cells.join('')}</div>`); s+=7; }
+  return `<div class="v1819k-month"><div class="v1819k-dows">${V1819K.DOW.map((d,i)=>`<span class="${i===0||i===6?'we':''}">${d}</span>`).join('')}</div>${rows.join('')}</div>`; }
+/* ---------- week ---------- */
+function v1819kWeekView(C,items,show,s,today){ const cols=[]; const O=v1819kOW(C);
+  for(let i=0;i<7;i++){ const dn=s+i; const t=v1819kYmd(dn); const isT=dn===today; const its=items.filter(it=>v1819kVisible(it,show)&&(it.dn===dn||(it.dn2!=null&&it.dn<=dn&&it.dn2>=dn)));
+    const body=its.map(it=>{ if(it.kind==='game'){ const f=it.f, o=v1819kOpp(C,f), res=v1819kRes(C,f), home=f.h===C.userSid; const riv=it.riv&&show.riv;
+        return `<button class="v1819k-wg ${res?'r'+res.r:'up'} ${riv?'riv':''}" data-a="openFixture" data-id="${f.id}">${crest(o,40)}<span><small>${esc(v1819kCompName(f))}${riv?' · 🔥 Rivalry':''}</small><b>${home?'vs':'at'} ${esc(o.town)}</b><em>${esc(f.ven||'')}</em><span class="v1819k-wr">${res?`<i>${res.r}</i> ${res.sc}`:f.st==='x'?'Skipped':esc(it.sd.time)}</span></span></button>`; }
+      if(it.kind==='friendly'){ const s2=v1819kOppSchool(C,it.opp); const R=it.O.done&&it.O.res; return `<div class="v1819k-wg fr ${R?'r'+R.r:'up'}">${crest(s2,40)}<span><small>Open-week friendly</small><b>at ${esc(s2.town)}</b><em>${esc(s2.section||'')}</em><span class="v1819k-wr">${R?`<i>${R.r}</i> ${R.gf}-${R.ga}`:'Planned · 4:00 PM'}</span></span></div>`; }
+      if(it.kind==='open') return `<div class="v1819k-wo"><b>◆ Open week</b><small>No league games${O.pick?` · ${esc(v1819kOpt(O.pick).t)}`:''}</small></div>`;
+      if(it.kind==='post') return `<div class="v1819k-we k-post"><i>🏆</i><span><b>${esc(it.t)}</b><small>If you get there</small></span></div>`;
+      return `<div class="v1819k-we k-${it.k}"><i>${it.ico}</i><span><b>${esc(it.t)}</b><small>${esc(it.tip)}</small></span></div>`; }).join('');
+    cols.push(`<div class="v1819k-wcol ${isT?'today':''}"><div class="v1819k-wh"><span>${V1819K.DOW[t.dow]}</span><b>${t.d}</b>${isT?'<i>Today</i>':''}</div><div class="v1819k-wb">${body||'<span class="v1819k-none">—</span>'}</div></div>`); }
+  return `<div class="v1819k-week">${cols.join('')}</div>`; }
+/* ---------- list ---------- */
+function v1819kList(C,items,show,today){ let cur=-1, h=''; let mark=false;
+  for(const it of items){ if(!v1819kVisible(it,show)) continue; const t=v1819kYmd(it.dn); if(t.m!==cur){ cur=t.m; h+=`<h3 class="v1819k-lm">${V1819K.MONL[t.m]}</h3>`; }
+    if(!mark&&it.dn>=today){ mark=true; h+=`<div class="v1819k-lnow"><span>Today · ${v1819kFmt(today)}</span></div>`; }
+    const date=`<span class="v1819k-ld ${it.dn===today?'today':''}"><small>${V1819K.DOW[t.dow]}</small><b>${t.d}</b></span>`;
+    if(it.kind==='game'){ const f=it.f, o=v1819kOpp(C,f), res=v1819kRes(C,f), home=f.h===C.userSid; const riv=it.riv&&show.riv;
+      h+=`<button class="v1819k-li g ${res?'r'+res.r:''} ${riv?'riv':''}" data-a="openFixture" data-id="${f.id}">${date}${crest(o,32)}<span class="v1819k-lt"><b>${home?'vs':'at'} ${esc(o.town)}${riv?' 🔥':''}</b><small>${esc(v1819kCompName(f))} · ${esc(it.sd.time)}</small></span><span class="v1819k-lr">${res?`<i>${res.r}</i>${res.sc}`:f.st==='x'?'Skipped':'<em>Upcoming</em>'}</span></button>`; }
+    else if(it.kind==='friendly'){ const s2=v1819kOppSchool(C,it.opp); const R=it.O.done&&it.O.res; h+=`<div class="v1819k-li g fr ${R?'r'+R.r:''}">${date}${crest(s2,32)}<span class="v1819k-lt"><b>at ${esc(s2.town)}</b><small>Open-week friendly · ${esc(s2.section||'outside the section')}</small></span><span class="v1819k-lr">${R?`<i>${R.r}</i>${R.gf}-${R.ga}`:'<em>Planned</em>'}</span></div>`; }
+    else if(it.kind==='open'){ const O=it.O; h+=`<div class="v1819k-li open">${date}<span class="v1819k-li-ico">◆</span><span class="v1819k-lt"><b>Open week · No league games</b><small>${v1819kWeekRange(it.dn)}${O.legacy?'':O.done?` · ${esc(v1819kOpt(O.pick).t)}`:O.pick?` · Plan: ${esc(v1819kOpt(O.pick).t)}${O.locked?' (locked in)':''}`:' · Nothing planned yet'}</small></span>${!O.done&&v1819kUpcoming(C)?'<button class="btn sm" data-a="v1819kOpenPlan">Plan</button>':''}</div>`; }
+    else if(it.kind==='post') h+=`<div class="v1819k-li post">${date}<span class="v1819k-li-ico">🏆</span><span class="v1819k-lt"><b>${esc(it.t)}</b><small>Postseason · if you get there</small></span></div>`;
+    else h+=`<div class="v1819k-li ev k-${it.k}">${date}<span class="v1819k-li-ico">${it.ico}</span><span class="v1819k-lt"><b>${esc(it.t)}${it.dn2?` <em>${v1819kWeekRange(it.dn)}</em>`:''}</b><small>${esc(it.tip)}</small></span></div>`; }
+  if(!mark) h+=`<div class="v1819k-lnow"><span>Today · ${v1819kFmt(today)}</span></div>`;
+  return `<div class="v1819k-list">${h}</div>`; }
+
+/* ---------- side: planner / recap ---------- */
+function v1819kPlanBody(C,inModal){ const O=v1819kOW(C); const dn=v1819kOpenDn(C.year); const pend=v1819kPending(C);
+  if(O.legacy) return '';
+  if(O.done){ const o=v1819kOpt(O.pick); const res=O.res||{lines:[],ps:[]}; const tmp=v1819kS(C).fx.filter(e=>e.why===O.pick||e.why==='knock');
+    const ps=(res.ps||[]).filter(x=>!x.tmp).slice(0,6).map(x=>{ const p=C.players[x.pid]; return p?`<li>${portraitSVG(p,28)}<span>${esc(pname(p))} <small>${p.pos} · ${LVL_NAME[p.lvl]||p.lvl}</small></span><b>+${(+x.d).toFixed(x.d<0.1?2:1)}</b></li>`:''; }).join('');
+    return `<div class="v1819k-recap"><div class="v1819k-ph"><span class="v1819k-kick">Open week · ${v1819kWeekRange(dn)}</span><h3>${o.ico} ${esc(o.k==='friendly'&&res.opp?`Friendly at ${res.opp.town}`:o.t)}</h3></div>
+      <ul class="v1819k-lines">${res.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>${ps?`<ul class="v1819k-gains">${ps}</ul>`:''}
+      ${tmp.length?`<p class="v1819k-still">Still active: ${tmp.filter(e=>e.amt>0).length?`+${(tmp.find(e=>e.amt>0)||{}).amt.toFixed(1)} on ${tmp.filter(e=>e.amt>0).length} players for ${Math.max(...tmp.filter(e=>e.amt>0).map(e=>e.left))} more game${Math.max(...tmp.filter(e=>e.amt>0).map(e=>e.left))===1?'':'s'}`:''}${tmp.some(e=>e.amt<0)?`${tmp.some(e=>e.amt>0)?' · ':''}a knock (${tmp.filter(e=>e.amt<0).map(e=>esc(pname(C.players[e.pid]))).join(', ')})`:''}</p>`:'<p class="v1819k-still done">Effects applied.</p>'}${O.auto?'<p class="v1819k-auto">Nothing was locked in, so the coaches gave everyone the week off.</p>':''}
+      ${inModal?`<div class="v1819k-pf"><button class="btn primary" data-a="v1819kGo">Continue to Matchday ${V1819K.OPEN_AFTER+1}</button></div>`:''}</div>`; }
+  const opp=v1819kFriendlyOpp(C); const os=v1819kOppSchool(C,opp);
+  const cards=V1819K_OPTS.map(o=>{ const on=O.pick===o.k; const t=o.k==='friendly'?`Friendly vs ${esc(opp.town)}`:esc(o.t);
+    return `<button class="v1819k-opt ${on?'on':''}" data-a="v1819kPick" data-k="${o.k}" aria-pressed="${on}"><span class="v1819k-oi">${o.k==='friendly'?crest(os,34):o.ico}</span><span class="v1819k-ot"><b>${t}</b><small>${esc(o.d)}${o.k==='friendly'&&opp.sec?` ${esc(os.section||'')}, rated ${(+opp.R).toFixed(1)}.`:''}</small><span class="v1819k-tags">${o.tags.map(([x,c])=>`<i class="${c}">${esc(x)}</i>`).join('')}</span></span><span class="v1819k-ck" aria-hidden="true">${on?'✓':''}</span></button>`; }).join('');
+  const note=pend?'This is the open week. Lock it in and the week plays out.':O.locked?`Locked in. You can change this until Monday morning (${v1819kFmt(dn)}).`:`You can change this until Monday morning (${v1819kFmt(dn)}).`;
+  return `<div class="v1819k-plan"><div class="v1819k-ph"><span class="v1819k-kick">Open week planner · ${v1819kWeekRange(dn)}</span><h3>The whole league is off.</h3><p>Pick one thing for your team.</p></div>
+    <div class="v1819k-opts">${cards}</div><div class="v1819k-pf"><small>${note}</small><button class="btn ${O.locked&&!pend?'':'primary'}" data-a="v1819kLock" ${O.pick?'':'disabled'}>${O.locked&&!pend?'✓ Locked in':'Lock it in'}</button></div></div>`; }
+/* ---------- season at a glance ---------- */
+function v1819kGlance(C){ const u=C.userSid; const O=v1819kOW(C); const fx=Object.values(C.fixtures).filter(f=>f.yr===C.year&&f.lvl==='V'&&(f.h===u||f.a===u));
+  const reg=fx.filter(f=>f.comp==='reg').sort((a,b)=>a.rd-b.rd); const post=fx.filter(f=>['sec','rgn','st'].includes(f.comp)).sort((a,b)=>fxOrder(a)-fxOrder(b));
+  let w=0,d=0,l=0; for(const f of [...reg,...post]){ const r=v1819kRes(C,f); if(!r) continue; if(r.r==='W') w++; else if(r.r==='L') l++; else d++; }
+  const left=reg.filter(f=>f.st==='s').length;
+  const pip=f=>{ const r=v1819kRes(C,f); const o=v1819kOpp(C,f); return `<button class="v1819k-pip ${r?'r'+r.r:''}" data-a="openFixture" data-id="${f.id}" title="${esc(`${v1819kCompName(f)}: ${f.h===u?'vs':'at'} ${o.town}${r?` · ${r.r} ${r.sc}`:''}`)}">${r?r.r:''}</button>`; };
+  let pips=''; reg.forEach((f,i)=>{ pips+=pip(f); if(f.rd===V1819K.OPEN_AFTER-1) pips+=`<span class="v1819k-pip ow ${O.done?'done':''}" title="Open week">◆</span>`; });
+  const P=C.post||{}; const reached=k=>post.some(f=>f.comp===k); const won=k=>post.some(f=>f.comp===k&&f.w===u&&(k==='rgn'||f.rd===2));
+  const chip=(k,t)=>`<span class="v1819k-pc ${won(k)?'won':reached(k)?'in':''}">${t}${won(k)?' ✓':''}</span>`;
+  const secp=post.filter(f=>f.comp==='sec').map(pip).join('');
+  return `<section class="v1819k-glance"><div class="v1819k-gh"><h3>Season at a glance</h3><span>${w}–${d}–${l} so far · ${left} game${left===1?'':'s'} to go</span></div>
+    <div class="v1819k-pips">${pips}</div><div class="v1819k-pips post">${chip('sec','Sectionals')}${secp}${chip('rgn','Regional')}${chip('st','State')}</div>
+    <div class="v1819k-key"><span><i class="rW"></i>Win</span><span><i class="rD"></i>Draw</span><span><i class="rL"></i>Loss</span><span><i class="ow">◆</i>Open week</span><span><i></i>To play</span></div></section>`; }
+
+/* ---------- the page ---------- */
+VIEWS.calendar=()=>{ const C=App.C; const S=v1819kS(C); const show=S.show; const lvl=['V','JV','MOD'].includes(App.params.clvl)?App.params.clvl:'V';
+  const view=['month','week','list'].includes(App.params.cv)?App.params.cv:(window.innerWidth<=600?'list':'month');
+  const items=v1819kItems(C,C.year,lvl); const today=v1819kToday(C); const tt=v1819kYmd(today);
+  let m=App.params.cm!=null?+App.params.cm:Math.max(7,Math.min(10,tt.m)); m=Math.max(7,Math.min(10,m));
+  const w0=App.params.cw!=null?+App.params.cw:today-tt.dow;
+  let title, body, prevOk=true, nextOk=true;
+  if(view==='month'){ title=`${V1819K.MONL[m]} <em>${C.year}</em>`; body=v1819kMonth(C,items,show,m,today); prevOk=m>7; nextOk=m<10; }
+  else if(view==='week'){ const a=v1819kYmd(w0), b=v1819kYmd(w0+6); title=a.m===b.m?`${V1819K.MON[a.m]} ${a.d}–${b.d}`:`${V1819K.MON[a.m]} ${a.d} – ${V1819K.MON[b.m]} ${b.d}`; body=v1819kWeekView(C,items,show,w0,today); prevOk=w0>v1819kWk(C.year,-2); nextOk=w0<v1819kWk(C.year,13); }
+  else { title=`The ${C.year} season`; body=v1819kList(C,items,show,today); prevOk=nextOk=false; }
+  const chip=(k,t,ic)=>`<button class="v1819k-lg k-${k} ${show[k]?'on':''}" data-a="v1819kToggle" data-k="${k}" aria-pressed="${!!show[k]}"><i>${ic}</i>${t}</button>`;
+  const nav=view==='list'?'':`<div class="v1819k-nav"><button class="v1819k-arr" data-a="v1819kStep" data-d="-1" ${prevOk?'':'disabled'} aria-label="Previous">${icon('chevl',18)}</button><button class="btn sm ghost" data-a="v1819kToday">Today</button><button class="v1819k-arr" data-a="v1819kStep" data-d="1" ${nextOk?'':'disabled'} aria-label="Next">${icon('chev',18)}</button></div>`;
+  const vseg=`<div class="seg v1819k-vs" role="group">${[['month','Month'],['week','Week'],['list','List']].map(([v,l])=>`<button class="${v===view?'on':''}" aria-pressed="${v===view}" data-a="v1819kView" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const lseg=`<div class="seg v1819k-ls" role="group">${[['V','Varsity'],['JV','JV'],['MOD','Modified']].map(([v,l])=>`<button class="${v===lvl?'on':''}" aria-pressed="${v===lvl}" data-a="setParam" data-k="clvl" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const plan=v1819kPlanBody(C,false);
+  return `<div class="v1819k v1819k-v-${view}"><section class="v1819k-main"><div class="v1819k-top"><div class="v1819k-ttl"><span class="v1819k-kick">${esc(Sx(C.userSid).town)} · ${LVL_NAME[lvl]||lvl} · Section ${C.section}</span><h2>${title}</h2></div><div class="v1819k-ctl">${nav}${vseg}${lseg}</div></div>
+    <div class="v1819k-legend">${chip('game','Game','⚽')}${chip('open','Open week','◆')}${chip('ev','School events','🏫')}${chip('riv','Rivalry','🔥')}<span class="v1819k-today-l">Today: <b>${v1819kFmt(today)}</b></span></div>
+    <div class="v1819k-card">${body}</div></section>
+    <aside class="v1819k-side">${plan?`<section class="v1819k-pcard">${plan}</section>`:''}${v1819kGlance(C)}</aside></div>`; };
+A.v1819kView=el=>{ App.params.cv=el.dataset.v; App.keepScroll=true; render(); };
+A.v1819kStep=el=>{ const C=App.C; const d=+el.dataset.d; const today=v1819kToday(C); const tt=v1819kYmd(today); const view=App.params.cv||(window.innerWidth<=600?'list':'month');
+  if(view==='week'){ const w0=App.params.cw!=null?+App.params.cw:today-tt.dow; App.params.cw=String(w0+7*d); }
+  else { const m=App.params.cm!=null?+App.params.cm:Math.max(7,Math.min(10,tt.m)); App.params.cm=String(Math.max(7,Math.min(10,m+d))); }
+  App.keepScroll=true; render(); };
+A.v1819kToday=()=>{ delete App.params.cm; delete App.params.cw; App.keepScroll=true; render(); };
+A.v1819kToggle=el=>{ const C=App.C; const S=v1819kS(C); const k=el.dataset.k; S.show[k]=S.show[k]?0:1; queueSave(); App.keepScroll=true; render(); };
+function v1819kRefresh(){ if(App.modal&&App.modal.type==='v1819kPlan') renderModal(); App.keepScroll=true; render(); }
+A.v1819kPick=el=>{ const C=App.C; const O=v1819kOW(C); if(O.done) return; O.pick=el.dataset.k; O.locked=false; queueSave(); v1819kRefresh(); };
+A.v1819kLock=()=>{ const C=App.C; const O=v1819kOW(C); if(O.done||!O.pick) return; O.locked=true;
+  if(v1819kPending(C)){ v1819kResolve(C,'lock'); App.odds.clear(); toast(`Open week: ${v1819kOpt(O.pick).t}. ${O.res&&O.res.lines[0]||''}`); }
+  else toast(`${v1819kOpt(O.pick).t} is locked in for the open week.`);
+  queueSave(); v1819kRefresh(); };
+A.v1819kOpenPlan=()=>{ App.modal={type:'v1819kPlan'}; renderModal(); };
+A.v1819kGo=()=>{ App.modal=null; renderModal(); render(); A.playNext(); };
+MODALS.v1819kPlan=m=>{ const C=App.C; const b=v1819kPlanBody(C,true)||'<div class="empty">There is no open week left this season.</div>'; return modalShell('Open week',b,'','v1819k-modal'); };
+/* Play: the planner first when the open week is here and nothing is locked in */
+{ const _pn=A.playNext; A.playNext=function(){ const C=App.C;
+    try{ if(C&&v1819kPending(C)){ const O=v1819kOW(C); if(!O.locked){ App.modal={type:'v1819kPlan'}; renderModal(); return; } v1819kResolve(C,'lock'); App.odds.clear(); queueSave(); toast(`Open week: ${v1819kOpt(O.pick).t}. ${O.res&&O.res.lines[0]||''}`); } }catch(e){ console.warn('open week',e); }
+    return _pn.apply(this,arguments); }; }
+{ const _pl=playLabel; playLabel=function(C){ try{ if(C&&v1819kPending(C)&&!v1819kOW(C).locked) return 'Plan the open week'; }catch(e){} return _pl.apply(this,arguments); }; }
+/* Overview: an item in the "This week" row */
+{ const _of=VIEWS.office; VIEWS.office=function(){ const h=_of.apply(this,arguments); try{ const C=App.C; if(!C||!v1819kUpcoming(C)) return h; if(C.phase!=='regular'||C.md<V1819K.OPEN_AFTER-3) return h;
+    const O=v1819kOW(C); const pend=v1819kPending(C); const t=document.createElement('template'); t.innerHTML=h; const box=t.content.querySelector('.v1817o-items'); if(!box) return h;
+    const cl=box.querySelector('.v1817o-clear'); if(cl) cl.remove();
+    const b=document.createElement('button'); b.className='dec v1819k-dec'+(O.locked?' ok':''); b.dataset.a='v1819kOpenPlan';
+    const range=v1819kWeekRange(v1819kOpenDn(C.year)); const left=V1819K.OPEN_AFTER-C.md;
+    b.innerHTML=`<span class="dec-ico">${O.locked?'✓':'🗓️'}</span><span class="grow"><b>${O.locked?`Open week: ${esc(v1819kOpt(O.pick).t)}`:pend?'Open week: pick a plan':'Plan the open week'}</b><small>${pend?`This week · ${range} · no league games`:`${range} · after ${left} more game${left===1?'':'s'}`}${O.locked?' · locked in':''}</small></span><span class="dec-go"></span>`;
+    box.prepend(b); return t.innerHTML; }catch(e){ console.warn('calendar overview',e); return h; } }; }
+
+/* ===================== v18.19 PICK'EM POOL =====================
+   Call every Varsity league game before each regular-season round (4 a round, your own game included) and race five
+   pundits over the season: the Courier, your assistant, the Friday radio call-in, the athletic director and the booster club.
+   A prediction game only: nothing here changes a result. Probabilities come from the engine's own odds (simProbs, 60 seeded
+   runs a game, its own seed salt), frozen the moment the round starts (first real startMatch of the round, or its first
+   finishMatch as a fallback). Pundit picks are seeded from the career seed and those frozen odds, so they are deterministic.
+   Scoring: right winner +3, right underdog +2 on top, right draw +4, exact score (your own game) +4, all four right +5.
+   A round is scored once, when advance() closes it. Season end: a Newswire story; winning the pool gives +1 prestige.
+   State: C.pick (created on first use, so old saves migrate by opening them). Identifiers v1819p / V1819P. */
+const V1819P={ PTS:{win:3,upset:2,draw:4,exact:4,perfect:5}, ROUNDS:14, N:60, STREAK:2, DOG:0.08, off:false };
+const V1819P_PUNDITS=[
+ {id:'courier',name:'Dana Whitlock',role:'Courier sports',ico:'📰',col:'#5b8def',style:'chalk',note:'Takes the favourite, every game.'},
+ {id:'tran',name:'Coach Tran',role:'Your assistant',ico:'📋',col:'#3ccf91',style:'sharp',note:'Runs the numbers; takes value where he sees it.'},
+ {id:'radio',name:'Section 5 Radio',role:'Friday call-in',ico:'📻',col:'#e8664a',style:'upset',note:'Loves an upset. Lives for the phone lines lighting up.'},
+ {id:'ad',name:'Ms. Reyes',role:'Athletic director',ico:'🏫',col:'#b48cf2',style:'draw',note:'Expects tight games and calls a lot of draws.'},
+ {id:'boost',name:'Brian',role:'Booster club',ico:'📣',col:'#f2a03d',style:'homer',note:'Your school wins. Always. Everyone else is a coin flip.'}];
+const v1819pMem={ fx:new Map(), pr:new Map(), q:[], busy:false };
+const v1819pR=(C,...k)=>rngFrom(hashStr([C.seed,'v1819p',...k].join('|')));
+const v1819pOrd=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:n%10<4?n%10:0]||'th');
+
+/* ---------- state ---------- */
+function v1819pS(C){
+  let P=C.pick; if(!P||P.v!==1) P=C.pick={v:1,yrs:{},titles:[]};
+  if(!P.yrs) P.yrs={}; if(!Array.isArray(P.titles)) P.titles=[];
+  return P;
+}
+function v1819pYear(C,yr){
+  const P=v1819pS(C); yr=yr==null?C.year:yr; let Y=P.yrs[yr];
+  if(!Y){ const open=v1819pOpen(C); Y=P.yrs[yr]={from:yr===C.year?(open==null?V1819P.ROUNDS:open):0,r:{},done:false,win:null};
+    for(const k of Object.keys(P.yrs)) if(+k<yr-1&&P.yrs[k].r){ const o=P.yrs[k]; if(!o.tot) o.tot=v1819pTotals(C,+k); delete o.r; } }
+  if(!Y.r) Y.r={}; return Y;
+}
+function v1819pRound(C,yr,rd){ const Y=v1819pYear(C,yr); return Y.r[rd]||(Y.r[rd]={u:{},xs:null,lk:0,fz:null,res:null}); }
+/* the round you can pick now: round 1 during the preseason, the next round during the regular season */
+function v1819pOpen(C){ if(C.phase==='preseason') return 0; if(C.phase==='regular'&&C.md<V1819P.ROUNDS) return C.md; return null; }
+function v1819pFx(C,yr,rd){ const k=yr+'|'+rd; let L=v1819pMem.fx.get(k);
+  if(!L||L.some(id=>!C.fixtures[id])){ L=Object.values(C.fixtures).filter(f=>f.yr===yr&&f.comp==='reg'&&f.rd===rd&&f.lvl==='V').map(f=>f.id).sort(); if(L.length) v1819pMem.fx.set(k,L); }
+  return L; }
+function v1819pXf(C,fx){ return fx.find(id=>{ const f=C.fixtures[id]; return f.h===C.userSid||f.a===C.userSid; })||fx[0]; }
+function v1819pLocked(C,yr,rd){ const r=v1819pYear(C,yr).r[rd]; return !!(r&&(r.fz||r.res)); }
+function v1819pPicked(C,yr,rd){ const r=v1819pYear(C,yr).r[rd]; return r?Object.keys(r.u).filter(k=>r.u[k]).length:0; }
+
+/* ---------- probabilities: the engine's own odds, a small seeded run, memoised by line-ups ---------- */
+function v1819pKey(C,fid){ const f=C.fixtures[fid]; return fid+'|'+[f.h,f.a].map(sid=>{ const lu=getLu(C,sid,f.lvl); return lu?lu.form+lu.slots.map(s=>s.pid+s.role).join('')+JSON.stringify(lu.tac)+(lu.strat||''):'-'; }).join('|')+C.settings.difficulty; }
+function v1819pProbs(C,fid,sync){
+  const k=v1819pKey(C,fid); let v=v1819pMem.pr.get(k); if(v) return v;
+  if(!sync){ if(!v1819pMem.q.includes(fid)) v1819pMem.q.push(fid); if(!v1819pMem.busy){ v1819pMem.busy=true; _idle(v1819pIdle); } return null; }
+  const o=simProbs(C,fid,V1819P.N); v={h:o.h,d:o.d,a:o.a,xh:o.xgH,xa:o.xgA}; v1819pMem.pr.set(k,v); return v;
+}
+function v1819pIdle(){ const C=App.C; const fid=v1819pMem.q.shift(); try{ if(C&&C.fixtures[fid]) v1819pProbs(C,fid,true); }catch(e){}
+  if(v1819pMem.q.length){ _idle(v1819pIdle); return; } v1819pMem.busy=false;
+  if(App.C&&App.route==='pickem'&&!App.modal){ App.keepScroll=true; render(); } }
+function v1819pDog(p){ if(!p) return null; if(p.a>p.h+V1819P.DOG) return 'h'; if(p.h>p.a+V1819P.DOG) return 'a'; return null; }
+function v1819pCrowd(C,fid,p){ if(!p) return null; const r=v1819pR(C,'crowd',fid);
+  const w={h:p.h*1.06*Math.exp(gauss(r)*0.14),d:p.d*0.82*Math.exp(gauss(r)*0.1),a:p.a*Math.exp(gauss(r)*0.14)}; const t=w.h+w.d+w.a;
+  const o={h:Math.round(w.h/t*100),d:Math.round(w.d/t*100)}; o.a=100-o.h-o.d; return o; }
+
+/* ---------- kick-off labels (the season calendar if there is one, else Tue/Fri and the weather's kick-off) ---------- */
+function v1819pWhen(C,f){
+  if(typeof seasonDate==='function'){ try{ const d=seasonDate(C,f); if(d){ const dn=typeof d.dow==='number'?['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.dow]:String(d.dow||'').slice(0,3); return {day:dn||'',time:d.time||weatherFor(f).kick,label:d.label||''}; } }catch(e){} }
+  return {day:f.rd%2?'Fri':'Tue',time:weatherFor(f).kick,label:''};
+}
+function v1819pMins(t){ const m=/(\d+):(\d+)\s*(AM|PM)?/i.exec(String(t||'')); if(!m) return 9999; let h=+m[1]%12; if(m[3]&&/pm/i.test(m[3])) h+=12; return h*60+(+m[2]); }
+function v1819pLockAt(C,fx){ let best=null; for(const id of fx){ const w=v1819pWhen(C,C.fixtures[id]); if(!best||v1819pMins(w.time)<v1819pMins(best.time)) best=w; } return best?`${best.day} ${best.time}`.trim():''; }
+
+/* ---------- freezing a round: odds, crowd and the pundits' picks ---------- */
+function v1819pPunditPick(C,yr,rd,P,fid,p,xf){
+  const r=v1819pR(C,'pp',yr,rd,P.id,fid); const f=C.fixtures[fid]; const dog=v1819pDog(p);
+  const fav=p.h>=p.a?'h':'a'; const chalk=p.d>p.h&&p.d>p.a?'d':fav; const samp=()=>{ const x=r()*(p.h+p.d+p.a); return x<p.h?'h':x<p.h+p.d?'d':'a'; };
+  let k;
+  if(P.style==='chalk') k=chalk;
+  else if(P.style==='sharp'){ const ev={h:p.h*(V1819P.PTS.win+(dog==='h'?V1819P.PTS.upset:0)),d:p.d*V1819P.PTS.draw,a:p.a*(V1819P.PTS.win+(dog==='a'?V1819P.PTS.upset:0))};
+    for(const x in ev) ev[x]*=Math.exp(gauss(r)*0.18); k=['h','d','a'].reduce((b,x)=>ev[x]>ev[b]?x:b,'h'); }
+  else if(P.style==='upset') k=dog&&p[dog]>0.16&&r()<0.6?dog:r()<0.25?'d':fav;
+  else if(P.style==='draw') k=(p.d>0.2&&Math.abs(p.h-p.a)<0.24&&r()<0.8)||r()<0.12?'d':fav;
+  else { const u=C.userSid; k=f.h===u?'h':f.a===u?'a':samp(); }
+  let xs=null;
+  if(fid===xf){ const W=[[1,0],[2,1],[2,0],[3,1],[3,2],[1,0]], D=[[1,1],[0,0],[2,2],[1,1]]; const s=k==='d'?pick(r,D):pick(r,W); xs=k==='a'?{h:s[1],a:s[0]}:{h:s[0],a:s[1]}; }
+  return {k,xs};
+}
+function v1819pFreeze(C,yr,rd){
+  if(V1819P.off||yr!==C.year||rd==null||rd<v1819pYear(C,yr).from) return null;
+  const R=v1819pRound(C,yr,rd); if(R.fz) return R.fz; const fx=v1819pFx(C,yr,rd); if(!fx.length) return null;
+  const xf=v1819pXf(C,fx); const p={}, crowd={}, dogs={};
+  for(const id of fx){ const q=v1819pProbs(C,id,true); p[id]=[+q.h.toFixed(4),+q.d.toFixed(4),+q.a.toFixed(4)]; crowd[id]=v1819pCrowd(C,id,q); dogs[id]=v1819pDog(q); }
+  const pp={}; for(const P of V1819P_PUNDITS){ const o={k:{},xs:null}; for(const id of fx){ const q={h:p[id][0],d:p[id][1],a:p[id][2]}; const x=v1819pPunditPick(C,yr,rd,P,id,q,xf); o.k[id]=x.k; if(x.xs) o.xs=x.xs; } pp[P.id]=o; }
+  if(R.xs&&R.u[xf]&&v1819pOut(R.xs)!==R.u[xf]) R.xs=null;
+  R.fz={fx,xf,p,crowd,dogs,pp,at:v1819pLockAt(C,fx)}; return R.fz;
+}
+function v1819pOut(s){ return s.h>s.a?'h':s.h<s.a?'a':'d'; }
+
+/* ---------- scoring ---------- */
+function v1819pScoreOne(C,fz,picks,xs){
+  let pts=0, ok=0; const bd={};
+  for(const id of fz.fx){ const f=C.fixtures[id]; const o=f.w===f.h?'h':f.w===f.a?'a':'d'; const k=picks[id]; let g=0, why='';
+    if(k&&k===o){ ok++; if(o==='d'){ g=V1819P.PTS.draw; why='draw'; } else { g=V1819P.PTS.win; why='win'; if(fz.dogs[id]===k){ g+=V1819P.PTS.upset; why='upset'; } } }
+    if(id===fz.xf&&xs&&xs.h===f.hg&&xs.a===f.ag){ g+=V1819P.PTS.exact; why+=(why?'+':'')+'exact'; }
+    pts+=g; bd[id]={o,k:k||null,g,why}; }
+  const perfect=ok===fz.fx.length; if(perfect) pts+=V1819P.PTS.perfect;
+  return {pts,ok,perfect,bd};
+}
+function v1819pSettle(C,yr){
+  if(V1819P.off) return 0; yr=yr==null?C.year:yr; const Y=v1819pYear(C,yr); let n=0;
+  for(let rd=Y.from;rd<V1819P.ROUNDS;rd++){ const fx=v1819pFx(C,yr,rd); if(!fx.length||!fx.every(id=>C.fixtures[id].st==='d')) continue;
+    const R=v1819pRound(C,yr,rd); if(R.res) continue; const fz=R.fz||v1819pFreeze(C,yr,rd); if(!fz) continue;
+    const res={u:v1819pScoreOne(C,fz,R.u,R.xs),p:{}}; for(const P of V1819P_PUNDITS) res.p[P.id]=v1819pScoreOne(C,fz,fz.pp[P.id].k,fz.pp[P.id].xs);
+    R.res=res; n++;
+    if(res.u.perfect) addNews(C,'program',`Pick'em: ${C.schools[C.userSid].town}'s coach calls all ${fz.fx.length} games of Matchday ${rd+1} right, a perfect round (+${res.u.pts})`,C.userSid);
+  }
+  const last=Y.r[V1819P.ROUNDS-1]; if(!Y.done&&last&&last.res) v1819pSeasonEnd(C,yr);
+  return n;
+}
+function v1819pTotals(C,yr){ const Y=C.pick&&C.pick.yrs[yr]; if(!Y) return null; if(!Y.r&&Y.tot) return Y.tot; const t={you:0}; for(const P of V1819P_PUNDITS) t[P.id]=0;
+  for(const k in Y.r){ const R=Y.r[k]; if(!R.res) continue; t.you+=R.res.u.pts; for(const P of V1819P_PUNDITS) t[P.id]+=R.res.p[P.id]?R.res.p[P.id].pts:0; } return t; }
+function v1819pStreak(Y,who){ let s=0; for(let rd=V1819P.ROUNDS-1;rd>=0;rd--){ const R=Y.r[rd]; if(!R||!R.res) continue; const x=who==='you'?R.res.u:R.res.p[who]; if(x&&x.ok>=V1819P.STREAK) s++; else break; } return s; }
+function v1819pBoard(C,yr){
+  yr=yr==null?C.year:yr; const Y=v1819pYear(C,yr); const t=v1819pTotals(C,yr)||{you:0};
+  const rows=[{id:'you',name:'You',role:`Coach · ${C.schools[C.userSid].town}`,pts:t.you||0,you:true},...V1819P_PUNDITS.map(P=>({id:P.id,name:v1819pPName(C,P),role:P.role,ico:P.ico,col:P.col,pts:t[P.id]||0}))];
+  for(const r of rows) r.streak=Y.r?v1819pStreak(Y,r.id):0;
+  rows.sort((a,b)=>b.pts-a.pts||(a.you?-1:b.you?1:0)); rows.forEach((r,i)=>{ r.rk=i&&rows[i-1].pts===r.pts?rows[i-1].rk:i+1; });
+  return rows;
+}
+function v1819pPName(C,P){ if(P.id==='radio') return `Section ${C.section} Radio`; if(P.id==='courier'&&typeof V1812P_VOTERS!=='undefined'&&V1812P_VOTERS[0]) return V1812P_VOTERS[0].name; return P.name; }
+function v1819pGap(C,rows){ const me=rows.find(r=>r.you); const top=rows.find(r=>!r.you&&r.rk===1)||rows.find(r=>!r.you); const best=rows.filter(r=>!r.you).sort((a,b)=>b.pts-a.pts)[0];
+  if(!best) return ''; const d=me.pts-best.pts;
+  if(d<0){ const lead=rows.find(r=>r.rk===1); return `You are ${-d} point${d===-1?'':'s'} behind ${lead.you?best.name:lead.name}.`; }
+  if(d===0) return me.pts?`You are level with ${best.name} at the top.`:'Everyone starts on zero. Make your first picks.';
+  return `You lead ${best.name} by ${d} point${d===1?'':'s'}.`; }
+function v1819pSeasonEnd(C,yr){
+  const Y=v1819pYear(C,yr); if(Y.done) return; Y.done=true; const rows=v1819pBoard(C,yr); const me=rows.find(r=>r.you); const lead=rows[0];
+  const won=me.rk===1; const s=C.schools[C.userSid]; Y.win=won?'you':lead.id; Y.tot=v1819pTotals(C,yr);
+  if(won){ const P=v1819pS(C); if(!P.titles.includes(yr)) P.titles.push(yr); s.prestige=Math.min(99,(s.prestige||0)+1);
+    addNews(C,'program',`${s.town}'s coach wins the Courier Pick'em Pool with ${me.pts} points${rows.filter(r=>r.rk===1).length>1?' (shared)':''}, ahead of ${rows.find(r=>!r.you).name}. Program prestige +1`,C.userSid); }
+  else addNews(C,'program',`${lead.name} (${lead.role}) wins the Courier Pick'em Pool with ${lead.pts} points; ${s.town}'s coach finishes ${v1819pOrd(me.rk)} with ${me.pts}`,C.userSid);
+}
+
+/* ---------- hooks: lock at the first real kick-off of a round, score when the round closes ---------- */
+{ const _sm=startMatch; startMatch=function(C,fid,opts){ if(!V1819P.off&&!(opts&&opts.fast)){ try{ const f=C.fixtures[fid]; if(f&&f.comp==='reg'&&f.st!=='d'&&f.yr===C.year) v1819pFreeze(C,f.yr,f.rd); }catch(e){ console.warn('pickem freeze',e); } } return _sm.apply(this,arguments); }; }
+{ const _fm=finishMatch; finishMatch=function(C,M){ if(!V1819P.off){ try{ const f=C.fixtures[M.fid]; if(f&&f.comp==='reg'&&f.st!=='d'&&f.yr===C.year) v1819pFreeze(C,f.yr,f.rd); }catch(e){ console.warn('pickem freeze',e); } } return _fm.apply(this,arguments); }; }
+{ const _ad=advance; advance=function(C){ const ph=C.phase, md=C.md, yr=C.year; const ev=_ad.apply(this,arguments); if(!V1819P.off&&ev&&ph==='regular'&&C.md!==md){ try{ v1819pSettle(C,yr); }catch(e){ console.warn('pickem settle',e); } } return ev; }; }
+{ const _mg=migrate; migrate=function(C){ const o=_mg.apply(this,arguments); try{ const X=o||C; if(X&&X.pick){ if(X.pick.v!==1||!X.pick.yrs) delete X.pick; else if(!Array.isArray(X.pick.titles)) X.pick.titles=[]; } }catch(e){} return o; }; }
+
+/* ===================== the page ===================== */
+ICON.v1819ppick='<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>';
+function v1819pAv(C,row,size){ size=size||34; if(row.you){ return `<span class="v1819p-av you" style="width:${size}px;height:${size}px">${crest(C.schools[C.userSid],size-6)}</span>`; }
+  return `<span class="v1819p-av" style="--pc:${row.col};width:${size}px;height:${size}px;font-size:${Math.round(size*.5)}px" aria-hidden="true">${row.ico}</span>`; }
+function v1819pPRow(C,id){ const P=V1819P_PUNDITS.find(x=>x.id===id); return {id,name:v1819pPName(C,P),role:P.role,ico:P.ico,col:P.col}; }
+function v1819pWorth(k,dog){ const W=V1819P.PTS; if(!k) return `<span class="muted">Pick one · favourite +${W.win}${dog?` · upset +${W.win+W.upset}`:''} · draw +${W.draw}</span>`;
+  if(k==='d') return `<b>Draw call:</b> +${W.draw} if right`; if(dog===k) return `<b>Upset call:</b> +${W.win} and +${W.upset} bonus if right`; return `<b>Winner:</b> +${W.win} if right`; }
+function v1819pGame(C,yr,rd,id,R,locked){
+  const f=C.fixtures[id], fz=R.fz, h=C.schools[f.h], a=C.schools[f.a]; const done=f.st==='d';
+  const p=fz?{h:fz.p[id][0],d:fz.p[id][1],a:fz.p[id][2]}:v1819pProbs(C,id,false);
+  const crowd=fz?fz.crowd[id]:v1819pCrowd(C,id,p); const dog=fz?fz.dogs[id]:v1819pDog(p); const k=R.u[id]; const o=done?(f.w===f.h?'h':f.w===f.a?'a':'d'):null;
+  const xf=fz?fz.xf:v1819pXf(C,v1819pFx(C,yr,rd)); const w=v1819pWhen(C,f); const mine=f.h===C.userSid||f.a===C.userSid;
+  const by={h:[],d:[],a:[]}; if(fz) for(const P of V1819P_PUNDITS){ const x=fz.pp[P.id].k[id]; if(x) by[x].push(v1819pPRow(C,P.id)); }
+  const btn=x=>{ const lab=x==='h'?'Home':x==='d'?'Draw':'Away'; const on=k===x; const cls=['v1819p-opt',on?'on':'',o?(o===x?'won':on?'lost':''):''].join(' ');
+    return `<button class="${cls}" data-a="v1819pPick" data-f="${id}" data-k="${x}" aria-pressed="${on}" ${locked?'disabled':''} aria-label="${esc(lab+(x==='h'?' · '+h.town:x==='a'?' · '+a.town:''))}${crowd?`, crowd ${crowd[x]}%`:''}"><span class="v1819p-ol">${lab}${dog===x?'<i class="v1819p-dogtag">Upset</i>':''}</span><b>${crowd?crowd[x]+'%':'<span class="v1819p-wait">··</span>'}</b>${o===x?'<span class="v1819p-tick">✓</span>':''}${fz?`<span class="v1819p-pp">${by[x].map(r=>`<i title="${esc(r.name)}" style="--pc:${r.col}">${r.ico}</i>`).join('')}</span>`:''}</button>`; };
+  const team=(s,side)=>`<div class="v1819p-team ${side}">${crest(s,46)}<div><b>${esc(s.town)}</b><small>${esc(s.mascot||'')}</small></div></div>`;
+  const mid=done?`<div class="v1819p-score"><b>${f.hg}–${f.ag}</b><small>Final</small></div>`:`<div class="v1819p-vs">vs</div>`;
+  let ex='';
+  if(id===xf){ const xs=R.xs; const st=s=>`<span class="v1819p-step"><button data-a="v1819pXs" data-s="${s}" data-d="-1" ${locked?'disabled':''} aria-label="One fewer ${s==='h'?'home':'away'} goal">−</button><b>${xs?xs[s]:'–'}</b><button data-a="v1819pXs" data-s="${s}" data-d="1" ${locked?'disabled':''} aria-label="One more ${s==='h'?'home':'away'} goal">+</button></span>`;
+    const hit=done&&xs&&xs.h===f.hg&&xs.a===f.ag;
+    ex=`<div class="v1819p-exact ${hit?'hit':''} ${xs?'set':''}"><span class="v1819p-exl"><b>Exact score</b><small>${mine?'Your game':'Game of the round'} · +${V1819P.PTS.exact} if right</small></span><span class="v1819p-exs">${st('h')}<i>–</i>${st('a')}</span>${xs&&!locked?'<button class="v1819p-x" data-a="v1819pXsClear" aria-label="Clear the exact score">×</button>':''}</div>`; }
+  let foot=v1819pWorth(k,dog);
+  if(R.res){ const b=R.res.u.bd[id]; const W={win:'right winner',upset:'upset call',draw:'right draw',exact:'exact score'}; foot=b&&b.g?`<b class="good">+${b.g}</b> ${b.why.split('+').map(x=>W[x]).join(' + ')}`:k?'<span class="bad">No points</span>':'<span class="muted">No pick</span>'; }
+  return `<article class="v1819p-game ${mine?'mine':''} ${k?'picked':''}" data-f="${id}"><div class="v1819p-gtop"><span><b>${esc(w.day)}</b> · ${esc(w.time)}</span><span class="v1819p-ven">${esc(f.ven||h.name)}</span>${mine?'<span class="v1819p-yours">Your game</span>':''}</div>
+    <div class="v1819p-teams">${team(h,'h')}${mid}${team(a,'a')}</div>
+    <div class="v1819p-opts">${btn('h')}${btn('d')}${btn('a')}</div>${ex}<div class="v1819p-worth">${foot}</div></article>`;
+}
+function v1819pChips(){ const W=V1819P.PTS; return `<div class="v1819p-chips"><span><b>+${W.win}</b>Right winner</span><span><b>+${W.upset}</b>Upset call bonus</span><span><b>+${W.draw}</b>Right draw</span><span><b>+${W.exact}</b>Exact score</span><span><b>+${W.perfect}</b>Perfect round</span></div>`; }
+function v1819pRoundCard(C){
+  const yr=C.year, rd=v1819pOpen(C); const Y=v1819pYear(C,yr);
+  if(rd==null||rd<Y.from){ const rows=v1819pBoard(C,yr); const me=rows.find(r=>r.you); const over=C.phase!=='preseason'&&C.phase!=='regular';
+    return `<section class="v1819p-card v1819p-round"><div class="v1819p-rh"><div><span class="v1819p-kick">${yr} pool</span><h3 class="v1819p-title">${over?'The pool is closed':'Picks open next round'}</h3></div></div>
+      <p class="v1819p-sub">${over?(Y.done?`The regular season is over. You finished <b>${v1819pOrd(me.rk)}</b> with <b>${me.pts}</b> points${Y.win==='you'?' and won the pool':''}. Picks for next season open in the preseason.`:'The regular season is over. Picks for next season open in the preseason.'):'This round is already under way. Your first picks open when it is played.'}</p>${v1819pChips()}</section>`; }
+  const R=v1819pRound(C,yr,rd); const fx=v1819pFx(C,yr,rd); const locked=!!(R.fz||R.lk); const n=v1819pPicked(C,yr,rd); const at=R.fz?R.fz.at:v1819pLockAt(C,fx);
+  const pill=R.fz?`<span class="v1819p-pill live">● Round under way</span>`:R.lk?`<span class="v1819p-pill done">🔒 Locked in · kicks off ${esc(at)}</span>`:`<span class="v1819p-pill">⏱ Locks ${esc(at)}</span>`;
+  const sub=R.fz?'Picks are locked. The pundits’ calls are shown under each game.':R.lk?`You locked in ${n} of ${fx.length} picks. The pundits reveal theirs at kick-off.`:`${n} of ${fx.length} picked · change them any time until kick-off. The pundits reveal their calls when the round locks.`;
+  return `<section class="v1819p-card v1819p-round"><div class="v1819p-rh"><div><span class="v1819p-kick">Matchday ${rd+1} of ${V1819P.ROUNDS}${C.phase==='preseason'?' · opens the league season':''}</span><h3 class="v1819p-title">Round ${rd+1} picks</h3></div>
+      <div class="v1819p-ra">${pill}${locked?'':`<button class="btn pri v1819p-lockbtn" data-a="v1819pLock" ${n?'':'disabled'}>Lock in my picks</button>`}</div></div>
+    <p class="v1819p-sub">${sub}</p>
+    <div class="v1819p-games">${fx.map(id=>v1819pGame(C,yr,rd,id,R,locked)).join('')}</div>${v1819pChips()}</section>`;
+}
+function v1819pBoardCard(C,yr){
+  const rows=v1819pBoard(C,yr); const Y=v1819pYear(C,yr); const any=Object.values(Y.r||{}).some(R=>R.res);
+  return `<section class="v1819p-card v1819p-board"><div class="v1819p-bh"><h3>Season leaderboard</h3><span class="chip">${yr}</span></div>
+    <ol class="v1819p-lb">${rows.map(r=>`<li class="${r.you?'you':''}" data-id="${r.id}"><span class="v1819p-rk">${any?r.rk:'–'}</span>${v1819pAv(C,r,36)}<span class="v1819p-nm"><b>${esc(r.name)}</b><small>${esc(r.role)}</small></span><span class="v1819p-st ${r.streak?'':'off'}" title="${r.streak} round${r.streak===1?'':'s'} in a row with ${V1819P.STREAK}+ right calls">🔥 ${r.streak}</span><span class="v1819p-pts"><b>${r.pts}</b><small>pts</small></span></li>`).join('')}</ol>
+    <p class="v1819p-gap">${any?esc(v1819pGap(C,rows)):'No rounds scored yet. Everyone starts on zero.'}</p>
+    <p class="tiny muted">🔥 rounds in a row with ${V1819P.STREAK} or more right calls.</p></section>`;
+}
+function v1819pChart(C,yr){
+  const Y=v1819pYear(C,yr); const pts=[]; for(let rd=0;rd<V1819P.ROUNDS;rd++){ const R=Y.r&&Y.r[rd]; pts.push(R&&R.res?R.res.u.pts:null); }
+  const got=pts.filter(x=>x!=null); const best=got.length?Math.max(...got):0; const max=Math.max(10,best); const bi=best>0?pts.indexOf(best):-1;
+  return `<section class="v1819p-card v1819p-chart"><div class="v1819p-bh"><h3>Your points by round</h3>${got.length?`<span class="chip v1819p-best">Best: ${best}</span>`:''}</div>
+    <div class="v1819p-bars" role="img" aria-label="Points per round: ${pts.map((x,i)=>'round '+(i+1)+' '+(x==null?'not played':x)).join(', ')}">${pts.map((x,i)=>`<div class="v1819p-bar ${x==null?'na':''} ${i===bi?'best':''}"><span class="v1819p-bv">${x==null?'':x}</span><i style="height:${x==null?0:Math.max(3,x/max*100)}%"></i><small>${i+1}</small></div>`).join('')}</div>
+    <p class="tiny muted">${got.length?`${got.length} round${got.length===1?'':'s'} scored · average ${(got.reduce((a,b)=>a+b,0)/got.length).toFixed(1)} a round`:'Bars fill in as rounds are played.'}</p></section>`;
+}
+function v1819pResults(C,yr){
+  const Y=v1819pYear(C,yr); const done=Object.keys(Y.r||{}).map(Number).filter(rd=>Y.r[rd].res).sort((a,b)=>a-b);
+  if(!done.length) return `<section class="v1819p-card v1819p-res"><div class="v1819p-bh"><h3>Past rounds</h3></div><div class="empty">Scored rounds appear here: what you picked, what happened and the points.</div></section>`;
+  let rd=+App.params.pr; if(!done.includes(rd)) rd=done[done.length-1]; const R=Y.r[rd], fz=R.fz, res=R.res;
+  const rows=fz.fx.map(id=>{ const f=C.fixtures[id]; const b=res.u.bd[id]; const h=C.schools[f.h], a=C.schools[f.a]; const name=k=>k==='h'?h.town:k==='a'?a.town:k==='d'?'Draw':'No pick';
+    const pp=V1819P_PUNDITS.map(P=>{ const x=res.p[P.id].bd[id]; return `<i class="${x.k===x.o?'ok':''}" title="${esc(v1819pPName(C,P))}: ${esc(name(x.k))}" style="--pc:${P.col}">${P.ico}</i>`; }).join('');
+    return `<div class="v1819p-rrow"><div class="v1819p-rm">${crest(h,24)}<b>${esc(h.town)}</b><span class="v1819p-rs">${f.hg}–${f.ag}</span><b>${esc(a.town)}</b>${crest(a,24)}</div>
+      <div class="v1819p-rp"><span class="v1819p-rk2 ${b.k?(b.k===b.o?'ok':'no'):'none'}">${b.k?(b.k===b.o?'✓':'✗'):'–'} ${esc(name(b.k))}${id===fz.xf&&R.xs?` · ${R.xs.h}–${R.xs.a}`:''}</span><span class="v1819p-rpp">${pp}</span><b class="v1819p-rg ${b.g?'good':''}">${b.g?'+'+b.g:'0'}</b></div></div>`; }).join('');
+  const bestP=V1819P_PUNDITS.map(P=>({n:v1819pPName(C,P),v:res.p[P.id].pts})).sort((a,b)=>b.v-a.v)[0];
+  return `<section class="v1819p-card v1819p-res"><div class="v1819p-bh"><h3>Past rounds</h3><div class="v1819p-rsel">${done.map(d=>`<button class="${d===rd?'on':''}" data-a="setParam" data-k="pr" data-v="${d}" aria-pressed="${d===rd}">R${d+1}</button>`).join('')}</div></div>
+    <div class="v1819p-rsum"><span>Round ${rd+1}: <b>${res.u.pts} pts</b> · ${res.u.ok} of ${fz.fx.length} right${res.u.perfect?` · <b class="good">perfect round +${V1819P.PTS.perfect}</b>`:''}</span><span class="muted">Best pundit: ${esc(bestP.n)} ${bestP.v}</span></div>
+    ${rows}<p class="tiny muted">✓ / ✗ is your call; the icons are the pundits’ calls (bright = right).</p></section>`;
+}
+function v1819pHow(C){ const P=v1819pS(C);
+  return `<section class="v1819p-card v1819p-how"><div class="v1819p-bh"><h3>How it works</h3></div>
+   <ul><li>Each round, call the four Varsity league games: home win, draw or away win. Your own game also takes an exact score.</li>
+   <li>The underdog is the side the odds rate at least ${Math.round(V1819P.DOG*100)} points less likely to win; a right underdog call earns the bonus.</li>
+   <li>Picks lock at the first kick-off of the round, or earlier if you lock them in. No pick, no points, no harm.</li>
+   <li>Win the season and the program gets <b>+1 prestige</b> (it fades like any prestige) and a pool pennant. Results on the pitch are never affected.</li></ul>
+   ${P.titles.length?`<div class="v1819p-pens">${P.titles.map(y=>`<span class="v1819p-pen">🏆 Pool champion ${y}</span>`).join('')}</div>`:''}</section>`; }
+function v1819pPast(C){ const P=v1819pS(C); const ys=Object.keys(P.yrs).map(Number).filter(y=>y<C.year&&P.yrs[y].done).sort((a,b)=>b-a); if(!ys.length) return '';
+  return `<section class="v1819p-card v1819p-hist"><div class="v1819p-bh"><h3>Past seasons</h3></div>${ys.map(y=>{ const Y=P.yrs[y]; const t=Y.tot||v1819pTotals(C,y)||{}; const W=V1819P_PUNDITS.find(x=>x.id===Y.win); const w=Y.win==='you'?'You':W?v1819pPName(C,W):'—';
+    return `<div class="v1819p-hrow"><b>${y}</b><span>Winner: ${esc(w)}</span><span class="muted">You ${t.you||0} pts</span></div>`; }).join('')}</section>`; }
+VIEWS.pickem=()=>{
+  const C=App.C; try{ v1819pSettle(C); }catch(e){ console.warn('pickem',e); }
+  const yr=C.year; const rows=v1819pBoard(C,yr); const me=rows.find(r=>r.you); const P=v1819pS(C);
+  let body; try{ body=`<div class="v1819p-grid"><div class="v1819p-main">${v1819pRoundCard(C)}${v1819pResults(C,yr)}</div><div class="v1819p-side">${v1819pBoardCard(C,yr)}${v1819pChart(C,yr)}${v1819pHow(C)}${v1819pPast(C)}</div></div>`; }
+  catch(e){ console.error('pickem',e); body='<div class="empty card">The Pick’em Pool could not be drawn this time. Your career is unaffected.</div>'; }
+  return `<div class="v1819p"><section class="v1819p-hero"><div><span class="v1819p-kick"><i></i>The Courier Pick’em Pool · ${yr} season</span><p>Call every game in the league before each round. Beat the Courier, the radio show and the rest of the pundits over the season.</p></div>
+    <div class="v1819p-me"><div><small>Your rank</small><b>${Object.values(v1819pYear(C,yr).r||{}).some(R=>R.res)?v1819pOrd(me.rk):'–'}</b></div><div><small>Points</small><b>${me.pts}</b></div><div><small>Pool titles</small><b>${P.titles.length}</b></div></div></section>${body}</div>`;
+};
+TITLES.pickem="Pick'em Pool"; NAV_ICON.pickem='v1819ppick'; if(typeof NAV_DESC!=='undefined') NAV_DESC.pickem='Call every league game; beat the Courier and the pundits';
+{ const i=NAV.findIndex(n=>n[0]==='statepoll'); const j=i>=0?i:NAV.findIndex(n=>n[0]==='league'); if(!NAV.some(n=>n[0]==='pickem')) NAV.splice(j>=0?j+1:NAV.length,0,['pickem',"Pick'em"]); }
+{ const g=TOPNAV.find(t=>t[0]==='league'); if(g&&!g[3].includes('pickem')){ const j=g[3].indexOf('countymap'); g[3].splice(j>=0?j+1:g[3].length,0,'pickem'); }
+  if(typeof V1817O_MENU!=='undefined'&&V1817O_MENU.league&&V1817O_MENU.league[0]&&!V1817O_MENU.league[0][1].includes('pickem')) V1817O_MENU.league[0][1].push('pickem'); }
+{ const _nb=navBadges; navBadges=function(C){ const b=_nb.apply(this,arguments); try{ const rd=v1819pOpen(C); if(rd!=null&&App.route!=='pickem'&&C.pick){ const Y=C.pick.yrs[C.year]; const R=Y&&Y.r[rd]; if(Y&&rd>=Y.from&&!(R&&(R.fz||R.lk))){ const n=v1819pFx(C,C.year,rd).length-v1819pPicked(C,C.year,rd); if(n>0) b.pickem=String(n); } } }catch(e){} return b; }; }
+
+/* ---------- actions ---------- */
+function v1819pEdit(fn){ const C=App.C; const rd=v1819pOpen(C); if(rd==null) return; const R=v1819pRound(C,C.year,rd); if(R.fz||R.lk){ toast('Picks for this round are locked.'); return; }
+  fn(R,C,rd); queueSave(); App.keepScroll=true; render(); }
+A.v1819pPick=el=>v1819pEdit((R,C,rd)=>{ const id=el.dataset.f, k=el.dataset.k; if(R.u[id]===k) delete R.u[id]; else R.u[id]=k;
+  const xf=v1819pXf(C,v1819pFx(C,C.year,rd)); if(id===xf&&R.xs&&R.u[id]!==v1819pOut(R.xs)) R.xs=null; try{ Sound.ui('click'); }catch(e){} });
+A.v1819pXs=el=>v1819pEdit((R,C,rd)=>{ const xf=v1819pXf(C,v1819pFx(C,C.year,rd)); const s=el.dataset.s, d=+el.dataset.d; const x=R.xs?{...R.xs}:{h:0,a:0}; if(R.xs) x[s]=clamp(x[s]+d,0,9); else if(d>0) x[s]=1; R.xs=x; R.u[xf]=v1819pOut(x); });
+A.v1819pXsClear=()=>v1819pEdit(R=>{ R.xs=null; });
+A.v1819pLock=()=>{ App.modal={type:'v1819pLock'}; renderModal(); };
+A.v1819pLockYes=()=>{ const C=App.C; const rd=v1819pOpen(C); if(rd!=null){ const R=v1819pRound(C,C.year,rd); if(!R.fz) R.lk=1; } App.modal=null; renderModal(); queueSave(); App.keepScroll=true; render(); toast('Picks locked in. Good luck.'); try{ Sound.ui('success'); }catch(e){} };
+MODALS.v1819pLock=()=>{ const C=App.C; const rd=v1819pOpen(C); if(rd==null) return modalShell('<h2>Pick’em Pool</h2>','<p>No round is open for picks right now.</p>','<button class="btn" data-a="closeModal">Close</button>','narrow');
+  const fx=v1819pFx(C,C.year,rd); const n=v1819pPicked(C,C.year,rd); const R=v1819pRound(C,C.year,rd);
+  const list=fx.map(id=>{ const f=C.fixtures[id]; const k=R.u[id]; return `<li><span>${esc(C.schools[f.h].town)} v ${esc(C.schools[f.a].town)}</span><b>${k?(k==='d'?'Draw':esc(C.schools[k==='h'?f.h:f.a].town)):'<span class="muted">no pick</span>'}</b></li>`; }).join('');
+  return modalShell(`<h2>Lock in Round ${rd+1}?</h2>`,`<p>Locked picks can’t be changed, even before kick-off.${n<fx.length?` <b>You have picked ${n} of ${fx.length} games</b>; a game without a pick scores nothing.`:''}</p><ul class="v1819p-ml">${list}</ul>${R.xs?`<p class="muted">Exact score: ${R.xs.h}–${R.xs.a}</p>`:''}`,
+   `<button class="btn" data-a="closeModal">Keep editing</button><button class="btn pri" data-a="v1819pLockYes">Lock in my picks</button>`,'narrow'); };
+
+/* ---------- the Overview's This week strip ---------- */
+{ const _of=VIEWS.office; VIEWS.office=function(){ const h=_of.apply(this,arguments); try{ const C=App.C; const rd=v1819pOpen(C); if(rd==null) return h; const Y=v1819pYear(C,C.year); if(rd<Y.from) return h;
+    const R=Y.r[rd]; if(R&&(R.fz||R.lk)) return h; const fx=v1819pFx(C,C.year,rd); if(!fx.length) return h; const n=v1819pPicked(C,C.year,rd);
+    const t=document.createElement('template'); t.innerHTML=h; const box=t.content.querySelector('.v1817o-items'); if(!box) return h;
+    const clr=box.querySelector('.v1817o-clear'); if(clr) clr.remove();
+    const b=document.createElement('button'); b.className='dec v1819p-dec'+(n===fx.length?' ok':''); b.dataset.a='go'; b.dataset.r='pickem';
+    b.innerHTML=`<span class="dec-ico">${n===fx.length?'✓':'🎯'}</span><span class="grow"><b>${n===fx.length?'Picks in for':'Make your picks for'} Matchday ${rd+1}</b><small>Pick’em Pool · ${n} of ${fx.length} picked · locks ${esc(v1819pLockAt(C,fx))}</small></span><span class="dec-go">${icon('chev',16)}</span>`;
+    box.appendChild(b); return t.innerHTML; }catch(e){ console.warn('pickem overview',e); return h; } }; }
 
 </script>
