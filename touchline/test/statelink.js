@@ -30,7 +30,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   const R=await page.evaluate(()=>{ const C=App.C; let g=0; while(C.phase!=='offseason'&&g++<400){ simRound(C); advance(C); } const yr=C.year; const S=C.v1814[yr]; const out={};
     const sec6=v1814Table(C,yr,6); out.rgn=S.rgn===sec6[0].id; const T=C.tourneys[yr]; const rgnF=C.fixtures[T.rgn]; out.rgnSchool=C.schools[rgnF.a].vid===S.rgn;
     const pl=C.poll.polls[yr]; const last=pl[pl.length-1]; const rk=v1812pRankMap(last);
-    const champs=V1812P.SECS.filter(s=>s!==6).map(s=>v1814Table(C,yr,s)[0].id); out.field=S.st.length===7&&S.st.every(v=>champs.includes(v))&&new Set(S.st).size===7;
+    const skip=C.lad?[6,V1819L.UP,V1819L.LO]:[6]; const champs=V1812P.SECS.filter(s=>!skip.includes(s)).map(s=>v1814Table(C,yr,s)[0].id); out.field=S.st.length===7&&S.st.every(v=>champs.includes(v))&&new Set(S.st).size===7;
     const worst=Math.max(...S.st.map(v=>rk.get(v)||999)); const left=champs.filter(v=>!S.st.includes(v)); out.best=left.every(v=>(rk.get(v)||999)>=worst);
     const stIds=T.st[0].flatMap(fid=>{ const f=C.fixtures[fid]; return [f.h,f.a]; }); out.st8=stIds.length===8&&stIds.filter(id=>C.schools[id].vid&&S.st.includes(C.schools[id].vid)).length===7;
     out.cap=stIds.every(id=>id===C.userSid||xiRating(C,id,'V')<=85.05); out.stR=stIds.map(id=>Math.round(xiRating(C,id,'V')));
@@ -71,7 +71,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(Object.values(Q.boards).every(n=>n===5)&&Q.intSorted&&Q.lgOnly, 'tackles, interceptions, clearances, defensive actions, shots on target, xG, save % and rating leaderboards cover the state (and your section on its own)');
 
   /* an older pool (v18.12: 80 schools, no bases) upgrades: new sections, bases from next season, this season untouched */
-  const U=await page.evaluate(()=>{ const C=App.C; const P=v1812pS(C); const old=P.pool.teams.filter(t=>t.sec<12).map(t=>{ const o={...t}; delete o.B; delete o.tier; return o; });
+  const U=await page.evaluate(()=>{ const C=App.C; const P=v1812pS(C); const old=v1812pMakePool(C).teams.filter(t=>t.sec<12).map(t=>{ const o={...t}; delete o.B; delete o.tier; return o; }); delete C.lad; /* the deterministic original pool: the Ladder reshuffles the live one */
     P.pool={teams:old,sig:v1812pHash(old.map(t=>t.id+t.town+t.R).join(','))}; v1812pMem.cmp.clear(); v1812pMem.vr.clear();
     const id=old[5].id; let R=old[5].R; for(let y=P.y0+1;y<=C.year;y++){ const r=v1812pRng(C,'vr',id,y); R=0.72*R+0.28*70.2+gauss(r)*2; } const before=Math.round(v1812pClamp(R,56,85)*100)/100;
     const Q=v1812pS(C); return {n:Q.pool.teams.length,v14:Q.pool.v14,bY:Q.pool.bY===C.year+1,same:v1812pVR(C,id,C.year)===before,tiers:Q.pool.teams.every(t=>t.B!=null),ids:new Set(Q.pool.teams.map(t=>t.id)).size}; });

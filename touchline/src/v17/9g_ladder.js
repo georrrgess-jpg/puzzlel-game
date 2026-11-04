@@ -25,6 +25,9 @@ function v1819lDown(c){ return c==='AAA'?'AA':c==='AA'?'A':null; }
 function v1819lSecAt(t,yr){ if(!t) return null; let s=t.sec0!=null?t.sec0:t.sec; if(t.sh) for(const [y,v] of t.sh) if(y<=yr) s=v; return s; }
 function v1819lBaseAt(t,yr,bY){ let b=(t.B!=null&&yr>=(t.bFrom!=null?t.bFrom:bY))?t.B:70.2; if(t.bh) for(const [y,v] of t.bh) if(y<=yr) b=v; return b; }
 function v1819lTouch(C){ const P=v1812pS(C); P.pool.mv=(P.pool.mv||0)+1; P.pool.sig=v1814Sig(P.pool.teams)+'|m'+P.pool.mv; for(const k of ['vy','vr','ros','vs','cmp']) if(v1812pMem[k]) v1812pMem[k].clear(); }
+/* the league you played in a given year (the Ladder moves schools between years) */
+function v1819lLgAt(C,yr){ const L=C&&C.lad; if(!L||!L.lg||yr===C.year) return C.league; if(L.lg[yr]) return L.lg[yr]; const ys=Object.keys(L.lg).map(Number).sort((a,b)=>a-b); return ys.length&&yr<ys[0]?L.lg[ys[0]]:C.league; }
+if(typeof v1812pS==='function'){
 v1812pVR=function(C,vid,yr){
   const P=v1812pS(C); const k=P.pool.sig+'|'+vid+'|'+yr; let v=v1812pMem.vr.get(k); if(v!=null) return v;
   const t=v1812pPoolMap(C).get(vid); if(!t) return 70; let R=t.R, y0=P.y0; if(t.rY!=null){ R=t.rA; y0=t.rY; }
@@ -32,12 +35,13 @@ v1812pVR=function(C,vid,yr){
   v=Math.round(v1812pClamp(R,56,85)*100)/100; v1812pMem.vr.set(k,v); return v; };
 v1812pVSeason=function(C,yr){
   const P=v1812pS(C); const k=P.pool.sig+'|'+yr; let v=v1812pMem.vy.get(k); if(v) return v;
-  const bySec={}; for(const t of P.pool.teams){ const s=v1819lSecAt(t,yr); if(!s||(yr===C.year&&C.league.includes(t.id))) continue; (bySec[s]||(bySec[s]=[])).push(t.id); }
+  const bySec={}; for(const t of P.pool.teams){ const s=v1819lSecAt(t,yr); if(!s||v1819lLgAt(C,yr).includes(t.id)) continue; (bySec[s]||(bySec[s]=[])).push(t.id); }
   const games=[]; for(const sec of V1812P.SECS){ const ids=bySec[sec]; if(!ids||ids.length<2) continue; roundRobin(ids).forEach((pairs,rd)=>{ for(const [h,a] of pairs) games.push(v1812pGame(C,yr,rd,h,a)); }); }
   const rec=new Map(); for(const s in bySec) for(const id of bySec[s]) rec.set(id,[]);
   for(const g of games){ rec.get(g.h).push(v1812pRec(g,0)); rec.get(g.a).push(v1812pRec(g,1)); }
   for(const arr of rec.values()) arr.sort((x,y)=>x.rd-y.rd);
   v=v1812pMem.vy.set(k,{games,rec}).get(k); if(v1812pMem.vy.size>12) v1812pMem.vy.delete(v1812pMem.vy.keys().next().value); return v; };
+{ const _lr=v1812pLeagueRecs; v1812pLeagueRecs=function(C,yr,bound){ const g=v1819lLgAt(C,yr); if(g===C.league) return _lr.apply(this,arguments); const keep=C.league; C.league=g; try{ return _lr.apply(this,arguments); } finally{ C.league=keep; } }; }
 v1812pAllIds=function(C){ const P=v1812pS(C); return [...C.league,...P.pool.teams.filter(t=>!C.league.includes(t.id)&&v1819lSecAt(t,C.year)).map(t=>t.id)]; };
 v1812pSec=function(C,id){ if(C.league.includes(id)) return C.section; return v1819lSecAt(v1812pPoolMap(C).get(id),C.year)||0; };
 v1814Table=function(C,yr,sec,bound){ const vs=v1812pVSeason(C,yr); const rows=[];
@@ -46,11 +50,15 @@ v1814Table=function(C,yr,sec,bound){ const vs=v1812pVSeason(C,yr); const rows=[]
     rows.push({id:t.id,sid:t.id,p:a.length,pts,gf,ga,gd:gf-ga,w,d,l,form}); }
   return rows.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||(a.id<b.id?-1:1)); };
 { const _ts=v1812pVTeamSeason; v1812pVTeamSeason=function(C,vid,yr,bound){ if(!v1812pVSeason(C,yr).rec.has(vid)) return {stats:new Map(),starters:[],bench:[]}; return _ts.apply(this,arguments); }; }
+/* poll players of schools that left your league carry the school's own id */
+v1812pParseVP=function(id){ const m=/^vp_(.+)_(\d+)_(\d)$/.exec(String(id)); return m?{vid:m[1],c:+m[2],k:+m[3]}:null; };
+/* the Preseason Cup draws from outside the Ladder's class sections */
 v1814PickPre=function(C,target,S){
   const r=v1812pRng(C,'v1814pre',C.year,S.pre.length); const yr=C.year; const last=S.pre.length===2; const T=last?target+4:target;
   const lad=new Set(C.lad?[...C.lad.cls.AAA,...C.lad.cls.AA,...C.lad.cls.A]:[]);
-  const cand=v1812pS(C).pool.teams.filter(t=>!S.pre.includes(t.id)&&!C.league.includes(t.id)&&v1819lSecAt(t,yr)&&!lad.has(t.id)&&(!last||t.tier==='power'||t.tier==='cont')).map(t=>({id:t.id,d:Math.abs(v1812pVR(C,t.id,yr)-T)+r()*0.01})).sort((a,b)=>a.d-b.d).slice(0,4);
+  const cand=v1812pS(C).pool.teams.filter(t=>{ const sc=v1819lSecAt(t,yr); return sc&&sc!==V1819L.UP&&sc!==V1819L.LO; }).filter(t=>!S.pre.includes(t.id)&&!C.league.includes(t.id)&&!lad.has(t.id)&&(!last||t.tier==='power'||t.tier==='cont')).map(t=>({id:t.id,d:Math.abs(v1812pVR(C,t.id,yr)-T)+r()*0.01})).sort((a,b)=>a.d-b.d).slice(0,4);
   return cand.length?cand[Math.floor(r()*cand.length)].id:null; };
+}
 
 /* ---------- state ---------- */
 function v1819lS(C){ if(!v1819lOn(C)) return null; if(C.lad&&C.lad.v===1) return C.lad; return v1819lInit(C); }
@@ -150,10 +158,12 @@ function v1819lApply(C){
   return _ss.apply(this,arguments); }; }
 { const _bl=balanceLeague; balanceLeague=function(C,start){ if(V1819L.rolling) return; const c=C.lad&&C.lad.mine||'AA'; const b=V1819L.BAND[c]; const keep={lo:BAL.lo,hi:BAL.hi,top:BAL.top}; BAL.lo=b.lo; BAL.hi=b.hi; BAL.top=b.top; try{ return _bl.apply(this,arguments); } finally{ BAL.lo=keep.lo; BAL.hi=keep.hi; BAL.top=keep.top; } }; }
 /* the State field comes from outside the Ladder's class sections */
+if(typeof v1814Champ==='function'){
 v1814Field=function(C,yr){ const polls=v1812pPolls(C,yr); const last=polls.length?polls[polls.length-1]:null; const rk=v1812pRankMap(last);
   const skip=C.lad?[6,V1819L.UP,V1819L.LO]:[6]; const ch=V1812P.SECS.filter(s=>!skip.includes(s)).map(s=>v1814Champ(C,yr,s)).filter(Boolean);
   const pw=new Map(); try{ for(const r of v1812pTable(C,yr)) pw.set(r.id,r.power); }catch(e){}
   return ch.sort((a,b)=>(rk.get(a)||999)-(rk.get(b)||999)||(pw.get(b)||v1812pVR(C,b,yr))-(pw.get(a)||v1812pVR(C,a,yr))||(a<b?-1:1)).slice(0,7); };
+}
 /* standings for a past season use that season's league */
 { const _st=standings; standings=function(C,lvl,yr){ const L=C&&C.lad; if(L&&L.lg&&yr&&yr!==C.year){ let g=L.lg[yr]; if(!g){ const ys=Object.keys(L.lg).map(Number).sort((a,b)=>a-b); g=yr<ys[0]?L.lg[ys[0]]:null; }
   if(g&&g.join()!==C.league.join()){ const keep=C.league; C.league=g; try{ return _st.apply(this,arguments); } finally{ C.league=keep; } } } return _st.apply(this,arguments); }; }
