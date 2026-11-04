@@ -199,10 +199,15 @@ B('space','in Outer Space',['space'],(o,R)=>{const t=o.t,c=o.c;
   const gr=pts(R,348,6,3);
   const planet=(x,y,r,col,ring)=>`<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="url(#${o.id}pl)"/><path d="M${f(x-r)} ${f(y)}a${f(r)} ${f(r)} 0 0 0 ${f(2*r)} 0" fill="#000" opacity=".25"/>${ring?`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r*1.8)}" ry="${f(r*.4)}" fill="none" stroke="${c('#ffe0b0')}" stroke-width="${f(r*.16)}" opacity=".85" transform="rotate(-14 ${f(x)} ${f(y)})"/>`:''}`;
   const px=R()<.5?60:240;
-  return{sky:`<defs>${lin(o.id+'sp',[[0,'#02030f'],[.6,'#0a0a2a'],[1,'#1a1240']])}${rad(o.id+'n1',[[0,neb[0],.5],[1,neb[0],0]])}${rad(o.id+'n2',[[0,neb[1],.45],[1,neb[1],0]])}${rad(o.id+'pl',[[0,'#ffd0a0'],[.7,'#e0805a'],[1,'#8a3a4a']],.35,.3,.8)}</defs><rect width="${W}" height="${H}" fill="url(#${o.id}sp)"/>`+
-      `<ellipse cx="${f(80+R()*60)}" cy="${f(110+R()*60)}" rx="140" ry="80" fill="url(#${o.id}n1)"/><ellipse cx="${f(170+R()*80)}" cy="${f(200+R()*60)}" rx="130" ry="90" fill="url(#${o.id}n2)"/>`+
-      stars(R,150,0,W,0,340)+scatter(R,8,0,W,0,320,(x,y)=>spark(x,y,2+R()*3,'#fff',.9))+planet(px,70+R()*40,22+R()*14,'',R()<.6)+`<circle cx="${f(W-px+R()*40-20)}" cy="${f(60+R()*30)}" r="9" fill="${c('#c8d0f0')}"/>`+
-      `<path d="M${f(R()*120)} ${f(30+R()*60)}l60 26" stroke="#fff" stroke-width="1.6" opacity=".6" stroke-linecap="round"/>`,
+  /* space is kept colourful everywhere (three nebula clouds and a band of the Milky Way across it), so no two pieces
+     of a 5x5 puzzle are plain black */
+  const ma=-25-R()*20,mx=W/2+R()*60-30,my=170+R()*60;
+  return{sky:`<defs>${lin(o.id+'sp',[[0,'#0a0828'],[.55,'#16124a'],[1,'#2a1a5a']])}${rad(o.id+'n1',[[0,neb[0],.75],[.5,neb[0],.3],[1,neb[0],0]])}${rad(o.id+'n2',[[0,neb[1],.7],[.5,neb[1],.28],[1,neb[1],0]])}${rad(o.id+'n3',[[0,'#ffffff',.35],[.4,neb[0],.25],[1,neb[1],0]])}${lin(o.id+'mw',[[0,'#ffffff',0],[.5,'#f4ecff',.22],[1,'#ffffff',0]],0,1)}${rad(o.id+'pl',[[0,'#ffd0a0'],[.7,'#e0805a'],[1,'#8a3a4a']],.35,.3,.8)}${rad(o.id+'p2',[[0,'#d8f4ff'],[.7,'#5ab0e0'],[1,'#2a4a8a']],.35,.3,.8)}</defs><rect width="${W}" height="${H}" fill="url(#${o.id}sp)"/>`+
+      `<ellipse cx="${f(70+R()*60)}" cy="${f(90+R()*60)}" rx="150" ry="95" fill="url(#${o.id}n1)"/><ellipse cx="${f(190+R()*70)}" cy="${f(210+R()*60)}" rx="150" ry="110" fill="url(#${o.id}n2)"/><ellipse cx="${f(60+R()*180)}" cy="${f(280+R()*40)}" rx="110" ry="60" fill="url(#${o.id}n3)"/>`+
+      `<g transform="translate(${f(mx)} ${f(my)}) rotate(${f(ma)})"><rect x="-260" y="-34" width="520" height="68" fill="url(#${o.id}mw)"/>${Array.from({length:70},()=>`<circle cx="${f(R()*520-260)}" cy="${f((R()+R()-1)*30)}" r="${f(.4+R()*.9)}" fill="#fff" opacity="${f(.4+R()*.6)}"/>`).join('')}</g>`+
+      stars(R,140,0,W,0,340)+scatter(R,14,0,W,0,330,(x,y,i)=>spark(x,y,2+R()*3.5,i%3?'#fff':neb[i%2],.95))+planet(px,70+R()*40,22+R()*14,'',R()<.6)+
+      `<circle cx="${f(W-px+R()*40-20)}" cy="${f(60+R()*30)}" r="11" fill="url(#${o.id}p2)"/><path d="M${f(W-px+R()*40-31)} ${f(68)}a11 11 0 0 0 22 0" fill="#000" opacity=".2"/>`+
+      `<path d="M${f(R()*120)} ${f(30+R()*60)}l60 26" stroke="#fff" stroke-width="1.6" opacity=".7" stroke-linecap="round"/>`,
     far:'',mid:'',
     near:hill(gr,c('#8a88a8'))+hill(pts(R,372,5,3),c('#a8a6c4'))+scatter(R,8,0,W,354,398,(x,y)=>{const r=4+R()*8;return`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r)}" ry="${f(r*.35)}" fill="${c('#6a6888')}"/><path d="M${f(x-r)} ${f(y)}a${f(r)} ${f(r*.35)} 0 0 0 ${f(2*r)} 0" stroke="${c('#c8c6e0')}" stroke-width="1" fill="none"/>`}),
     gy:x=>290,fy:H-10,wy:null,weather:[]};

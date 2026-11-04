@@ -59,6 +59,28 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v7.1 (Jigsaw feel)
+- **Opening reveal:** each puzzle opens on the whole picture with a shine. It then cracks into cards that spin and fly to
+  their shuffled spots. Tap to skip.
+- **Drag feel:**
+  - Pressing a piece lights up the whole group that will move.
+  - A lifted group grows a little and leans with your swipe.
+  - It lands with a small squash, and pushed-aside pieces glint as they settle.
+- **Locks:**
+  - A line of light zips along every new seam.
+  - The lock chime climbs in pitch as the picture comes together.
+  - Several locks in one move earn "Nice!", "Great!" or "Amazing!".
+- **Progress strip:** a bar under the board shows how much of the picture is done, with cheers at halfway and at 80%.
+- **Guidance:**
+  - Hints show a finger dragging the piece to its spot.
+  - The first puzzle shows the same finger until you make your first move.
+- **Finish:**
+  - A wave of light runs across the picture and sparkles circle the frame.
+  - The finished picture flies off the board into the win card.
+  - Back in the gallery, it stamps into its album slot.
+  - The Continue button shows the next puzzle's piece count.
+- **Space pictures:** now colourful all over (nebulas and the Milky Way), so their pieces are easy to tell apart.
+
 ## What's new in v7 (Jigsaw)
 - **New: Jigsaw**, an endless picture-puzzle track with its own tab, gallery, album pages, quests and 4 trophies (see above).
 - **Merge Bloom** plays on a wooden planter of soil beds instead of flat green squares.

@@ -73,7 +73,7 @@ function startLevel(n,opts={}){
   $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;refreshUndo();
   refreshHUD();show('play');sfx.whoosh();
   const me=cur,go=()=>{if(cur===me&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
-  if(!S.seen[type])showHowTo(type,go);else{go();showIntro()}
+  if(!S.seen[type])showHowTo(type,go);else{go();if(!jig)showIntro()}   // a jigsaw opens with its own reveal
 }
 /* level intro: a short banner that names the puzzle and states the 3-star goal */
 function showIntro(){

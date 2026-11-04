@@ -15,7 +15,19 @@ function jigReward(n,stars,prev){
 const jigDone=n=>(S.jig.stars[n]||0)>0;
 const pageDone=p=>{for(let n=(p-1)*12+1;n<=p*12;n++)if(!jigDone(n))return false;return true};
 const starRow=k=>[0,1,2].map(i=>STAR.replace('<svg','<svg class="'+(i<k?'on':'')+'"')).join('');
-let jigPageView=0;
+let jigPageView=0,jigFresh=0;
+/* the finished picture lifts off the board and flies into the win card */
+function flyPicture(from,to,url,fc){
+  if(REDUCED||!from||!to)return;
+  const a=from.getBoundingClientRect();if(!a.width)return;
+  const f=el('div','jflight',`<img alt="" src="${url}">`);f.style.cssText=`left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;--fc:${fc}`;
+  document.body.appendChild(f);to.style.opacity='0';to.classList.add('flown');
+  setTimeout(()=>{
+    const b=to.getBoundingClientRect();if(!b.width||!f.animate){to.style.opacity='';f.remove();return}
+    const an=f.animate([{transform:'none'},{transform:`translate(${(b.left-a.left)*.5}px,${(b.top-a.top)*.5-30}px) scale(${(b.width/a.width+1)/2},${(b.height/a.height+1)/2}) rotate(-3deg)`,offset:.55},{transform:`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`}],{duration:700,easing:'cubic-bezier(.45,0,.25,1)',fill:'forwards'});
+    an.onfinish=()=>{to.style.opacity='';f.remove();sfx.pop(1.4)};
+  },420);
+}
 
 function playJig(n){if(!jigOpen())return;Trans.stop();startLevel(n,{jig:true})}
 /* the hub screen */
@@ -35,11 +47,12 @@ function renderAlbum(){
   let k=0,html='';
   for(let n=(p-1)*12+1;n<=p*12;n++){
     const st=S.jig.stars[n]||0,isNext=n===S.jig.next;if(st)k++;
-    if(st)html+=`<button class="jslot done" data-n="${n}" style="--i:${n%12}"><img alt="" src="${JigPic.get(n).url}"><span class="jsst">${starRow(st)}</span></button>`;
+    if(st)html+=`<button class="jslot done${n===jigFresh?' fresh':''}" data-n="${n}" style="--i:${n%12}"><img alt="" src="${JigPic.get(n).url}"><span class="jsst">${starRow(st)}</span></button>`;
     else if(isNext)html+=`<button class="jslot next" data-n="${n}" style="--i:${n%12}"><b>?</b><small>Next</small></button>`;
     else html+=`<div class="jslot lock" style="--i:${n%12}"><b>${n}</b></div>`;
   }
   $('#jgGrid').innerHTML=html;
+  if(jigFresh&&$('#jgGrid .jslot.fresh')){jigFresh=0;setTimeout(()=>{sfx.star(2);const e=$('#jgGrid .jslot.fresh');if(e){const[x,y]=centerOf(e);burst(x,y,'#ffd166',20,1)}},700)}
   $('#jgPg').textContent=`Page ${p}`;$('#jgPgN').textContent=`${k}/12`;$('#jgPgBar').style.width=k/12*100+'%';
   $('#jgPrev').disabled=p<=1;$('#jgNext').disabled=p>=maxPg;
   const J=ECON.jig.page;$('#jgReward').innerHTML=S.jig.pages[p]?'<span class="ok">✓ Page complete · bonus collected</span>':`Fill the page: <span class="rc"><i class="coin"></i>${J.coins}</span><span class="rc">💡 ${J.hints}</span>`;
@@ -75,6 +88,7 @@ function onJigWin(stars){
   const rw=jigReward(n,stars,prev);
   if(stars>prev)S.jig.stars[n]=stars;
   if(n>=S.jig.next)S.jig.next=n+1;
+  if(first){jigFresh=n;jigPageView=jigPage(n)}
   if(S.jig.res&&S.jig.res.n===n)S.jig.res=null;
   const p=jigPage(n);let page=null;
   if(first&&pageDone(p)&&!S.jig.pages[p]){S.jig.pages[p]=1;page=ECON.jig.page;rw.coins+=page.coins;S.hints+=page.hints}
@@ -99,13 +113,14 @@ function onJigWin(stars){
       ${xr.ups.length?`<div class="extra gold">🆙 Level up! Player level ${S.plv}</div>`:''}
       ${stars<3?`<p>Finish in ${jigPar(C*R).s3} moves or fewer for ★★★</p>`:''}`,
       [{label:'Gallery',cls:'sec sm',fn:b=>playExit('jig',b)},{label:'Replay',cls:'sec sm',fn:()=>playJig(n)},
-       {label:`<span class="nx">🧩</span>Puzzle ${nn} ▶`,cls:'big next',fn:()=>playJig(nn)}],{cls:'win jwin',back:()=>playExit('jig')});
-    for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);const s=$$('.jwst .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',18,1)}},(i*.3+.7)*1000);
+       {label:`<span class="nx">🧩</span>Puzzle ${nn} <small class="nxp">· ${nC*nR} pieces</small> ▶`,cls:'big next',fn:()=>playJig(nn)}],{cls:'win jwin',back:()=>playExit('jig')});
+    flyPicture($('.jgb'),$('#modal .jwpic'),pic.url,pic.frame);
+    for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);const s=$$('.jwst .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',18,1)}},(i*.3+1.2)*1000);
     if(page)setTimeout(()=>{if(cur!==me)return;sfx.chest();const e=$('#modal .extra.gold');if(e){const[x,y]=centerOf(e);fountain(x,y,30)}},1600);
     if(rw.coins)setTimeout(()=>{if(cur===me)flyCoins($('.reward .coin'),Math.min(10,3+rw.coins/4|0))},900);
     if(xr.ups.length)xpBanner(xr);
     refreshHUD();
-  },900);
+  },450);
 }
 
 /* first paint: the tab state, and the welcome once the Jigsaw is open */

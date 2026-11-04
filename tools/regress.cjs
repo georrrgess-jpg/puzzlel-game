@@ -550,7 +550,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('J3 no lock ever breaks over random play', r.broke === 0 && r.moves > 60, JSON.stringify(r));
   });
   await test('J4 a dragged piece swaps and an unfinished puzzle is kept', async p => {
-    await jprep(p); await p.evaluate(() => { __game.S.jig.next = 7; __game.startJig(7) }); await sleep(2400);
+    await jprep(p); await p.evaluate(() => { __game.S.jig.next = 7; __game.startJig(7) }); await sleep(3000);
     const st = await p.evaluate(() => __game.cur.puz._state()), from = st.g.indexOf(0);
     const pt = c => p.evaluate(c => { const st = __game.cur.puz._state(), r = document.querySelector('.jgb').getBoundingClientRect(); return [r.left + (c % st.C + .5) * r.width / st.C, r.top + (Math.floor(c / st.C) + .5) * r.height / st.R] }, c);
     const [x0, y0] = await pt(from), [x1, y1] = await pt(0);
@@ -571,6 +571,16 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
       g.startJig(12); const q = g.cur.puz; while (!g.cur.locked) { if (!q._bot()) break } await new Promise(r => setTimeout(r, 2900));
       return { page: g.S.jig.pages[1], hints: g.S.hints - h0, line: !!document.querySelector('#modal .extra.gold') } });
     ck('J5 page 1 is marked and pays a hint', r.page === 1 && r.hints === 1 && r.line, JSON.stringify(r));
+  });
+  await test('J7 the opening reveal plays, a tap skips it, and progress fills to 100%', async p => {
+    await jprep(p); await p.evaluate(() => { __game.S.jig.next = 9; __game.startJig(9) }); await sleep(500);
+    const a = await p.evaluate(() => ({ intro: __game.cur.puz._state().intro, whole: !document.querySelector('.jgw.cut') && !!document.querySelector('.jgw.intro') }));
+    await p.evaluate(() => document.querySelector('.jgb').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: 10, clientY: 10, pointerId: 1 }))); await sleep(200);
+    const b = await p.evaluate(() => ({ intro: __game.cur.puz._state().intro, pct: document.querySelector('.jpt').textContent }));
+    ck('J7 the puzzle opens on the whole picture', a.intro && a.whole, JSON.stringify(a));
+    ck('J7 a tap skips straight to play at 0%', !b.intro && b.pct === '0%', JSON.stringify(b));
+    await p.evaluate(() => { const q = __game.cur.puz; for (let k = 0; k < 60 && !__game.cur.locked; k++) q._bot() }); await sleep(300);
+    ck('J7 a finished picture reads 100%', await p.evaluate(() => document.querySelector('.jpt').textContent === '100%'));
   });
   await test('J6 pictures do not repeat', async p => {
     const r = await p.evaluate(() => { const seen = new Map(); let dup = 0, same = 0, prev = null; for (let n = 1; n <= 400; n++) { const c = JIGART.compose(n), k = c.biome + '|' + c.main + '|' + c.side + '|' + c.time; if (seen.has(k)) dup++; seen.set(k, n); if (prev && prev.biome === c.biome) same++; prev = c } return { dup, same, variety: JIGART.variety() } });
