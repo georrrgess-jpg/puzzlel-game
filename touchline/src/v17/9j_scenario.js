@@ -72,7 +72,7 @@ const v1819sOrd=n=>n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10]||'th
 function v1819sFacts(C,yr){
   const u=C.userSid; const F={yr,w:0,d:0,l:0,gp:0,gf:0,ga:0,stage:0,out:false,pos:null,n:C.league.length,lgN:Math.max(2,(C.league.length-1)*2),lgDone:false,done:false};
   const ko=[];
-  for(const id in C.fixtures){ const f=C.fixtures[id]; if(f.yr!==yr||f.lvl!=='V'||f.st!=='d'||(f.h!==u&&f.a!==u)) continue;
+  for(const id in C.fixtures){ const f=C.fixtures[id]; if(f.yr!==yr||f.lvl!=='V'||f.st!=='d'||f.lpo||(f.h!==u&&f.a!==u)) continue; /* a Ladder playoff is not a postseason round */
     const us=f.h===u?f.hg:f.ag, th=f.h===u?f.ag:f.hg;
     if(f.comp==='reg'){ F.gp++; F.gf+=us; F.ga+=th; if(f.w===u) F.w++; else if(f.w) F.l++; else F.d++; }
     else if(isKO(f.comp)) ko.push(f); }

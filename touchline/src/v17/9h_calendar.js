@@ -27,7 +27,7 @@ function v1819kWk(y,k){ return v1819kLabor(y)+7*(k-1); }
 function v1819kRegWk(rd){ return rd<V1819K.OPEN_AFTER?1+Math.floor(rd/2):2+Math.floor(rd/2); }
 function v1819kRegDn(y,rd){ return v1819kWk(y,v1819kRegWk(rd))+(rd%2?4:1); }
 function v1819kOpenDn(y){ return v1819kWk(y,V1819K.OPEN_WK); }
-function v1819kFxDn(f){ if(!f) return null; const y=f.yr; if(f.comp==='reg') return v1819kRegDn(y,f.rd); const T=V1819K.SLOT[f.comp]; if(!T) return null; const s=T[Math.max(0,Math.min(f.rd||0,T.length-1))]; return v1819kWk(y,s[0])+s[1]; }
+function v1819kFxDn(f){ if(!f) return null; const y=f.yr; if(f.comp==='reg') return v1819kRegDn(y,f.rd); if(f.lpo) return v1819kWk(y,13)+1; const T=V1819K.SLOT[f.comp]; if(!T) return null; const s=T[Math.max(0,Math.min(f.rd||0,T.length-1))]; return v1819kWk(y,s[0])+s[1]; }
 function v1819kSeasonEnd(y){ return v1819kWk(y,12)+5; }
 function v1819kFmt(dn,o){ const t=v1819kYmd(dn); o=o||{}; return `${o.long?V1819K.DOWL[t.dow]:V1819K.DOW[t.dow]}, ${V1819K.MON[t.m]} ${t.d}`; }
 const _v1819kWx=weatherFor;

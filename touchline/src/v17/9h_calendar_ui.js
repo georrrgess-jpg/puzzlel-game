@@ -78,7 +78,7 @@ function v1819kPlanBody(C,inModal){ const O=v1819kOW(C); const dn=v1819kOpenDn(C
     <div class="v1819k-opts">${cards}</div><div class="v1819k-pf"><small>${note}</small><button class="btn ${O.locked&&!pend?'':'primary'}" data-a="v1819kLock" ${O.pick?'':'disabled'}>${O.locked&&!pend?'✓ Locked in':'Lock it in'}</button></div></div>`; }
 /* ---------- season at a glance ---------- */
 function v1819kGlance(C){ const u=C.userSid; const O=v1819kOW(C); const fx=Object.values(C.fixtures).filter(f=>f.yr===C.year&&f.lvl==='V'&&(f.h===u||f.a===u));
-  const reg=fx.filter(f=>f.comp==='reg').sort((a,b)=>a.rd-b.rd); const post=fx.filter(f=>['sec','rgn','st'].includes(f.comp)).sort((a,b)=>fxOrder(a)-fxOrder(b));
+  const reg=fx.filter(f=>f.comp==='reg').sort((a,b)=>a.rd-b.rd); const post=fx.filter(f=>!f.lpo&&['sec','rgn','st'].includes(f.comp)).sort((a,b)=>fxOrder(a)-fxOrder(b));
   let w=0,d=0,l=0; for(const f of [...reg,...post]){ const r=v1819kRes(C,f); if(!r) continue; if(r.r==='W') w++; else if(r.r==='L') l++; else d++; }
   const left=reg.filter(f=>f.st==='s').length;
   const pip=f=>{ const r=v1819kRes(C,f); const o=v1819kOpp(C,f); return `<button class="v1819k-pip ${r?'r'+r.r:''}" data-a="openFixture" data-id="${f.id}" title="${esc(`${v1819kCompName(f)}: ${f.h===u?'vs':'at'} ${o.town}${r?` · ${r.r} ${r.sc}`:''}`)}">${r?r.r:''}</button>`; };

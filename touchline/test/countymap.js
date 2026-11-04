@@ -86,7 +86,7 @@ const DIGEST=()=>{ const g=v1812mGeo(App.C); return JSON.stringify({t:g.towns.ma
   ok(OLD.news&&OLD.seen&&OLD.idem, 'the migration adds no news, starts with the map already seen (no replay), and is idempotent');
   /* results are untouched: the engine alone gives the same scores */
   const same=await page.evaluate(()=>{ const sig=C=>Object.values(C.fixtures).filter(f=>f.st==='d').sort((a,b)=>a.id<b.id?-1:1).map(f=>f.id+':'+f.hg+'-'+f.ag+':'+f.w).join('|'); const mine=sig(App.C);
-    const C2=newCareer({slot:1,coachName:'Map Coach',seed:App.C.seed,now:0}); for(let i=0;i<17;i++){ for(const f of roundFixtures(C2)){ if(!f||f.st==='d') continue; const M=startMatch(C2,f.id,{}); runToEnd(C2,M); V1812M.rawFinish(C2,M); } try{ advance(C2); }catch(e){} }
+    const keep=v1812mAfter; v1812mAfter=()=>{}; /* only the map hook is off: later finishMatch wrappers (v18.19 calendar boosts) still run */ const C2=newCareer({slot:1,coachName:'Map Coach',seed:App.C.seed,now:0}); try{ for(let i=0;i<17;i++){ for(const f of roundFixtures(C2)){ if(!f||f.st==='d') continue; const M=startMatch(C2,f.id,{}); runToEnd(C2,M); finishMatch(C2,M); } try{ advance(C2); }catch(e){} } } finally{ v1812mAfter=keep; }
     return {eq:mine===sig(C2),n:mine.length,mapless:!C2.map}; });
   ok(same.eq&&same.n>200&&same.mapless, 'every score is exactly what the engine plays without the map hook: the map changes no result');
 

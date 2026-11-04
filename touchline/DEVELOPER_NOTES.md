@@ -2,6 +2,47 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.19 (The Ladder, Season Calendar, Pick'em Pool, Scenario Mode)
+
+Four features, each in its own files with its own prefix. Tests: `test/ladder.js`, `calendar.js`, `pickem.js`, `scenario.js` (all in `run_all.sh`).
+
+### The Ladder (`src/v17/9g_ladder.js`, `9g_ladder_ui.js`, `9g_ladder.css`; v1819l / V1819L)
+- Three classes of eight (AAA/AA/A). Your class is your league (engine-played). The class above is State Poll section `V1819L.UP` (4) and the class below is `V1819L.LO` (7). Section 6 stays the Regional pool, and neither class section sends a team to the State field (`v1814Field` skips them; `v1814PickPre` keeps them out of the Preseason Cup).
+- State: `C.lad = {v:1, cls:{AAA,AA,A}, mine, lg:{yr:[ids]}, hist:{yr:{tab,moves,po,champ,done,mine}}, y0, flash, next}`. Created in `newCareer`/`migrate` wrappers.
+- Season end (`advance` wrapper on reaching the offseason): `v1819lClose` builds class tables, moves (top two up, bottom two down), playoffs (third of the lower class vs sixth of the upper), champions and news. Your own playoff is a real engine fixture: comp `'rgn'` with `f.lpo = key`, against an ext opponent dressed as the poll school. It is played from the Ladder page or Play, or simulated at rollover.
+  - Anything that reads `rgn` fixtures as the postseason must skip `f.lpo` (done in Scenario facts and the Calendar glance; the Calendar dates it on the Tuesday after the State final week).
+- Rollover: `L.next = v1819lNext(C)`; then `seasonStart` applies the swap (`v1819lToLeague` makes a poll school a real school with rosters, keeping id, name, colours and crest; `v1819lToPool` turns a leaving school into a poll school in its new class) and runs `balanceLeague` with the class band (`V1819L.BAND`).
+- The poll became year-aware: `t.sh` (section history), `t.bh` (base history), `sec0`, `rA/rY` anchors. Overridden: `v1812pVR`, `v1812pVSeason` (sections per year, skipping that year's league via `v1819lLgAt`), `v1812pLeagueRecs` (that year's league), `v1812pAllIds`, `v1812pSec`, `v1814Table`, `v1812pParseVP` (school ids in player ids). These overrides are guarded with `typeof` so a build without the poll still loads (`test/poll.js` baseline). `standings(C,lvl,yr)` for a past year uses `C.lad.lg[yr]`.
+- Off when `V1814.on` is false (the poll test switch).
+- Emblems in crests now show from 20 px (were 28), so class rows at 26 px keep their emblems.
+
+### Season Calendar (`9h_calendar.js`, `9h_calendar_ui.js`, `9h_calendar.css`; v1819k / V1819K)
+- `seasonDate(C,f)` → `{y,m,d,dow,time,label,dn}` is the source of truth. Week 1 = Labor Day; league games Tue/Fri; open week = week 5, after matchday 8 (`V1819K.OPEN_AFTER`); pre/postseason slots in `V1819K.SLOT`. `weatherFor().kick` and `v1812gWhen` read it.
+- Events (`v1819kEvents`, seeded per year): first day, picture day, booster night, homecoming week (Mon–Fri bar), in-service day, Halloween, senior night, report cards, Thanksgiving, banquet. Homecoming is real: the `startMatch` wrapper gives that Friday home game ×1.3 attendance and +0.012 home advantage (fast odds too, so odds and results agree), with news once per year (`C.cal.hc`).
+- Open week: `C.cal.ow[yr] = {pick, locked, done, res, opp, auto, legacy}`. Resolves exactly once (`v1819kResolve`): Lock it in during the open week, Play with a locked plan, or the first non-fast `startMatch` of matchday 9 (default Rest). `advance` is the safety net. Effects in `V1819K_FX`; temporary boosts in `C.cal.fx`, counted down per user game by a `finishMatch` wrapper and undone with `shiftOvr(-amt)` (rollover undoes the rest).
+- Season results change from matchday 9 on (automatic Rest) and in the homecoming game; still deterministic per seed.
+- Fix at merge: homecoming news and tooltips read `C.schools` (not `Sx`, which reads `App.C`), and the homecoming memo checks its fixture still belongs to the career.
+
+### Pick'em Pool (`9i_pickem.js`, `9i_pickem.css`; v1819p / V1819P)
+- State: `C.pick = {v:1, yrs:{[yr]:{from, r:{[rd]:{u, xs, lk, fz, res}}, done, win, tot}}, titles:[yr]}`, created on first use. Seasons older than last keep only `tot`.
+- Picks: the 4 Varsity `comp:'reg'` games of a round; exact score only for your own game (a score sets the matching pick; a contradicting pick clears it).
+- Freeze (`v1819pFreeze`) at the first real `startMatch` of the round (fallback `finishMatch`): `simProbs(C,fid,60)` chances, crowd %, underdogs (≥ 8 points less likely) and the five pundits' picks, all seeded. About 130 ms per round.
+- Scoring (`v1819pSettle`, from `advance` and lazily in the view): winner +3, underdog +2 more, draw +4, exact +4, perfect round +5; exactly once per round (`R.res`). Season end: Newswire story; topping the board (ties count) gives +1 prestige and a pennant.
+- Results are identical with `V1819P.off=true` over a regular season.
+
+### Scenario Mode (`9j_scenario.js`, `9j_scenario_ui.js`, `9j_scenario.css`; v1819s / V1819S)
+- A scenario is a normal career with `C.scn = {id, seasons, y0, seed, rules[], medals{b,s,g}, def, status, earned, missed, hist, inj, end, pend, code, rcode}`. `v1819sBuild({id|def, seed})` runs `newCareer`, then the setup with `rngFrom(seed+':scn:'+id)`.
+- Six setups (Rebuild, Last Dance, Underdog Story, The Streak, Bad Break, Title Defense); tuning in `V1819S_TUNE`. Medal rates from 16–20 auto-simulated runs each are in the commit history; Underdog and Title Defense medals were changed from the concept to be reachable.
+- Rules are enforced while live (wrappers on `finishMatch`, `advance`, `rollover`, `campEnsure`, `startMatch`, settings, player editor). Every scenario locks the player editor, directed results and Manager Mode.
+- Medals/bests/runs live in `PREFS.v1819s`; custom results are kept apart and do not unlock. Unlocks: Last Dance 1 medal, Underdog 2, Title Defense 3; a challenge code bypasses the lock.
+- Codes: `TL-TAG-` + Crockford base32 with a 10-bit checksum (version, kind, seed, result, custom definition).
+
+### Not verified
+- Real phones, Safari and touch; themes other than the default dark one for the Calendar and Scenario screens.
+- A full human-played Scenario run (balance comes from auto-simulation only).
+- A Ladder playoff started from the live 3-D match view (tested through `startMatch` and the Play button path).
+- A Pick'em freeze from a live match started in the UI (tested by calling `startMatch`).
+
 ## Version 18.18 (school logos redrawn)
 
 `src/v17/9f_mascots.js` replaces `MASCOT_ART` (and clears `MASCOT_DETAIL`) for **rams, dragons, gators, coyotes, mustangs, rhinos**.
