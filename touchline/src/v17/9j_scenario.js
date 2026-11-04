@@ -35,6 +35,8 @@ const V1819S_GOALS={
   winrec:{t:'Finish the league above .500'}, unbeaten:{t:'Go unbeaten in the league'}, perfect:{t:'Win every league game'}
 };
 const V1819S_MEDALS=[['b','Bronze'],['s','Silver'],['g','Gold']];
+/* The Streak, v18.20: each medal contains the one below (unbeaten, then the Section title, then a perfect league and the Section title), so a draw costs gold only and the run carries on into Sectionals */
+const V1819S_STREAK_MD={b:{k:'unbeaten'},s:{k:'sec'},g:{k:'and',of:[{k:'perfect'},{k:'sec'}]}};
 const V1819S_LIST=[
   {id:'rebuild',tag:'RBLD',name:'The Rebuild',stars:2,seasons:2,unlock:0,kick:'Rescue a program',
     blurb:'Fourteen freshmen and four seniors on Varsity. Two seasons to make the bracket count.',
@@ -47,7 +49,7 @@ const V1819S_LIST=[
     rules:['zeroscout','tier1','nocall'],medals:{b:{k:'top',n:5},s:{k:'secfinal'},g:{k:'sec'}}},
   {id:'streak',tag:'STRK',name:'The Streak',stars:2,seasons:1,unlock:0,kick:'Hold your nerve',
     blurb:'You start the season 9–0 with five rounds left. Stay unbeaten.',
-    rules:['sudden'],medals:{b:{k:'unbeaten'},s:{k:'perfect'},g:{k:'and',of:[{k:'perfect'},{k:'sec'}]}}},
+    rules:['sudden'],medals:V1819S_STREAK_MD},
   {id:'badbreak',tag:'BRKE',name:'Bad Break',stars:2,seasons:1,unlock:0,kick:'Next man up',
     blurb:'Your star striker is out for the season. Find the goals somewhere else.',
     rules:['nostar'],medals:{b:{k:'winrec'},s:{k:'top',n:3},g:{k:'sec'}}},
@@ -74,7 +76,7 @@ function v1819sFacts(C,yr){
   const ko=[];
   for(const id in C.fixtures){ const f=C.fixtures[id]; if(f.yr!==yr||f.lvl!=='V'||f.st!=='d'||f.lpo||(f.h!==u&&f.a!==u)) continue; /* a Ladder playoff is not a postseason round */
     const us=f.h===u?f.hg:f.ag, th=f.h===u?f.ag:f.hg;
-    if(f.comp==='reg'){ F.gp++; F.gf+=us; F.ga+=th; if(f.w===u) F.w++; else if(f.w) F.l++; else F.d++; }
+    if(f.comp==='reg'){ F.gp++; F.gf+=us; F.ga+=th; if(f.w===u) F.w++; else { if(f.w) F.l++; else F.d++; if(!F.drop||f.rd<F.drop.rd) { const o=C.schools[f.h===u?f.a:f.h]; F.drop={rd:f.rd,town:o?o.town:'',us,th,l:!!f.w}; } } }
     else if(isKO(f.comp)) ko.push(f); }
   const ord={sec:0,rgn:1,st:2}; ko.sort((a,b)=>(ord[a.comp]-ord[b.comp])||(a.rd-b.rd));
   for(const f of ko){ if(f.w===u) F.stage++; else { F.out=true; break; } }
@@ -88,6 +90,7 @@ function v1819sFactsFor(C,S,yr){ if(yr===C.year||!S.hist||!S.hist[yr]){ const F=
 function v1819sStageName(n){ return ['Not yet','Won a Sectionals game','In the Section final','Section champions','Regional champions','State semifinal','In the State final','State champions'][n]||''; }
 
 /* ---------- goals ---------- */
+function v1819sDropTxt(F){ const d=F.drop; if(!d) return ' · dropped points'; return ` · ${d.l?'lost':'drew'} ${d.us}–${d.th} ${d.town?'with '+d.town+' ':''}on matchday ${d.rd+1}`; }
 function v1819sSeasonGoal(g,F){
   const rem=Math.max(0,F.lgN-F.gp);
   if(V1819S_KO[g.k]){ const need=V1819S_KO[g.k]; const ok=F.stage>=need; const dead=!ok&&F.out;
@@ -99,7 +102,7 @@ function v1819sSeasonGoal(g,F){
     return {ok,dead,pct:ok?1:pct,prog:F.pos?`${v1819sOrd(F.pos)} of ${F.n}${F.lgDone?' (final)':` · ${rem} to play`}`:'League starts after the Preseason Cup'}; }
   if(g.k==='winrec'){ const ok=F.w>F.l+rem||(F.lgDone&&F.w>F.l); const dead=!ok&&F.w+rem<=F.l; return {ok,dead,pct:ok?1:clamp(F.gp?F.w/Math.max(1,F.l+1)/2:0,0,0.95),prog:F.gp?`${rec}${F.lgDone?' (final)':` · ${rem} to play`}`:'Not started'}; }
   if(g.k==='unbeaten'){ const dead=F.l>0; const ok=!dead&&F.lgDone&&F.gp>0; return {ok,dead,pct:dead?0:F.gp/F.lgN,prog:F.gp?`${rec}${dead?' · beaten':rem?` · ${rem} to play`:''}`:'Not started'}; }
-  if(g.k==='perfect'){ const dead=F.l+F.d>0; const ok=!dead&&F.lgDone&&F.gp>0&&F.w===F.gp; return {ok,dead,pct:dead?0:F.w/F.lgN,prog:F.gp?`${rec}${dead?' · dropped points':rem?` · ${rem} to play`:''}`:'Not started'}; }
+  if(g.k==='perfect'){ const dead=F.l+F.d>0; const ok=!dead&&F.lgDone&&F.gp>0&&F.w===F.gp; return {ok,dead,pct:dead?0:F.w/F.lgN,prog:F.gp?`${rec}${dead?v1819sDropTxt(F):rem?` · ${rem} to play`:''}`:'Not started'}; }
   if(g.k==='and'){ const R=g.of.map(x=>v1819sSeasonGoal(x,F)); return {ok:R.every(x=>x.ok),dead:R.some(x=>x.dead),pct:R.reduce((a,x)=>a+x.pct,0)/R.length,prog:R.map(x=>x.prog).join(' · ')}; }
   return {ok:false,dead:true,pct:0,prog:''}; }
 /* the goal over the scenario: any season counts, except "every season" goals */
@@ -289,4 +292,13 @@ function v1819sLine(C,S){ const s=C.schools[C.userSid]; const n=C.league.length;
 { const _ro=rollover; rollover=function(C){ const live=v1819sLive(C); const r=_ro.apply(this,arguments); try{ if(live&&r&&r.ok&&v1819sLive(C)){ if(C.scn.rules.includes('tier1')) v1819sTier1(C); if(C.scn.rules.includes('hard')) C.settings.difficulty='hard'; v1819sCheck(C); } }catch(e){ console.warn('v1819s rollover',e); } return r; }; }
 { const _ce=campEnsure; campEnsure=function(C){ const K=_ce.apply(this,arguments); try{ if(K&&!K.v1819s&&v1819sHas(C,'zeroscout')){ K.pts=0; K.v1819s=1; } }catch(e){} return K; }; }
 { const _sm=startMatch; startMatch=function(C,fid,opts){ try{ if(C&&C.directed&&C.directed[fid]&&v1819sLive(C)) delete C.directed[fid]; }catch(e){} return _sm.apply(this,arguments); }; }
-{ const _mg=migrate; migrate=function(raw){ const C=_mg.apply(this,arguments); try{ if(C&&C.scn&&!C.scn.v) C.scn.v=1; }catch(e){} return C; }; }
+{ const _mg=migrate; migrate=function(raw){ const C=_mg.apply(this,arguments); try{ if(C&&C.scn&&!C.scn.v) C.scn.v=1; if(C&&C.scn) v1819sRegrade(C); }catch(e){ console.warn('v1819s regrade',e); } return C; }; }
+/* v18.20: The Streak's medals changed (silver was "win every league game", so a single draw also killed gold and the run ended before Sectionals).
+   Saves carry the new medals; a finished run that did not end on a league loss is graded again on its own season, so a Section title won after a draw now counts. */
+function v1819sRegrade(C){ const S=C.scn; if(S.id!=='streak'||S.md20) return; S.md20=1; S.medals=JSON.parse(JSON.stringify(V1819S_STREAK_MD));
+  if(S.status!=='done'||!S.end||S.end.why==='sudden') return;
+  const F=v1819sFacts(C,S.y0); if(!F.gp||F.l) return; S.hist=S.hist||{}; S.hist[S.y0]=F; S.earned=S.earned||{}; const fresh=[];
+  for(const [m] of V1819S_MEDALS){ const e=v1819sSeasonGoal(S.medals[m],F); if(e.ok&&!S.earned[m]){ S.earned[m]={yr:S.y0,md:C.md,ph:'regrade'}; fresh.push(m); } }
+  if(!fresh.length) return; const res=v1819sResN(S); S.missed={}; for(const [m] of V1819S_MEDALS) if(!S.earned[m]) S.missed[m]='dead';
+  S.end.res=res; S.end.stage=F.stage; S.rcode=v1819sCodeFor(S,{medal:res,w:F.w,d:F.d,l:F.l}); S.fresh=(S.fresh||[]).concat(fresh); S.regraded=1; S.pend=true;
+  addNews(C,'program',`${S.name} regraded under the new medals: ${['no medal','bronze','silver','gold'][res]}.`,C.userSid); }

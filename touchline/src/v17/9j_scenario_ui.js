@@ -275,7 +275,7 @@ for(const [nm,rule] of [['saveDirect','fair'],['savePlayer','fair']]){ const _f=
 
 /* ---------- medal toasts and the end-of-scenario ceremony ---------- */
 function v1819sAfterRender(){ const C=App.C; const S=C&&C.scn; if(!S) return;
-  if(S.fresh&&S.fresh.length&&!App.live){ const names=S.fresh.map(m=>({b:'Bronze',s:'Silver',g:'Gold'}[m])); S.fresh=[]; queueSave(); toast(`${names.join(' and ')} medal earned · ${S.name}`); try{ Sound.ui('pop'); }catch(e){} }
+  if(S.fresh&&S.fresh.length&&!App.live){ try{ v1819sSyncPrefs(C); }catch(e){} const names=S.fresh.map(m=>({b:'Bronze',s:'Silver',g:'Gold'}[m])); S.fresh=[]; queueSave(); toast(`${names.join(' and ')} medal earned · ${S.name}`); try{ Sound.ui('pop'); }catch(e){} }
   if(S.pend) v1819sCeremonySoon(); }
 function v1819sCeremonySoon(){ clearTimeout(V1819S_UI.cerT); V1819S_UI.cerT=setTimeout(()=>{ const C=App.C; const S=C&&C.scn; if(!S||!S.pend) return;
     if(App.modal||App.drawer||App.live||document.querySelector('.ceremony')){ v1819sCeremonySoon(); return; }

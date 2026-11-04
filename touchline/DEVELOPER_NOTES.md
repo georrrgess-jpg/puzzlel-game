@@ -2,6 +2,16 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.20 (Scenario medals: The Streak)
+
+Bug report: a Streak run finished unbeaten and won the Section title but only got bronze. Cause: medals were bronze `unbeaten`, silver `perfect`, gold `perfect AND sec`, so one league draw made silver and gold both dead at once; with every medal settled, `v1819sCheck` ended the run (`why:'settled'`) at the end of the league, and the Section title won afterwards was never graded. Every 14-0 run in a sweep (UI live play, quick sim, Sim ahead, save/reload) was graded correctly; the draw path reproduces the report exactly.
+
+- `V1819S_STREAK_MD` (`src/v17/9j_scenario.js`): bronze `unbeaten`, silver `sec`, gold `perfect AND sec`. Each contains the one below; a draw costs gold only, so the run continues into Sectionals. 80 auto-simulated runs: bronze 79%, silver 56%, gold 34%.
+- Facts keep the first game that cost points (`F.drop`); a dead `perfect` goal says "drew 1–1 with X on matchday 12".
+- `v1819sRegrade` (from the `migrate` wrapper, once per save via `S.md20`): live Streak runs get the new medals; a finished run that did not end on a league loss is graded again on its own season (fresh facts), adding medals only, with a news item, a toast (prefs synced in `v1819sAfterRender`) and the ceremony again.
+- Tests: `test/scenario.js` covers the draw path (bronze + silver, gold out of reach with the reason) and the regrade of an old 13-1-0 + Section title save (bronze → silver, once).
+- Not verified: a regrade of a real save from the published v18.19 build (tested with a save made by the current build using the old medal definition).
+
 ## Version 18.19 (The Ladder, Season Calendar, Pick'em Pool, Scenario Mode)
 
 Four features, each in its own files with its own prefix. Tests: `test/ladder.js`, `calendar.js`, `pickem.js`, `scenario.js` (all in `run_all.sh`).

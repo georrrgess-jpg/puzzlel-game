@@ -82,7 +82,14 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
     o.stLoss=run('streak',21,{reg:(C,f)=>{ nerf(C); return null; },ko:0}); o.stB=run('streak',22,{reg:(C,f)=>{ if(f.rd===12){ nerf(C); return null; } return true; },ko:0});
     { const C=v1819sBuild({id:'streak',seed:23}); App.C=C; const S=C.scn; const u=C.userSid; let g=0; while(S.status==='live'&&g++<60){ const uf=userFixture(C); if(uf&&uf.comp==='reg'&&C.md===11){ S.status='paused'; C.directed[uf.id]={mode:'score',hg:1,ag:1}; simRound(C); delete C.directed[uf.id]; S.status='live'; advance(C); continue; }
         if(uf&&(uf.comp==='reg'||uf.comp==='sec')){ S.status='paused'; C.directed[uf.id]={mode:'winner',winner:u}; simRound(C); delete C.directed[uf.id]; S.status='live'; } else simRound(C); advance(C); }
-      o.stDraw={why:S.end&&S.end.why,res:S.end&&S.end.res,earned:Object.keys(S.earned).sort().join('')}; }
+      o.stDraw={why:S.end&&S.end.why,res:S.end&&S.end.res,earned:Object.keys(S.earned).sort().join(''),stage:v1819sFacts(C,S.y0).stage,prog:v1819sMedalStates(C,S).g.prog}; }
+    /* a save from before v18.20 (old medals: silver = every league game won), finished 13-1-0 with the Section title, is graded again on load */
+    { const C=v1819sBuild({id:'streak',seed:23}); App.C=C; const S=C.scn; const u=C.userSid; S.medals={b:{k:'unbeaten'},s:{k:'perfect'},g:{k:'and',of:[{k:'perfect'},{k:'sec'}]}}; let g=0;
+      while(C.phase!=='offseason'&&g++<60){ const uf=userFixture(C); const live=S.status==='live'; if(uf&&uf.comp==='reg'&&C.md===11){ if(live) S.status='paused'; C.directed[uf.id]={mode:'score',hg:1,ag:1}; simRound(C); delete C.directed[uf.id]; if(live) S.status='live'; advance(C); continue; }
+        if(uf&&(uf.comp==='reg'||uf.comp==='sec')){ if(live) S.status='paused'; C.directed[uf.id]={mode:'winner',winner:u}; simRound(C); delete C.directed[uf.id]; if(live) S.status='live'; } else simRound(C); advance(C); }
+      const before={why:S.end&&S.end.why,earned:Object.keys(S.earned).sort().join('')}; delete S.md20; const M=migrate(JSON.parse(JSON.stringify(careerForSave(C)))); const T=M.scn;
+      const M2=migrate(JSON.parse(JSON.stringify(careerForSave(M)))); const again=M2.scn;
+      o.stOld={before,after:Object.keys(T.earned).sort().join(''),res:T.end.res,pend:T.pend,news:M.news.some(n=>/regraded under the new medals: silver/.test(n.text)),medals:JSON.stringify(T.medals),idem:Object.keys(again.earned).sort().join('')===Object.keys(T.earned).sort().join('')&&M2.news.filter(n=>/regraded/.test(n.text)).length===1}; }
     o.rbG=run('rebuild',31,{reg:W,ko:3}); o.rbTime=run('rebuild',32,{reg:(C,f)=>false,ko:0});
     o.udB=run('underdog',41,{reg:W,ko:0});
     o.prefs=JSON.parse(JSON.stringify(v1819sP())); o.count=v1819sMedalCount(); o.unl2=V1819S_LIST.map(d=>d.id+':'+(v1819sUnlocked(d)?1:0)).join(',');
@@ -94,7 +101,8 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(F.ldG.res===3&&F.ldG.earned==='bgs'&&F.ldG.why==='gold'&&/^TL-LAST-/.test(F.ldG.code), `Last Dance, State champions: gold, ending with a result code ${F.ldG.code}`);
   ok(F.count1===3&&F.prefs1.best.lastdance===3&&F.prefs1.med.lastdance.b&&F.prefs1.med.lastdance.g&&F.prefs1.runs.length===4, 'medals and the best result are recorded in PREFS across careers (4 runs, best gold)');
   ok(F.stLoss.why==='sudden'&&F.stLoss.res===0&&F.stB.why==='sudden'&&F.stB.res===0, 'The Streak: a league loss ends the scenario on the spot (round 10 or round 13), no medal');
-  ok(F.stDraw.res===1&&F.stDraw.earned==='b', `The Streak: a draw keeps you unbeaten, so bronze but no 14-0 (${F.stDraw.why})`);
+  ok(F.stOld.before.earned==='b'&&F.stOld.after==='bs'&&F.stOld.res===2&&F.stOld.news&&F.stOld.idem&&/"s":\{"k":"sec"\}/.test(F.stOld.medals), `an older Streak save that ended 13-1-0 with bronze is regraded on load: the Section title it won becomes silver, once (${JSON.stringify(F.stOld)})`);
+  ok(F.stDraw.res===2&&F.stDraw.earned==='bs'&&F.stDraw.stage>=3&&/drew 1–1 .*matchday 12/.test(F.stDraw.prog), `The Streak: a draw keeps you unbeaten (bronze) and the run goes on into Sectionals, where the Section title is silver; gold (14-0 and the title) is gone and says which game cost it (${F.stDraw.why}, ${F.stDraw.prog})`);
   ok(F.rbG.res===3&&F.rbG.yr===F.rbG.yr&&F.rbTime.res===0&&F.rbTime.why!=='gold', `The Rebuild: Section title in season one is gold; losing everything for two seasons ends with no medal (${F.rbTime.why}, ${F.rbTime.yr})`);
   ok(F.udB.res>=1&&/b/.test(F.udB.earned), `Underdog Story: winning the league is at least bronze (${F.udB.earned})`);
   ok(F.count>=8&&/defense:1/.test(F.unl2)&&/underdog:1/.test(F.unl2)&&F.ls&&F.ls.best&&F.ls.best.lastdance===3, `${F.count} medals unlock every scenario (${F.unl2}); stored in localStorage`);
