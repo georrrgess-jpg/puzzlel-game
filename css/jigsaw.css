@@ -1,45 +1,49 @@
 /* ====================== Jigsaw ======================
    The board: pieces are cards (a coloured frame round a slice of the picture). --ul/--ur/--ut/--ub are 1 while a
-   side is open and 0 once it is locked to its neighbour; registered as numbers so the frame and the gap melt away
-   smoothly when two pieces lock (browsers without @property just switch). */
-@property --ul{syntax:'<number>';inherits:true;initial-value:1}
-@property --ur{syntax:'<number>';inherits:true;initial-value:1}
-@property --ut{syntax:'<number>';inherits:true;initial-value:1}
-@property --ub{syntax:'<number>';inherits:true;initial-value:1}
+   side is open and 0 once it is locked to its neighbour. They switch at once (a light zips along the seam as it
+   closes): animating them would mean restyling every piece on every frame, which slow phones feel.
+   Performance rules for everything below: moving things use transform, flashes and glows animate the opacity of an
+   overlay, and nothing repaints a big area every frame. */
 .jgw{--g:2px;--F:3px;--rad:9px;--gf:calc(var(--g) + var(--F));display:flex;justify-content:center;align-items:center;width:100%;height:100%;position:relative}
 .jgf{position:relative;padding:7px;border-radius:20px;background:radial-gradient(120% 90% at 50% 12%,#3a3466,#262150 60%,#1a163a);
-  box-shadow:inset 0 0 0 2px #ffffff1c,inset 0 0 24px #0008,0 16px 34px #0008;transition:box-shadow .6s}
-.jgb{position:relative;width:var(--bw);height:var(--bh);touch-action:none;-webkit-user-select:none;user-select:none}
+  box-shadow:inset 0 0 0 2px #ffffff1c,inset 0 0 24px #0008,0 16px 34px #0008}
+/* the golden glow of a finished picture fades in as a layer of its own */
+.jgf::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .5s;
+  box-shadow:inset 0 0 0 2px #ffe08a,0 0 0 3px #ffe08a80,0 0 46px #ffd16690}
+.jgw.won .jgf::after{opacity:1}
+.jgb{position:relative;width:var(--bw);height:var(--bh);touch-action:none;-webkit-user-select:none;user-select:none;contain:layout style}
 /* faint slots under the pieces (seen only through the gaps) */
 .jgb::before{content:'';position:absolute;inset:0;border-radius:12px;background:
   repeating-linear-gradient(90deg,transparent 0 calc(var(--cw) - 1px),#ffffff10 calc(var(--cw) - 1px) var(--cw)),
   repeating-linear-gradient(0deg,transparent 0 calc(var(--ch) - 1px),#ffffff10 calc(var(--ch) - 1px) var(--ch)),#120f2a}
+/* every piece is its own GPU layer: moving it never redraws it */
 .jp{position:absolute;left:0;top:0;width:var(--cw);height:var(--ch);cursor:grab;-webkit-tap-highlight-color:transparent;
-  transition:transform .26s cubic-bezier(.3,1.25,.5,1),--ul .24s ease-out,--ur .24s ease-out,--ut .24s ease-out,--ub .24s ease-out}
+  transition:transform .26s cubic-bezier(.3,1.25,.5,1);will-change:transform;contain:layout style}
 .jp.still{transition:none}
+/* one box per card: the frame is its border-box background, the picture its content-box background (the padding is the
+   frame, so the picture's corners round themselves), and a soft gloss sits on top while the card is on its own */
 .jc{position:absolute;left:calc(var(--ul)*var(--g));right:calc(var(--ur)*var(--g));top:calc(var(--ut)*var(--g));bottom:calc(var(--ub)*var(--g));
-  background:linear-gradient(160deg,color-mix(in srgb,var(--fc) 70%,#fff),var(--fc) 40%,color-mix(in srgb,var(--fc) 80%,#000));
+  padding:calc(var(--ut)*var(--F)) calc(var(--ur)*var(--F)) calc(var(--ub)*var(--F)) calc(var(--ul)*var(--F));
+  background:linear-gradient(155deg,rgb(255 255 255/calc(var(--ul)*var(--ur)*var(--ut)*var(--ub)*.19)),transparent 30%) content-box,
+    var(--pic) no-repeat content-box,
+    linear-gradient(160deg,color-mix(in srgb,var(--fc) 70%,#fff),var(--fc) 40%,color-mix(in srgb,var(--fc) 80%,#000)) border-box;
+  background-size:auto,var(--bw) var(--bh),auto;
+  background-position:0 0,calc(var(--hx)*var(--cw)*-1 - var(--ul)*var(--gf)) calc(var(--hy)*var(--ch)*-1 - var(--ut)*var(--gf)),0 0;
+  background-color:#2a2550;
   border-radius:calc(var(--ut)*var(--ul)*var(--rad)) calc(var(--ut)*var(--ur)*var(--rad)) calc(var(--ub)*var(--ur)*var(--rad)) calc(var(--ub)*var(--ul)*var(--rad));
   box-shadow:0 calc(var(--ub)*2px) 0 #0006}
-.ji{position:absolute;left:calc(var(--ul)*var(--F));right:calc(var(--ur)*var(--F));top:calc(var(--ut)*var(--F));bottom:calc(var(--ub)*var(--F));
-  background:var(--pic) no-repeat #2a2550;background-size:var(--bw) var(--bh);
-  background-position:calc(var(--hx)*var(--cw)*-1 - var(--ul)*var(--gf)) calc(var(--hy)*var(--ch)*-1 - var(--ut)*var(--gf));
-  border-radius:calc(var(--ut)*var(--ul)*(var(--rad) - 3px)) calc(var(--ut)*var(--ur)*(var(--rad) - 3px)) calc(var(--ub)*var(--ur)*(var(--rad) - 3px)) calc(var(--ub)*var(--ul)*(var(--rad) - 3px))}
-/* a soft gloss on each open card, gone once it is part of a bigger picture */
-.ji::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(155deg,#ffffff30,transparent 30%);opacity:calc(var(--ul)*var(--ur)*var(--ut)*var(--ub));pointer-events:none}
+.jc::after{content:'';position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;pointer-events:none;transition:opacity .14s}
 .jgw.loading .jp{opacity:0}
 .jp.jin{animation:jin .42s cubic-bezier(.3,1.5,.5,1) both}
 @keyframes jin{from{opacity:0;scale:.55}}
-/* a group that just grew */
-.jp.jsnap .jc{animation:jsnap .45s ease-out}
-@keyframes jsnap{0%{filter:brightness(1.6)}100%{filter:none}}
-/* hint */
-.jp.hint .jc{animation:jhint .7s ease-in-out infinite alternate}
-@keyframes jhint{to{filter:brightness(1.35);box-shadow:0 0 0 3px #fff,0 0 16px #fff}}
+/* hint: a white ring and a soft pulse */
+.jp.hint .jc{box-shadow:0 0 0 3px #fff,0 0 14px #ffffffb0}
+.jp.hint .jc::after{animation:jhf .7s ease-in-out infinite alternate}
+@keyframes jhf{from{opacity:0}to{opacity:.3}}
 /* the lifted group: one layer, one drop shadow that follows its outline */
 .jlift{position:absolute;inset:0;z-index:30;pointer-events:none;will-change:transform;transition:filter .15s}
-.jlift.up{filter:drop-shadow(0 12px 12px #000a) brightness(1.06);transform:translateY(-5px)}
-.jlift.land{transition:transform .17s cubic-bezier(.2,.9,.3,1.1),filter .17s;filter:none}
+.jlift.up{filter:drop-shadow(0 12px 10px #000a);transform:translateY(-5px)}
+.jlift.land{transition:transform .17s cubic-bezier(.2,.9,.3,1.1);filter:none}
 .jlift .jp{cursor:grabbing}
 /* where the group would land */
 .jtl{position:absolute;inset:0;z-index:20;pointer-events:none}
@@ -53,14 +57,15 @@
 .jpeek{position:absolute;inset:0;z-index:40;pointer-events:none;opacity:0;transition:opacity .25s;border-radius:12px;overflow:hidden;box-shadow:0 0 0 3px var(--fc)}
 .jpeek img{width:100%;height:100%;display:block}
 .jgw.peek .jpeek{opacity:1}
-/* solved: the frame glows and a shine sweeps across the picture */
-.jgw.won .jgf{box-shadow:inset 0 0 0 2px #ffe08a,0 0 0 3px #ffe08a80,0 0 46px #ffd16690,0 16px 34px #0008}
-.jgw.won .jgb::after{content:'';position:absolute;inset:0;z-index:35;pointer-events:none;border-radius:10px;
-  background:linear-gradient(115deg,transparent 35%,#ffffff70 48%,#ffffffb0 50%,#ffffff70 52%,transparent 65%) no-repeat;background-size:250% 100%;animation:jshine 1.1s .15s ease-in-out both}
-@keyframes jshine{from{background-position:130% 0}to{background-position:-30% 0}}
+/* a shine sweeps across the picture (opening and finish): a light band slides inside a clipping box */
+.jshn{position:absolute;inset:0;z-index:35;pointer-events:none;border-radius:10px;overflow:hidden}
+.jshn i{position:absolute;top:0;bottom:0;left:0;width:45%;display:none;background:linear-gradient(105deg,transparent 10%,#ffffff60 42%,#ffffffb0 50%,#ffffff60 58%,transparent 90%);will-change:transform}
+.jgw.intro .jshn i{display:block;animation:jsh .85s .05s ease-in-out both}
+.jgw.won .jshn i{display:block;animation:jsh 1.1s .15s ease-in-out both}
+@keyframes jsh{from{transform:translateX(-110%)}to{transform:translateX(240%)}}
 .jgw.won .jgb{animation:jwon .6s .1s cubic-bezier(.3,1.5,.5,1)}
 @keyframes jwon{40%{scale:1.035}}
-@media (prefers-reduced-motion:reduce){.jp,.jlift.land{transition:none}.jgw.won .jgb,.jgw.won .jgb::after{animation:none}}
+@media (prefers-reduced-motion:reduce){.jp,.jlift.land{transition:none}.jgw.won .jgb,.jshn i{animation:none}}
 
 /* how-to demo: a 2x2 picture */
 .jdm{position:relative;display:grid;grid-template-columns:repeat(2,44px);gap:4px}
@@ -80,7 +85,9 @@
 .jgnext{display:flex;gap:14px;align-items:stretch;padding:12px;border-radius:24px;background:var(--panel);box-shadow:inset 0 1.5px 0 #ffffff40,inset 0 0 0 1px var(--rim),0 10px 26px #0007;animation:popin .5s cubic-bezier(.3,1.4,.5,1) both}
 .jgcover{position:relative;flex:none;width:min(36vw,150px);aspect-ratio:3/4;border:0;padding:0;border-radius:14px;overflow:hidden;cursor:pointer;background:#2a2550;
   box-shadow:0 0 0 3px #ffffffd0,0 0 0 6px #ff8a3d,0 8px 18px #0008}
-.jgcover img{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(9px) saturate(1.3) brightness(.9)}
+/* the cover is a tiny thumbnail stretched up: it looks blurred without a (costly) blur filter */
+.jgcover img{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);object-fit:cover;opacity:0;transition:opacity .4s}
+.jgcover img.on{opacity:.92}
 .jgcut{position:absolute;inset:0;background:
   repeating-linear-gradient(90deg,transparent 0 calc(100%/var(--C) - 1.5px),#ffffffa0 calc(100%/var(--C) - 1.5px) calc(100%/var(--C))),
   repeating-linear-gradient(180deg,transparent 0 calc(100%/var(--R) - 1.5px),#ffffffa0 calc(100%/var(--R) - 1.5px) calc(100%/var(--R)))}
@@ -107,7 +114,9 @@
 .jggrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .jslot{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:10px;font:inherit;color:#fff;overflow:hidden;animation:popin .4s calc(var(--i)*30ms + .1s) cubic-bezier(.3,1.4,.5,1) both}
 .jslot.done{cursor:pointer;box-shadow:0 0 0 2.5px #fff,0 4px 10px #0007;background:#2a2550}
-.jslot.done img{width:100%;height:100%;display:block}
+.jslot.done{background:linear-gradient(160deg,#4a3a8a,#2a2050)}
+.jslot.done img{width:100%;height:100%;display:block;opacity:0;transition:opacity .3s}
+.jslot.done img.on{opacity:1}
 .jslot.done:active{transform:scale(.95)}
 .jsst{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:1px;padding:8px 0 3px;background:linear-gradient(transparent,#0009)}
 .jsst svg{width:13px;height:13px;fill:#ffffff40}.jsst svg.on{fill:#ffd23a;filter:drop-shadow(0 1px 0 #8a5a00)}
@@ -133,7 +142,8 @@
 .jvst{display:flex;justify-content:center;gap:4px}.jvst svg{width:28px;height:28px;fill:#ffffff30}.jvst svg.on{fill:#ffd23a;filter:drop-shadow(0 2px 0 #8a5a00)}
 .jwpic{position:relative;width:min(46vw,190px);margin:6px auto 8px;aspect-ratio:3/4;border-radius:14px;overflow:hidden;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--fc),0 12px 24px #0008;animation:jwpic .7s .1s cubic-bezier(.3,1.5,.5,1) both}
 .jwpic img{width:100%;height:100%;display:block}
-.jwshine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,#ffffff90 50%,transparent 65%) no-repeat;background-size:250% 100%;animation:jshine 1.2s .7s ease-in-out both}
+.jwshine{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.jwshine::before{content:'';position:absolute;top:0;bottom:0;left:0;width:50%;background:linear-gradient(105deg,transparent 10%,#ffffff90 50%,transparent 90%);transform:translateX(-110%);animation:jsh 1.2s .7s ease-in-out both}
 @keyframes jwpic{from{opacity:0;transform:scale(.6) rotate(-6deg)}}
 .jwtitle{display:flex;flex-direction:column;align-items:center;line-height:1.15;margin-bottom:4px}.jwtitle b{font-size:19px;color:#fff}.jwtitle small{font-size:13px;color:#cfc4ff}
 .jwst{display:flex;justify-content:center;gap:6px;margin:2px 0 8px}
@@ -149,8 +159,10 @@
 #skipBtn.peekb .badge{display:none}
 .jgnext .jgplay{height:auto;min-height:56px;padding:10px 12px 8px;border-radius:22px}
 .jgnext .jgplay b{font-size:28px;letter-spacing:3px}
+/* the moment a puzzle's picture is being prepared after a tap */
+body.jigwait #jgPlay,body.jigwait #modal .btn.next{filter:brightness(.92);transform:scale(.97)}
 /* pieces that would be pushed aside by the group being dragged */
-.jp.pv .jc{filter:brightness(.88) saturate(.9)}
+.jp.pv .jc::after{background:#000;opacity:.14}
 
 /* ====================== v2: the feel ====================== */
 /* effects layer over the pieces: seam zips, the guiding finger */
@@ -161,47 +173,59 @@
 @keyframes jzipv{0%{transform:scaleY(0);opacity:1}40%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1.05);opacity:0}}
 @keyframes jziph{0%{transform:scaleX(0);opacity:1}40%{transform:scaleX(1);opacity:1}100%{transform:scaleX(1.05);opacity:0}}
 /* pressing a piece lights up the whole group it belongs to (that is what will move) */
-.jp .jc{transition:filter .15s}
-.jp.grab .jc{filter:brightness(1.14) saturate(1.1)}
-/* a group that just grew, pieces pushed aside, a landing, and the finishing wave */
-.jp.jsnap .jc{animation:jsnap .55s var(--d,0ms) ease-out}
-@keyframes jsnap{0%{filter:brightness(1)}25%{filter:brightness(1.55) saturate(1.2)}100%{filter:none}}
-.jp.jbump .jc{animation:jbump .4s ease-out}
-@keyframes jbump{35%{filter:brightness(1.18)}}
-.jp.jland .jc{animation:jland .35s ease-out}
-@keyframes jland{30%{filter:brightness(1.22)}}
-.jp.jwave .jc{animation:jwave .7s var(--d,0ms) ease-out both}
-@keyframes jwave{0%{filter:none}30%{filter:brightness(1.6) saturate(1.25)}100%{filter:none}}
+.jp.grab .jc::after{opacity:.16}
+/* a group that just grew, pieces pushed aside, a landing, and the finishing wave: a white flash of the overlay */
+.jp.fs0 .jc::after{animation:jfs0 .6s var(--d,0ms) ease-out backwards}.jp.fs1 .jc::after{animation:jfs1 .6s var(--d,0ms) ease-out backwards}
+.jp.fm0 .jc::after{animation:jfm0 .35s ease-out}.jp.fm1 .jc::after{animation:jfm1 .35s ease-out}
+.jp.fw0 .jc::after{animation:jfw0 .4s ease-out}.jp.fw1 .jc::after{animation:jfw1 .4s ease-out}
+/* (pairs of identical keyframes: a piece alternates between them, which restarts the flash without a forced layout) */
+@keyframes jfs0{0%{opacity:0}30%{opacity:.48}100%{opacity:0}}@keyframes jfs1{0%{opacity:0}30%{opacity:.48}100%{opacity:0}}
+@keyframes jfm0{0%{opacity:0}30%{opacity:.26}100%{opacity:0}}@keyframes jfm1{0%{opacity:0}30%{opacity:.26}100%{opacity:0}}
+@keyframes jfw0{0%{opacity:0}35%{opacity:.18}100%{opacity:0}}@keyframes jfw1{0%{opacity:0}35%{opacity:.18}100%{opacity:0}}
 /* the lifted group: a touch bigger and leaning with the drag; it settles with a small squash */
-.jlift.land{transition:transform .19s cubic-bezier(.2,1.5,.4,1),filter .19s}
+.jlift.land{transition:transform .19s cubic-bezier(.2,1.5,.4,1)}
 /* the guiding finger */
 .jfinger{position:absolute;left:0;top:0;width:0;height:0;animation:jfing 1.6s ease-in-out var(--n,2) both}
 .jfinger::before{content:'';position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle,#ffffffc0,#ffffff00 70%);animation:jfdot 1.6s ease-in-out var(--n,2) both}
 .jfinger i{position:absolute;left:-8px;top:-4px;font-size:36px;font-style:normal;line-height:1;filter:drop-shadow(0 5px 4px #0009)}
 @keyframes jfing{0%{transform:translate(var(--x0),var(--y0));opacity:0}12%{transform:translate(var(--x0),var(--y0)) scale(.86);opacity:1}25%{transform:translate(var(--x0),var(--y0)) scale(.86)}72%{transform:translate(var(--x1),var(--y1)) scale(.86);opacity:1}84%{transform:translate(var(--x1),var(--y1)) scale(1);opacity:1}100%{transform:translate(var(--x1),var(--y1));opacity:0}}
 @keyframes jfdot{0%,10%{opacity:0;transform:scale(.4)}22%,72%{opacity:1;transform:scale(1)}85%,100%{opacity:0;transform:scale(1.6)}}
-/* the opening: the whole picture shines, cracks into cards, and the cards fly to their places with a little spin */
-.jgw.intro .jgf{box-shadow:inset 0 0 0 2px #ffffff60,0 0 34px #ffffff40,0 16px 34px #0008}
-.jgw.intro .jgb::after{content:'';position:absolute;inset:0;z-index:35;pointer-events:none;border-radius:10px;
-  background:linear-gradient(115deg,transparent 35%,#ffffff60 48%,#ffffffa0 50%,#ffffff60 52%,transparent 65%) no-repeat;background-size:250% 100%;animation:jshine .85s .05s ease-in-out both}
+/* the opening: the whole picture shines, cracks into cards, and the cards fly to their places with a little spin
+   (four fixed spins, so the spin runs on the GPU) */
 .jgw.intro .jp{cursor:default}
-.jp.jfly{transition-duration:.6s,.24s,.24s,.24s,.24s;transition-timing-function:cubic-bezier(.3,1.18,.45,1),ease-out,ease-out,ease-out,ease-out}
-.jp.jfly .jc{animation:jtilt .6s ease-in-out both;animation-delay:inherit}   /* the delay is set on the piece itself */
-@keyframes jtilt{0%{transform:none}45%{transform:rotate(var(--tilt,6deg)) scale(1.08)}100%{transform:none}}
+.jcrack{position:absolute;inset:0;z-index:34;pointer-events:none;opacity:0;background:
+  repeating-linear-gradient(90deg,transparent 0 calc(var(--cw) - 2px),#fffbe8 calc(var(--cw) - 2px) calc(var(--cw) + 2px),transparent calc(var(--cw) + 2px) var(--cw)),
+  repeating-linear-gradient(0deg,transparent 0 calc(var(--ch) - 2px),#fffbe8 calc(var(--ch) - 2px) calc(var(--ch) + 2px),transparent calc(var(--ch) + 2px) var(--ch))}
+.jgw.cut .jcrack{animation:jcrack .5s ease-out both}
+@keyframes jcrack{0%{opacity:0}25%{opacity:.9}100%{opacity:0}}
+/* (the flight's timing and spin are set from script on each card, so starting and ending it restyles nothing else) */
 /* progress: how much of the picture is together */
 .jprog{display:flex;align-items:center;gap:8px;height:16px;margin-top:6px;padding:0 3px}
 .jpb{flex:1;height:8px;border-radius:99px;background:#0008;box-shadow:inset 0 1px 2px #000b;overflow:hidden}
-.jpb b{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,color-mix(in srgb,var(--fc) 70%,#fff),var(--fc));box-shadow:0 0 10px var(--fc);transition:width .55s cubic-bezier(.3,1.25,.5,1)}
+.jpb b{display:block;height:100%;width:100%;border-radius:inherit;background:linear-gradient(90deg,color-mix(in srgb,var(--fc) 70%,#fff),var(--fc));transform:scaleX(0);transform-origin:0 50%;transition:transform .55s cubic-bezier(.3,1.25,.5,1)}
 .jpt{font-weight:800;font-size:12.5px;color:#fff;min-width:36px;text-align:right;text-shadow:0 1px 0 #0008}
-.jprog.bump .jpt{animation:jpbump .4s cubic-bezier(.3,1.6,.5,1)}
-@keyframes jpbump{40%{transform:scale(1.35);color:#ffe08a}}
-.jprog.full .jpb b{background:linear-gradient(90deg,#ffd166,#fff3b0);box-shadow:0 0 14px #ffd166}
-@media (prefers-reduced-motion:reduce){.jzip,.jfinger,.jfinger::before,.jp.jfly .jc,.jp.jsnap .jc,.jp.jwave .jc{animation:none}}
+.jprog.bump0 .jpt{animation:jpb0 .4s cubic-bezier(.3,1.6,.5,1)}.jprog.bump1 .jpt{animation:jpb1 .4s cubic-bezier(.3,1.6,.5,1)}
+@keyframes jpb0{40%{transform:scale(1.35)}}@keyframes jpb1{40%{transform:scale(1.35)}}
+.jprog.full .jpb b{background:linear-gradient(90deg,#ffd166,#fff3b0)}
+@media (prefers-reduced-motion:reduce){.jzip,.jfinger,.jfinger::before,.jp.jfly .jc,.jc::after{animation:none!important}}
 /* the finished picture flies from the board into the win card; a new picture stamps into its album slot */
 .jflight{position:fixed;z-index:9999;transform-origin:0 0;border-radius:12px;overflow:hidden;pointer-events:none;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--fc),0 18px 40px #000a;will-change:transform}
 .jflight img{width:100%;height:100%;display:block}
 .jwpic.flown{animation:none}
-.jwpic.flown .jwshine{animation-delay:1.1s}
+.jwpic.flown .jwshine::before{animation-delay:1.1s}
 .jslot.fresh{z-index:2;animation:jstamp .75s .25s cubic-bezier(.3,1.5,.5,1) both;box-shadow:0 0 0 2.5px #fff,0 0 0 5px #ffd166,0 0 24px #ffd166b0}
 @keyframes jstamp{0%{transform:scale(1.9) rotate(-12deg);opacity:0}55%{transform:scale(.92) rotate(2deg);opacity:1}100%{transform:none;opacity:1}}
 .btn.next .nxp{font-size:.72em;font-weight:700;opacity:.75}
+
+/* ====================== lighter on slower devices (html.q-med / q-low come from js/perf.js) ====================== */
+html.q-med .jlift.up{filter:drop-shadow(0 7px 5px #0009)}
+html.q-low .jlift.up{filter:none}
+html.q-low .jlift.up .jc{box-shadow:0 6px 10px #0008}
+html.q-low .jzip{box-shadow:none}
+html.q-low .jgw.intro .jshn i{display:none}
+html.q-low .jgq,html.q-low .jslot.next,html.q-low .bn.new .bnew{animation:none}
+/* browsers without color-mix() (iOS before 16.2) would drop the whole card background, picture included: a plain frame */
+@supports not (color:color-mix(in srgb,red,blue)){
+  .jc{background:var(--pic) no-repeat content-box,var(--fc) border-box;background-size:var(--bw) var(--bh),auto;
+    background-position:calc(var(--hx)*var(--cw)*-1 - var(--ul)*var(--gf)) calc(var(--hy)*var(--ch)*-1 - var(--ut)*var(--gf)),0 0}
+}

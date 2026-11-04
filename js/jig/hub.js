@@ -19,7 +19,7 @@ let jigPageView=0,jigFresh=0;
 /* the finished picture lifts off the board and flies into the win card */
 function flyPicture(from,to,url,fc){
   if(REDUCED||!from||!to)return;
-  const a=from.getBoundingClientRect();if(!a.width)return;
+  const a=from.getBoundingClientRect?from.getBoundingClientRect():from;if(!a.width)return;
   const f=el('div','jflight',`<img alt="" src="${url}">`);f.style.cssText=`left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;--fc:${fc}`;
   document.body.appendChild(f);to.style.opacity='0';to.classList.add('flown');
   setTimeout(()=>{
@@ -29,13 +29,27 @@ function flyPicture(from,to,url,fc){
   },420);
 }
 
-function playJig(n){if(!jigOpen())return;Trans.stop();startLevel(n,{jig:true})}
+let jigStarting=0;
+function playJig(n){
+  if(!jigOpen()||jigStarting)return;JigPic.cancel();
+  /* the board's picture is made before the screen changes (at most a short wait), so its opening plays smoothly */
+  const p=JigPic.prep(n),go=()=>{jigStarting=0;Trans.stop();startLevel(n,{jig:true})};
+  if(!p){go();return}
+  jigStarting=1;document.body.classList.add('jigwait');
+  Promise.race([p,wait(1500)]).then(()=>{document.body.classList.remove('jigwait');go()});
+}
 /* the hub screen */
 function renderJig(){
-  const n=S.jig.next,[C,R]=jigDims(n),pic=JigPic.get(n),res=S.jig.res&&S.jig.res.n===n,pg=jigPage(n);
+  const n=S.jig.next,[C,R]=jigDims(n),res=S.jig.res&&S.jig.res.n===n,pg=jigPage(n);
   if(!jigPageView)jigPageView=pg;
   const cv=$('#jgCover');
-  cv.innerHTML=`<img alt="" src="${pic.url}"><i class="jgcut" style="--C:${C};--R:${R}"></i><b class="jgq">?</b>`;
+  cv.innerHTML=`<img alt=""><i class="jgcut" style="--C:${C};--R:${R}"></i><b class="jgq">?</b>`;
+  /* the cover is a tiny thumbnail (it looks blurred when stretched); the next board's picture is made while you browse */
+  const ci=cv.firstChild,setCover=u=>{if(ci.isConnected&&u){ci.onload=()=>ci.classList.add('on');ci.src=u}};
+  /* once the screen has settled: the next board's picture is made (so PLAY starts at once) and the cover comes from it */
+  setTimeout(()=>{if(!$('#jig').classList.contains('active')||!ci.isConnected)return;
+    const run=()=>{const p=JigPic.prep(n);if(p)p.then(u=>u&&JigPic.miniFrom(n,u)).then(setCover);else JigPic.later(n,true,setCover)};
+    window.requestIdleCallback?requestIdleCallback(run,{timeout:1500}):run()},700);
   $('#jgNum').textContent=`PUZZLE ${n}`;$('#jgSize').innerHTML=`<i>🧩</i>${C*R} pieces <small>${C}×${R}</small>`;
   $('#jgPlay b').textContent=res?'CONTINUE':'PLAY';$('#jgPlay').classList.toggle('resume',!!res);
   const done=Object.keys(S.jig.stars).length;
@@ -47,11 +61,13 @@ function renderAlbum(){
   let k=0,html='';
   for(let n=(p-1)*12+1;n<=p*12;n++){
     const st=S.jig.stars[n]||0,isNext=n===S.jig.next;if(st)k++;
-    if(st)html+=`<button class="jslot done${n===jigFresh?' fresh':''}" data-n="${n}" style="--i:${n%12}"><img alt="" src="${JigPic.get(n).url}"><span class="jsst">${starRow(st)}</span></button>`;
+    if(st)html+=`<button class="jslot done${n===jigFresh?' fresh':''}" data-n="${n}" style="--i:${n%12}"><img alt="" data-n="${n}"><span class="jsst">${starRow(st)}</span></button>`;
     else if(isNext)html+=`<button class="jslot next" data-n="${n}" style="--i:${n%12}"><b>?</b><small>Next</small></button>`;
     else html+=`<div class="jslot lock" style="--i:${n%12}"><b>${n}</b></div>`;
   }
-  $('#jgGrid').innerHTML=html;
+  JigPic.cancel();$('#jgGrid').innerHTML=html;
+  /* thumbnails arrive one at a time in quiet moments (made once, then kept), each fading in */
+  $$('#jgGrid img[data-n]').forEach(im=>JigPic.later(+im.dataset.n,false,u=>{if(!im.isConnected)return;im.onload=()=>im.classList.add('on');im.src=u}));
   if(jigFresh&&$('#jgGrid .jslot.fresh')){jigFresh=0;setTimeout(()=>{sfx.star(2);const e=$('#jgGrid .jslot.fresh');if(e){const[x,y]=centerOf(e);burst(x,y,'#ffd166',20,1)}},700)}
   $('#jgPg').textContent=`Page ${p}`;$('#jgPgN').textContent=`${k}/12`;$('#jgPgBar').style.width=k/12*100+'%';
   $('#jgPrev').disabled=p<=1;$('#jgNext').disabled=p>=maxPg;
@@ -87,6 +103,7 @@ function onJigWin(stars){
   const me=cur,n=cur.level,prev=S.jig.stars[n]||0,first=!prev,pic=JigPic.get(n),[C,R]=jigDims(n);
   const rw=jigReward(n,stars,prev);
   if(stars>prev)S.jig.stars[n]=stars;
+  JigPic.thumbFrom(n,pic.raster);
   if(n>=S.jig.next)S.jig.next=n+1;
   if(first){jigFresh=n;jigPageView=jigPage(n)}
   if(S.jig.res&&S.jig.res.n===n)S.jig.res=null;
@@ -95,14 +112,15 @@ function onJigWin(stars){
   S.coins+=rw.coins;const xr=addXP(rw.xp);save();
   emit('jig',{stars});if(rw.coins)emit('coins',rw.coins);
   sfx.win();buzz([30,40,60]);confetti();
-  const[bx,by]=centerOf($('.jgb')||board);burst(bx,by,'#ffd166',50,1.8);
+  /* (the board's own sparkles circle the frame: no extra burst here, and no measuring, which would force a layout) */
+  const brect=cur.puz.boardRect?cur.puz.boardRect():$('.jgb').getBoundingClientRect();
   const k=Array.from({length:12},(_,i)=>jigDone((p-1)*12+i+1)).filter(Boolean).length;
   const nn=n+1,[nC,nR]=jigDims(nn);
   setTimeout(()=>{
     if(cur!==me)return;
     openModal(`<div class="rays"></div><div class="wglow"></div>
       <div class="ribbon"><span>PUZZLE ${n} COMPLETE</span></div>
-      <div class="jwpic" style="--fc:${pic.frame}"><img alt="" src="${pic.url}"><i class="jwshine"></i></div>
+      <div class="jwpic" style="--fc:${pic.frame}"><img alt="" src="${pic.raster||pic.url}"><i class="jwshine"></i></div>
       <div class="jwtitle"><b>${pic.title}</b><small>${pic.sub}</small></div>
       <div class="jwst">${[0,1,2].map(i=>`<span class="sock ${i<stars?'on':''}" style="--d:${i*.3+.5}s">${STAR}</span>`).join('')}</div>
       <div class="wrows">
@@ -114,7 +132,7 @@ function onJigWin(stars){
       ${stars<3?`<p>Finish in ${jigPar(C*R).s3} moves or fewer for ★★★</p>`:''}`,
       [{label:'Gallery',cls:'sec sm',fn:b=>playExit('jig',b)},{label:'Replay',cls:'sec sm',fn:()=>playJig(n)},
        {label:`<span class="nx">🧩</span>Puzzle ${nn} <small class="nxp">· ${nC*nR} pieces</small> ▶`,cls:'big next',fn:()=>playJig(nn)}],{cls:'win jwin',back:()=>playExit('jig')});
-    flyPicture($('.jgb'),$('#modal .jwpic'),pic.url,pic.frame);
+    flyPicture(brect,$('#modal .jwpic'),pic.raster||pic.url,pic.frame);
     for(let i=0;i<stars;i++)setTimeout(()=>{if(cur!==me)return;sfx.star(i);const s=$$('.jwst .sock')[i];if(s){s.classList.add('hit');const[x,y]=centerOf(s);burst(x,y,'#ffd166',18,1)}},(i*.3+1.2)*1000);
     if(page)setTimeout(()=>{if(cur!==me)return;sfx.chest();const e=$('#modal .extra.gold');if(e){const[x,y]=centerOf(e);fountain(x,y,30)}},1600);
     if(rw.coins)setTimeout(()=>{if(cur===me)flyCoins($('.reward .coin'),Math.min(10,3+rw.coins/4|0))},900);

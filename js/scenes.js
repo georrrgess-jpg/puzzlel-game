@@ -116,7 +116,8 @@ const Scene=(()=>{
     for(const n in made)made[n].classList.toggle('on',n===k);
     if(k&&!made[k]){const d=document.createElement('div');d.className='scn on';d.innerHTML=SCENES[k].replace(/id="(\w+)"/g,`id="${k}-$1"`).replace(/url\(#(\w+)\)/g,`url(#${k}-$1)`);/* ids unique per scene */if(SCENES.fx[k])d.insertAdjacentHTML('beforeend',`<div class="fx">${SCENES.fx[k]}</div>`);el_.appendChild(d);made[k]=d}
     el_.classList.toggle('on',!!k);
-    if(typeof BG!=='undefined'&&BG.setStill)BG.setStill(!!k);   // the canvas is hidden behind the scene: draw it once and stop
+    /* the canvas is hidden behind a scene, and a jigsaw board covers the screen: draw it once and stop */
+    if(typeof BG!=='undefined'&&BG.setStill)BG.setStill(!!k||(id==='play'&&typeof cur!=='undefined'&&!!cur&&!!cur.jig));   // the canvas is hidden behind the scene: draw it once and stop
   }
   return{show};
 })();

@@ -4,8 +4,10 @@ const fxc=$('#fx'),fctx=fxc.getContext('2d');let parts=[],raf=0,dpr=1,dirtyBox=n
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function resizeFx(){dirtyBox=null;dpr=1;/* particles are soft glows: a smaller canvas costs far less to commit every frame */fxc.width=innerWidth*dpr;fxc.height=innerHeight*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
 addEventListener('resize',resizeFx);Q.on(resizeFx);resizeFx();
-/* every effect goes through add() so the live-particle count never exceeds the tier's cap */
-const add=p=>{if(parts.length<Q.pcap||p.sh==='flash')parts.push(p)};
+/* every effect goes through add() so the live-particle count never exceeds the tier's cap; while frames are coming
+   slowly (a busy moment on a slow phone) the cap halves, so effects never pile more work onto a struggling frame */
+let fxSlow=0,fxLast=0;
+const add=p=>{if(parts.length<(fxSlow>24?Q.pcap*.5:Q.pcap)||p.sh==='flash')parts.push(p)};
 function starPath(c,r){c.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,rr=i%2?r*.45:r;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}
 /* soft glow sprites, cached per colour (drawn with additive blending) */
 const GLOW={};
@@ -38,8 +40,10 @@ function fountain(x,y,n=60){
 }
 /* One pass per frame: normal particles first (one transform call each, no save/restore), then every glow in a
    single additive batch. Clears only the area the particles occupied last frame. */
-function loop(){
+function loop(t){
   const D=dpr;
+  /* a running average of frame time while particles are on screen */
+  if(fxLast&&t-fxLast<200)fxSlow=fxSlow*.8+(t-fxLast)*.2;fxLast=t;
   if(dirtyBox){fctx.setTransform(1,0,0,1,0,0);fctx.clearRect(dirtyBox[0]*D-2,dirtyBox[1]*D-2,(dirtyBox[2]-dirtyBox[0])*D+4,(dirtyBox[3]-dirtyBox[1])*D+4)}
   if(Q.modal&&Q.tier==='low')parts.length=Math.min(parts.length,30);
   for(let i=parts.length-1;i>=0;i--){const p=parts[i];if(!(p.life>0&&p.y<innerHeight+40)){parts[i]=parts[parts.length-1];parts.pop()}}
@@ -72,7 +76,7 @@ function loop(){
   fctx.globalAlpha=1;
   dirtyBox=parts.length?[Math.max(0,x0),Math.max(0,y0),Math.min(innerWidth,x1),Math.min(innerHeight,y1)]:null;
   if(!parts.length){fctx.setTransform(1,0,0,1,0,0);fctx.clearRect(0,0,fxc.width,fxc.height);fctx.setTransform(D,0,0,D,0,0)}
-  raf=parts.length?requestAnimationFrame(loop):0;
+  raf=parts.length?requestAnimationFrame(loop):0;if(!raf)fxLast=0;
 }
 function kick(){if(!raf)raf=requestAnimationFrame(loop)}
 function centerOf(e){const r=e.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]}

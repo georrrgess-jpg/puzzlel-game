@@ -59,6 +59,35 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v7.2 (Jigsaw on slower phones)
+Measured with `tools/jig-perf.cjs`, a slow phone simulated with the CPU 6× slower at 2.75× pixel density:
+
+| | before | after |
+|---|---|---|
+| Opening a puzzle from the gallery or the win card | 914 ms freeze, ~2 s blocked, 14 stutters | longest task ~100 ms, 3–4 stutters, 55 fps |
+| Moving pieces | 54 fps, 5 stutters | 59 fps, 1–2 stutters |
+| Dragging | 58 fps | 60 fps, no stutters |
+| Opening the gallery | 634 ms freeze | longest task ~100–160 ms; on later visits every picture shows at once |
+
+- **The board paints a bitmap:** a JPEG of the picture is made once at screen resolution, instead of every piece
+  redrawing the SVG scene. It is a little softer on slower devices, which means far fewer pixels to draw.
+- **Picture made ahead:** the next puzzle's picture is prepared while you look at the gallery or the win card, so the
+  opening plays smoothly.
+- **Cheaper cards:**
+  - Each card is one styled box instead of three.
+  - Seams switch at once (the light zip covers the moment) instead of animating on every frame.
+  - Flashes, glows, shines and the progress bar run on the GPU.
+  - Only pieces that actually changed are touched.
+  - A drag is applied once per screen frame.
+  - No code forces the browser to re-measure the page in the middle of an animation.
+- **Album thumbnails** are made one at a time in quiet moments and kept between visits. A finished picture's thumbnail
+  comes free from its board picture. The gallery cover is a tiny thumbnail stretched up, so it looks blurred without a
+  blur filter.
+- **Particles adapt:** when frames run slowly, effects let in fewer new particles (this helps every mode). The finish
+  uses fewer bursts.
+- **Lighter tiers:** low and medium graphics drop the opening spin, the drop shadow under a lifted group and the seam
+  sparkles. The background animation pauses behind a jigsaw.
+
 ## What's new in v7.1 (Jigsaw feel)
 - **Opening reveal:** each puzzle opens on the whole picture with a shine. It then cracks into cards that spin and fly to
   their shuffled spots. Tap to skip.

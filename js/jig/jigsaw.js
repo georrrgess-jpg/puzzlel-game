@@ -16,9 +16,13 @@ const JIG_EARLY=[0,1,2,3,2,3,4,3,4,5,4,5],JIG_MID=[4,5,3,5,4,6,4,5,6,4,5,6],JIG_
 const jigSize=n=>{const i=(n-1)%12;return n<=12?JIG_EARLY[i]:n<=36?JIG_MID[i]:JIG_LATE[i]};
 /* star targets in moves, by number of pieces (measured against the solver; a careful player beats it) */
 const jigPar=N=>({s3:N+1,s2:Math.ceil(N*1.6)+2});
-/* pictures as image URLs, kept for a while (the album shows the same ones again) */
+/* pictures, kept for a while (the album shows the same ones again).
+   Performance: the SVG picture is the expensive thing to draw (the browser lays out its ~1,000 shapes, and every piece
+   would replay all of them), so the board paints a JPEG of it made once at screen resolution, the album shows small
+   JPEG thumbnails (kept in Cache Storage between visits where the browser has it), and the gallery cover is a tiny
+   thumbnail stretched up, which looks blurred without a blur filter. */
 const JigPic=(()=>{
-  const cache=new Map();
+  const cache=new Map(),bms=new Map(),th=new Map(),TV='t1';
   function get(n){
     let r=cache.get(n);
     if(r){cache.delete(n);cache.set(n,r);return r}
@@ -27,8 +31,64 @@ const JigPic=(()=>{
     if(cache.size>48){const k=cache.keys().next().value;URL.revokeObjectURL(cache.get(k).url);cache.delete(k)}
     return r;
   }
-  return{get};
+  const canvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+  const toBlob=(c,q)=>new Promise(res=>{try{c.toBlob(b=>res(b),'image/jpeg',q)}catch(e){res(null)}});
+  /* the one costly step: the browser reads and lays out the SVG once, drawn straight into a canvas */
+  const draw=(n,w,h)=>new Promise(res=>{const im=new Image();im.onload=()=>{try{const c=canvas(w,h);c.getContext('2d').drawImage(im,0,0,w,h);res(c)}catch(e){res(null)}};im.onerror=()=>res(null);im.src=get(n).url});
+  /* picture n as a JPEG at w x h device pixels (null if this browser can't, then the SVG is used) */
+  function bitmap(n,w,h){
+    const k=n+':'+w+'x'+h;let p=bms.get(k);if(p)return p;
+    p=draw(n,w,h).then(c=>c&&toBlob(c,.92)).then(b=>b&&URL.createObjectURL(b));bms.set(k,p);
+    if(bms.size>6){const[k0,p0]=bms.entries().next().value;bms.delete(k0);p0.then(u=>u&&setTimeout(()=>URL.revokeObjectURL(u),8000))}
+    return p;
+  }
+  let store=null;try{if(window.caches&&window.isSecureContext)store=caches.open('jig-thumbs-'+TV).catch(()=>null)}catch(e){}
+  /* album thumbnail (216 x 288), or with mini the 24 x 32 one for the blurred cover */
+  function thumb(n,mini){
+    const k=n+(mini?'m':'');let p=th.get(k);if(p)return p;
+    p=(async()=>{
+      const req='jig-thumb/'+TV+'/'+k,c=store&&await store;
+      if(c){try{const r=await c.match(req);if(r)return URL.createObjectURL(await r.blob())}catch(e){}}
+      let b=null;
+      if(mini){const big=await thumb(n);const im=new Image();im.src=big;try{await im.decode();const cv=canvas(24,32);cv.getContext('2d').drawImage(im,0,0,24,32);b=await toBlob(cv,.8)}catch(e){}}
+      else{const cv=await draw(n,216,288);b=cv&&await toBlob(cv,.84)}
+      if(!b)return get(n).url;
+      if(c)try{await c.put(req,new Response(b,{headers:{'content-type':'image/jpeg'}}))}catch(e){}
+      return URL.createObjectURL(b);
+    })();
+    th.set(k,p);return p;
+  }
+  /* a queue that makes thumbnails one at a time in idle moments, so opening the album never freezes the screen */
+  const q=[];let busy=false;
+  const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:250}):setTimeout(f,30);
+  /* (only while the gallery is on screen: a thumbnail made in the middle of a drag would cost a frame or two) */
+  function pump(){if(busy||!q.length)return;busy=true;idle(()=>{const jg=document.getElementById('jig');if(!jg||!jg.classList.contains('active')){q.length=0;busy=false;return}
+    const it=q.shift();if(!it){busy=false;return}const[n,mini,cb]=it;thumb(n,mini).then(u=>{busy=false;cb(u);pump()})})}
+  let hold=0;
+  function later(n,mini,cb){const k=n+(mini?'m':''),p=th.get(k);if(p){p.then(cb);return}q.push([n,mini,cb]);
+    /* (wait for the gallery's entrance animation to finish before the first one) */
+    if(!busy&&!hold)hold=setTimeout(()=>{hold=0;pump()},650)}
+  function cancel(){q.length=0}
+  /* a finished puzzle's album thumbnail is shrunk from its board bitmap: no SVG work at all */
+  function thumbFrom(n,url){
+    if(!url||th.has(n+''))return;
+    th.set(n+'',(async()=>{try{const im=new Image();im.src=url;await im.decode();const cv=canvas(216,288);cv.getContext('2d').drawImage(im,0,0,216,288);const b=await toBlob(cv,.84);if(!b)return get(n).url;
+      const c=store&&await store;if(c)try{await c.put('jig-thumb/'+TV+'/'+n,new Response(b,{headers:{'content-type':'image/jpeg'}}))}catch(e){}
+      return URL.createObjectURL(b)}catch(e){th.delete(n+'');return thumb(n)}})());
+  }
+  /* the 24 x 32 cover straight from a board bitmap (once that exists, no SVG work) */
+  function miniFrom(n,url){
+    const k=n+'m';if(th.has(k))return th.get(k);
+    const p=(async()=>{try{const im=new Image();im.src=url;await im.decode();const cv=canvas(24,32);cv.getContext('2d').drawImage(im,0,0,24,32);const b=await toBlob(cv,.8);return b?URL.createObjectURL(b):url}catch(e){return url}})();
+    th.set(k,p);return p;
+  }
+  return{get,bitmap,thumb,later,cancel,thumbFrom,miniFrom,lastBW:0};
 })();
+/* make puzzle n's board bitmap ahead of time, at the size the last board had (in a quiet moment, so it starts at once) */
+/* how sharp the board bitmap is: full screen sharpness on fast phones, a little softer (far fewer pixels) on slow ones */
+JigPic.dpr=()=>Math.min(Q.tier==='low'?1.5:Q.tier==='med'?2:2.5,window.devicePixelRatio||1);
+JigPic.prep=n=>{const bw=JigPic.lastBW;if(!bw||n<1)return null;const d=JigPic.dpr(),[c,r]=JIG_SIZES[jigSize(n)];
+  return JigPic.bitmap(n,Math.round(Math.floor(bw/c)*c*d),Math.round(Math.floor(bw*4/3/r)*r*d))};
 INFO.jigsaw={name:'Jigsaw',icon:'🧩',col:'#ff8a3d',tip:'Drag a piece onto another to swap them. Pieces that belong together lock and move as one.'};
 HOWTO.jigsaw={
   goal:'Put the picture back together.',
@@ -114,21 +174,40 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
   let introT=[],introRun=false,introDone=false,introView=[],tutor=null,lastLocks=0,cheered=0;
   const wrap=el('div','jgw'),frame=el('div','jgf'),bd=el('div','jgb'),tl=el('div','jtl'),peekEl=el('div','jpeek'),fx=el('div','jfx');
   const prog=el('div','jprog','<i class="jpb"><b></b></i><span class="jpt"></span>');
-  wrap.style.setProperty('--C',C);wrap.style.setProperty('--R',RW);wrap.style.setProperty('--fc',pic.frame);wrap.style.setProperty('--pic',`url("${pic.url}")`);
-  peekEl.innerHTML=`<img alt="" src="${pic.url}">`;
-  frame.appendChild(bd);frame.appendChild(prog);wrap.appendChild(frame);bd.appendChild(tl);bd.appendChild(peekEl);bd.appendChild(fx);
+  wrap.style.setProperty('--C',C);wrap.style.setProperty('--R',RW);wrap.style.setProperty('--fc',pic.frame);
+  peekEl.innerHTML=`<img alt="">`;const peekImg=peekEl.firstChild,shn=el('div','jshn','<i></i>'),pbar=prog.querySelector('b'),ptxt=prog.querySelector('.jpt');
+  frame.appendChild(bd);frame.appendChild(prog);wrap.appendChild(frame);bd.appendChild(tl);bd.appendChild(peekEl);bd.appendChild(fx);bd.appendChild(shn);bd.appendChild(el('i','jcrack'));
   const pe=[];   // piece elements by piece id
-  for(let p=0;p<N;p++){const e=el('div','jp','<div class="jc"><div class="ji"></div></div>');e.dataset.p=p;e.style.setProperty('--hx',cx(p));e.style.setProperty('--hy',cy(p));pe.push(e);bd.appendChild(e)}
+  for(let p=0;p<N;p++){const e=el('div','jp','<div class="jc"></div>');e.dataset.p=p;e.style.setProperty('--hx',cx(p));e.style.setProperty('--hy',cy(p));pe.push(e);bd.appendChild(e)}
   const tg=Array.from({length:N},()=>{const e=el('div','jtg');tl.appendChild(e);return e});
   board.appendChild(wrap);
   wrap.classList.add('loading');
-  const img=new Image();img.src=pic.url;
-  const ready=(img.decode?img.decode():Promise.resolve()).catch(()=>{});
+  /* the board's place on screen, measured once and kept (measuring right after a change forces an extra layout) */
+  let bdr=null,laid=false,bwNow=0,rasterKey='',rasterP=null,firstRes;
+  const ready=new Promise(r=>{firstRes=r});   // the picture is on the pieces
+  const rect=()=>bdr||(bdr=bd.getBoundingClientRect());
+  const unrect=()=>{bdr=null};addEventListener('resize',unrect);addEventListener('orientationchange',unrect);
   function layout(){
+    bdr=null;
+    if(!board.clientWidth)return;   // not on screen yet (the play screen is still opening): sized when it shows
     const w=Math.max(120,board.clientWidth-14),h=Math.max(160,board.clientHeight-10-24);
-    let bw=Math.min(w,h*.75,620);cw=Math.floor(bw/C);ch=Math.floor(bw*4/3/RW);
+    const bw=Math.min(w,h*.75,620),ncw=Math.floor(bw/C),nch=Math.floor(bw*4/3/RW);bwNow=bw;
+    if(laid&&ncw===cw&&nch===ch)return;   // same size: leave every piece alone
+    laid=true;cw=ncw;ch=nch;JigPic.lastBW=bw;
     wrap.style.setProperty('--cw',cw+'px');wrap.style.setProperty('--ch',ch+'px');wrap.style.setProperty('--bw',cw*C+'px');wrap.style.setProperty('--bh',ch*RW+'px');
+    pe.forEach(e=>{e._tr=''});
     if(introRun)place(false,...introView);else place(false);
+    rasterP=raster();
+  }
+  /* the picture as a bitmap at this size (made once; the next puzzle's is made ahead of time); the SVG if that fails */
+  const dpr=JigPic.dpr();
+  const sizeFor=(bw,c,r)=>[Math.round(Math.floor(bw/c)*c*dpr),Math.round(Math.floor(bw*4/3/r)*r*dpr)];
+  function raster(){
+    const[w,h]=sizeFor(bwNow,C,RW),k=w+'x'+h;if(k===rasterKey)return rasterP;rasterKey=k;
+    return JigPic.bitmap(level,w,h).then(u=>{
+      const src=u||pic.url,im=new Image();im.src=src;
+      return(im.decode?im.decode():Promise.resolve()).catch(()=>{}).then(()=>{if(rasterKey!==k||!wrap.isConnected)return;wrap.style.setProperty('--pic',`url("${src}")`);peekImg.src=src;if(u)pic.raster=u;firstRes()});
+    });
   }
   const posOf=p=>g.indexOf(p);
   function lockFlags(gg){   // per cell: [left,right,top,bottom] open (1) or locked (0)
@@ -137,23 +216,35 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
     return f;
   }
   /* put every piece where the board `arr` says (with locks `fl`, by default the ones `arr` has) */
+  /* only what changed is written: every style write makes the browser restyle that piece */
+  const setT=(e,x,y)=>{const t=`translate(${x}px,${y}px)`;if(e._tr!==t){e._tr=t;e.style.transform=t}};
   function place(anim=true,arr=g,fl=null){
-    const f=fl||lockFlags(arr);
-    for(let i=0;i<N;i++){const e=pe[arr[i]],[l,r,t,b]=f[i];
-      if(!anim)e.classList.add('still');e.classList.remove('pv');
-      e.style.transform=`translate(${cx(i)*cw}px,${cy(i)*ch}px)`;e.dataset.c=i;
-      e.style.setProperty('--ul',l);e.style.setProperty('--ur',r);e.style.setProperty('--ut',t);e.style.setProperty('--ub',b)}
-    if(!anim){void bd.offsetWidth;pe.forEach(e=>e.classList.remove('still'))}
+    const f=fl||lockFlags(arr);let still=false;
+    for(let i=0;i<N;i++){const e=pe[arr[i]],[l,r,t,b]=f[i],fk=l+''+r+t+b;
+      if(!anim&&e._tr!==`translate(${cx(i)*cw}px,${cy(i)*ch}px)`){e.classList.add('still');still=true}
+      if(e._pv){e._pv=false;e.classList.remove('pv')}
+      setT(e,cx(i)*cw,cy(i)*ch);if(e._c!==i){e._c=i;e.dataset.c=i}
+      if(e._fk!==fk){e._fk=fk;e.style.setProperty('--ul',l);e.style.setProperty('--ur',r);e.style.setProperty('--ut',t);e.style.setProperty('--ub',b)}}
+    if(still){void bd.offsetWidth;pe.forEach(e=>e.classList.remove('still'))}
     if(arr===g)flags=f;
   }
+  /* a white flash over pieces: kinds fs (strong), fm (medium), fw (soft). Each piece alternates between two identical
+     animations, so a flash restarts without forcing the browser to restyle and lay out the page first */
+  function flash(els,kind,delays){
+    els.forEach((e,i)=>{const f=e._fl=(e._fl||0)^1;
+      if(delays)e.style.setProperty('--d',delays[i]+'ms');else if(e._d){e.style.removeProperty('--d')}e._d=!!delays;
+      if(e._fc)e.classList.remove(e._fc);e._fc=kind+f;e.classList.add(e._fc)});
+  }
+  const fxLevel=()=>Q.tier==='low'?0:Q.tier==='med'?1:2;
   const ro=window.ResizeObserver?new ResizeObserver(()=>{if(!dr)layout()}):null;if(ro)ro.observe(board);
-  layout();
+  layout();if(!ro)setTimeout(layout,60);
+  JigPic.lastBW=bwNow||JigPic.lastBW;
   /* how much of the picture is put together: locks made out of all there are */
   function progress(anim=true){
     const k=links(g),pct=Math.round(k/LINKS*100);
-    prog.querySelector('b').style.width=pct+'%';prog.querySelector('.jpt').textContent=pct+'%';
+    pbar.style.transform=`scaleX(${pct/100})`;ptxt.textContent=pct+'%';
     prog.classList.toggle('full',pct>=100);
-    if(anim&&k>lastLocks){gfx.pulse(prog,'bump')}
+    if(anim&&k>lastLocks){const f=prog._f=(prog._f||0)^1;prog.classList.remove('bump'+(f^1));prog.classList.add('bump'+f)}
     lastLocks=k;return pct;
   }
 
@@ -162,13 +253,15 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
     if(gfx.reduced()){endIntro();return}
     introRun=true;busy=true;
     introView=[IDENT,ALL(0)];place(false,...introView);wrap.classList.remove('loading');wrap.classList.add('intro');
-    prog.querySelector('b').style.width='0%';prog.querySelector('.jpt').textContent='0%';
+    pbar.style.transform='scaleX(0)';ptxt.textContent='0%';
     const at=(ms,f)=>introT.push(setTimeout(f,ms));
-    at(950,()=>{introView=[IDENT,ALL(1)];place(true,...introView);wrap.classList.add('cut');sfx.jigCut()});
+    /* the crack is a flash of light lines over the picture; the cards get their frames as they set off */
+    at(950,()=>{wrap.classList.add('cut');sfx.jigCut()});
     at(1230,()=>{
-      /* each card flies on its own little delay and tilt */
-      const order=shuffle(IDENT.slice(),R);
-      order.forEach((p,k)=>{const e=pe[p],d=(k*Math.min(18,340/N))+'ms';e.style.transitionDelay=d;e.style.animationDelay=d;e.style.setProperty('--tilt',(R()*16-8).toFixed(1)+'deg');e.classList.add('jfly')});
+      /* each card flies on its own little delay and spin (set right on the card: nothing else is restyled) */
+      const order=shuffle(IDENT.slice(),R),step=Math.min(18,340/N),spin=fxLevel()>0;
+      order.forEach((p,k)=>{const e=pe[p],d=k*step;e.style.transition=`transform .6s cubic-bezier(.3,1.18,.45,1) ${d}ms`;
+        if(spin&&e.firstChild.animate)e.firstChild.animate([{transform:'none'},{transform:`rotate(${[-7,-3,4,8][k%4]}deg) scale(1.07)`,offset:.45},{transform:'none'}],{duration:600,delay:d,easing:'ease-in-out'})});
       introView=[g,null];place(true);sfx.jigScatter();
     });
     at(1230+Math.min(18,340/N)*N+600,endIntro);
@@ -176,10 +269,12 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
   function endIntro(){
     introT.forEach(clearTimeout);introT=[];
     const was=introRun;introRun=false;introDone=true;busy=false;
-    pe.forEach(e=>{e.style.transitionDelay='';e.style.animationDelay='';e.classList.remove('jfly')});
-    wrap.classList.remove('intro','cut','loading');place(!was);progress(false);
+    pe.forEach(e=>{if(e.style.transition)e.style.transition=''});
+    wrap.classList.remove('intro','cut','loading');place(!was);progress(false);bdr=null;
     if(level<=1&&!S.jig.tips.drag)setTimeout(()=>{if(!busy&&!moves)showTutor()},250);
   }
+  /* the next puzzle's bitmap, made while this one's win card is up (a quiet moment), so Next starts at once */
+  function prepNext(){JigPic.prep(level+1)}
   /* a finger that drags a piece to where it belongs (the first puzzle until the first move, and every hint) */
   function finger(from,to,loops=2){
     hideFinger();
@@ -195,7 +290,7 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
   /* ---------- feedback ---------- */
   function seams(before,after){
     /* every newly locked edge: a line of light zips along the seam, with a few sparkles; returns them */
-    const r=bd.getBoundingClientRect(),out=[];
+    const r=rect(),out=[],sparks=fxLevel();
     for(let i=0;i<N;i++){
       if(before[i][1]&&!after[i][1])out.push([cx(i)+1,cy(i)+.5,'v']);
       if(before[i][3]&&!after[i][3])out.push([cx(i)+.5,cy(i)+1,'h']);
@@ -203,11 +298,11 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
     out.forEach(([x,y,d],k)=>{
       const z=el('i','jzip '+d);z.style.left=x*cw+'px';z.style.top=y*ch+'px';z.style.setProperty('--len',(d==='v'?ch:cw)+'px');z.style.animationDelay=k*45+'ms';
       fx.appendChild(z);setTimeout(()=>z.remove(),900);
-      if(k<6)setTimeout(()=>flBurst(r.left+x*cw,r.top+y*ch,'#fff3b0',7,.5),80+k*45);
+      if(sparks&&k<(sparks>1?6:2))setTimeout(()=>flBurst(r.left+x*cw,r.top+y*ch,'#fff3b0',7,.5),80+k*45);
     });
     return out;
   }
-  const say=(x,y,t,big)=>{const r=bd.getBoundingClientRect();floatText(r.left+x*cw,r.top+y*ch,t,big)};
+  const say=(x,y,t,big)=>{const r=rect();floatText(r.left+x*cw,r.top+y*ch,t,big)};
   function settle(prevFlags,G){
     const now=lockFlags(g),made=seams(prevFlags,now),k=made.length;
     const pct=progress(true);
@@ -216,7 +311,7 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
       sfx.jigSnap(Math.round(pct/100*8));buzz(k>1?[10,30,14]:12);
       const[x,y]=made[0],cell=Math.min(N-1,Math.floor(y)*C+Math.floor(x-(made[0][2]==='v'?1:0)));api.good(pe[g[cell]],{silent:true});
       /* the group that just grew glows */
-      const gid=groups(g),root=gid[cell];cellsOf(gid,root).forEach((c,i)=>{const e=pe[g[c]];e.style.setProperty('--d',i*25+'ms');gfx.pulse(e,'jsnap')});
+      const gid=groups(g),cs=cellsOf(gid,gid[cell]);flash(cs.map(c=>pe[g[c]]),'fs',cs.map((c,i)=>Math.min(i,12)*25));
       if(k>=2)setTimeout(()=>say(x,y-.3,k>=4?'Amazing! ✨':k>=3?'Great!':'Nice!',k>=4),120);
       if(moves<=4&&!S.jig.tips.lock){S.jig.tips.lock=1;save();api.coach('🔒 Locked! Locked pieces move as one')}
       /* cheers on the way */
@@ -231,22 +326,24 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
     busy=true;api.lock();api.moves(moves,s3,s2);hideFinger();
     /* a wave of light runs across the picture from the last piece placed, sparkles circle the frame, then the card */
     const last=+(bd.dataset.last||0),lx=cx(last),ly=cy(last);
-    setTimeout(()=>{pe.forEach((e,p)=>{const d=Math.hypot(cx(p)-lx,cy(p)-ly);e.style.setProperty('--d',Math.round(d*70)+'ms');gfx.pulse(e,'jwave')})},260);
+    setTimeout(()=>flash(pe,'fs',pe.map((e,p)=>Math.round(Math.hypot(cx(p)-lx,cy(p)-ly)*70))),260);
     setTimeout(()=>{
       wrap.classList.add('won');sfx.jigDone();buzz([20,40,30]);
-      const r=frame.getBoundingClientRect(),n=14;
+      const b=rect(),r={left:b.left-6,top:b.top-6,right:b.right+6,bottom:b.bottom+30,width:b.width+12,height:b.height+36},n=[0,6,12][fxLevel()];
       for(let i=0;i<n;i++)setTimeout(()=>{const t=i/n*4,side=Math.floor(t),u=t-side;
         const x=side===0?r.left+u*r.width:side===1?r.right:side===2?r.right-u*r.width:r.left,y=side===0?r.top:side===1?r.top+u*r.height:side===2?r.bottom:r.bottom-u*r.height;
         flBurst(x,y,i%2?'#ffd166':'#ffffff',8,.7)},i*45);
       flRing(r.left+r.width/2,r.top+r.height/2,'#fff',Math.max(r.width,r.height)*.7,900);
     },520);
     setTimeout(()=>api.win(moves<=s3?3:moves<=s2?2:1),1500);
+    setTimeout(()=>{if(wrap.isConnected)(window.requestIdleCallback||setTimeout)(prepNext,{timeout:1500})},5200);
   }
   function commit(ng,anchor){
     const before=flags,prev=g;g=ng;moves++;if(anchor!=null)bd.dataset.last=g[anchor];hideFinger();
     api.commit();place(true);
     /* pieces that were pushed aside get a soft glint when they arrive (the group that was carried has its own landing) */
-    for(let i=0;i<N;i++){const q=g[i];if(prev[i]!==q){const e=pe[q];if(e._moved)e._moved=false;else gfx.pulse(e,'jbump')}}
+    const bumped=[];for(let i=0;i<N;i++){const q=g[i];if(prev[i]!==q){const e=pe[q];if(e._moved)e._moved=false;else bumped.push(e)}}
+    flash(bumped,'fw');
     settle(before);
   }
 
@@ -263,7 +360,7 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
   function preview(ng,cs){
     const mv=new Set(cs.map(c=>g[c])),src=ng||g,key=src.join();if(key===pvKey)return;pvKey=key;
     let any=false;
-    for(let i=0;i<N;i++){const q=src[i];if(mv.has(q))continue;const e=pe[q];e.style.transform=`translate(${cx(i)*cw}px,${cy(i)*ch}px)`;const m=!!ng&&g[i]!==q;if(m)any=true;e.classList.toggle('pv',m)}
+    for(let i=0;i<N;i++){const q=src[i];if(mv.has(q))continue;const e=pe[q];setT(e,cx(i)*cw,cy(i)*ch);const m=!!ng&&g[i]!==q;if(m)any=true;if(e._pv!==m){e._pv=m;e.classList.toggle('pv',m)}}
     if(any)sfx.jigSlide();
   }
   let lift=null;
@@ -276,32 +373,39 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
     const L=lift;if(!L){cb&&cb();return}lift=null;
     L.classList.add('land');L.style.transform=`translate(${toX}px,${toY}px)`;
     /* the pieces go back on the board exactly where the lift put them (no transition), then the move plays out */
-    const done=()=>{if(!L.isConnected)return;const kids=[...L.children];kids.forEach(e=>{const c=+e.dataset.c;e.classList.add('still');e.style.transform=`translate(${cx(c)*cw+toX}px,${cy(c)*ch+toY}px)`;bd.appendChild(e)});
-      void bd.offsetWidth;pe.forEach(e=>e.classList.remove('still'));L.remove();kids.forEach(e=>{if(landed)gfx.pulse(e,'jland');else e._moved=false});cb&&cb()};
+    /* (moving a piece to a new parent restarts its style, so it lands without a transition and without a forced layout) */
+    const done=()=>{if(!L.isConnected)return;const kids=[...L.children];kids.forEach(e=>{const c=e._c;setT(e,cx(c)*cw+toX,cy(c)*ch+toY);bd.appendChild(e)});
+      L.remove();if(landed)flash(kids,'fm');else kids.forEach(e=>{e._moved=false});cb&&cb()};
     if(gfx.reduced())done();else setTimeout(done,190);
   }
   function refuse(){api.shake();sfx.bonk();buzz(30);if(!S.jig.tips.room){S.jig.tips.room=1;save();api.coach('No room for that group there: move the other group first')}}
-  const cellAt=(x,y)=>{const r=bd.getBoundingClientRect(),c=Math.floor((x-r.left)/cw),w=Math.floor((y-r.top)/ch);return c<0||w<0||c>=C||w>=RW?-1:w*C+c};
+  const cellAt=(x,y)=>{const r=rect(),c=Math.floor((x-r.left)/cw),w=Math.floor((y-r.top)/ch);return c<0||w<0||c>=C||w>=RW?-1:w*C+c};
   bd.addEventListener('pointerdown',e=>{
     if(introRun){endIntro();return}   // a tap during the opening skips it
     if(busy||api.over()||dr)return;const p=e.target.closest('.jp');if(!p||e.button>0)return;
-    const c=posOf(+p.dataset.p),gid=groups(g),G=gid[c],cs=cellsOf(gid,G),r=bd.getBoundingClientRect();
+    const c=posOf(+p.dataset.p),gid=groups(g),G=gid[c],cs=cellsOf(gid,G),r=rect();
     dr={G,c,cs,b:bounds(cs),x0:e.clientX,y0:e.clientY,gx:e.clientX-r.left,gy:e.clientY-r.top,id:e.pointerId,moved:false,ox:0,oy:0,lx:e.clientX,tilt:0};
     if(!sel)grab(cs,true);
     try{bd.setPointerCapture(e.pointerId)}catch(_){}
   });
-  bd.addEventListener('pointermove',e=>{
-    if(!dr||e.pointerId!==dr.id)return;const dx=e.clientX-dr.x0,dy=e.clientY-dr.y0;
-    if(!dr.moved){if(Math.hypot(dx,dy)<7)return;dr.moved=true;clearSel();hideFinger();liftUp(dr.cs,dr.gx,dr.gy);pvKey=''}
+  /* the drag: touch events can come faster than the screen refreshes, so the latest one is applied once per frame */
+  let dragRaf=0;
+  function dragFrame(){
+    dragRaf=0;if(!dr||!dr.moved||!lift)return;const dx=dr.px-dr.x0,dy=dr.py-dr.y0;
     /* the lifted group leans a little into the direction it is moving */
-    dr.tilt=dr.tilt*.7+clamp((e.clientX-dr.lx)*.6,-7,7)*.3;dr.lx=e.clientX;
+    dr.tilt=dr.tilt*.7+clamp((dr.px-dr.lx)*.6,-7,7)*.3;dr.lx=dr.px;
     lift.style.transform=`translate(${dx}px,${dy}px) scale(1.05) rotate(${dr.tilt.toFixed(2)}deg)`;
     const ox=clamp(Math.round(dx/cw),-dr.b.x0,C-1-dr.b.x1),oy=clamp(Math.round(dy/ch),-dr.b.y0,RW-1-dr.b.y1);
     if(ox!==dr.ox||oy!==dr.oy||!tgOn.length){dr.ox=ox;dr.oy=oy;
       if(ox||oy){const ng=plan(g,dr.G,ox,oy);showTarget(dr.cs,ox,oy,!!ng);preview(ng,dr.cs);if(!ng)sfx.tick(.6)}else{hideTarget();preview(null,dr.cs)}}
+  }
+  bd.addEventListener('pointermove',e=>{
+    if(!dr||e.pointerId!==dr.id)return;dr.px=e.clientX;dr.py=e.clientY;
+    if(!dr.moved){if(Math.hypot(dr.px-dr.x0,dr.py-dr.y0)<7)return;dr.moved=true;clearSel();hideFinger();liftUp(dr.cs,dr.gx,dr.gy);pvKey=''}
+    if(!dragRaf)dragRaf=requestAnimationFrame(dragFrame);
   });
   const endDrag=e=>{
-    if(!dr||e.pointerId!==dr.id)return;const d=dr;dr=null;grab(d.cs,false);
+    if(!dr||e.pointerId!==dr.id)return;if(dragRaf){cancelAnimationFrame(dragRaf);dragFrame()}const d=dr;dr=null;grab(d.cs,false);
     if(!d.moved)return;   // a tap: the click handler takes it
     justDragged=true;setTimeout(()=>justDragged=false,60);hideTarget();
     const ng=e.type==='pointercancel'||(!d.ox&&!d.oy)?null:plan(g,d.G,d.ox,d.oy);
@@ -349,9 +453,11 @@ MAKERS.jigsaw=function({R,tier,level,board,api}){
     _plan:(G,ox,oy)=>!!plan(g,G,ox,oy),
     _move(G,ox,oy){skip();if(busy)return false;const ng=plan(g,G,ox,oy);if(!ng)return false;commit(ng);return true},
     _groups:()=>groups(g),
+    /* where the board is (measured once), for the win card's effects and the picture's flight */
+    boardRect:()=>rect(),
     peek,
     /* the opening plays once the how-to (if any) is closed; a kept puzzle (restore) skips it */
     begin(){ready.then(()=>{if(!introDone)runIntro()})},
-    destroy(){if(ro)ro.disconnect();clearTimeout(peekT);introT.forEach(clearTimeout)}
+    destroy(){if(ro)ro.disconnect();clearTimeout(peekT);introT.forEach(clearTimeout);removeEventListener('resize',unrect);removeEventListener('orientationchange',unrect);if(dragRaf)cancelAnimationFrame(dragRaf)}
   };
 };
