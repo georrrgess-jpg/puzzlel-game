@@ -4358,6 +4358,305 @@ button.v1819k-li{cursor:pointer}button.v1819k-li:hover{background:var(--surface2
   .v1819p-rp{width:100%;justify-content:space-between}
 }
 
+/* ---------- v18.19 Scenario Mode (9j_scenario*.js) ----------
+   Dark cards from the theme tokens, big condensed display type, amber --accent only on the Start actions, medal colours
+   bronze/silver/gold with a slow shine. Motion is transform/opacity only and switched off under reduced motion. */
+.v1819s-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.v1819s-kick{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-weight:800;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:color-mix(in srgb,var(--text) 70%,transparent)}
+.v1819s-eyebrow{display:block;font-size:.72rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:color-mix(in srgb,var(--accent) 80%,var(--text))}
+.v1819s-stars{display:inline-flex;gap:1px;font-size:.86rem;line-height:1;letter-spacing:0}
+.v1819s-stars i{font-style:normal;color:color-mix(in srgb,var(--text) 22%,transparent)}
+.v1819s-stars i.on{color:#f4c542;text-shadow:0 0 8px rgba(244,197,66,.35)}
+
+/* medals */
+.v1819s-med{position:relative;flex:none;display:inline-grid;place-items:center;width:var(--s);height:var(--s);border-radius:50%;line-height:0;vertical-align:middle}
+.v1819s-med svg{display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+.v1819s-med.v1819s-on{overflow:hidden}
+.v1819s-med.v1819s-on::after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);transform:translateX(-120%);animation:v1819s-shine 5.5s ease-in-out infinite;pointer-events:none}
+.v1819s-mb.v1819s-on::after{animation-delay:.6s}.v1819s-ms.v1819s-on::after{animation-delay:1.2s}
+.v1819s-med.v1819s-off{opacity:.32;filter:grayscale(.7)}
+.v1819s-med.v1819s-empty{border:2px dashed color-mix(in srgb,var(--text) 30%,transparent);box-sizing:border-box}
+.v1819s-med.v1819s-lock{border:1px solid color-mix(in srgb,var(--text) 18%,transparent);background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted);box-sizing:border-box}
+@keyframes v1819s-shine{0%,62%{transform:translateX(-120%)}82%,100%{transform:translateX(120%)}}
+
+/* ---------- main menu entry ---------- */
+.start.v1811m .v1819s-entry{position:relative;display:flex;align-items:center;gap:16px;width:100%;padding:14px 16px;border-radius:18px;cursor:pointer;text-align:left;font:inherit;color:var(--text);
+  background:linear-gradient(120deg,color-mix(in srgb,#f4c542 12%,var(--surface)) 0%,color-mix(in srgb,var(--surface) 88%,transparent) 55%);border:1px solid color-mix(in srgb,#f4c542 30%,var(--line));box-shadow:0 14px 34px rgba(0,0,0,.32);transition:transform .25s,border-color .2s,box-shadow .25s}
+.start.v1811m .v1819s-entry:hover{transform:translateY(-2px);border-color:color-mix(in srgb,#f4c542 55%,var(--line));box-shadow:0 20px 44px rgba(0,0,0,.4)}
+.start.v1811m .v1819s-entry:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.v1819s-entry-med{flex:none;display:flex;align-items:flex-end;gap:0}
+.v1819s-entry-med .v1819s-med:nth-child(1){margin-right:-8px;transform:rotate(-12deg)}
+.v1819s-entry-med .v1819s-med:nth-child(3){margin-left:-8px;transform:rotate(12deg)}
+.v1819s-entry-med .v1819s-med:nth-child(2){z-index:1;transform:translateY(-3px)}
+.v1819s-entry-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.v1819s-entry-k{font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#f4c542}
+.v1819s-entry-t b{font-family:var(--f-display);font-weight:900;font-size:1.35rem;line-height:1;text-transform:uppercase;letter-spacing:.02em}
+.v1819s-entry-t small{font-size:.84rem;color:var(--muted);line-height:1.35}
+.v1819s-entry-go{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text);transition:transform .2s}
+.v1819s-entry:hover .v1819s-entry-go{transform:translateX(3px)}
+
+/* ---------- the hub ---------- */
+.scrim.v1819s-scrim{align-items:center;justify-content:center;padding:18px}
+.modal.v1819s-modal{width:min(1240px,100%);max-width:none;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow:auto;overscroll-behavior:contain;padding:0;border-radius:22px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 92%,#0b1a33) 0%,color-mix(in srgb,var(--bg) 92%,#06101f) 100%);border:1px solid color-mix(in srgb,var(--line) 85%,transparent);box-shadow:0 40px 120px rgba(0,0,0,.6)}
+.v1819s-hh{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 26px 16px;background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 96%,#0b1a33) 70%,transparent);backdrop-filter:none}
+.v1819s-hh h2{margin:6px 0 4px;font-family:var(--f-display);font-weight:900;font-size:clamp(1.6rem,3vw,2.5rem);line-height:.95;text-transform:uppercase;letter-spacing:.01em}
+.v1819s-hh p{margin:0;color:var(--muted);font-size:.95rem;max-width:44em}
+.v1819s-hh .x{flex:none}
+.v1819s-cols{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:18px;padding:4px 26px 26px;align-items:start}
+.v1819s-detail,.v1819s-side{border-radius:18px;background:color-mix(in srgb,var(--surface) 82%,#0d1b30);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);padding:20px;min-width:0}
+.v1819s-detail{animation:v1819s-in .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes v1819s-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.v1819s-dtop{display:flex;gap:18px;align-items:center}
+.v1819s-dcrest{flex:none;line-height:0;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
+.v1819s-dtt{min-width:0}
+.v1819s-dtt h3{margin:4px 0 6px;font-family:var(--f-display);font-weight:900;font-size:clamp(2rem,4vw,3.1rem);line-height:.9;text-transform:uppercase;letter-spacing:.01em;outline:none}
+.v1819s-dmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:.84rem;color:var(--muted)}
+.v1819s-dmeta>span{white-space:nowrap}
+.v1819s-dline{margin:8px 0 0;font-size:1rem;line-height:1.45;color:color-mix(in srgb,var(--text) 88%,transparent)}
+.v1819s-chal{display:flex;align-items:center;gap:12px;margin:16px 0 0;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,#f4c542 10%,transparent);border:1px solid color-mix(in srgb,#f4c542 30%,transparent)}
+.v1819s-chal span:last-child{display:flex;flex-direction:column;gap:2px}.v1819s-chal small{color:var(--muted)}
+.v1819s-dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:18px}
+.v1819s-blk{margin-top:18px;min-width:0}.v1819s-dgrid .v1819s-blk{margin-top:0}
+.v1819s-blk h4{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:.74rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.v1819s-squad,.v1819s-rules,.v1819s-medals,.v1819s-list,.v1819s-steps,.v1819s-slotl,.v1819s-bmed,.v1819s-yrs{list-style:none;margin:0;padding:0}
+.v1819s-squad{display:flex;flex-direction:column;gap:6px}
+.v1819s-pl{display:flex;align-items:center;gap:10px;min-height:48px;padding:3px 8px 3px 3px;border-radius:12px;background:color-mix(in srgb,var(--text) 4%,transparent)}
+.v1819s-pl>svg{flex:none;width:44px;height:44px;border-radius:10px;background:color-mix(in srgb,var(--text) 6%,transparent)}
+.v1819s-plt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.v1819s-plt b{font-size:.94rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1819s-plt small{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:.78rem;color:var(--muted)}
+.v1819s-plt em{font-style:normal;font-weight:700;color:color-mix(in srgb,var(--text) 75%,transparent)}
+.v1819s-plt i{font-style:normal;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--text) 9%,transparent)}
+.v1819s-plt i.bad{background:color-mix(in srgb,#ef5b5b 24%,transparent);color:#ffb1a8}.v1819s-plt i.gold{background:color-mix(in srgb,#f4c542 22%,transparent);color:#ffe08a}.v1819s-plt i.fr{background:color-mix(in srgb,#5aa9e6 22%,transparent);color:#bfe0ff}
+.v1819s-plr{flex:none;min-width:34px;text-align:center;font-family:var(--f-display);font-weight:900;font-size:1.25rem;color:var(--r)}
+.v1819s-skel .v1819s-skf{width:44px;height:44px;border-radius:10px;background:color-mix(in srgb,var(--text) 8%,transparent)}
+.v1819s-skel b,.v1819s-skel small{display:block;height:10px;border-radius:5px;background:color-mix(in srgb,var(--text) 8%,transparent);width:70%}
+.v1819s-skel small{width:40%;height:8px}
+.v1819s-skel .v1819s-pl{animation:v1819s-pulse 1.2s ease-in-out infinite alternate}
+@keyframes v1819s-pulse{from{opacity:.55}to{opacity:1}}
+.v1819s-rules{display:flex;flex-direction:column;gap:8px}
+.v1819s-rules li{display:flex;align-items:flex-start;gap:10px;font-size:.9rem;line-height:1.35}
+.v1819s-rules li>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.v1819s-rules small{color:var(--muted);font-size:.8rem}
+.v1819s-rules li.fair{opacity:.82}
+.v1819s-ric{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:color-mix(in srgb,var(--text) 7%,transparent);color:color-mix(in srgb,var(--text) 85%,transparent)}
+.v1819s-rst{flex:none;display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:3px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--line) 80%,transparent)}
+.v1819s-rst.on{color:color-mix(in srgb,var(--accent2,#3ccf91) 85%,var(--text));border-color:color-mix(in srgb,var(--accent2,#3ccf91) 40%,transparent)}
+.v1819s-medals{display:flex;flex-direction:column;gap:6px}
+.v1819s-medals li{display:flex;align-items:center;gap:12px;padding:7px 12px 7px 8px;border-radius:12px;background:color-mix(in srgb,var(--text) 4%,transparent)}
+.v1819s-medals li>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column}
+.v1819s-medals small{font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.v1819s-medals b{font-size:.95rem;font-weight:600}
+.v1819s-medals li.got{background:color-mix(in srgb,var(--accent2,#3ccf91) 10%,transparent)}
+.v1819s-tick{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent2,#3ccf91);color:#06140e}
+.v1819s-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-top:20px}
+.btn.v1819s-start{min-height:50px;padding:0 24px;border-radius:14px;font-family:var(--f-display);font-weight:900;font-size:1.2rem;letter-spacing:.06em;text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+.btn.v1819s-start[aria-busy="true"]{opacity:.85}
+.btn.v1819s-start:disabled{opacity:.6;cursor:not-allowed;font-size:1rem}
+.btn.v1819s-ghost{display:inline-flex;align-items:center;gap:7px;min-height:44px;background:color-mix(in srgb,var(--text) 6%,transparent);border:1px solid color-mix(in srgb,var(--line) 90%,transparent);color:var(--text)}
+.btn.v1819s-ghost:hover{background:color-mix(in srgb,var(--text) 11%,transparent)}
+.btn.v1819s-ghost.wide{width:100%;justify-content:center;flex-wrap:wrap}
+.btn.v1819s-ghost small{color:var(--muted);font-weight:500}
+.v1819s-best{display:inline-flex;align-items:center;gap:6px;font-size:.86rem;color:var(--muted)}
+.v1819s-best b{color:var(--text)}
+.v1819s-codebox{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 12px 12px 16px;border-radius:14px;border:1px dashed color-mix(in srgb,var(--text) 28%,transparent);background:color-mix(in srgb,var(--bg) 55%,transparent);animation:v1819s-in .28s cubic-bezier(.2,.8,.2,1)}
+.v1819s-codel{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.v1819s-codel small{font-size:.76rem;color:var(--muted)}
+.v1819s-codel code{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;font-size:1rem;letter-spacing:.04em;overflow-wrap:anywhere;user-select:all;color:var(--text);background:none;padding:0}
+.v1819s-codebox .btn{flex:none;display:inline-flex;align-items:center;gap:6px}
+.v1819s-err{min-height:1.2em;margin:6px 0 0;font-size:.84rem;color:#ff8f86}
+.v1819s-err:empty{min-height:0;margin:0}
+
+/* right column */
+.v1819s-sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.v1819s-sh h3{margin:0;font-size:.78rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.v1819s-sh span{font-size:.84rem;color:var(--muted)}.v1819s-sh b{color:#f4c542;font-family:var(--f-display);font-size:1.15rem}
+.v1819s-list{display:flex;flex-direction:column;gap:6px}
+.v1819s-li{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px;border-radius:14px;border:1px solid transparent;background:color-mix(in srgb,var(--text) 3%,transparent);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
+.v1819s-li:hover{background:color-mix(in srgb,var(--text) 8%,transparent);transform:translateX(2px)}
+.v1819s-li.on{background:color-mix(in srgb,var(--accent) 10%,var(--surface));border-color:color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
+.v1819s-li:focus-visible,.v1819s-shi:focus-visible,.v1819s-slot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.v1819s-li.locked .v1819s-lcrest,.v1819s-li.locked .v1819s-lt b{opacity:.55}
+.v1819s-lcrest{flex:none;width:40px;line-height:0}
+.v1819s-lt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.v1819s-ln{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.v1819s-ln b{font-family:var(--f-display);font-weight:800;font-size:1.08rem;text-transform:uppercase;letter-spacing:.02em}
+.v1819s-lt small{font-size:.8rem;color:var(--muted);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.v1819s-lt em{display:inline-flex;align-items:center;gap:4px;font-style:normal;font-size:.72rem;font-weight:700;color:color-mix(in srgb,var(--text) 65%,transparent)}
+.v1819s-lmed{flex:none;min-width:30px;display:grid;place-items:center}
+.v1819s-note{margin:12px 2px 0;font-size:.82rem;color:var(--muted);line-height:1.4}
+.v1819s-own{margin-top:16px;padding:14px;border-radius:14px;background:color-mix(in srgb,var(--text) 4%,transparent);border:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.v1819s-own.on{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+.v1819s-steps{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 12px;font-size:.88rem}
+.v1819s-steps li{display:inline-flex;align-items:center;gap:6px}
+.v1819s-steps i,.v1819s-num{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:.72rem;font-weight:800;background:color-mix(in srgb,var(--text) 12%,transparent);color:var(--text)}
+.v1819s-codef{margin-top:14px}
+.v1819s-codef label,.v1819s-field label,.v1819s-lab{display:block;margin:0 0 6px;font-size:.74rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.v1819s-codein{display:flex;gap:8px}
+.v1819s-codein input,.v1819s-field input{flex:1;min-width:0;min-height:44px;box-sizing:border-box}
+.v1819s-codein input{font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:.03em;text-transform:uppercase}
+#v1819s-bseed{text-transform:none}
+.v1819s-codein input[aria-invalid="true"]{border-color:#ef6b5b}
+.v1819s-shake{animation:v1819s-shake .36s}
+@keyframes v1819s-shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.v1819s-field{margin-top:16px}
+.v1819s-field input{width:100%}
+
+/* builder */
+.v1819s-seg{display:flex;flex-wrap:wrap;gap:6px}
+.v1819s-seg label{position:relative;flex:1 1 0;min-width:72px;cursor:pointer}
+.v1819s-seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.v1819s-seg label>span{display:flex;flex-direction:column;gap:2px;height:100%;box-sizing:border-box;padding:9px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--line) 85%,transparent);background:color-mix(in srgb,var(--text) 4%,transparent);transition:background .15s,border-color .15s}
+.v1819s-seg label.on>span{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.v1819s-seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.v1819s-seg b{font-size:.92rem}.v1819s-seg small{font-size:.74rem;color:var(--muted)}
+.v1819s-row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:12px;align-items:end}
+.v1819s-row2 .v1819s-field{margin-top:0}
+.v1819s-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.v1819s-checks label{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:12px;cursor:pointer;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);background:color-mix(in srgb,var(--text) 3%,transparent)}
+.v1819s-checks label.on{border-color:color-mix(in srgb,var(--accent) 55%,transparent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.v1819s-checks label.fixed{opacity:.75;cursor:default}
+.v1819s-checks input{margin-top:3px;flex:none;accent-color:var(--accent);width:18px;height:18px}
+.v1819s-checks span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.v1819s-checks b{font-size:.88rem}.v1819s-checks small{font-size:.76rem;color:var(--muted);line-height:1.3}
+.v1819s-bmed{display:flex;flex-direction:column;gap:8px}
+.v1819s-bmed li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--text) 4%,transparent)}
+.v1819s-sel{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.v1819s-sel select{min-height:40px;max-width:100%}
+.v1819s-sel.n span{font-size:.8rem;color:var(--muted)}
+.v1819s-mtx{flex-basis:100%;padding-left:40px;font-size:.8rem;color:var(--muted)}
+
+/* slot picker */
+.v1819s-slotl{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.v1819s-slot{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 14px;border-radius:14px;border:1px dashed color-mix(in srgb,var(--text) 28%,transparent);background:color-mix(in srgb,var(--text) 3%,transparent);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:background .18s,border-color .18s}
+.v1819s-slot:hover{background:color-mix(in srgb,var(--text) 8%,transparent)}
+.v1819s-slot.filled{border-style:solid;border-color:color-mix(in srgb,var(--line) 85%,transparent);box-shadow:inset 3px 0 0 var(--team1)}
+.v1819s-slot.warn{border-color:#ef6b5b}
+.v1819s-slot>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.v1819s-slot small{color:var(--muted);font-size:.8rem}
+.v1819s-slot-ic{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:color-mix(in srgb,var(--text) 8%,transparent);line-height:0}
+.v1819s-slot-w{flex:none;font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.v1819s-confirm{margin:6px 0 4px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,#ef5b5b 12%,transparent);border:1px solid color-mix(in srgb,#ef5b5b 40%,transparent);animation:v1819s-in .2s}
+.v1819s-confirm p{margin:0 0 10px;font-size:.9rem}
+.v1819s-confirm div{display:flex;flex-wrap:wrap;gap:8px}
+
+/* ---------- in career: the scenario page ---------- */
+.v1819s-page{display:flex;flex-direction:column;gap:16px}
+.v1819s-hero{position:relative;overflow:hidden;display:flex;align-items:center;gap:22px;padding:24px;border-radius:20px;border:1px solid color-mix(in srgb,var(--c1,var(--accent)) 35%,var(--line));
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--c1,#234) 30%,transparent) 0%,transparent 55%),color-mix(in srgb,var(--surface) 92%,#0b1a33)}
+.v1819s-hcrest,.v1819s-heroic{flex:none;line-height:0;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
+.v1819s-ht{flex:1;min-width:0}
+.v1819s-hero h2{margin:6px 0 6px;font-family:var(--f-display);font-weight:900;font-size:clamp(2rem,4.2vw,3.2rem);line-height:.9;text-transform:uppercase}
+.v1819s-hero p{margin:0;color:color-mix(in srgb,var(--text) 86%,transparent);max-width:46em;line-height:1.45}
+.v1819s-none .btn{margin-top:14px}
+.v1819s-hact{flex:none;display:flex;flex-direction:column;gap:8px}
+.v1819s-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.v1819s-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.78rem;font-weight:700;background:color-mix(in srgb,var(--text) 8%,transparent);color:color-mix(in srgb,var(--text) 85%,transparent)}
+.v1819s-chip.live{background:color-mix(in srgb,var(--accent2,#3ccf91) 16%,transparent);color:color-mix(in srgb,var(--accent2,#3ccf91) 80%,var(--text))}
+.v1819s-chip.live i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:v1819s-pulse 1s ease-in-out infinite alternate}
+.v1819s-chalnote{margin-top:10px!important;font-size:.86rem;display:flex;align-items:center;gap:6px;color:var(--muted)!important}
+.v1819s-pshare .v1819s-codebox{margin-top:0}
+.v1819s-donebar{display:flex;align-items:center;gap:16px;padding:16px 20px;border-radius:16px;background:color-mix(in srgb,var(--surface) 90%,transparent);border:1px solid color-mix(in srgb,var(--line) 80%,transparent)}
+.v1819s-donebar.res3{border-color:color-mix(in srgb,#e8b030 55%,transparent);background:linear-gradient(90deg,color-mix(in srgb,#e8b030 14%,var(--surface)),var(--surface))}
+.v1819s-donebar.res2{border-color:color-mix(in srgb,#b9c3ce 50%,transparent)}.v1819s-donebar.res1{border-color:color-mix(in srgb,#c27a3e 50%,transparent)}
+.v1819s-donebar>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.v1819s-donebar b{font-family:var(--f-display);font-weight:900;font-size:1.6rem;text-transform:uppercase;line-height:1}
+.v1819s-donebar small{color:var(--muted)}
+.v1819s-pgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+.v1819s-pcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.v1819s-goals ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.v1819s-goal{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--text) 4%,transparent);border:1px solid transparent}
+.v1819s-goal.got{border-color:color-mix(in srgb,var(--accent2,#3ccf91) 40%,transparent);background:color-mix(in srgb,var(--accent2,#3ccf91) 8%,transparent)}
+.v1819s-goal.dead{opacity:.62}
+.v1819s-gt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.v1819s-gh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.v1819s-gh small{font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.v1819s-gt b{font-size:1.02rem}
+.v1819s-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:.7rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;background:color-mix(in srgb,var(--text) 9%,transparent);color:color-mix(in srgb,var(--text) 80%,transparent);white-space:nowrap}
+.v1819s-pill.got{background:var(--accent2,#3ccf91);color:#06140e}.v1819s-pill.dead{background:color-mix(in srgb,#ef5b5b 18%,transparent);color:#ffb1a8}
+.v1819s-bar{display:block;height:6px;border-radius:3px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
+.v1819s-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent2,#3ccf91) 70%,#fff),var(--accent2,#3ccf91));transform-origin:left;animation:v1819s-grow .7s cubic-bezier(.2,.8,.2,1)}
+.v1819s-goal.got .v1819s-bar i{background:linear-gradient(90deg,#ffe08a,#e8b030)}
+@keyframes v1819s-grow{from{transform:scaleX(0)}to{transform:none}}
+.v1819s-prog{font-size:.8rem;color:var(--muted)}
+.v1819s-yrs{display:flex;flex-direction:column;gap:6px}
+.v1819s-yr{display:flex;align-items:center;gap:14px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--text) 4%,transparent)}
+.v1819s-yr>b{font-family:var(--f-display);font-size:1.3rem;font-weight:900;min-width:3ch}
+.v1819s-yr.now{box-shadow:inset 3px 0 0 var(--accent2,#3ccf91)}
+.v1819s-yr.fut{opacity:.55;font-size:.86rem}
+.v1819s-yrc{flex:1;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:.88rem;font-weight:600}
+.v1819s-yrc small{display:block;font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.v1819s-dec .dec-ico{line-height:0}
+.v1819s-decm{display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px}
+.v1819s-ovcard{padding:10px}
+.v1819s-injn{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,#ef5b5b 14%,transparent);color:#ffcbc4;font-weight:700;font-size:.9rem}
+.v1819s-setn{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+
+/* coach shelf */
+.v1819s-shelf{margin-top:16px}
+.v1819s-shh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.v1819s-shelf ul{list-style:none;margin:12px 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.v1819s-shi{display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;height:100%;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);background:color-mix(in srgb,var(--text) 3%,transparent);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.v1819s-shi:hover{background:color-mix(in srgb,var(--text) 8%,transparent)}
+.v1819s-shm{display:flex;gap:4px}
+.v1819s-shi b{font-family:var(--f-display);font-weight:800;text-transform:uppercase;font-size:1rem}
+.v1819s-shi small{display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:.74rem}
+.v1819s-shi.locked{opacity:.65}
+
+/* ---------- the ceremony ---------- */
+.modal.v1819s-endm{position:relative;overflow:hidden;width:min(560px,100%);max-height:calc(100dvh - 36px);overflow-y:auto;padding:30px 28px 22px;text-align:center;border-radius:24px;
+  background:radial-gradient(90% 60% at 50% 0%,color-mix(in srgb,var(--medc,#8aa) 26%,transparent),transparent 70%),color-mix(in srgb,var(--surface) 94%,#0b1a33)}
+.v1819s-endm.res3{--medc:#e8b030}.v1819s-endm.res2{--medc:#c8d2dc}.v1819s-endm.res1{--medc:#c27a3e}.v1819s-endm.res0{--medc:#5b6b80}
+.v1819s-endm .x{position:absolute;top:12px;right:12px;z-index:2}
+.v1819s-rays{position:absolute;left:50%;top:118px;width:620px;height:620px;margin:-310px 0 0 -310px;border-radius:50%;pointer-events:none;opacity:.22;
+  background:repeating-conic-gradient(from 0deg,var(--medc) 0deg 6deg,transparent 6deg 18deg);mask:radial-gradient(circle,#000 0%,transparent 62%);-webkit-mask:radial-gradient(circle,#000 0%,transparent 62%);animation:v1819s-spin 40s linear infinite}
+.v1819s-endm.res0 .v1819s-rays{display:none}
+@keyframes v1819s-spin{to{transform:rotate(360deg)}}
+.v1819s-bigmed{position:relative;display:inline-block;margin:6px auto 12px;animation:v1819s-drop .9s cubic-bezier(.2,1.4,.3,1) both}
+.v1819s-bigmed .v1819s-med svg{filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))}
+.v1819s-bigmed .v1819s-med.v1819s-on::after{animation-duration:3.6s;animation-delay:1s}
+.v1819s-ribbon{position:absolute;left:50%;top:-26px;width:56px;height:40px;margin-left:-28px;z-index:-1;background:linear-gradient(90deg,var(--c1,#1d4ed8) 0 33%,var(--c2,#e5e7eb) 33% 66%,var(--c1,#1d4ed8) 66%);clip-path:polygon(0 0,100% 0,78% 100%,22% 100%)}
+@keyframes v1819s-drop{0%{opacity:0;transform:translateY(-40px) scale(.6) rotate(-14deg)}60%{opacity:1}100%{opacity:1;transform:none}}
+.v1819s-endm .v1819s-kick{display:flex;justify-content:center}
+.v1819s-endm h2{margin:6px 0 4px;font-family:var(--f-display);font-weight:900;font-size:clamp(2.2rem,7vw,3.4rem);line-height:.92;text-transform:uppercase;animation:v1819s-in .5s .45s both}
+.v1819s-newbest{display:inline-block;align-self:center;margin:4px 0 2px;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:var(--medc);color:#120d02;animation:v1819s-in .5s .7s both}
+.v1819s-why{margin:8px auto 14px;max-width:34em;color:var(--muted);line-height:1.45}
+.v1819s-endrows{text-align:left}
+.v1819s-endrows li{animation:v1819s-in .4s both}
+.v1819s-endrows li:nth-child(1){animation-delay:.8s}.v1819s-endrows li:nth-child(2){animation-delay:.95s}.v1819s-endrows li:nth-child(3){animation-delay:1.1s}
+.v1819s-rk{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;color:var(--muted)}
+.v1819s-endrows li.got .v1819s-rk{background:var(--accent2,#3ccf91);color:#06140e}
+.v1819s-endm .v1819s-codebox{text-align:left}
+.v1819s-endact{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:16px 0 8px}
+.v1819s-endact .btn{min-height:44px}
+
+/* ---------- responsive ---------- */
+@media (max-width:1000px){ .v1819s-cols{grid-template-columns:minmax(0,1fr)} .v1819s-pgrid{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:640px){
+  .scrim.v1819s-scrim{padding:0;align-items:stretch}
+  .modal.v1819s-modal{max-height:100vh;max-height:100dvh;height:100dvh;border-radius:0;border:0}
+  .v1819s-hh{position:static;padding:16px 16px 10px;background:none}.v1819s-hh p{font-size:.86rem}
+  .v1819s-cols{padding:4px 12px 20px;gap:12px}
+  .v1819s-detail,.v1819s-side{padding:14px;border-radius:16px}
+  .v1819s-dtop{gap:12px;align-items:flex-start}.v1819s-dcrest svg{width:60px;height:69px}
+  .v1819s-dgrid{grid-template-columns:minmax(0,1fr)}
+  .v1819s-checks,.v1819s-row2{grid-template-columns:minmax(0,1fr)}
+  .v1819s-seg4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .v1819s-actions .btn{flex:1 1 100%;justify-content:center}
+  .v1819s-best{flex:1 1 100%;justify-content:center}
+  .v1819s-hero{flex-direction:column;align-items:flex-start;padding:18px;gap:14px}
+  .v1819s-hcrest svg{width:64px;height:74px}
+  .v1819s-hact{flex-direction:row;flex-wrap:wrap;width:100%}.v1819s-hact .btn{flex:1 1 160px;justify-content:center}
+  .v1819s-donebar{flex-wrap:wrap}
+  .v1819s-yrc{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .modal.v1819s-endm{padding:26px 16px 18px}
+  .v1819s-codebox{flex-wrap:wrap}.v1819s-codebox .btn{flex:1 1 100%;justify-content:center}
+  .start.v1811m .v1819s-entry{padding:12px}.v1819s-entry-t b{font-size:1.15rem}
+}
+@media (prefers-reduced-motion:reduce){ .v1819s-med.v1819s-on::after,.v1819s-rays,.v1819s-bigmed,.v1819s-detail,.v1819s-endm h2,.v1819s-newbest,.v1819s-endrows li,.v1819s-bar i,.v1819s-codebox,.v1819s-skel .v1819s-pl,.v1819s-chip.live i{animation:none!important} }
+body.rm .v1819s-med.v1819s-on::after,body.rm .v1819s-rays,body.rm .v1819s-bigmed,body.rm .v1819s-detail,body.rm .v1819s-endm h2,body.rm .v1819s-newbest,body.rm .v1819s-endrows li,body.rm .v1819s-bar i{animation:none!important}
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -26799,7 +27098,7 @@ function v1819kResolve(C,why){ const O=v1819kOW(C); if(O.done) return O; const k
   return O; }
 
 /* ---------- homecoming: a Friday home game in weeks 3-8 (not the open week) ---------- */
-function v1819kHomecoming(C,yr){ yr=yr||C.year; const key=C.seed+'|'+yr+'|'+C.userSid+'|hc'; const m=V1819K.memo.get(key); if(m) return m;
+function v1819kHomecoming(C,yr){ yr=yr||C.year; const key=C.seed+'|'+yr+'|'+C.userSid+'|hc'; const m=V1819K.memo.get(key); if(m){ const g=m.fid&&C.fixtures[m.fid]; if(g&&g.yr===yr&&g.comp==='reg'&&g.lvl==='V'&&g.h===C.userSid) return m; } /* a memo from another career with the same seed points at other fixtures */
   const r=rngFrom(hashStr(C.seed+'|v1819khc|'+yr)); const u=C.userSid; const fx=Object.values(C.fixtures).filter(f=>f.yr===yr&&f.comp==='reg'&&f.lvl==='V'&&f.h===u);
   const wks=[6,7,4,3,8]; let best=null; const order=wks.map(w=>({w,k:r()+(w===6||w===7?0:0.6)})).sort((a,b)=>a.k-b.k).map(x=>x.w);
   for(const w of order){ const rd=w<V1819K.OPEN_WK?2*(w-1)+1:2*(w-2)+1; const f=fx.find(x=>x.rd===rd); if(f){ best={wk:w,fid:f.id}; break; } }
@@ -26812,11 +27111,11 @@ function v1819kEvents(C,yr){ yr=yr||C.year; const r=rngFrom(hashStr(C.seed+'|v18
   const pic=W(2+Math.floor(r()*2))+2+Math.floor(r()*2); ev('picture',pic,'📸','Picture day','Team and individual photos before practice. Wear the home kit. Informational.');
   let bn=W(2+Math.floor(r()*3))+3; if(bn===pic) bn+=7; ev('booster',bn,'🍝','Booster night','The Booster Club pasta dinner in the cafeteria. Parents, players and a raffle. Informational.');
   const hc=v1819kHomecoming(C,yr); const hcf=hc.fid&&C.fixtures[hc.fid];
-  ev('homecoming',W(hc.wk),'👑','Homecoming week',hcf?`Spirit week ends with the Friday home game against ${Sx(hcf.a).town}: a 30% bigger crowd and a little extra home advantage.`:'Spirit week, the dance and the parade. Informational this year (no Friday home game).',{dn2:W(hc.wk)+4,bar:1,fid:hc.fid});
+  ev('homecoming',W(hc.wk),'👑','Homecoming week',hcf?`Spirit week ends with the Friday home game against ${C.schools[hcf.a].town}: a 30% bigger crowd and a little extra home advantage.`:'Spirit week, the dance and the parade. Informational this year (no Friday home game).',{dn2:W(hc.wk)+4,bar:1,fid:hc.fid});
   ev('inservice',W(6+Math.floor(r()*2)),'✏️','In-service day','No classes: teachers are in training. Practice moves to the morning. Informational.');
   ev('halloween',v1819kDn(yr,9,31),'🎃','Halloween','Costumes in the hallways. Informational.');
   ev('report',W(9+Math.floor(r()*2))+3,'📝','Report cards','First-quarter grades go home. Informational.');
-  try{ const sn=seniorNightFixture(C,yr); if(sn&&(yr!==C.year||seniorsOf(C).length)) ev('senior',v1819kFxDn(sn),'🌹','Senior night',`Your seniors are honored before the last home game, against ${Sx(sn.a).town}.`,{fid:sn.id}); }catch(e){}
+  try{ const sn=seniorNightFixture(C,yr); if(sn&&(yr!==C.year||seniorsOf(C).length)) ev('senior',v1819kFxDn(sn),'🌹','Senior night',`Your seniors are honored before the last home game, against ${C.schools[sn.a].town}.`,{fid:sn.id}); }catch(e){}
   { const nov1=v1819kDn(yr,10,1); const th=nov1+((4-v1819kYmd(nov1).dow+7)%7)+21; ev('thanks',th,'🦃','Thanksgiving','No school Thursday and Friday. Informational.'); }
   ev('banquet',v1819kSeasonEnd(yr)+1,'🏆','Awards banquet','End-of-season banquet: letters, captains for next year, the coach\'s speech. Informational.');
   return out.sort((a,b)=>a.dn-b.dn); }
@@ -26841,7 +27140,7 @@ function v1819kItems(C,yr,lvl){ yr=yr||C.year; lvl=lvl||'V'; const u=C.userSid; 
     return M; }; }
 { const _fm=finishMatch; finishMatch=function(C,M){ const f=C.fixtures[M.fid]; const was=f&&f.st; const out=_fm.apply(this,arguments);
     try{ if(f&&was!=='d'&&f.st==='d'){ v1819kTick(C,f);
-        if(M.v1819kHc&&!M.fast){ const S=v1819kS(C); if(!S.hc[f.yr]){ S.hc[f.yr]=f.id; const u=C.userSid; addNews(C,'program',`Homecoming: ${(f.att||0).toLocaleString()} pack the stands as ${Sx(u).town} ${f.w===u?'beat':f.w?'fall to':'draw with'} ${Sx(f.a).town}, ${f.hg}-${f.ag}`,u,{fid:f.id}); } } } }catch(e){ console.warn('calendar',e); }
+        if(M.v1819kHc&&!M.fast){ const S=v1819kS(C); if(!S.hc[f.yr]){ S.hc[f.yr]=f.id; const u=C.userSid; addNews(C,'program',`Homecoming: ${(f.att||0).toLocaleString()} pack the stands as ${C.schools[u].town} ${f.w===u?'beat':f.w?'fall to':'draw with'} ${C.schools[f.a].town}, ${f.hg}-${f.ag}`,u,{fid:f.id}); } } } }catch(e){ console.warn('calendar',e); }
     return out; }; }
 { const _ad=advance; advance=function(C){ const ev=_ad.apply(this,arguments); try{ if(ev&&C.phase!=='regular'&&C.phase!=='preseason'){ const O=v1819kOW(C); if(!O.done&&!O.legacy) v1819kResolve(C,'auto'); } }catch(e){} return ev; }; }
 { const _ro=rollover; rollover=function(C){ try{ v1819kUndoAll(C); }catch(e){} return _ro.apply(this,arguments); }; }
@@ -27245,6 +27544,600 @@ MODALS.v1819pLock=()=>{ const C=App.C; const rd=v1819pOpen(C); if(rd==null) retu
     const b=document.createElement('button'); b.className='dec v1819p-dec'+(n===fx.length?' ok':''); b.dataset.a='go'; b.dataset.r='pickem';
     b.innerHTML=`<span class="dec-ico">${n===fx.length?'✓':'🎯'}</span><span class="grow"><b>${n===fx.length?'Picks in for':'Make your picks for'} Matchday ${rd+1}</b><small>Pick’em Pool · ${n} of ${fx.length} picked · locks ${esc(v1819pLockAt(C,fx))}</small></span><span class="dec-go">${icon('chev',16)}</span>`;
     box.appendChild(b); return t.innerHTML; }catch(e){ console.warn('pickem overview',e); return h; } }; }
+
+/* ===================== v18.19 SCENARIO MODE: definitions, setup, rules, medals, challenge codes (v1819s) =====================
+   A scenario is a normal career that starts from a hand-built situation, with a goal over 1-3 seasons, a few rules that are
+   really enforced while it is live, and three medals checked automatically. When the time limit is reached, gold is earned,
+   no medal is reachable any more, or a "one loss ends it" rule fires, the scenario ends (ceremony in 9j_scenario_ui.js) and
+   the career carries on as a normal one with the rules lifted.
+
+   State on the career: C.scn = {v, id, tag, name, stars, seasons, y0, seed, rules[], medals{b,s,g}, def (custom only),
+     line, status 'live'|'done', earned{b:{yr}}, missed{}, hist{yr:facts}, inj{pid,yr}, end{yr,why,res,rec}, pend, code}.
+   Across careers: PREFS.v1819s = {med{id:{b,s,g}}, best{id:0-3}, runs[], cust{key:{name,best,code}}, coach}.
+
+   Goals are season facts read from the fixtures (league W/D/L and finish, knockout wins: the postseason is sequential and a
+   loss eliminates you, so "stage" = knockout wins this season: 1 a Sectionals win, 2 Section final, 3 Section title,
+   4 Regional title, 6 State final, 7 State title). League size is read from C.league each season (never assumed 8).
+
+   Challenge codes: TL-<TAG>-<base32 groups>. Bits: version 3, kind 3 (0-5 built-in, 6 custom), seed 32, result flag 1
+   (+ medal 2, W/D/L 4+4+4), custom definition (school 2, seasons 2, rules 8, three medals x (goal 4 + n 3), name 5 + 6/char),
+   then a 10-bit checksum. Crockford base32, so O/I/L typos are forgiven and case does not matter. */
+const V1819S_RULES={
+  fair:{t:'Fair play',d:'No player editor, no directed results and no Manager Mode while the scenario is live.',ic:'shield',always:true},
+  zeroscout:{t:'Scouting points start at zero',d:'Summer camp opens with no points: no scouting reports, no invitations.',ic:'binoc'},
+  tier1:{t:'Stadium stays Tier 1',d:'The Backyard Field. No facility upgrades until the scenario ends.',ic:'school'},
+  hard:{t:'Hard difficulty, locked',d:'Rival programs develop faster and the postseason field is stronger.',ic:'flame'},
+  nocall:{t:'No call-ups',d:'JV and Modified players cannot be promoted to Varsity during the season.',ic:'squads'},
+  sudden:{t:'One loss ends it',d:'A league defeat ends the scenario on the spot.',ic:'alert'},
+  strict:{t:'Strict referees',d:'Cards on strict and suspensions on, locked. A red card costs a game.',ic:'card'},
+  nostar:{t:'Star out for the season',d:'Your best forward misses the whole first season.',ic:'cross'}
+};
+const V1819S_RULE_IDS=['zeroscout','tier1','hard','nocall','sudden','strict','nostar'];
+const V1819S_KO={secwin:1,secfinal:2,sec:3,rgn:4,stfinal:6,st:7};
+const V1819S_GOAL_IDS=['secwin','secfinal','sec','rgn','stfinal','st','top','topall','winrec','unbeaten','perfect'];
+const V1819S_GOALS={
+  secwin:{t:'Win a Sectionals game'}, secfinal:{t:'Reach the Section final'}, sec:{t:'Win the Section title'}, rgn:{t:'Win the Regional title'},
+  stfinal:{t:'Reach the State final'}, st:{t:'Win the State title'},
+  top:{t:n=>n===1?'Win the league':`Finish top ${n} in the league`,n:true}, topall:{t:n=>n>=7?'Finish above last place every season':n===1?'Win the league every season':`Finish top ${n} every season`,n:true},
+  winrec:{t:'Finish the league above .500'}, unbeaten:{t:'Go unbeaten in the league'}, perfect:{t:'Win every league game'}
+};
+const V1819S_MEDALS=[['b','Bronze'],['s','Silver'],['g','Gold']];
+const V1819S_LIST=[
+  {id:'rebuild',tag:'RBLD',name:'The Rebuild',stars:2,seasons:2,unlock:0,kick:'Rescue a program',
+    blurb:'Fourteen freshmen and four seniors on Varsity. Two seasons to make the bracket count.',
+    rules:['nocall'],medals:{b:{k:'secwin'},s:{k:'secfinal'},g:{k:'sec'}}},
+  {id:'lastdance',tag:'LAST',name:'Last Dance',stars:3,seasons:1,unlock:1,kick:'One shot',
+    blurb:'A golden class of nine seniors. Win the State title this year, before they graduate.',
+    rules:['strict'],medals:{b:{k:'sec'},s:{k:'rgn'},g:{k:'st'}}},
+  {id:'underdog',tag:'UNDR',name:'Underdog Story',stars:3,seasons:3,unlock:2,kick:'Climb from the bottom',
+    blurb:'Take over the lowest-rated school in the league. Three seasons, no shortcuts.',
+    rules:['zeroscout','tier1','nocall'],medals:{b:{k:'top',n:5},s:{k:'secfinal'},g:{k:'sec'}}},
+  {id:'streak',tag:'STRK',name:'The Streak',stars:2,seasons:1,unlock:0,kick:'Hold your nerve',
+    blurb:'You start the season 9–0 with five rounds left. Stay unbeaten.',
+    rules:['sudden'],medals:{b:{k:'unbeaten'},s:{k:'perfect'},g:{k:'and',of:[{k:'perfect'},{k:'sec'}]}}},
+  {id:'badbreak',tag:'BRKE',name:'Bad Break',stars:2,seasons:1,unlock:0,kick:'Next man up',
+    blurb:'Your star striker is out for the season. Find the goals somewhere else.',
+    rules:['nostar'],medals:{b:{k:'winrec'},s:{k:'top',n:3},g:{k:'sec'}}},
+  {id:'defense',tag:'DEFN',name:'Title Defense',stars:3,seasons:1,unlock:3,kick:'Defend the crown',
+    blurb:'Last year you won State. Eight seniors graduated. Everybody wants a piece of the champs.',
+    rules:['nocall'],medals:{b:{k:'rgn'},s:{k:'stfinal'},g:{k:'st'}}}
+];
+const V1819S_BY=Object.fromEntries(V1819S_LIST.map(d=>[d.id,d]));
+const V1819S_SCHOOL=['Strongest school','An average school','Weakest school','The school you are dealt'];
+const V1819S_TUNE={rebuild:{fr:[60,2.2],sr:[71.5,1.2]},lastdance:{gold:84.9},streak:{xi:74.6},badbreak:{star:82,xi:68.2},defense:{xi:80.6},underdog:{gap:0.5}};
+
+function v1819sGoalText(g){ if(!g) return ''; if(g.k==='and') return g.of.map(v1819sGoalText).join(', and ').replace(/^(.)/,c=>c.toUpperCase()).replace(', and Win',' and win');
+  const G=V1819S_GOALS[g.k]; if(!G) return ''; return typeof G.t==='function'?G.t(g.n||3):G.t; }
+function v1819sGoalShort(g){ if(!g) return ''; if(g.k==='and'&&g.of.length===2&&g.of[0].k==='perfect'&&g.of[1].k==='sec') return 'Perfect league and the Section title'; return v1819sGoalText(g); }
+function v1819sDef(id){ return V1819S_BY[id]||null; }
+function v1819sYears(S){ const a=[]; for(let i=0;i<S.seasons;i++) a.push(S.y0+i); return a; }
+function v1819sLive(C){ const S=C&&C.scn; return S&&S.status==='live'?S:null; }
+function v1819sHas(C,rule){ const S=v1819sLive(C); return !!S&&(rule==='fair'||(S.rules||[]).includes(rule)); }
+const v1819sOrd=n=>n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10]||'th');
+
+/* ---------- season facts ---------- */
+function v1819sFacts(C,yr){
+  const u=C.userSid; const F={yr,w:0,d:0,l:0,gp:0,gf:0,ga:0,stage:0,out:false,pos:null,n:C.league.length,lgN:Math.max(2,(C.league.length-1)*2),lgDone:false,done:false};
+  const ko=[];
+  for(const id in C.fixtures){ const f=C.fixtures[id]; if(f.yr!==yr||f.lvl!=='V'||f.st!=='d'||(f.h!==u&&f.a!==u)) continue;
+    const us=f.h===u?f.hg:f.ag, th=f.h===u?f.ag:f.hg;
+    if(f.comp==='reg'){ F.gp++; F.gf+=us; F.ga+=th; if(f.w===u) F.w++; else if(f.w) F.l++; else F.d++; }
+    else if(isKO(f.comp)) ko.push(f); }
+  const ord={sec:0,rgn:1,st:2}; ko.sort((a,b)=>(ord[a.comp]-ord[b.comp])||(a.rd-b.rd));
+  for(const f of ko){ if(f.w===u) F.stage++; else { F.out=true; break; } }
+  F.done=yr<C.year||(yr===C.year&&(C.phase==='offseason'||C.phase==='awards'));
+  F.lgDone=yr<C.year||(yr===C.year&&!['preseason','regular'].includes(C.phase));
+  if(F.done) F.out=true;
+  if(F.gp){ const t=standings(C,'V',yr); const i=t.findIndex(x=>x.sid===u); F.pos=i>=0?i+1:null; F.n=t.length; }
+  if(F.lgDone) F.lgN=F.gp;
+  return F; }
+function v1819sFactsFor(C,S,yr){ if(yr===C.year||!S.hist||!S.hist[yr]){ const F=v1819sFacts(C,yr); if(yr<=C.year) (S.hist||(S.hist={}))[yr]=F; return F; } return S.hist[yr]; }
+function v1819sStageName(n){ return ['Not yet','Won a Sectionals game','In the Section final','Section champions','Regional champions','State semifinal','In the State final','State champions'][n]||''; }
+
+/* ---------- goals ---------- */
+function v1819sSeasonGoal(g,F){
+  const rem=Math.max(0,F.lgN-F.gp);
+  if(V1819S_KO[g.k]){ const need=V1819S_KO[g.k]; const ok=F.stage>=need; const dead=!ok&&F.out;
+    const prog=F.stage?v1819sStageName(F.stage):F.lgDone?(F.out?'Out in the first round':'Sectionals under way'):`Sectionals after matchday ${F.lgN}`;
+    return {ok,dead,pct:Math.min(1,F.stage/need),prog}; }
+  const rec=`${F.w}–${F.d}–${F.l}`;
+  if(g.k==='top'||g.k==='topall'){ const n=g.n||3; const ok=F.lgDone&&F.pos!=null&&F.pos<=n; const dead=F.lgDone&&!ok;
+    const pct=F.pos? clamp((F.n-F.pos+1)/Math.max(1,F.n-n+1),0,1):0;
+    return {ok,dead,pct:ok?1:pct,prog:F.pos?`${v1819sOrd(F.pos)} of ${F.n}${F.lgDone?' (final)':` · ${rem} to play`}`:'League starts after the Preseason Cup'}; }
+  if(g.k==='winrec'){ const ok=F.w>F.l+rem||(F.lgDone&&F.w>F.l); const dead=!ok&&F.w+rem<=F.l; return {ok,dead,pct:ok?1:clamp(F.gp?F.w/Math.max(1,F.l+1)/2:0,0,0.95),prog:F.gp?`${rec}${F.lgDone?' (final)':` · ${rem} to play`}`:'Not started'}; }
+  if(g.k==='unbeaten'){ const dead=F.l>0; const ok=!dead&&F.lgDone&&F.gp>0; return {ok,dead,pct:dead?0:F.gp/F.lgN,prog:F.gp?`${rec}${dead?' · beaten':rem?` · ${rem} to play`:''}`:'Not started'}; }
+  if(g.k==='perfect'){ const dead=F.l+F.d>0; const ok=!dead&&F.lgDone&&F.gp>0&&F.w===F.gp; return {ok,dead,pct:dead?0:F.w/F.lgN,prog:F.gp?`${rec}${dead?' · dropped points':rem?` · ${rem} to play`:''}`:'Not started'}; }
+  if(g.k==='and'){ const R=g.of.map(x=>v1819sSeasonGoal(x,F)); return {ok:R.every(x=>x.ok),dead:R.some(x=>x.dead),pct:R.reduce((a,x)=>a+x.pct,0)/R.length,prog:R.map(x=>x.prog).join(' · ')}; }
+  return {ok:false,dead:true,pct:0,prog:''}; }
+/* the goal over the scenario: any season counts, except "every season" goals */
+function v1819sGoalState(C,S,g){
+  const ys=v1819sYears(S); const last=ys[ys.length-1]; const cur=Math.min(C.year,last);
+  if(g.k==='topall'){ let ok=true, dead=false, txt=''; let pct=0, n=0;
+    for(const y of ys){ if(y>C.year){ ok=false; continue; } const F=v1819sFactsFor(C,S,y); const e=v1819sSeasonGoal({k:'top',n:g.n},F); if(e.dead) dead=true; if(!e.ok) ok=false; pct+=e.pct; n++; if(y===cur) txt=e.prog; }
+    const done=ys.filter(y=>y<=C.year&&v1819sFactsFor(C,S,y).lgDone&&v1819sSeasonGoal({k:'top',n:g.n},v1819sFactsFor(C,S,y)).ok).length;
+    return {ok:ok&&!dead,dead,pct:(pct/ys.length),prog:`${done} of ${ys.length} seasons${txt?' · now '+txt:''}`,yr:ok&&!dead?last:null}; }
+  let best=null;
+  for(const y of ys){ if(y>C.year) break; const F=v1819sFactsFor(C,S,y); const e=v1819sSeasonGoal(g,F); if(e.ok) return {...e,yr:y};
+    if(y===cur) best=e; }
+  if(!best) return {ok:false,dead:false,pct:0,prog:'Not started'};
+  const dead=best.dead&&cur===last; const more=best.dead&&cur<last;
+  return {...best,dead,prog:more?`${best.prog} · next season`:best.prog}; }
+function v1819sMedalStates(C,S){ const o={}; for(const [m] of V1819S_MEDALS){ const g=S.medals[m]; const e=v1819sGoalState(C,S,g); if(S.earned&&S.earned[m]) e.ok=true, e.dead=false, e.yr=S.earned[m].yr; o[m]=e; } return o; }
+const v1819sResN=S=>S&&S.earned?(S.earned.g?3:S.earned.s?2:S.earned.b?1:0):0;
+
+/* ---------- PREFS: medals, bests, runs (across careers) ---------- */
+function v1819sP(){ let P=PREFS.v1819s; if(!P||typeof P!=='object'){ P=PREFS.v1819s={}; } P.med=P.med||{}; P.best=P.best||{}; P.runs=P.runs||[]; P.cust=P.cust||{}; return P; }
+function v1819sMedalCount(){ const P=v1819sP(); let n=0; for(const d of V1819S_LIST){ const m=P.med[d.id]||{}; n+=(m.b?1:0)+(m.s?1:0)+(m.g?1:0); } return n; }
+function v1819sUnlocked(d){ return !d||!d.unlock||v1819sMedalCount()>=d.unlock; }
+function v1819sCustKey(S){ const D=S.def||{}; const md=D.md||{}; const g=x=>x?[x.k,x.n||0]:null; return 'c'+hashStr(JSON.stringify([D.n,D.sc,D.se,[...(D.ru||[])].sort(),g(md.b),g(md.s),g(md.g)])).toString(36); }
+function v1819sSyncPrefs(C){ const S=C&&C.scn; if(!S||typeof App==='undefined'||App.C!==C) return; const P=v1819sP(); let ch=false; const res=v1819sResN(S);
+  if(S.id==='custom'){ const k=v1819sCustKey(S); const o=P.cust[k]||(P.cust[k]={name:S.name,best:0,code:S.code}); if(res>o.best){ o.best=res; ch=true; } }
+  else { const m=P.med[S.id]||(P.med[S.id]={}); for(const [k] of V1819S_MEDALS) if(S.earned&&S.earned[k]&&!m[k]){ m[k]=S.earned[k].yr||1; ch=true; } if(res>(P.best[S.id]||0)){ P.best[S.id]=res; ch=true; } }
+  if(ch) savePrefs(); }
+function v1819sLogRun(C){ const S=C.scn; if(typeof App==='undefined'||App.C!==C) return; const P=v1819sP();
+  P.runs.unshift({id:S.id,name:S.name,res:v1819sResN(S),yr:S.end&&S.end.yr,rec:S.end&&S.end.rec,code:S.rcode||S.code,at:Date.now()}); if(P.runs.length>30) P.runs.length=30; savePrefs(); }
+
+/* ---------- check: earn medals, end the scenario ---------- */
+function v1819sCheck(C){ const S=v1819sLive(C); if(!S) return null;
+  const ys=v1819sYears(S); const last=ys[ys.length-1]; S.earned=S.earned||{}; const fresh=[];
+  const st=v1819sMedalStates(C,S);
+  for(const [m] of V1819S_MEDALS){ if(st[m].ok&&!S.earned[m]){ S.earned[m]={yr:st[m].yr||C.year,md:C.md,ph:C.phase}; fresh.push(m); } }
+  if(fresh.length){ S.fresh=(S.fresh||[]).concat(fresh); for(const m of fresh) addNews(C,'program',`Scenario medal: ${V1819S_MEDALS.find(x=>x[0]===m)[1]} in ${S.name}. ${v1819sGoalShort(S.medals[m])}.`,C.userSid); }
+  v1819sSyncPrefs(C);
+  const allSettled=V1819S_MEDALS.every(([m])=>S.earned[m]||st[m].dead);
+  const timeUp=C.year>last||(C.year===last&&(C.phase==='offseason'||C.phase==='awards'));
+  if(S.earned.g) v1819sEnd(C,'gold'); else if(allSettled) v1819sEnd(C,'settled'); else if(timeUp) v1819sEnd(C,'time');
+  return {fresh,st}; }
+function v1819sEnd(C,why){ const S=C.scn; if(!S||S.status!=='live') return; const st=v1819sMedalStates(C,S);
+  S.missed={}; for(const [m] of V1819S_MEDALS) if(!S.earned[m]) S.missed[m]=st[m].dead?'dead':'time';
+  const yr=Math.min(C.year,S.y0+S.seasons-1); const F=v1819sFactsFor(C,S,yr);
+  S.status='done'; S.end={yr:C.year,ph:C.phase,why,res:v1819sResN(S),rec:{w:F.w,d:F.d,l:F.l},stage:F.stage,pos:F.pos};
+  S.rcode=v1819sCodeFor(S,{medal:S.end.res,w:F.w,d:F.d,l:F.l}); S.pend=true;
+  const nm=['no medal','bronze','silver','gold'][S.end.res];
+  addNews(C,'program',why==='sudden'?`The streak is over. ${S.name} ends with ${nm}.`:`Scenario complete: ${S.name} ends with ${nm}. The program carries on.`,C.userSid);
+  v1819sSyncPrefs(C); v1819sLogRun(C); }
+
+/* ---------- challenge codes ---------- */
+const V1819S_B32='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+const V1819S_NAMEC=" ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'";
+function v1819sCleanName(s){ return String(s||'').split('').filter(c=>V1819S_NAMEC.includes(c)).join('').replace(/\s+/g,' ').trim().slice(0,24); }
+function v1819sEncode(o){ const bits=[]; const put=(v,n)=>{ for(let i=n-1;i>=0;i--) bits.push((Math.floor(v/Math.pow(2,i)))%2); };
+  put(1,3); const kind=o.def?6:V1819S_LIST.findIndex(d=>d.id===o.id); put(kind,3); put(o.seed>>>0,32);
+  put(o.res?1:0,1); if(o.res){ put(o.res.medal&3,2); put(Math.min(15,o.res.w|0),4); put(Math.min(15,o.res.d|0),4); put(Math.min(15,o.res.l|0),4); }
+  if(o.def){ const D=o.def; put(D.sc&3,2); put(clamp(D.se|0,1,3),2); let mask=0; V1819S_RULE_IDS.forEach((r,i)=>{ if(D.ru.includes(r)) mask|=1<<i; }); put(mask,8);
+    for(const [m] of V1819S_MEDALS){ const g=D.md[m]; put(Math.max(0,V1819S_GOAL_IDS.indexOf(g.k)),4); put(clamp((g.n||3)-1,0,7),3); }
+    const nm=v1819sCleanName(D.n); put(nm.length,5); for(const c of nm) put(V1819S_NAMEC.indexOf(c),6); }
+  const sum=hashStr(bits.join(''))&1023; put(sum,10);
+  while(bits.length%5) bits.push(0);
+  let s=''; for(let i=0;i<bits.length;i+=5){ let v=0; for(let j=0;j<5;j++) v=v*2+bits[i+j]; s+=V1819S_B32[v]; }
+  const tag=o.def?'CUST':V1819S_BY[o.id].tag; return 'TL-'+tag+'-'+s.match(/.{1,4}/g).join('-'); }
+function v1819sDecode(raw){
+  let s=String(raw||'').trim().toUpperCase().replace(/[\s_]+/g,'-'); if(!s) return {err:'Type or paste a challenge code first.'};
+  if(!/^TL-/.test(s)) return {err:'Challenge codes start with TL-. Check you copied the whole thing.'};
+  const parts=s.split('-').filter(Boolean); const tag=parts[1]; const tags=[...V1819S_LIST.map(d=>d.tag),'CUST'];
+  if(!tags.includes(tag)) return {err:`"${tag||''}" is not a scenario this version knows.`};
+  const body=parts.slice(2).join('').replace(/O/g,'0').replace(/[IL]/g,'1'); if(body.length<9) return {err:'That code is too short. Part of it may be missing.'};
+  const bits=[]; for(const c of body){ const v=V1819S_B32.indexOf(c); if(v<0) return {err:`"${c}" can't appear in a code. Check for typos.`}; for(let j=4;j>=0;j--) bits.push((v>>j)&1); }
+  let p=0; const take=n=>{ let v=0; for(let i=0;i<n;i++){ if(p>=bits.length) throw new Error('short'); v=v*2+bits[p++]; } return v; };
+  try{ const ver=take(3); if(ver!==1) return {err:'This code comes from a newer version of Touchline.'}; const kind=take(3); const seed=take(32)>>>0;
+    const o={seed}; if(take(1)) o.res={medal:take(2),w:take(4),d:take(4),l:take(4)};
+    if(kind===6){ const D={sc:take(2),se:clamp(take(2),1,3),ru:[],md:{}}; const mask=take(8); V1819S_RULE_IDS.forEach((r,i)=>{ if(mask&(1<<i)) D.ru.push(r); });
+      for(const [m] of V1819S_MEDALS){ const k=V1819S_GOAL_IDS[take(4)]; const n=take(3)+1; if(!k) return {err:'That code has a medal this version does not know.'}; D.md[m]=V1819S_GOALS[k].n?{k,n}:{k}; }
+      const len=take(5); let nm=''; for(let i=0;i<len;i++) nm+=V1819S_NAMEC[take(6)]||''; D.n=nm||'Custom scenario'; o.def=D; o.id='custom'; }
+    else { const d=V1819S_LIST[kind]; if(!d) return {err:'That code points at a scenario this version does not know.'}; o.id=d.id; }
+    const end=p; const sum=take(10); const chk=hashStr(bits.slice(0,end).join(''))&1023; if(sum!==chk) return {err:'One of the characters is off. Check the code for typos.'};
+    if((o.def?'CUST':V1819S_BY[o.id].tag)!==tag) return {err:'The tag at the start does not match the rest of the code.'};
+    return o; }catch(e){ return {err:'That code is too short. Part of it may be missing.'}; } }
+function v1819sCodeFor(S,res){ return v1819sEncode({id:S.id,seed:S.seed,def:S.id==='custom'?S.def:null,res}); }
+
+/* ---------- world building helpers ---------- */
+function v1819sRelu(C,sid){ const s=C.schools[sid]; const user=sid===C.userSid;
+  for(const lvl of LVLS){ const lu=getLu(C,sid,lvl)||{}; const caps=(lu.caps||[]).filter(id=>C.players[id]&&C.players[id].sid===sid&&C.players[id].lvl===lvl);
+    let n; if(user){ const b=bestFormation(C,sid,lvl); n={...b.lineup,form:b.form}; } else n=autoLineup(C,sid,lvl,C.coaches[s.coachId].form);
+    s.lu[lvl]={...n,tac:lu.tac||{pass:50,tempo:50,press:50,ment:50},strat:lu.strat||'balanced',caps};
+    if(caps.length<2) s.lu[lvl].caps=[...caps,...defaultCaptains(C,sid,lvl).filter(x=>!caps.includes(x))].slice(0,2); } }
+function v1819sNums(C,sid,r){ for(const lvl of LVLS){ const used=retiredSet(C,sid); for(const p of squad(C,sid,lvl).sort((a,b)=>a.id<b.id?-1:1)){ if(!p.num||used.has(p.num)) p.num=assignNum(r,used,p.pos); else used.add(p.num); } } }
+function v1819sSetOvr(p,t){ for(let i=0;i<3;i++) shiftOvr(p,t-ovr(p),'balanced'); }
+function v1819sLeave(C,p,yr,why){ C.alumni[p.id]=compactAlum(p,yr,why); delete C.players[p.id]; }
+function v1819sNew(C,r,o){ const p=genPlayer(C,r,{sid:C.userSid,lvl:o.lvl||'V',grade:o.grade,pos:o.pos,target:o.target,user:true}); C.players[p.id]=p; p.joined=C.year; planDev(C,p,r); return p; }
+function v1819sOthers(C){ return C.league.filter(s=>s!==C.userSid).map(s=>xiRating(C,s,'V')).sort((a,b)=>a-b); }
+function v1819sRank(C){ const u=C.userSid; return [...C.league].sort((a,b)=>xiRating(C,b,'V')-xiRating(C,a,'V')).indexOf(u)+1; }
+function v1819sCloseTryouts(C){ try{ if(typeof v1812tBox==='function'){ const T=v1812tBox(C); T.yr=C.year; T.st='none'; T.day=0; T.a={}; T.tags={}; T.cands={}; T.pool=[]; T.info={}; T.posted=null; } }catch(e){} }
+function v1819sStar(C){ return squad(C,C.userSid,'V').filter(p=>p.pos==='FWD').sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1))[0]||null; }
+function v1819sInjure(C,S,r){ const p=v1819sStar(C); if(!p) return; if(ovr(p)<79) v1819sSetOvr(p,(V1819S_TUNE.badbreak.star)+r()*1.5); p.pot=Math.max(p.pot,Math.ceil(ovr(p))+2); p.susp=99; S.inj={pid:p.id,yr:C.year,nm:pname(p)}; }
+function v1819sTier1(C){ const s=C.schools[C.userSid]; const st=s.stadium; if(!st) return; if(st.tier!==1){ const T=STADIUM_TIERS[1]; st.tier=1; st.cap=Math.round((T.min+T.max)/20)*10; } if(st.ovr){ delete st.ovr.tier; delete st.ovr.cap; } }
+
+/* ---------- the six setups (deterministic: rngFrom(seed + id)) ---------- */
+const V1819S_SETUP={
+  rebuild(C,S,r){ const u=C.userSid; const T=V1819S_TUNE.rebuild; const V=squad(C,u,'V');
+    const seniors=V.filter(p=>p.grade>=12).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1)); const keep=new Set(seniors.slice(0,4).map(p=>p.id));
+    for(const p of V){ if(keep.has(p.id)) continue; if(p.grade<=10){ p.lvl='JV'; } else v1819sLeave(C,p,C.year-1,'Transferred out when the old coach left'); }
+    const want={GK:2,DEF:6,MID:6,FWD:4}; for(const id of keep) want[C.players[id].pos]--;
+    const jv=squad(C,u,'JV').filter(p=>p.grade===9).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1)); let fromJV=0;
+    for(const g of GROUPS){ while(want[g]>0){ const i=fromJV<6?jv.findIndex(p=>p.pos===g):-1; let p; if(i>=0){ p=jv.splice(i,1)[0]; p.lvl='V'; fromJV++; } else p=v1819sNew(C,r,{grade:9,pos:g,target:58}); want[g]--; } }
+    if(!squad(C,u,'JV').some(p=>p.pos==='GK')) v1819sNew(C,r,{lvl:'JV',grade:9,pos:'GK',target:48});
+    for(const p of squad(C,u,'V')){ if(p.grade===9){ v1819sSetOvr(p,T.fr[0]+gauss(r)*T.fr[1]); p.pot=Math.round(clamp(ovr(p)+19+r()*12,ovr(p)+12,93)); p.v1819f=1; } else { v1819sSetOvr(p,T.sr[0]+gauss(r)*T.sr[1]); p.pot=Math.max(p.pot,Math.ceil(ovr(p))+1); } }
+    C.schools[u].prestige=Math.min(C.schools[u].prestige,38);
+    addNews(C,'program',`${C.schools[u].town} start over: fourteen freshmen join four seniors on Varsity`,u); },
+  lastdance(C,S,r){ const u=C.userSid; let sen=squad(C,u,'V').filter(p=>p.grade>=12).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1));
+    while(sen.length<9){ sen.push(v1819sNew(C,r,{grade:12,pos:pick(r,['DEF','MID','FWD']),target:72})); }
+    const gold=new Set(sen.slice(0,9).map(p=>p.id)); v1819sRelu(C,u);
+    for(const id of gold){ const p=C.players[id]; v1819sSetOvr(p,V1819S_TUNE.lastdance.gold+gauss(r)*1.4); p.pot=Math.ceil(ovr(p))+1; p.v1819g=1; }
+    C.schools[u].prestige=Math.max(C.schools[u].prestige,72);
+    addNews(C,'program',`${C.schools[u].town}'s golden class: nine seniors, one last run at State`,u); },
+  underdog(C,S,r){ const u=C.userSid; const lo=v1819sOthers(C)[0]; fitTeam(C,u,lo-V1819S_TUNE.underdog.gap-r()*0.3); C.schools[u].prestige=18; C.schools[u].strength=0.12; for(const p of schoolPlayers(C,u)) if(p.grade<=10) p.pot=Math.min(97,Math.round(p.pot+7+r()*4));
+    addNews(C,'program',`${C.schools[u].town} picked to finish last in Section ${C.section}`,u); },
+  streak(C,S,r){ const u=C.userSid; fitTeam(C,u,V1819S_TUNE.streak.xi+r()*0.6); },
+  badbreak(C,S,r){ const u=C.userSid; v1819sInjure(C,S,r); fitTeam(C,u,V1819S_TUNE.badbreak.xi+r()*0.6,p=>p.id!==S.inj.pid);
+    addNews(C,'program',`${S.inj.nm} is out for the season. ${C.schools[u].town} must find goals elsewhere`,u); },
+  defense(C,S,r){ const u=C.userSid; const yr=C.year-1; const s=C.schools[u];
+    const sen=squad(C,u,'V').filter(p=>p.grade>=12).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1)).slice(0,8);
+    const H=['Section '+C.section+' Champions','Regional Champions','State Champions'];
+    for(const p of squad(C,u,'V')) if(p.grade>=11&&!sen.includes(p)) for(const h of H) p.honors.push({yr,label:h});
+    for(const p of sen){ for(const h of H) p.honors.push({yr,label:h}); p.grade=12; v1819sLeave(C,p,yr,pick(r,['Playing college soccer','Walked on at the state university','Signed with a Division II program','Playing club soccer in college'])); }
+    S.grads=sen.map(p=>p.id);
+    const jv=squad(C,u,'JV').filter(p=>p.grade>=10).sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1)); for(const p of jv.slice(0,4)) p.lvl='V';
+    if(!squad(C,u,'V').some(p=>p.pos==='GK')) v1819sNew(C,r,{grade:11,pos:'GK',target:66});
+    v1819sRelu(C,u); fitTeam(C,u,V1819S_TUNE.defense.xi+r()*0.6);
+    for(const h of H) if(!s.honors.some(x=>x.yr===yr&&x.label===h)) s.honors.push({yr,label:h});
+    const co=C.coaches[s.coachId]; if(co){ co.titles=(co.titles||0)+1; co.rec[yr]={w:12,d:1,l:1}; }
+    s.prestige=Math.max(s.prestige,84);
+    addNews(C,'champion',`${s.name} are the defending ${C.stateName} state champions`,u);
+    addNews(C,'program',`Eight seniors from the ${yr} title team have graduated. Can ${s.town} do it again?`,u); }
+};
+function v1819sCustomSchool(C,sc,r){ const u=C.userSid; const o=v1819sOthers(C); if(sc===0) fitTeam(C,u,o[o.length-1]+2+r()*0.8); else if(sc===1) fitTeam(C,u,(o[Math.floor(o.length/2)-1]+o[Math.floor(o.length/2)])/2); else if(sc===2){ fitTeam(C,u,o[0]-2.4-r()*0.6); C.schools[u].prestige=Math.min(C.schools[u].prestige,24); } }
+
+/* a scenario career: the normal world for this seed, then the hand-built situation on top */
+function v1819sBuild(o,meta){ meta=meta||{};
+  const seed=o.seed>>>0; const def=o.def||null; const D=def?null:V1819S_BY[o.id];
+  const C=newCareer({slot:meta.slot||1,coachName:meta.coach||'Sam Rivera',seed,now:meta.now||0});
+  const r=rngFrom(hashStr(seed+':scn:'+(def?'custom':o.id)));
+  const S={v:1,id:def?'custom':o.id,tag:def?'CUST':D.tag,name:def?(def.n||'Custom scenario'):D.name,stars:def?0:D.stars,seasons:def?clamp(def.se|0,1,3):D.seasons,
+    y0:C.year,seed,rules:def?[...def.ru]:[...D.rules],medals:def?JSON.parse(JSON.stringify(def.md)):JSON.parse(JSON.stringify(D.medals)),def:def?JSON.parse(JSON.stringify(def)):null,
+    status:'setup',earned:{},missed:{},hist:{},inj:null,end:null,pend:false};
+  C.scn=S; C.settings.manager=false; C.directed={};
+  if(def) v1819sCustomSchool(C,def.sc|0,r); else V1819S_SETUP[o.id](C,S,r);
+  if(S.rules.includes('nostar')&&!S.inj) v1819sInjure(C,S,r);
+  if(S.rules.includes('tier1')) v1819sTier1(C);
+  if(S.rules.includes('hard')) C.settings.difficulty='hard';
+  if(S.rules.includes('strict')){ C.settings.cards='strict'; C.settings.suspensions=true; }
+  const u=C.userSid; v1819sNums(C,u,r); v1819sRelu(C,u);
+  for(const p of schoolPlayers(C,u)){ if(!p.plan) planDev(C,p,r); p.ovr0[C.year]=r1(ovr(p)); }
+  v1819sCloseTryouts(C);
+  if(S.id==='streak') v1819sStreakRun(C,S);
+  S.rank=v1819sRank(C); S.xi=Math.round(xiRating(C,u,'V')*10)/10;
+  S.line=v1819sLine(C,S); S.code=v1819sCodeFor(S,null);
+  S.status='live'; v1819sCheck(C);
+  return C; }
+/* The Streak: the Preseason Cup is played as normal, then nine league rounds with your result directed to a win (the engine's own
+   directed-result path builds a plausible score and full match log). Directions are cleared afterwards and the fixtures carry no
+   "directed" flag, so standings, fixtures, logs, player stats and news all agree. */
+function v1819sStreakRun(C,S){ const u=C.userSid; let g=0; const gd=typeof v1812gBox==='function'?v1812gBox(C):null; const gdOn=gd?gd.on:undefined; if(gd) gd.on=false;
+  while(C.phase==='preseason'&&g++<10){ simRound(C); advance(C); }
+  while(C.phase==='regular'&&C.md<9&&g++<40){ const uf=userFixture(C); if(uf) C.directed[uf.id]={mode:'winner',winner:u}; simRound(C); if(uf){ delete C.directed[uf.id]; uf.dir=false; } advance(C); }
+  C.directed={}; if(gd) gd.on=gdOn; S.pre9=v1819sFacts(C,C.year); }
+function v1819sLine(C,S){ const s=C.schools[C.userSid]; const n=C.league.length; const rk=S.rank;
+  const ss=S.seasons===1?'One season.':S.seasons===2?'Two seasons.':'Three seasons.';
+  switch(S.id){
+    case 'rebuild': return `You take over ${s.name}: fourteen freshmen and four seniors on Varsity, rated ${v1819sOrd(rk)} of ${n}. ${ss}`;
+    case 'lastdance': return `You coach ${s.name} and a golden class of nine seniors, rated ${v1819sOrd(rk)} of ${n}. One season to win State.`;
+    case 'underdog': return `You take over ${s.name}, rated ${v1819sOrd(rk)} of ${n} in the league. ${ss}`;
+    case 'streak': return `${s.name} are ${S.pre9?`${S.pre9.w}–${S.pre9.d}–${S.pre9.l}`:'9–0'} with five rounds left. Stay unbeaten.`;
+    case 'badbreak': return `${S.inj?S.inj.nm:'Your star striker'} is out for the season at ${s.name}, rated ${v1819sOrd(rk)} of ${n}. ${ss}`;
+    case 'defense': return `${s.name} won State last year, then lost eight seniors. Rated ${v1819sOrd(rk)} of ${n}. Defend the title.`;
+    default: return `${V1819S_SCHOOL[(S.def&&S.def.sc)|0]}: ${s.name}, rated ${v1819sOrd(rk)} of ${n}. ${ss}`; } }
+
+/* ---------- rules, enforced on the engine side ---------- */
+{ const _fm=finishMatch; finishMatch=function(C,M){ const f0=C&&M&&C.fixtures&&C.fixtures[M.fid]; const was=f0&&f0.st; const r=_fm.apply(this,arguments);
+  try{ const S=v1819sLive(C); if(S&&was!=='d'&&f0&&f0.lvl==='V'){ if(S.inj&&S.inj.yr===C.year){ const p=C.players[S.inj.pid]; if(p) p.susp=Math.max(p.susp||0,99); }
+      const u=C.userSid; if(f0.h===u||f0.a===u){ if(S.rules.includes('sudden')&&f0.comp==='reg'&&f0.w&&f0.w!==u&&f0.yr>=S.y0&&f0.yr<S.y0+S.seasons){ S.lostAt=f0.id; v1819sEnd(C,'sudden'); } else v1819sCheck(C); } } }catch(e){ console.warn('v1819s finish',e); }
+  return r; }; }
+{ const _ad=advance; advance=function(C){ const r=_ad.apply(this,arguments); try{ if(v1819sLive(C)) v1819sCheck(C); }catch(e){ console.warn('v1819s advance',e); } return r; }; }
+{ const _ro=rollover; rollover=function(C){ const live=v1819sLive(C); const r=_ro.apply(this,arguments); try{ if(live&&r&&r.ok&&v1819sLive(C)){ if(C.scn.rules.includes('tier1')) v1819sTier1(C); if(C.scn.rules.includes('hard')) C.settings.difficulty='hard'; v1819sCheck(C); } }catch(e){ console.warn('v1819s rollover',e); } return r; }; }
+{ const _ce=campEnsure; campEnsure=function(C){ const K=_ce.apply(this,arguments); try{ if(K&&!K.v1819s&&v1819sHas(C,'zeroscout')){ K.pts=0; K.v1819s=1; } }catch(e){} return K; }; }
+{ const _sm=startMatch; startMatch=function(C,fid,opts){ try{ if(C&&C.directed&&C.directed[fid]&&v1819sLive(C)) delete C.directed[fid]; }catch(e){} return _sm.apply(this,arguments); }; }
+{ const _mg=migrate; migrate=function(raw){ const C=_mg.apply(this,arguments); try{ if(C&&C.scn&&!C.scn.v) C.scn.v=1; }catch(e){} return C; }; }
+
+/* ===================== v18.19 SCENARIO MODE, the screens (v1819s) =====================
+   - The hub (MODALS.v1819sHub): the selected scenario on the left (crest, "SCENARIO 3 OF 6", setup line, top five of the real
+     starting squad, rules, medals, Start / Share), all scenarios on the right (stars, best medal, lock), Make your own and
+     Enter a challenge code. Opened from the main menu entry (wraps v1811mHTML), the in-career page and the coach card.
+     The left panel also hosts the builder (U.view 'build') and the save-slot picker (U.view 'slot').
+     Starting worlds are built for real (v1819sBuild) one at a time in the background while the hub is open, so the squad,
+     crest and "rated 8th of 8" line are the ones you will get; Start reuses that exact draft.
+   - In career: VIEWS.scenario (goals with live progress, seasons, rules), a "This week" item on the Overview, a Competition menu
+     entry, rule locks on the controls (editor tab, Manager Mode, difficulty, cards, directed results, call-ups), medal toasts,
+     the end-of-scenario ceremony (MODALS.v1819sEnd) and a medal shelf on School & Stadium (the coach profile). */
+const V1819S_UI={pick:null,seeds:{},drafts:{},order:[],timer:null,view:'detail',codeErr:'',share:null,metas:[],confirm:null,b:null,copied:0};
+ICON.v1819s='<circle cx="12" cy="14" r="6"/><path d="M8.5 9.2L6 3h4l2 4 2-4h4l-2.5 6.2"/><path d="M12 11.5l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 13.6l2-.3z"/>';
+ICON.lock='<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
+ICON.flame='<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1.5 1.5 2 2 2 0-3-1-5 1-7z"/>';
+ICON.alert='<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/>';
+ICON.card='<rect x="7" y="3" width="10" height="16" rx="2"/>';
+ICON.cross='<circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/>';
+ICON.copy='<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>';
+ICON.check='<path d="M5 12.5l4.5 4.5L19 7.5"/>';
+let v1819sN=0;
+const V1819S_PAL={b:['#f6c08f','#c27a3e','#7a4318'],s:['#ffffff','#b9c3ce','#66717e'],g:['#fff1b8','#e8b030','#93610b']};
+function v1819sMedalSVG(m,size,state){ size=size||28; state=state||'on'; const nm={b:'Bronze',s:'Silver',g:'Gold'}[m]||'';
+  if(state==='lock') return `<span class="v1819s-med v1819s-lock" style="--s:${size}px" role="img" aria-label="Locked">${icon('lock',Math.round(size*.5))}</span>`;
+  if(state==='empty'||!V1819S_PAL[m]) return `<span class="v1819s-med v1819s-empty" style="--s:${size}px" role="img" aria-label="${state==='empty'?'No medal yet':''}"></span>`;
+  const [l,c,d]=V1819S_PAL[m]; const id='v1819sm'+(v1819sN++);
+  return `<span class="v1819s-med v1819s-${state} v1819s-m${m}" style="--s:${size}px" role="img" aria-label="${nm} medal${state==='off'?' (not earned)':''}"><svg viewBox="0 0 40 40" width="${size}" height="${size}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${l}"/><stop offset=".55" stop-color="${c}"/><stop offset="1" stop-color="${d}"/></linearGradient></defs>
+    <circle cx="20" cy="20" r="18" fill="url(#${id})" stroke="${d}" stroke-width="1.6"/><circle cx="20" cy="20" r="13.2" fill="none" stroke="${l}" stroke-opacity=".75" stroke-width="1.3"/><circle cx="20" cy="20" r="13.2" fill="none" stroke="${d}" stroke-opacity=".35" stroke-width=".8" stroke-dasharray="1.2 1.6"/>
+    <path d="M20 11.6l2.5 5.1 5.6.8-4.05 3.95.95 5.6L20 24.4l-5 2.65.95-5.6L11.9 17.5l5.6-.8z" fill="${d}" fill-opacity=".9"/><path d="M20 12.6l2.1 4.3" stroke="${l}" stroke-width=".9" stroke-linecap="round"/></svg></span>`; }
+function v1819sStars(n){ if(!n) return ''; return `<span class="v1819s-stars" role="img" aria-label="Difficulty ${n} of 3">${[1,2,3].map(i=>`<i class="${i<=n?'on':''}">★</i>`).join('')}</span>`; }
+function v1819sWith(C,fn){ const prev=App.C; App.C=C; try{ return fn(); }finally{ App.C=prev; } }
+function v1819sSeed(id){ const U=V1819S_UI; return U.seeds[id]||(U.seeds[id]=(Math.random()*4294967295)>>>0); }
+function v1819sKey(pk){ return pk?(pk.def?'c:'+pk.seed+':'+JSON.stringify(pk.def):pk.id+':'+pk.seed):''; }
+function v1819sGrade(g){ return {9:'Fr',10:'So',11:'Jr',12:'Sr'}[g]||('Gr '+g); }
+function v1819sCoach(){ const P=v1819sP(); return P.coach||'Sam Rivera'; }
+function v1819sEmblem(i,size){ const hues=[205,32,150,265,350,48,190]; const h=hues[i%hues.length];
+  return `<svg class="v1819s-emb" width="${size}" height="${(size*1.15).toFixed(1)}" viewBox="0 0 100 115" aria-hidden="true"><path d="M50 3 93 14v41c0 30-20 47-43 57C27 102 7 85 7 55V14z" fill="hsl(${h} 35% 22%)" stroke="hsl(${h} 45% 55%)" stroke-width="5"/><text x="50" y="72" text-anchor="middle" font-family="'Big Shoulders Display',sans-serif" font-weight="900" font-size="46" fill="hsl(${h} 60% 80%)">${i<6?i+1:'+'}</text></svg>`; }
+
+/* ---------- background world building ---------- */
+function v1819sQueue(){ const U=V1819S_UI; if(U.timer) return; U.timer=setTimeout(v1819sPump,90); }
+function v1819sPump(){ const U=V1819S_UI; U.timer=null; if(!App.modal||App.modal.type!=='v1819sHub') return;
+  const want=[U.pick&&U.pick.id?U.pick:null,...V1819S_LIST.map(d=>({id:d.id,seed:v1819sSeed(d.id)}))].filter(Boolean);
+  const next=want.find(p=>!U.drafts[v1819sKey(p)]); if(!next) return; const k=v1819sKey(next);
+  try{ U.drafts[k]=v1819sBuild(next,{coach:v1819sCoach()}); }catch(e){ console.warn('v1819s build',e); U.drafts[k]={err:String(e&&e.message||e)}; }
+  U.order.push(k); while(U.order.length>9){ const old=U.order.shift(); if(old!==v1819sKey(U.pick)) delete U.drafts[old]; }
+  v1819sPatch(next); v1819sQueue(); }
+function v1819sPatch(pk){ const U=V1819S_UI; const k=v1819sKey(pk); const D=U.drafts[k];
+  if(D&&D.schools&&!pk.def){ const el=document.querySelector(`.v1819s-lcrest[data-crest="${pk.id}"]`); if(el) el.innerHTML=v1819sWith(D,()=>crest(D.schools[D.userSid],40)); }
+  if(k===v1819sKey(U.pick)&&U.view==='detail'){ const det=document.querySelector('.v1819s-detail'); if(det) v1819sKeepFocus(()=>{ det.outerHTML=v1819sDetailHTML(); }); } }
+function v1819sKeepFocus(fn){ const a=document.activeElement; const id=a&&a.id; const sc=document.querySelector('.v1819s-modal'); const top=sc?sc.scrollTop:0; fn();
+  const sc2=document.querySelector('.v1819s-modal'); if(sc2) sc2.scrollTop=top; if(id){ const el=document.getElementById(id); if(el) el.focus({preventScroll:true}); } }
+function v1819sTop(){ const m=document.querySelector('.v1819s-modal'); if(m) m.scrollTop=0; }
+function v1819sRefresh(){ v1819sKeepFocus(()=>renderModal()); }
+
+/* ---------- hub: the selected scenario ---------- */
+function v1819sPickDef(){ const pk=V1819S_UI.pick; return pk&&!pk.def?V1819S_BY[pk.id]:null; }
+function v1819sTop5(C){ const u=C.userSid; const lu=getLu(C,u,'V'); const xi=new Set((lu&&lu.slots||[]).map(s=>s.pid));
+  const inj=C.scn&&C.scn.inj?C.players[C.scn.inj.pid]:null; let ps=squad(C,u,'V').sort((a,b)=>ovr(b)-ovr(a)||(a.id<b.id?-1:1)).slice(0,5);
+  return ps.map(p=>{ const tags=[]; if(inj&&p.id===inj.id) tags.push(['bad','Out for season']); if(p.v1819g) tags.push(['gold','Golden class']); if(p.v1819f) tags.push(['fr','Freshman']); if(!xi.has(p.id)&&!(inj&&p.id===inj.id)) tags.push(['','Bench']);
+    return `<li class="v1819s-pl">${portraitSVG(p,44)}<span class="v1819s-plt"><b>${esc(pname(p))}</b><small>${p.pos} · ${R(ovr(p))}<em>${v1819sGrade(p.grade)}</em>${tags.map(([c,t])=>`<i class="${c}">${t}</i>`).join('')}</small></span><span class="v1819s-plr" style="--r:${badgeColor(R(ovr(p)))}">${R(ovr(p))}</span></li>`; }).join(''); }
+function v1819sRulesHTML(rules,live){ const all=['fair',...rules];
+  return `<ul class="v1819s-rules">${all.map(k=>{ const R0=V1819S_RULES[k]; if(!R0) return ''; return `<li class="${k==='fair'?'fair':''}"><span class="v1819s-ric">${icon(R0.ic,16)}</span><span><b>${esc(R0.t)}</b><small>${esc(R0.d)}</small></span>${live!=null?`<span class="v1819s-rst ${live?'on':''}">${live?icon('lock',13)+'Enforced':'Lifted'}</span>`:''}</li>`; }).join('')}</ul>`; }
+function v1819sMedalRows(medals,got){ return `<ul class="v1819s-medals">${V1819S_MEDALS.map(([m,nm])=>{ const on=!!(got&&got[m]); return `<li class="${on?'got':''}">${v1819sMedalSVG(m,30,on?'on':'off')}<span><small>${nm}</small><b>${esc(v1819sGoalText(medals[m]))}</b></span>${on?`<span class="v1819s-tick" aria-label="Earned">${icon('check',16)}</span>`:''}</li>`; }).join('')}</ul>`; }
+function v1819sDetailHTML(){ const U=V1819S_UI; const pk=U.pick; if(U.view==='build') return v1819sBuilderHTML(); if(U.view==='slot') return v1819sSlotHTML();
+  const d=v1819sPickDef(); const P=v1819sP(); const D=U.drafts[v1819sKey(pk)]; const ready=D&&D.schools;
+  const i=d?V1819S_LIST.indexOf(d):6; const locked=d&&!v1819sUnlocked(d)&&pk.from!=='code';
+  const name=d?d.name:(pk.def.n||'Custom scenario'); const medals=d?d.medals:pk.def.md; const rules=d?d.rules:pk.def.ru; const seasons=d?d.seasons:pk.def.se;
+  const got=d?P.med[d.id]:null; const best=d?P.best[d.id]||0:((P.cust[pk.def?v1819sCustKey({def:pk.def}):'']||{}).best||0);
+  const sc=ready?D.schools[D.userSid]:null;
+  const crestH=ready?v1819sWith(D,()=>crest(sc,84)):v1819sEmblem(i,84);
+  const line=ready?D.scn.line:(d?d.blurb:`${V1819S_SCHOOL[pk.def.sc|0]}. ${seasons} season${seasons>1?'s':''}.`);
+  const chal=pk.res?`<div class="v1819s-chal">${v1819sMedalSVG(['', 'b','s','g'][pk.res.medal]||'b',26,pk.res.medal?'on':'empty')}<span><b>Challenge: ${pk.res.medal?['','Bronze','Silver','Gold'][pk.res.medal]:'No medal'} · ${pk.res.w}–${pk.res.d}–${pk.res.l} in the league</b><small>Someone played this exact world. Same school, same squad, same schedule. Beat it.</small></span></div>`:pk.from==='code'?`<div class="v1819s-chal"><span class="v1819s-ric">${icon('v1819s',16)}</span><span><b>From a challenge code</b><small>This is the exact world the code describes.</small></span></div>`:'';
+  const squadH=ready?`<ul class="v1819s-squad">${v1819sWith(D,()=>v1819sTop5(D))}</ul>`:D&&D.err?`<p class="v1819s-err">Could not build this world: ${esc(D.err)}</p>`:`<ul class="v1819s-squad v1819s-skel" aria-busy="true">${'<li class="v1819s-pl"><span class="v1819s-skf"></span><span class="v1819s-plt"><b></b><small></small></span></li>'.repeat(5)}</ul>`;
+  const lastRun=P.runs.find(r=>d?r.id===d.id:(r.code===(pk.code||'')));
+  const shareLab=lastRun&&lastRun.res?'Share result as a challenge code':'Share as a challenge code';
+  return `<section class="v1819s-detail" aria-labelledby="v1819s-dname">
+    <div class="v1819s-dtop"><span class="v1819s-dcrest">${crestH}</span><div class="v1819s-dtt"><span class="v1819s-eyebrow">${d?`Scenario ${i+1} of ${V1819S_LIST.length}`:'Custom scenario'}${d?' · '+esc(d.kick):''}</span>
+      <h3 id="v1819s-dname" tabindex="-1">${esc(name)}</h3><div class="v1819s-dmeta">${d?v1819sStars(d.stars):''}<span>${seasons} season${seasons>1?'s':''}</span>${ready?`<span>${esc(sc.town)} ${esc(sc.mascot)}</span>`:''}</div>
+      <p class="v1819s-dline">${esc(line)}</p></div></div>
+    ${chal}
+    <div class="v1819s-dgrid"><div class="v1819s-blk"><h4>Your starting squad</h4>${squadH}</div>
+      <div class="v1819s-blk"><h4>Rules for this scenario</h4>${v1819sRulesHTML(rules)}</div></div>
+    <div class="v1819s-blk"><h4>Medals</h4>${v1819sMedalRows(medals,got)}</div>
+    <div class="v1819s-actions">${locked?`<button class="btn v1819s-start" disabled id="v1819s-start">${icon('lock',16)} Earn ${d.unlock-v1819sMedalCount()} more medal${d.unlock-v1819sMedalCount()>1?'s':''} to unlock</button>`:`<button class="btn pri v1819s-start" id="v1819s-start" data-a="v1819sStart" ${ready?'':'aria-busy="true"'}>${icon('play',16)} Start scenario</button>`}
+      <button class="btn v1819s-ghost" id="v1819s-share" data-a="v1819sShare">${icon('copy',15)} ${shareLab}</button>
+      <span class="v1819s-best">${best?`Best so far: ${v1819sMedalSVG(['','b','s','g'][best],18)} <b>${['','Bronze','Silver','Gold'][best]}</b>`:'Best so far: <b>none yet</b>'}</span></div>
+    ${U.share?v1819sCodeBox(U.share.code,U.share.note):''}
+  </section>`; }
+function v1819sCodeBox(code,note){ const U=V1819S_UI; return `<div class="v1819s-codebox"><div class="v1819s-codel"><small>${esc(note||'Challenge code')}</small><code id="v1819s-codeout" tabindex="0">${esc(code)}</code></div><button class="btn sm" id="v1819s-copy" data-a="v1819sCopy" data-code="${esc(code)}">${icon(U.copied&&Date.now()-U.copied<2500?'check':'copy',15)} ${U.copied&&Date.now()-U.copied<2500?'Copied':'Copy'}</button></div>`; }
+
+/* ---------- hub: the list ---------- */
+function v1819sListHTML(){ const U=V1819S_UI; const P=v1819sP(); const n=v1819sMedalCount(); const tot=V1819S_LIST.length*3;
+  const rows=V1819S_LIST.map((d,i)=>{ const on=U.pick&&!U.pick.def&&U.pick.id===d.id&&U.view==='detail'; const lock=!v1819sUnlocked(d); const best=P.best[d.id]||0;
+    const D=U.drafts[d.id+':'+v1819sSeed(d.id)]; const cr=D&&D.schools?v1819sWith(D,()=>crest(D.schools[D.userSid],40)):v1819sEmblem(i,40);
+    return `<li><button class="v1819s-li ${on?'on':''} ${lock?'locked':''}" id="v1819s-li-${d.id}" data-a="v1819sPick" data-id="${d.id}" aria-pressed="${on}">
+      <span class="v1819s-lcrest" data-crest="${d.id}">${cr}</span>
+      <span class="v1819s-lt"><span class="v1819s-ln"><b>${esc(d.name)}</b>${v1819sStars(d.stars)}</span><small>${esc(d.blurb)}</small>${lock?`<em>${icon('lock',12)} ${d.unlock} medal${d.unlock>1?'s':''} to unlock</em>`:''}</span>
+      <span class="v1819s-lmed">${lock?v1819sMedalSVG('',30,'lock'):best?v1819sMedalSVG(['','b','s','g'][best],30):v1819sMedalSVG('',30,'empty')}</span></button></li>`; }).join('');
+  const cust=U.pick&&U.pick.def&&U.view==='detail'?`<li><button class="v1819s-li on" aria-pressed="true" data-a="v1819sNoop"><span class="v1819s-lcrest">${v1819sEmblem(6,40)}</span><span class="v1819s-lt"><span class="v1819s-ln"><b>${esc(U.pick.def.n||'Custom scenario')}</b></span><small>Custom scenario${U.pick.from==='code'?' from a challenge code':''}</small></span><span class="v1819s-lmed"></span></button></li>`:'';
+  return `<aside class="v1819s-side" aria-label="All scenarios">
+    <div class="v1819s-sh"><h3>All scenarios</h3><span><b>${n}</b> of ${tot} medal${tot>1?'s':''} earned</span></div>
+    <ol class="v1819s-list">${cust}${rows}</ol>
+    <p class="v1819s-note">Earned medals unlock the harder scenarios and show on your coach profile.</p>
+    <section class="v1819s-own ${U.view==='build'?'on':''}"><span class="v1819s-kick">Make your own</span>
+      <ol class="v1819s-steps"><li><i>1</i>Choose a school</li><li><i>2</i>Set rules</li><li><i>3</i>Set medals</li></ol>
+      <button class="btn v1819s-ghost wide" id="v1819s-buildbtn" data-a="v1819sBuildOpen">${icon('edit',15)} Build a scenario <small>→ produces a challenge code</small></button></section>
+    <section class="v1819s-codef"><label for="v1819s-code">Enter a challenge code</label><div class="v1819s-codein"><input id="v1819s-code" type="text" autocomplete="off" spellcheck="false" placeholder="TL-UNDR-7K2M-…" value="${esc(U.codeIn||'')}" aria-describedby="v1819s-codeerr"><button class="btn" id="v1819s-codego" data-a="v1819sCode">Play</button></div>
+      <p id="v1819s-codeerr" class="v1819s-err" role="alert">${esc(U.codeErr||'')}</p></section>
+  </aside>`; }
+
+MODALS.v1819sHub=()=>{ const U=V1819S_UI; if(!U.pick) U.pick={id:V1819S_LIST[0].id,seed:v1819sSeed(V1819S_LIST[0].id),from:'list'};
+  return `<div class="scrim v1819s-scrim" data-a="scrimClose"><div class="modal v1819s-modal" role="dialog" aria-modal="true" aria-labelledby="v1819s-ttl" data-stop="1">
+    <header class="v1819s-hh"><div><span class="v1819s-kick">${icon('v1819s',15)} Scenario Mode</span><h2 id="v1819s-ttl">Start from a hand-built situation</h2><p>Rescue a program, defend a title or survive a brutal run. Each scenario has a goal, a few rules and three medals.</p></div><button class="x" data-a="closeModal" aria-label="Close Scenario Mode" data-autofocus>✕</button></header>
+    <div class="v1819s-cols">${v1819sDetailHTML()}${v1819sListHTML()}</div></div></div>`; };
+
+/* ---------- builder ---------- */
+function v1819sBDef(){ const U=V1819S_UI; if(!U.b) U.b={n:'My scenario',sc:2,se:2,ru:['tier1'],md:{b:{k:'top',n:4},s:{k:'secfinal'},g:{k:'sec'}},seed:(Math.random()*4294967295)>>>0}; return U.b; }
+function v1819sBCode(){ const B=v1819sBDef(); return v1819sEncode({def:{n:v1819sCleanName(B.n)||'Custom scenario',sc:B.sc,se:B.se,ru:B.ru,md:B.md},seed:B.seed}); }
+function v1819sBuilderHTML(){ const B=v1819sBDef();
+  const seg=(k,opts,cur)=>`<div class="v1819s-seg${opts.length>3?' v1819s-seg4':''}" role="radiogroup">${opts.map(([v,l,sub])=>`<label class="${String(v)===String(cur)?'on':''}"><input type="radio" name="v1819s-${k}" id="v1819s-${k}-${v}" value="${v}" data-c="v1819sB" data-k="${k}" ${String(v)===String(cur)?'checked':''}><span><b>${esc(l)}</b>${sub?`<small>${esc(sub)}</small>`:''}</span></label>`).join('')}</div>`;
+  const goalOpts=V1819S_GOAL_IDS.map(k=>[k,k==='top'?'Finish top N in the league':k==='topall'?'Finish top N every season':V1819S_GOALS[k].t]);
+  const medal=([m,nm])=>{ const g=B.md[m]; const nOpts=[1,2,3,4,5,6,7].map(n=>`<option value="${n}" ${g.n===n?'selected':''}>${n===7&&g.k==='topall'?'7 (above last)':n}</option>`).join('');
+    return `<li>${v1819sMedalSVG(m,30)}<label class="v1819s-sel"><span class="v1819s-sr">${nm} goal</span><select id="v1819s-md-${m}" data-c="v1819sB" data-k="md" data-m="${m}">${goalOpts.map(([v,l])=>`<option value="${v}" ${g.k===v?'selected':''}>${esc(l)}</option>`).join('')}</select></label>${V1819S_GOALS[g.k].n?`<label class="v1819s-sel n"><span>N =</span><select id="v1819s-mdn-${m}" data-c="v1819sB" data-k="mdn" data-m="${m}">${nOpts}</select></label>`:''}<span class="v1819s-mtx">${esc(v1819sGoalText(g))}</span></li>`; };
+  return `<section class="v1819s-detail v1819s-build" aria-labelledby="v1819s-bname">
+    <div class="v1819s-dtop"><span class="v1819s-dcrest">${v1819sEmblem(6,84)}</span><div class="v1819s-dtt"><span class="v1819s-eyebrow">Make your own</span><h3 id="v1819s-bname" tabindex="-1">Scenario builder</h3><p class="v1819s-dline">Pick a school, the rules and three medals. You get a code anyone can play, in the same world.</p></div></div>
+    <div class="v1819s-field"><label for="v1819s-bn">Scenario name</label><input id="v1819s-bn" type="text" maxlength="24" value="${esc(B.n)}" data-v1819s-in="n" autocomplete="off"></div>
+    <div class="v1819s-blk"><h4><i class="v1819s-num">1</i> Choose a school</h4>${seg('sc',[[0,'Strongest','Top of the league'],[1,'Average','Mid-table'],[2,'Weakest','Rated last'],[3,'As dealt','Whatever the seed gives']],B.sc)}
+      <div class="v1819s-row2"><div><span class="v1819s-lab">Seasons</span>${seg('se',[[1,'1'],[2,'2'],[3,'3']],B.se)}</div>
+      <div class="v1819s-field"><label for="v1819s-bseed">World seed</label><div class="v1819s-codein"><input id="v1819s-bseed" type="text" inputmode="numeric" value="${B.seed}" data-v1819s-in="seed" autocomplete="off"><button class="btn sm" id="v1819s-reroll" data-a="v1819sReroll" aria-label="New random world">↻</button></div></div></div></div>
+    <div class="v1819s-blk"><h4><i class="v1819s-num">2</i> Set rules</h4><div class="v1819s-checks">
+      <label class="fixed"><input type="checkbox" checked disabled><span><b>${V1819S_RULES.fair.t}</b><small>Always on</small></span></label>
+      ${V1819S_RULE_IDS.map(k=>`<label class="${B.ru.includes(k)?'on':''}"><input type="checkbox" id="v1819s-ru-${k}" data-c="v1819sB" data-k="ru" data-r="${k}" ${B.ru.includes(k)?'checked':''}><span><b>${esc(V1819S_RULES[k].t)}</b><small>${esc(V1819S_RULES[k].d)}</small></span></label>`).join('')}</div></div>
+    <div class="v1819s-blk"><h4><i class="v1819s-num">3</i> Set medals</h4><ul class="v1819s-bmed">${V1819S_MEDALS.map(medal).join('')}</ul></div>
+    ${v1819sCodeBox(v1819sBCode(),'Your challenge code')}
+    <div class="v1819s-actions"><button class="btn pri v1819s-start" id="v1819s-bstart" data-a="v1819sBuildStart">${icon('play',16)} Start this scenario</button><button class="btn v1819s-ghost" id="v1819s-bback" data-a="v1819sBack">Back to scenarios</button></div>
+  </section>`; }
+CH.v1819sB=el=>{ const B=v1819sBDef(); const k=el.dataset.k;
+  if(k==='sc') B.sc=+el.value; else if(k==='se') B.se=+el.value;
+  else if(k==='ru'){ const r=el.dataset.r; B.ru=B.ru.filter(x=>x!==r); if(el.checked) B.ru.push(r); B.ru.sort((a,b)=>V1819S_RULE_IDS.indexOf(a)-V1819S_RULE_IDS.indexOf(b)); }
+  else if(k==='md'){ const m=el.dataset.m; const kk=el.value; B.md[m]=V1819S_GOALS[kk].n?{k:kk,n:B.md[m].n||(kk==='topall'?7:3)}:{k:kk}; }
+  else if(k==='mdn'){ const m=el.dataset.m; B.md[m].n=+el.value; }
+  v1819sRefresh(); };
+document.addEventListener('input',e=>{ const el=e.target&&e.target.closest&&e.target.closest('[data-v1819s-in]'); if(!el) return; if(el.dataset.v1819sIn==='coach'){ V1819S_UI.coachIn=el.value; return; } const B=v1819sBDef();
+  if(el.dataset.v1819sIn==='n') B.n=el.value.slice(0,24); else if(el.dataset.v1819sIn==='seed'){ const v=String(el.value).trim(); B.seed=/^\d+$/.test(v)&&+v<4294967296?(+v)>>>0:hashStr(v||'0'); }
+  const out=document.getElementById('v1819s-codeout'); if(out) out.textContent=v1819sBCode(); const cp=document.getElementById('v1819s-copy'); if(cp) cp.dataset.code=v1819sBCode(); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Enter') return; const t=e.target; if(t&&t.id==='v1819s-code'){ e.preventDefault(); A.v1819sCode(); } });
+
+/* ---------- save slot picker ---------- */
+function v1819sSlotHTML(){ const U=V1819S_UI; const by={}; for(const m of U.metas) by[m.slot]=m; const pk=U.pick; const d=v1819sPickDef(); const name=d?d.name:(pk.def&&pk.def.n)||'Custom scenario';
+  const rows=[1,2,3].map(n=>{ const m=by[n]; const conf=U.confirm===n;
+    if(!m) return `<li><button class="v1819s-slot" id="v1819s-slot-${n}" data-a="v1819sSlot" data-slot="${n}"><span class="v1819s-slot-ic">${icon('play',16)}</span><span><b>Slot ${n} · empty</b><small>Start ${esc(name)} here</small></span></button></li>`;
+    return `<li><button class="v1819s-slot filled ${conf?'warn':''}" id="v1819s-slot-${n}" data-a="v1819sSlot" data-slot="${n}" style="--team1:${esc(m.c1||'#345')}"><span class="v1819s-slot-ic">${m.mk?mascotSVG(m.mk,m.c1,m.c2,34):''}</span><span><b>Slot ${n} · ${esc(m.school)}</b><small>${m.year} · season ${m.seasonNo} · Coach ${esc(m.coach)}${App.C&&App.slot===n?' · open now':''}</small></span><span class="v1819s-slot-w">Replace</span></button>
+      ${conf?`<div class="v1819s-confirm" role="alert"><p><b>Replace ${esc(m.school)}?</b> That career and its match history will be deleted. This cannot be undone.</p><div><button class="btn" id="v1819s-keep" data-a="v1819sSlotCancel">Keep it</button><button class="btn danger" id="v1819s-replace" data-a="v1819sLaunch" data-slot="${n}">Replace slot ${n}</button></div></div>`:''}</li>`; }).join('');
+  return `<section class="v1819s-detail v1819s-slots" aria-labelledby="v1819s-sname">
+    <div class="v1819s-dtt"><span class="v1819s-eyebrow">Start · ${esc(name)}</span><h3 id="v1819s-sname" tabindex="-1">Choose a save slot</h3><p class="v1819s-dline">A scenario career lives in a normal save slot. When the scenario ends, it carries on as a normal career.</p></div>
+    <div class="v1819s-field"><label for="v1819s-coach">Your coach name</label><input id="v1819s-coach" type="text" maxlength="40" value="${esc(U.coachIn!=null?U.coachIn:v1819sCoach())}" data-v1819s-in="coach" autocomplete="off"></div>
+    <ul class="v1819s-slotl">${rows}</ul>
+    <div class="v1819s-actions"><button class="btn v1819s-ghost" id="v1819s-sback" data-a="v1819sBack">Back</button></div></section>`; }
+
+/* ---------- hub actions ---------- */
+A.v1819sNoop=()=>{};
+A.v1819sHub=el=>{ const U=V1819S_UI; U.view='detail'; U.share=null; U.codeErr=''; U.confirm=null; const id=el&&el.dataset&&el.dataset.id; if(id&&V1819S_BY[id]) U.pick={id,seed:v1819sSeed(id),from:'list'};
+  if(!U.pick&&App.C&&App.C.scn&&V1819S_BY[App.C.scn.id]) U.pick={id:App.C.scn.id,seed:v1819sSeed(App.C.scn.id),from:'list'};
+  App.modal={type:'v1819sHub'}; document.body.classList.remove('navopen'); renderModal(); v1819sQueue(); };
+A.v1819sPick=el=>{ const U=V1819S_UI; const id=el.dataset.id; U.pick={id,seed:v1819sSeed(id),from:'list'}; U.view='detail'; U.share=null; U.confirm=null; v1819sRefresh(); v1819sQueue();
+  if(window.matchMedia&&matchMedia('(max-width: 900px)').matches){ const h=document.getElementById('v1819s-dname'); const sc=document.querySelector('.v1819s-modal'); if(h&&sc) sc.scrollTo({top:0,behavior:reducedMotion()?'auto':'smooth'}); } };
+A.v1819sShare=()=>{ const U=V1819S_UI; const pk=U.pick; const d=v1819sPickDef(); const P=v1819sP();
+  const run=d?P.runs.find(r=>r.id===d.id&&r.res):null;
+  if(run&&run.code) U.share={code:run.code,note:`Your ${['','bronze','silver','gold'][run.res]} run${run.rec?` · ${run.rec.w}–${run.rec.d}–${run.rec.l}`:''}: anyone with this code plays your exact world`};
+  else U.share={code:v1819sEncode({id:pk.id,seed:pk.seed,def:pk.def||null,res:pk.res||null}),note:'Anyone with this code plays this exact world'};
+  U.copied=0; v1819sRefresh(); };
+A.v1819sCopy=async el=>{ const U=V1819S_UI; const code=el.dataset.code; let ok=false; try{ await navigator.clipboard.writeText(code); ok=true; }catch(e){}
+  if(!ok){ try{ const out=document.getElementById('v1819s-codeout'); const r=document.createRange(); r.selectNodeContents(out); const s=getSelection(); s.removeAllRanges(); s.addRange(r); ok=document.execCommand&&document.execCommand('copy'); }catch(e){} }
+  U.copied=Date.now(); el.innerHTML=`${icon('check',15)} Copied`; toast(ok?'Code copied. Send it to a friend.':'Select the code and copy it.'); setTimeout(()=>{ if(el.isConnected) el.innerHTML=`${icon('copy',15)} Copy`; },2500); };
+A.v1819sCode=()=>{ const U=V1819S_UI; const inp=document.getElementById('v1819s-code'); const raw=inp?inp.value:''; U.codeIn=raw; const o=v1819sDecode(raw);
+  if(o.err){ U.codeErr=o.err; const er=document.getElementById('v1819s-codeerr'); if(er) er.textContent=o.err; if(inp){ inp.setAttribute('aria-invalid','true'); inp.classList.remove('v1819s-shake'); void inp.offsetWidth; inp.classList.add('v1819s-shake'); } return; }
+  U.codeErr=''; U.codeIn=''; U.pick={...o,from:'code',code:raw.trim().toUpperCase()}; U.view='detail'; U.share=null; renderModal(); v1819sTop(); v1819sQueue();
+  const h=document.getElementById('v1819s-dname'); if(h) h.focus(); toast('Challenge loaded. Building the world…'); };
+A.v1819sBuildOpen=()=>{ const U=V1819S_UI; U.view='build'; U.share=null; renderModal(); v1819sTop(); const h=document.getElementById('v1819s-bname'); if(h) h.focus(); };
+A.v1819sReroll=()=>{ const B=v1819sBDef(); B.seed=(Math.random()*4294967295)>>>0; v1819sRefresh(); };
+A.v1819sBack=()=>{ const U=V1819S_UI; U.view='detail'; U.confirm=null; renderModal(); v1819sTop(); const h=document.getElementById('v1819s-dname'); if(h) h.focus(); };
+A.v1819sBuildStart=()=>{ const U=V1819S_UI; const B=v1819sBDef(); U.pick={id:'custom',seed:B.seed,def:{n:v1819sCleanName(B.n)||'Custom scenario',sc:B.sc,se:B.se,ru:[...B.ru],md:JSON.parse(JSON.stringify(B.md))},from:'build'}; U.pick.code=v1819sBCode(); v1819sToSlots(); };
+A.v1819sStart=()=>{ const d=v1819sPickDef(); const U=V1819S_UI; if(d&&!v1819sUnlocked(d)&&U.pick.from!=='code'){ toast('Earn more medals to unlock this scenario.'); return; } v1819sToSlots(); };
+async function v1819sToSlots(){ const U=V1819S_UI; try{ U.metas=await DB.getMeta(); }catch(e){ U.metas=[]; } U.view='slot'; U.confirm=null; renderModal(); v1819sTop(); v1819sQueue(); const h=document.getElementById('v1819s-sname'); if(h) h.focus(); }
+A.v1819sSlot=el=>{ const U=V1819S_UI; const n=+el.dataset.slot; if(U.metas.some(m=>m.slot===n)){ U.confirm=U.confirm===n?null:n; v1819sRefresh(); const b=document.getElementById('v1819s-keep'); if(b&&U.confirm) b.focus(); return; } v1819sLaunch(n); };
+A.v1819sSlotCancel=()=>{ V1819S_UI.confirm=null; v1819sRefresh(); };
+A.v1819sLaunch=el=>v1819sLaunch(+el.dataset.slot);
+async function v1819sLaunch(slot){ const U=V1819S_UI; const pk=U.pick; if(!pk) return; const inp=document.getElementById('v1819s-coach'); const coach=((inp&&inp.value)||v1819sCoach()).trim().slice(0,40)||'Sam Rivera';
+  const P=v1819sP(); P.coach=coach; savePrefs();
+  const k=v1819sKey(pk); let C=U.drafts[k]; delete U.drafts[k]; if(!C||!C.schools){ C=v1819sBuild(pk,{slot,coach}); }
+  C.slot=slot; C.flags={}; C.created=Date.now(); const us=C.schools[C.userSid]; C.coaches[C.userCoachId].name=coach;
+  C.news=C.news.filter(n=>!(n.type==='program'&&/named head coach/.test(n.text))); addNews(C,'program',`${coach} named head coach of the ${us.name} ${us.mascot}. Scenario: ${C.scn.name}`,C.userSid);
+  if(pk.from==='code'&&pk.code) C.scn.from=pk.code; if(pk.res) C.scn.chal=pk.res;
+  C._dirty=new Set(Object.keys(C.logs||{}));
+  try{ if(App.C) await saveNow(); }catch(e){}
+  try{ const metas=await DB.getMeta(); if(metas.some(m=>m.slot===slot)) await DB.del(slot); }catch(e){}
+  App.C=C; App.slot=slot; App.loadedYears=new Set([C.year]); if(App.odds) App.odds.clear(); App.modal=null; App.drawer=null; App.route='scenario'; App.params={}; PREFS.lastSlot=slot; savePrefs();
+  U.view='detail'; U.confirm=null; U.share=null; if(!pk.def&&!pk.res) delete U.seeds[pk.id];
+  await saveNow(); render(); try{ Sound.syncMenu(); }catch(e){} window.scrollTo(0,0); toast(`${C.scn.name}: you're in charge of ${us.name}. Good luck, Coach.`); }
+
+/* ---------- in career: the scenario page ---------- */
+function v1819sStatusLine(C,S){ const ys=v1819sYears(S); const last=ys[ys.length-1];
+  if(S.status==='done') return `Complete · ${['No medal','Bronze','Silver','Gold'][S.end.res]}`;
+  const i=Math.min(ys.length,Math.max(1,C.year-S.y0+1)); const left=last-C.year; return `Season ${i} of ${S.seasons}${left>0?` · ${left} more after this one`:' · final season'}`; }
+function v1819sSeasonRows(C,S){ return v1819sYears(S).map(y=>{ if(y>C.year) return `<li class="v1819s-yr fut"><b>${y}</b><span>Still to come</span></li>`; const F=v1819sFactsFor(C,S,y);
+  return `<li class="v1819s-yr ${y===C.year&&S.status==='live'?'now':''}"><b>${y}</b><span class="v1819s-yrc"><span><small>League</small>${F.gp?`${F.w}–${F.d}–${F.l}`:'—'}</span><span><small>Finish</small>${F.pos?v1819sOrd(F.pos)+(F.lgDone?'':' now'):'—'}</span><span><small>Postseason</small>${F.stage?esc(v1819sStageName(F.stage)):F.lgDone?(F.out?'Out in round one':'Sectionals'):'—'}</span></span></li>`; }).join(''); }
+VIEWS.scenario=()=>{ const C=App.C; const S=C.scn; const us=Sx(C.userSid);
+  if(!S) return `<div class="v1819s-page"><section class="v1819s-hero v1819s-none"><span class="v1819s-heroic">${v1819sMedalSVG('g',72,'off')}</span><div><span class="v1819s-kick">Scenario Mode</span><h2>This is a regular career</h2><p>Scenarios start from a hand-built situation with a goal, a few rules and three medals. Start one in a free save slot; this career stays as it is.</p><button class="btn pri" data-a="v1819sHub">${icon('v1819s',16)} Open Scenario Mode</button></div></section></div>`;
+  const st=v1819sMedalStates(C,S); const live=S.status==='live'; const d=V1819S_BY[S.id];
+  const goals=V1819S_MEDALS.map(([m,nm])=>{ const e=st[m]; const got=!!(S.earned&&S.earned[m]); const dead=!got&&(e.dead||(!live&&S.missed&&S.missed[m]));
+    const pill=got?`<span class="v1819s-pill got">${icon('check',13)} Earned ${S.earned[m].yr}</span>`:dead?'<span class="v1819s-pill dead">Out of reach</span>':live?'<span class="v1819s-pill">In play</span>':'<span class="v1819s-pill dead">Missed</span>';
+    return `<li class="v1819s-goal ${got?'got':dead?'dead':''}">${v1819sMedalSVG(m,40,got?'on':'off')}<div class="v1819s-gt"><span class="v1819s-gh"><small>${nm}</small>${pill}</span><b>${esc(v1819sGoalText(S.medals[m]))}</b>
+      <span class="v1819s-bar" role="progressbar" aria-label="${nm} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round((got?1:e.pct||0)*100)}"><i style="width:${Math.round((got?1:e.pct||0)*100)}%"></i></span><small class="v1819s-prog">${esc(got?'Done':e.prog||'')}</small></div></li>`; }).join('');
+  const res=S.end?S.end.res:0;
+  const banner=!live?`<section class="v1819s-donebar res${res}">${v1819sMedalSVG(['','b','s','g'][res]||'',56,res?'on':'empty')}<div><span class="v1819s-kick">Scenario complete · ${S.end.yr}</span><b>${['No medal this time','Bronze medal','Silver medal','Gold medal'][res]}</b><small>The rules are lifted. This career carries on as a normal one, as far as you want to take it.</small></div><button class="btn" data-a="v1819sReplay">${icon('history',15)} Replay this world</button></section>`:'';
+  const chal=S.chal?`<p class="v1819s-chalnote">${icon('v1819s',14)} Challenge to beat: <b>${['No medal','Bronze','Silver','Gold'][S.chal.medal]}</b> with ${S.chal.w}–${S.chal.d}–${S.chal.l} in the league.</p>`:'';
+  return `<div class="v1819s-page">
+    <section class="v1819s-hero" style="--c1:${us.c1};--c2:${us.c2}"><span class="v1819s-hcrest">${crest(us,92)}</span><div class="v1819s-ht"><span class="v1819s-kick">${d?`Scenario ${V1819S_LIST.indexOf(d)+1} of ${V1819S_LIST.length}`:'Custom scenario'} ${v1819sStars(S.stars)}</span><h2>${esc(S.name)}</h2><p>${esc(S.line||'')}</p>
+      <div class="v1819s-chips"><span class="v1819s-chip ${live?'live':''}">${live?'<i></i>':''}${esc(v1819sStatusLine(C,S))}</span><span class="v1819s-chip">Started ${S.y0}</span><span class="v1819s-chip">Rated ${v1819sOrd(S.rank||1)} of ${C.league.length} at the start</span></div>${chal}</div>
+      <div class="v1819s-hact"><button class="btn v1819s-ghost" data-a="v1819sShareCareer">${icon('copy',15)} ${S.status==='done'&&S.end.res?'Share result as a challenge code':'Share as a challenge code'}</button><button class="btn v1819s-ghost" data-a="v1819sHub">${icon('v1819s',15)} All scenarios</button></div></section>
+    ${App.v1819sShare?`<div class="v1819s-pshare">${v1819sCodeBox(App.v1819sShare.code,App.v1819sShare.note)}</div>`:''}
+    ${banner}
+    <div class="v1819s-pgrid"><section class="card v1819s-goals"><h3>Medals</h3><p class="muted small">Checked after every game. Any season in the scenario counts${S.medals.b.k==='topall'?', except "every season" goals':''}.</p><ul>${goals}</ul></section>
+      <div class="v1819s-pcol"><section class="card"><h3>Seasons</h3><ul class="v1819s-yrs">${v1819sSeasonRows(C,S)}</ul></section>
+      <section class="card"><h3>Rules</h3>${v1819sRulesHTML(S.rules,live)}${S.inj?`<p class="tiny muted">${esc(S.inj.nm)} is listed as out for the ${S.inj.yr} season and cannot be picked.</p>`:''}</section></div></div></div>`; };
+A.v1819sShareCareer=()=>{ const C=App.C; const S=C&&C.scn; if(!S) return; const done=S.status==='done';
+  App.v1819sShare={code:done?S.rcode:S.code,note:done&&S.end.res?`Your ${['','bronze','silver','gold'][S.end.res]} result: anyone with this code plays your exact world`:'Anyone with this code starts this exact scenario'}; V1819S_UI.copied=0; App.keepScroll=true; render(); };
+A.v1819sReplay=()=>{ const C=App.C; const S=C&&C.scn; if(!S) return; const U=V1819S_UI; U.pick={id:S.id,seed:S.seed,def:S.def||null,from:'code',code:S.code}; U.view='detail'; U.share=null; App.modal={type:'v1819sHub'}; renderModal(); v1819sQueue(); };
+TITLES.scenario='Scenario'; NAV_ICON.scenario='v1819s'; if(typeof NAV_DESC!=='undefined') NAV_DESC.scenario='Goals, rules and medals';
+{ const g=TOPNAV.find(t=>t[0]==='league'); if(g&&!g[3].includes('scenario')) g[3].push('scenario'); }
+if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('scenario');
+{ const _nb=navBadges; navBadges=function(C){ const b=_nb.apply(this,arguments); try{ const S=C&&C.scn; if(S&&S.fresh&&S.fresh.length) b.scenario=S.fresh.length; else if(S&&S.status==='live') b.scenario=''; }catch(e){} return b; }; }
+{ const _go=A.go; A.go=function(el){ if(el&&el.dataset&&el.dataset.r!=='scenario') App.v1819sShare=null; return _go.apply(this,arguments); }; }
+
+/* ---------- Overview: the scenario in "This week" ---------- */
+function v1819sWeekItem(C){ const S=C.scn; if(!S) return ''; const live=S.status==='live'; const st=live?v1819sMedalStates(C,S):null;
+  const next=live?V1819S_MEDALS.find(([m])=>!S.earned[m]&&!st[m].dead):null; const got=V1819S_MEDALS.filter(([m])=>S.earned&&S.earned[m]).map(([m])=>v1819sMedalSVG(m,18)).join('');
+  const sub=live?(next?`Next: ${v1819sGoalText(S.medals[next[0]])} · ${st[next[0]].prog||''}`:'Every medal is settled'):`Complete · ${['no medal','bronze','silver','gold'][S.end.res]}`;
+  return `<button class="dec v1819s-dec" data-a="go" data-r="scenario"><span class="dec-ico">${v1819sMedalSVG(S.end&&S.end.res?['','b','s','g'][S.end.res]:'g',26,live||S.end.res?'on':'empty')}</span><span class="grow"><b>${esc(S.name)} · ${esc(v1819sStatusLine(C,S).replace(/ · .*$/,''))} ${got?`<span class="v1819s-decm">${got}</span>`:''}</b><small>${esc(sub)}</small></span><span class="dec-go"></span></button>`; }
+{ const _of=VIEWS.office; VIEWS.office=function(){ let h=_of.apply(this,arguments); try{ const C=App.C; if(!C||!C.scn) return h; const item=v1819sWeekItem(C);
+    const t=document.createElement('template'); t.innerHTML=h; const box=t.content.querySelector('.v1817o-items');
+    if(box){ const clear=box.querySelector('.v1817o-clear'); if(clear) clear.remove(); box.insertAdjacentHTML('afterbegin',item); h=t.innerHTML; }
+    else { const i=h.indexOf('<div class="ov-grid'); const card=`<section class="ov-card v1819s-ovcard">${item}</section>`; h=i>=0?h.slice(0,i)+card+h.slice(i):card+h; } }catch(e){ console.warn('v1819s office',e); } return h; }; }
+
+/* ---------- School & Stadium: the coach's medal shelf ---------- */
+function v1819sShelfHTML(){ const P=v1819sP(); const n=v1819sMedalCount();
+  return `<section class="card v1819s-shelf"><div class="v1819s-shh"><h3>Scenario medals</h3><span class="muted small">${n} of ${V1819S_LIST.length*3} earned, across every career</span></div>
+    <ul>${V1819S_LIST.map(d=>{ const m=P.med[d.id]||{}; const lock=!v1819sUnlocked(d); return `<li><button class="v1819s-shi ${lock?'locked':''}" data-a="v1819sHub" data-id="${d.id}"><span class="v1819s-shm">${V1819S_MEDALS.map(([k])=>v1819sMedalSVG(k,22,m[k]?'on':'off')).join('')}</span><b>${esc(d.name)}</b>${v1819sStars(d.stars)}${lock?`<small>${icon('lock',11)} Locked</small>`:''}</button></li>`; }).join('')}</ul>
+    <button class="btn sm" data-a="v1819sHub">${icon('v1819s',15)} Open Scenario Mode</button></section>`; }
+{ const _sv=VIEWS.school; VIEWS.school=function(){ const h=_sv.apply(this,arguments); try{ return h+v1819sShelfHTML(); }catch(e){ return h; } }; }
+
+/* ---------- main menu: the entry ---------- */
+function v1819sEntryHTML(){ const n=v1819sMedalCount(); const tot=V1819S_LIST.length*3;
+  return `<button class="v1819s-entry v1811m-in" style="--v1811m-d:4" data-a="v1819sHub"><span class="v1819s-entry-med" aria-hidden="true">${v1819sMedalSVG('b',30,n>=1?'on':'off')}${v1819sMedalSVG('g',40,'on')}${v1819sMedalSVG('s',30,n>=2?'on':'off')}</span>
+    <span class="v1819s-entry-t"><span class="v1819s-entry-k">Scenario Mode</span><b>Six hand-built challenges</b><small>Rescue a program, defend a title or survive a brutal run · ${n} of ${tot} medals</small></span><span class="v1819s-entry-go" aria-hidden="true">${icon('chev',20)}</span></button>`; }
+if(typeof v1811mHTML==='function'){ const _mh=v1811mHTML; v1811mHTML=function(){ let h=_mh.apply(this,arguments); try{ const i=h.indexOf('<section class="v1811m-saves'); if(i>=0) h=h.slice(0,i)+v1819sEntryHTML()+h.slice(i); }catch(e){} return h; }; }
+
+/* ---------- rule locks on the controls ---------- */
+function v1819sLockMsg(r){ return `Scenario rule: ${V1819S_RULES[r].t}. Locked until the scenario ends.`; }
+{ const _sp=A.setParam; A.setParam=function(el){ const C=App.C; const k=el&&el.dataset&&el.dataset.k;
+    if(C&&k==='set_difficulty'&&v1819sHas(C,'hard')){ toast(v1819sLockMsg('hard')); return; }
+    if(C&&k==='set_cards'&&v1819sHas(C,'strict')){ toast(v1819sLockMsg('strict')); return; }
+    return _sp.apply(this,arguments); }; }
+{ const _cs=CH.setting; CH.setting=function(el){ const C=App.C; const k=el&&el.dataset&&el.dataset.k;
+    if(C&&((k==='manager'&&v1819sHas(C,'fair'))||(k==='suspensions'&&v1819sHas(C,'strict')))){ el.checked=!!C.settings[k]; toast(v1819sLockMsg(k==='manager'?'fair':'strict')); return; }
+    return _cs.apply(this,arguments); }; }
+for(const [nm,rule] of [['saveDirect','fair'],['savePlayer','fair']]){ const _f=A[nm]; if(typeof _f==='function') A[nm]=function(){ if(App.C&&v1819sHas(App.C,rule)){ toast(v1819sLockMsg(rule)); return; } return _f.apply(this,arguments); }; }
+{ const _pr=A.promote; A.promote=function(el){ const C=App.C; if(C&&el&&el.dataset&&el.dataset.to==='V'&&v1819sHas(C,'nocall')&&C.players[el.dataset.id]&&C.players[el.dataset.id].sid===C.userSid){ toast(v1819sLockMsg('nocall')); return; } return _pr.apply(this,arguments); }; }
+{ const _mp=MODALS.player; MODALS.player=function(m){ const C=App.C; const fair=C&&v1819sHas(C,'fair'); if(fair&&m&&m.tab==='edit') m.tab='overview'; let h=_mp.apply(this,arguments);
+    try{ if(fair){ h=h.replace(/<button role="tab"[^>]*data-v="edit"[^>]*>[^<]*<\/button>/,''); }
+      if(C&&v1819sHas(C,'nocall')) h=h.replace(/<button class="btn sm pri" data-a="promote"[^>]*data-to="V">[^<]*<\/button>/,'<span class="tiny muted">No call-ups (scenario rule)</span>');
+      const S=C&&C.scn; if(S&&S.inj&&S.inj.pid===m.id&&S.inj.yr===C.year&&S.status==='live'){ const i=h.indexOf('<div class="mbody">'); if(i>=0){ const j=i+19; h=h.slice(0,j)+`<div class="v1819s-injn">${icon('cross',16)} Out for the ${S.inj.yr} season (scenario: ${esc(S.name)})</div>`+h.slice(j); } } }catch(e){} return h; }; }
+{ const _st=VIEWS.settings; VIEWS.settings=function(){ const h=_st.apply(this,arguments); try{ const C=App.C; const S=v1819sLive(C); if(!S) return h; const locks=['Player editor','Manager Mode','Directed results'];
+    if(S.rules.includes('hard')) locks.push('Difficulty (Hard)'); if(S.rules.includes('strict')) locks.push('Cards and suspensions'); if(S.rules.includes('nocall')) locks.push('Varsity call-ups');
+    return `<div class="notice v1819s-setn">${icon('lock',16)}<span><b>${esc(S.name)} is live.</b> Locked until it ends: ${locks.join(', ')}. <button class="link" data-a="go" data-r="scenario">See the rules</button></span></div>`+h; }catch(e){ return h; } }; }
+
+/* ---------- medal toasts and the end-of-scenario ceremony ---------- */
+function v1819sAfterRender(){ const C=App.C; const S=C&&C.scn; if(!S) return;
+  if(S.fresh&&S.fresh.length&&!App.live){ const names=S.fresh.map(m=>({b:'Bronze',s:'Silver',g:'Gold'}[m])); S.fresh=[]; queueSave(); toast(`${names.join(' and ')} medal earned · ${S.name}`); try{ Sound.ui('pop'); }catch(e){} }
+  if(S.pend) v1819sCeremonySoon(); }
+function v1819sCeremonySoon(){ clearTimeout(V1819S_UI.cerT); V1819S_UI.cerT=setTimeout(()=>{ const C=App.C; const S=C&&C.scn; if(!S||!S.pend) return;
+    if(App.modal||App.drawer||App.live||document.querySelector('.ceremony')){ v1819sCeremonySoon(); return; }
+    S.pend=false; queueSave(); App.modal={type:'v1819sEnd'}; renderModal(); },700); }
+{ const _r=render; render=function(){ const r=_r.apply(this,arguments); try{ v1819sAfterRender(); }catch(e){ console.warn('v1819s render',e); } return r; }; }
+{ const _rm=renderModal; renderModal=function(){ const r=_rm.apply(this,arguments); try{ if(!App.modal&&App.C&&App.C.scn&&App.C.scn.pend) v1819sCeremonySoon(); }catch(e){} return r; }; }
+MODALS.v1819sEnd=()=>{ const C=App.C; const S=C&&C.scn; if(!S||!S.end) return ''; const res=S.end.res; const m=['','b','s','g'][res]; const P=v1819sP();
+  const nm=['No medal this time','Bronze medal','Silver medal','Gold medal'][res];
+  const why={gold:'Gold earned. That is the top of the podium.',time:'The clock ran out on this scenario.',settled:'Every medal is settled.',sudden:'One loss ends it, and the streak is over.'}[S.end.why]||'';
+  const rows=V1819S_MEDALS.map(([k,n])=>{ const got=!!S.earned[k]; return `<li class="${got?'got':''}">${v1819sMedalSVG(k,28,got?'on':'off')}<span><small>${n}</small><b>${esc(v1819sGoalText(S.medals[k]))}</b></span><span class="v1819s-rk">${got?icon('check',16):'–'}</span></li>`; }).join('');
+  const rec=S.end.rec; const best=S.id!=='custom'&&res>0&&res>=(P.best[S.id]||0);
+  return `<div class="scrim v1819s-scrim" data-a="scrimClose"><div class="modal v1819s-endm res${res}" style="--c1:${esc(Sx(C.userSid).c1)};--c2:${esc(Sx(C.userSid).c2)}" role="dialog" aria-modal="true" aria-labelledby="v1819s-endh" data-stop="1">
+    <button class="x" data-a="closeModal" aria-label="Close">✕</button>
+    <div class="v1819s-rays" aria-hidden="true"></div>
+    <div class="v1819s-bigmed">${res?v1819sMedalSVG(m,150):v1819sMedalSVG('',150,'empty')}${res?'<span class="v1819s-ribbon" aria-hidden="true"></span>':''}</div>
+    <span class="v1819s-kick">Scenario complete · ${esc(S.name)}</span>
+    <h2 id="v1819s-endh">${nm}</h2>${best?'<span class="v1819s-newbest">Your best yet</span>':''}
+    <p class="v1819s-why">${esc(why)} ${rec&&(rec.w+rec.d+rec.l)?`League ${rec.w}–${rec.d}–${rec.l}`:''}${S.end.stage?` · ${esc(v1819sStageName(S.end.stage))}`:''}.</p>
+    <ul class="v1819s-medals v1819s-endrows">${rows}</ul>
+    ${v1819sCodeBox(S.rcode,'Share your result: anyone with this code plays your exact world')}
+    <div class="v1819s-endact"><button class="btn v1819s-ghost" data-a="v1819sReplay">Try this world again</button><button class="btn v1819s-ghost" data-a="v1819sHub">Scenario hub</button><button class="btn pri" data-a="closeModal" data-autofocus>Keep playing this career</button></div>
+    <p class="tiny muted">The rules are lifted. ${esc(Sx(C.userSid).town)} carry on as a normal career.</p></div></div>`; };
 
 </script>
 </body></html>
