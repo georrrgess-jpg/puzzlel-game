@@ -14,6 +14,26 @@ An endless, relaxing puzzle game for phones. It runs in the browser: open `index
 | 🌱 **Block Garden** | Drag blocks from the tray onto the bed. Full rows and columns bloom away. Some levels are weed-pulling levels. |
 | 🖼️ **Picture Pop** | Pictures are cut into tiles and shuffled on a grid. Swap tiles until a picture is whole: two halves side by side, or on harder levels four quarters as a 2×2 square. A finished picture pops into your gallery and new tiles drop in from the deck. 31 hand-made scenes: landscapes, animals, space, underwater, still life, architecture and abstract art. |
 
+## 🧩 Jigsaw (its own endless track)
+
+Jigsaw has its own tab, which opens once level 6 is cleared. Each puzzle is a brand-new illustrated picture, drawn in the
+style of the Picture Pop cards and cut into a grid from 2×2 up to 5×5. The board fills most of a phone screen.
+
+- **Play:** drag a piece onto another and they swap. You can also tap a piece, then tap a spot.
+- **Locking:** two pieces that belong side by side lock together and move as one from then on.
+- **Live preview:** while you drag, the pieces you would push aside slide out of the way, and the landing spot is outlined.
+- **Groups never break:** pieces a group lands on make room around it whole, or the move is refused.
+- **Help:** Peek (hold or tap) shows the finished picture; hints, Undo and Restart work as in levels.
+- **Pictures:** made from parts. There are 18 biomes (meadow, mountains, coast, tropical island, lake, forest, desert,
+  canyon, snow, farm, city, Zen garden, jungle, volcano, autumn woods, Candy Land, under the sea, outer space), up to 7
+  times of day, and about 70 hand-drawn subjects (buildings, vehicles, animals, plants, sea creatures, space things).
+  A main subject and a side subject are paired, and weather and details are added.
+- **No repeats:** puzzle numbers walk through more than 15,000 distinct pictures before any combination comes back, and
+  neighbouring puzzles never share a biome.
+- **Album:** finished pictures fill an album, 12 to a page. A full page pays a bonus.
+- **Progression:** jigsaws have their own stars, coins, XP, quests and trophies, and pay a little less per minute than
+  levels, so neither track starves the other.
+
 Every level is generated from its number, so levels never run out and always play the same. Every mode has hints, Undo,
 a how-to card, and a built-in solver that guarantees each level can be finished. There are no timers and no game over.
 
@@ -38,6 +58,13 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Fits every phone**: boards size themselves from the free space; verified clean on iPhone SE (320x568), iPhone 8, iPhone 13,
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
+
+## What's new in v7 (Jigsaw)
+- **New: Jigsaw**, an endless picture-puzzle track with its own tab, gallery, album pages, quests and 4 trophies (see above).
+- **Merge Bloom** plays on a wooden planter of soil beds instead of flat green squares.
+- **Tests:** new regression checks J1–J6 cover unlocking, every grid size solving, locks never breaking under random play,
+  drag preview, keeping an unfinished puzzle, album page bonuses and picture variety. The 6-device layout check now
+  includes the Jigsaw hub, board and win card.
 
 ## What's new in v6 (worlds and difficulty)
 - **Difficulty that keeps rising.** Before, every mode hit its hardest boards by about level 50. Now difficulty climbs smoothly up to about level 300, and new players get a gentler start.

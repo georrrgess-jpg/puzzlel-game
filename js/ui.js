@@ -43,29 +43,33 @@ const api={
 function startLevel(n,opts={}){
   if(opts.daily&&dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}
   if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();
-  const daily=!!opts.daily;let type,tier,seed;
+  const daily=!!opts.daily,jig=!!opts.jig&&!daily;let type,tier,seed;
   if(daily){const c=dailyCfg();type=c.type;tier=c.tier;seed=c.seed}
+  else if(jig){type='jigsaw';tier=jigSize(n);seed=hashSeed(n,7177)}
   else{type=typeFor(n);tier=tierFor(n);seed=hashSeed(n,TYPES.indexOf(type)+1)}
-  const bonus=!daily&&isBonus(n),chal=!daily&&isChallenge(n);
+  const bonus=!daily&&!jig&&isBonus(n),chal=!daily&&!jig&&isChallenge(n);
   board.innerHTML='';closeModal();pendingUnlock=null;
   $('#hudStars').innerHTML=STAR+STAR+STAR;meterKey='';$('#hudInfo').innerHTML='';
-  $('#ptitle').textContent=daily?'📅 Daily Challenge':bonus?`👑 Level ${n}`:chal?`🔥 Level ${n}`:'Level '+n;
+  $('#ptitle').textContent=daily?'📅 Daily Challenge':jig?`🧩 Puzzle ${n}`:bonus?`👑 Level ${n}`:chal?`🔥 Level ${n}`:'Level '+n;
   $('.ptitle').classList.toggle('bonus',bonus||daily);$('.ptitle').classList.toggle('chal',chal&&!bonus);
-  $('#psub').innerHTML=`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(bonus?'<span class="sx"> · BONUS 2× coins</span>':chal?'<span class="sx"> · Finale</span>':daily?'<span class="sx"> · big reward!</span>':'');
+  $('#psub').innerHTML=`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(jig?`<span class="sx"> · ${JIG_SIZES[tier][0]*JIG_SIZES[tier][1]} pieces</span>`:bonus?'<span class="sx"> · BONUS 2× coins</span>':chal?'<span class="sx"> · Finale</span>':daily?'<span class="sx"> · big reward!</span>':'');
   /* the written instruction is for the first 3 levels of each mode; after that the coach pill is the only guidance (? still opens the how-to) */
-  const again=!!cur&&cur.level===n&&cur.daily===daily;   // a restart is not a new level
+  const again=!!cur&&cur.level===n&&cur.daily===daily&&!!cur.jig===jig;   // a restart is not a new level
   S.seenN=S.seenN||{};const seenN=S.seenN[type]||0;if(!again&&seenN<3){S.seenN[type]=seenN+1;save()}
   $('#instr').textContent=INFO[type].tip;$('#instr').classList.toggle('off',seenN>=3);api.coach('');
-  const replay=again||(!daily&&(S.stars[n]||0)>0);
-  cur={replay,level:n,type,daily,bonus,chal,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
+  const replay=again||(jig?(S.jig.stars[n]||0)>0:!daily&&(S.stars[n]||0)>0);
+  cur={replay,level:n,type,daily,jig,bonus,chal,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
   /* pick an unfinished level up where it was left (a restart starts it fresh) */
-  if(S.resume&&S.resume.n===n&&S.resume.t===type&&!daily){
-    if(again)S.resume=null;
-    else{try{const h=S.resume.h;cur.puz.restore(h[h.length-1]);cur.history=h.slice();refreshUndo();const me=cur;setTimeout(()=>{if(cur===me)toast('↩️ Picked up where you left off')},900)}catch(e){cur.history=[cur.puz.snap()]}}
-    S.resume=null;save();
+  const kept=jig?S.jig.res:S.resume;
+  if(kept&&kept.n===n&&kept.t===type&&!daily){
+    if(again){if(jig)S.jig.res=null;else S.resume=null}
+    else{try{const h=kept.h;cur.puz.restore(h[h.length-1]);cur.history=h.slice();refreshUndo();const me=cur;setTimeout(()=>{if(cur===me)toast('↩️ Picked up where you left off')},900)}catch(e){cur.history=[cur.puz.snap()]}}
+    if(jig)S.jig.res=null;else S.resume=null;save();
   }
+  /* in a jigsaw the Skip button is Peek (hold it, or tap it, to see the finished picture) */
+  $('#play').classList.toggle('jigm',jig);$('#skipBtn').classList.toggle('peekb',jig);$('#skipBtn').firstElementChild.textContent=jig?'👁️':'⏭️';$('#skipBtn').childNodes[1].textContent=jig?'Peek':'Skip';
   $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;refreshUndo();
   refreshHUD();show('play');sfx.whoosh();
   const me=cur,go=()=>{if(cur===me&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
@@ -81,7 +85,7 @@ function showIntro(){
   }
   const goal=c.puz.goal||(L?`★★★ in ${L.s3} moves or fewer`:'');
   const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
-    <small>${c.daily?'DAILY CHALLENGE':c.bonus?'👑 BONUS LEVEL · 2× COINS':c.chal?`🔥 WORLD FINALE · LEVEL ${c.level}`:'LEVEL '+c.level}</small><b>${i.name}</b>
+    <small>${c.daily?'DAILY CHALLENGE':c.jig?`🧩 JIGSAW · PUZZLE ${c.level}`:c.bonus?'👑 BONUS LEVEL · 2× COINS':c.chal?`🔥 WORLD FINALE · LEVEL ${c.level}`:'LEVEL '+c.level}</small><b>${i.name}</b>
     ${goal?`<em>${goal}</em>`:''}${best?`<span class="lvi-best">Your best: ${'★'.repeat(best)}${'☆'.repeat(3-best)}</span>`:''}</div>`);
   $('#play').appendChild(b);
   setTimeout(()=>b.classList.add('out'),1500);setTimeout(()=>b.remove(),2100);
@@ -113,6 +117,7 @@ function showHowTo(type,done){
 /* an unfinished (non-daily) level is kept, so leaving it, or closing the app, never loses progress */
 function keepResume(){
   if(!cur||cur.over||cur.daily||cur.puz.noUndo)return;
+  if(cur.jig){if(cur.history.length>1){S.jig.res={n:cur.level,t:cur.type,h:cur.history.slice(-40)};save()}else if(S.jig.res&&S.jig.res.n===cur.level){S.jig.res=null;save()}return}
   if(cur.history.length>1){S.resume={n:cur.level,t:cur.type,h:cur.history.slice(-40)};save()}
   else if(S.resume&&S.resume.n===cur.level){S.resume=null;save()}
 }
@@ -135,6 +140,7 @@ function useHint(){
   cur.hinted=true;emit('hint',1);save();refreshHUD();sfx.good();$('#hintBtn').classList.remove('pulse');
 }
 function skipLevel(){
+  if(cur&&cur.jig){if(!cur.over&&cur.puz.peek){sfx.click();cur.puz.peek()}return}
   if(!cur||cur.over||cur.locked||cur.daily)return;
   const n=cur.level,hasToken=S.skips>0;
   openModal(`<h2>Skip level?</h2><p>Move on to the next level. This level stays unstarred so you can come back for stars later.</p>
@@ -147,6 +153,7 @@ function skipLevel(){
 }
 function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);clearTimeout(pulseT);$('#hintBtn').classList.remove('pulse');refreshUndo();
+  if(cur.jig)return onJigWin(stars);
   const me=cur,n=cur.level,daily=cur.daily;
   let coins,prev=0,streakBonus=0,chest=0,dstreak=0,chalBonus=0,world=null;
   /* a daily is booked to the day it was STARTED (a win after midnight still counts for that day) and only once; a
@@ -292,7 +299,7 @@ addEventListener('popstate',()=>{
   if(m.classList.contains('on')){const f=m._back;if(f&&!Trans.busy)f();syncGuard();return}
   if(Trans.busy){syncGuard();return}
   if($('#play').classList.contains('active')){$('#backBtn').click();syncGuard();return}
-  if($('#map').classList.contains('active')||$('#shop').classList.contains('active')){show('home');return}
+  if($('#map').classList.contains('active')||$('#shop').classList.contains('active')||$('#jig').classList.contains('active')){show('home');return}
   history.back();   // the home screen: let the Back button really leave
 });
 /* closing is instant for the game (state flips now); the card just plays a short exit while it fades */
@@ -309,7 +316,8 @@ function show(id,o={}){
     if($('#map').classList.contains('active'))mapTop=$('#mapwrap').scrollTop;   // a hidden screen forgets its scroll: remember it for the next visit
     $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
     Scene.show(id);document.body.dataset.scr=id;$$('#nav .bn').forEach(b=>b.classList.toggle('on',b.dataset.nav===id));
-    if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();
+    if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();if(id==='jig'){renderJig();if(!S.jig.intro){S.jig.intro=true;save()}}
+    refreshJigTab();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
     refreshHUD();syncGuard();
     if(id==='home'){setTimeout(drainModalQ,700);setTimeout(wiggleTiles,520)}
@@ -345,7 +353,9 @@ function refreshHUD(){
 $('#playBtn').onclick=()=>{sfx.good();playLevel(S.unlocked,{},$('#playBtn'))};
 $('.nextcard').onclick=()=>$('#playBtn').click();   // the Next up card plays the next level too
 /* the bottom bar, the coin chips (+ opens the shop's boosts) and the garden's Edit button */
-$$('#nav .bn').forEach(b=>b.onclick=()=>{if(b.classList.contains('on'))return;sfx.click();show(b.dataset.nav)});
+$$('#nav .bn').forEach(b=>b.onclick=()=>{if(b.classList.contains('on'))return;
+  if(b.dataset.nav==='jig'&&!jigOpen()){sfx.bad();toast(`🔒 Clear level ${ECON.jig.unlock-1} to unlock the Jigsaw`);wa(b,[{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'none'}],{duration:280});return}
+  sfx.click();show(b.dataset.nav)});
 $$('.coinbtn').forEach(b=>b.onclick=()=>{sfx.click();setShopTab('boosts');if(!$('#shop').classList.contains('active'))show('shop')});
 $('#gardenEdit').onclick=()=>{sfx.click();setShopTab('garden');show('shop')};
 $('#settingsBtn').onclick=()=>{sfx.click();showSettings()};
@@ -355,12 +365,12 @@ $('#tSpin').onclick=()=>{sfx.click();showSpin()};
 $('#tQuests').onclick=()=>{sfx.click();showQuests()};
 $('#tTrophy').onclick=()=>{sfx.click();showTrophies()};
 $$('[data-go]').forEach(b=>b.onclick=()=>{sfx.click();show(b.dataset.go)});
-$('#backBtn').onclick=()=>{if(Trans.busy||(cur&&cur.locked&&!cur.over))return;sfx.click();playExit(cur&&cur.daily?'home':'map')};
+$('#backBtn').onclick=()=>{if(Trans.busy||(cur&&cur.locked&&!cur.over))return;sfx.click();playExit(cur&&cur.jig?'jig':cur&&cur.daily?'home':'map')};
 $('#undoBtn').onclick=undo;
 $('#hintBtn').onclick=useHint;
 $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};
 /* Restart asks first when 3 or more moves would be lost; holding the button restarts at once */
-const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:cur.daily})};
+const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:cur.daily,jig:cur.jig})};
 (()=>{
   const rb=$('#restartBtn');let t=0,long=false;
   rb.addEventListener('pointerdown',()=>{long=false;clearTimeout(t);t=setTimeout(()=>{long=true;if(cur&&!cur.over&&!cur.locked){sfx.click();buzz(15);doRestart()}},650)});
@@ -375,6 +385,12 @@ const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:
   };
 })();
 $('#skipBtn').onclick=skipLevel;
+/* Peek also works as press-and-hold: the picture shows while the button is held */
+(()=>{const b=$('#skipBtn');let t=0,held=false;
+  b.addEventListener('pointerdown',()=>{if(!cur||!cur.jig||cur.over)return;held=false;clearTimeout(t);t=setTimeout(()=>{held=true;cur.puz.peek(true)},220)});
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{clearTimeout(t);if(held&&cur&&cur.jig){cur.puz.peek(false);if(ev==='pointerup'){b._held=true;setTimeout(()=>b._held=false,80)}}held=false}));
+  b.addEventListener('click',e=>{if(b._held){e.stopImmediatePropagation();b._held=false}},true);
+})();
 // desktop shortcuts: U/Z undo, H hint, R restart, Enter or Space presses the main popup button, Esc goes back
 $('#modal').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget&&e.currentTarget._dismiss&&!Trans.busy)e.currentTarget._dismiss()});
 addEventListener('keydown',e=>{
@@ -409,4 +425,4 @@ addEventListener('storage',e=>{
   applyTheme();refreshHUD();const a=$('.screen.active');if(a&&a.id!=='play')show(a.id);
   toast('Progress updated from another tab');
 });
-window.__game={S,TYPES,typeFor,tierFor,levelFor:(t,tier)=>{for(let n=1;n<5000;n++)if(typeFor(n)===t&&tierFor(n)>=tier)return n},startLevel,get cur(){return cur},show,api,closeModal};
+window.__game={S,TYPES,typeFor,tierFor,startJig:n=>startLevel(n,{jig:true}),jigSize,levelFor:(t,tier)=>{for(let n=1;n<5000;n++)if(typeFor(n)===t&&tierFor(n)>=tier)return n},startLevel,get cur(){return cur},show,api,closeModal};

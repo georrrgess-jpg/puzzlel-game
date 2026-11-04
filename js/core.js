@@ -27,6 +27,9 @@ const ECON={
   clear:{base:6,perStar:4,improve:2,bonusMult:2,streakStep:1,streakCap:5,challengeMult:1.25},   // first clear = base + perStar per star; replays only pay for new stars
   world:{bonus:5,hints:1},   // one-off reward for finishing a world (its challenge level) the first time
   daily:{base:20,perStar:4,streakStep:4,streakMax:7},
+  /* the Jigsaw track: opens when level 6 is cleared; a first clear pays base + perPiece x pieces + perStar x stars
+     (12-22 coins, a little under a level per minute of play); each full album page of 12 pays a bonus */
+  jig:{unlock:7,base:4,perPiece:.5,perStar:2,improve:3,xpBase:8,xpPiece:.3,xpStar:3,page:{coins:40,hints:1}},
   hint:{cost:42,p3:100,p10:300},
   skip:{cost:150,token:120,p3:330},
   spin:{cd:4*3600e3,cost:40},
@@ -51,6 +54,7 @@ function levelReward(prev,stars,bonus,streak){   // streak counts consecutive 3-
   return{coins:coins+streakBonus,streakBonus};
 }
 const dailyReward=(stars,dstreak)=>ECON.daily.base+stars*ECON.daily.perStar+Math.min(ECON.daily.streakMax,dstreak)*ECON.daily.streakStep;
+const jigOpen=()=>S.unlocked>=ECON.jig.unlock;   // the Jigsaw opens once level 6 is cleared
 const levelUpReward=L=>Math.min(ECON.lvlup.cap,ECON.lvlup.base+L*ECON.lvlup.per);
 const chestReward=m=>ECON.chest.base+ECON.chest.per*m;
 const xpNeed=L=>ECON.xp.need(L);
@@ -63,14 +67,16 @@ const DEFAULTS={ver:3,deco:[],unlocked:1,stars:{},coins:0,hints:2,skips:0,theme:
   xp:0,plv:1,music:true,sfx:true,musVol:.55,sfxVol:.85,haptics:true,symbols:false,gfx:'auto',
   login:{last:-1,streak:0},spinAt:0,quests:{day:-1,list:[],bonus:false},ach:{},
   dchal:{last:-1,streak:0},deal:{day:-1,bought:false},
-  stats:{wins:0,perfect:0,types:{},bestStreak:0,maxCombo:0,daily:0,spins:0,nohint:0,quests:0,bestLogin:0,coinsEarned:0,hints:0}
+  stats:{wins:0,perfect:0,types:{},bestStreak:0,maxCombo:0,daily:0,spins:0,nohint:0,quests:0,bestLogin:0,coinsEarned:0,hints:0,jig:0,jigPerfect:0},
+  // the Jigsaw: next puzzle, stars per puzzle, album pages claimed, an unfinished puzzle, one-time tips, whether its intro was shown
+  jig:{next:1,stars:{},pages:{},res:null,tips:{},intro:false}
 };
 let S=load();
 function load(){
   const d=JSON.parse(JSON.stringify(DEFAULTS));let raw={};
   try{raw=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
   const s=Object.assign(d,raw);
-  for(const k of['login','quests','dchal','deal','stats'])s[k]=Object.assign(JSON.parse(JSON.stringify(DEFAULTS[k])),raw[k]||{});
+  for(const k of['login','quests','dchal','deal','stats','jig'])s[k]=Object.assign(JSON.parse(JSON.stringify(DEFAULTS[k])),raw[k]||{});
   s.stats.types=Object.assign({},s.stats.types);
   // migrate older saves: count existing clears so trophies make sense
   if(!raw.stats&&raw.stars){const v=Object.values(raw.stars);s.stats.wins=v.length;s.stats.perfect=v.filter(x=>x===3).length}

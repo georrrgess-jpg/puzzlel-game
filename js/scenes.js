@@ -111,6 +111,7 @@ const Scene=(()=>{
   const bg=document.getElementById('bg');bg.after(el_);
   const made={};
   function show(id){
+    if(id==='jig')id='map';   // the Jigsaw hub shares the Levels scene
     const k=SCENES[id]&&id!=='fx'?id:null;
     for(const n in made)made[n].classList.toggle('on',n===k);
     if(k&&!made[k]){const d=document.createElement('div');d.className='scn on';d.innerHTML=SCENES[k].replace(/id="(\w+)"/g,`id="${k}-$1"`).replace(/url\(#(\w+)\)/g,`url(#${k}-$1)`);/* ids unique per scene */if(SCENES.fx[k])d.insertAdjacentHTML('beforeend',`<div class="fx">${SCENES.fx[k]}</div>`);el_.appendChild(d);made[k]=d}

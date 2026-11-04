@@ -105,6 +105,11 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
       // how-to card
       await page.evaluate(() => document.querySelector('#helpBtn').click()); await sleep(700); await check('howto-' + t); await shot('howto-' + t); await closeM();
     }
+    // the Jigsaw: its hub (with an album page part filled), a 5x5 board mid-play, and its win card
+    await closeM(); await page.evaluate(() => { const S = __game.S; S.unlocked = Math.max(S.unlocked, 10); S.jig.intro = true; S.seen.jigsaw = true; for (let n = 1; n <= 5; n++) S.jig.stars[n] = 1 + n % 3; S.jig.next = 6; __game.show('jig') }); await sleep(1100); await check('jig'); await shot('jig');
+    await page.evaluate(() => { __game.S.jig.next = 18; __game.startJig(18) }); await sleep(2600); await page.evaluate(() => __game.cur.puz._bot()); await sleep(600); await check('play-jigsaw'); await shot('play-jigsaw');
+    await page.evaluate(() => { const q = __game.cur.puz; for (let k = 0; k < 60 && !__game.cur.locked; k++) q._bot() }); await sleep(3200); await check('jig-win'); await shot('jig-win');
+    await closeM(); await page.evaluate(() => { __game.S.jig.next = 1; __game.S.jig.stars = {} });
     // popups
     await openAndCheck('settings', () => page.evaluate(() => { __game.show('home'); document.querySelector('#settingsBtn').click() }));
     await openAndCheck('quests', () => page.evaluate(() => document.querySelector('#tQuests').click()));

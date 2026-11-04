@@ -516,6 +516,68 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
       ck('Q1 holding Restart starts the level fresh', await p.evaluate(() => __game.cur.history.length === 1)) }
   });
 
+  /* ---------- Jigsaw ---------- */
+  const jprep = (p, unlocked = 10) => p.evaluate(u => { const g = __game; g.closeModal(); for (const t of [...g.TYPES, 'jigsaw']) g.S.seen[t] = true; g.S.login.last = today(); g.S.welcome3 = false; g.S.unlocked = u; g.S.jig.intro = true }, unlocked);
+  await test('J1 the Jigsaw opens after level 6', async p => {
+    await jprep(p, 3); await p.evaluate(() => { __game.show('home'); renderHome() }); await sleep(600);
+    await p.evaluate(() => document.querySelector('#nav .bn[data-nav="jig"]').click()); await sleep(700);
+    ck('J1 locked before: the tab shows a padlock and does not open', await p.evaluate(() => document.querySelector('#nav .bn[data-nav="jig"]').classList.contains('lock') && document.querySelector('.screen.active').id === 'home'));
+    await p.evaluate(() => { __game.S.unlocked = 7; __game.S.jig.intro = false; __game.show('map') }); await sleep(800); await p.evaluate(() => __game.show('home')); await sleep(2400);
+    ck('J1 clearing level 6 shows the welcome', await p.evaluate(() => /Jigsaw/.test(document.querySelector('#modal.on h2')?.textContent || '')));
+    await p.evaluate(() => document.querySelector('#modal .mbtns .btn:last-child').click()); await sleep(1300);
+    ck('J1 Try it opens the gallery', await p.evaluate(() => document.querySelector('.screen.active').id === 'jig' && !!document.querySelector('#jgGrid .jslot.next')));
+  });
+  await test('J2 every size can be solved and pays once', async p => {
+    await jprep(p);
+    const r = await p.evaluate(async () => { const g = __game, out = []; const w = ms => new Promise(r => setTimeout(r, ms));
+      for (const n of [1, 2, 3, 4, 7, 10, 18]) { g.S.jig.next = n; g.startJig(n); await w(60); const q = g.cur.puz; let k = 0; while (!g.cur.locked && k < 80) { if (!q._bot()) break; k++ } const st = q._state(); const c0 = g.S.coins; await w(2900);
+        out.push({ n, N: st.N, solved: st.home === st.N, card: !!document.querySelector('#modal.on .jwpic'), paid: g.S.coins - c0, next: g.S.jig.next, star: g.S.jig.stars[n] }); g.closeModal() }
+      g.startJig(1); await w(60); const q = g.cur.puz; while (!g.cur.locked) { if (!q._bot()) break } const c1 = g.S.coins; await w(2900); out.push({ replay: true, paid: g.S.coins - c1 }); g.closeModal(); return out });
+    ck('J2 sizes run 2x2 to 5x5', r.filter(x => x.N).map(x => x.N).join() === '4,6,9,12,16,20,25', r.map(x => x.N).join());
+    ck('J2 the solver finishes every one', r.filter(x => x.N).every(x => x.solved && x.card), JSON.stringify(r.filter(x => !x.solved || !x.card)));
+    ck('J2 a first clear pays and opens the next puzzle', r.filter(x => x.N).every(x => x.paid > 0 && x.next === x.n + 1 && x.star >= 1), JSON.stringify(r.map(x => [x.n, x.paid, x.next])));
+    ck('J2 a replay of a 3-star puzzle pays nothing', r[r.length - 1].paid === 0, JSON.stringify(r[r.length - 1]));
+  });
+  await test('J3 locked pieces never come apart', async p => {
+    await jprep(p);
+    const r = await p.evaluate(() => { const g = __game; let broke = 0, moves = 0, refused = 0; const R = mulberry32(7);
+      for (const n of [18, 30, 61]) { g.startJig(n); const q = g.cur.puz;
+        const pairs = () => { const st = q._state(), s = new Set(); for (let i = 0; i < st.N; i++) { const a = st.g[i]; if (i % st.C < st.C - 1 && a % st.C < st.C - 1 && st.g[i + 1] === a + 1) s.add(a + '>'); if (i + st.C < st.N && st.g[i + st.C] === a + st.C) s.add(a + 'v') } return s };
+        for (let k = 0; k < 140 && !g.cur.locked; k++) { const st = q._state(), gid = q._groups(), G = gid[Math.floor(R() * st.N)], ox = Math.floor(R() * 5) - 2, oy = Math.floor(R() * 5) - 2; const before = pairs();
+          if (k % 9 === 0) q._bot(); else if (!q._move(G, ox, oy)) { refused++; continue }
+          moves++; const after = pairs(); for (const x of before) if (!after.has(x)) broke++ } }
+      return { broke, moves, refused } });
+    ck('J3 no lock ever breaks over random play', r.broke === 0 && r.moves > 60, JSON.stringify(r));
+  });
+  await test('J4 a dragged piece swaps and an unfinished puzzle is kept', async p => {
+    await jprep(p); await p.evaluate(() => { __game.S.jig.next = 7; __game.startJig(7) }); await sleep(2400);
+    const st = await p.evaluate(() => __game.cur.puz._state()), from = st.g.indexOf(0);
+    const pt = c => p.evaluate(c => { const st = __game.cur.puz._state(), r = document.querySelector('.jgb').getBoundingClientRect(); return [r.left + (c % st.C + .5) * r.width / st.C, r.top + (Math.floor(c / st.C) + .5) * r.height / st.R] }, c);
+    const [x0, y0] = await pt(from), [x1, y1] = await pt(0);
+    await p.mouse.move(x0, y0); await p.mouse.down(); for (let i = 1; i <= 10; i++) { await p.mouse.move(x0 + (x1 - x0) * i / 10, y0 + (y1 - y0) * i / 10); await sleep(16) }
+    const shown = await p.evaluate(() => [document.querySelectorAll('.jtg.on').length, document.querySelectorAll('.jp.pv').length]);
+    await p.mouse.up(); await sleep(600);
+    const s2 = await p.evaluate(() => __game.cur.puz._state());
+    ck('J4 dragging shows the landing spot and the piece that moves aside', shown[0] === 1 && shown[1] >= 1, JSON.stringify(shown));
+    ck('J4 the dragged piece lands and the other goes back to its spot', s2.g[0] === 0 && s2.g[from] === st.g[0] && s2.moves === 1, JSON.stringify([from, s2.g.indexOf(0), s2.moves]));
+    await p.evaluate(() => document.querySelector('#backBtn').click()); await sleep(1200);
+    ck('J4 leaving keeps the puzzle and the gallery says Continue', await p.evaluate(() => __game.S.jig.res && __game.S.jig.res.n === 7 && document.querySelector('.screen.active').id === 'jig' && /CONTINUE/.test(document.querySelector('#jgPlay').textContent)));
+    await p.evaluate(() => document.querySelector('#jgPlay').click()); await sleep(1500);
+    ck('J4 continuing restores the moves', await p.evaluate(() => __game.cur.jig && __game.cur.puz._state().moves === 1));
+  });
+  await test('J5 a full album page pays its bonus', async p => {
+    await jprep(p);
+    const r = await p.evaluate(async () => { const g = __game; for (let n = 1; n <= 11; n++) g.S.jig.stars[n] = 2; g.S.jig.next = 12; const h0 = g.S.hints;
+      g.startJig(12); const q = g.cur.puz; while (!g.cur.locked) { if (!q._bot()) break } await new Promise(r => setTimeout(r, 2900));
+      return { page: g.S.jig.pages[1], hints: g.S.hints - h0, line: !!document.querySelector('#modal .extra.gold') } });
+    ck('J5 page 1 is marked and pays a hint', r.page === 1 && r.hints === 1 && r.line, JSON.stringify(r));
+  });
+  await test('J6 pictures do not repeat', async p => {
+    const r = await p.evaluate(() => { const seen = new Map(); let dup = 0, same = 0, prev = null; for (let n = 1; n <= 400; n++) { const c = JIGART.compose(n), k = c.biome + '|' + c.main + '|' + c.side + '|' + c.time; if (seen.has(k)) dup++; seen.set(k, n); if (prev && prev.biome === c.biome) same++; prev = c } return { dup, same, variety: JIGART.variety() } });
+    ck('J6 400 puzzles, no (biome, subjects, time) twice, never the same biome twice in a row', r.dup === 0 && r.same === 0, JSON.stringify(r));
+    ck('J6 more than 10,000 different pictures before the walk repeats', r.variety > 10000, JSON.stringify(r));
+  });
+
   console.log(fails ? `\n${fails} FAILED` : '\nall regression checks passed');
   await browser.close(); srv.close(); process.exit(fails ? 1 : 0);
 })();

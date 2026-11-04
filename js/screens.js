@@ -5,6 +5,8 @@ function buildLogo(){
   $('#logoWord').innerHTML=[...'PUZZLE POP'].map((ch,i)=>ch===' '?'<span class="sp"></span>':`<span data-ch="${ch}" style="color:${COLORS[cols[i]]};--i:${i};animation-delay:${i*.12}s,${.2+i*.07}s">${ch}</span>`).join('');
 }
 function renderHome(){
+  /* the Jigsaw tab (hub.js loads after this file, so it may not be there yet on the very first render) */
+  if(typeof refreshJigTab==="function"){refreshJigTab();if(jigOpen()&&!S.jig.intro&&!renderHome._jq){renderHome._jq=1;queueModal(()=>{renderHome._jq=0;showJigIntro()},900)}}
   const stars=totalStars(),m=S.milestone,prevT=m?msThreshold(m-1):0,t=msThreshold(m),pct=clamp((stars-prevT)/(t-prevT)*100,4,100);
   /* the garden: your decorations on a bed of soil (tall phones show the bed even when it is empty, as a nudge towards the shop) */
   $('#garden').innerHTML=S.deco.map(id=>{const d=ECON.deco.find(x=>x.id===id);return d?`<i title="${d.name}" style="--k:${(hashSeed(id.length*7+id.charCodeAt(0),3)%100)/100}">${d.ic}</i>`:''}).join('')||'<em class="gempty">🌱 Your garden grows with Shop decorations</em>';

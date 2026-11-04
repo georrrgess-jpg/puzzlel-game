@@ -19,6 +19,7 @@ function emit(ev,d){
   if(ev==='spin')st.spins++;
   if(ev==='coins')st.coinsEarned+=d;
   if(ev==='hint')st.hints++;
+  if(ev==='jig'){st.jig=(st.jig||0)+1;if(d.stars===3)st.jigPerfect=(st.jigPerfect||0)+1}
   questEvent(ev,d);checkAch();save();
 }
 
@@ -31,11 +32,12 @@ const QT={
   combo:{ic:'⚡',txt:n=>`Reach a ×${n} combo`,ns:[4,5,6],ev:'combo',max:true},
   coins:{ic:'🪙',txt:n=>`Collect ${n} coins`,ns:[80,120,150],ev:'coins',add:true},
   daily:{ic:'📅',txt:()=>'Beat the Daily Challenge',ns:[1],ev:'daily'},
-  spin:{ic:'🎡',txt:()=>'Spin the Lucky Wheel',ns:[1],ev:'spin'}
+  spin:{ic:'🎡',txt:()=>'Spin the Lucky Wheel',ns:[1],ev:'spin'},
+  jig:{ic:'🧩',txt:n=>`Finish ${n} jigsaw puzzle${n>1?'s':''}`,ns:[1,2],ev:'jig'}
 };
 function ensureQuests(){
   const d=today();if(S.quests.day===d&&S.quests.list.length)return;
-  const R=rngOf(hashSeed(d,4242)),keys=shuffle(Object.keys(QT),R).slice(0,3);
+  const R=rngOf(hashSeed(d,4242)),keys=shuffle(Object.keys(QT).filter(k=>k!=='jig'||jigOpen()),R).slice(0,3);
   S.quests={day:d,bonus:false,list:keys.map((k,i)=>{const q=QT[k];return{k,n:R.pick(q.ns),p:q.param?R.pick(TYPES):null,v:0,claimed:false,r:ECON.quest.rewards[i]}})};
   save();
 }
@@ -97,7 +99,11 @@ const ACH=[
   {id:'q10',ic:'📜',name:'Quest Hunter',desc:'Claim 10 quest rewards',t:()=>st().quests>=10,r:50},
   {id:'th',ic:'🎨',name:'Stylish',desc:'Buy a colour theme',t:()=>S.owned.length>=2,r:20},
   {id:'th4',ic:'🖼️',name:'Collector',desc:'Own 4 colour themes',t:()=>S.owned.length>=4,r:60},
-  {id:'pl10',ic:'🏅',name:'Rising Star',desc:'Reach player level 10',t:()=>S.plv>=10,r:90}
+  {id:'pl10',ic:'🏅',name:'Rising Star',desc:'Reach player level 10',t:()=>S.plv>=10,r:90},
+  {id:'j1',ic:'🧩',name:'Piece by Piece',desc:'Finish your first jigsaw',t:()=>(st().jig||0)>=1,r:15},
+  {id:'jpg',ic:'📖',name:'Page Turner',desc:'Fill a jigsaw album page',t:()=>Object.keys(S.jig.pages).length>=1,r:40},
+  {id:'jp10',ic:'💠',name:'Picture Perfect',desc:'Get 3 stars on 10 jigsaws',t:()=>(st().jigPerfect||0)>=10,r:50},
+  {id:'j50',ic:'🏛️',name:'Gallery Owner',desc:'Finish 50 jigsaws',t:()=>(st().jig||0)>=50,r:120}
 ];
 /* [current, target] for every trophy, shown as a progress bar while it is locked */
 const ACH_PROG={
@@ -106,7 +112,8 @@ const ACH_PROG={
   p10:()=>[st().perfect,10],p50:()=>[st().perfect,50],k5:()=>[st().bestStreak,5],k12:()=>[st().bestStreak,12],
   all:()=>[TYPES.filter(x=>st().types[x]).length,TYPES.length],spec:()=>[Math.max(0,...Object.values(st().types)),15],
   c6:()=>[st().maxCombo,6],c12:()=>[st().maxCombo,12],d1:()=>[st().daily,1],d7:()=>[st().daily,7],l7:()=>[st().bestLogin,7],
-  sp5:()=>[st().spins,5],nh20:()=>[st().nohint,20],q10:()=>[st().quests,10],th:()=>[S.owned.length-1,1],th4:()=>[S.owned.length,4],pl10:()=>[S.plv,10]
+  sp5:()=>[st().spins,5],nh20:()=>[st().nohint,20],q10:()=>[st().quests,10],th:()=>[S.owned.length-1,1],th4:()=>[S.owned.length,4],pl10:()=>[S.plv,10],
+  j1:()=>[st().jig||0,1],jpg:()=>[Object.keys(S.jig.pages).length,1],jp10:()=>[st().jigPerfect||0,10],j50:()=>[st().jig||0,50]
 };
 function checkAch(){
   let n=0,sum=0;
