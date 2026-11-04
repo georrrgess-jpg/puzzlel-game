@@ -10,12 +10,14 @@
 /* defs most subjects need: the window-glass gradient (warm and lit at night) and the warm light halo */
 const D=o=>o.night?glowDef(o.id+'g','#ffcf6a',.8)+glowDef(o.id+'f','#ff9a3a',.75)+lin(o.id+'w',[[0,'#fff6c4'],[1,'#ffb54a']]):lin(o.id+'w',[[0,o.c('#e4f6ff')],[.45,o.c('#a4dcff')],[1,o.c('#5fa8e8')]]);
 const halo=(o,x,y,r)=>o.night?glow(o.id+'g',x,y,r):'';
-const shadow=(o,rx,cx=0,cy=0)=>`<ellipse cx="${f(cx)}" cy="${f(cy+.6)}" rx="${f(rx)}" ry="${f(Math.max(2.4,rx*.11))}" fill="${o.c('#1a1028')}" opacity=".26"/>`;
+const shadow=(o,rx,cx=0,cy=0)=>`<ellipse cx="${f(cx)}" cy="${f(cy+.4)}" rx="${f(rx)}" ry="${f(Math.min(3,Math.max(2,rx*.07)))}" fill="${o.c('#1a1028')}" opacity=".26"/>`;
 const glint=(o,x,y,w,h)=>o.night?'':`<path d="${P([[x+w*.16,y+h*.66],[x+w*.52,y+h*.14],[x+w*.76,y+h*.14],[x+w*.4,y+h*.66]])}" fill="${o.c('#ffffff')}" opacity=".7"/>`;
 /* a window with its top-left at x,y. k.fr frame colour, k.b glazing bars (0 none, 1 upright, 2 cross), k.arch round top, k.sw frame width */
 const win=(o,x,y,w,h,k={})=>{const fr=o.c(k.fr||'#4a3220'),b=k.b??2,sw=k.sw??1.1,r=w/2;
   const sh=k.arch?`<path d="M${f(x)} ${f(y+h)}V${f(y+r)}A${f(r)} ${f(r)} 0 0 1 ${f(x+w)} ${f(y+r)}V${f(y+h)}Z"`:`<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"${k.rx?` rx="${k.rx}"`:''}`;
   return `${sh} fill="url(#${o.id}w)" stroke="${fr}" stroke-width="${sw}" stroke-linejoin="round"/>${halo(o,x+w/2,y+h/2,Math.max(w,h)*1.3)}${b?`<path d="M${f(x+w/2)} ${f(y)}V${f(y+h)}${b>1?`M${f(x)} ${f(y+h*(k.arch?.6:.5))}H${f(x+w)}`:''}" stroke="${fr}" stroke-width="${f(sw*.65)}"/>`:''}${glint(o,x,y+(k.arch?r*.6:0),w,h-(k.arch?r*.6:0))}`};
+/* a row of plain windows drawn as one shape: L=[[x,y,w,h],...], k.arch, k.fr frame colour, k.sw frame width */
+const wrow=(o,L,k={})=>`<path d="${L.map(([x,y,w,h])=>k.arch?`M${f(x)} ${f(y+h)}V${f(y+w/2)}A${f(w/2)} ${f(w/2)} 0 0 1 ${f(x+w)} ${f(y+w/2)}V${f(y+h)}Z`:`M${f(x)} ${f(y)}h${f(w)}v${f(h)}h${f(-w)}Z`).join('')}" fill="url(#${o.id}w)" stroke="${o.c(k.fr||'#4a3220')}" stroke-width="${k.sw??1}" stroke-linejoin="round"/>${o.night?L.map(([x,y,w,h])=>halo(o,x+w/2,y+h/2,Math.max(w,h)*1.05)).join(''):`<path d="${L.map(([x,y,w,h])=>{const yy=y+(k.arch?w*.3:0),hh=h-(k.arch?w*.3:0);return`M${f(x+w*.16)} ${f(yy+hh*.66)}L${f(x+w*.52)} ${f(yy+hh*.14)}H${f(x+w*.76)}L${f(x+w*.4)} ${f(yy+hh*.66)}Z`}).join('')}" fill="${o.c('#ffffff')}" opacity=".7"/>`}`;
 /* a round porthole window */
 const port=(o,x,y,r,fr='#8a8a9a')=>`<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="url(#${o.id}w)" stroke="${o.c(fr)}" stroke-width="${f(r*.32)}"/>${halo(o,x,y,r*2.3)}${o.night?'':`<path d="M${f(x-r*.55)} ${f(y+r*.1)}A${f(r*.6)} ${f(r*.6)} 0 0 1 ${f(x+r*.1)} ${f(y-r*.55)}" fill="none" stroke="${o.c('#ffffff')}" stroke-width="${f(r*.22)}" stroke-linecap="round" opacity=".8"/>`}`;
 /* a flame standing on x,y (s=1 is 12 tall); real light, so raw colours, with a halo at night */
@@ -33,7 +35,7 @@ const mort=(o,x0,x1,y0,y1,dy=5,bw=8,col='#9a8a72',op=.5)=>{let d='';for(let y=y1
 const pick=(o,a)=>a[Math.floor(o.R()*a.length)];
 
 /* =================== ground =================== */
-JIGART.subject({id:'lighthouse',name:'Lighthouse',biomes:['coast','island','lake','snow'],place:'ground',w:.5,draw:o=>{const c=o.c,I=o.id,n=o.night,hw=y=>16+(y+8)*6/62,
+JIGART.subject({id:'lighthouse',name:'Lighthouse',biomes:['coast','island','lake','snow'],place:'ground',w:.75,draw:o=>{const c=o.c,I=o.id,n=o.night,hw=y=>16+(y+8)*6/62,
   band=(a,b)=>P([[-hw(a),a],[-hw(b),b],[hw(b),b],[hw(a),a]]),red=c('#dc3b3b'),wh=c('#f6f1ea'),dk=c('#34303e');
   return `<defs>${D(o)}${lin(I+'s',[[0,c('#ffffff'),.42],[.38,c('#ffffff'),0],[.6,c('#000000'),0],[1,c('#000000'),.3]],1,0)}${rad(I+'r',[[0,c('#b8b6c2')],[1,c('#5a566a')]],.35,.3,.8)}${rad(I+'d',[[0,c('#ff7a68')],[1,c('#a8262a')]],.3,.3,.9)}${n?lin(I+'b',[[0,'#fff4c0',.7],[1,'#fff4c0',0]],1,0)+glowDef(I+'L','#fff0b0',1):''}</defs>
   ${n?`<path d="M4 -88L64 -102V-74Z" fill="url(#${I}b)"/><path d="M4 -88L64 -102V-74Z" fill="url(#${I}b)" transform="scale(-1 1)"/>`:''}${shadow(o,42)}
@@ -53,7 +55,7 @@ JIGART.subject({id:'lighthouse',name:'Lighthouse',biomes:['coast','island','lake
   <path d="M-11 -94Q-10.5 -101.5 0 -105.5Q10.5 -101.5 11 -94Z" fill="url(#${I}d)"/><rect x="-11.5" y="-95.4" width="23" height="2.2" rx="1.1" fill="${c('#8a2024')}"/><path d="M-6 -97Q-4 -102 0 -103.5" stroke="${c('#ffffff')}" stroke-width=".9" opacity=".45" fill="none"/>
   <circle cx="0" cy="-106.6" r="1.8" fill="${dk}"/><rect x="-.4" y="-110" width=".8" height="3" fill="${dk}"/>`}});
 
-JIGART.subject({id:'windmill',name:'Windmill',biomes:['meadow','farm','lake','autumn'],place:'ground',w:.95,draw:o=>{const c=o.c,I=o.id,R=o.R,hw=y=>21+y*9/62,a=f(33+R()*24),wd=c('#5a3a22'),
+JIGART.subject({id:'windmill',name:'Windmill',biomes:['meadow','farm','lake','autumn'],place:'ground',w:.8,draw:o=>{const c=o.c,I=o.id,R=o.R,hw=y=>21+y*9/62,a=f(33+R()*24),wd=c('#5a3a22'),
   fac=(p,q,col)=>`<path d="${P([[hw(-4)*p,-4],[hw(-62)*p,-62],[hw(-62)*q,-62],[hw(-4)*q,-4]])}" fill="${c(col)}"/>`,
   tul=(x,y)=>{const t=c(pick(o,['#ff4a5a','#ffcf3a','#ff8ad0','#ff7a2a','#c86aff']));return`<path d="M${x} ${y}V${y-5}" stroke="${c('#3f8a3a')}" stroke-width=".7"/><path d="M${x-1.4} ${y-4.6}Q${x} ${y-2.6} ${x+1.4} ${y-4.6}V${y-7}L${x+.5} ${y-6}L${x} ${y-7.4}L${x-.5} ${y-6}L${x-1.4} ${y-7}Z" fill="${t}"/>`},
   sail=`<rect x="-5.2" y="-47" width="16" height="36" fill="${c('#f8f0e0')}" opacity=".0"/><rect x="1.3" y="-47" width="9.5" height="36" fill="${c('#faf2e2')}"/><rect x="7" y="-47" width="3.8" height="36" fill="${c('#000000')}" opacity=".07"/>
@@ -76,7 +78,7 @@ JIGART.subject({id:'windmill',name:'Windmill',biomes:['meadow','farm','lake','au
   ${[-36,-32.5,-29,-25.5,25.5,29,32.5,36].map((x,i)=>`<ellipse cx="${x}" cy="-1.4" rx="2.6" ry="1.8" fill="${c(i%2?'#3f9a3a':'#4fae46')}"/>${tul(x,-1)}`).join('')}`}});
 
 JIGART.subject({id:'castle',name:'Castle',biomes:['meadow','mountains','forest','lake','candy','snow','autumn'],place:'ground',w:1.05,draw:o=>{const c=o.c,I=o.id,R=o.R,rf=pick(o,['#e2445a','#3d6fd8','#8a52d8','#2e9a8a']),st=c('#e8ddca'),
-  mer=(x0,x1,y,nn,fl,h=5)=>{const w=(x1-x0)/(2*nn-1);return Array.from({length:nn},(_,i)=>`<rect x="${f(x0+2*i*w)}" y="${f(y-h)}" width="${f(w)}" height="${h}" fill="${fl}"/>`).join('')},
+  mer=(x0,x1,y,nn,fl,h=5)=>{const w=(x1-x0)/(2*nn-1);return`<path d="${Array.from({length:nn},(_,i)=>`M${f(x0+2*i*w)} ${y}v${-h}h${f(w)}v${h}Z`).join('')}" fill="${fl}"/>`},
   cone=(x,yb,hw,ya)=>{const m=yb-(yb-ya)*.45;return`<path d="M${x-hw} ${yb}Q${f(x-hw*.3)} ${f(m)} ${x} ${ya}Q${f(x+hw*.3)} ${f(m)} ${x+hw} ${yb}Q${x} ${yb+3} ${x-hw} ${yb}Z" fill="url(#${I}r)"/><path d="M${x} ${ya}Q${f(x-hw*.22)} ${f(m)} ${f(x-hw*.5)} ${yb+1.6}M${x} ${ya}Q${f(x+hw*.15)} ${f(m)} ${f(x+hw*.3)} ${yb+2}M${f(x-hw*.62)} ${f(yb-(yb-ya)*.3)}Q${x} ${f(yb-(yb-ya)*.3+2)} ${f(x+hw*.62)} ${f(yb-(yb-ya)*.3)}M${f(x-hw*.85)} ${f(yb-(yb-ya)*.1)}Q${x} ${f(yb-(yb-ya)*.1+2.4)} ${f(x+hw*.85)} ${f(yb-(yb-ya)*.1)}" stroke="${c(darken(rf,.4))}" stroke-width=".6" opacity=".55" fill="none"/>`},
   flag=(x,y)=>`<path d="M${x} ${y}V${y-6.5}" stroke="${c('#4a3a2a')}" stroke-width=".7"/><path d="M${x} ${y-6.8}Q${x+3} ${y-7.6} ${x+7} ${y-5.6}Q${x+3} ${y-4.6} ${x} ${y-3.8}Z" fill="${c('#ffd23d')}"/>`,
   tower=x=>`<rect x="${x-11}" y="-62" width="22" height="62" fill="url(#${I}t)"/>${mort(o,x-11,x+11,-62,0,5,7,'#9a8a72',.45)}<rect x="${x-13}" y="-67" width="26" height="5.4" rx="1" fill="url(#${I}t)"/>${[-9,-3,3,9].map(d=>`<path d="M${x+d-2.4} -61.6A2.4 2.4 0 0 0 ${x+d+2.4} -61.6Z" fill="${c('#b8a88e')}"/>`).join('')}${cone(x,-66,14.5,-94)}${flag(x,-94)}
@@ -84,7 +86,7 @@ JIGART.subject({id:'castle',name:'Castle',biomes:['meadow','mountains','forest',
   ban=x=>`<rect x="${x-.6}" y="-35.4" width="8.2" height="1.2" rx=".6" fill="${c('#6a4a2a')}"/><path d="M${x} -34.4h7v15l-3.5 -3l-3.5 3Z" fill="${c(rf)}"/><path d="M${x+.8} -34.4v13.6" stroke="${c('#ffffff')}" stroke-width=".5" opacity=".35"/><circle cx="${x+3.5}" cy="-27" r="1.9" fill="${c('#ffd23d')}"/>`;
   return `<defs>${D(o)}${lin(I+'t',[[0,c('#f8f0e4')],[.45,c('#e4d8c4')],[1,c('#a8987e')]],1,0)}${lin(I+'v',[[0,c('#efe6d4')],[1,c('#cfc2aa')]])}${lin(I+'r',[[0,c(lighten(rf,.25))],[.5,c(rf)],[1,c(darken(rf,.35))]],1,0)}</defs>${shadow(o,58)}
   <rect x="-22" y="-64" width="44" height="30" fill="${c('#d6c9b2')}"/>${mort(o,-22,22,-64,-34,5,8,'#9a8a72',.45)}${mer(-22,22,-64,5,c('#d6c9b2'))}
-  <rect x="-10" y="-84" width="20" height="22" fill="url(#${I}t)"/>${mort(o,-10,10,-84,-64,5,7,'#9a8a72',.4)}<rect x="-12" y="-88" width="24" height="5" rx="1" fill="url(#${I}t)"/>${cone(0,-87,13.5,-105)}${flag(0,-104)}
+  <rect x="-10" y="-84" width="20" height="22" fill="url(#${I}t)"/>${mort(o,-10,10,-84,-64,5,7,'#9a8a72',.4)}<rect x="-12" y="-88" width="24" height="5" rx="1" fill="url(#${I}t)"/>${cone(0,-87,13.5,-104)}${flag(0,-103)}
   ${win(o,-3,-81,6,9,{arch:1,b:1,fr:'#6a5a4a'})}${win(o,-17,-59,5.5,9,{arch:1,b:1,fr:'#6a5a4a'})}${win(o,11.5,-59,5.5,9,{arch:1,b:1,fr:'#6a5a4a'})}
   <rect x="-31" y="-36" width="62" height="36" fill="url(#${I}v)"/>${mort(o,-31,31,-36,0,5,8)}${mer(-31,31,-36,7,c('#efe6d4'))}<rect x="-31" y="-36.5" width="62" height="1.4" fill="${c('#b8a88e')}"/>
   ${tower(-42)}${tower(42)}
@@ -99,12 +101,12 @@ JIGART.subject({id:'castle',name:'Castle',biomes:['meadow','mountains','forest',
 JIGART.subject({id:'cabin',name:'Log Cabin',biomes:['forest','mountains','snow','lake','autumn'],place:'ground',w:1,draw:o=>{const c=o.c,I=o.id,n=o.night,lp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
   let rows='',side='',ends='';for(let i=0;i<7;i++){const y=-6-i*5.72;rows+=`<rect x="-41" y="${f(y)}" width="56" height="5.9" rx="2.9" fill="url(#${I}l)"/>`;
     side+=`<path d="M15 ${f(y+5.8)}L44 ${f(y+3.2)}V${f(y+.6)}L15 ${f(y)}Z" fill="url(#${I}m)"/><path d="M15 ${f(y+5.8)}L44 ${f(y+3.2)}" stroke="${c('#3e200e')}" stroke-width=".5"/>`;
-    ends+=[-41,15].map(x=>`<circle cx="${x}" cy="${f(y+2.95)}" r="3" fill="${c('#dca46c')}" stroke="${c('#8a5a30')}" stroke-width=".6"/><circle cx="${x}" cy="${f(y+2.95)}" r="1.3" fill="none" stroke="${c('#a8743e')}" stroke-width=".45"/>`).join('')}
+    ends+=[-41,15].map(x=>`<circle cx="${x}" cy="${f(y+2.95)}" r="3"/><circle cx="${x}" cy="${f(y+2.95)}" r="1.3"/>`).join('')}
   let sh='';for(let t=.1;t<.95;t+=.1){const a=lp([19,-37],[-13,-68],t),b=lp([49,-40],[17,-70],t);sh+=`M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`;for(let s=(t*10%2<1?.08:.16);s<1;s+=.16){const p=lp(a,b,s);sh+=`M${f(p[0])} ${f(p[1])}l-3 3`}}
   return `<defs>${D(o)}${lin(I+'l',[[0,c('#c8844a')],[.45,c('#9a5a2e')],[1,c('#683818')]])}${lin(I+'m',[[0,c('#8a4e26')],[1,c('#5a3014')]])}${lin(I+'r',[[0,c('#7a3a2e')],[1,c('#4e2018')]],1,1)}</defs>${shadow(o,52,-2)}
   <path d="M15 0L44 -3V-42L15 -40Z" fill="${c('#5a3014')}"/>${side}
-  ${rows}<path d="M-40 -40L-13 -66L14 -40Z" fill="${c('#8a5530')}"/><path d="${[-34,-29,-24,-19,-14,-9,-4,1,6,11].map(x=>`M${x} -40V${f(-40-(27-Math.abs(x+13))*26/27)}`).join('')}" stroke="${c('#5a3418')}" stroke-width=".6"/>${ends}
-  ${port(o,-13,-50.5,4.4,'#4a2a14')}
+  ${rows}<path d="M-40 -40L-13 -66L14 -40Z" fill="${c('#8a5530')}"/><path d="${[-34,-29,-24,-19,-14,-9,-4,1,6,11].map(x=>`M${x} -40V${f(-40-(27-Math.abs(x+13))*26/27)}`).join('')}" stroke="${c('#5a3418')}" stroke-width=".6"/>
+  <g fill="${c('#dca46c')}" stroke="${c('#8a5a30')}" stroke-width=".55">${ends}</g>${port(o,-13,-50.5,4.4,'#4a2a14')}
   <rect x="31" y="-79" width="10" height="34" fill="${c('#9a929c')}"/>${[[32,-77,4,3],[36.5,-76,4,3.4],[31.5,-72,5,3],[37,-71.5,3.6,3],[32,-67,3.6,3.2],[36,-66.5,4.6,3],[31.5,-61,4.6,3],[36.6,-60.6,4,3.4],[32,-55,4,3]].map(([x,y,w,h],i)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.2" fill="${c(i%3?'#b4aeb8':'#7e7684')}"/>`).join('')}<rect x="29.6" y="-81.5" width="12.8" height="3" rx="1" fill="${c('#6a6270')}"/>
   <path d="M-13 -68L19 -37L49 -40L17 -70Z" fill="url(#${I}r)"/><path d="${sh}" stroke="${c('#2e120c')}" stroke-width=".55" opacity=".55" fill="none"/>
     <path d="M-47.5 -35.5L-13 -69.5L20.5 -35.5" stroke="${c('#4a2418')}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M-47.5 -36.3L-13 -70.3L20.5 -36.3" stroke="${c('#8a4a34')}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -114,7 +116,7 @@ JIGART.subject({id:'cabin',name:'Log Cabin',biomes:['forest','mountains','snow',
   <rect x="-38.6" y="-31" width="3.8" height="13" fill="${c('#3f6e46')}"/><rect x="-20.4" y="-31" width="3.8" height="13" fill="${c('#3f6e46')}"/><path d="M-38.6 -28.5h3.8M-38.6 -26h3.8M-38.6 -23.5h3.8M-38.6 -21h3.8M-20.4 -28.5h3.8M-20.4 -26h3.8M-20.4 -23.5h3.8M-20.4 -21h3.8" stroke="${c('#2a4a30')}" stroke-width=".45"/>${win(o,-34.4,-31,13.6,13,{fr:'#4a2a14',sw:1.4})}
   <g transform="translate(29 -24) skewY(-5) translate(-29 24)">${win(o,24.5,-30,9,11,{fr:'#3a1e0c',sw:1.2})}</g>
   <rect x="-7" y="-2.8" width="17" height="3" rx=".6" fill="${c('#8a5a32')}"/>
-  ${[[22,-2.5],[27,-2.5],[32,-2.5],[37,-2.5],[42,-2.5],[24.5,-7.2],[29.5,-7.2],[34.5,-7.2],[39.5,-7.2],[27,-11.9],[32,-11.9],[37,-11.9]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.45" fill="${c('#d8985a')}" stroke="${c('#7a4a26')}" stroke-width=".55"/><circle cx="${x}" cy="${y}" r=".8" fill="${c('#9a6436')}"/>`).join('')}
+  ${(W=>`<g fill="${c('#d8985a')}" stroke="${c('#7a4a26')}" stroke-width=".55">${W.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.45"/>`).join('')}</g><path d="${W.map(([x,y])=>`M${x} ${y}h.01`).join('')}" stroke="${c('#9a6436')}" stroke-width="1.6" stroke-linecap="round"/>`)([[22,-2.5],[27,-2.5],[32,-2.5],[37,-2.5],[42,-2.5],[24.5,-7.2],[29.5,-7.2],[34.5,-7.2],[39.5,-7.2],[27,-11.9],[32,-11.9],[37,-11.9]])}
   <path d="M-57 0V-7.5H-47V0Z" fill="${c('#8a5a32')}"/><ellipse cx="-52" cy="-7.5" rx="5" ry="1.6" fill="${c('#dcae78')}"/><path d="M-52 -7.5L-46 -16" stroke="${c('#a87a4a')}" stroke-width="1.2" stroke-linecap="round"/><path d="M-54.2 -9.4L-51.2 -13.8L-49 -11.2Q-51.5 -9 -54.2 -9.4Z" fill="${c('#a8b0bc')}"/>`}});
 
 JIGART.subject({id:'cottage',name:'Cottage',biomes:['meadow','farm','forest','autumn','garden'],place:'ground',w:1.1,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,dc=pick(o,['#3a6ab8','#2f8a5a','#c8443a','#7a4ab0']),
@@ -158,11 +160,11 @@ JIGART.subject({id:'pagoda',name:'Pagoda',biomes:['garden','mountains','lake'],p
   <rect x="-3" y="-80" width="6" height="4" fill="${c(darken(rc,.2))}"/><rect x="-.8" y="-102" width="1.6" height="22" fill="${gold}"/>${Array.from({length:7},(_,i)=>`<ellipse cx="0" cy="${-83-i*2.6}" rx="${f(3.4-i*.2)}" ry=".9" fill="${gold}"/>`).join('')}<path d="M0 -109.5Q3.2 -105 0 -102Q-3.2 -105 0 -109.5Z" fill="${gold}"/>
   <rect x="40" y="-3" width="8" height="3" fill="${c('#a8a49c')}"/><rect x="42.6" y="-14" width="2.8" height="11" fill="${c('#a8a49c')}"/><rect x="40" y="-16" width="8" height="2" fill="${c('#98948c')}"/><rect x="41" y="-22" width="6" height="6" fill="${c('#b8b4ac')}"/><rect x="42.4" y="-21" width="3.2" height="4" fill="${n?'#ffd27a':c('#3a3a40')}"/>${halo(o,44,-19,9)}<path d="M38 -22L44 -27L50 -22Z" fill="${c('#8a8680')}"/><circle cx="44" cy="-27.6" r="1.2" fill="${c('#8a8680')}"/>`}});
 
-JIGART.subject({id:'pyramid',name:'Pyramid',biomes:['desert','canyon'],place:'ground',w:1.15,draw:o=>{const c=o.c,I=o.id,R=o.R,A=[4,-98],L=[-62,0],F=[14,3],Rt=[60,-2],lp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+JIGART.subject({id:'pyramid',name:'Pyramid',biomes:['desert','canyon'],place:'ground',w:1.25,draw:o=>{const c=o.c,I=o.id,R=o.R,A=[4,-98],L=[-62,0],F=[14,3],Rt=[60,-2],lp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
   let co='',jt='';for(let k=0;k<16;k++){const t=k/18,t2=(k+1)/18;if(k){const a=lp(L,A,t),b=lp(F,A,t),d=lp(Rt,A,t);co+=`M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}L${f(d[0])} ${f(d[1])}`}
     for(const[p,q,m]of[[L,F,5],[F,Rt,3]])for(let j=0;j<m;j++){const s=(j+(k%2?.5:.15)+R()*.2)/m;if(s>.97)continue;const a=lp(lp(p,A,t),lp(q,A,t),s),b=lp(lp(p,A,t2),lp(q,A,t2),s);jt+=`M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`}}
   const g1=lp(L,A,.88),g2=lp(F,A,.88),g3=lp(Rt,A,.88);
-  return `<defs>${lin(I+'a',[[0,c('#fbe2a4')],[1,c('#e2b06a')]],1,1)}${lin(I+'b',[[0,c('#c8945a')],[1,c('#946436')]],1,1)}${lin(I+'g',[[0,c('#fff2a0')],[1,c('#e0a82a')]],1,1)}</defs>${shadow(o,60,8)}
+  return `<defs>${lin(I+'a',[[0,c('#fbe2a4')],[1,c('#e2b06a')]],1,1)}${lin(I+'b',[[0,c('#c8945a')],[1,c('#946436')]],1,1)}${lin(I+'g',[[0,c('#fff2a0')],[1,c('#e0a82a')]],1,1)}</defs>${shadow(o,58,2)}
   <path d="${P([L,F,A])}" fill="url(#${I}a)"/><path d="${P([F,Rt,A])}" fill="url(#${I}b)"/>
   <path d="${co}" stroke="${c('#8a5a2a')}" stroke-width=".6" opacity=".45" fill="none"/><path d="${jt}" stroke="${c('#8a5a2a')}" stroke-width=".5" opacity=".35" fill="none"/>
   <path d="${P([g1,g2,A])}" fill="url(#${I}g)"/><path d="${P([g2,g3,A])}" fill="${c('#c8901e')}"/><path d="M${F[0]} ${F[1]}L${A[0]} ${A[1]}" stroke="${c('#fff2cc')}" stroke-width=".8" opacity=".6"/>
@@ -171,7 +173,7 @@ JIGART.subject({id:'pyramid',name:'Pyramid',biomes:['desert','canyon'],place:'gr
   <path d="M-16 -9L-15 -19.5H-9L-8 -9Z" fill="${c('#3a2412')}"/><rect x="-17.6" y="-22" width="11.2" height="2.6" fill="${c('#e8c488')}"/><path d="M-17 -22L-12 -26.5L-7 -22" stroke="${c('#9a6a36')}" stroke-width=".7" fill="none"/>
   <rect x="38" y="-5" width="7" height="5" fill="${c('#d8b070')}"/><rect x="44" y="-3.4" width="6" height="3.4" fill="${c('#c8a060')}"/><rect x="-2" y="-2.8" width="5" height="3.6" fill="${c('#e0b878')}" transform="rotate(-8)"/>
   <ellipse cx="-36" cy="2" rx="13" ry="2" fill="${c('#4ab4e0')}" stroke="${c('#e8d09a')}" stroke-width=".8"/><path d="M-42 1.6H-34" stroke="${c('#ffffff')}" stroke-width=".6" opacity=".7"/>
-  ${palm(o,-48,3,48,-5)}${palm(o,52,3,38,4)}
+  ${palm(o,-42,3,45,-1)}${palm(o,47,3,36,0)}
   ${[[-26,2],[-22,1.4],[30,2],[57,2.4]].map(([x,y])=>`<path d="M${x-3} ${y}Q${x-2} ${y-4} ${x-3.5} ${y-6}M${x} ${y}Q${x+.5} ${y-5} ${x} ${y-7}M${x+3} ${y}Q${x+2} ${y-4} ${x+4} ${y-5.5}" stroke="${c('#6a9a3a')}" stroke-width=".9" fill="none" stroke-linecap="round"/>`).join('')}`}});
 
 JIGART.subject({id:'igloo',name:'Igloo',biomes:['snow'],place:'ground',w:1.15,draw:o=>{const c=o.c,I=o.id,n=o.night,hw=y=>50*Math.sqrt(Math.max(0,1-(y/56)**2)),Y=k=>-k*8.2,bl=c('#9cbcdc');
@@ -217,7 +219,7 @@ JIGART.subject({id:'treehouse',name:'Treehouse',biomes:['forest','jungle','meado
   ${[[-24,-86],[36,-92],[-44,-72],[20,-102],[50,-60],[-10,-104]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="${c('#e8443a')}"/><circle cx="${x-.5}" cy="${y-.5}" r=".5" fill="${c('#ffffff')}" opacity=".6"/>`).join('')}
   <path d="M-20 0Q-24 -3 -28 -1M18 0Q24 -3 28 0" stroke="${c('#6a4020')}" stroke-width="2" fill="none" stroke-linecap="round"/>`}});
 
-JIGART.subject({id:'mushroomhouse',name:'Mushroom House',biomes:['forest','meadow','candy','autumn'],place:'ground',w:1.05,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,cap=pick(o,[['#ff5a4a','#b8202a'],['#ff6aa8','#c02a6a'],['#ff8a3a','#c04a1a']]),
+JIGART.subject({id:'mushroomhouse',name:'Mushroom House',biomes:['forest','meadow','candy','autumn'],place:'ground',w:1,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,cap=pick(o,[['#ff5a4a','#b8202a'],['#ff6aa8','#c02a6a'],['#ff8a3a','#c04a1a']]),
   sm=(x,s,col)=>`<rect x="${f(x-1.6*s)}" y="${f(-9*s)}" width="${f(3.2*s)}" height="${f(9*s)}" rx="${f(1.2*s)}" fill="${c('#f6ead2')}"/><path d="M${f(x-7*s)} ${f(-8*s)}Q${f(x-7*s)} ${f(-14*s)} ${x} ${f(-14.5*s)}Q${f(x+7*s)} ${f(-14*s)} ${f(x+7*s)} ${f(-8*s)}Q${x} ${f(-6.5*s)} ${f(x-7*s)} ${f(-8*s)}Z" fill="${c(col)}"/><circle cx="${f(x-2.6*s)}" cy="${f(-11*s)}" r="${f(1.2*s)}" fill="${c('#fff8ee')}"/><circle cx="${f(x+2.4*s)}" cy="${f(-12.2*s)}" r="${f(.9*s)}" fill="${c('#fff8ee')}"/>`;
   return `<defs>${D(o)}${rad(I+'c',[[0,c(lighten(cap[0],.2))],[.55,c(cap[0])],[1,c(cap[1])]],.38,.25,.85)}${lin(I+'s',[[0,c('#fffaf0')],[.5,c('#f2e4c8')],[1,c('#c8b08a')]],1,0)}</defs>${shadow(o,46)}
   <ellipse cx="0" cy="-44" rx="46" ry="7.5" fill="${c('#e6d0ae')}"/><path d="${Array.from({length:15},(_,i)=>{const x=-42+i*6;return`M${f(x*.3)} -45L${x} ${f(-44+7.5*Math.sqrt(1-(x/46)**2))}`}).join('')}" stroke="${c('#b89a74')}" stroke-width=".6"/>
@@ -234,11 +236,11 @@ JIGART.subject({id:'mushroomhouse',name:'Mushroom House',biomes:['forest','meado
   ${sm(38,1,cap[0])}${sm(47,.6,'#b07ad8')}${sm(-38,.8,'#c8843a')}
   ${[[-28,0],[30,0],[-46,0],[54,0]].map(([x,y])=>`<path d="M${x-2} ${y}Q${x-1.6} ${y-3} ${x-2.6} ${y-4.6}M${x} ${y}Q${x+.3} ${y-3.4} ${x} ${y-5.4}M${x+2} ${y}Q${x+1.6} ${y-3} ${x+2.8} ${y-4.2}" stroke="${c('#4a9a3a')}" stroke-width=".8" fill="none" stroke-linecap="round"/>`).join('')}`}});
 
-JIGART.subject({id:'barn',name:'Red Barn',biomes:['farm','meadow','autumn'],place:'ground',w:1.15,draw:o=>{const c=o.c,I=o.id,n=o.night,wh=c('#f6f2ea'),lp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],
+JIGART.subject({id:'barn',name:'Red Barn',biomes:['farm','meadow','autumn'],place:'ground',w:1.1,draw:o=>{const c=o.c,I=o.id,n=o.night,wh=c('#f6f2ea'),lp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],
   ln=(a,b)=>`M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`,front='M-56 0V-42L-50 -64L-32 -80L-14 -64L-8 -42V0Z';
   let sh='';for(const[a,b,c2,d]of[[[-8,-42],[-14,-64],[22,-44],[16,-66]],[[-14,-64],[-32,-80],[16,-66],[-2,-82]]])for(let t=.2;t<.99;t+=.2){const p=lp(a,b,t),q=lp(c2,d,t);sh+=ln(p,q);for(let s=(t*5%2<1?.06:.14);s<1;s+=.16){const m=lp(p,q,s);sh+=`M${f(m[0])} ${f(m[1])}l-.8 ${f(-(b[1]-a[1])*.2)}`}}
   const door=x=>`<rect x="${x}" y="-31" width="15" height="31" fill="${c('#b8302a')}" stroke="${wh}" stroke-width="1.6"/><path d="M${x} -31L${x+15} 0M${x+15} -31L${x} 0" stroke="${wh}" stroke-width="1.6"/>`;
-  return `<defs>${D(o)}${lin(I+'m',[[0,c('#eef1f6')],[.35,c('#cfd4de')],[1,c('#7e889a')]],1,0)}${lin(I+'f',[[0,c('#de4632')],[1,c('#ae2a22')]])}${lin(I+'r',[[0,c('#7a7a8c')],[1,c('#4a4a5a')]])}<clipPath id="${I}c"><path d="${front}"/></clipPath></defs>${shadow(o,58,-4)}
+  return `<defs>${D(o)}${lin(I+'m',[[0,c('#eef1f6')],[.35,c('#cfd4de')],[1,c('#7e889a')]],1,0)}${lin(I+'q',[[0,c('#de4632')],[1,c('#ae2a22')]])}${lin(I+'r',[[0,c('#7a7a8c')],[1,c('#4a4a5a')]])}<clipPath id="${I}c"><path d="${front}"/></clipPath></defs>${shadow(o,58,-4)}
   <rect x="28" y="-76" width="22" height="76" fill="url(#${I}m)"/><path d="${Array.from({length:9},(_,i)=>`M28 ${-8-i*8}Q39 ${-6.6-i*8} 50 ${-8-i*8}`).join('')}" stroke="${c('#6a7282')}" stroke-width=".6" fill="none"/>
   <path d="M28 -76Q28 -91 39 -92Q50 -91 50 -76Z" fill="url(#${I}m)"/><path d="M31 -82Q34 -89 39 -90" stroke="${c('#ffffff')}" stroke-width="1.2" fill="none" opacity=".7"/><rect x="37" y="-95" width="4" height="3.4" fill="${c('#8a94a6')}"/>
   <path d="M44.5 -2V-78M47.5 -2V-78${Array.from({length:25},(_,i)=>`M44.5 ${-4-i*3}H47.5`).join('')}" stroke="${c('#5a6272')}" stroke-width=".55"/>
@@ -248,7 +250,7 @@ JIGART.subject({id:'barn',name:'Red Barn',biomes:['farm','meadow','autumn'],plac
   <path d="${P([[-8,-42],[-14,-64],[16,-66],[22,-44]])}" fill="url(#${I}r)"/><path d="${P([[-14,-64],[-32,-80],[-2,-82],[16,-66]])}" fill="${c('#8a8a9c')}"/><path d="${sh}" stroke="${c('#34343e')}" stroke-width=".5" opacity=".6" fill="none"/>
   <rect x="-22" y="-90" width="10" height="9" fill="${wh}"/><path d="M-20.5 -88H-13.5M-20.5 -86H-13.5M-20.5 -84H-13.5" stroke="${c('#5a5a66')}" stroke-width=".7"/><path d="M-24 -89.6L-17 -96.6L-10 -89.6Z" fill="${c('#5a5a6a')}"/>
   <path d="M-17 -96.6V-106M-21.5 -103H-12.5" stroke="${c('#3a3a44')}" stroke-width=".7"/><path d="M-12.5 -103l-1.6 -1.1v2.2Z M-21.5 -103l-1.4 -1.4h2Z" fill="${c('#3a3a44')}"/><circle cx="-17" cy="-98" r=".9" fill="${c('#e8b84a')}"/>
-  <path d="${front}" fill="url(#${I}f)"/><g clip-path="url(#${I}c)"><path d="${Array.from({length:13},(_,i)=>`M${-52.5+i*3.5} 0V-80`).join('')}" stroke="${c('#8a1e1a')}" stroke-width=".55"/></g>
+  <path d="${front}" fill="url(#${I}q)"/><g clip-path="url(#${I}c)"><path d="${Array.from({length:13},(_,i)=>`M${-52.5+i*3.5} 0V-80`).join('')}" stroke="${c('#8a1e1a')}" stroke-width=".55"/></g>
   <path d="M-56 0V-42L-50 -64L-32 -80L-14 -64L-8 -42V0" stroke="${wh}" stroke-width="2.2" stroke-linejoin="round" fill="none"/><path d="M-57.5 -41L-50.5 -65.5L-32 -82L-13.5 -65.5L-6.5 -41" stroke="${c('#4a4a58')}" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
   <path d="M-49 -33.4H-15" stroke="${c('#3a3a44')}" stroke-width="1.2"/>${door(-47)}${door(-32)}
   <rect x="-38" y="-62" width="12" height="12" fill="${c('#7a1a18')}" stroke="${wh}" stroke-width="1.3"/><path d="M-38 -62L-26 -50M-26 -62L-38 -50" stroke="${wh}" stroke-width="1.1"/><path d="M-37 -50l1 3l1 -3l1.4 3.4l1 -3.4l1.6 3l.6 -3l1.4 3.2l.8 -3.2l1 2.6l.6 -2.6" stroke="${c('#f0c84a')}" stroke-width=".8" fill="none"/>
@@ -292,7 +294,7 @@ JIGART.subject({id:'ferriswheel',name:'Ferris Wheel',biomes:['city','coast','can
   <g transform="translate(43 0)">${[0,1,2,3,4,5].map(i=>`<rect x="${-7+i*2.4}" y="-18" width="2.4" height="18" fill="${c(i%2?'#ffffff':'#e8443a')}"/>`).join('')}<rect x="-7.6" y="-14" width="15.2" height="7" fill="${c('#f6f2ea')}"/>${win(o,-5.6,-13.4,11.2,5.4,{b:1,fr:'#8a3a2a'})}<rect x="-8.4" y="-7.2" width="16.8" height="1.6" fill="${c('#8a3a2a')}"/>
     <path d="M-9 -18L0 -26L9 -18Z" fill="${c('#e8443a')}"/><path d="M-9 -18q1.5 2 3 0q1.5 2 3 0q1.5 2 3 0q1.5 2 3 0q1.5 2 3 0q1.5 2 3 0" fill="${c('#ffffff')}"/><path d="M0 -26V-31" stroke="${c('#5a5a6a')}" stroke-width=".6"/><path d="M0 -31L4.5 -29.6L0 -28.2Z" fill="${c('#ffcf3a')}"/></g>`}});
 
-JIGART.subject({id:'tent',name:'Campsite',biomes:['forest','mountains','lake','desert','canyon','snow'],place:'ground',w:1.6,draw:o=>{const c=o.c,I=o.id,n=o.night,tc=pick(o,['#ff8a3a','#3aa86a','#3a7ae8','#e8443a']);
+JIGART.subject({id:'tent',name:'Campsite',biomes:['forest','mountains','lake','desert','canyon','snow'],place:'ground',w:1.5,draw:o=>{const c=o.c,I=o.id,n=o.night,tc=pick(o,['#ff8a3a','#3aa86a','#3a7ae8','#e8443a']);
   return `<defs>${D(o)}${lin(I+'a',[[0,c(lighten(tc,.15))],[1,c(tc)]])}${lin(I+'b',[[0,c(darken(tc,.18))],[1,c(darken(tc,.34))]])}${n?rad(I+'k',[[0,'#fff0b0'],[1,'#ff9a40']],.5,.8,.8):''}</defs>${shadow(o,50,-6)}
   <path d="M-20 -66L20 -62L36 -2L8 0Z" fill="url(#${I}b)"/><path d="M-20 -66L20 -62M-6 -64.6L18 -1.2M7 -63.4L27 -1.6" stroke="${c(darken(tc,.5))}" stroke-width=".6" opacity=".6"/>
   <path d="M-48 0L-20 -66L8 0Z" fill="url(#${I}a)"/><path d="M-20 -66L-34 -33M-20 -66L-6 -33" stroke="${c(lighten(tc,.35))}" stroke-width=".7" opacity=".5"/>
@@ -308,7 +310,7 @@ JIGART.subject({id:'tent',name:'Campsite',biomes:['forest','mountains','lake','d
   ${n?'':`<path d="M44 -22Q41 -28 44 -33Q47 -38 43 -44" stroke="${c('#c8c8d0')}" stroke-width="1.6" fill="none" opacity=".45" stroke-linecap="round"/>`}
   ${[[41,-24],[47.6,-28],[43.6,-32]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r=".6" fill="#ffb03a"/>`).join('')}`}});
 
-JIGART.subject({id:'train',name:'Steam Train',biomes:['meadow','mountains','desert','farm','snow','autumn','canyon'],place:'ground',w:1.3,draw:o=>{const c=o.c,I=o.id,n=o.night,bc=pick(o,['#2f8a4e','#2a58b0','#c0322a']),dk=c('#2e2e38'),gd=c('#e8b84a'),
+JIGART.subject({id:'train',name:'Steam Train',biomes:['meadow','mountains','desert','farm','snow','autumn','canyon'],place:'ground',w:1.2,draw:o=>{const c=o.c,I=o.id,n=o.night,bc=pick(o,['#2f8a4e','#2a58b0','#c0322a']),dk=c('#2e2e38'),gd=c('#e8b84a'),
   wh=(x,y,r,sp=6)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${dk}"/><circle cx="${x}" cy="${y}" r="${f(r*.8)}" fill="${c('#c8382a')}"/><path d="${Array.from({length:sp},(_,i)=>{const a=i*Math.PI/sp;return`M${f(x-Math.cos(a)*r*.8)} ${f(y-Math.sin(a)*r*.8)}L${f(x+Math.cos(a)*r*.8)} ${f(y+Math.sin(a)*r*.8)}`}).join('')}" stroke="${c('#8a1e18')}" stroke-width="${f(r*.12)}"/><circle cx="${x}" cy="${y}" r="${f(r*.22)}" fill="${c('#d8dce6')}"/>`;
   return `<defs>${D(o)}${lin(I+'b',[[0,c(darken(bc,.25))],[.3,c(lighten(bc,.2))],[1,c(darken(bc,.4))]])}${lin(I+'l',[[0,c(lighten(bc,.1))],[1,c(darken(bc,.2))]])}${lin(I+'s',[[0,c('#ffffff')],[1,c('#c8ccd8')]])}</defs>${shadow(o,64)}
   <path d="M-65 2L-63 -2H63L65 2Z" fill="${c('#9a9084')}"/>${Array.from({length:19},(_,i)=>`<rect x="${-62+i*6.8}" y="-3" width="3.6" height="2.6" fill="${c('#6a4a32')}"/>`).join('')}<rect x="-65" y="-4.4" width="130" height="1.6" fill="${c('#7a7e8a')}"/><path d="M-65 -4.2H65" stroke="${c('#d0d4de')}" stroke-width=".4"/>
@@ -316,7 +318,7 @@ JIGART.subject({id:'train',name:'Steam Train',biomes:['meadow','mountains','dese
   <rect x="-60" y="-17" width="54" height="4" fill="${dk}"/><rect x="-4" y="-18" width="7" height="2.6" fill="${dk}"/>
   <rect x="-62" y="-50" width="58" height="34" rx="2" fill="${c('#f4e6c8')}"/><rect x="-62" y="-32" width="58" height="16" rx="1" fill="${c('#8a2a3a')}"/><path d="M-62 -32.6H-4" stroke="${gd}" stroke-width="1"/><path d="M-60 -20H-6" stroke="${c('#6a1a2a')}" stroke-width=".5"/>
   <path d="M-64 -49.4Q-33 -58 -2 -49.4Z" fill="${c('#4a4a58')}"/>${[-50,-33,-16].map(x=>`<rect x="${x}" y="-55.6" width="4" height="2" rx=".6" fill="${c('#3a3a46')}"/>`).join('')}
-  ${[0,1,2,3,4].map(i=>win(o,-58+i*10.6,-46,7.4,10,{fr:'#6a4a2a',b:0,rx:1.2})).join('')}<path d="M-61 -44V-20M-5 -44V-20" stroke="${c('#c8b48a')}" stroke-width=".7"/>
+  ${wrow(o,[0,1,2,3,4].map(i=>[-58+i*10.6,-46,7.4,10]),{fr:'#6a4a2a'})}<path d="M-61 -44V-20M-5 -44V-20" stroke="${c('#c8b48a')}" stroke-width=".7"/>
   ${[[-56,-15,13],[-22,-15,13]].map(([x,y,w])=>`<rect x="${x}" y="${y}" width="${w}" height="3.4" rx=".8" fill="${c('#3a3a46')}"/>`).join('')}${wh(-53,-8.6,4.4,4)}${wh(-44,-8.6,4.4,4)}${wh(-19,-8.6,4.4,4)}${wh(-10,-8.6,4.4,4)}
   <rect x="2" y="-24" width="60" height="4" fill="${dk}"/><path d="M2 -22.8H62" stroke="${c('#c8382a')}" stroke-width=".7"/><rect x="5" y="-20" width="52" height="6" fill="${dk}"/>
   <rect x="21" y="-46" width="32" height="22" rx="2" fill="url(#${I}b)"/>${[27,37,47].map(x=>`<rect x="${x}" y="-46" width="1.6" height="22" fill="${gd}"/>`).join('')}
@@ -329,7 +331,7 @@ JIGART.subject({id:'train',name:'Steam Train',biomes:['meadow','mountains','dese
   ${wh(9,-9.4,5.4,5)}${wh(24,-12.6,8.4)}${wh(39,-12.6,8.4)}${wh(52,-8.6,4.4,4)}<path d="M28 -10.6H43L49 -17.6" stroke="${c('#d8dce6')}" stroke-width="1.4" fill="none" stroke-linecap="round"/>
   <path d="M58 -14H62L65 -4H56Z" fill="${c('#c8382a')}"/><path d="M59 -12L58 -4M61 -12L61 -4M63 -10L64 -4" stroke="${c('#8a1e18')}" stroke-width=".6"/>`}});
 
-JIGART.subject({id:'camper',name:'Camper Van',biomes:['coast','desert','canyon','meadow','mountains','autumn'],place:'ground',w:1.6,draw:o=>{const c=o.c,I=o.id,n=o.night,bc=pick(o,['#2fb6a8','#ff8a3a','#e8443a','#3a8ae8']),cu=pick(o,['#ff8a5a','#ffcf3a','#ff6aa8']),sb=pick(o,['#ffcf3a','#ff6aa8','#4ac0ff']),ch=c('#c8ccd8'),
+JIGART.subject({id:'camper',name:'Camper Van',biomes:['coast','desert','canyon','meadow','mountains','autumn'],place:'ground',w:1.5,draw:o=>{const c=o.c,I=o.id,n=o.night,bc=pick(o,['#2fb6a8','#ff8a3a','#e8443a','#3a8ae8']),cu=pick(o,['#ff8a5a','#ffcf3a','#ff6aa8']),sb=pick(o,['#ffcf3a','#ff6aa8','#4ac0ff']),ch=c('#c8ccd8'),
   wl=x=>`<circle cx="${x}" cy="-11" r="11" fill="${c('#2a2a32')}"/><circle cx="${x}" cy="-11" r="6.4" fill="${c('#f0ece4')}"/><circle cx="${x}" cy="-11" r="4.4" fill="${c(bc)}"/><circle cx="${x}" cy="-11" r="2.2" fill="${ch}"/>${[0,1,2,3,4].map(i=>{const a=i*1.2566;return`<circle cx="${f(x+Math.cos(a)*3.3)}" cy="${f(-11+Math.sin(a)*3.3)}" r=".45" fill="${c('#8a8e9a')}"/>`}).join('')}<path d="M${x-8} -15A9 9 0 0 1 ${x-2} -19.4" stroke="${c('#5a5a66')}" stroke-width=".8" fill="none"/>`,
   crt=(x,y,w,h)=>`<path d="M${x} ${y}h${f(w*.3)}Q${f(x+w*.12)} ${f(y+h*.45)} ${x} ${f(y+h*.9)}Z" fill="${c(cu)}"/><path d="M${f(x+w)} ${y}h${f(-w*.3)}Q${f(x+w*.88)} ${f(y+h*.45)} ${f(x+w)} ${f(y+h*.9)}Z" fill="${c(cu)}"/>`,
   dai=(x,y)=>`${[0,1,2,3,4,5].map(i=>{const a=i*1.0472;return`<ellipse cx="${f(x+Math.cos(a)*2.4)}" cy="${f(y+Math.sin(a)*2.4)}" rx="1.6" ry="1" transform="rotate(${f(i*60)} ${f(x+Math.cos(a)*2.4)} ${f(y+Math.sin(a)*2.4)})" fill="${c('#ffffff')}"/>`}).join('')}<circle cx="${x}" cy="${y}" r="1.3" fill="${c('#ffcf3a')}"/>`;
@@ -348,7 +350,7 @@ JIGART.subject({id:'camper',name:'Camper Van',biomes:['coast','desert','canyon',
   <circle cx="55" cy="-32" r="2.8" fill="${ch}"/><circle cx="55" cy="-32" r="2" fill="${n?'#fff6c0':c('#fff6d8')}"/>${halo(o,55.6,-32,9)}<rect x="53.4" y="-27.4" width="3" height="1.6" rx=".6" fill="${n?'#ffb03a':c('#ffa03a')}"/>
   <path d="M46 -46L49.6 -49" stroke="${c('#3a3a44')}" stroke-width=".8"/><rect x="48.4" y="-52" width="2.6" height="3.6" rx=".8" fill="${c('#3a3a44')}"/>`}});
 
-JIGART.subject({id:'clocktower',name:'Clock Tower',biomes:['city','meadow','snow'],place:'ground',w:.45,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,hr=R()*360,mn=R()*360,dk=c('#2a2a34'),gd=c('#d8a83a'),
+JIGART.subject({id:'clocktower',name:'Clock Tower',biomes:['city','meadow','snow'],place:'ground',w:.5,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,hr=R()*360,mn=R()*360,dk=c('#2a2a34'),gd=c('#d8a83a'),
   cor=(y)=>`<rect x="-24" y="${y}" width="48" height="3" fill="${c('#ddd2bc')}"/><path d="${Array.from({length:12},(_,i)=>`M${-22.6+i*4} ${y+3}h2v1.2h-2Z`).join('')}" fill="${c('#b8ac94')}"/>`,
   quo=(y0,y1)=>{let s='';for(let y=y1,i=0;y>y0;y-=4,i++)s+=`<rect x="-22" y="${y-4}" width="${i%2?4:6}" height="3.6" fill="${c('#ece4d2')}"/><rect x="${i%2?18:16}" y="${y-4}" width="${i%2?4:6}" height="3.6" fill="${c('#b8ac94')}"/>`;return s};
   return `<defs>${D(o)}${lin(I+'s',[[0,c('#efe6d4')],[.5,c('#d8ccb4')],[1,c('#ac9e84')]],1,0)}${lin(I+'b',[[0,c('#d07a58')],[.5,c('#b8603e')],[1,c('#8a4028')]],1,0)}${lin(I+'r',[[0,c('#5ab4a0')],[.5,c('#3a8a7a')],[1,c('#24605a')]],1,0)}${n?glowDef(I+'L','#fff2c0',.85):''}</defs>${shadow(o,30)}
@@ -367,7 +369,7 @@ JIGART.subject({id:'clocktower',name:'Clock Tower',biomes:['city','meadow','snow
   <path d="M0 -107.4V-110" stroke="${gd}" stroke-width=".8"/><circle cx="0" cy="-107.8" r="1.1" fill="${gd}"/>
   ${[[-26,-3,4],[-28.6,-6,3],[26,-3,4],[28.4,-6.4,3]].map(([x,y,r],i)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c(i%2?'#3f9a3a':'#4aa844')}"/><circle cx="${x+.6}" cy="${y-1}" r=".8" fill="${c(i<2?'#ff6a8a':'#ffcf3a')}"/>`).join('')}`}});
 
-JIGART.subject({id:'icecreamcart',name:'Ice-Cream Cart',biomes:['coast','island','city','candy'],place:'ground',w:.95,draw:o=>{const c=o.c,I=o.id,n=o.night,[ca,cb]=pick(o,[['#ff6a8a','#ffd6e0'],['#2fc0b0','#c6f2ea'],['#ffa03a','#ffe4c0'],['#8a7aff','#e2dcff']]),wh=c('#ffffff'),
+JIGART.subject({id:'icecreamcart',name:'Ice-Cream Cart',biomes:['coast','island','city','candy'],place:'ground',w:.88,draw:o=>{const c=o.c,I=o.id,n=o.night,[ca,cb]=pick(o,[['#ff6a8a','#ffd6e0'],['#2fc0b0','#c6f2ea'],['#ffa03a','#ffe4c0'],['#8a7aff','#e2dcff']]),wh=c('#ffffff'),
   E=Array.from({length:9},(_,k)=>{const x=-46+k*10.5;return[x,-83+2.6*((x+4)/42)**2]}),bl=['#fff27a','#ff8ad8','#8affea','#ffb03a'];
   return `<defs>${D(o)}<clipPath id="${I}k"><path d="M-46 -80.4Q-44 -99 -4 -101Q36 -99 38 -80.4Z"/></clipPath>${lin(I+'b',[[0,c(cb)],[1,c(darken(cb,.12))]])}${rad(I+'h',[[0,c('#ffffff'),.35],[1,c('#000000'),.12]],.3,.2,.9)}${n?glowDef(I+'L','#fff2a0',.75):''}</defs>${shadow(o,38,-2)}
   <rect x="-4.8" y="-97" width="1.6" height="51" fill="${c('#c8ccd8')}"/>
@@ -386,12 +388,14 @@ JIGART.subject({id:'icecreamcart',name:'Ice-Cream Cart',biomes:['coast','island'
   <path d="M18 -14L21 0M16 -14L13 0" stroke="${c('#8a8e9a')}" stroke-width="1.4"/><rect x="11" y="-1" width="12" height="1.6" rx=".8" fill="${c('#5a5a66')}"/>
   <circle cx="-18" cy="-12" r="12" fill="${c('#2a2a32')}"/><circle cx="-18" cy="-12" r="9.6" fill="none" stroke="${c(ca)}" stroke-width="1.4"/><path d="${Array.from({length:8},(_,i)=>{const a=i*Math.PI/8;return`M${f(-18-Math.cos(a)*9)} ${f(-12-Math.sin(a)*9)}L${f(-18+Math.cos(a)*9)} ${f(-12+Math.sin(a)*9)}`}).join('')}" stroke="${c('#d8dce6')}" stroke-width=".55"/><circle cx="-18" cy="-12" r="2" fill="${c('#d8dce6')}"/>`}});
 
-JIGART.subject({id:'temple',name:'Ancient Temple',biomes:['jungle','desert','canyon','volcano'],place:'ground',w:1.15,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,lv=c('#3f8a34'),
-  T=[0,1,2,3,4].map(i=>[-i*13,58-i*7.5]),leaf=(x,y,a,L,col)=>{const r=a*Math.PI/180,tx=x+Math.cos(r)*L,ty=y+Math.sin(r)*L,mx=(x+tx)/2,my=(y+ty)/2,px=-Math.sin(r)*L*.22,py=Math.cos(r)*L*.22;return`<path d="M${f(x)} ${f(y)}Q${f(mx+px)} ${f(my+py)} ${f(tx)} ${f(ty)}Q${f(mx-px)} ${f(my-py)} ${f(x)} ${f(y)}Z" fill="${col}"/>`},
-  fern=(x,s)=>[-160,-130,-105,-80,-55,-25].map((a,i)=>leaf(x,0,a,(14+i%2*4)*s,c(i%2?'#3f9a3a':'#57b84a'))).join(''),
-  vine=(x,y,L)=>{let d=`M${x} ${y}`,lv2='';for(let k=1;k<=L;k++){const xx=x+(k%2?1.4:-1.4),yy=y+k*3;d+=`Q${f(xx)} ${f(yy-1.5)} ${x} ${yy}`;lv2+=leaf(x,yy-1,k%2?20:160,3.2,c(k%2?'#4aa040':'#3a8a34'))}return`<path d="${d}" stroke="${lv}" stroke-width=".7" fill="none"/>${lv2}`};
-  let tiers='',deco='';T.forEach(([y0,hb],i)=>{const ht=hb-2.5;tiers+=`<path d="${P([[-hb,y0],[-ht,y0-13],[ht,y0-13],[hb,y0]])}" fill="url(#${I}s)"/>${mort(o,-ht,ht,y0-11.8,y0,4,9,'#6a5a3e',.4)}<rect x="${-ht-1}" y="${y0-13}" width="${ht*2+2}" height="1.6" fill="${c('#e4d8b8')}"/>${Array.from({length:Math.floor((ht-14)/7)},(_,k)=>[-1,1].map(s=>{const x=s*(17+k*7);return`<rect x="${x-1.6}" y="${y0-8.6}" width="3.2" height="3.2" fill="none" stroke="${c('#7a6a4a')}" stroke-width=".55"/><circle cx="${x}" cy="${y0-7}" r=".55" fill="${c('#7a6a4a')}"/>`}).join('')).join('')}`;
-    for(let k=0;k<2;k++){const s=R()<.5?-1:1,x=s*(16+R()*(ht-20));deco+=vine(f(x),y0-12,2+Math.floor(R()*3))+`<ellipse cx="${f(x+s*3)}" cy="${y0-12.4}" rx="4.4" ry="1.2" fill="${c('#5aa040')}"/>`}});
+JIGART.subject({id:'temple',name:'Ancient Temple',biomes:['jungle','desert','canyon','volcano'],place:'ground',w:1.2,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,lv=c('#3f8a34'),
+  T=[0,1,2,3,4].map(i=>[-i*13,58-i*7.5]),leaf=(x,y,a,L)=>{const r=a*Math.PI/180,tx=x+Math.cos(r)*L,ty=y+Math.sin(r)*L,mx=(x+tx)/2,my=(y+ty)/2,px=-Math.sin(r)*L*.22,py=Math.cos(r)*L*.22;return`M${f(x)} ${f(y)}Q${f(mx+px)} ${f(my+py)} ${f(tx)} ${f(ty)}Q${f(mx-px)} ${f(my-py)} ${f(x)} ${f(y)}Z`},
+  fern=(x,s)=>[0,1].map(j=>`<path d="${[-160,-130,-105,-80,-55,-25].filter((_,i)=>i%2===j).map((a,i)=>leaf(x,0,a,(14+j*4)*s)).join('')}" fill="${c(j?'#3f9a3a':'#57b84a')}"/>`).join(''),
+  vine=(x,y,L)=>{let d=`M${x} ${y}`,lv2='';for(let k=1;k<=L;k++){const xx=x+(k%2?1.4:-1.4),yy=y+k*3;d+=`Q${f(xx)} ${f(yy-1.5)} ${x} ${yy}`;lv2+=leaf(x,yy-1,k%2?20:160,3.2)}return`<path d="${d}" stroke="${lv}" stroke-width=".7" fill="none"/><path d="${lv2}" fill="${c('#4aa040')}"/>`};
+  let tiers='',deco='',gq='',gd='';T.forEach(([y0,hb],i)=>{const ht=hb-2.5;tiers+=`<path d="${P([[-hb,y0],[-ht,y0-13],[ht,y0-13],[hb,y0]])}" fill="url(#${I}s)"/>${mort(o,-ht,ht,y0-11.8,y0,4,9,'#6a5a3e',.4)}<rect x="${-ht-1}" y="${y0-13}" width="${ht*2+2}" height="1.6" fill="${c('#e4d8b8')}"/>`;
+    for(let k=0;k<Math.floor((ht-14)/7);k++)for(const sg of[-1,1]){const x=sg*(17+k*7);gq+=`M${f(x-1.6)} ${y0-8.6}h3.2v3.2h-3.2Z`;gd+=`M${x} ${y0-7}h.01`}
+    {const sg=i%2?1:-1,x=sg*(16+R()*(ht-20));deco+=vine(f(x),y0-12,2+Math.floor(R()*3))+`<ellipse cx="${f(x+sg*3)}" cy="${y0-12.4}" rx="4.4" ry="1.2" fill="${c('#5aa040')}"/>`}});
+  tiers+=`<path d="${gq}" fill="none" stroke="${c('#7a6a4a')}" stroke-width=".55"/><path d="${gd}" stroke="${c('#7a6a4a')}" stroke-width="1.1" stroke-linecap="round"/>`;
   return `<defs>${D(o)}${lin(I+'s',[[0,c('#d4c6a2')],[1,c('#9a8a68')]])}${lin(I+'h',[[0,c('#d8cca8')],[1,c('#ac9c78')]],1,0)}${n?rad(I+'k',[[0,'#ffe2a0'],[1,'#ff9a40']],.5,.8,.8):''}</defs>${shadow(o,60)}
   ${tiers}<path d="M-13 0L-9 -65H9L13 0Z" fill="${c('#ddd0ae')}"/><path d="${Array.from({length:19},(_,i)=>{const y=-3.4-i*3.25,w=13-(i+1)*3.25*4/65;return`M${f(-w)} ${f(y)}H${f(w)}`}).join('')}" stroke="${c('#9a8a66')}" stroke-width=".6"/><path d="M-13 0L-9 -65M13 0L9 -65" stroke="${c('#a89874')}" stroke-width="2.2"/>
   ${deco}<path d="M30 -18l2 3l-1.4 2.6l2 3M-36 -6l-2 2.4l1.6 2" stroke="${c('#5a4a32')}" stroke-width=".6" fill="none"/>
@@ -401,16 +405,16 @@ JIGART.subject({id:'temple',name:'Ancient Temple',biomes:['jungle','desert','can
   <path d="M-6 -65V-81.8H6V-65Z" fill="${n?`url(#${I}k)`:c('#1e160e')}"/>${halo(o,0,-72,14)}
   ${[-12,12].map(x=>`<rect x="${x-.8}" y="-73" width="1.6" height="8" fill="${c('#5a3a22')}"/><path d="M${x-2} -73h4l-.6 2h-2.8Z" fill="${c('#7a5a3a')}"/>${flame(o,x,-73,.55)}`).join('')}
   ${vine(-17,-91,4)}${vine(15,-91,3)}${vine(10,-104,2)}<ellipse cx="-14" cy="-91.4" rx="5" ry="1.4" fill="${c('#5aa040')}"/><ellipse cx="6" cy="-104.4" rx="5" ry="1.2" fill="${c('#5aa040')}"/>
-  <rect x="44" y="-6" width="8" height="6" fill="${c('#b8a882')}" transform="rotate(12 48 -3)"/><rect x="34" y="-4" width="6" height="4.4" fill="${c('#a8987a')}" transform="rotate(-8 37 -2)"/>${fern(-54,1)}${fern(58,.8)}${fern(-22,.5)}`}});
+  <rect x="44" y="-6" width="8" height="6" fill="${c('#b8a882')}" transform="rotate(12 48 -3)"/><rect x="34" y="-4" width="6" height="4.4" fill="${c('#a8987a')}" transform="rotate(-8 37 -2)"/>${fern(-50,.8)}${fern(52,.7)}${fern(-22,.5)}`}});
 
 JIGART.subject({id:'tikihut',name:'Tiki Hut',biomes:['island','coast','volcano'],place:'ground',w:1,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,hw=y=>50*(y+104)/44,
   band=(yb,col)=>{let pts=[[0,-104],[-hw(yb),yb]];for(let x=-hw(yb)+3;x<hw(yb);x+=3)pts.push([x,yb+((x/3|0)%2?2.8:-.4)]);pts.push([hw(yb),yb]);return`<path d="${P(pts)}" fill="${c(col)}"/><path d="${Array.from({length:Math.floor(hw(yb)/3)},(_,i)=>{const x=-hw(yb)+4+i*6;return`M${f(x*.9)} ${f(yb-8)}L${f(x)} ${f(yb+1.4)}`}).join('')}" stroke="${c('#8a6424')}" stroke-width=".55" opacity=".6"/>`},
   pole=(x)=>`<rect x="${x-1.7}" y="-38" width="3.4" height="38" fill="${c('#8a5a32')}"/><path d="M${x-1.7} -12h3.4M${x-1.7} -10.6h3.4M${x-1.7} -30h3.4M${x-1.7} -28.6h3.4" stroke="${c('#e0c890')}" stroke-width=".6"/>`;
-  const bam=Array.from({length:16},(_,i)=>{const x=-28+i*3.5,y1=-62+R()*6;return`<rect x="${x}" y="-66" width="3.5" height="26" fill="${c(i%2?'#d8b46a':'#c8a058')}"/><path d="M${x+.3} ${f(y1)}h2.9M${x+.3} ${f(y1+9+R()*4)}h2.9" stroke="${c('#8a6a2a')}" stroke-width=".55"/>`}).join('');
+  const bam=`<rect x="-28" y="-66" width="56" height="26" fill="${c('#c8a058')}"/>`+Array.from({length:8},(_,i)=>`<rect x="${-24.5+i*7}" y="-66" width="3.5" height="26" fill="${c('#d8b46a')}"/>`).join('')+`<path d="${Array.from({length:16},(_,i)=>{const x=-28+i*3.5,y1=-62+R()*6;return`M${x+.3} ${f(y1)}h2.9M${x+.3} ${f(y1+9+R()*4)}h2.9M${x} -66v26`}).join('')}" stroke="${c('#8a6a2a')}" stroke-width=".5"/>`;
   return `<defs>${D(o)}${n?rad(I+'k',[[0,'#ffe2a0'],[1,'#ff9a40']],.5,.8,.8):''}</defs>${shadow(o,50)}
   <path d="M-30 -36L-12 -10M-12 -36L-30 -10M12 -36L30 -10M30 -36L12 -10" stroke="${c('#7a4a26')}" stroke-width="1"/>${[-30,-12,12,30].map(pole).join('')}
   ${bam}<path d="M-28 -66H28" stroke="${c('#8a6a2a')}" stroke-width=".8"/>
-  <path d="M-7 -40V-58H7V-40Z" fill="${n?`url(#${I}k)`:c('#3a2416')}"/>${halo(o,0,-48,14)}${[-5,-2.5,0,2.5,5].map((x,i)=>`<path d="M${x} -58V-46" stroke="${c('#8a5a32')}" stroke-width=".4"/>${[0,1,2,3].map(j=>`<circle cx="${x}" cy="${-56+j*3}" r=".7" fill="${c(['#ff5a6a','#ffcf3a','#3ac0ff','#ffffff'][(i+j)%4])}"/>`).join('')}`).join('')}<path d="M-7.6 -58.6H7.6M-7.6 -58.6V-40M7.6 -58.6V-40" stroke="${c('#6a4020')}" stroke-width="1.2"/>
+  <path d="M-7 -40V-58H7V-40Z" fill="${n?`url(#${I}k)`:c('#3a2416')}"/>${halo(o,0,-48,14)}${[-5,-2.5,0,2.5,5].map((x,i)=>`<path d="M${x} -58V-46" stroke="${c('#8a5a32')}" stroke-width=".4"/>${[0,1,2].map(j=>`<circle cx="${x}" cy="${-55+j*3.6}" r=".75" fill="${c(['#ff5a6a','#ffcf3a','#3ac0ff','#ffffff'][(i+j)%4])}"/>`).join('')}`).join('')}<path d="M-7.6 -58.6H7.6M-7.6 -58.6V-40M7.6 -58.6V-40" stroke="${c('#6a4020')}" stroke-width="1.2"/>
   ${win(o,-23.5,-58,10,9,{fr:'#6a4020',sw:1.3})}${win(o,13.5,-58,10,9,{fr:'#6a4020',sw:1.3})}
   <rect x="-38" y="-41" width="76" height="4.4" fill="${c('#a8743e')}"/><path d="${Array.from({length:19},(_,i)=>`M${-36+i*4} -41v4.4`).join('')}" stroke="${c('#6a4020')}" stroke-width=".5"/>
   <path d="M-37 -36.6Q0 -30 37 -36.6" stroke="${c('#3f8a3a')}" stroke-width=".8" fill="none"/>${Array.from({length:13},(_,i)=>{const t=i/12,x=-37+74*t,y=-36.6+6.6*4*t*(1-t)*.5*2*.5*2;return`<circle cx="${f(x)}" cy="${f(-36.6+6.6*t*(1-t)*2)}" r="1.3" fill="${c(['#ff5a8a','#ffcf3a','#ffffff','#ff8a3a'][i%4])}"/>`}).join('')}
@@ -423,7 +427,7 @@ JIGART.subject({id:'tikihut',name:'Tiki Hut',biomes:['island','coast','volcano']
   <path d="M47 0L45 -34" stroke="${c('#c8a058')}" stroke-width="1.6"/><path d="M43 -34h4.6l-.8 -3h-3Z" fill="${c('#7a4a26')}"/><path d="M42.6 -36.6h5.4" stroke="${c('#5a3418')}" stroke-width=".7"/>${flame(o,45.4,-37,.9)}
   <path d="M-22 -.6l1 -2.2l1 2.2l2.4 .2l-1.8 1.5l.6 2.3l-2.2 -1.2l-2.2 1.2l.6 -2.3l-1.8 -1.5Z" fill="${c('#ff8a4a')}"/><path d="M18 0q1.6 -3.6 3.2 0Z" fill="${c('#ffd0c0')}"/>`}});
 
-JIGART.subject({id:'rocket',name:'Rocket',biomes:['desert','canyon','snow','meadow'],place:'ground',w:.75,draw:o=>{const c=o.c,I=o.id,n=o.night,rd=c('#e2402e'),tw=c('#d8402e');
+JIGART.subject({id:'rocket',name:'Rocket',biomes:['desert','canyon','snow','meadow'],place:'ground',w:.8,draw:o=>{const c=o.c,I=o.id,n=o.night,rd=c('#e2402e'),tw=c('#d8402e');
   let lat='';for(let y=-8;y>-96;y-=11)lat+=`M20 ${y}L34 ${y-11}M34 ${y}L20 ${y-11}M20 ${y}H34`;
   return `<defs>${D(o)}${lin(I+'b',[[0,c('#c8ccd8')],[.3,c('#ffffff')],[.7,c('#e8eaf2')],[1,c('#9aa0b4')]],1,0)}${lin(I+'n',[[0,c('#ff7a5a')],[.5,c('#e2402e')],[1,c('#a82418')]],1,0)}${n?glowDef(I+'R','#ff5040',.85)+glowDef(I+'L','#fff6d0',.8):''}</defs>${shadow(o,46)}
   <rect x="19" y="-98" width="2.4" height="90" fill="${tw}"/><rect x="33" y="-98" width="2.4" height="90" fill="${tw}"/><path d="${lat}" stroke="${tw}" stroke-width=".9"/>
@@ -443,7 +447,7 @@ JIGART.subject({id:'rocket',name:'Rocket',biomes:['desert','canyon','snow','mead
   ${[[-26,-7,5],[-33,-4,4],[8,-6,4.6],[14,-3,3.4],[-20,-4,3.6]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c('#f6f6fa')}" opacity=".9"/>`).join('')}`}});
 
 /* =================== water (y=0 is the water line) =================== */
-JIGART.subject({id:'sailboat',name:'Sailboat',biomes:['coast','island','lake'],place:'water',w:.85,draw:o=>{const c=o.c,I=o.id,n=o.night,ac=pick(o,['#e8443a','#2a6ad8','#ffb02a','#2fb6a8']),
+JIGART.subject({id:'sailboat',name:'Sailboat',biomes:['coast','island','lake'],place:'water',w:.8,draw:o=>{const c=o.c,I=o.id,n=o.night,ac=pick(o,['#e8443a','#2a6ad8','#ffb02a','#2fb6a8']),
   B=t=>[(1-t)**2*-1.2+2*(1-t)*t*-14+t*t*-37,(1-t)**2*-102+2*(1-t)*t*-64+t*t*-21.4],b8=B(.8),b9=B(.9);
   return `<defs>${D(o)}<clipPath id="${I}k"><path d="M-42 -9L44 -12Q41 0 28 8L-30 8Q-40 3 -42 -9Z"/></clipPath>${lin(I+'s',[[0,c('#ffffff')],[1,c('#dde2ee')]],1,0)}${lin(I+'h',[[0,c('#ffffff')],[1,c('#d6dce8')]])}${n?glowDef(I+'L','#ffffff',.8):''}</defs>
   <path d="M0 -104L44 -12M0 -104L-42 -9M0 -80L-5 -12M0 -80L5 -12M-5 -64H5" stroke="${c('#5a5e6a')}" stroke-width=".4"/>
@@ -456,16 +460,16 @@ JIGART.subject({id:'sailboat',name:'Sailboat',biomes:['coast','island','lake'],p
   <path d="M-42 -9L44 -12" stroke="${c(ac)}" stroke-width="1.4" stroke-linecap="round"/><path d="M-41.4 -6L42.6 -9" stroke="${c('#8a94aa')}" stroke-width=".5"/>${[-20,-8,4,16].map((x,i)=>port(o,x,-4.4-i*.3,1.5,'#8a94aa')).join('')}
   <path d="M29 1.6Q36 -1.4 45 1.8M-46 1.6Q-41 -.8 -35 1.4M-22 9.4Q0 11 22 9.4" stroke="${c('#ffffff')}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".85"/>`}});
 
-JIGART.subject({id:'pirateship',name:'Pirate Ship',biomes:['coast','island','volcano'],place:'water',w:1.1,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,wd=c('#6a4022'),hull='M-58 -44L-30 -44L-30 -30L34 -30L40 -34L52 -35Q50 -16 40 -2Q34 6 24 8L-40 8Q-52 2 -55 -16Z',
+JIGART.subject({id:'pirateship',name:'Pirate Ship',biomes:['coast','island','volcano'],place:'water',w:1.05,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,wd=c('#6a4022'),hull='M-58 -44L-30 -44L-30 -30L34 -30L40 -34L52 -35Q50 -16 40 -2Q34 6 24 8L-40 8Q-52 2 -55 -16Z',
   sail=(x,yt,yb,wt,wb)=>`<path d="M${x-wt} ${yt}L${x+wt} ${yt}Q${x+wb+3} ${(yt+yb)/2} ${x+wb} ${yb}Q${x} ${yb+3.4} ${x-wb} ${yb}Q${x-wb-3} ${(yt+yb)/2} ${x-wt} ${yt}Z" fill="url(#${I}s)"/><path d="M${f(x-wt*.4)} ${yt}Q${f(x-wb*.48)} ${(yt+yb)/2} ${f(x-wb*.42)} ${yb+1.6}M${f(x+wt*.4)} ${yt}Q${f(x+wb*.48)} ${(yt+yb)/2} ${f(x+wb*.42)} ${yb+1.6}" stroke="${c('#c8b48a')}" stroke-width=".5" fill="none"/><rect x="${f(x-wt*.2+R()*wt*.6)}" y="${f(yt+3+R()*(yb-yt-9))}" width="3.4" height="3" fill="${c('#d8c49a')}" stroke="${c('#a8946a')}" stroke-width=".3" stroke-dasharray=".6 .5"/><path d="M${x-wt-2} ${yt}H${x+wt+2}" stroke="${wd}" stroke-width="1.5" stroke-linecap="round"/>`;
   return `<defs>${D(o)}<clipPath id="${I}k"><path d="${hull}"/></clipPath>${lin(I+'h',[[0,c('#9a6236')],[1,c('#4a2a14')]])}${lin(I+'s',[[0,c('#fbf2da')],[1,c('#d8c8a2')]],1,1)}</defs>
   <path d="M-4 -104L26 -92L63 -41.6M-42 -86L-4 -98M-55 -42L-42 -86M-30 -30L-4 -94M20 -30L-4 -94M34 -30L26 -90M48 -34L26 -90" stroke="${c('#3a2a1e')}" stroke-width=".45" fill="none"/>
-  <path d="M-42 -44V-86M-4 -30V-110M26 -30V-92" stroke="${wd}" stroke-width="2.4"/>
+  <path d="M-42 -44V-86M-4 -30V-109M26 -30V-92" stroke="${wd}" stroke-width="2.4"/>
   <path d="M26 -88L62.6 -42L45 -36Z" fill="url(#${I}s)"/><path d="M47 -34L64 -42.6" stroke="${wd}" stroke-width="1.8" stroke-linecap="round"/>
   ${sail(-42,-82,-62,10,12)}${sail(-4,-94,-78,12,15)}${sail(-4,-76,-52,16,20)}${sail(26,-86,-70,10,13)}${sail(26,-68,-46,13,16)}
   <circle cx="-4" cy="-65" r="4.2" fill="${c('#2a2a2a')}"/><rect x="-6.4" y="-62" width="4.8" height="3" rx="1" fill="${c('#2a2a2a')}"/><circle cx="-5.6" cy="-65.4" r="1.1" fill="${c('#f0e4c4')}"/><circle cx="-2.4" cy="-65.4" r="1.1" fill="${c('#f0e4c4')}"/><path d="M-11 -58L3 -54M3 -58L-11 -54" stroke="${c('#2a2a2a')}" stroke-width="1.4" stroke-linecap="round"/>
   <path d="M-8 -98H0L-1 -101.6H-7Z" fill="${wd}"/>
-  <path d="M-4 -110Q2 -111.4 9 -109.6V-103.4Q2 -105.2 -4 -103.8Z" fill="${c('#1e1e24')}"/><circle cx="2.6" cy="-107.6" r="1.5" fill="${c('#f4f0e6')}"/><path d="M.4 -105L4.8 -105.6" stroke="${c('#f4f0e6')}" stroke-width=".6"/>
+  <path d="M-4 -108.8Q2 -110.2 9 -108.4V-102.2Q2 -104 -4 -102.6Z" fill="${c('#1e1e24')}"/><circle cx="2.6" cy="-106.4" r="1.5" fill="${c('#f4f0e6')}"/><path d="M.4 -103.8L4.8 -104.4" stroke="${c('#f4f0e6')}" stroke-width=".6"/>
   <path d="${hull}" fill="url(#${I}h)"/><g clip-path="url(#${I}k)"><path d="${Array.from({length:11},(_,i)=>`M-60 ${-40+i*4.4}H60`).join('')}" stroke="${c('#3a200e')}" stroke-width=".5"/><rect x="-60" y="-24" width="120" height="3.2" fill="${c('#e8b84a')}"/><rect x="-60" y="2" width="120" height="8" fill="${c('#2a1a10')}"/></g>
   ${[-20,-8,4,16,28].map(x=>`<rect x="${x-2.2}" y="-17.6" width="4.4" height="4.4" fill="${c('#2a1a10')}" stroke="${c('#a8302a')}" stroke-width=".7"/><circle cx="${x}" cy="-15.4" r="1.1" fill="${c('#5a5a62')}"/>`).join('')}
   ${[-54,-48.4,-42.8].map(x=>win(o,x,-41,4.2,5,{b:1,fr:'#e8b84a',sw:.8})).join('')}
@@ -473,7 +477,7 @@ JIGART.subject({id:'pirateship',name:'Pirate Ship',biomes:['coast','island','vol
   <path d="M-58 -44V-52" stroke="${c('#2a2a2a')}" stroke-width=".7"/><rect x="-60" y="-56" width="4" height="4.6" rx=".8" fill="${n?'#ffd27a':c('#fff0c0')}" stroke="${c('#2a2a2a')}" stroke-width=".6"/>${halo(o,-58,-53.6,10)}
   <path d="M38 2Q46 -2 54 2M-60 2Q-52 -1 -46 1.6M-30 9.6Q0 11.4 26 9.6" stroke="${c('#ffffff')}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".85"/>`}});
 
-JIGART.subject({id:'paddlesteamer',name:'Paddle Steamer',biomes:['lake','coast'],place:'water',w:1.15,draw:o=>{const c=o.c,I=o.id,n=o.night,wh=c('#fbf8f0'),rd=c('#c8382a'),dk=c('#2a2a34'),gd=c('#e8b84a'),hull='M-48 -14H60L56 -4Q52 6 40 8H-40Q-48 4 -48 -14Z',
+JIGART.subject({id:'paddlesteamer',name:'Paddle Steamer',biomes:['lake','coast'],place:'water',w:1.1,draw:o=>{const c=o.c,I=o.id,n=o.night,wh=c('#fbf8f0'),rd=c('#c8382a'),dk=c('#2a2a34'),gd=c('#e8b84a'),hull='M-48 -14H60L56 -4Q52 6 40 8H-40Q-48 4 -48 -14Z',
   rail=(x0,x1,y)=>`<path d="M${x0} ${y-4}H${x1}${Array.from({length:Math.floor((x1-x0)/3)+1},(_,i)=>`M${x0+i*3} ${y-4}V${y}`).join('')}" stroke="${wh}" stroke-width=".6"/>`,
   trim=(x0,x1,y)=>`<path d="M${x0} ${y}${Array.from({length:Math.floor((x1-x0)/3)},()=>'q1.5 2.2 3 0').join('')}Z" fill="${wh}"/>`;
   return `<defs>${D(o)}<clipPath id="${I}k"><path d="${hull}"/></clipPath>${lin(I+'h',[[0,c('#ffffff')],[1,c('#d8dce6')]])}${lin(I+'d',[[0,c('#fffaf0')],[1,c('#e8e0cc')]])}</defs>
@@ -482,14 +486,176 @@ JIGART.subject({id:'paddlesteamer',name:'Paddle Steamer',biomes:['lake','coast']
   ${[16,26].map(x=>`<rect x="${x-2.6}" y="-96" width="5.2" height="50" fill="${dk}"/><path d="M${x-2.6} -96l-1.4 -3l1 .8l.8 -2l1 1.6l.8 -2l.8 2l1 -1.6l.8 2l1 -.8l-1.4 3Z" fill="${gd}"/><rect x="${x-2.6}" y="-90" width="5.2" height="1.2" fill="${gd}"/>`).join('')}<path d="M18.6 -82H23.4" stroke="${dk}" stroke-width=".8"/>
   <circle cx="14" cy="-103" r="3.4" fill="${c('#c8ccd8')}" opacity=".7"/><circle cx="8" cy="-106" r="2.6" fill="${c('#c8ccd8')}" opacity=".5"/><circle cx="25" cy="-103.6" r="2.8" fill="${c('#c8ccd8')}" opacity=".6"/>
   <path d="${hull}" fill="url(#${I}h)"/><g clip-path="url(#${I}k)"><rect x="-50" y="-1" width="112" height="10" fill="${rd}"/><path d="M-50 -2H62" stroke="${gd}" stroke-width=".8"/></g>
-  <rect x="-44" y="-30" width="90" height="16" fill="url(#${I}d)"/>${Array.from({length:12},(_,i)=>win(o,-40+i*7.2,-27,4,7,{arch:1,b:0,fr:'#8a2a1e',sw:.8})).join('')}${rail(-46,50,-14)}
+  <rect x="-44" y="-30" width="90" height="16" fill="url(#${I}d)"/>${wrow(o,Array.from({length:12},(_,i)=>[-40+i*7.2,-27,4,7]),{arch:1,fr:'#8a2a1e',sw:.8})}${rail(-46,50,-14)}
   <rect x="-48" y="-32.4" width="100" height="2.4" fill="${wh}"/><rect x="-48" y="-30.4" width="100" height=".8" fill="${rd}"/>${trim(-46,50,-29.6)}
-  <rect x="-36" y="-46" width="68" height="14" fill="url(#${I}d)"/>${Array.from({length:8},(_,i)=>win(o,-32+i*7.6,-43,4,6.4,{arch:1,b:0,fr:'#8a2a1e',sw:.8})).join('')}${rail(-38,34,-32)}
+  <rect x="-36" y="-46" width="68" height="14" fill="url(#${I}d)"/>${wrow(o,Array.from({length:8},(_,i)=>[-32+i*7.6,-43,4,6.4]),{arch:1,fr:'#8a2a1e',sw:.8})}${rail(-38,34,-32)}
   <rect x="-40" y="-48.4" width="76" height="2.4" fill="${wh}"/><rect x="-40" y="-46.4" width="76" height=".8" fill="${rd}"/>${trim(-38,34,-45.6)}
   <rect x="-12" y="-60" width="18" height="12" fill="${wh}"/>${[-10,-4,2].map(x=>win(o,x,-57.6,4.4,5.4,{b:0,fr:'#3a3a44',sw:.7})).join('')}<path d="M-15 -60H9L6 -63.4H-12Z" fill="${rd}"/><path d="M-3 -63.4V-72" stroke="${dk}" stroke-width=".6"/><path d="M-3 -72L4 -70.4L-3 -68.8Z" fill="${rd}"/>
   <path d="M58 -14V-24" stroke="${dk}" stroke-width=".5"/><path d="M58 -24L63 -22.6L58 -21.2Z" fill="${c('#2a6ad8')}"/>
   <circle cx="40" cy="-21" r="2.4" fill="none" stroke="${c('#ffffff')}" stroke-width="1.2"/><circle cx="40" cy="-21" r="2.4" fill="none" stroke="${rd}" stroke-width="1.2" stroke-dasharray="1.9 1.9"/>
   <path d="M46 2Q52 -1 58 1.6M-64 1Q-58 -3 -52 1Q-46 -2 -40 1.4M-34 9.6Q0 11.4 36 9.6" stroke="${c('#ffffff')}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".85"/>`}});
+
+/* =================== sky (y=0 is the lowest point) =================== */
+JIGART.subject({id:'balloon',name:'Hot Air Balloon',biomes:['meadow','mountains','desert','canyon','farm','coast','lake','autumn','candy','city'],place:'sky',w:.72,draw:o=>{const c=o.c,I=o.id,n=o.night,
+  pal=pick(o,[['#ff5a5a','#ffd23a'],['#3a8ae8','#ffffff'],['#ff7ad0','#8ae0ff'],['#7ad04a','#ffcf3a'],['#ff8a3a','#ffffff'],['#ff5a5a','#ff9a3a','#ffd23a','#6ad04a','#3ab0ff','#7a6aff','#d86aff','#ff6aa8']]),
+  X=u=>u<=.5?38*Math.sqrt(Math.max(0,1-(1-u/.5)**2)):38-29*((u-.5)/.5)**1.3,Y=u=>-106+76*u,U=[0,.03,.08,.15,.24,.35,.5,.62,.75,.88,1],S=k=>Math.sin((-90+k*22.5)*Math.PI/180),
+  edge=(s,us)=>us.map(u=>[s*X(u),Y(u)]),bd=(u)=>Array.from({length:13},(_,i)=>{const t=(-90+i*15)*Math.PI/180;return[Math.sin(t)*X(u),Y(u)+2.4*Math.cos(t)]});
+  const gores=Array.from({length:8},(_,k)=>`<path d="${P([...edge(S(k),U),...edge(S(k+1),[...U].reverse())])}" fill="${c(pal[k%pal.length])}"/>`).join('');
+  const b1=bd(.5),b2=bd(.57);
+  return `<defs>${D(o)}${rad(I+'h',[[0,c('#ffffff'),.45],[.45,c('#ffffff'),0],[.8,c('#000000'),.08],[1,c('#000000'),.3]],.32,.28,.75)}${n?glowDef(I+'L','#ffb050',.55):''}</defs>
+  ${gores}<path d="${P([...b1,...[...b2].reverse()])}" fill="${c(pal.length>2?'#ffffff':darken(pal[0],.25))}"/>${b1.filter((_,i)=>i%2).map(([x,y],i)=>`<circle cx="${f(x)}" cy="${f(y+2.6)}" r="1.2" fill="${c(pal.length>2?'#ff5a8a':pal[1])}"/>`).join('')}
+  <path d="${P([...edge(-1,U),...edge(1,[...U].reverse())])}" fill="url(#${I}h)"/>${n?glow(I+'L',0,-40,22):''}
+  <path d="M-9 -30L-6.4 -24H6.4L9 -30Z" fill="${c(darken(pal[0],.3))}"/>
+  <path d="M-8.6 -29L-7.4 -13M-3 -28L-3 -13M3 -28L3 -13M8.6 -29L7.4 -13" stroke="${c('#6a5a4a')}" stroke-width=".5"/>
+  <rect x="-4" y="-22.4" width="8" height="3" rx=".6" fill="${c('#8a8e9a')}"/>${flame(o,0,-22.4,.5)}
+  <circle cx="-3.4" cy="-15.4" r="2" fill="${c('#f2c8a0')}"/><path d="M-5.4 -16Q-3.4 -18.6 -1.4 -16Z" fill="${c('#6a3a1e')}"/><circle cx="3.2" cy="-15.6" r="2" fill="${c('#e8b088')}"/><path d="M1.2 -16.2H5.2L4.6 -17.8H1.8Z" fill="${c('#e8443a')}"/><path d="M5 -14.6L8.4 -19" stroke="${c('#e8b088')}" stroke-width="1" stroke-linecap="round"/>
+  <rect x="-8" y="-13" width="16" height="13" rx="1.8" fill="${c('#b8844a')}"/><path d="M-8 -9.4H8M-8 -6.2H8M-8 -3H8${[-6,-2,2,6].map(x=>`M${x} -12.4V-9.4M${x+2} -9.4V-6.2M${x} -6.2V-3M${x+2} -3V0`).join('')}" stroke="${c('#7a4e26')}" stroke-width=".5"/>
+  <rect x="-9" y="-14.4" width="18" height="2.8" rx="1.3" fill="${c('#6a3e1e')}"/>${[-1,1].map(s=>`<path d="M${s*8} -11v2" stroke="${c('#6a5a4a')}" stroke-width=".4"/><ellipse cx="${s*8.6}" cy="-7.6" rx="1.6" ry="2" fill="${c('#e8d8b0')}"/>`).join('')}`}});
+
+JIGART.subject({id:'airship',name:'Airship',biomes:['city','mountains','coast','snow'],place:'sky',w:1.45,draw:o=>{const c=o.c,I=o.id,n=o.night,eb=pick(o,['#c8ccd8','#e8443a','#3a7ae8','#f2e6c8']),ac=eb==='#e8443a'?'#ffcf3a':'#e8443a',
+  env='M58 -50C58 -66 40 -74 6 -74C-30 -74 -52 -62 -56 -50C-52 -38 -30 -26 6 -26C40 -26 58 -34 58 -50Z',
+  fin=(pts)=>`<path d="${P(pts)}" fill="${c(ac)}"/><path d="M${pts[0][0]} ${pts[0][1]}L${pts[2][0]} ${pts[2][1]}" stroke="${c('#ffffff')}" stroke-width="1" opacity=".6"/>`,
+  pod=(x,y)=>`<path d="M${x+6} ${y+5}L${x+12} ${y+9}" stroke="${c('#5a5a66')}" stroke-width=".8"/><ellipse cx="${x}" cy="${y}" rx="5.4" ry="2.6" fill="${c('#8a90a4')}"/><ellipse cx="${x-5.6}" cy="${y}" rx=".8" ry="5" fill="${c('#d8dce6')}" opacity=".85"/><circle cx="${x-5.6}" cy="${y}" r="1" fill="${c('#3a3a44')}"/>`;
+  return `<defs>${D(o)}<clipPath id="${I}k"><path d="${env}"/></clipPath>${lin(I+'e',[[0,c(lighten(eb,.5))],[.35,c(lighten(eb,.15))],[1,c(darken(eb,.32))]])}${n?glowDef(I+'R','#ff4a3a',.9)+glowDef(I+'G','#4aff8a',.9):''}</defs>
+  ${fin([[-36,-64],[-54,-84],[-62,-84],[-55,-58]])}${fin([[-36,-36],[-54,-16],[-62,-16],[-55,-42]])}
+  <path d="M-14 -27L-12 -17M18 -27L16 -17M-2 -26L0 -18" stroke="${c('#5a5a66')}" stroke-width=".6"/>
+  <path d="${env}" fill="url(#${I}e)"/><g clip-path="url(#${I}k)"><rect x="-60" y="-52.4" width="120" height="5.4" fill="${c(ac)}"/><rect x="51" y="-76" width="10" height="52" fill="${c(darken(eb,.2))}"/>
+    <path d="${[-38,-22,-6,10,26,42].map(x=>`M${x} -76Q${x+5} -50 ${x} -24`).join('')}" stroke="${c(darken(eb,.4))}" stroke-width=".6" opacity=".5" fill="none"/></g>
+  <path d="M-30 -68Q6 -74 40 -67" stroke="${c('#ffffff')}" stroke-width="1.6" fill="none" opacity=".55" stroke-linecap="round"/>
+  <circle cx="22" cy="-61.6" r="4.6" fill="${c('#ffffff')}" stroke="${c(ac)}" stroke-width="1"/>${spark(22,-61.6,3.2,c(ac))}
+  ${fin([[-40,-52],[-63,-54],[-63,-46],[-40,-48]])}
+  <path d="M-16 -18H20Q24 -18 22 -12L18 -2Q16 0 12 0H-8Q-12 0 -14 -2L-18 -12Q-19 -18 -16 -18Z" fill="${c('#efe8da')}"/><path d="M-17.6 -6H20.6" stroke="${c(ac)}" stroke-width="1.6"/><path d="M-16 -18H20" stroke="${c('#8a8478')}" stroke-width="1"/>
+  ${[0,1,2,3,4,5].map(i=>win(o,-12.6+i*5.4,-15.6,3.4,5,{b:0,fr:'#5a5a66',sw:.6,rx:.8})).join('')}
+  ${pod(-24,-22)}${pod(28,-22).replace(`M34 -17L40 -13`,'M22 -17L16 -13')}
+  ${n?glow(I+'R',-62,-84,7)+glow(I+'G',-62,-16,7):''}<circle cx="-62" cy="-84" r="1.2" fill="${n?'#ff6a5a':c('#e8443a')}"/><circle cx="-62" cy="-16" r="1.2" fill="${n?'#6aff9a':c('#3ac06a')}"/>`}});
+
+JIGART.subject({id:'ufo',name:'Flying Saucer',biomes:['desert','canyon','farm','snow','city','meadow'],place:'sky',w:1,draw:o=>{const c=o.c,I=o.id,n=o.night,lc=['#fffa8a','#8affea','#ff8ad8'],
+  bm=n?'#d8ffb0':'#fffbd0',lights=Array.from({length:9},(_,i)=>{const t=(.1+i*.1)*Math.PI;return[f(Math.cos(t)*48),f(-80+Math.sin(t)*7.4)]});
+  return `<defs>${D(o)}${lin(I+'b',[[0,bm,n?.6:.4],[1,bm,n?.1:.04]])}${lin(I+'m',[[0,c('#f6f8fc')],[.5,c('#b8c0d0')],[1,c('#6a7286')]])}${rad(I+'d',[[0,n?'#e6fff6':c('#e6fbff'),.75],[1,n?'#7ae8c8':c('#8ad8f0'),.6]],.4,.35,.7)}${n?glowDef(I+'L','#d8ffb0',.7)+glowDef(I+'R','#fff6c0',.8):''}</defs>
+  <path d="M-13 -72H13L38 0H-38Z" fill="url(#${I}b)"/><ellipse cx="0" cy="-1" rx="38" ry="3.6" fill="${bm}" opacity="${n?.3:.2}"/>
+  ${[[-14,-12],[16,-22],[-8,-52],[9,-46],[-20,-30]].map(([x,y],i)=>spark(x,y,1.6+i%2,n?'#f0fff0':c('#ffffff'),.8)).join('')}
+  <g transform="translate(0 -34) rotate(-16)"><path d="M-11 -1Q-17 2 -16 7" stroke="${c('#ffffff')}" stroke-width="1" fill="none"/><circle cx="-16" cy="7.4" r="1.2" fill="${c('#2a2a32')}"/>
+    ${[[-8,4],[-4,4.8],[4,4.8],[7.6,4]].map(([x,y])=>`<rect x="${x-1.1}" y="${y}" width="2.2" height="6" rx=".8" fill="${c('#ffffff')}"/><rect x="${x-1.1}" y="${y+4.6}" width="2.2" height="1.6" fill="${c('#3a3a42')}"/>`).join('')}
+    <ellipse cx="0" cy="0" rx="11" ry="6.5" fill="${c('#ffffff')}" stroke="${c('#c8c8d4')}" stroke-width=".5"/><ellipse cx="-4" cy="-2" rx="3.4" ry="2.4" fill="${c('#2a2a32')}"/><ellipse cx="5" cy="1.6" rx="2.6" ry="2" fill="${c('#2a2a32')}"/><ellipse cx="1.4" cy="-4.4" rx="2" ry="1.2" fill="${c('#2a2a32')}"/><ellipse cx="1" cy="5.4" rx="2.2" ry="1.2" fill="${c('#ffb0c0')}"/>
+    <path d="M10 -6Q9 -9 11 -10M14 -6Q15 -9 13.6 -10" stroke="${c('#f2e6c8')}" stroke-width="1" fill="none" stroke-linecap="round"/><ellipse cx="8.6" cy="-5" rx="1.8" ry="1" fill="${c('#8a8e9a')}"/><ellipse cx="12.4" cy="-3" rx="4.4" ry="3.6" fill="${c('#ffffff')}"/><ellipse cx="14.8" cy="-1.2" rx="2.6" ry="2" fill="${c('#ffb0b8')}"/><circle cx="14" cy="-1.4" r=".4" fill="${c('#7a3a40')}"/><circle cx="15.6" cy="-1.2" r=".4" fill="${c('#7a3a40')}"/><circle cx="11.6" cy="-4.6" r=".7" fill="${c('#2a2a32')}"/></g>
+  <path d="M-30 -79A30 9 0 0 0 30 -79Z" fill="${c('#7a8094')}"/><ellipse cx="0" cy="-72.4" rx="12" ry="2.4" fill="${n?bm:c('#fff6c0')}"/>${n?glow(I+'L',0,-72,16):''}
+  <ellipse cx="0" cy="-80" rx="52" ry="9" fill="url(#${I}m)"/><path d="M-52 -80A52 9 0 0 0 52 -80" stroke="${c('#5a6278')}" stroke-width="1" fill="none"/><path d="M-46 -81.6Q0 -76 46 -81.6" stroke="${c('#ffffff')}" stroke-width=".8" fill="none" opacity=".6"/>
+  <ellipse cx="0" cy="-84.6" rx="34" ry="6" fill="${c('#dfe4ee')}"/><path d="M-34 -84.6A34 6 0 0 0 34 -84.6" stroke="${c('#9aa2b4')}" stroke-width=".7" fill="none"/>
+  <ellipse cx="0" cy="-87.4" rx="6" ry="3" fill="${c('#6ad04a')}"/><path d="M-2 -100L-4.6 -105.6M2 -100L4.6 -105.6" stroke="${c('#5ac040')}" stroke-width=".8"/><circle cx="-4.6" cy="-105.8" r="1.2" fill="${c('#ff7ad0')}"/><circle cx="4.6" cy="-105.8" r="1.2" fill="${c('#ff7ad0')}"/>
+  <path d="M5 -88Q9 -90 10 -95" stroke="${c('#6ad04a')}" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="10.2" cy="-95.6" r="1.6" fill="${c('#6ad04a')}"/>
+  <ellipse cx="0" cy="-95" rx="6.6" ry="7" fill="${c('#7ad85a')}"/><ellipse cx="-2.8" cy="-95.6" rx="2" ry="2.8" fill="${c('#141420')}" transform="rotate(-15 -2.8 -95.6)"/><ellipse cx="2.8" cy="-95.6" rx="2" ry="2.8" fill="${c('#141420')}" transform="rotate(15 2.8 -95.6)"/><circle cx="-3.2" cy="-96.8" r=".7" fill="${c('#ffffff')}"/><circle cx="2.4" cy="-96.8" r=".7" fill="${c('#ffffff')}"/><path d="M-1.6 -91.4Q0 -90.2 1.6 -91.4" stroke="${c('#2a5a20')}" stroke-width=".6" fill="none"/>
+  <path d="M-20 -86A20 19 0 0 1 20 -86Z" fill="url(#${I}d)"/>${n?glow(I+'L',0,-94,16):''}<path d="M-13 -92A14 13 0 0 1 -4 -102" stroke="${c('#ffffff')}" stroke-width="1.4" fill="none" opacity=".75" stroke-linecap="round"/><path d="M-20.4 -86H20.4" stroke="${c('#9aa2b4')}" stroke-width="1.2"/>
+  ${lights.map(([x,y],i)=>(n?glow(I+'R',x,y,4.4):'')+`<circle cx="${x}" cy="${y}" r="1.5" fill="${n?lc[i%3]:c(['#ffe9a0','#a8f0e0','#ffc0e8'][i%3])}"/>`).join('')}`}});
+
+/* =================== under the sea =================== */
+JIGART.subject({id:'submarine',name:'Yellow Submarine',biomes:['underwater'],place:'under',w:1.55,draw:o=>{const c=o.c,I=o.id,n=o.night,hull='M-48 -18Q-48 -36 -30 -36H30Q50 -36 50 -18Q50 0 30 0H-30Q-48 0 -48 -18Z',bl='#fffbd0';
+  return `<defs>${D(o)}<clipPath id="${I}k"><path d="${hull}"/></clipPath>${lin(I+'h',[[0,c('#ffe680')],[.35,c('#ffcf2a')],[1,c('#d88a10')]])}${lin(I+'b',[[0,bl,n?.7:.4],[1,bl,0]],1,0)}${n?glowDef(I+'L',bl,.9):''}</defs>
+  <path d="M50 -18L65 -30V-6Z" fill="url(#${I}b)"/>
+  ${[[-62,-30,1.6],[-60,-38,2.2],[-63,-47,1.4],[-58,-55,2.6],[-61,-64,1.6],[24,-64,1.4],[28,-72,2],[22,-80,1.2]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c('#bfe8ff')}" fill-opacity=".25" stroke="${c('#e6f8ff')}" stroke-width=".5"/><circle cx="${f(x-r*.35)}" cy="${f(y-r*.35)}" r="${f(r*.3)}" fill="${c('#ffffff')}"/>`).join('')}
+  <path d="M-44 -32L-56 -40H-60L-56 -26Z" fill="${c('#e8a820')}"/><path d="M-44 -4L-56 4H-60L-56 -10Z" fill="${c('#d89a18')}"/>
+  <path d="M-46 -26L-58 -22V-14L-46 -10Z" fill="${c('#e8a820')}"/><ellipse cx="-60.4" cy="-23" rx="1.6" ry="5" fill="${c('#c8ccd8')}"/><ellipse cx="-60.4" cy="-13" rx="1.6" ry="5" fill="${c('#a8acb8')}"/><circle cx="-59.4" cy="-18" r="2" fill="${c('#6a6e7a')}"/>
+  <path d="M-10 -35L-6 -52Q-5 -55 -2 -55H14Q17 -55 18 -52L22 -35Z" fill="url(#${I}h)"/><path d="M-6 -55H18" stroke="${c('#8a8e9a')}" stroke-width=".8"/>${[-4,0,4,8,12,16].map(x=>`<path d="M${x} -55V-58" stroke="${c('#8a8e9a')}" stroke-width=".5"/>`).join('')}<path d="M-4.6 -58H16.6" stroke="${c('#8a8e9a')}" stroke-width=".6"/>
+  <rect x="10" y="-70" width="2" height="15" fill="${c('#9aa0ae')}"/><rect x="10" y="-72" width="9" height="3.6" rx="1" fill="${c('#9aa0ae')}"/><circle cx="19" cy="-70.2" r="1.6" fill="${c('#2a4a8a')}"/>
+  <path d="M-8 -55V-63" stroke="${c('#5a5a66')}" stroke-width=".5"/><path d="M-8 -63L-2.6 -61.4L-8 -59.8Z" fill="${c('#e8443a')}"/>${port(o,6,-45,3,'#b8bcc8')}
+  <path d="${hull}" fill="url(#${I}h)"/><g clip-path="url(#${I}k)"><rect x="-50" y="-9" width="102" height="3.4" fill="${c('#e8443a')}"/><rect x="12" y="-40" width="4" height="44" fill="${c('#e8443a')}"/></g>
+  <path d="M-40 -32Q0 -38 40 -32" stroke="${c('#fff6c0')}" stroke-width="1.6" fill="none" opacity=".7" stroke-linecap="round"/><path d="${Array.from({length:14},(_,i)=>`M${-40+i*6.2} -29.6h.01M${-40+i*6.2} -3.4h.01`).join('')}" stroke="${c('#a86a10')}" stroke-width="1" stroke-linecap="round"/>
+  ${[-26,-10,30].map(x=>port(o,x,-19,4.6,'#b8bcc8')).join('')}
+  <path d="M30 -12L40 -8L42 -5L30 -8Z" fill="${c('#c88a10')}"/><circle cx="48.6" cy="-18" r="2.2" fill="${n?bl:c('#fff6c0')}" stroke="${c('#b8bcc8')}" stroke-width=".8"/>${n?glow(I+'L',50,-18,10):''}`}});
+
+JIGART.subject({id:'sunkenship',name:'Sunken Ship',biomes:['underwater'],place:'under',w:1.3,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,hull='M-44 -40L-38 -43L-33 -38L-27 -45L30 -44L47 -50L41 -24Q32 -6 14 -4H-34Q-44 -12 -44 -26L-39 -30L-46 -35Z',
+  kelp=(x,h,col)=>{let d=`M${x} 0`;for(let i=1;i<=6;i++)d+=`Q${x+(i%2?5:-5)} ${f(-h*(i-.5)/6)} ${x} ${f(-h*i/6)}`;return`<path d="${d}" stroke="${c(col)}" stroke-width="2.4" fill="none" stroke-linecap="round"/>${[1,2,3,4,5].map(i=>`<ellipse cx="${x+(i%2?3:-3)}" cy="${f(-h*i/6)}" rx="2.6" ry="1.2" fill="${c(col)}" transform="rotate(${i%2?-30:30} ${x+(i%2?3:-3)} ${f(-h*i/6)})"/>`).join('')}`};
+  return `<defs>${D(o)}<clipPath id="${I}k"><path d="${hull}"/></clipPath>${lin(I+'h',[[0,c('#86704a')],[1,c('#3e3020')]])}${lin(I+'s',[[0,c('#f0dca4')],[1,c('#c8ae72')]])}${n?glowDef(I+'A','#c8fff0',.9):''}</defs>
+  ${kelp(-52,46,'#3f9a5a')}${kelp(54,38,'#4aa860')}
+  <g transform="rotate(-10 0 -10)">
+    <path d="M-2 -44L-7 -88L-4 -86L-6 -92L-2 -88Z" fill="${c('#6a5032')}"/><path d="M-16 -78L10 -82" stroke="${c('#6a5032')}" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M-15 -77.6L9 -81.4L8 -64L5 -66L4 -58L0 -62L-3 -56L-6 -63L-10 -58L-12 -66Z" fill="${c('#d8ccaa')}" opacity=".85"/><circle cx="-2" cy="-71" r="2" fill="${c('#2a5a7a')}" opacity=".7"/><circle cx="4" cy="-74" r="1.2" fill="${c('#2a5a7a')}" opacity=".7"/>
+    <path d="M24 -44L26 -62L28 -60L29 -64L30 -44Z" fill="${c('#6a5032')}"/>
+    <path d="${hull}" fill="url(#${I}h)"/><g clip-path="url(#${I}k)"><path d="${Array.from({length:9},(_,i)=>`M-50 ${-40+i*4.4}H50`).join('')}" stroke="${c('#2a2014')}" stroke-width=".5"/><rect x="-50" y="-33" width="100" height="2.6" fill="${c('#a8884a')}"/></g>
+    <path d="M-12 -26L-8 -30L-4 -27L-2 -21L-7 -18L-11 -21Z" fill="${c('#141008')}"/><path d="M22 -20L26 -24L30 -20L27 -15Z" fill="${c('#141008')}"/>
+    ${[-28,8].map(x=>`<circle cx="${x}" cy="-37.6" r="2.6" fill="${c('#1e2a34')}" stroke="${c('#c8a050')}" stroke-width="1"/>`).join('')}
+    <path d="M-24 -44V-48M-18 -44V-49M-12 -44V-47M14 -44V-48M20 -44.6V-49M-24 -48L-12 -48" stroke="${c('#6a5032')}" stroke-width=".9"/>
+    ${[[-30,-14],[-26,-11],[-22,-15],[18,-10],[36,-30],[33,-27],[-40,-30]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.3" fill="${c('#e8e2d2')}" stroke="${c('#a8a090')}" stroke-width=".4"/>`).join('')}
+    <path d="M40 -44Q42 -52 38 -58M44 -46Q48 -52 46 -60" stroke="${c('#4aa860')}" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>
+  <path d="M-63 2Q-50 -10 -20 -12Q20 -14 50 -8Q60 -4 63 2Z" fill="url(#${I}s)"/><path d="M-40 -4Q-30 -6 -20 -4M8 -6Q18 -8 28 -6M-8 -1Q2 -3 12 -1" stroke="${c('#b89a5a')}" stroke-width=".7" fill="none"/>
+  <g transform="translate(40 -9) rotate(18)"><path d="M0 -16V4M-4 -12H4M-7 0Q0 7 7 0" stroke="${c('#6a7078')}" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="0" cy="-18" r="2" fill="none" stroke="${c('#6a7078')}" stroke-width="1.2"/><path d="M-8.6 -1.4L-6 1.6L-9 2.4ZM8.6 -1.4L6 1.6L9 2.4Z" fill="${c('#6a7078')}"/></g>
+  <path d="M-44 -4Q-46 -10 -42 -14M-44 -4Q-40 -10 -38 -12M-42 -9Q-46 -12 -48 -12" stroke="${c('#ff7a9a')}" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M16 -8l1 -2.2l1 2.2l2.4 .2l-1.8 1.5l.6 2.3l-2.2 -1.2l-2.2 1.2l.6 -2.3l-1.8 -1.5Z" fill="${c('#ff8a3a')}"/>
+  <g transform="translate(-34 -60)"><ellipse cx="0" cy="0" rx="5" ry="3" fill="${c('#ffcf3a')}"/><path d="M4.6 0L8.4 -3V3Z" fill="${c('#ffb02a')}"/><path d="M-1 -2.6V2.6" stroke="${c('#3a8ae8')}" stroke-width="1"/><circle cx="-2.8" cy="-.6" r=".7" fill="${c('#1a1a2a')}"/></g>
+  <g transform="translate(-34 -26)"><path d="M3 -5Q5 -12 10 -12" stroke="${c('#4a4a5a')}" stroke-width=".6" fill="none"/>${n?glow(I+'A',10,-12,8):''}<circle cx="10" cy="-12" r="1.4" fill="${n?'#e8fff6':c('#bfeedd')}"/><ellipse cx="0" cy="0" rx="6" ry="5" fill="${c('#4a4a62')}"/><path d="M5.6 -1L10 -4V4Z" transform="scale(-1 1)" fill="${c('#4a4a62')}"/><path d="M1 1.6L5.4 .4" stroke="${c('#ffffff')}" stroke-width=".6" stroke-dasharray=".6 .6"/><circle cx="2.4" cy="-1.8" r=".9" fill="${c('#ffffff')}"/></g>
+  ${[[-14,-56,1.6],[-12,-64,1.2],[-15,-72,2],[24,-34,1.2],[26,-42,1.8]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${c('#e6f8ff')}" stroke-width=".5"/>`).join('')}`}});
+
+JIGART.subject({id:'treasurechest',name:'Treasure Chest',biomes:['underwater'],place:'under',w:1.3,draw:o=>{const c=o.c,I=o.id,R=o.R,n=o.night,gd=c('#e8b84a'),
+  gem=(x,y,s,col)=>`<path d="${P([[x-3*s,y],[x-1.8*s,y-2*s],[x+1.8*s,y-2*s],[x+3*s,y],[x,y+3.4*s]])}" fill="${c(col)}"/><path d="${P([[x-1.8*s,y-2*s],[x+1.8*s,y-2*s],[x+.8*s,y],[x-.8*s,y]])}" fill="${c(lighten(col,.45))}"/><path d="M${f(x-3*s)} ${y}H${f(x+3*s)}" stroke="${c(darken(col,.3))}" stroke-width=".4"/>`;
+  const coins=[];for(let i=0;i<46;i++){const x=-29+R()*58,top=-40-17*(1-(x/31)**2);coins.push([x,top+R()*(-40-top+2)])}coins.sort((a,b)=>a[1]-b[1]);
+  return `<defs>${D(o)}${rad(I+'c',[[0,c('#fff6b0')],[.6,c('#ffd23a')],[1,c('#d89a1a')]],.35,.35,.7)}${lin(I+'o',[[0,c('#a8683a')],[1,c('#6a3a1a')]])}${lin(I+'s',[[0,c('#f0dca4')],[1,c('#c8ae72')]])}${n?glowDef(I+'L','#ffd060',.6):''}</defs>
+  <path d="M-60 2Q-44 -10 0 -10Q44 -10 60 2Z" fill="url(#${I}s)"/>
+  ${[[-50,'#3f9a5a',30],[52,'#4aa860',24]].map(([x,col,h])=>`<path d="M${x} 0Q${x-5} ${f(-h*.3)} ${x} ${f(-h*.55)}Q${x+5} ${f(-h*.8)} ${x} ${-h}" stroke="${c(col)}" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M${x+3} 0Q${x+7} ${f(-h*.3)} ${x+3} ${f(-h*.65)}" stroke="${c(col)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`).join('')}
+  <path d="M-28 -48Q-36 -70 -32 -88Q0 -96 32 -88Q36 -70 28 -48Z" fill="${c('#5a2c14')}"/><path d="M-26 -52Q-32 -70 -29 -85Q0 -92 29 -85Q32 -70 26 -52Z" fill="${c('#8a2a3a')}"/><path d="M-30 -66Q0 -72 30 -66M-28 -76Q0 -82 29 -76" stroke="${c('#6a1a2a')}" stroke-width=".6" fill="none"/>
+  <path d="M-32 -88Q0 -96 32 -88" stroke="${gd}" stroke-width="2.4" fill="none"/><path d="M-22 -50Q-27 -70 -23 -89.6M22 -50Q27 -70 23 -89.6" stroke="${gd}" stroke-width="2.6" fill="none"/>
+  <path d="M-34 -40L-28 -48H28L34 -40Z" fill="${c('#3a1a0e')}"/>
+  ${n?glow(I+'L',0,-50,34):''}<g fill="url(#${I}c)" stroke="${c('#b8801a')}" stroke-width=".5">${coins.map(([x,y])=>`<circle cx="${f(x)}" cy="${f(y)}" r="3"/>`).join('')}</g><path d="${coins.map(([x,y])=>`M${f(x-1.8)} ${f(y)}a1.8 1.8 0 0 1 3.6 0`).join('')}" fill="none" stroke="${c('#c8901e')}" stroke-width=".4"/>
+  <g transform="translate(6 -60)"><path d="M-7 0V-6L-4 -3L0 -9L4 -3L7 -6V0Z" fill="${gd}" stroke="${c('#b8801a')}" stroke-width=".5"/><rect x="-7" y="-1.4" width="14" height="2.4" fill="${c('#d8a030')}"/><circle cx="0" cy="-.2" r="1" fill="${c('#e8302a')}"/><circle cx="-4" cy="-.2" r=".8" fill="${c('#3a8ae8')}"/><circle cx="4" cy="-.2" r=".8" fill="${c('#3ac06a')}"/><circle cx="0" cy="-9.4" r=".9" fill="${gd}"/></g>
+  ${gem(-14,-50,1.3,'#e8304a')}${gem(18,-49,1.1,'#2ab06a')}${gem(-4,-45,1,'#3a7ae8')}${gem(24,-43,.9,'#a85ae8')}
+  <rect x="-34" y="-40" width="68" height="34" rx="1.4" fill="url(#${I}o)"/><path d="M-34 -29H34M-34 -18H34" stroke="${c('#4a2410')}" stroke-width=".7"/>
+  <rect x="-35" y="-41.4" width="70" height="4" rx="1" fill="${gd}"/><rect x="-35" y="-9" width="70" height="3.4" rx="1" fill="${gd}"/>${[-26,22].map(x=>`<rect x="${x}" y="-40" width="4" height="34" fill="${gd}"/>${[-35,-27,-19,-11].map(y=>`<circle cx="${x+2}" cy="${y}" r=".6" fill="${c('#a8701a')}"/>`).join('')}`).join('')}
+  <path d="M-5 -36H5V-26Q5 -22 0 -21Q-5 -22 -5 -26Z" fill="${gd}" stroke="${c('#a8701a')}" stroke-width=".6"/><circle cx="0" cy="-30.4" r="1.3" fill="${c('#2a1a0e')}"/><path d="M-.6 -30L-1 -26.4H1L.6 -30Z" fill="${c('#2a1a0e')}"/>
+  <path d="M-30 -41Q-22 -26 -10 -40.6" stroke="${c('#c8c0d0')}" stroke-width=".4" fill="none"/><g fill="${c('#f8f4fc')}" stroke="${c('#c8c0d0')}" stroke-width=".3">${Array.from({length:11},(_,i)=>{const t=i/10,x=(1-t)**2*-30+2*(1-t)*t*-22+t*t*-10,y=(1-t)**2*-41+2*(1-t)*t*-26+t*t*-40.6;return`<circle cx="${f(x)}" cy="${f(y)}" r="1.3"/>`}).join('')}</g>
+  ${[[-42,-3],[-37,-1.4],[38,-3],[44,-1],[31,0],[-46,0]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3" ry="1.4" fill="url(#${I}c)" stroke="${c('#b8801a')}" stroke-width=".4"/>`).join('')}${gem(36,-6,.8,'#e8304a')}
+  <path d="M-24 -1Q-24 -6 -20 -6.4Q-16 -6 -16 -1Z" fill="${c('#ffb0a0')}"/><path d="M-20 -6.2V-1M-22.4 -5.4L-21.4 -1M-17.6 -5.4L-18.6 -1" stroke="${c('#e8806a')}" stroke-width=".4"/>
+  ${[[-16,-58,3.4],[14,-62,2.8],[-26,-46,2.4],[30,-40,2],[2,-68,2.4]].map(([x,y,s])=>spark(x,y,s,n?'#fffbe0':c('#ffffff'),.9)).join('')}
+  ${[[40,-30,1.6],[42,-38,1.1],[38,-46,2]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="${c('#e6f8ff')}" stroke-width=".5"/>`).join('')}`}});
+
+/* =================== space =================== */
+JIGART.subject({id:'astronaut',name:'Astronaut',biomes:['space'],place:'space',w:.95,draw:o=>{const c=o.c,I=o.id,n=o.night,su=c('#f4f6fa'),ln=c('#b8bcca'),
+  limb=(d,w)=>`<path d="${d}" stroke="${ln}" stroke-width="${w+1.8}" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="${su}" stroke-width="${w}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  ring=(x,y,a,w)=>`<path d="M${f(x-Math.cos(a)*w)} ${f(y-Math.sin(a)*w)}L${f(x+Math.cos(a)*w)} ${f(y+Math.sin(a)*w)}" stroke="${c('#c8ccd8')}" stroke-width="1.2"/>`;
+  return `<defs>${D(o)}${rad(I+'h',[[0,c('#ffffff')],[.7,c('#e8eaf2')],[1,c('#a8acbc')]],.35,.3,.8)}${lin(I+'v',[[0,c('#fff2b0')],[.45,c('#e8a83a')],[1,c('#7a4a14')]],1,1)}${lin(I+'s',[[0,c('#ffffff')],[1,c('#d0d4e0')]],1,0)}${n?glowDef(I+'L','#fff6d0',.8):''}</defs>
+  <path d="M-14 -46Q-30 -40 -28 -28Q-26 -14 -40 -14Q-54 -14 -50 -26Q-46 -36 -62 -32" stroke="${c('#d8dce6')}" stroke-width="1.3" fill="none"/>
+  <rect x="-19" y="-78" width="38" height="40" rx="5" fill="${c('#c8ccd8')}"/><rect x="-19" y="-78" width="38" height="5" rx="2" fill="${c('#a8acb8')}"/><path d="M15 -78L19 -92" stroke="${c('#8a8e9a')}" stroke-width=".9"/><circle cx="19" cy="-92.6" r="1.3" fill="${n?'#ff6a5a':c('#e8443a')}"/>
+  ${limb('M-7 -40L-12 -22L-10 -9',11)}${limb('M7 -40L15 -25L22 -15',11)}${ring(-11.6,-24,0,5.6)}${ring(15,-25.6,-.5,5.6)}
+  <rect x="-16.4" y="-9" width="12.6" height="9" rx="3" fill="${c('#8a8e9a')}"/><rect x="-16.4" y="-2.4" width="12.6" height="2.4" rx="1" fill="${c('#5a5e6a')}"/><g transform="rotate(-35 23 -13)"><rect x="17" y="-17" width="12.6" height="9" rx="3" fill="${c('#8a8e9a')}"/><rect x="17" y="-10.4" width="12.6" height="2.4" rx="1" fill="${c('#5a5e6a')}"/></g>
+  ${limb('M-13 -62L-26 -66L-30 -79',9)}${limb('M13 -62L25 -54L30 -45',9)}${ring(-26,-66,1.3,4.6)}${ring(25,-54,.6,4.6)}
+  <circle cx="-30.6" cy="-82" r="4.4" fill="${c('#e8eaf2')}" stroke="${ln}" stroke-width=".8"/><rect x="-34" y="-80" width="7" height="2.6" rx="1" fill="${c('#e8443a')}"/><circle cx="30.8" cy="-42.4" r="4.4" fill="${c('#e8eaf2')}" stroke="${ln}" stroke-width=".8"/><rect x="27" y="-47.6" width="7" height="2.6" rx="1" fill="${c('#e8443a')}" transform="rotate(30 30.5 -46.3)"/>
+  <rect x="-15" y="-68" width="30" height="32" rx="8" fill="url(#${I}s)" stroke="${ln}" stroke-width=".9"/><path d="M-15 -42H15" stroke="${c('#c8ccd8')}" stroke-width="1.6"/>
+  <rect x="-8" y="-61" width="16" height="12" rx="1.6" fill="${c('#8a90a4')}"/>${[['#ff5a5a',-4.6],['#5aff8a',0],['#5ab4ff',4.6]].map(([col,x])=>(n?glow(I+'L',x,-57.6,3.4):'')+`<circle cx="${x}" cy="-57.6" r="1.3" fill="${n?col:c(col)}"/>`).join('')}<rect x="-5.6" y="-54.6" width="11.2" height="3.6" rx=".6" fill="${n?'#8affea':c('#3a5a6a')}"/><path d="M-4 -52.8h5" stroke="${n?'#1a6a5a':c('#8ad8e0')}" stroke-width=".5"/>
+  <rect x="6.4" y="-66.6" width="6" height="4" fill="${c('#3a6ae8')}"/><path d="M6.4 -65.4h6M6.4 -64h6" stroke="${c('#ffffff')}" stroke-width=".4"/><rect x="6.4" y="-66.6" width="2.4" height="2" fill="${c('#e8443a')}"/>
+  <ellipse cx="0" cy="-71" rx="10.4" ry="3.2" fill="${c('#a8acb8')}"/><circle cx="0" cy="-86" r="15" fill="url(#${I}h)"/>
+  <ellipse cx="0" cy="-86" rx="11" ry="9.6" fill="url(#${I}v)" stroke="${c('#8a8e9a')}" stroke-width="1"/><path d="M-7.6 -88Q-6 -93 -1 -94.4" stroke="${c('#ffffff')}" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".75"/><circle cx="5" cy="-82" r="2.2" fill="${c('#4ab4ff')}" opacity=".75"/><path d="M3.6 -82.8Q5 -84 6.6 -83" stroke="${c('#6ad04a')}" stroke-width=".8" fill="none" opacity=".8"/>${spark(-4,-82,1.2,c('#ffffff'),.85)}${spark(6.4,-89,.9,c('#ffffff'),.8)}
+  <rect x="9" y="-99" width="4.4" height="3" rx="1" fill="${c('#8a8e9a')}" transform="rotate(35 11 -97.5)"/>${n?glow(I+'L',12,-98.6,7):''}<circle cx="12.2" cy="-98.4" r="1" fill="${n?'#fff6d0':c('#fff2c0')}"/>`}});
+
+JIGART.subject({id:'spacestation',name:'Space Station',biomes:['space'],place:'space',w:1.6,draw:o=>{const c=o.c,I=o.id,n=o.night,gd=c('#e8b84a'),
+  panel=(x,y,h)=>`<path d="M${x+6.5} ${y<-40?y+h:y}V-40" stroke="${c('#9aa0ae')}" stroke-width=".8"/><rect x="${x}" y="${y}" width="13" height="${h}" fill="url(#${I}p)" stroke="${gd}" stroke-width=".7"/><path d="M${x+6.5} ${y}V${y+h}${Array.from({length:Math.floor(h/4.2)},(_,i)=>`M${x} ${f(y+4.2*(i+1))}H${x+13}`).join('')}" stroke="${c('#6a8ae8')}" stroke-width=".4"/><path d="M${x+1} ${y+h*.7}L${x+12} ${y+h*.2}" stroke="${c('#ffffff')}" stroke-width="2" opacity=".18"/>`;
+  let tr='M-64 -41.5H64M-64 -38.5H64';for(let x=-64;x<64;x+=3)tr+=`M${x} -41.5L${x+3} -38.5`;
+  return `<defs>${D(o)}${lin(I+'p',[[0,c('#3a5ad8')],[1,c('#1a2a7a')]],1,1)}${lin(I+'m',[[0,c('#ffffff')],[.4,c('#d8dce6')],[1,c('#8a90a4')]])}${n?glowDef(I+'R','#ff4a3a',.9)+glowDef(I+'G','#4aff8a',.9):''}</defs>
+  <path d="${tr}" stroke="${c('#b8bcc8')}" stroke-width=".7"/>
+  ${panel(-60,-76,30)}${panel(-45,-76,30)}${panel(32,-76,30)}${panel(47,-76,30)}${panel(-60,-34,30)}${panel(-45,-34,30)}${panel(32,-34,30)}${panel(47,-34,30)}
+  <rect x="-6" y="-32" width="12" height="18" rx="2" fill="${c('#e8c060')}"/><path d="M-5 -28L-1 -26L-4 -22L1 -19M2 -30L5 -26L2 -22" stroke="${c('#b8902a')}" stroke-width=".5" fill="none"/>
+  <path d="M0 -14V-9" stroke="${c('#9aa0ae')}" stroke-width="1.2"/><path d="M-9 -8Q0 2 9 -8Z" fill="${c('#f4f4f8')}"/><ellipse cx="0" cy="-8" rx="9" ry="1.8" fill="${c('#d8dce6')}" stroke="${c('#9aa0ae')}" stroke-width=".5"/><path d="M0 -8V-3" stroke="${c('#8a8e9a')}" stroke-width=".6"/><circle cx="0" cy="-2.6" r=".9" fill="${c('#8a8e9a')}"/>
+  <rect x="-7" y="-66" width="14" height="20" rx="2" fill="url(#${I}m)"/><rect x="-4" y="-70" width="8" height="4" fill="${c('#9aa0ae')}"/><path d="M-5 -70L-3 -80H3L5 -70Z" fill="${c('#f2f2f6')}"/><path d="M-3 -80Q0 -83 3 -80" fill="${c('#d8dce6')}"/>${port(o,0,-74.6,1.4,'#8a8e9a')}${port(o,0,-58,2.4,'#9aa0ae')}
+  <rect x="-28" y="-48" width="56" height="16" rx="5" fill="url(#${I}m)"/><path d="M-20 -48V-32M-10 -48V-32M10 -48V-32M20 -48V-32" stroke="${c('#8a90a4')}" stroke-width=".6"/><rect x="-28" y="-41" width="56" height="2" fill="${c('#c8ccd8')}"/>
+  ${[-23,-15,15,23].map(x=>port(o,x,-44.6,1.8,'#8a90a4')).join('')}
+  <path d="M16 -48L26 -60L22 -68" stroke="${c('#f4f4f8')}" stroke-width="2.2" fill="none" stroke-linejoin="round"/><circle cx="26" cy="-60" r="1.6" fill="${c('#8a90a4')}"/><path d="M20 -70L22 -68L24 -71" stroke="${c('#8a90a4')}" stroke-width="1" fill="none"/>
+  <rect x="-26" y="-60" width="7" height="10" fill="${c('#f4f4f8')}" stroke="${c('#c8ccd8')}" stroke-width=".5"/><path d="M-26 -57h7M-26 -54h7M-22.5 -50V-48" stroke="${c('#c8ccd8')}" stroke-width=".5"/>
+  ${n?glow(I+'R',-64,-40,7)+glow(I+'G',64,-40,7):''}<circle cx="-64" cy="-40" r="1.3" fill="${n?'#ff6a5a':c('#e8443a')}"/><circle cx="64" cy="-40" r="1.3" fill="${n?'#6aff9a':c('#3ac06a')}"/>`}});
+
+JIGART.subject({id:'rover',name:'Moon Buggy',biomes:['space'],place:'space',w:1.25,draw:o=>{const c=o.c,I=o.id,n=o.night,fl=pick(o,[['#3a6ae8','#ffffff'],['#e8443a','#ffcf3a'],['#2fb6a8','#ffffff']]),
+  wheel=(x,y,r,dim)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c(dim?'#6a6e7a':'#8a8e9a')}"/><path d="${Array.from({length:10},(_,i)=>{const a=i*Math.PI/5;return`M${f(x+Math.cos(a)*(r-2.2))} ${f(y+Math.sin(a)*(r-2.2))}L${f(x+Math.cos(a+.3)*r)} ${f(y+Math.sin(a+.3)*r)}`}).join('')}" stroke="${c('#4a4e5a')}" stroke-width=".7"/><circle cx="${x}" cy="${y}" r="${f(r*.55)}" fill="${c(dim?'#3a3a46':'#4a4e5a')}"/><circle cx="${x}" cy="${y}" r="${f(r*.25)}" fill="${c('#e8b84a')}"/>`;
+  return `<defs>${D(o)}${rad(I+'r',[[0,c('#d8d4e0')],[.6,c('#a8a4b4')],[1,c('#66627a')]],.4,.25,.8)}${n?lin(I+'b',[[0,'#fff6c0',.6],[1,'#fff6c0',0]],1,0)+glowDef(I+'L','#fff6d0',.8):''}</defs>
+  <path d="M-50 0Q-57 -10 -46 -20Q-36 -30 -14 -28Q0 -33 18 -29Q40 -31 48 -18Q57 -8 50 0Q0 4 -50 0Z" fill="url(#${I}r)"/>
+  ${[[-30,-12,6.4,2.6],[12,-9,8,3],[36,-19,4,1.8],[-8,-22,3,1.2],[-44,-5,3.4,1.4]].map(([x,y,a,b])=>`<ellipse cx="${x}" cy="${y}" rx="${a}" ry="${b}" fill="${c('#7a768a')}"/><path d="M${x-a} ${y}A${a} ${b} 0 0 0 ${x+a} ${y}" stroke="${c('#e2deea')}" stroke-width=".8" fill="none"/>`).join('')}
+  <path d="M-48 -24h2M-43 -25h2M-38 -26.4h2M-33 -27.4h2" stroke="${c('#5a566a')}" stroke-width="1.2"/>
+  ${n?'<path d="M33 -44L64 -52V-36Z" fill="url(#'+I+'b)"/>':''}
+  ${wheel(-20,-36,7,1)}${wheel(26,-36,7,1)}
+  <path d="M-30 -80V-46" stroke="${c('#c8ccd8')}" stroke-width=".9"/><rect x="-30" y="-81" width="15" height="9" fill="${c(fl[0])}"/><path d="M-30 -78h15M-30 -75h15" stroke="${c(fl[1])}" stroke-width=".9"/>${spark(-25.6,-77.4,2,c(fl[1]))}<path d="M-30 -81H-15" stroke="${c('#c8ccd8')}" stroke-width=".7"/>
+  <path d="M24 -46V-64" stroke="${c('#9aa0ae')}" stroke-width="1.2"/><g transform="rotate(-25 23 -68)"><path d="M14 -68Q23 -63 32 -68Z" fill="${c('#e8eaf2')}"/><ellipse cx="23" cy="-68" rx="9" ry="1.8" fill="${c('#f6f6fa')}" stroke="${c('#9aa0ae')}" stroke-width=".5"/><path d="M23 -68V-73M16 -68L23 -73M30 -68L23 -73" stroke="${c('#9aa0ae')}" stroke-width=".5"/></g>
+  <rect x="17" y="-60" width="6" height="4" rx=".8" fill="${c('#5a5e6a')}"/><circle cx="23" cy="-58" r="1.2" fill="${c('#2a4a8a')}"/>
+  <rect x="-18" y="-41" width="32" height="6" fill="${c('#e8c060')}"/><path d="M-16 -38L-10 -40L-4 -37L2 -40L8 -37" stroke="${c('#b8902a')}" stroke-width=".5" fill="none"/>
+  <path d="M-33 -46H31L34 -42L31 -40H-30Z" fill="${c('#c8ccd8')}"/><path d="M-33 -46H31" stroke="${c('#f4f6fa')}" stroke-width="1"/>
+  ${[-14,-2].map(x=>`<path d="M${x} -46V-50H${x+8}V-46Z" fill="${c('#3a5ab8')}"/><path d="M${x} -50L${x-1.4} -58H${x+1.6}L${x+2.4} -50Z" fill="${c('#3a5ab8')}"/>`).join('')}
+  <path d="M13 -46L11 -55" stroke="${c('#8a8e9a')}" stroke-width="1.2"/><path d="M8 -55.6H14" stroke="${c('#5a5e6a')}" stroke-width="1.4" stroke-linecap="round"/><rect x="9.2" y="-53" width="5" height="3.2" rx=".6" fill="${n?'#8affea':c('#3a5a6a')}"/>
+  <rect x="31" y="-46" width="3" height="3.4" rx=".6" fill="${c('#8a8e9a')}"/><circle cx="33.6" cy="-44.3" r="1.2" fill="${n?'#fff6d0':c('#fff2c0')}"/>${n?glow(I+'L',34,-44,8):''}
+  <path d="M-30 -40A10 10 0 0 1 -10 -40M16 -40A10 10 0 0 1 36 -40" stroke="${c('#e8eaf2')}" stroke-width="2" fill="none"/>
+  ${wheel(-20,-34,7.4,0)}${wheel(26,-34,7.4,0)}`}});
 
 /*END*/
 })();

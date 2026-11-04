@@ -180,7 +180,7 @@ B('candy','in Candy Land',LAND,(o,R)=>{const c=o.c,p3=pts(R,298,6,3),p4=pts(R,35
 
 /* underwater and space draw their own sky; their "times" are lighting moods */
 B('underwater','under the Sea',['under'],(o,R)=>{const c=o.c,t=o.t,deep=t==='night'||t==='dusk';
-  const top={day:'#3ad0e8',golden:'#6ad8c8',dusk:'#1a6aa8',night:'#0a2a5a'}[t],bot={day:'#0a5a9a',golden:'#1a6a8a',dusk:'#0a2a5a',night:'#030c26'}[t];
+  const top={day:'#3ad0e8',golden:'#6ad8c8',dusk:'#1a6aa8',night:'#0a2a5a',sunset:'#4ab8c8',dawn:'#8ae0e0'}[t],bot={day:'#0a5a9a',golden:'#1a6a8a',dusk:'#0a2a5a',night:'#030c26',sunset:'#3a3a8a',dawn:'#2a6aa8'}[t];
   const floor=pts(R,334,8,3),p4=pts(R,366,5,3);
   const weed=(x,y,h,col)=>`<path d="M${f(x)} ${f(y)}q-6 ${f(-h/4)} 0 ${f(-h/2)}t0 ${f(-h/2)}" stroke="${col}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
   const coral=(x,y,s,col)=>`<g stroke="${col}" stroke-width="${f(3.4*s)}" stroke-linecap="round" fill="none"><path d="M${f(x)} ${f(y)}V${f(y-18*s)}M${f(x)} ${f(y-8*s)}l${f(-8*s)} ${f(-8*s)}v${f(-6*s)}M${f(x)} ${f(y-12*s)}l${f(7*s)} ${f(-7*s)}v${f(-7*s)}"/></g>`;
@@ -192,10 +192,10 @@ B('underwater','under the Sea',['under'],(o,R)=>{const c=o.c,t=o.t,deep=t==='nig
     mid:hill(floor,c('#e8d4a0'))+scatter(R,6,0,W,334,350,(x,y,i)=>weed(x,y,40+R()*30,c(['#2fa86a','#4ac080'][i%2]))),
     near:hill(p4,c('#d8c088'))+scatter(R,5,0,W,368,396,(x,y,i)=>coral(x,y,1+R()*.6,c(['#ff6a8a','#ff9a4a','#b98bff','#ff5ad0'][i%4])))+scatter(R,6,0,W,372,398,(x,y,i)=>i%2?`<path d="M${f(x)} ${f(y-5)}l1.5 3.5h3.8l-3 2.4l1.2 3.7l-3.5 -2.2l-3.5 2.2l1.2 -3.7l-3 -2.4h3.8z" fill="${c('#ff7a4a')}"/>`:`<path d="M${f(x-5)} ${f(y)}a5 5 0 0 1 10 0z" fill="${c('#fff0e0')}"/>`),
     gy:x=>yAt(floor,x)+14,fy:H-8,wy:null,weather:['bubbles']};
-},{times:['day','golden','dusk','night'],ownSky:true});
+},{times:['day','golden','dusk','night','sunset','dawn'],ownSky:true});
 
 B('space','in Outer Space',['space'],(o,R)=>{const t=o.t,c=o.c;
-  const neb={dusk:['#ff6ad8','#8a5aff'],night:['#4a8aff','#2ad0ff'],aurora:['#4affb0','#2ab0ff'],sunset:['#ff8a4a','#ff4a8a']}[t];
+  const neb={dusk:['#ff6ad8','#8a5aff'],night:['#4a8aff','#2ad0ff'],aurora:['#4affb0','#2ab0ff'],sunset:['#ff8a4a','#ff4a8a'],golden:['#ffd04a','#2ad0b0'],dawn:['#ff9ad8','#6ab0ff']}[t];
   const gr=pts(R,348,6,3);
   const planet=(x,y,r,col,ring)=>`<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="url(#${o.id}pl)"/><path d="M${f(x-r)} ${f(y)}a${f(r)} ${f(r)} 0 0 0 ${f(2*r)} 0" fill="#000" opacity=".25"/>${ring?`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r*1.8)}" ry="${f(r*.4)}" fill="none" stroke="${c('#ffe0b0')}" stroke-width="${f(r*.16)}" opacity=".85" transform="rotate(-14 ${f(x)} ${f(y)})"/>`:''}`;
   const px=R()<.5?60:240;
@@ -206,7 +206,7 @@ B('space','in Outer Space',['space'],(o,R)=>{const t=o.t,c=o.c;
     far:'',mid:'',
     near:hill(gr,c('#8a88a8'))+hill(pts(R,372,5,3),c('#a8a6c4'))+scatter(R,8,0,W,354,398,(x,y)=>{const r=4+R()*8;return`<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r)}" ry="${f(r*.35)}" fill="${c('#6a6888')}"/><path d="M${f(x-r)} ${f(y)}a${f(r)} ${f(r*.35)} 0 0 0 ${f(2*r)} 0" stroke="${c('#c8c6e0')}" stroke-width="1" fill="none"/>`}),
     gy:x=>290,fy:H-10,wy:null,weather:[]};
-},{times:['dusk','night','aurora','sunset'],ownSky:true});
+},{times:['dusk','night','aurora','sunset','golden','dawn'],ownSky:true});
 
 /* ---------- the sky for a time of day ---------- */
 function skyFor(o,R,sunX){
@@ -255,13 +255,16 @@ const gcd=(a,b)=>b?gcd(b,a%b):a;
 const stepFor=N=>{let s=Math.max(1,Math.round(N*.618));while(gcd(s,N)!==1)s++;return s};
 /* the side subject is something else that belongs in the biome, of another kind where that matters (never two balloons
    or two boats); a main subject with no partner goes alone */
+/* a few subjects that also suit a biome their artist did not list (keeps the smallest biome varied for thousands of puzzles) */
+const EXTRA={volcano:['balloon','airship','tent','observatory']};
+const inBiome=(s,k)=>s.biomes.includes(k)||(EXTRA[k]||[]).includes(s.id);
 const partner=(m,s)=>s!==m&&!(m.place==='sky'&&s.place==='sky')&&(s.place!==m.place||s.place==='ground'||s.place==='under'||s.place==='space');
 const pairsOf=mains=>{const r=[];for(const m of mains){const ss=mains.filter(s=>partner(m,s));if(ss.length)ss.forEach(s=>r.push([m,s]));else r.push([m,null])}return r};
 function partsFor(n){
   const biomes=JIGART.biomes,subjects=JIGART.subjects,k=Math.max(0,n-1),j=Math.floor(k/ORDER.length);
   /* a biome with nothing to show in it (never the case with the full art set) hands its turn to the next one */
   let bk,bm,fits,mains=[];
-  for(let t=0;t<ORDER.length&&!mains.length;t++){bk=ORDER[(k+t)%ORDER.length];bm=biomes.find(b=>b.k===bk);fits=s=>s.biomes.includes(bk)&&bm.places.includes(s.place);
+  for(let t=0;t<ORDER.length&&!mains.length;t++){bk=ORDER[(k+t)%ORDER.length];bm=biomes.find(b=>b.k===bk);fits=s=>inBiome(s,bk)&&bm.places.includes(s.place);
     mains=subjects.filter(fits);if(!mains.length)mains=subjects.filter(s=>bm.places.includes(s.place))}
   if(!mains.length)throw new Error('no jigsaw subjects');
   /* the walk goes through every (main subject, side subject, time of day) the biome allows, in a scrambled order;
@@ -308,10 +311,10 @@ function compose(n){
   svg+=weatherFor(b.weather||[],o,R);
   svg+=border(fc)+'</svg>';
   const tname={day:'Daytime',golden:'Golden hour',sunset:'Sunset',dusk:'Dusk',night:'Night',dawn:'Dawn',aurora:'Northern lights'}[tk];
-  const mood=bm.k==='underwater'?{day:'Sunlit shallows',golden:'Warm lagoon',dusk:'Deep blue',night:'Glowing depths'}[tk]:bm.k==='space'?{dusk:'Pink nebula',night:'Blue nebula',aurora:'Green nebula',sunset:'Orange nebula'}[tk]:tname;
+  const mood=bm.k==='underwater'?{day:'Sunlit shallows',golden:'Warm lagoon',dusk:'Deep blue',night:'Glowing depths',sunset:'Coral sunset',dawn:'Morning reef'}[tk]:bm.k==='space'?{dusk:'Pink nebula',night:'Blue nebula',aurora:'Green nebula',sunset:'Orange nebula',golden:'Golden nebula',dawn:'Rose nebula'}[tk]:tname;
   return{svg,title:`${main.name} ${bm.where}`+(cycle?' '+['II','III','IV','V','VI','VII','VIII','IX'][Math.min(cycle-1,7)]:''),sub:mood,biome:bm.k,time:tk,main:main.id,side:side&&side.id,frame:fc};
 }
 /* how many different (biome, main subject, time, side subject) pictures there are before the walk repeats */
-const variety=()=>JIGART.biomes.reduce((a,b)=>a+pairsOf(JIGART.subjects.filter(s=>s.biomes.includes(b.k)&&b.places.includes(s.place))).length*b.times.length,0);
+const variety=()=>JIGART.biomes.reduce((a,b)=>a+pairsOf(JIGART.subjects.filter(s=>inBiome(s,b.k)&&b.places.includes(s.place))).length*b.times.length,0);
 Object.assign(JIGART,{compose,variety,FRAMES});
 })();
