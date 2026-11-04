@@ -9,7 +9,7 @@ function v1817sAbbr(s){ const w=String(s.town||s.name||'').replace(/[^A-Za-z ]/g
 const V1817S_VAR=[['round','split'],['hex','bend'],['banner','pales'],['heater','chevron'],['diamond','bend']];
 function v1817sLive(C){ const s=v1817sMe(); const d=v1817cDef(s); const opp=Sx(C.rivals.heated)||Sx(C.league.find(x=>x!==C.userSid));
   return `<div class="v1817-card"><span class="v1817-k">Scoreboard</span><div class="v1817-sb">${crest(s,30)}<b>${esc(v1817sAbbr(s))}</b><span>2 – 1</span><b>${esc(v1817sAbbr(opp))}</b>${crest(opp,30)}</div></div>
-   <div class="v1817-card v1817-row"><span class="v1817-k">Jersey chest</span><span class="v1817-shirt">${shirtSVG(s.c1,s.c2,'10',112)}<i>${crest(s,22)}</i></span><p>The crest scales down cleanly. Small sizes drop the emblem and keep the shape and field.</p></div>
+   <div class="v1817-card v1817-row"><span class="v1817-k">Jersey chest</span><span class="v1817-shirt">${shirtSVG(s.c1,s.c2,'10',112)}<i>${crest(s,18)}</i></span><p>The crest scales down cleanly. The smallest sizes drop the emblem and keep the shape and field.</p></div>
    <div class="v1817-card"><span class="v1817-k">Stadium sign</span>${v1817sSign(s)}</div>
    <button class="v1817-card v1817-row v1817-png" data-a="v1817Png"><span class="v1817-pngc">${crest(s,40)}</span><span><b>Save as an image</b><small>PNG with a clear background, for avatars and posters</small></span></button>`; }
 function v1817sSign(s){ return `<div class="v1817-sign" style="--c1:${s.c1};--c2:${s.c2}">${crest(s,52)}<span><b>Home of the ${esc(s.mascot)}</b><small>${esc(s.name)}</small></span></div>`; }

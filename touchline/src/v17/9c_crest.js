@@ -2,7 +2,7 @@
    A school crest is {sh: shape, fd: field, em: emblem (mascot key), rb: ribbon text} drawn by crest(), so it carries to every
    place a crest already appears (schedule, tables, State Poll, the pitch and stadium in 3-D ...). Your school keeps the classic
    shield until you edit it in the Crest Studio (s.crest); every other school, including the State Poll schools, gets a seeded
-   design from its id and the career seed. Small sizes drop the emblem and keep the shape and field; the ribbon shows from 64 px.
+   design from its id and the career seed. Under 20 px the emblem is dropped and the shape and field stay; the ribbon shows from 64 px.
    Identifiers v1817c / V1817C. */
 const V1817C={
   SH:{shield:'M50 3 93 14v41c0 30-20 47-43 57C27 102 7 85 7 55V14z',heater:'M8 6H92V46C92 78 72 98 50 110C28 98 8 78 8 46Z',round:'M3 57a47 47 0 1 0 94 0a47 47 0 1 0 -94 0Z',hex:'M50 4L93 29V85L50 110L7 85V29Z',diamond:'M50 3L97 57L50 111L3 57Z',banner:'M9 5H91V86L50 110L9 86Z'},
@@ -26,7 +26,7 @@ function v1817cField(fd,A,B,dark){
   return `<rect width="100" height="115" fill="${A}"/>${[12,40,68].map(x=>`<rect x="${x}" width="14" height="115" fill="${B}"/>`).join('')}`; }
 /* the markup (ids: V17_ID for the mascot filter, V1817C.CLIP for the clip path) */
 function v1817cBuild(s,size,d,mode){ const P=mascotPalette(s.c1,s.c2); const dark=_mc(P.P,'#05070b',0.66); const path=V1817C.SH[d.sh];
-  const showEm=size>=28; const showRb=!!d.rb&&size>=64; const art=showEm?mascotInner(d.em,s.c1,s.c2,true):'';
+  const showEm=size>=20; const showRb=!!d.rb&&size>=64; const art=showEm?mascotInner(d.em,s.c1,s.c2,true):'';
   const inner=!showEm?'':mode==='l'?art:`${mode==='i'?`<defs>${mascotFilter(V17_ID,P)}</defs>`:''}<g filter="url(#${V17_ID})">${art}</g>`;
   const emT=showRb?'translate(18 7) scale(.64)':d.sh==='round'||d.sh==='diamond'?'translate(17 20) scale(.66)':'translate(13 15) scale(.74)';
   const rb=showRb?`<g><path d="M6 81H94L91 97H9Z" fill="#f2ead6" stroke="${_mc(P.P,'#000',0.35)}" stroke-width="1.6" stroke-linejoin="round"/><text x="50" y="93.4" text-anchor="middle" font-family="'Big Shoulders Display',Oswald,'Arial Narrow',sans-serif" font-weight="900" font-size="${d.rb.length>10?10.5:12.5}" letter-spacing="1.2" fill="#1b1712">${esc(d.rb.toUpperCase())}</text></g>`:'';
