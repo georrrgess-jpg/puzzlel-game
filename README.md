@@ -45,7 +45,9 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Shop**: boosts, a deal of the day, 10 colour themes and 9 garden decorations that appear on your home screen.
 - **Economy**: every price and reward is in the `ECON` table in `js/core.js`; `tools/economy-sim.cjs` simulates three
   kinds of player and checks the balance targets (about 20-32 coins per level, first theme around level 16, all themes around level 300).
-- **Audio**: everything is synthesized with Web Audio: generative music (calm in play) and a full effects set, with volume controls.
+- **Audio**: everything is synthesized with Web Audio, with no sound files. There are four original songs: a menu theme and
+  three level songs that rotate as a playlist. Sound effects play in the key of the song that is on. Volume controls are in
+  Settings, and M toggles the music.
 - **Accessibility**: colour symbols, reduced-motion support, vibration and sound toggles, tap alternatives to dragging.
 - Progress is saved in `localStorage`. Saves from older versions migrate automatically (levels restart, everything else is kept).
 
@@ -58,6 +60,51 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Fits every phone**: boards size themselves from the free space; verified clean on iPhone SE (320x568), iPhone 8, iPhone 13,
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
+- **Also at home on a computer**: from 1000 px wide, a desktop layout with a navigation rail, a two-column home and
+  large boards (see v8 below). Keyboard: Z or U undo, H hint, R restart, M music, Esc back, Enter for a popup's main button.
+
+## What's new in v8 (new soundtrack, PC layout, smoother Block Garden)
+**A new soundtrack** (`js/music.js`): four composed songs played live by a small synthesized band. The band has an FM
+electric piano, warm pads, bass, plucks, marimba, kalimba, bells, a flute-like lead and drums, mixed with a hall reverb,
+a ping-pong delay, chorus and a sidechain pump.
+
+| Song | Where | Style |
+|---|---|---|
+| Pop Parade | menus | F major, 108 bpm, bright and hooky |
+| Garden Groove | levels | D major, 84 bpm, lo-fi swing with tape wobble and vinyl crackle |
+| Brain Bounce | levels | B♭ major, 100 bpm, bossa bounce with a whistled tune |
+| Starlight | levels | C major, 72 bpm, dreamy bells and flute |
+
+- **Songs with sections:** each song has an intro, verses, a chorus or hook, and a bridge or breakdown, with drum fills,
+  cymbal swells and risers. The level songs form a playlist that carries on from level to level and hands over on the
+  bar line. Settings shows the song that is playing.
+- **Music around popups and wins:** behind a popup the music sounds as if from the next room. It ducks under fanfares.
+- **Rebuilt sound effects:** chimes, mallets, bells, wooden taps and stereo sweeps. Every one plays in the key of the
+  current song, so a combo's rising notes and the win fanfare always fit the music.
+- **Mix checks without speakers:** `tools/music-render.cjs` renders every song and effect offline. It checks that every
+  bar adds up and that no held melody note rubs against its chord. It measures peaks, loudness and spectrum, and writes
+  MP3 previews.
+
+**PC layout** (`css/desktop.css`, from 1000 px wide):
+- **Navigation:** a rail on the left replaces the bottom bar.
+- **Home:** a two-column dashboard. The world card and PLAY are on one side, the garden and the four tiles on the other.
+- **A level:** three columns. The stars, moves meter, tip and coach are on the left, a much larger board is in the
+  middle, and Undo, Hint, Restart and Skip are on the right with their keyboard keys written on them.
+- **Other screens:** the map has bigger level nodes, the shop shows four columns, and the jigsaw hub puts the next
+  puzzle beside the album. Mouse users get hover feedback.
+- **Checked:** `tools/matrix.cjs` now also checks a landscape tablet (1024x768) and 1366x768, 1440x900 and 1920x1080
+  screens.
+
+**Block Garden drag and drop**, measured with the new `tools/blocks-perf.cjs` (real touch drags on a phone with the CPU
+6x slower):
+- **Preview on its own layer:** the preview of where a block lands, and the bar over each line that will bloom, is drawn
+  on its own layer. Following the finger no longer repaints the 64 glossy cells: raster work while dragging is down 86%,
+  and paint per drag fell from about 4 ms to 0.3 ms.
+- **No forced layouts on a drop:** a drop no longer forces two layouts of the page.
+- **Meter marker on the GPU:** the moves meter's marker glides on the GPU. In every mode, each move used to make the HUD
+  lay out and repaint for 0.4 s.
+- **Lighter bloom sound:** a line bloom's sound builds a fraction of the audio nodes it did (about 150 before). Long
+  tasks during blooms fell from 12 to 2 in the same test.
 
 ## What's new in v7.3 (smooth in every mode)
 Measured with the new `tools/mode-perf.cjs`, a slow phone simulated with the CPU 6× slower at 2.75× pixel density
@@ -291,7 +338,9 @@ The game is a mobile-first web app. Once it is hosted it can be installed to the
 
 - `index.html`; styles in `css/` (`style.css` base, then `menus.css`, `hud.css`, `modes/*.css`, `perf.css`, `mobile.css` override it).
 - `js/core.js`: helpers, saves + migration, **ECON (economy)**, themes, level rotation and `registerMode()`.
-- `js/perf.js`: quality tiers. `js/audio.js`, `js/fx.js`: sound, particles, animated background.
+- `js/perf.js`: quality tiers. `js/audio.js`: the audio engine and the sound effects. `js/music.js`: the songs and the band
+  that plays them. `js/fx.js`: particles, animated background.
+- `css/desktop.css`: the layout for computers and landscape tablets (loaded last).
 - `js/meta.js`: XP, quests, trophies, daily, spin, settings. `js/howto.js`: how-to demo helpers.
 - `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `arrows`, `tubes`, `threads`, `merge`, `blocks`, `pics` (its art is in `pics-art.js`).
 - `js/screens.js`: home, map, shop. `js/ui.js`: game flow, popups, HUD.
@@ -311,8 +360,10 @@ Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier. A mode whose 
 | `shot.cjs` | Screenshots of any screen/mode/popup and auto-solves levels; prints page errors |
 | `solve-all.cjs` | Every mode x a spread of difficulty tiers is solvable by its solver |
 | `drag.cjs [W H]` | Real touch drags (CDP) in the three drag modes on a phone viewport |
-| `matrix.cjs` | Six phone sizes x every screen: scroll, off-screen controls, tap-target sizes |
+| `matrix.cjs` | Six phones, a landscape tablet and three computer screens x every screen: scroll, off-screen controls, tap-target sizes |
 | `perf.cjs [rate]` | fps and long tasks under CPU throttling (`GFX=high|med|low`) |
+| `music-render.cjs [secs] [song ...] [--sfx] [--parts]` | Renders the songs and effects offline: notation and harmony checks, levels, spectrum, MP3 previews in `music-out/` |
+| `blocks-perf.cjs [rate] [drags]` | Block Garden on a slow phone: real touch drags and drops, frame by frame, and what gets repainted |
 | `mode-perf.cjs [rate] [mode ...]` | Every mode on a slow phone: opening, playing moves, finish and win card (fps, stutters, longest task) |
 | `jig-perf.cjs [rate]` | Jigsaw on a slow phone: opening, moves, drags, the gallery |
 | `economy-sim.cjs` | Economy targets for three player types |
