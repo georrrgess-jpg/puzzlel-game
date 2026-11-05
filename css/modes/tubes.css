@@ -1,4 +1,5 @@
 /* Sort Tubes board */
+.tubes>.tube{flex:none}   /* tubes keep their size: the rows are balanced by width (js/modes/tubes.js) */
 .tubes{display:flex;flex-wrap:wrap;gap:22px 14px;justify-content:center;align-content:center;max-width:min(94vw,540px);--seg:clamp(22px,min(8vw,6.4dvh),38px);padding-top:26px}
 .tube{width:calc(var(--seg)*1.3);height:calc(var(--seg)*4 + 18px);border-radius:10px 10px calc(var(--seg)*.65) calc(var(--seg)*.65);border:3px solid #ffffff55;border-top-color:#ffffff22;background:linear-gradient(90deg,#ffffff1c,#ffffff06 35%,#ffffff04 60%,#ffffff1a);display:flex;flex-direction:column-reverse;padding:3px;gap:2px;transition:transform .28s cubic-bezier(.3,1.6,.5,1),box-shadow .3s,border-color .3s,opacity .3s;position:relative;overflow:visible;box-shadow:inset 0 0 14px #ffffff10,0 10px 20px #0004}
 .tube::before{content:'';position:absolute;top:-7px;left:-7px;right:-7px;height:8px;border-radius:6px;background:linear-gradient(180deg,#ffffff70,#ffffff28);box-shadow:0 2px 4px #0004}

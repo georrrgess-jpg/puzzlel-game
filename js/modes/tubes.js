@@ -59,6 +59,27 @@ MAKERS.tubes=function({R,tier,board,api}){
   let moves=0,sel=-1,hintPair=null,lastNew=null,lastFrom=-1,lastGhost=null;
   const wrap=el('div','tubes');if(tubes.length<=6)wrap.classList.add('row1');/* one row of tubes: bigger sand (sizes in mobile.css) */board.appendChild(wrap);
   const tEls=tubes.map((_,i)=>{const t=el('div','tube');t.onclick=()=>tapTube(i);wrap.appendChild(t);return t});
+  /* the tube rack fits the board: every arrangement from one to four equal rows (8 tubes stand 4 + 4, never 7 + 1) is
+     tried at the size the free width and height allow, and the one with the biggest tubes wins. Measured again only
+     when the board changes size */
+  const DESK=matchMedia('(min-width:860px) and (min-height:480px) and (min-aspect-ratio:5/4)');
+  let rowKey='';
+  function balanceRows(){
+    if(!wrap.isConnected)return;const bw=board.clientWidth,bh=board.clientHeight,k=bw+'|'+bh+'|'+DESK.matches;
+    if(!bw||!bh||k===rowKey)return;rowKey=k;
+    const n=tEls.length,desk=DESK.matches,W=Math.min(bw-8,desk?940:Math.min(innerWidth*.94,540)),cap=desk?(n<=6?84:66):(n<=6?48:38);
+    let best=null;
+    for(let r=1;r<=4;r++){const per=Math.ceil(n/r);if(r>1&&Math.ceil(n/(r-1))===per)continue;
+      /* desktop gaps scale with the tubes; phone gaps are fixed */
+      const cg=desk?.32:0,cgf=desk?0:14,rg=desk?.5:0,rgf=desk?0:22,pad=desk?.4:0,padf=desk?10:28;
+      const sw=(W-(per-1)*cgf)/(per*1.3+(per-1)*cg),sh=(bh-padf-r*18-(r-1)*rgf-30)/(r*4+(r-1)*rg+pad);
+      const seg=Math.min(cap,sw,sh);if(!best||seg>best.seg+.5)best={r,per,seg,cg,cgf}}
+    const seg=Math.max(16,Math.floor(best.seg)),tw=seg*1.3,gap=best.cg*seg+best.cgf;
+    wrap.style.setProperty('--seg',seg+'px');wrap.style.maxWidth='none';
+    wrap.style.width=Math.ceil(best.per*tw+(best.per-1)*gap+tw*.5)+'px';   // room for exactly `per` tubes a row
+  }
+  requestAnimationFrame(balanceRows);
+  const rowRO=window.ResizeObserver?new ResizeObserver(()=>requestAnimationFrame(balanceRows)):null;if(rowRO)rowRO.observe(board);
   api.stagger(tEls,50);
   /* static decoration is created once per tube; only the sand layers are rebuilt, and only when a tube's contents changed */
   tEls.forEach(e=>{e.appendChild(el('i','gf-tk'));e.appendChild(el('i','gf-sh'));e.appendChild(el('i','gf-gl'));
@@ -187,7 +208,7 @@ MAKERS.tubes=function({R,tier,board,api}){
       sel=-1;hintPair=m;render();clearTimeout(hintT);hintT=setTimeout(()=>{if(hintPair===m&&wrap.isConnected){hintPair=null;render()}},3200);
       return true;
     },
-    destroy(){clearTimeout(hintT)}
+    destroy(){clearTimeout(hintT);if(rowRO)rowRO.disconnect()}
   };
 };
 

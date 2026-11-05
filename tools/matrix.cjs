@@ -12,7 +12,9 @@ const DEVICES = {
   'iPhone-ProMax': { width: 430, height: 932, dpr: 3 }, 'Galaxy-360': { width: 360, height: 800, dpr: 3 }, 'Pixel-5': { width: 393, height: 851, dpr: 2.75 },
   /* computers (mouse and keyboard, the desktop layout in css/desktop.css) and a landscape tablet */
   'iPad-landscape': { width: 1024, height: 768, dpr: 2, touch: true }, 'Laptop-1366': { width: 1366, height: 768, dpr: 1, desk: true },
-  'Desktop-1440': { width: 1440, height: 900, dpr: 1, desk: true }, 'Desktop-1920': { width: 1920, height: 1080, dpr: 1, desk: true }
+  'Desktop-1440': { width: 1440, height: 900, dpr: 1, desk: true }, 'Desktop-1920': { width: 1920, height: 1080, dpr: 1, desk: true },
+  /* real browser windows are shorter than the screen: a 1280x720 laptop leaves 1280x577, and windows get narrowed */
+  'Laptop-window': { width: 1280, height: 577, dpr: 1.5, desk: true }, 'Narrow-window': { width: 920, height: 700, dpr: 1, desk: true }
 };
 const out = process.argv[2] || 'matrix-out', filter = process.argv[3] && !process.argv[3].startsWith('--') ? process.argv[3] : null, quiet = process.argv.includes('--quiet');
 const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36';

@@ -48,6 +48,8 @@ const PPBMP=(()=>{
 })();
 /* the picture as an image inside the tile's SVG (the tile keeps its viewBox, so it still shows only its piece) */
 const ppImg=(u,H)=>`<image href="${u}" width="120" height="${H}" preserveAspectRatio="none"/>`;
+/* two pieces of a 4-piece picture lock together: a short wooden two-note click, higher for each new join */
+sfx.picJoin=k=>{if(!ok())return;const b=Math.min(6,k||0);marimba(pent(b+7,60),.16);marimba(pent(b+9,60),.12,.05);noise({dur:.03,vol:.05,type:'bandpass',f:2400,q:2})};
 sfx.picPop=k=>{if(!ok())return;const b=Math.min(4,k||0);[0,2,4,7].forEach((s,i)=>marimba(pent(s+5+b,60),.2,i*.06));bell(pent(14+b,60),.1,1,.2);
   noise({dur:.3,vol:.06,type:'bandpass',f:2000,f2:6500,q:.7,verb:.35})};
 
@@ -174,14 +176,19 @@ MAKERS.pics=function({R,tier,board,api}){
     shown=doneN;seams();counters();
   }
   /* pieces of a 4-piece picture that already fit together close the gap between them */
-  function seams(){
-    const at=i=>i>=0&&i<G?g[i]:-1;
+  let joinedNow=new Set();   // pieces currently locked to a neighbour (for the snap effect when a new join appears)
+  function seams(fxOn){
+    const at=i=>i>=0&&i<G?g[i]:-1,was=joinedNow,fresh=[];joinedNow=new Set();
     g.forEach((a,i)=>{if(a<0)return;const e=els.get(a);if(!e)return;const A=pcs[a],P=pics[A.pic];let l=0,r=0,t=0,b=0;
       if(P.k===4){const c=i%C,same=(j,q)=>{const x=at(j);return x>=0&&pcs[x].pic===A.pic&&pcs[x].q===q};
         if(A.q%2===0&&c<C-1&&same(i+1,A.q+1))r=1;if(A.q%2===1&&c>0&&same(i-1,A.q-1))l=1;
         if(A.q<2&&same(i+C,A.q+2))b=1;if(A.q>1&&same(i-C,A.q-2))t=1}
       e.style.setProperty('--jx',r-l);e.style.setProperty('--jy',b-t);
-      e.classList.toggle('jl',!!l);e.classList.toggle('jr',!!r);e.classList.toggle('jt',!!t);e.classList.toggle('jb',!!b)});
+      e.classList.toggle('jl',!!l);e.classList.toggle('jr',!!r);e.classList.toggle('jt',!!t);e.classList.toggle('jb',!!b);
+      if(l||r||t||b){joinedNow.add(a);if(!was.has(a))fresh.push(e)}});
+    /* new joins: the pieces flash, a few sparkles where they meet, and a click */
+    if(fxOn&&fresh.length&&!FL_RM){let sx=0,sy=0;fresh.forEach(e=>{again(e,'jn');const r=e.getBoundingClientRect();sx+=r.left+r.width/2;sy+=r.top+r.height/2});
+      sx/=fresh.length;sy/=fresh.length;flBurst(sx,sy,'#fff3b0',Q.tier==='low'?4:9,.55);sfx.picJoin(joinedNow.size>>1);buzz(6)}
   }
   function counters(){$('.ppdn',top).textContent=shown;$('.ppdk',top).textContent=deck.length-dp;top.classList.toggle('empty',dp>=deck.length)}
   function coach(){
@@ -210,8 +217,8 @@ MAKERS.pics=function({R,tier,board,api}){
     if(FL_RM||fast){build();coach();if(n)sfx.picPop(0);if(doneN>=NP)finish();return true}
     /* the swap: both tiles glide to their new cells (the dragged one from where the finger let go) */
     [[ea,b],[eb,a]].forEach(([e,i])=>{if(!e)return;e.classList.remove('drag','sel');e.style.translate='';place(e,i)});
-    r0.forEach((rc,e)=>{const r1=e.getBoundingClientRect(),dx=rc.left-r1.left,dy=rc.top-r1.top;if(dx||dy)wa(e,[{translate:`${dx}px ${dy}px`,scale:e===ea&&dragged?1.1:1},{translate:'0 0',scale:1}],{duration:230,easing:'cubic-bezier(.3,1.25,.5,1)'})});
-    if(!r.steps.length){seams();coach();return true}
+    r0.forEach((rc,e)=>{const r1=e.getBoundingClientRect(),dx=rc.left-r1.left,dy=rc.top-r1.top;if(dx||dy)wa(e,[{translate:`${dx}px ${dy}px`,scale:e===ea&&dragged?1.1:1.04},{translate:'0 0',scale:.95,offset:.72},{translate:'0 0',scale:1}],{duration:280,easing:'cubic-bezier(.3,1.1,.5,1)'})});
+    if(!r.steps.length){later(()=>{if(wrap.isConnected)seams(true)},210);coach();return true}
     play(r.steps);return true;
   }
   /* a chain of finished pictures, one link at a time; input waits until it has played */
@@ -222,7 +229,7 @@ MAKERS.pics=function({R,tier,board,api}){
       later(()=>{if(my!==gen)return;st.done.forEach((j,x)=>pop(j,k+x));},t);
       later(()=>{if(my!==gen)return;st.spawn.forEach(([i,a],x)=>drop(tileEl(a),i,x));counters()},t+BL-260);
     });
-    later(()=>{if(my!==gen)return;busy=false;seams();coach();if(doneN>=NP)finish()},240+steps.length*(BL+80));
+    later(()=>{if(my!==gen)return;busy=false;seams(true);coach();if(doneN>=NP)finish()},240+steps.length*(BL+80));
   }
   /* the finish of one picture: its pieces close up into the whole picture with a gold frame and a shine,
      sparkles and the picture's name, then it flies into the gallery counter */
@@ -270,8 +277,10 @@ MAKERS.pics=function({R,tier,board,api}){
     pk.style.setProperty('--pc',P.fc);again(pk,'pk');
   }
   let drag=null;
-  const cellAt=(x,y)=>{const b=inner.getBoundingClientRect(),s=slots[0].getBoundingClientRect(),gp=slots[1].getBoundingClientRect().left-s.right;
-    const c=Math.floor((x-b.left+gp/2)/(s.width+gp)),r=Math.floor((y-b.top+gp/2)/(s.height+gp));return c>=0&&c<C&&r>=0&&r<RW?r*C+c:-1};
+  /* the board's geometry is read once when a drag begins, not on every frame of it */
+  let geo=null;const measureGeo=()=>{const b=inner.getBoundingClientRect(),s=slots[0].getBoundingClientRect(),gp=slots[1].getBoundingClientRect().left-s.right;geo={l:b.left,t:b.top,w:s.width,h:s.height,gp}};
+  const cellAt=(x,y)=>{if(!geo)measureGeo();const{l,t,w,h,gp}=geo;
+    const c=Math.floor((x-l+gp/2)/(w+gp)),r=Math.floor((y-t+gp/2)/(h+gp));return c>=0&&c<C&&r>=0&&r<RW?r*C+c:-1};
   /* the tile under a dragged tile leans towards the dragged tile's cell: a preview of the swap */
   let tgEl=null;const target=(e,from)=>{if(tgEl===e)return;if(tgEl){tgEl.classList.remove('tg');tgEl.style.removeProperty('--sx');tgEl.style.removeProperty('--sy')}tgEl=e;
     if(e){if(from>=0&&e.classList.contains('pt')){const t=+e.dataset.i;e.style.setProperty('--sx',Math.sign(from%C-t%C));e.style.setProperty('--sy',Math.sign(Math.floor(from/C)-Math.floor(t/C)))}e.classList.add('tg');sfx.tick(1.5)}};
@@ -279,7 +288,7 @@ MAKERS.pics=function({R,tier,board,api}){
     start(e){
       if(busy||api.over())return false;
       const t=e.target.closest('.pt,.pps');if(!t)return false;
-      const i=+t.dataset.i;drag={i,x:e.clientX,y:e.clientY,el:g[i]>=0?els.get(g[i]):null,on:false};return true;
+      const i=+t.dataset.i;drag={i,x:e.clientX,y:e.clientY,el:g[i]>=0?els.get(g[i]):null,on:false};measureGeo();return true;
     },
     move(x,y,e){
       if(!drag||!drag.el)return;
@@ -322,6 +331,9 @@ MAKERS.pics=function({R,tier,board,api}){
     },
     _done:h=>complete(h).length>0,get _lastFour(){return lastFour},   // tests
     _play(){if(busy)return true;const m=choose(g,dp,botF);return m?doMove(m[0],m[1],false):false},   // tests: the solver's move, animated
+    /* tools/pics-perf.cjs: the solver's next swap as screen points (drag the first tile onto the second) */
+    _plan(){if(busy)return null;const m=choose(g,dp,botF);if(!m)return null;const c=i=>{const r=slots[i].getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]};
+      const h=g.slice();[h[m[0]],h[m[1]]]=[h[m[1]],h[m[0]]];return{from:c(m[0]),to:c(m[1]),pops:resolve(h,dp).steps.length>0}},
     _bot(){if(busy)return true;const m=choose(g,dp,botF);if(!m)return false;fast=true;const ok=doMove(m[0],m[1],false);fast=false;return ok},
     destroy(){gen++;timers.forEach(clearTimeout);fx.forEach(x=>x.remove())}
   };

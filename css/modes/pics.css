@@ -36,7 +36,18 @@
 .pt.jb{border-bottom-left-radius:0;border-bottom-right-radius:0;padding-bottom:0}.pt.jt{border-top-left-radius:0;border-top-right-radius:0;padding-top:0}
 .pt.jr .pim,.pt.jl .pim,.pt.jt .pim,.pt.jb .pim{border-radius:0}
 .pt.sel{z-index:5;transform:translate(0,-4px) scale(1.06);box-shadow:0 0 0 3px var(--acc),0 10px 18px #0007}
+/* the picked-up tile breathes: a ring that fades in and out (opacity only, so it costs nothing) */
+.pt.sel::before{content:'';position:absolute;inset:-7px;border-radius:calc(var(--rd) + 6px);box-shadow:0 0 0 2.5px var(--acc),0 0 16px var(--acc);pointer-events:none;animation:ppSelRing 1s ease-in-out infinite alternate}
+@keyframes ppSelRing{from{opacity:.25}to{opacity:1}}
+/* two pieces lock together: a white flash on each (an overlay's opacity) and a small squeeze */
+.pt.jna,.pt.jnb{animation:ppJoinA .42s cubic-bezier(.3,1.6,.5,1)}.pt.jnb{animation-name:ppJoinB}
+@keyframes ppJoinA{40%{scale:1.07}}@keyframes ppJoinB{40%{scale:1.07}}
+.pt.jna::before,.pt.jnb::before{content:'';position:absolute;inset:0;border-radius:inherit;background:#fff;pointer-events:none;animation:ppJoinF .5s ease-out both}
+@keyframes ppJoinF{from{opacity:.75}to{opacity:0}}
 .pt.drag{z-index:30;cursor:grabbing;transform:scale(1.12) rotate(5deg);box-shadow:0 18px 30px #0009;transition:transform .15s,box-shadow .15s}
+/* the tile in the hand and the one leaning out of its way get layers of their own: following the pointer then never
+   repaints the board (every repaint redrew picture tiles under it) */
+.pt.drag,.pt.tg{will-change:transform,translate}
 .pt.tg{box-shadow:0 0 0 3px #fff,0 0 16px #fff9}
 .pt.gone{opacity:0;transition:opacity .12s}
 .pt.hint{z-index:6;animation:hint .6s ease-in-out infinite alternate}

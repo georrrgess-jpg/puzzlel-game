@@ -60,8 +60,36 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Fits every phone**: boards size themselves from the free space; verified clean on iPhone SE (320x568), iPhone 8, iPhone 13,
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
-- **Also at home on a computer**: from 1000 px wide, a desktop layout with a navigation rail, a two-column home and
+- **Also at home on a computer**: in any landscape window from about 860x480, a desktop layout with a navigation rail, a two-column home and
   large boards (see v8 below). Keyboard: Z or U undo, H hint, R restart, M music, Esc back, Enter for a popup's main button.
+
+## What's new in v8.1 (PC fixes, smoother Picture Pop)
+**The PC layout now appears in real browser windows.** Windows are shorter than the screen: a 1280x720 laptop leaves
+about 1280x577 for the page, and such windows used to get the phone layout, with tiny boards and a bottom tab bar. The
+desktop layout now applies to any landscape window from about 860x480. It has compact versions for windows under 820
+px and 640 px tall, and side columns that narrow with the window.
+
+- **Home:** the logo and the garden share the top row. The world card with PLAY and the star chest sit on the left, the
+  four tiles on the right. On short windows the garden steps aside. On big monitors everything grows.
+- **Levels map:** the map gets the whole height, and the picked level's card sits at the side with a big PLAY button.
+- **Jigsaw album:** shows the whole page at once, six cards to a row.
+- **Sand Tubes:** the rack now fits the board. It tries one to four rows of equal length and keeps the biggest tubes
+  that fit, so 8 tubes stand 4 + 4 (not 7 + 1) and 12 stand 6 + 6. Nothing spills off a short window. Tubes no longer
+  shrink out of shape. This applies on phones too.
+- **Narrow windows:** under 1100 px the key chips on the action buttons step aside. The tooltips still name the keys.
+- **Checked:** `tools/matrix.cjs` also checks a 1280x577 laptop window and a 920x700 window.
+
+**Picture Pop**, measured with the new `tools/pics-perf.cjs` (real drags of the solver's next swap):
+- **Smoother dragging:** the tile in your hand, and the one leaning aside for it, get their own layers. Following the
+  pointer no longer repaints the board. The board's position is read once per drag, not every frame. Stutters while
+  dragging went from 4 to 0 on a phone with the CPU 6x slower, and from 8 to 0 on a desktop. Raster work fell by about
+  45%. When a picture pops, stutters went from 15 to 6 (phone) and 11 to 4 (desktop).
+- **More satisfying:**
+  - Swapped tiles land with a little bounce.
+  - When pieces of a 4-piece picture lock together they flash, sparkle where they meet and click, one note higher
+    for each join.
+  - The picked-up tile has a softly breathing ring.
+  - On PC, tiles lift under the mouse.
 
 ## What's new in v8 (new soundtrack, PC layout, smoother Block Garden)
 **A new soundtrack** (`js/music.js`): four composed songs played live by a small synthesized band. The band has an FM
@@ -363,6 +391,7 @@ Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier. A mode whose 
 | `matrix.cjs` | Six phones, a landscape tablet and three computer screens x every screen: scroll, off-screen controls, tap-target sizes |
 | `perf.cjs [rate]` | fps and long tasks under CPU throttling (`GFX=high|med|low`) |
 | `music-render.cjs [secs] [song ...] [--sfx] [--parts]` | Renders the songs and effects offline: notation and harmony checks, levels, spectrum, MP3 previews in `music-out/` |
+| `pics-perf.cjs [phone\|desktop] [rate] [drags]` | Picture Pop under load: real drags of the solver's swaps, frame by frame |
 | `blocks-perf.cjs [rate] [drags]` | Block Garden on a slow phone: real touch drags and drops, frame by frame, and what gets repainted |
 | `mode-perf.cjs [rate] [mode ...]` | Every mode on a slow phone: opening, playing moves, finish and win card (fps, stutters, longest task) |
 | `jig-perf.cjs [rate]` | Jigsaw on a slow phone: opening, moves, drags, the gallery |
