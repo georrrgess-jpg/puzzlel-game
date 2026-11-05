@@ -51,7 +51,7 @@
 .ppsh{position:absolute;inset:3px;border-radius:7px;overflow:hidden;z-index:2}
 .ppsh::before{content:'';position:absolute;top:-20%;bottom:-20%;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffffd0,transparent);
   transform:skewX(-18deg);animation:ppshine .7s ease-out .12s both}
-@keyframes ppshine{to{left:130%}}
+@keyframes ppshine{to{transform:translateX(475%) skewX(-18deg)}}   /* slid with transform, not left: no layout per frame */
 .pprays{position:absolute;left:50%;top:50%;width:260%;aspect-ratio:1;translate:-50% -50%;z-index:0;border-radius:50%;
   background:repeating-conic-gradient(from 0deg,#fff6c055 0 8deg,transparent 8deg 22deg);
   -webkit-mask:radial-gradient(circle,#000 20%,transparent 68%);mask:radial-gradient(circle,#000 20%,transparent 68%);animation:pprays .95s ease-out both}
@@ -71,7 +71,9 @@
 .pppeek{flex:1;display:grid;place-items:center;height:54px;margin:0 8px}
 .pppeek svg{height:52px;border-radius:7px;box-shadow:0 0 0 2.5px var(--pc,#fff),0 6px 14px #0006;background:#000}
 .pppeek svg.p2{width:78px}.pppeek svg.p4{width:39px}
-.ppph{font-size:11.5px;font-weight:600;line-height:1.25;text-align:center;color:#ffffffc0;max-width:150px}
+/* before the first tap: a small empty card and two short lines, so it never wraps on a narrow phone */
+.ppph{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;line-height:1.25;color:#ffffffc0;white-space:nowrap}
+.pphc{display:grid;place-items:center;width:30px;height:40px;flex:none;border-radius:6px;border:2px dashed #ffffff60;background:#ffffff12;font-style:normal;font-size:15px}
 .pppeek.pka svg,.pppeek.pkb svg{animation:pkin .3s cubic-bezier(.3,1.5,.5,1)}.pppeek.pkb svg{animation-name:pkin2}
 @keyframes pkin{from{scale:.6;opacity:.3}}@keyframes pkin2{from{scale:.6;opacity:.3}}
 .pt.tg{translate:calc(var(--sx,0)*18%) calc(var(--sy,0)*14%)}

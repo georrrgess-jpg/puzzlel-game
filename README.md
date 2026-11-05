@@ -59,6 +59,49 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
   iPhone Pro Max, Galaxy 360 and Pixel 5 sizes.
 - **Installable and offline**: add it to the home screen; a service worker caches the game.
 
+## What's new in v7.3 (smooth in every mode)
+Measured with the new `tools/mode-perf.cjs`, a slow phone simulated with the CPU 6× slower at 2.75× pixel density
+(stutter = a frame over 34 ms; "—" = not measured before):
+
+| Mode | Playing moves, before → after | Finish and win card, before → after |
+|---|---|---|
+| Picture Pop | 32 fps, 18 stutters → 55 fps, 8 | 27 fps, 26 stutters → 43 fps, 18 |
+| Sand Tubes | 35 fps, 27 stutters → 49 fps, 10 | 26 fps, 30 stutters → 38 fps, 17 |
+| Arrow Escape | 37 fps, 20 stutters → 56 fps, 4 | 51 fps, 5 stutters → 48 fps, 7 (the same, within run-to-run noise) |
+| Merge Bloom | 36 fps, 20 stutters → 54 fps, 5 | — → 47 fps, 6 |
+| Block Garden | 45 fps, 14 stutters → 54 fps, 7 | — → 39 fps, 11 |
+| Star Threads | 58 fps, 0 stutters → 59 fps, 0 | 29 fps, 35 stutters → 34 fps, 16 |
+| Jigsaw | 37 fps, 21 stutters → 52 fps, 8 | — → 38 fps, 15 |
+
+Opening a Picture Pop level went from a 692 ms freeze to a longest task of ~240 ms. The win card's opening went from
+107 ms of blocked work to 14 ms.
+
+- **Picture Pop draws each picture once:** each picture becomes an image, kept on the device, so this happens once.
+  Tiles, the finished-picture overlay and the peek then show that image instead of every tile redrawing the whole
+  scene. The first time, a tile shows a soft card back for a moment. The peek's hint is now a small card and two
+  short lines, so it no longer wraps onto four lines on an iPhone SE.
+- **Calmer background in a level:** the animated background is drawn once and holds still while you play any mode. It
+  is behind the board and barely seen, but it cost every frame.
+- **Cheaper particles:**
+  - Every shape is drawn once per colour into a small sprite, and those for a win are made in a quiet moment after
+    start-up.
+  - Particles off screen are skipped.
+  - Confetti uses 130 pieces instead of 180.
+- **No re-measuring mid-animation:**
+  - Sand Tubes measures the tubes before a pour, not after.
+  - Arrow Escape measures the cell size once per board size.
+  - Block Garden's tray redraws only the slots that changed.
+  - Effects restart their animations without re-measuring the page.
+  - The screen size is read once, not on every effect.
+  - A popup focuses its button a frame later.
+- **Shines on the GPU:** the shine on buttons and on a finished picture now slides on the GPU. Sliding it the old way
+  made the page lay itself out on every frame.
+- **Popups:** only the background scenery and the board pause behind a popup. Marking every element on the page made
+  opening one restyle the whole page. Board loops (a hint pulsing, a finished constellation twinkling) wait under a
+  popup and carry on when it closes.
+- **Star Threads finish:** the light runs along the whole path in about a second, so it ends before the win card. The
+  stars twinkle a few times and then hold still.
+
 ## What's new in v7.2 (Jigsaw on slower phones)
 Measured with `tools/jig-perf.cjs`, a slow phone simulated with the CPU 6× slower at 2.75× pixel density:
 
@@ -270,6 +313,8 @@ Give it a `_bot()` so `tools/solve-all.cjs` can verify every tier. A mode whose 
 | `drag.cjs [W H]` | Real touch drags (CDP) in the three drag modes on a phone viewport |
 | `matrix.cjs` | Six phone sizes x every screen: scroll, off-screen controls, tap-target sizes |
 | `perf.cjs [rate]` | fps and long tasks under CPU throttling (`GFX=high|med|low`) |
+| `mode-perf.cjs [rate] [mode ...]` | Every mode on a slow phone: opening, playing moves, finish and win card (fps, stutters, longest task) |
+| `jig-perf.cjs [rate]` | Jigsaw on a slow phone: opening, moves, drags, the gallery |
 | `economy-sim.cjs` | Economy targets for three player types |
 | `migration.cjs` | An old save upgrades correctly |
 | `regress.cjs [filter]` | Pass/fail checks for every fixed bug and the Picture Pop rules |

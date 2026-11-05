@@ -54,7 +54,8 @@
 .thr.solved .thg{animation:thWaveG .7s ease-out both}
 @keyframes thWave{40%{stroke:#fff;stroke-width:2.4}100%{stroke:#ffe9a8;stroke-width:1.35}}
 @keyframes thWaveG{40%{opacity:.75}100%{opacity:.38}}
-.thr.solved .st .core{fill:url(#thStar);animation:thTwinkle 1.5s ease-in-out var(--tw,0ms) infinite alternate}
+/* a few twinkles, then still: each twinkle repaints the whole board, and the win card is soon on top of it */
+.thr.solved .st .core{fill:url(#thStar);animation:thTwinkle 1.5s ease-in-out var(--tw,0ms) 4 alternate both}
 .thr.solved .st .halo{fill:url(#thHalo)}
 @keyframes thTwinkle{from{transform:scale(1.55)}to{transform:scale(1.95)}}
 .thname{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);pointer-events:none;opacity:0;text-align:center;white-space:nowrap;z-index:2;

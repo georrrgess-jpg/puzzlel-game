@@ -33,8 +33,9 @@ svg{display:block}
 .btn:disabled{opacity:.45;pointer-events:none;filter:grayscale(.5)}
 .btn.sm{padding:9px 16px;font-size:15px;border-radius:15px}
 .btn .shine,.shinebox::after{position:absolute;inset:0;pointer-events:none}
+/* the band slides with transform (the compositor moves it); sliding it with left made the page lay itself out every frame */
 .btn .shine::before{content:'';position:absolute;top:-20%;bottom:-20%;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffffc0,transparent);transform:skewX(-20deg);animation:sweep 3.2s ease-in-out infinite}
-@keyframes sweep{0%,55%{left:-60%}100%{left:130%}}
+@keyframes sweep{0%,55%{transform:translateX(0) skewX(-20deg)}100%{transform:translateX(475%) skewX(-20deg)}}
 .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center}
 .bar{height:14px;border-radius:99px;background:#00000055;overflow:hidden;box-shadow:inset 0 2px 3px #0006}
 .bar>div{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:99px;transition:width .8s cubic-bezier(.2,1.2,.4,1);position:relative;box-shadow:inset 0 2px 0 #ffffff60}
@@ -135,7 +136,8 @@ svg{display:block}
 .item .tx small{color:var(--dim)}
 .item s{opacity:.6;font-size:12px}
 .swatch{width:50px;height:50px;border-radius:16px;border:2px solid #fff5;flex:none;position:relative;overflow:hidden}
-.swatch::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,#ffffff70 45%,transparent 60%);animation:sweep 3s infinite}
+.swatch::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,#ffffff70 45%,transparent 60%);animation:swsweep 3s infinite}
+@keyframes swsweep{0%,55%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
 /* ---------- play ---------- */
 #play{align-items:center}

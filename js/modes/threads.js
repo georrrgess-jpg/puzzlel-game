@@ -168,7 +168,9 @@ MAKERS.threads=function({R,tier,board,api}){
   function finish(){
     over=true;box.classList.add('solved');band.classList.remove('on');render();
     sfx.sparkle();buzz([20,40,30]);
-    for(let k=1;k<path.length;k++){const i=eKey[path[k-1]+','+path[k]];thr[i].c.style.animationDelay=thr[i].g.style.animationDelay=k*55+'ms'}
+    /* the wave runs the whole path in at most about 1.1 s, so it is over before the win card comes up */
+    const wd=Math.min(55,1100/path.length);
+    for(let k=1;k<path.length;k++){const i=eKey[path[k-1]+','+path[k]];thr[i].c.style.animationDelay=thr[i].g.style.animationDelay=Math.round(k*wd)+'ms'}
     sg.forEach((g,i)=>{g.style.setProperty('--tw',(i*137%900)+'ms');setTimeout(()=>{if(!g.isConnected||Q.modal)return;const[x,y]=toClient(P[i]);flBurst(x,y,'#ffd166',5,.45)},150+i*60)});
     if(!FL_RM){const sh=el('i','tshoot');box.appendChild(sh);setTimeout(()=>sh.remove(),1600)}
     api.win(starsFor(moves,s3,s2));

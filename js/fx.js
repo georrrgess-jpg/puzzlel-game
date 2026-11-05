@@ -27,6 +27,11 @@ function shapeSprite(sh,col){
   else{g.beginPath();g.arc(0,0,16,0,7);g.fill();g.fillStyle='#ffffff80';g.beginPath();g.arc(-4.8,-4.8,5.4,0,7);g.fill()}
   return SPR[k]=c;
 }
+/* the sprites a win uses (confetti in the game's colours, gold bursts) are drawn in a quiet moment after start-up, not in
+   the frame the first win's confetti starts */
+setTimeout(()=>{const todo=[];for(const c of[...COLORS,'#ffd166','#fff'])for(const sh of['sq','rib','star','dot'])todo.push([sh,c]);
+  const idle=window.requestIdleCallback||(f=>setTimeout(()=>f({timeRemaining:()=>8}),60));
+  const go=d=>{while(todo.length&&d.timeRemaining()>2)shapeSprite(...todo.pop());if(todo.length)idle(go,{timeout:2000})};idle(go,{timeout:2000})},3000);
 /* soft glow sprites, cached per colour (drawn with additive blending) */
 const GLOW={};
 function glowSprite(col){

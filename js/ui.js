@@ -278,7 +278,9 @@ function openModal(html,btns,o={}){
   /* the screen behind a popup pauses its animations, but marking it so restyles every element on it: done once the
      popup's own entrance has played, not in the same frame as building the popup */
   m.classList.add('on');clearTimeout(openModal.mt);openModal.mt=setTimeout(()=>{if(m.classList.contains('on'))Q.setModal(true)},450);syncGuard();
-  const fb=o.noEnter?row.firstChild:row.lastChild;if(fb)try{fb.focus({preventScroll:true})}catch(_){}
+  /* focus waits a frame: focusing now would make the browser lay the new card out in the middle of building it (the win
+     card then adds more), and lay it out again for the frame */
+  const fb=o.noEnter?row.firstChild:row.lastChild;if(fb)requestAnimationFrame(()=>{if(m.classList.contains('on')&&fb.isConnected)try{fb.focus({preventScroll:true})}catch(_){}});
 }
 /* popups that appear on their own (welcome, daily reward) wait until the player is on the home screen with nothing open */
 const modalQ=[];

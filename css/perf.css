@@ -12,6 +12,9 @@
 /* behind a popup the animated scenery pauses (the background canvas stops too, from js/fx.js). Only the scenery: a rule
    reaching every element on the screen made opening a popup restyle the whole page, a visible hitch on slow phones */
 #scene.modal-open .fx *,#scene.modal-open .fx *::before{animation-play-state:paused !important}
+/* the board's own loops (a finished constellation twinkling, a hint pulsing) wait under a popup too, and carry on
+   after it closes: a board is a few dozen elements, so this restyle is small */
+#board.held *,#board.held *::before,#board.held *::after{animation-play-state:paused !important}
 
 /* ---- drop-shadow filters are re-rasterised every frame when the element animates: use text-shadow instead ---- */
 .mtile i,.mtile.on i{filter:none;text-shadow:0 3px 3px #0006}

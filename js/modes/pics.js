@@ -156,7 +156,7 @@ MAKERS.pics=function({R,tier,board,api}){
 
   /* ---- DOM ---- */
   const wrap=el('div','ppw');wrap.style.setProperty('--C',C);wrap.style.setProperty('--R',RW);
-  const top=el('div','pptop',`<div class="ppgal"><i>🖼️</i><b class="ppdn">0</b><small>/${NP}</small></div><div class="pppeek"><span class="ppph">👆 Tap a tile to peek at its picture</span></div><div class="ppdeck"><span class="ppcb"></span><span class="ppcb"></span><span class="ppcb"></span><b class="ppdk">0</b></div>`);
+  const top=el('div','pptop',`<div class="ppgal"><i>🖼️</i><b class="ppdn">0</b><small>/${NP}</small></div><div class="pppeek"><span class="ppph"><i class="pphc">👆</i><span>Tap a tile<br>to peek</span></span></div><div class="ppdeck"><span class="ppcb"></span><span class="ppcb"></span><span class="ppcb"></span><b class="ppdk">0</b></div>`);
   const felt=el('div','ppg'),inner=el('div','ppb');felt.appendChild(inner);wrap.append(top,felt);board.appendChild(wrap);
   const slots=[...Array(G)].map((_,i)=>{const s=el('div','pps');s.style.setProperty('--r',Math.floor(i/C));s.style.setProperty('--c',i%C);s.dataset.i=i;inner.appendChild(s);return s});
   const els=new Map();   // piece id -> tile element (pieces on the board)
