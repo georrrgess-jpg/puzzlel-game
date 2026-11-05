@@ -12,7 +12,10 @@ const gfx={
   acc(){const v=getComputedStyle(document.documentElement).getPropertyValue('--acc').trim();return /^#[0-9a-f]{6}$/i.test(v)?v:'#ffd166'},
   anim(e,k,o){if(!e||!e.animate||gfx.reduced())return null;try{return e.animate(k,o)}catch(_){return null}},
   /* restart a CSS animation class */
-  pulse(e,cls){e.classList.remove(cls);void e.offsetWidth;e.classList.add(cls)},
+  /* restart a CSS animation class without forcing the page to lay itself out: the class comes off now and back on
+     two frames later (one style pass must see it gone); all restarts in a frame share those two frames */
+  pulse(e,cls){e.classList.remove(cls);(gfx._pq||(gfx._pq=[])).push([e,cls]);
+    if(!gfx._pr)gfx._pr=requestAnimationFrame(()=>{gfx._pr=requestAnimationFrame(()=>{gfx._pr=0;for(const[x,c]of gfx._pq.splice(0))x.classList.add(c)})})},
   /* drop one-shot animation classes when their animation ends (so fill:both never pins a stale state) */
   ONCE:{squash:'flip',puff:'out',seal:'lock',wob:'tick',lockin:'lockin'},
   tidy(e){e.addEventListener('animationend',ev=>{const k=gfx.ONCE[ev.animationName];if(k)e.classList.remove(k)});

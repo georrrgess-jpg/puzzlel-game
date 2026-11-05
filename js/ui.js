@@ -187,7 +187,7 @@ function onWin(stars){
   if(daily&&!booked)emit('daily',1);
   emit('coins',coins+chest);
   sfx.win();buzz([30,40,60]);confetti();
-  const[bx,by]=centerOf(board);burst(bx,by,'#ffd166',50,1.8);ring(bx,by,'#fff',420,900);
+  const[bx,by]=centerOf(board);burst(bx,by,'#ffd166',34,1.8);ring(bx,by,'#fff',420,900);
   const els=$$('#board .cell,#board .tube,#board .cel,#board .bz.f,#board .mg.full'),step=Math.min(28,700/Math.max(1,els.length));
   els.forEach((c,i)=>{c.style.animationDelay=i*step+'ms';c.classList.add('celebrate')});
   const L=cur.last,near=!daily&&stars<3&&L?L.m-(stars===2?L.s3:L.s2):0;
@@ -275,7 +275,9 @@ function openModal(html,btns,o={}){
   btns.forEach((b,i)=>{const big=/\bbig\b/.test(b.cls||''),x=el('button','btn '+(b.cls||''),b.label+(big?'<span class="shine"></span>':''));x.style.setProperty('--i',i);
     /* a button works once per tap (no double-charge on a double tap); a handler that returns false declines and re-arms it */
     x.onclick=()=>{if(x.disabled)return;x.disabled=true;sfx.click();if(b.fn(x)===false)x.disabled=false};row.appendChild(x)});
-  m.classList.add('on');Q.setModal(true);syncGuard();
+  /* the screen behind a popup pauses its animations, but marking it so restyles every element on it: done once the
+     popup's own entrance has played, not in the same frame as building the popup */
+  m.classList.add('on');clearTimeout(openModal.mt);openModal.mt=setTimeout(()=>{if(m.classList.contains('on'))Q.setModal(true)},450);syncGuard();
   const fb=o.noEnter?row.firstChild:row.lastChild;if(fb)try{fb.focus({preventScroll:true})}catch(_){}
 }
 /* popups that appear on their own (welcome, daily reward) wait until the player is on the home screen with nothing open */
@@ -305,7 +307,7 @@ addEventListener('popstate',()=>{
 /* closing is instant for the game (state flips now); the card just plays a short exit while it fades */
 function closeModal(){
   const m=$('#modal');if(!m.classList.contains('on'))return;
-  m.classList.remove('on');Q.setModal(false);
+  m.classList.remove('on');clearTimeout(openModal.mt);Q.setModal(false);
   const pf=m._prevFocus;m._prevFocus=null;if(pf&&pf.isConnected)try{pf.focus({preventScroll:true})}catch(_){}
   setTimeout(drainModalQ,450);
   if(REDUCED||Q.tier==='low')return;

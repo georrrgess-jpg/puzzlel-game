@@ -15,6 +15,39 @@ function ppArt(i,H){
   return id;
 }
 const ppPiece=(art,H,q)=>`<svg class="pim" viewBox="${q%2?60:0} ${q>1?80:0} 60 80" preserveAspectRatio="none"><use href="#${art}"/></svg>`;
+/* Performance: a tile that shows its picture through <use> re-draws the whole scene every time it paints, and a board
+   holds 20 or more tiles. So each picture is drawn once into a JPEG (kept in Cache Storage between visits, so this
+   happens once per device), and tiles, the finished-picture overlay and the peek show that image instead. Until a
+   picture's image is ready its tiles use the SVG, and they switch over the moment it arrives (they look the same). */
+const PPBMP=(()=>{
+  const made=new Map(),wait=new Map(),q=[],V='p1';let busy=false,store=null;
+  try{if(window.caches&&window.isSecureContext)store=caches.open('pp-bmp-'+V).catch(()=>null)}catch(e){}
+  const key=(i,H)=>i+'h'+H;
+  async function make(i,H){
+    const k=key(i,H),req='pp-bmp/'+V+'/'+k,c=store&&await store;
+    if(c){try{const r=await c.match(req);if(r)return URL.createObjectURL(await r.blob())}catch(e){}}
+    const id='ppb'+k+'_',svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 ${H}" width="480" height="${H*4}" preserveAspectRatio="none">${PIC_ART[i].d(H,id,mulberry32(hashSeed(i+1,H)))}</svg>`;
+    const u=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+    try{const im=new Image();im.src=u;await im.decode();const cv=document.createElement('canvas');cv.width=480;cv.height=H*4;cv.getContext('2d').drawImage(im,0,0,480,H*4);
+      const b=await new Promise(r=>{try{cv.toBlob(r,'image/jpeg',.9)}catch(e){r(null)}});if(!b)return null;
+      if(c)try{await c.put(req,new Response(b,{headers:{'content-type':'image/jpeg'}}))}catch(e){}
+      return URL.createObjectURL(b)}catch(e){return null}finally{URL.revokeObjectURL(u)}
+  }
+  /* one picture at a time, in quiet moments */
+  function pump(){if(busy||!q.length)return;busy=true;
+    const go=()=>{const it=q.shift();if(!it){busy=false;return}const[i,H]=it;make(i,H).then(u=>{busy=false;const k=key(i,H);if(u)made.set(k,u);const cbs=wait.get(k)||[];wait.delete(k);cbs.forEach(f=>f(u));pump()})};
+    window.requestIdleCallback?requestIdleCallback(go,{timeout:400}):setTimeout(go,30)}
+  /* the image's URL now, or null; then cb(url) is called once it is made */
+  function get(i,H,cb){const k=key(i,H);if(made.has(k))return made.get(k);if(cb){if(!wait.has(k)){wait.set(k,[]);q.push([i,H]);pump()}wait.get(k).push(cb)}return null}
+  /* at start-up, in a quiet moment: every picture already saved on this device is loaded, so a Picture Pop level later
+     in the session shows its tiles at once */
+  async function warm(){const c=store&&await store;if(!c)return;
+    for(let i=0;i<PIC_ART.length;i++)for(const H of[80,160]){const k=key(i,H);if(made.has(k))continue;try{const r=await c.match('pp-bmp/'+V+'/'+k);if(r)made.set(k,URL.createObjectURL(await r.blob()))}catch(e){}}}
+  setTimeout(()=>{(window.requestIdleCallback||setTimeout)(()=>warm(),{timeout:4000})},2500);
+  return{get};
+})();
+/* the picture as an image inside the tile's SVG (the tile keeps its viewBox, so it still shows only its piece) */
+const ppImg=(u,H)=>`<image href="${u}" width="120" height="${H}" preserveAspectRatio="none"/>`;
 sfx.picPop=k=>{if(!ok())return;const b=Math.min(4,k||0);[0,2,4,7].forEach((s,i)=>marimba(pent(s+5+b,60),.2,i*.06));bell(pent(14+b,60),.1,1,.2);
   noise({dur:.3,vol:.06,type:'bandpass',f:2000,f2:6500,q:.7,verb:.35})};
 
@@ -119,6 +152,7 @@ MAKERS.pics=function({R,tier,board,api}){
   const timers=[],fx=new Set(),botF={j:-1,c0:0};
   const later=(fn,ms)=>{const t=setTimeout(fn,ms);timers.push(t);return t};
   const H4=j=>pics[j].k===4?160:80;
+  pics.forEach((P,j)=>PPBMP.get(P.a,H4(j),()=>{}));
 
   /* ---- DOM ---- */
   const wrap=el('div','ppw');wrap.style.setProperty('--C',C);wrap.style.setProperty('--R',RW);
@@ -127,7 +161,9 @@ MAKERS.pics=function({R,tier,board,api}){
   const slots=[...Array(G)].map((_,i)=>{const s=el('div','pps');s.style.setProperty('--r',Math.floor(i/C));s.style.setProperty('--c',i%C);s.dataset.i=i;inner.appendChild(s);return s});
   const els=new Map();   // piece id -> tile element (pieces on the board)
   function tileEl(a){
-    const P=pics[pcs[a].pic],e=el('div','pt',ppPiece(ppArt(P.a,H4(pcs[a].pic)),H4(pcs[a].pic),pcs[a].q));
+    const P=pics[pcs[a].pic],H=H4(pcs[a].pic),q=pcs[a].q,e=el('div','pt');
+    const u=PPBMP.get(P.a,H,u=>{if(!e.isConnected)return;const s=e.querySelector('svg.pim');if(!s)return;s.classList.remove('ppl');s.innerHTML=u?ppImg(u,H):`<use href="#${ppArt(P.a,H)}"/>`});
+    e.innerHTML=`<svg class="pim${u?'':' ppl'}" viewBox="${q%2?60:0} ${q>1?80:0} 60 80" preserveAspectRatio="none">${u?ppImg(u,H):''}</svg>`;
     e.style.setProperty('--pc',P.fc);   // every picture has its own frame colour, so its pieces are easy to group
     e.dataset.a=a;inner.appendChild(e);els.set(a,e);return e;
   }
@@ -193,7 +229,7 @@ MAKERS.pics=function({R,tier,board,api}){
   function pop(j,chain){
     const my=gen,P=pics[j],ids=P.ids,cells=ids.map(a=>+els.get(a).dataset.i),c0=Math.min(...cells);
     const tiles=ids.map(a=>els.get(a));tiles.forEach(e=>{els.delete(+e.dataset.a);e.classList.add('gone')});
-    const ov=el('div','ppf'+(P.k===4?' f4':''),`${Q.tier==='high'?'<i class="pprays"></i>':''}<svg viewBox="0 0 120 ${H4(j)}" preserveAspectRatio="none"><use href="#${ppArt(P.a,H4(j))}"/></svg><i class="ppsh"></i>`);
+    const ov=el('div','ppf'+(P.k===4?' f4':''),`${Q.tier==='high'?'<i class="pprays"></i>':''}<svg viewBox="0 0 120 ${H4(j)}" preserveAspectRatio="none">${(u=>u?ppImg(u,H4(j)):`<use href="#${ppArt(P.a,H4(j))}"/>`)(PPBMP.get(P.a,H4(j)))}</svg><i class="ppsh"></i>`);
     ov.style.setProperty('--r',Math.floor(c0/C));ov.style.setProperty('--c',c0%C);inner.appendChild(ov);fx.add(ov);
     const or=ov.getBoundingClientRect(),gr=$('.ppgal',top).getBoundingClientRect();
     const cx=or.left+or.width/2,cy=or.top+or.height/2,dx=gr.left+gr.width/2-cx,dy=gr.top+gr.height/2-cy;
@@ -230,7 +266,7 @@ MAKERS.pics=function({R,tier,board,api}){
   function peek(a){
     const pk=$('.pppeek',top);if(a<0||!pk)return;
     const j=pcs[a].pic,P=pics[j],H=H4(j),q=pcs[a].q;
-    pk.innerHTML=`<svg class="${P.k===4?'p4':'p2'}" viewBox="0 0 120 ${H}" preserveAspectRatio="none"><use href="#${ppArt(P.a,H)}"/><rect x="${q%2?61:1}" y="${q>1?81:1}" width="58" height="78" rx="5" fill="none" stroke="#fff" stroke-width="4"/><rect x="${q%2?61:1}" y="${q>1?81:1}" width="58" height="78" rx="5" fill="none" stroke="${P.fc}" stroke-width="2"/></svg>`;
+    pk.innerHTML=`<svg class="${P.k===4?'p4':'p2'}" viewBox="0 0 120 ${H}" preserveAspectRatio="none">${(u=>u?ppImg(u,H):`<use href="#${ppArt(P.a,H)}"/>`)(PPBMP.get(P.a,H))}<rect x="${q%2?61:1}" y="${q>1?81:1}" width="58" height="78" rx="5" fill="none" stroke="#fff" stroke-width="4"/><rect x="${q%2?61:1}" y="${q>1?81:1}" width="58" height="78" rx="5" fill="none" stroke="${P.fc}" stroke-width="2"/></svg>`;
     pk.style.setProperty('--pc',P.fc);again(pk,'pk');
   }
   let drag=null;

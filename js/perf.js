@@ -28,7 +28,8 @@ const Q=(()=>{
       const cores=navigator.hardwareConcurrency||6,mem=navigator.deviceMemory||4;
       q.set(mem<=2||cores<=2?'low':mem<=3||cores<=4?'med':'high');
     },
-    setModal(on){if(q.modal===on)return;q.modal=on;root.classList.toggle('modal-open',on);q.listeners.forEach(f=>{try{f(q.tier)}catch(e){}})}
+    /* (the mark goes on the scenery layer, the only thing that pauses for a popup: a class on <html> restyles the page) */
+    setModal(on){if(q.modal===on)return;q.modal=on;const sc=document.getElementById('scene');if(sc)sc.classList.toggle('modal-open',on);q.listeners.forEach(f=>{try{f(q.tier)}catch(e){}})}
   };
   /* auto-downgrade: ignores the first 3 s (page load is always busy) and any frame gaps from tab switches; then
    three slow 70-frame windows in a row (average under ~33 fps) drop one tier. It never steps back up, to avoid flip-flopping. */

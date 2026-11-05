@@ -369,7 +369,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     const lv = await p.evaluate(() => { let n = 25; while (__game.typeFor(n) !== 'pics') n++; return n }); await p.evaluate(n => __game.startLevel(n), lv); await sleep(2600);
     const i = await p.evaluate(() => JSON.parse(__game.cur.puz.snap()).g.findIndex(x => x >= 0));
     await tapCell(p, i); await sleep(300);
-    ck('P5 the peek shows the picture with the tile outlined', await p.evaluate(() => !!document.querySelector('.pppeek svg use') && document.querySelectorAll('.pppeek svg rect').length === 2));
+    ck('P5 the peek shows the picture with the tile outlined', await p.evaluate(() => !!document.querySelector('.pppeek svg use,.pppeek svg image') && document.querySelectorAll('.pppeek svg rect').length === 2));
     ck('P5 tiles of one picture share a frame colour, other pictures differ', await p.evaluate(() => { const m = {}; document.querySelectorAll('.ppb .pt').forEach(e => { const a = +e.dataset.a, c = e.style.getPropertyValue('--pc'); m[c] = m[c] || new Set(); m[c].add(a) }); return Object.keys(m).length > 3 }));
   });
   await test('P2 a finished picture pops and the deck refills', async p => {

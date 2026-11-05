@@ -126,8 +126,9 @@ MAKERS.tubes=function({R,tier,board,api}){
     if(plan&&plan.length&&plan[0][0]===from&&plan[0][1]===i)plan.shift();else plan=null;
     lastNew={i,from:oldLen};tubes[i].push(...mv);lastFrom=from;lastGhost={i:from,segs:mv};
     sel=-1;moves++;sfx.sand(cnt);buzz(10);
+    const geo=pourGeo(from,i,oldLen);   // measured before the board changes, so measuring costs no extra layout
     render();api.commit();lastFrom=-1;lastNew=null;lastGhost=null;
-    pourAnim(from,i,COLORS[col],cnt,oldLen);
+    pourAnim(from,i,COLORS[col],cnt,geo);
     const finished=tubes[i].length===cap&&uniform(tubes[i]);
     if(finished){const T=tEls[i],cc=COLORS[tubes[i][0]];setTimeout(()=>{if(!T.isConnected)return;sfx.done();const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
       if(!FL_RM)T.animate([{filter:'brightness(1)'},{filter:'brightness(1.7)',offset:.25},{filter:'brightness(1)'}],{duration:700})},FL_RM?0:520)}
@@ -136,14 +137,21 @@ MAKERS.tubes=function({R,tier,board,api}){
     else if(!pourMoves(tubes).length){toast('No moves left — try Undo! ↩️');$('#undoBtn').classList.add('glow');setTimeout(()=>$('#undoBtn').classList.remove('glow'),3000)}
   }
   /* the source tube lifts, tilts over the target and pours a stream of liquid into it */
-  function pourAnim(from,to,color,cnt,oldLen){
+  /* where everything is, read while the layout is still the one on screen */
+  function pourGeo(from,to,oldLen){
+    if(FL_RM)return null;const A=tEls[from],B=tEls[to];if(!A.isConnected)return null;
+    const segs=B.querySelectorAll('.seg'),b=B.getBoundingClientRect();
+    return{w:A.offsetWidth,h:A.offsetHeight,al:A.offsetLeft,at:A.offsetTop,bl:B.offsetLeft,bt:B.offsetTop,bw:B.offsetWidth,bh:B.offsetHeight,b,
+      land:oldLen&&segs[oldLen-1]?segs[oldLen-1].getBoundingClientRect().top:b.bottom-6};
+  }
+  function pourAnim(from,to,color,cnt,G){
     const A=tEls[from],B=tEls[to];
-    if(FL_RM||!A.isConnected){return}
+    if(!G||!A.isConnected){return}
     if(A._pa)A._pa.cancel();
-    const w=A.offsetWidth,h=A.offsetHeight,side=(B.offsetLeft+B.offsetWidth/2)>=(A.offsetLeft+w/2)?1:-1;
-    const dx=(B.offsetLeft+B.offsetWidth/2)-(A.offsetLeft+w/2),dy=(B.offsetTop+B.offsetHeight/2)-(A.offsetTop+h/2);
+    const w=G.w,h=G.h,side=(G.bl+G.bw/2)>=(G.al+w/2)?1:-1;
+    const dx=(G.bl+G.bw/2)-(G.al+w/2),dy=(G.bt+G.bh/2)-(G.at+h/2);
     const th=side*74*Math.PI/180,lip=Math.max(18,h*.12);
-    const mx=-side*w*.18,my=-B.offsetHeight/2-lip;
+    const mx=-side*w*.18,my=-G.bh/2-lip;
     const tx=dx+mx-Math.sin(th)*h/2,ty=dy+my+Math.cos(th)*h/2,deg=th*180/Math.PI;
     A.style.zIndex=6;
     const an=A.animate([
@@ -153,8 +161,8 @@ MAKERS.tubes=function({R,tier,board,api}){
       {transform:'translate(0,0) rotate(0deg)'}],{duration:820,easing:'cubic-bezier(.4,0,.3,1)'});
     A._pa=an;an.onfinish=an.oncancel=()=>{if(A._pa===an){A._pa=null;A.style.zIndex=''}};
     /* grains fall from the lip to where the sand lands */
-    const b=B.getBoundingClientRect(),land=B.querySelectorAll('.seg')[oldLen];
-    const sx=b.left+b.width/2+mx,sy=b.top-lip+4,ey=land?land.getBoundingClientRect().bottom:b.bottom-6,fall=Math.max(12,ey-sy);
+    const b=G.b;
+    const sx=b.left+b.width/2+mx,sy=b.top-lip+4,ey=G.land,fall=Math.max(12,ey-sy);
     const sw=4+cnt*1.5,st=el('div','pourst');
     st.style.cssText=`left:${sx-sw/2}px;top:${sy}px;width:${sw}px;height:${fall}px;--c:${color}`;document.body.appendChild(st);
     st.animate([{transform:'translateY(0) scaleY(0)'},{transform:'translateY(0) scaleY(1)',offset:.3},{transform:'translateY(0) scaleY(1)',offset:.7},{transform:`translateY(${fall}px) scaleY(0)`}],{duration:460,delay:230,easing:'ease-in-out',fill:'both'}).onfinish=()=>st.remove();

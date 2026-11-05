@@ -97,6 +97,7 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   const progT=$('.bgpt',prog),progB=$('.bgpb i',prog);
   let cs=40,cp=44,ox=0,oy=0;   // cell size / pitch / origin in client px (measured when needed)
   function measure(){   // from the board's box (immune to per-cell animation transforms)
+    slotWH=null;
     const r=grid.getBoundingClientRect(),st=getComputedStyle(grid),pl=parseFloat(st.paddingLeft)||0,pt=parseFloat(st.paddingTop)||0,pr=parseFloat(st.paddingRight)||0,gap=parseFloat(st.columnGap)||0;
     cs=(r.width-pl-pr-gap*(N-1))/N;cp=cs+gap;ox=r.left+pl;oy=r.top+pt;
   }
@@ -104,13 +105,17 @@ MAKERS.blocks=function({R,tier,level,board,api}){
 
   function pieceHTML(s,size,gap){return `<div class="bpc" style="grid-template-columns:repeat(${s.w},${size}px);grid-template-rows:repeat(${s.h},${size}px);gap:${gap}px">${
     [...Array(s.w*s.h)].map((_,i)=>{const x=i%s.w,y=(i/s.w)|0,on=s.c.some(p=>p[0]===x&&p[1]===y);return on?`<i class="bp" style="--c:${COLORS[BG_COL[s.base]]}"></i>`:'<i></i>'}).join('')}</div>`}
+  let slotWH=null;   // the slots' size, read once per layout (measure() clears it)
   function renderTray(refill){
-    const slotW=slots[0].clientWidth||80,slotH=slots[0].clientHeight||70;
+    if(!slotWH)slotWH=[slots[0].clientWidth||80,slots[0].clientHeight||70];
+    const[slotW,slotH]=slotWH;
     slots.forEach((el_,i)=>{
       const si=tray[i];
-      if(si==null){el_.innerHTML='';el_.classList.add('used');return}
-      el_.classList.remove('used');const s=BG_SHAPES[si];
-      const size=Math.max(10,Math.min(cs*.62,(slotW-14)/s.w-2,(slotH-14)/s.h-2));
+      if(si==null){if(el_._k!=='x'){el_._k='x';el_.innerHTML='';el_.classList.add('used')}return}
+      const s=BG_SHAPES[si];
+      const size=Math.max(10,Math.min(cs*.62,(slotW-14)/s.w-2,(slotH-14)/s.h-2)),k=si+':'+size.toFixed(1);
+      if(el_._k===k&&!refill)return;   // the same piece at the same size: leave it
+      el_._k=k;el_.classList.remove('used');
       el_.innerHTML=pieceHTML(s,size,2);
       /* B7: a fresh set of three slides in from the right, one after another */
       if(refill)wa(el_.firstElementChild,[{transform:'translateX(70px) scale(.8)',opacity:0},{transform:'none',opacity:1}],{duration:420,delay:i*70,easing:'cubic-bezier(.3,1.5,.5,1)',fill:'backwards'});

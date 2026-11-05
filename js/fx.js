@@ -2,13 +2,31 @@
 /* ====================== particles ====================== */
 const fxc=$('#fx'),fctx=fxc.getContext('2d');let parts=[],raf=0,dpr=1,dirtyBox=null;
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resizeFx(){dirtyBox=null;dpr=1;/* particles are soft glows: a smaller canvas costs far less to commit every frame */fxc.width=innerWidth*dpr;fxc.height=innerHeight*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
-addEventListener('resize',resizeFx);Q.on(resizeFx);resizeFx();
+/* the screen size, kept here: reading innerWidth/innerHeight can make the browser lay the page out first, and the
+   particle loop needs it for every particle on every frame */
+let VW=innerWidth,VH=innerHeight;
+function resizeFx(){
+  VW=innerWidth;VH=innerHeight;
+  if(fxc.width===VW&&fxc.height===VH)return;   // (re-allocating a full-screen canvas is costly: only on a real change)
+  dirtyBox=null;dpr=1;/* particles are soft glows: a smaller canvas costs far less to commit every frame */fxc.width=VW*dpr;fxc.height=VH*dpr;fctx.setTransform(dpr,0,0,dpr,0,0)}
+addEventListener('resize',resizeFx);resizeFx();
 /* every effect goes through add() so the live-particle count never exceeds the tier's cap; while frames are coming
    slowly (a busy moment on a slow phone) the cap halves, so effects never pile more work onto a struggling frame */
 let fxSlow=0,fxLast=0;
 const add=p=>{if(parts.length<(fxSlow>24?Q.pcap*.5:Q.pcap)||p.sh==='flash')parts.push(p)};
 function starPath(c,r){c.beginPath();for(let i=0;i<10;i++){const a=i*Math.PI/5-Math.PI/2,rr=i%2?r*.45:r;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath()}
+/* every particle shape is drawn once per colour into a small sprite; a particle then costs one transform and one
+   drawImage instead of building and filling paths (a star took 22 calls), which slow phones notice */
+const SPR={};
+function shapeSprite(sh,col){
+  const k=sh+col;if(SPR[k])return SPR[k];
+  const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');g.translate(16,16);g.fillStyle=col;
+  if(sh==='sq'){g.fillRect(-16,-16,32,32);g.fillStyle='#ffffff55';g.fillRect(-16,-16,32,9.7)}
+  else if(sh==='rib')g.fillRect(-16,-16,32,32);
+  else if(sh==='star'){starPath(g,16);g.fill();g.fillStyle='#ffffff70';starPath(g,6.4);g.fill()}
+  else{g.beginPath();g.arc(0,0,16,0,7);g.fill();g.fillStyle='#ffffff80';g.beginPath();g.arc(-4.8,-4.8,5.4,0,7);g.fill()}
+  return SPR[k]=c;
+}
 /* soft glow sprites, cached per colour (drawn with additive blending) */
 const GLOW={};
 function glowSprite(col){
@@ -28,8 +46,8 @@ function burst(x,y,color,n=14,power=1){
   kick();
 }
 function confetti(){
-  for(let i=0,N=Math.round(180*Q.pscale);i<N;i++){const k=i%6;add({x:Math.random()*innerWidth,y:-20-Math.random()*240,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,g:.07,life:1,decay:.005+Math.random()*.005,size:6+Math.random()*7,color:COLORS[i%COLORS.length],rot:Math.random()*6,vr:(Math.random()-.5)*.3,sh:k===0?'star':k<3?'rib':'sq',wob:Math.random()*6})}
-  for(let i=0,N=Math.round(24*Q.pscale);i<N;i++)add({x:Math.random()*innerWidth,y:-10-Math.random()*200,vx:(Math.random()-.5)*1.5,vy:1.5+Math.random()*2,g:.03,life:1,decay:.008,size:10+Math.random()*10,color:hex6(COLORS[i%COLORS.length]),rot:0,vr:0,sh:'glow',wob:Math.random()*6});
+  for(let i=0,N=Math.round(130*Q.pscale);i<N;i++){const k=i%6;add({x:Math.random()*VW,y:-20-Math.random()*240,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,g:.07,life:1,decay:.005+Math.random()*.005,size:6+Math.random()*7,color:COLORS[i%COLORS.length],rot:Math.random()*6,vr:(Math.random()-.5)*.3,sh:k===0?'star':k<3?'rib':'sq',wob:Math.random()*6})}
+  for(let i=0,N=Math.round(16*Q.pscale);i<N;i++)add({x:Math.random()*VW,y:-10-Math.random()*200,vx:(Math.random()-.5)*1.5,vy:1.5+Math.random()*2,g:.03,life:1,decay:.008,size:10+Math.random()*10,color:hex6(COLORS[i%COLORS.length]),rot:0,vr:0,sh:'glow',wob:Math.random()*6});
   kick();
 }
 function fountain(x,y,n=60){
@@ -46,24 +64,25 @@ function loop(t){
   if(fxLast&&t-fxLast<200)fxSlow=fxSlow*.8+(t-fxLast)*.2;fxLast=t;
   if(dirtyBox){fctx.setTransform(1,0,0,1,0,0);fctx.clearRect(dirtyBox[0]*D-2,dirtyBox[1]*D-2,(dirtyBox[2]-dirtyBox[0])*D+4,(dirtyBox[3]-dirtyBox[1])*D+4)}
   if(Q.modal&&Q.tier==='low')parts.length=Math.min(parts.length,30);
-  for(let i=parts.length-1;i>=0;i--){const p=parts[i];if(!(p.life>0&&p.y<innerHeight+40)){parts[i]=parts[parts.length-1];parts.pop()}}
-  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,lastC='',plain=false;const glows=[],sparks=[];
+  for(let i=parts.length-1;i>=0;i--){const p=parts[i];if(!(p.life>0&&p.y<VH+40)){parts[i]=parts[parts.length-1];parts.pop()}}
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,plain=false;const glows=[],sparks=[];
   for(const p of parts){p.x+=p.vx+(p.wob?Math.sin(p.life*20+p.wob)*.8:0);p.y+=p.vy;p.vy+=p.g;p.vx*=.985;p.life-=p.decay;p.rot+=p.vr;
     const m=(p.sh==='glow'||p.sh==='flash'?p.size:p.size*1.6)+8;
     if(p.x-m<x0)x0=p.x-m;if(p.y-m<y0)y0=p.y-m;if(p.x+m>x1)x1=p.x+m;if(p.y+m>y1)y1=p.y+m;
+    if(p.y<-m||p.x<-m||p.x>VW+m)continue;   // above or beside the screen (confetti waiting to fall in): moved, not drawn
     if(p.sh==='glow'||p.sh==='flash'){glows.push(p);continue}
     if(p.sh==='spark'){sparks.push(p);continue}
     const al=Math.max(0,Math.min(1,p.life*1.6));if(al<.03)continue;
-    fctx.globalAlpha=al;if(p.color!==lastC){fctx.fillStyle=p.color;lastC=p.color}
+    fctx.globalAlpha=al;const z=p.size;
     if(p.sh==='sq'||p.sh==='rib'||p.sh==='star'){   // rotated shapes need their own transform
       const c=Math.cos(p.rot)*D,s=Math.sin(p.rot)*D;fctx.setTransform(c,s,-s,c,p.x*D,p.y*D);plain=false;
-      if(p.sh==='sq'){const h=Math.cos(p.rot*2);fctx.fillRect(-p.size/2,-p.size/3*h,p.size,p.size*.66*h);fctx.fillStyle='#ffffff55';fctx.fillRect(-p.size/2,-p.size/3*h,p.size,p.size*.2*h);lastC=''}
-      else if(p.sh==='rib'){const h=Math.cos(p.rot*1.7);fctx.fillRect(-p.size*.18*h,-p.size*.8,p.size*.36*h,p.size*1.6)}
-      else{starPath(fctx,p.size*.8);fctx.fill();fctx.fillStyle='#ffffff70';starPath(fctx,p.size*.32);fctx.fill();lastC=''}
-    }else{   // round dots: no rotation, so no per-particle transform; the highlight only where it can be seen (6 px and up)
+      const spr=shapeSprite(p.sh,p.color);
+      if(p.sh==='sq'){const h=Math.abs(Math.cos(p.rot*2))+.05;fctx.drawImage(spr,-z/2,-z*.33*h,z,z*.66*h)}   // a square card that flips
+      else if(p.sh==='rib'){const h=Math.abs(Math.cos(p.rot*1.7))+.05;fctx.drawImage(spr,-z*.18*h,-z*.8,z*.36*h,z*1.6)}   // a ribbon that twists
+      else fctx.drawImage(spr,-z*.8,-z*.8,z*1.6,z*1.6);
+    }else{   // round dots: no rotation, so no per-particle transform
       if(!plain){fctx.setTransform(D,0,0,D,0,0);plain=true}
-      fctx.beginPath();fctx.arc(p.x,p.y,p.size/2,0,7);fctx.fill();
-      if(p.size>=6){fctx.fillStyle='#ffffff80';fctx.beginPath();fctx.arc(p.x-p.size*.15,p.y-p.size*.15,p.size*.17,0,7);fctx.fill();lastC=''}
+      fctx.drawImage(shapeSprite('dot',p.color),p.x-z/2,p.y-z/2,z,z);
     }}
   fctx.setTransform(D,0,0,D,0,0);
   if(sparks.length){fctx.strokeStyle='#fff';fctx.lineWidth=2;fctx.lineCap='round';fctx.globalAlpha=.8;fctx.beginPath();for(const p of sparks){fctx.moveTo(p.x,p.y);fctx.lineTo(p.x-p.vx*3,p.y-p.vy*3)}fctx.stroke()}
@@ -74,7 +93,7 @@ function loop(t){
       fctx.globalAlpha=p.sh==='flash'?p.life*.8:al*.75;fctx.drawImage(glowSprite(p.color),p.x-s/2,p.y-s/2,s,s)}
     fctx.globalCompositeOperation='source-over'}
   fctx.globalAlpha=1;
-  dirtyBox=parts.length?[Math.max(0,x0),Math.max(0,y0),Math.min(innerWidth,x1),Math.min(innerHeight,y1)]:null;
+  dirtyBox=parts.length?[Math.max(0,x0),Math.max(0,y0),Math.min(VW,x1),Math.min(VH,y1)]:null;
   if(!parts.length){fctx.setTransform(1,0,0,1,0,0);fctx.clearRect(0,0,fxc.width,fxc.height);fctx.setTransform(D,0,0,D,0,0)}
   raf=parts.length?requestAnimationFrame(loop):0;if(!raf)fxLast=0;
 }
@@ -248,7 +267,7 @@ const BG=(()=>{
   addEventListener('resize',size);
   document.addEventListener('visibilitychange',wake);
   Q.on(()=>{if(Math.abs(Q.bgScale-S_)>.01)size();else wake()});
-  addEventListener('pointermove',e=>{tx=e.clientX/innerWidth-.5;ty=e.clientY/innerHeight-.5},{passive:true});
+  addEventListener('pointermove',e=>{tx=e.clientX/VW-.5;ty=e.clientY/VH-.5},{passive:true});
   addEventListener('deviceorientation',e=>{if(e.gamma!=null){tx=clamp(e.gamma/45,-.5,.5);ty=clamp((e.beta-40)/45,-.5,.5)}},{passive:true});
   return{start(){init();wake()},retheme,wake,setCalm(v){calmT=v;wake()},setStill(v){if(still!==v){still=v;wake()}}};
 })();
@@ -266,7 +285,9 @@ const Trans=(()=>{
     // the active screen keeps its in-* class: removing it would restart the screen's default entrance animation (a blink)
     $$('.screen').forEach(s=>{s.classList.remove('leaving');if(!s.classList.contains('active'))s.classList.remove('in-fwd','in-back','in-fade','in-zoom');s.style.zIndex=''});
   }
-  const enter=(scr,cls)=>{scr.classList.remove('in-fwd','in-back','in-fade','in-zoom');void scr.offsetWidth;scr.classList.add(cls)};
+  /* (no forced layout to restart the entrance: the screen was hidden until now, and an animation starts afresh when its
+     element starts being shown; forcing it would lay out the whole new screen twice) */
+  const enter=(scr,cls)=>{scr.classList.remove('in-fwd','in-back','in-fade','in-zoom');scr.classList.add(cls)};
   const arm=my=>{clearTimeout(safety);safety=setTimeout(()=>{if(my===tok)stop()},2400)};
   function go(id,o,apply){
     const from=$('.screen.active');

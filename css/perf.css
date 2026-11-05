@@ -1,5 +1,5 @@
 /* Performance layer. Loaded last so it can trim the decoration in the other stylesheets.
-   Quality tier classes (html.q-high / q-med / q-low) come from js/perf.js; html.modal-open is set while a popup is up. */
+   Quality tier classes (html.q-high / q-med / q-low) come from js/perf.js; #scene.modal-open is set while a popup is up. */
 
 /* ---- never blur the screen behind things: full-screen blur is the #1 mobile jank source ---- */
 #modal,.nextcard{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
@@ -9,7 +9,9 @@
 #board{perspective:none}
 
 /* ---- nothing animates underneath a popup (it is covered anyway) ---- */
-html.modal-open .screen *,html.modal-open .screen *::before,html.modal-open .screen *::after{animation-play-state:paused !important}
+/* behind a popup the animated scenery pauses (the background canvas stops too, from js/fx.js). Only the scenery: a rule
+   reaching every element on the screen made opening a popup restyle the whole page, a visible hitch on slow phones */
+#scene.modal-open .fx *,#scene.modal-open .fx *::before{animation-play-state:paused !important}
 
 /* ---- drop-shadow filters are re-rasterised every frame when the element animates: use text-shadow instead ---- */
 .mtile i,.mtile.on i{filter:none;text-shadow:0 3px 3px #0006}

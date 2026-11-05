@@ -92,19 +92,23 @@ MAKERS.arrows=function({R,tier,board,api}){
     api.commit();hud();api.meh();combo=0;
     if(!quiet){sfx.bonk();buzz([8,20,8])}
     if(!FL_RM&&e){
-      const c=e.offsetWidth+gap(),dist=(k-1)*c+c*.28,[dx,dy]=AR_D[d];
+      const c=cellStride(e),dist=(k-1)*c+c*.28,[dx,dy]=AR_D[d];
       wa(e,[{translate:'0 0'},{translate:`${dx*dist}px ${dy*dist}px`,offset:.42,easing:'cubic-bezier(.5,0,.9,.5)'},{translate:`${dx*(dist-6)}px ${dy*(dist-6)}px`,offset:.55},{translate:'0 0'}],{duration:280+k*55,easing:'cubic-bezier(.2,.8,.3,1.2)'});
-      e.classList.remove('arno');void e.offsetWidth;e.classList.add('arno');
-      if(be)setTimeout(()=>{if(!be.isConnected)return;be.classList.remove('arhit');void be.offsetWidth;be.classList.add('arhit');be.style.setProperty('--hx',dx*5+'px');be.style.setProperty('--hy',dy*5+'px')},(280+k*55)*.42);
+      gfx.pulse(e,'arno');
+      if(be)setTimeout(()=>{if(!be.isConnected)return;gfx.pulse(be,'arhit');be.style.setProperty('--hx',dx*5+'px');be.style.setProperty('--hy',dy*5+'px')},(280+k*55)*.42);
     }
     return true;
   }
   const gap=()=>{const a=bd.querySelector('.ardot');return a?parseFloat(getComputedStyle(wrap).getPropertyValue('--gap'))||4:4};
+  /* one cell's stride in px, measured once and again only when the board changes size (a tile flying off then never
+     makes the browser lay the page out first) */
+  let stride=0;const cellStride=e=>stride||(stride=e.offsetWidth+gap());
+  const sro=window.ResizeObserver?new ResizeObserver(()=>{stride=0}):null;if(sro)sro.observe(bd);
   /* the escape: a little squash, then the tile shoots off with a streak behind it and pops in a puff of its colour */
   function fly(e,d,x,y){
     if(!e)return;
     if(FL_RM){e.remove();return}
-    const c=e.offsetWidth+gap(),[dx,dy]=AR_D[d];
+    const c=cellStride(e),[dx,dy]=AR_D[d];
     const steps=dx>0?W-x:dx<0?x+1:dy>0?H-y:y+1,dist=(steps+1.4)*c;
     const tr=el('i','artrail');tr.style.setProperty('--ac',AR_COL[d]);tr.style.setProperty('--x',x);tr.style.setProperty('--y',y);tr.style.rotate=(d*90)+'deg';bd.appendChild(tr);
     e.classList.add('argo');
@@ -140,6 +144,7 @@ MAKERS.arrows=function({R,tier,board,api}){
   function clearHint(){bd.querySelectorAll('.hint').forEach(e=>e.classList.remove('hint'))}
 
   return{
+    destroy(){if(sro)sro.disconnect()},
     snap:()=>JSON.stringify({g,moves}),
     restore(s){const o=JSON.parse(s);g=o.g;moves=o.moves;combo=0;wrap.classList.remove('won');bd.querySelectorAll('.art,.artrail').forEach(e=>e.remove());tiles.clear();build();hud()},
     hint(){const i=g.findIndex((d,j)=>free(j));if(i<0)return false;clearHint();api.flash(tiles.get(i),3200);api.coach('💡 Tap the glowing tile');return true},
