@@ -158,7 +158,8 @@ svg{display:block}
 .mbar i{height:100%;display:block}
 .mbar i:first-child{border-radius:99px 0 0 99px}.mbar i:last-of-type{border-radius:0 99px 99px 0}
 .mbar .z3{background:linear-gradient(90deg,#6be585,#3dd68c)}.mbar .z2{background:linear-gradient(90deg,#ffd166,#ffb02e)}.mbar .z1{background:linear-gradient(90deg,#ff8a5c,#ff5d73)}
-.mbar .mk{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px #0006,0 0 10px #fff;transform:translate(-50%,-50%);transition:left .4s cubic-bezier(.3,1.5,.5,1)}
+.mbar .mkt{position:absolute;inset:0;pointer-events:none;transition:transform .4s cubic-bezier(.3,1.5,.5,1)}
+.mbar .mk{position:absolute;left:0;top:50%;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px #0006,0 0 10px #fff;transform:translate(-50%,-50%)}
 .instr{color:var(--dim);font-size:14px;text-align:center;margin:4px 10px 6px;min-height:36px;max-width:460px;line-height:1.35}
 .coach{color:var(--text);font-weight:600;font-size:14.5px;min-height:30px;text-align:center;margin:0 10px 6px;max-width:440px;padding:5px 14px;border-radius:99px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--acc) 22%,transparent),transparent);transition:opacity .2s}
 .coach:empty{opacity:0}

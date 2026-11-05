@@ -91,21 +91,23 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   const grid=el('div','bgb glass');grid.style.gridTemplateColumns=`repeat(${N},1fr)`;
   const cells=[...Array(N*N)].map(()=>{const c=el('div','bz');grid.appendChild(c);return c});
   const fxL=el('div','bgfx');grid.appendChild(fxL);   // overlay for line beams and flowers (absolute, outside the grid flow)
+  /* the drag preview lives on its own layer above the bed: where the block will land and which lines will bloom are
+     drawn there, so following the finger never repaints the bed itself (64 glossy cells) */
+  const pvL=el('div','bgpvl');grid.appendChild(pvL);const pvM=[],pvB=[];
   const trayEl=el('div','bgt');
   const slots=[0,1,2].map(i=>{const s=el('div','bgs');s.dataset.slot=i;trayEl.appendChild(s);return s});
   wrap.append(prog,grid,trayEl);board.appendChild(wrap);api.stagger(cells,10);
   const progT=$('.bgpt',prog),progB=$('.bgpb i',prog);
-  let cs=40,cp=44,ox=0,oy=0;   // cell size / pitch / origin in client px (measured when needed)
+  let cs=40,cp=44,ox=0,oy=0,padL=0,padT=0;   // cell size / pitch / origin in client px, the bed's padding (measured when needed)
   function measure(){   // from the board's box (immune to per-cell animation transforms)
-    slotWH=null;
     const r=grid.getBoundingClientRect(),st=getComputedStyle(grid),pl=parseFloat(st.paddingLeft)||0,pt=parseFloat(st.paddingTop)||0,pr=parseFloat(st.paddingRight)||0,gap=parseFloat(st.columnGap)||0;
-    cs=(r.width-pl-pr-gap*(N-1))/N;cp=cs+gap;ox=r.left+pl;oy=r.top+pt;
+    cs=(r.width-pl-pr-gap*(N-1))/N;cp=cs+gap;ox=r.left+pl;oy=r.top+pt;padL=pl;padT=pt;
   }
   const colOf=v=>COLORS[(v-1)%COLORS.length];
 
   function pieceHTML(s,size,gap){return `<div class="bpc" style="grid-template-columns:repeat(${s.w},${size}px);grid-template-rows:repeat(${s.h},${size}px);gap:${gap}px">${
     [...Array(s.w*s.h)].map((_,i)=>{const x=i%s.w,y=(i/s.w)|0,on=s.c.some(p=>p[0]===x&&p[1]===y);return on?`<i class="bp" style="--c:${COLORS[BG_COL[s.base]]}"></i>`:'<i></i>'}).join('')}</div>`}
-  let slotWH=null;   // the slots' size, read once per layout (measure() clears it)
+  let slotWH=null;   // the slots' size, read once per layout (the ResizeObserver below clears it)
   function renderTray(refill){
     if(!slotWH)slotWH=[slots[0].clientWidth||80,slots[0].clientHeight||70];
     const[slotW,slotH]=slotWH;
@@ -135,12 +137,11 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   }
   api.setTip('Drag a block onto the bed. Fill a whole row or column to bloom it away. A bright outline shows what will clear.');
   requestAnimationFrame(()=>{measure();renderTray()});render();
-  const ro=window.ResizeObserver?new ResizeObserver(()=>{if(grid.isConnected){measure();renderTray()}}):null;if(ro)ro.observe(wrap);
+  const ro=window.ResizeObserver?new ResizeObserver(()=>{if(grid.isConnected){slotWH=null;measure();renderTray()}}):null;if(ro)ro.observe(wrap);
 
   /* ---------- placing ---------- */
   function place(slot,bx,by){
     const si=tray[slot];if(si==null||finished)return false;const s=BG_SHAPES[si];if(!fits(G,s,bx,by))return false;
-    measure();
     const col=BG_COL[s.base]+1,mine=s.c.map(([x,y])=>(by+y)*N+bx+x);
     const a=apply(G,s,bx,by,col);
     // visual step 1: the block lands
@@ -237,8 +238,8 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   }
 
   /* ---------- dragging ---------- */
-  let ghost=null,slotI=-1,target=null,pvCells=[],clrCells=[];
-  function clearPv(){pvCells.forEach(c=>c.classList.remove('pv'));clrCells.forEach(c=>c.classList.remove('clr'));pvCells=[];clrCells=[]}
+  let ghost=null,slotI=-1,target=null,pvN=0,pbN=0;
+  function clearPv(){for(let k=0;k<pvN;k++)pvM[k].hidden=true;for(let k=0;k<pbN;k++)pvB[k].hidden=true;pvN=pbN=0}
   function snapTo(x,y,e){
     // piece centre -> fractional anchor; try the nearest valid anchor within one cell
     const s=BG_SHAPES[tray[slotI]],gy=y-LIFT(e);
@@ -250,10 +251,14 @@ MAKERS.blocks=function({R,tier,level,board,api}){
   }
   function showPreview(t){
     clearPv();if(!t)return;
-    const s=BG_SHAPES[tray[slotI]],mine=s.c.map(([x,y])=>(t[1]+y)*N+t[0]+x);
-    mine.forEach(i=>{cells[i].classList.add('pv');pvCells.push(cells[i])});
+    const s=BG_SHAPES[tray[slotI]],gap=cp-cs,len=N*cp-gap;
+    s.c.forEach(([x,y])=>{const m=pvM[pvN]||(pvM[pvN]=pvL.appendChild(el('i','bgpvm')));pvN++;
+      m.style.cssText=`width:${cs}px;height:${cs}px;transform:translate(${padL+(t[0]+x)*cp}px,${padT+(t[1]+y)*cp}px)`;m.hidden=false});
     const a=apply(G,s,t[0],t[1],1);
-    if(a.lines)a.clr.forEach(i=>{cells[i].classList.add('clr');clrCells.push(cells[i])});
+    /* each line that will bloom gets one glowing bar over it */
+    const bar=(row,k)=>{const b=pvB[pbN]||(pvB[pbN]=pvL.appendChild(el('i','bgpvb')));pbN++;
+      b.style.cssText=row?`width:${len}px;height:${cs}px;transform:translate(${padL}px,${padT+k*cp}px)`:`width:${cs}px;height:${len}px;transform:translate(${padL+k*cp}px,${padT}px)`;b.hidden=false};
+    if(a.lines){a.r.forEach(k=>bar(1,k));a.c.forEach(k=>bar(0,k))}
   }
   dragify(wrap,{
     start(e){
@@ -304,6 +309,9 @@ MAKERS.blocks=function({R,tier,level,board,api}){
       return true;
     },
     _bot(){const m=bestMove(G,tray);if(!m)return false;return place(m.slot,m.x,m.y)},
+    /* for tools/blocks-perf.cjs: the solver's next move as a finger would make it (slot centre -> where the block's centre lands) */
+    _plan(){const m=bestMove(G,tray);if(!m)return null;measure();const s=BG_SHAPES[tray[m.slot]],r=slots[m.slot].getBoundingClientRect();
+      return{sx:r.left+r.width/2,sy:r.top+r.height/2,tx:ox+(m.x+(s.w-1)/2)*cp+cs/2,ty:oy+(m.y+(s.h-1)/2)*cp+cs/2,lines:apply(G,s,m.x,m.y,1).lines}},
     destroy(){gen++;if(ro)ro.disconnect();if(ghost)ghost.remove();clearHint()}
   };
 };

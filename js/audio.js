@@ -80,10 +80,15 @@ function noise(o){
 }
 const PENT=[0,2,4,7,9];
 const pent=(i,base=60)=>mtof(base+(AU.key||0)+PENT[((i%5)+5)%5]+12*Math.floor(i/5));
+/* one note's output: its partials share a single pan and reverb send (a mallet or bell note costs a few nodes, not a
+   dozen: a Block Garden bloom plays ten of them at once) */
+function noteBus(pan,verb){const c=AU.ctx,g=c.createGain();let out=g;
+  if(pan&&c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=pan;g.connect(p);out=p}
+  out.connect(AU.sfx);if(verb&&Q.sfxVerb){const s=c.createGain();s.gain.value=verb;out.connect(s);s.connect(AU.verb)}return g}
 /* glockenspiel: a pure tone with the bar's two inharmonic overtones */
-function bell(f,vol,dur,dt=0,pan=0){const t=now()+dt;voice({f,dur,vol,t,verb:.4,pan});voice({f:f*2.76,dur:dur*.45,vol:vol*.3,t,verb:.3,pan});voice({f:f*5.4,dur:dur*.18,vol:vol*.11,t,pan})}
-/* marimba: a wooden bar (fundamental, the 4th partial, a mallet knock) */
-function marimba(f,vol=.26,dt=0,bus,pan=0){const t=now()+dt;voice({f,dur:.6,vol,t,verb:.28,bus,pan});voice({f:f*3.98,dur:.08,vol:vol*.24,t,bus,pan});voice({f:f*9.8,dur:.025,vol:vol*.07,t,bus,pan})}
+function bell(f,vol,dur,dt=0,pan=0){if(!AU.ctx)return;const t=now()+dt,b=noteBus(pan,.4);voice({f,dur,vol,t,bus:b});voice({f:f*2.76,dur:dur*.45,vol:vol*.3,t,bus:b});voice({f:f*5.4,dur:dur*.18,vol:vol*.11,t,bus:b})}
+/* marimba: a wooden bar (the fundamental and its bright 4th partial) */
+function marimba(f,vol=.26,dt=0,bus,pan=0){if(!AU.ctx)return;const t=now()+dt,b=bus||noteBus(pan,.28);voice({f,dur:.6,vol,t,bus:b});voice({f:f*3.98,dur:.08,vol:vol*.26,t,bus:b})}
 /* a soft FM chime (ratio 3.5: glassy), for confirmations */
 function chime(n,vol,dt=0,dur=.9,pan=0){const t=now()+dt,f=mtof(n);voice({f,dur,vol,t,fm:3.5,fmi:1.6,fmd:.12,verb:.35,pan});voice({f:f*2,dur:dur*.4,vol:vol*.18,t,pan})}
 const ok=()=>S.sfx&&audio();
@@ -143,8 +148,8 @@ sfx.bloom=i=>{if(!ok())return;marimba(pent(i*2+4,60),.24);bell(pent(i*2+9,60),.0
 sfx.pluck=i=>{if(!ok())return;const f=pent((i||0)%10+7,60);voice({f,dur:.9,type:'triangle',vol:.14,verb:.45,fm:2,fmi:.4,fmd:.06});voice({f:f*2,dur:.25,vol:.045,verb:.3})};
 /* a line of Block Garden blooms: a bright upward arpeggio per line, a shimmer on top, a soft whoosh under it */
 sfx.lineBloom=(n,combo=0)=>{if(!ok())return;const t0=now(),b=Math.min(4,combo)*2;
-  for(let k=0;k<5+Math.min(3,n)*2;k++)marimba(pent(k+3+b,60),.16,k*.045,undefined,(k%5/4-.5)*.6);
-  [0,1,2].forEach(k=>bell(pent(10+b+k*2,60),.055,.9,.22+k*.06));
+  for(let k=0;k<5+Math.min(2,n);k++)marimba(pent(k+3+b,60),.17,k*.045,undefined,(k%5/4-.5)*.6);
+  [0,2].forEach((k,i)=>bell(pent(10+b+k*2,60),.06,.9,.22+i*.08,i?.3:-.3));
   noise({t:t0,dur:.45,vol:.055,type:'bandpass',f:1800,f2:5200,q:.7,verb:.35,pan:-.4,pan2:.4})};
 /* two plants merge: a rising chime, brighter the higher the stage */
 sfx.grow=v=>{if(!ok())return;const t0=now();voice({f:pent(v*2+2,60),t:t0,dur:.16,type:'triangle',vol:.11,slide:1.5,slideT:.12});

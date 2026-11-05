@@ -9,15 +9,17 @@ const board=$('#board');
 const api={
   commit(){cur.history.push(cur.puz.snap());refreshUndo()},
   setInfo(h){$('#hudInfo').innerHTML=h;meterKey=''},
-  setStars(n){$$('#hudStars svg').forEach((s,i)=>{const on=i<n;if(!on&&s.classList.contains('on')){s.classList.remove('lose');void s.offsetWidth;s.classList.add('lose');sfx.pop(.5)}s.classList.toggle('on',on)})},
+  setStars(n){$$('#hudStars svg').forEach((s,i)=>{const on=i<n;if(!on&&s.classList.contains('on')){gfx.pulse(s,'lose');sfx.pop(.5)}s.classList.toggle('on',on)})},
   /* star meter: green ★★★ zone, yellow ★★ zone, red ★ zone and a marker for moves used */
   moves(m,s3,s2,limit){
     const max=limit||s2+Math.max(2,Math.ceil(s2*.4)),pct=v=>clamp(v/max*100,0,100),n=m<=s3?3:m<=s2?2:1,info=$('#hudInfo'),key=[s3,s2,limit].join();
-    if(meterKey!==key){meterKey=key;info.innerHTML=`<div class="meter"><div class="mtx"><span>Moves <b class="mv"></b>${limit?` / ${limit}`:''}</span><span class="nx"></span></div><div class="mbar"><i class="z3" style="width:${pct(s3)}%"></i><i class="z2" style="width:${pct(s2)-pct(s3)}%"></i><i class="z1" style="width:${100-pct(s2)}%"></i><div class="mk"></div></div></div>`}
+    if(meterKey!==key){meterKey=key;info.innerHTML=`<div class="meter"><div class="mtx"><span>Moves <b class="mv"></b>${limit?` / ${limit}`:''}</span><span class="nx"></span></div><div class="mbar"><i class="z3" style="width:${pct(s3)}%"></i><i class="z2" style="width:${pct(s2)-pct(s3)}%"></i><i class="z1" style="width:${100-pct(s2)}%"></i><div class="mkt"><div class="mk"></div></div></div></div>`}
     $('.mv',info).textContent=m;
     /* "within" is dropped on narrow phones (css): ★★★ ≤14 fits where ★★★ within 14 does not */
     $('.nx',info).innerHTML=n===3?`★★★ <span class="w">within </span><span class="le">≤</span>${s3}`:n===2?`★★ <span class="w">within </span><span class="le">≤</span>${s2}`:limit?`${limit-m} left`:'★ finish it!';
-    $('.mk',info).style.left=pct(m)+'%';
+    /* the marker rides a full-width track moved with transform (the compositor slides it; sliding it with left made
+       the page lay out and repaint for every frame of the glide, after every move in every mode) */
+    $('.mkt',info).style.transform=`translateX(${pct(m)}%)`;
     if(cur){if(cur.last&&cur.last.m<=s3&&m===s3+1&&!cur.warned&&!cur.over){cur.warned=true;toast('★★★ slipped away! Tap ↩️ Undo or 🔄 Restart to get it back')}cur.last={m,s3,s2}}
     api.setStars(n);
   },

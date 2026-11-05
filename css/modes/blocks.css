@@ -12,11 +12,13 @@
 .bp{position:relative;display:block;border-radius:20%}
 .bz.w{background:radial-gradient(circle at 50% 28%,#55792f,#2c4719 84%)}
 .bz.w::after{content:'🌿';position:absolute;inset:0;display:grid;place-items:center;font-size:calc(var(--bw)/var(--n)*.56);filter:none;text-shadow:0 2px 2px #0007}
-/* drag preview: where the block lands, and which lines will bloom */
-.bz.pv{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px color-mix(in srgb,var(--acc) 80%,transparent),inset 0 2px 5px #000a;background-color:#fff}
-.bz.f.pv{box-shadow:inset 0 0 0 2.5px #fff,0 0 14px var(--acc)}
-.bz.clr::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle,#fff6,#fff2);box-shadow:inset 0 0 0 2px var(--acc),0 0 12px var(--acc);pointer-events:none}
-.bz.w.clr::after{content:'🌿';display:grid;place-items:center;background:#fff3;font-size:calc(var(--bw)/var(--n)*.56)}
+/* drag preview: where the block lands, and which lines will bloom. Drawn on an overlay layer of its own (see
+   js/modes/blocks.js), so the glossy cells underneath are never repainted while a block follows the finger */
+.bgpvl{position:absolute;inset:0;pointer-events:none;z-index:3;will-change:transform}
+.bgpvm,.bgpvb{position:absolute;left:0;top:0;display:block}
+.bgpvm[hidden],.bgpvb[hidden]{display:none}
+.bgpvm{border-radius:20%;background:#ffffff2e;box-shadow:inset 0 0 0 2.5px #fff,0 0 8px color-mix(in srgb,var(--acc) 85%,transparent)}
+.bgpvb{border-radius:12px;background:linear-gradient(90deg,#ffffff1a,#ffffff40,#ffffff1a);box-shadow:inset 0 0 0 2px var(--acc),0 0 10px var(--acc)}
 .bz.la{animation:bgDropA .34s cubic-bezier(.3,1.7,.5,1)}
 .bz.lb{animation:bgDropB .34s cubic-bezier(.3,1.7,.5,1)}   /* twin keyframes: see again() in common.js */
 @keyframes bgDropA{0%{transform:scale(1.35)}55%{transform:scale(.92)}100%{transform:none}}
