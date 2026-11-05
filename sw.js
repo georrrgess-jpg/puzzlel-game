@@ -4,7 +4,7 @@ const VERSION='pop-v36';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest',
   'css/font.css', 'fonts/fredoka-latin.woff2', 'css/style.css', 'css/menus.css', 'css/hud.css', 'css/modes/common.css', 'css/modes/arrows.css', 'css/modes/tubes.css', 'css/modes/threads.css', 'css/modes/merge.css', 'css/modes/blocks.css', 'css/modes/pics.css', 'css/perf.css', 'css/mobile.css', 'css/jigsaw.css', 'css/redesign.css',
-  'js/core.js', 'js/perf.js', 'js/audio.js', 'js/fx.js', 'js/meta.js', 'js/howto.js',
+  'js/core.js', 'js/perf.js', 'js/audio.js', 'js/music.js', 'js/fx.js', 'js/meta.js', 'js/howto.js',
   'js/modes/common.js', 'js/modes/arrows.js', 'js/modes/tubes.js', 'js/modes/threads.js', 'js/modes/merge.js', 'js/modes/blocks.js', 'js/modes/pics-art.js', 'js/modes/pics.js', 'js/scenes.js', 'js/screens.js', 'js/ui.js',
   'js/jig/art.js', 'js/jig/subjects-a.js', 'js/jig/subjects-b.js', 'js/jig/compose.js', 'js/jig/jigsaw.js', 'js/jig/hub.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'
