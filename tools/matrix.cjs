@@ -1,4 +1,4 @@
-// Device matrix: visits every screen, every mode and the main popups on six phone sizes and reports layout problems
+// Device matrix: visits every screen, every mode and the main popups on six phones, a tablet and three computer screens and reports layout problems
 // (horizontal scroll, controls outside the viewport, touch targets under 40px, popup buttons below the fold).
 // Screenshots go to <outdir>/<device>/<screen>.png.
 // Usage: NODE_PATH=$(npm root -g) node tools/matrix.cjs <outdir> [deviceFilter] [--quiet]
@@ -9,7 +9,10 @@ const srv = http.createServer((q, r) => { let p = q.url.split('?')[0]; if (p.end
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const DEVICES = {
   'iPhone-SE': { width: 320, height: 568, dpr: 2 }, 'iPhone-8': { width: 375, height: 667, dpr: 2 }, 'iPhone-13': { width: 390, height: 844, dpr: 3 },
-  'iPhone-ProMax': { width: 430, height: 932, dpr: 3 }, 'Galaxy-360': { width: 360, height: 800, dpr: 3 }, 'Pixel-5': { width: 393, height: 851, dpr: 2.75 }
+  'iPhone-ProMax': { width: 430, height: 932, dpr: 3 }, 'Galaxy-360': { width: 360, height: 800, dpr: 3 }, 'Pixel-5': { width: 393, height: 851, dpr: 2.75 },
+  /* computers (mouse and keyboard, the desktop layout in css/desktop.css) and a landscape tablet */
+  'iPad-landscape': { width: 1024, height: 768, dpr: 2, touch: true }, 'Laptop-1366': { width: 1366, height: 768, dpr: 1, desk: true },
+  'Desktop-1440': { width: 1440, height: 900, dpr: 1, desk: true }, 'Desktop-1920': { width: 1920, height: 1080, dpr: 1, desk: true }
 };
 const out = process.argv[2] || 'matrix-out', filter = process.argv[3] && !process.argv[3].startsWith('--') ? process.argv[3] : null, quiet = process.argv.includes('--quiet');
 const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36';
@@ -18,7 +21,8 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
   const browser = await chromium.launch(); let total = 0;
   for (const [name, d] of Object.entries(DEVICES)) {
     if (filter && !name.includes(filter)) continue;
-    const ctx = await browser.newContext({ viewport: { width: d.width, height: d.height }, deviceScaleFactor: d.dpr, isMobile: true, hasTouch: true, userAgent: UA, serviceWorkers: 'block' });
+    const ctx = await browser.newContext(d.desk ? { viewport: { width: d.width, height: d.height }, deviceScaleFactor: d.dpr, serviceWorkers: 'block' } :
+      { viewport: { width: d.width, height: d.height }, deviceScaleFactor: d.dpr, isMobile: !d.touch, hasTouch: true, userAgent: UA, serviceWorkers: 'block' });
     const page = await ctx.newPage(); const errs = []; page.on('pageerror', e => errs.push(e.message));
     const dir = path.join(out, name); fs.mkdirSync(dir, { recursive: true });
     await page.goto('http://localhost:' + PORT + '/'); await sleep(1400);

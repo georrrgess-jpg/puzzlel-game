@@ -395,7 +395,7 @@ $('#skipBtn').onclick=skipLevel;
   ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{clearTimeout(t);if(held&&cur&&cur.jig){cur.puz.peek(false);if(ev==='pointerup'){b._held=true;setTimeout(()=>b._held=false,80)}}held=false}));
   b.addEventListener('click',e=>{if(b._held){e.stopImmediatePropagation();b._held=false}},true);
 })();
-// desktop shortcuts: U/Z undo, H hint, R restart, Enter or Space presses the main popup button, Esc goes back
+// desktop shortcuts: U/Z undo, H hint, R restart, M music on/off, Enter or Space presses the main popup button, Esc goes back
 $('#modal').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget&&e.currentTarget._dismiss&&!Trans.busy)e.currentTarget._dismiss()});
 addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input'))return;
@@ -406,6 +406,8 @@ addEventListener('keydown',e=>{
     if(ae&&m.contains(ae)&&ae.matches('button,input,a'))return;   // the browser presses the focused control itself
     if(m.dataset.noenter)return;                                  // destructive popups are never answered by a bare key
     const b=$('.mbtns .btn:last-child',m);if(b&&!b.disabled){e.preventDefault();b.click()}return}
+  /* M: music on/off, anywhere */
+  if(k==='m'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){S.music=!S.music;save();applyVolumes();if(S.music)Music.start();toast(S.music?'🎵 Music on: '+Music.nowPlaying():'🔇 Music off');return}
   if(m||!$('#play').classList.contains('active'))return;
   if(k==='u'||(k==='z'&&(e.ctrlKey||e.metaKey))){e.preventDefault();undo()}
   else if(k==='h')useHint();

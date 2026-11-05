@@ -29,6 +29,7 @@
 <link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="css/redesign.css">
 <link rel="stylesheet" href="css/jigsaw.css">
+<link rel="stylesheet" href="css/desktop.css">
 </head>
 <body>
 <canvas id="bg"></canvas>
@@ -129,19 +130,19 @@
 
 <section id="play" class="screen">
   <div class="topbar">
-    <button class="iconbtn" id="backBtn" aria-label="Back">←</button>
+    <button class="iconbtn" id="backBtn" aria-label="Back" title="Back (Esc)" data-k="ESC">←</button>
     <div class="ptitle"><b id="ptitle">Level 1</b><small id="psub"></small></div>
     <div class="chip"><i class="coin"></i><b class="coinval">0</b></div>
-    <button class="iconbtn" id="helpBtn" aria-label="How to play">?</button>
+    <button class="iconbtn" id="helpBtn" aria-label="How to play" title="How to play">?</button>
   </div>
   <div class="hud"><div class="hudstars" id="hudStars"></div><div id="hudInfo"></div></div>
   <div class="instr" id="instr"></div>
   <div class="coach" id="coach"></div>
   <div id="board"></div>
   <div class="toolbar">
-    <button class="tool" id="undoBtn"><span>↩️</span>Undo</button>
-    <button class="tool" id="hintBtn"><span>💡</span>Hint<div class="badge" id="hintBadge"></div></button>
-    <button class="tool" id="restartBtn"><span>🔄</span>Restart</button>
+    <button class="tool" id="undoBtn" title="Undo (Z)" data-k="Z"><span>↩️</span>Undo</button>
+    <button class="tool" id="hintBtn" title="Hint (H)" data-k="H"><span>💡</span>Hint<div class="badge" id="hintBadge"></div></button>
+    <button class="tool" id="restartBtn" title="Restart (R)" data-k="R"><span>🔄</span>Restart</button>
     <button class="tool" id="skipBtn"><span>⏭️</span>Skip<div class="badge" id="skipBadge"></div></button>
   </div>
 </section>
