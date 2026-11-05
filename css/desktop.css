@@ -195,3 +195,50 @@
 @media (min-width:860px) and (min-height:480px) and (min-aspect-ratio:5/4) and (hover:hover) and (pointer:fine){
   .pt:not(.drag):not(.sel):not(.gone):not(.tg):hover{translate:0 -3px;box-shadow:0 8px 14px #0007;transition:translate .15s,box-shadow .15s}
 }
+
+/* ================= PC home after the concept art =================
+   Logo centred on top; the world card with PLAY in the middle and the star chest under it; Daily and Quests on the
+   left, Spin and Trophies on the right; the garden island floats at the top right beside the logo (wide windows). */
+@media (min-width:860px) and (min-height:480px) and (min-aspect-ratio:5/4){
+  #home .homemain{position:relative;max-width:1280px;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr) minmax(0,1fr);
+    grid-template-areas:"logo logo logo" "d hero s" "q hero t" ". bar .";grid-template-rows:auto auto auto auto;gap:18px clamp(18px,1.9vw,30px);align-content:center}
+  #home .logo{grid-area:logo;justify-self:center;align-self:end;margin:0 0 14px}
+  #home .logo .word{font-size:clamp(52px,5.8vw,100px)}
+  /* the four tiles leave their grid and take their own places either side of the card */
+  #home .tiles4{display:contents}
+  #home #tDaily{grid-area:d;align-self:end}#home #tQuests{grid-area:q;align-self:start}
+  #home #tSpin{grid-area:s;align-self:end}#home #tTrophy{grid-area:t;align-self:start}
+  #home .mtile{min-height:clamp(78px,10.5vh,104px);padding:12px 18px 12px 14px;border-radius:24px;gap:14px}
+  #home .mtile i{width:clamp(48px,6.4vh,64px);height:clamp(48px,6.4vh,64px);font-size:clamp(26px,3.4vh,34px)}
+  #home .mtile b{font-size:clamp(17px,1.4vw,21px)}
+  #home .mtile small{font-size:clamp(12px,.95vw,14px);font-weight:700}
+  #home .mtile .dot{top:10px;right:10px}
+  #home .hero{grid-area:hero;align-self:stretch;justify-content:center;padding:clamp(16px,2.4vh,24px) clamp(18px,1.6vw,24px);gap:clamp(14px,2.2vh,22px)}
+  #home .playbtn{padding:clamp(14px,2.4vh,22px) 20px}
+  #home .playbtn b{font-size:clamp(34px,3.4vw,52px);letter-spacing:4px}
+  #home .streakpill{background:linear-gradient(180deg,#fff7e8,#ffe2bf);color:#c2410c;box-shadow:inset 0 -2px 0 #0002,0 3px 8px #0004}
+  #home .starbar{grid-area:bar;margin:4px 0 0;align-self:start}
+  /* the garden: on wide windows a floating island top right; on narrower ones there is no room beside the logo */
+  #home .island{display:none}
+}
+@media (min-width:1360px) and (min-height:700px) and (min-aspect-ratio:5/4){
+  #home .island{display:block;position:absolute;grid-area:auto;right:0;top:70px;width:330px;height:150px;margin:0}
+  #home .island .gempty{white-space:nowrap;font-size:11px}
+  #home .island .garden i{font-size:30px}
+}
+@media (min-width:1600px) and (min-height:820px) and (min-aspect-ratio:5/4){
+  #home .island{right:-90px;top:96px;width:370px;height:170px}
+  #home .island .garden i{font-size:36px}
+}
+/* narrower windows: the tiles keep their words, the small status line steps aside */
+@media (min-width:860px) and (max-width:1199px) and (min-height:480px) and (min-aspect-ratio:5/4){
+  #home .mtile small{display:none}
+  #home .mtile{padding:10px 12px}
+}
+/* short windows: a smaller logo, the card and tiles keep the room */
+@media (min-width:860px) and (min-height:480px) and (min-aspect-ratio:5/4) and (max-height:640px){
+  #home .homemain{grid-template-areas:"logo logo logo" "d hero s" "q hero t" ". bar .";gap:10px 22px}
+  #home .logo{margin:0 0 4px}
+  #home .logo .word{font-size:clamp(38px,4.4vw,58px)}
+  #home .mtile{min-height:62px}
+}

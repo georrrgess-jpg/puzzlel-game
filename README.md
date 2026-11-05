@@ -63,6 +63,12 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Also at home on a computer**: in any landscape window from about 860x480, a desktop layout with a navigation rail, a two-column home and
   large boards (see v8 below). Keyboard: Z or U undo, H hint, R restart, M music, Esc back, Enter for a popup's main button.
 
+## What's new in v8.2 (PC home after the concept art)
+The PC home screen follows the concept art. The logo is centred on top, with the garden island floating beside it on
+wide windows. The world card with PLAY sits in the middle, with the star chest under it. Daily and Quests are on the
+left, Spin and Trophies on the right, either side of the card. Windows narrower than 1200 px drop the tiles' small
+status lines. Short windows shrink the logo. The garden island shows from 1360 px wide.
+
 ## What's new in v8.1 (PC fixes, smoother Picture Pop)
 **The PC layout now appears in real browser windows.** Windows are shorter than the screen: a 1280x720 laptop leaves
 about 1280x577 for the page, and such windows used to get the phone layout, with tiny boards and a bottom tab bar. The
