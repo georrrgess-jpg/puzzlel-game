@@ -28269,7 +28269,7 @@ function v1821dGrowthCard(C){ const u=C.userSid; const Y=(C.dvx&&C.dvx.yr[C.year
     const parts=L?Object.entries(L.parts).filter(([,v])=>Math.abs(v)>0.005).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])):[]; const n=Math.max(1,ps.length);
     const avg=v1821dLvlAvg(C,l,'tick'); const pct=Math.round((avg.m-1)*100);
     return `<div class="v1821d-gl"><div class="v1821d-glh"><b>${LVL_NAME[l]}</b><span class="v1821d-pct ${pct>0?'up':pct<0?'dn':''}">${pct>0?'+':''}${pct}% growth rate</span></div>
-      <div class="v1821d-big"><span class="${g>0?'good':''}">${g>0?'+':''}${fmt1(g)}</span><small>average OVR this season · ${ps.length} players</small></div>
+      <div class="v1821d-big"><span class="${g>0?'good':''}">${g>0?'+':''}${fmt1(g)}</span><small>average OVR gained this season · ${ps.length} players</small></div>
       <ul class="v1821d-parts">${parts.length?parts.map(([k,v])=>`<li><span>${esc(v1821dLabel(k))}</span><b class="${v>0?'good':'bad'}">${v>0?'+':''}${fmt1(v)}</b></li>`).join('')+`<li class="tot"><span>Extra OVR in the squad from boosts</span><b>${fmt1(parts.reduce((a,[,v])=>a+v,0))}</b></li>`:`<li class="muted">No boosts have paid out yet this season.</li>`}</ul></div>`; }).join('');
   const sums=[]; for(const t of V1821D.tabs){ try{ const s=t.summary&&t.summary(C); if(s) sums.push(`<button class="v1821d-sum ${s.warn?'warn':''}" data-a="v1821dTab" data-k="${t.id}"><span aria-hidden="true">${t.ico||'•'}</span><span><b>${esc(s.t)}</b><small>${esc(s.s||'')}</small></span></button>`); }catch(e){} }
   return `<section class="card v1821d-gc"><div class="hd"><h3>Growth this season</h3><span class="small muted">Boosts multiply each player's normal growth; nobody passes his potential</span></div>
