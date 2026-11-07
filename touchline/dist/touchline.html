@@ -4685,6 +4685,49 @@ body.rm .v1819s-med.v1819s-on::after,body.rm .v1819s-rays,body.rm .v1819s-bigmed
 @media (max-width:900px){ .v1821d-gls{grid-template-columns:minmax(0,1fr)} }
 @media (max-width:640px){ .v1821d-tabs{width:100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none} .v1821d-tabs button{flex:none;padding:8px 11px} }
 
+/* v18.21 Coaching Staff */
+.v1821c-top .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.v1821c-open{border-color:color-mix(in srgb,var(--accent) 55%,var(--line));color:var(--accent)}
+.v1821c-lead{margin:6px 0 10px;max-width:880px}
+.v1821c-bud{display:grid;gap:6px;margin:4px 0 6px}
+.v1821c-bl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.v1821c-bl b{font-family:var(--f-display);font-size:1.3rem;text-transform:uppercase}.v1821c-bl span{color:var(--muted);font-size:.86rem}
+.v1821c-bar{height:10px;border-radius:999px;background:color-mix(in srgb,var(--surface2) 90%,transparent);overflow:hidden;border:1px solid var(--line)}
+.v1821c-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--team,#4a8),var(--team-hi,#6c9));border-radius:999px}.v1821c-bar i.over{background:#e2574c}
+.v1821c-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.v1821c-role{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:10px;min-width:0}
+.v1821c-role.vac{border-style:dashed;border-color:color-mix(in srgb,#e8b84a 55%,var(--line))}
+.v1821c-role.exp{border-color:color-mix(in srgb,#e8b84a 45%,var(--line))}
+.v1821c-role header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.v1821c-role h4,.v1821c-grp h4{margin:0;font-family:var(--f-display);text-transform:uppercase;font-size:1.05rem;letter-spacing:.02em}
+.v1821c-who{font-size:.78rem;color:var(--muted)}
+.v1821c-co,.v1821c-cand{display:flex;align-items:center;gap:12px;min-width:0}
+.v1821c-av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.95rem;color:#fff;background:linear-gradient(145deg,hsl(var(--v1821c-h,200) 45% 42%),hsl(var(--v1821c-h,200) 50% 28%));border:2px solid color-mix(in srgb,var(--team,#888) 60%,transparent)}
+.v1821c-av.vac{background:var(--surface2);color:var(--muted);border-style:dashed;border-color:var(--line)}
+.v1821c-nm{flex:1;min-width:0}.v1821c-nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v1821c-nm small{display:block;color:var(--muted);font-size:.8rem}
+.v1821c-m{color:var(--good,#5fd38d);font-weight:700;white-space:nowrap}
+.v1821c-rb{flex:none;text-align:center;min-width:52px}.v1821c-rb b{display:block;font-family:var(--f-display);font-size:1.7rem;line-height:1}.v1821c-rb small{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+.v1821c-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.v1821c-facts div{background:color-mix(in srgb,var(--surface2) 45%,transparent);border-radius:10px;padding:6px 8px;min-width:0}
+.v1821c-facts dt{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.v1821c-facts dd{margin:0;font-weight:700;font-size:.86rem}
+.v1821c-fx{align-self:flex-start;font-weight:800;font-size:.86rem;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--surface2) 90%,transparent);color:var(--muted)}
+.v1821c-fx.up{color:#5fd38d;background:color-mix(in srgb,#3fbf73 16%,transparent)}.v1821c-fx.dn{color:#ff8a7a;background:color-mix(in srgb,#e2574c 16%,transparent)}
+.v1821c-act,.v1821c-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.v1821c-renew{border-top:1px solid var(--line);padding-top:8px;display:grid;gap:8px}.v1821c-renew p{margin:0;font-size:.86rem}
+.v1821c-warn{color:#ff8a7a}
+.v1821c-len{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)}
+.v1821c-len select{font:inherit;color:var(--text);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:4px 6px}
+.v1821c-ft{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0 12px}
+.v1821c-ft button{appearance:none;font:inherit;font-weight:700;font-size:.84rem;color:var(--muted);background:none;border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+.v1821c-ft button.on{color:var(--text);background:var(--surface2);border-color:color-mix(in srgb,var(--team,#888) 60%,var(--line))}
+.v1821c-grp{display:grid;gap:8px;margin-bottom:14px}.v1821c-grp h4 .small{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-weight:400}
+.v1821c-cand{display:grid;grid-template-columns:44px minmax(120px,1fr) 56px 230px 170px 290px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.v1821c-cfx,.v1821c-cs{display:grid;gap:3px;min-width:0;justify-items:start}.v1821c-cfx small,.v1821c-cs small{color:var(--muted);font-size:.78rem}
+.v1821c-cs small.bad,.v1821c-cfx b.bad{color:#ff8a7a}.v1821c-cfx b.good{color:#5fd38d}
+.v1821c-lost{margin:10px 0 0;padding-left:18px;font-size:.86rem;color:var(--muted)}
+@media (max-width:1100px){ .v1821c-cand{grid-template-columns:44px minmax(0,1fr) 56px;row-gap:8px} .v1821c-cfx,.v1821c-cs{grid-column:2 / -1} .v1821c-cand .v1821c-row{grid-column:1 / -1;justify-content:flex-end} }
+@media (max-width:760px){ .v1821c-roles{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:420px){ .v1821c-facts{grid-template-columns:repeat(2,minmax(0,1fr))} .v1821c-facts div:last-child{grid-column:1 / -1} }
+
 </style>
 <div id="app"></div>
 <script>
@@ -28283,5 +28326,200 @@ function v1821dGrowthCard(C){ const u=C.userSid; const Y=(C.dvx&&C.dvx.yr[C.year
     const chips=M.parts.map(x=>`<span class="v1821d-fc ${x.m>=1?'up':'dn'}">${esc(x.label)} <b>${x.m>=1?'+':'−'}${Math.round(Math.abs(x.m-1)*100)}%</b></span>`).join('')+(fk?`<span class="v1821d-fc foc">Focus <b>${esc(V1821D_FOC[fk]||fk)}</b></span>`:'');
     const strip=`<div class="v1821d-pstrip"><span class="v1821d-pk">Growth ${M.m>=1?'+':'−'}${Math.round(Math.abs(M.m-1)*100)}%</span>${chips}<button class="v1821d-fc more" data-a="go" data-r="dev">Development</button></div>`;
     const i=h.indexOf('<div class="mbody">'); if(i>=0){ const j=i+'<div class="mbody">'.length; h=h.slice(0,j)+strip+h.slice(j); } }catch(e){ console.warn('v1821d player',e); } return h; }; }
+
+/* ===================== v18.21 COACHING STAFF =====================
+   Four assistant coaches under the head coach. Each has a name, a rating (40-90), a specialty, a salary and a contract.
+   - Roles: JV Coach (every JV player), Modified Coach (every MOD player), Goalkeeper Coach (every GK at every level),
+     Strength & Conditioning Coach (every Varsity player; his specialty leans growth toward pace or stamina through the
+     development focus hook, only when no other focus applies and the team trains Balanced).
+   - Effect: a growth multiplier 1 + (rating-60)/250 for each role that covers a player (40 = 0.92, 60 = 1.00, 90 = 1.12),
+     +0.02 when the coach's specialty matches the team training focus. The product per player is capped at V1821C.CAP, so
+     the staff can never add more than +12% to anyone. It applies to 'tick' and 'off' growth through v1821dMod('staff').
+   - A vacant role is covered by a volunteer (rating 45, free, -6%).
+   - Budget: 100 + school prestige per season ($k). Payroll may never exceed it when hiring or renewing.
+   - Market: 3-4 seeded candidates per role, refreshed for each hiring window (preseason and offseason). Hiring and
+     releasing happen only in those windows.
+   - Rollover: +1..+3 rating per season served (seeded, max 90); contracts that end are re-signed at a new salary (if the
+     coach is willing and it fits) or he leaves (news); after a strong season a good coach may be poached (rare, news).
+   - Parity: every other league school has seeded staff ratings recentred each season to an average of exactly 60 per role,
+     so their average multiplier stays ~1.00.
+   State: C.stf (created lazily; safe for old saves). Identifiers v1821c / V1821C. */
+const V1821C={ ROLES:['JV','MOD','GK','SC'], VOL:45, MIN:40, MAX:90, CAP:1.12, SPEC:0.02, MEAN:60, WILL:0.8, POACH:0.12, off:false };
+const V1821C_ROLE={
+  JV:{t:'JV Coach', s:'JV', who:'every JV player', fx:'JV growth'},
+  MOD:{t:'Modified Coach', s:'Modified', who:'every Modified player', fx:'Modified growth'},
+  GK:{t:'Goalkeeper Coach', s:'Goalkeeper', who:'every goalkeeper at every level', fx:'Goalkeeper growth'},
+  SC:{t:'Strength & Conditioning Coach', s:'S&C', who:'every Varsity player', fx:'Varsity growth'} };
+const V1821C_SPECS={ JV:['attacking','defending','possession','fitness','youth'], MOD:['attacking','defending','possession','fitness','youth'], GK:['gk_stop','gk_dist'], SC:['sc_pace','sc_sta'] };
+const V1821C_SPN={ attacking:'Attacking play', defending:'Defending', possession:'Possession', fitness:'Fitness', youth:'Youth development', gk_stop:'Shot-stopping', gk_dist:'Distribution', sc_pace:'Pace', sc_sta:'Stamina' };
+/* the team training focus (C.training) each specialty matches */
+const V1821C_SPT={ attacking:'attacking', defending:'defending', possession:'possession', fitness:'fitness', youth:'youth', gk_stop:'defending', gk_dist:'possession', sc_pace:'fitness', sc_sta:'fitness' };
+const v1821cR=(C,...k)=>v1821dR(C,'v1821c',...k);
+function v1821cSal(r){ const x=Math.max(0,r-40); return Math.round(6+0.5*x+0.0252*x*x); }
+function v1821cAsk(c){ return Math.max(c.sal+2,Math.round(v1821cSal(c.r)*1.08)); }
+function v1821cBudget(C){ const s=C.schools[C.userSid]; return 100+Math.round((s&&s.prestige)||0); }
+function v1821cPay(C){ const S=v1821cS(C); let t=0; for(const k of V1821C.ROLES) if(S.u[k]) t+=S.u[k].sal; return t; }
+function v1821cEff(r){ return (r-V1821C.MEAN)/250; }
+function v1821cMatch(C,c){ return !!(c&&C.training&&V1821C_SPT[c.sp]===C.training); }
+/* growth effect of a role for your school (a fraction: 0.08 = +8%) */
+function v1821cRoleEff(C,k){ const c=v1821cS(C).u[k]; if(!c) return v1821cEff(V1821C.VOL); return v1821cEff(c.r)+(v1821cMatch(C,c)?V1821C.SPEC:0); }
+function v1821cRolesOf(p){ const out=[p.lvl==='JV'?'JV':p.lvl==='MOD'?'MOD':'SC']; if(p.pos==='GK') out.push('GK'); return out; }
+function v1821cName(r){ const [f,l]=genName(r); return f+' '+l; }
+function v1821cCoach(C,r,role,rating,o){ const sp=pick(r,V1821C_SPECS[role]); const rr=Math.round(clamp(rating,V1821C.MIN,V1821C.MAX));
+  return Object.assign({id:'sc'+(hashStr(C.seed+'|'+role+'|'+r())%1e9).toString(36), nm:v1821cName(r), r:rr, sp, sal:v1821cSal(rr), since:C.year, end:C.year, yrs:0, hue:Math.floor(r()*360)},o||{}); }
+/* ---------- state ---------- */
+function v1821cS(C){ let S=C.stf;
+  if(!S||!S.v){ S=C.stf={v:1,u:{},mkt:{k:null,c:[]},cpu:{yr:null,s:{}},lost:[]}; const r=v1821cR(C,'init');
+    /* the program inherits three part-time assistants (average ~60, short contracts) and has never had a goalkeeper coach */
+    ['JV','MOD','SC'].forEach((k,i)=>{ const c=v1821cCoach(C,r,k,60+gauss(r)*4.5,{end:C.year+(i===0?0:rint(r,0,1))}); c.yrs=rint(r,0,4); S.u[k]=c; }); S.u.GK=null; }
+  if(S.cpu.yr!==C.year) v1821cCpuRoll(C,S);
+  return S; }
+function v1821cCpuSids(C){ return C.league.filter(s=>s!==C.userSid&&C.schools[s]&&!C.schools[s].ext); }
+/* CPU staff: keep 75% of coaches (+1..3 experience), replace the rest, then recentre each role on 60 (parity) */
+function v1821cCpuRoll(C,S){ const prev=S.cpu.s||{}; const r=v1821cR(C,'cpu',C.year); const out={}; const sids=v1821cCpuSids(C);
+  for(const sid of sids){ const o={}; for(const k of V1821C.ROLES){ const old=prev[sid]&&prev[sid][k]; o[k]=(old!=null&&r()<0.75)?Math.min(V1821C.MAX,old+rint(r,1,3)):clamp(V1821C.MEAN+gauss(r)*9,V1821C.MIN,85); } out[sid]=o; }
+  if(sids.length) for(const k of V1821C.ROLES) for(let it=0;it<4;it++){ const m=sids.reduce((a,s)=>a+out[s][k],0)/sids.length; const d=V1821C.MEAN-m; if(Math.abs(d)<0.05) break; for(const s of sids) out[s][k]=clamp(out[s][k]+d,V1821C.MIN,V1821C.MAX); }
+  for(const s of sids) for(const k of V1821C.ROLES) out[s][k]=Math.round(out[s][k]*10)/10;
+  S.cpu={yr:C.year,s:out}; }
+/* ---------- the multiplier ---------- */
+function v1821cMultFor(C,p){ const sch=C.schools[p.sid]; if(!sch||sch.ext) return null; const S=v1821cS(C); let m=1;
+  if(p.sid===C.userSid){ for(const k of v1821cRolesOf(p)) m*=1+v1821cRoleEff(C,k); }
+  else { const o=S.cpu.s[p.sid]; if(!o) return null; for(const k of v1821cRolesOf(p)) m*=1+v1821cEff(o[k]); }
+  return Math.min(V1821C.CAP,m); }
+v1821dMod('staff','Coaching staff',(C,p,ctx)=>V1821C.off?null:v1821cMultFor(C,p));
+/* S&C specialty: Varsity outfield players lean toward pace or stamina, only when nothing else sets a focus */
+function v1821cFocusFor(C,p,base){ if(V1821C.off||p.sid!==C.userSid||p.lvl!=='V'||p.pos==='GK') return null; const c=v1821cS(C).u.SC; if(!c) return null;
+  const free=base==='balanced'||(base==null&&(C.training==='balanced'||C.training==='youth')); if(!free) return null; return c.sp==='sc_pace'?'f_spd':'f_sta'; }
+{ const _vf=v1821dFocus; v1821dFocus=function(C,p,base){ const k=_vf.apply(this,arguments); if(k!==base) return k; try{ const z=v1821cFocusFor(C,p,base); if(z&&FOCUS_SHARE[z]) return z; }catch(e){} return k; }; }
+/* ---------- hiring window and market ---------- */
+function v1821cWin(C){ return C.phase==='offseason'?'off':C.phase==='preseason'?'pre':null; }
+function v1821cMktKey(C){ const w=v1821cWin(C); return w?C.year+w:null; }
+function v1821cMkt(C){ const S=v1821cS(C); const key=v1821cMktKey(C); if(!key) return null; if(S.mkt.k===key) return S.mkt;
+  const r=v1821cR(C,'mkt',key); const c=[];
+  for(const k of V1821C.ROLES){ const n=3+(r()<0.5?1:0); const rs=[]; for(let i=0;i<n;i++) rs.push(clamp(58+gauss(r)*11,42,90)); if(Math.max(...rs)<70) rs[0]=rint(r,70,84);
+    rs.sort((a,b)=>b-a).forEach((x,i)=>{ const q=v1821cCoach(C,r,k,x); q.sal=Math.max(5,Math.round(q.sal*(0.9+r()*0.25))); q.role=k; q.id='m'+key+k+i; c.push(q); }); }
+  S.mkt={k:key,c}; return S.mkt; }
+function v1821cSince(C){ return C.phase==='offseason'?C.year+1:C.year; }
+function v1821cHire(C,cid,yrs){ const w=v1821cWin(C); if(!w) return {ok:false,msg:'Coaches can only be hired in the preseason or offseason.'};
+  const M=v1821cMkt(C); const q=M.c.find(x=>x.id===cid&&!x.hired); if(!q) return {ok:false,msg:'That candidate is no longer available.'};
+  yrs=Math.round(+yrs||1); if(yrs<1||yrs>3) return {ok:false,msg:'Contracts run 1 to 3 seasons.'};
+  const S=v1821cS(C); const cur=S.u[q.role]; const pay=v1821cPay(C)-(cur?cur.sal:0)+q.sal; const bud=v1821cBudget(C);
+  if(pay>bud) return {ok:false,msg:`Over budget: payroll would be $${pay}k of $${bud}k.`};
+  const since=v1821cSince(C); S.u[q.role]={id:q.id.replace(/^m/,'h'),nm:q.nm,r:q.r,sp:q.sp,sal:q.sal,since,end:since+yrs-1,yrs:0,hue:q.hue}; q.hired=true;
+  return {ok:true,msg:`${q.nm} hired as ${V1821C_ROLE[q.role].t} through ${since+yrs-1}${cur?` (${cur.nm} released)`:''}.`}; }
+function v1821cRelease(C,k){ if(!v1821cWin(C)) return {ok:false,msg:'Staff changes are made in the preseason or offseason.'}; const S=v1821cS(C); const c=S.u[k]; if(!c) return {ok:false,msg:'That role is already vacant.'};
+  S.u[k]=null; return {ok:true,msg:`${c.nm} released. A volunteer covers the ${V1821C_ROLE[k].t} role.`}; }
+/* contract renewals: offseason, final-year coaches who want to stay */
+function v1821cExpiring(C,c){ return !!(c&&c.end<=C.year); }
+function v1821cWilling(C,c){ return v1821cR(C,'will',c.id,C.year)()<V1821C.WILL; }
+function v1821cRenew(C,k,yrs){ if(C.phase!=='offseason') return {ok:false,msg:'Contracts are renewed in the offseason.'}; const S=v1821cS(C); const c=S.u[k];
+  if(!c||!v1821cExpiring(C,c)) return {ok:false,msg:'No contract to renew.'}; if(!v1821cWilling(C,c)) return {ok:false,msg:`${c.nm} has decided to move on.`};
+  yrs=Math.round(+yrs||1); if(yrs<1||yrs>3) return {ok:false,msg:'Contracts run 1 to 3 seasons.'};
+  const ask=v1821cAsk(c); const pay=v1821cPay(C)-c.sal+ask; const bud=v1821cBudget(C); if(pay>bud) return {ok:false,msg:`Over budget: payroll would be $${pay}k of $${bud}k.`};
+  c.sal=ask; c.end=C.year+yrs; return {ok:true,msg:`${c.nm} re-signed through ${c.end} at $${ask}k a season.`}; }
+/* decisions waiting (badge, This week) */
+function v1821cDecisions(C){ const w=v1821cWin(C); if(!w) return []; const S=v1821cS(C); const out=[];
+  for(const k of V1821C.ROLES){ const c=S.u[k]; if(!c) out.push({k,t:'vacant'}); else if(w==='off'&&v1821cExpiring(C,c)) out.push({k,t:v1821cWilling(C,c)?'expiring':'leaving'}); }
+  return out; }
+/* ---------- rollover ---------- */
+function v1821cAfterRoll(C,yr,strong){ const S=v1821cS(C); const r=v1821cR(C,'roll',yr); const sch=C.schools[C.userSid];
+  for(const k of V1821C.ROLES){ const c=S.u[k]; if(!c||c.since>yr) continue; c.yrs++; c.r=Math.min(V1821C.MAX,c.r+rint(v1821cR(C,'exp',yr,c.id),1,3)); }
+  /* poaching after a strong season: rare, at most one, a long contract halves the risk */
+  if(strong){ const cand=V1821C.ROLES.filter(k=>{ const c=S.u[k]; return c&&c.r>=75&&c.since<=yr&&c.end>yr; });
+    for(const k of cand){ const c=S.u[k]; const p=V1821C.POACH*(c.end-yr>=2?0.5:1); if(r()<p){ const others=v1821cCpuSids(C); const to=others.length?C.schools[pick(r,others)]:null;
+        S.u[k]=null; S.lost.push({yr,k,nm:c.nm,r:c.r,to:to?to.id:null,why:'poach'}); addNews(C,'program',`${to?to.name:'Another program'} hire away ${sch.town}'s ${V1821C_ROLE[k].t} ${c.nm} after a strong season`,C.userSid); break; } } }
+  /* contracts that ran out: re-sign at a new salary if willing and affordable, otherwise he leaves */
+  for(const k of V1821C.ROLES){ const c=S.u[k]; if(!c||c.end>yr) continue;
+    const C0={...C,year:yr}; const will=v1821cWilling(C0,c); const ask=v1821cAsk(c); const fits=v1821cPay(C)-c.sal+ask<=v1821cBudget(C);
+    if(will&&fits){ c.sal=ask; c.end=C.year; addNews(C,'program',`${V1821C_ROLE[k].t} ${c.nm} re-signs with ${sch.town} for one season at $${ask}k`,C.userSid); }
+    else { S.u[k]=null; S.lost.push({yr,k,nm:c.nm,r:c.r,why:will?'budget':'left'}); addNews(C,'program',`${V1821C_ROLE[k].t} ${c.nm} leaves ${sch.town} as his contract runs out${will?' (no room in the staff budget)':''}`,C.userSid); } }
+  if(S.lost.length>12) S.lost=S.lost.slice(-12);
+  v1821cCpuRoll(C,S); }
+{ const _ro=rollover; rollover=function(C){ let yr=null, strong=false;
+    try{ if(C&&C.phase==='offseason'&&!(C.rolled&&C.rolled[C.year])&&!V1821C.off&&!V1821D.off){ yr=C.year; v1821cS(C); const tab=standings(C,'V',yr); const i=tab.findIndex(t=>t.sid===C.userSid); const T=C.tourneys&&C.tourneys[yr];
+        strong=(i>=0&&i<=1)||!!(T&&T.secChamp===C.userSid); } }catch(e){ console.warn('staff pre-roll',e); }
+    const res=_ro.apply(this,arguments);
+    try{ if(yr!=null&&C.rolled&&C.rolled[yr]) v1821cAfterRoll(C,yr,strong); }catch(e){ console.warn('staff rollover',e); }
+    return res; }; }
+{ const _mg=migrate; migrate=function(C){ const r=_mg.apply(this,arguments); try{ if(C&&C.stf&&C.stf.v){ const S=C.stf; S.u=S.u||{}; S.mkt=S.mkt||{k:null,c:[]}; S.cpu=S.cpu||{yr:null,s:{}}; S.lost=S.lost||[]; } }catch(e){} return r; }; }
+/* a sensible staff for a budget (used by the test script and the "Suggest" hint): best total value per $ */
+function v1821cWeights(C){ const u=C.userSid; const n=l=>squad(C,u,l).filter(p=>p.pot>ovr(p)).length; const gk=Object.values(C.players).filter(p=>p.sid===u&&p.pos==='GK'&&p.pot>ovr(p)).length;
+  /* roughly how much OVR a +1% on that role adds per season (players x typical yearly growth) */
+  return {JV:n('JV')*4.2, MOD:n('MOD')*5, SC:n('V')*1.7, GK:gk*3.5}; }
+
+/* v18.21 Coaching Staff: the Staff tab on Squads -> Development (four role cards, budget bar, hiring market with comparison,
+   contract renewals), the Overview growth-card chip, the tab badge and a This week item. Identifiers v1821c. */
+function v1821cPct(x){ const v=Math.round(x*100); return (v>0?'+':v<0?'−':'±')+Math.abs(v)+'%'; }
+function v1821cShort(k){ return {JV:'JV',MOD:'MOD',GK:'GK',SC:'S&C'}[k]; }
+function v1821cIni(nm){ return String(nm||'?').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase(); }
+function v1821cAv(c){ return c?`<span class="v1821c-av" style="--v1821c-h:${c.hue||0}" aria-hidden="true">${esc(v1821cIni(c.nm))}</span>`:`<span class="v1821c-av vac" aria-hidden="true">?</span>`; }
+function v1821cCovered(C,k){ const u=C.userSid; if(k==='GK') return Object.values(C.players).filter(p=>p.sid===u&&p.pos==='GK').length; return squad(C,u,k==='SC'?'V':k).length; }
+function v1821cFx(C,k,eff){ return `<span class="v1821c-fx ${eff>0.004?'up':eff<-0.004?'dn':''}">${V1821C_ROLE[k].fx} ${v1821cPct(eff)}</span>`; }
+function v1821cYrs(C,c){ const left=c.end-C.year+(C.phase==='offseason'?0:1); return c.end<C.year?'ended':c.end===C.year?(C.phase==='offseason'?'ends now':'final season'):`through ${c.end} · ${left} season${left===1?'':'s'} left`; }
+function v1821cWith(C,c){ if(c.since>C.year) return 'Starts next season'; const n=c.yrs+1; return `${n}${n%10===1&&n!==11?'st':n%10===2&&n!==12?'nd':n%10===3&&n!==13?'rd':'th'} season`; }
+function v1821cLenSel(id,lab){ return `<label class="v1821c-len"><span>${lab||'Contract'}</span><select id="v1821c-len-${id}" aria-label="${lab||'Contract'} length"><option value="1">1 season</option><option value="2" selected>2 seasons</option><option value="3">3 seasons</option></select></label>`; }
+function v1821cRoleCard(C,k){ const S=v1821cS(C); const c=S.u[k]; const R=V1821C_ROLE[k]; const w=v1821cWin(C); const eff=v1821cRoleEff(C,k); const n=v1821cCovered(C,k);
+  const head=`<header><h4>${R.t}</h4><span class="v1821c-who">Covers ${R.who} · ${n} now</span></header>`;
+  if(!c) return `<article class="v1821c-role vac">${head}<div class="v1821c-co">${v1821cAv(null)}<div class="v1821c-nm"><b>Vacant</b><small>A volunteer fills in (rating ${V1821C.VOL}, no salary)</small></div><div class="v1821c-rb"><b>${V1821C.VOL}</b><small>rating</small></div></div>
+    ${v1821cFx(C,k,eff)}<div class="v1821c-act">${w?`<button class="btn sm pri" data-a="v1821cFind" data-k="${k}">See ${R.s} candidates</button>`:`<span class="small muted">Hire one in the offseason or preseason.</span>`}</div></article>`;
+  const m=v1821cMatch(C,c); const exp=v1821cExpiring(C,c);
+  let act='';
+  if(C.phase==='offseason'&&exp){ if(v1821cWilling(C,c)){ const ask=v1821cAsk(c); const pay=v1821cPay(C)-c.sal+ask; const bud=v1821cBudget(C);
+      act=`<div class="v1821c-renew"><p><b>Contract ends this season.</b> He asks <b>$${ask}k</b> a season (now $${c.sal}k). Not renewed by rollover: he re-signs for one season only if the budget has room, otherwise he leaves.</p>
+        <div class="v1821c-row">${v1821cLenSel(c.id,'Renew for')}<button class="btn sm pri" data-a="v1821cRenew" data-k="${k}" data-id="${c.id}" ${pay>bud?'disabled':''}>Renew at $${ask}k</button><button class="btn sm ghost" data-a="v1821cRel" data-k="${k}">Let him go</button></div>${pay>bud?`<p class="v1821c-warn">Payroll would be $${pay}k of $${bud}k. Release someone first.</p>`:''}</div>`; }
+    else act=`<div class="v1821c-renew"><p><b>${esc(c.nm)} has decided to move on</b> and leaves when the season rolls over. Hire his replacement from the market.</p></div>`; }
+  else if(w) act=`<div class="v1821c-act"><button class="btn sm ghost" data-a="v1821cRel" data-k="${k}">Release</button><button class="btn sm" data-a="v1821cFind" data-k="${k}">Compare candidates</button></div>`;
+  return `<article class="v1821c-role${exp?' exp':''}">${head}<div class="v1821c-co">${v1821cAv(c)}<div class="v1821c-nm"><b>${esc(c.nm)}</b><small>Specialty: ${V1821C_SPN[c.sp]}${m?` <span class="v1821c-m">matches training +2%</span>`:''}</small></div><div class="v1821c-rb"><b>${c.r}</b><small>rating</small></div></div>
+    <dl class="v1821c-facts"><div><dt>With you</dt><dd>${v1821cWith(C,c)}</dd></div><div><dt>Contract</dt><dd>${v1821cYrs(C,c)}</dd></div><div><dt>Salary</dt><dd>$${c.sal}k</dd></div></dl>
+    ${v1821cFx(C,k,eff)}${act}</article>`; }
+function v1821cBudgetCard(C){ const pay=v1821cPay(C), bud=v1821cBudget(C); const pr=Math.round(C.schools[C.userSid].prestige||0); const w=v1821cWin(C); const pct=Math.min(100,Math.round(pay/bud*100));
+  const vac=V1821C.ROLES.filter(k=>!v1821cS(C).u[k]).length;
+  return `<section class="card v1821c-top"><div class="hd"><h3>Coaching staff</h3><span class="chip ${w?'v1821c-open':''}">${w?`Hiring open · ${w==='off'?'Offseason':'Preseason'}`:'Hiring opens in the offseason'}</span></div>
+    <p class="small muted v1821c-lead">Each assistant multiplies the normal growth of the players he coaches: rating 40 = −8%, 60 = ±0%, 90 = +12%, plus 2% when his specialty matches your training focus. A player covered by two coaches (a goalkeeper) gets both, capped at +12%. Nobody passes his potential.</p>
+    <div class="v1821c-bud"><div class="v1821c-bl"><b>Payroll $${pay}k</b><span>of $${bud}k staff budget · $${bud-pay}k free</span></div><div class="v1821c-bar" role="meter" aria-label="Staff payroll" aria-valuemin="0" aria-valuemax="${bud}" aria-valuenow="${pay}"><i style="width:${pct}%" class="${pay>bud?'over':''}"></i></div>
+      <small class="muted">Budget = 100 + school prestige (${pr}); it moves with prestige every season. Salaries rise with rating, so you choose where to spend.${vac?` ${vac} role${vac===1?' is':'s are'} vacant.`:''}</small></div>
+    <p class="small muted">League rivals keep staffs averaging rating ${V1821C.MEAN} in every role (growth ±0%); your edge is choosing well.</p></section>`; }
+function v1821cMktCard(C){ const M=v1821cMkt(C); const S=v1821cS(C);
+  if(!M){ const lost=(S.lost||[]).slice(-3).reverse(); return `<section class="card v1821c-mkt"><div class="hd"><h3>Hiring market</h3></div><div class="empty">The market is closed during the season. A fresh list of candidates (3–4 per role) opens in the offseason and again in the preseason.</div>
+      ${lost.length?`<ul class="v1821c-lost">${lost.map(x=>`<li>${x.yr}: ${V1821C_ROLE[x.k].t} ${esc(x.nm)} (${x.r}) ${x.why==='poach'?`was hired away${x.to&&C.schools[x.to]?` by ${esc(C.schools[x.to].name)}`:''}`:x.why==='budget'?'left (no room in the budget)':'left when his contract ran out'}</li>`).join('')}</ul>`:''}</section>`; }
+  const f=App.params&&App.params.srole; const roles=f&&V1821C_ROLE[f]?[f]:V1821C.ROLES; const pay=v1821cPay(C), bud=v1821cBudget(C);
+  const tabs=`<div class="v1821c-ft" role="group" aria-label="Filter candidates by role">${['all',...V1821C.ROLES].map(k=>`<button class="${k===f||(k==='all'&&!f)?'on':''}" data-a="v1821cFind" data-k="${k}" aria-pressed="${k===f||(k==='all'&&!f)}">${k==='all'?'All':v1821cShort(k)}</button>`).join('')}</div>`;
+  const rows=roles.map(k=>{ const cur=S.u[k]; const now=v1821cRoleEff(C,k); const list=M.c.filter(q=>q.role===k&&!q.hired);
+    const body=list.length?list.map(q=>{ const eff=v1821cEff(q.r)+(V1821C_SPT[q.sp]===C.training?V1821C.SPEC:0); const d=eff-now; const after=pay-(cur?cur.sal:0)+q.sal; const over=after>bud;
+      return `<div class="v1821c-cand">${v1821cAv(q)}<div class="v1821c-nm"><b>${esc(q.nm)}</b><small>${V1821C_SPN[q.sp]}${V1821C_SPT[q.sp]===C.training?' · matches training':''}</small></div>
+        <div class="v1821c-rb"><b>${q.r}</b><small>rating</small></div>
+        <div class="v1821c-cfx">${v1821cFx(C,k,eff)}<small>${cur?`vs ${esc(cur.nm.split(' ').pop())} (${cur.r})`:'vs volunteer'}: <b class="${d>0.004?'good':d<-0.004?'bad':''}">${v1821cPct(d)}</b></small></div>
+        <div class="v1821c-cs"><b>$${q.sal}k</b><small class="${over?'bad':''}">payroll $${after}k of $${bud}k</small></div>
+        <div class="v1821c-row">${v1821cLenSel(q.id)}<button class="btn sm ${over||d<=0.004?'':'pri'}" data-a="v1821cHire" data-id="${q.id}" ${over?'disabled':''} aria-label="Hire ${esc(q.nm)} as ${V1821C_ROLE[k].t}">${over?'Over budget':cur?'Hire (replaces)':'Hire'}</button></div></div>`; }).join(''):`<div class="empty">Every ${V1821C_ROLE[k].t} candidate has been hired. New names arrive with the next window.</div>`;
+    return `<div class="v1821c-grp" id="v1821c-m-${k}"><h4>${V1821C_ROLE[k].t} <span class="small muted">now: ${cur?`${esc(cur.nm)} (${cur.r})`:'volunteer (45)'} · ${V1821C_ROLE[k].fx} ${v1821cPct(now)}</span></h4>${body}</div>`; }).join('');
+  return `<section class="card v1821c-mkt"><div class="hd"><h3>Hiring market</h3><span class="small muted">${C.phase==='offseason'?'Hired now: starts with the offseason training and coaches next season':'Candidates for this season'}</span></div>${tabs}${rows}</section>`; }
+function v1821cRender(C){ v1821cS(C);
+  return `${v1821cBudgetCard(C)}<div class="v1821c-roles">${V1821C.ROLES.map(k=>v1821cRoleCard(C,k)).join('')}</div>${v1821cMktCard(C)}`; }
+function v1821cSummary(C){ const S=v1821cS(C); const vac=V1821C.ROLES.filter(k=>!S.u[k]); const pay=v1821cPay(C), bud=v1821cBudget(C);
+  if(vac.length) return {t:vac.length===1?`${V1821C_ROLE[vac[0]].t} role is vacant`:`${vac.length} staff roles are vacant`, s:`A volunteer fills in: ${vac.map(k=>`${v1821cShort(k)} −6%`).join(', ')}`, warn:true};
+  const parts=V1821C.ROLES.map(k=>[k,v1821cRoleEff(C,k)]).filter(([,e])=>Math.round(e*100)!==0).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  return {t:parts.length?`Staff: ${parts.map(([k,e])=>`${v1821cShort(k)} ${v1821cPct(e)}`).join(', ')}`:'Staff: league-average coaches', s:`Payroll $${pay}k of $${bud}k`}; }
+function v1821cBadge(C){ const n=v1821cDecisions(C).length; return n||''; }
+v1821dTab({id:'staff',label:'Staff',ico:'🧢',order:10,render:v1821cRender,summary:v1821cSummary,badge:v1821cBadge});
+/* ---------- actions ---------- */
+function v1821cDone(res){ toast(res.msg); if(res.ok){ queueSave(); try{ App.odds&&App.odds.clear&&App.odds.clear(); }catch(e){} try{ Sound.ui('success'); }catch(e){} } App.keepScroll=true; render(); }
+A.v1821cFind=el=>{ const k=el.dataset.k; App.params={...(App.params||{}),dtab:'staff',srole:k==='all'?undefined:k}; App.keepScroll=true; render();
+  try{ const t=document.getElementById('v1821c-m-'+(k==='all'?'JV':k)); if(t&&k!=='all') t.scrollIntoView({block:'start',behavior:'auto'}); }catch(e){} };
+A.v1821cHire=el=>{ const C=App.C; const id=el.dataset.id; const s=document.getElementById('v1821c-len-'+id); v1821cDone(v1821cHire(C,id,s?+s.value:2)); };
+A.v1821cRenew=el=>{ const C=App.C; const s=document.getElementById('v1821c-len-'+el.dataset.id); v1821cDone(v1821cRenew(C,el.dataset.k,s?+s.value:1)); };
+A.v1821cRel=el=>{ App.modal={type:'v1821cRel',k:el.dataset.k}; renderModal(); };
+A.v1821cRelYes=el=>{ const k=App.modal&&App.modal.k; App.modal=null; renderModal(); if(k) v1821cDone(v1821cRelease(App.C,k)); };
+MODALS.v1821cRel=m=>{ const C=App.C; const c=v1821cS(C).u[m.k]; const R=V1821C_ROLE[m.k]; if(!c) return modalShell('<h2>Release</h2>','<p>That role is already vacant.</p>','<button class="btn" data-a="closeModal">Close</button>','narrow');
+  return modalShell(`<h2>Release ${esc(c.nm)}?</h2>`,`<p>This frees <b>$${c.sal}k</b> of the staff budget. Until you hire someone, a volunteer (rating ${V1821C.VOL}) covers ${R.who}: ${R.fx} goes from <b>${v1821cPct(v1821cRoleEff(C,m.k))}</b> to <b>${v1821cPct(v1821cEff(V1821C.VOL))}</b>. A released coach does not come back.</p>`,
+    `<button class="btn" data-a="closeModal">Keep him</button><button class="btn danger" data-a="v1821cRelYes">Release</button>`,'narrow'); };
+/* ---------- Overview: This week item when a role is vacant or a contract is up ---------- */
+{ const _of=VIEWS.office; VIEWS.office=function(){ const h=_of.apply(this,arguments); try{ const C=App.C; if(!C||V1821C.off) return h; const D=v1821cDecisions(C); if(!D.length) return h;
+    const t=document.createElement('template'); t.innerHTML=h; const box=t.content.querySelector('.v1817o-items'); if(!box) return h;
+    const cl=box.querySelector('.v1817o-clear'); if(cl) cl.remove();
+    const vac=D.filter(d=>d.t==='vacant'), ex=D.filter(d=>d.t!=='vacant');
+    const title=vac.length&&!ex.length?(vac.length===1?`${V1821C_ROLE[vac[0].k].t} role is vacant`:`${vac.length} staff roles are vacant`):ex.length===1&&!vac.length?`${V1821C_ROLE[ex[0].k].t}'s contract is up`:`${D.length} coaching staff decisions`;
+    const b=document.createElement('button'); b.className='dec v1821c-dec'; b.dataset.a='go'; b.dataset.r='dev'; b.dataset.p=JSON.stringify({dtab:'staff'});
+    b.innerHTML=`<span class="dec-ico">🧢</span><span class="grow"><b>${esc(title)}</b><small>Coaching staff · ${vac.length?'a volunteer covers it (−6%)':'renew or let him go'}</small></span><span class="dec-go">${icon('chev',16)}</span>`;
+    box.appendChild(b); return t.innerHTML; }catch(e){ console.warn('staff overview',e); return h; } }; }
 
 </script>
