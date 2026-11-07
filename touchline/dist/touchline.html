@@ -28460,7 +28460,7 @@ MODALS.v1819sEnd=()=>{ const C=App.C; const S=C&&C.scn; if(!S||!S.end) return ''
    - Hub tabs: V1821D.tabs holds {id,label,order,render(C),summary(C)}; the core draws the tab bar on VIEWS.dev.
    With no feature registered every number is identical to before (devTick is a copy with the hook added).
    Identifiers v1821d / V1821D. */
-const V1821D={ CAP:[0.75,1.6], FORM:0.02, mods:[], focus:[], match:[], tabs:[], off:false, skip:null, bookAll:false }; /* skip: a Set of mod keys to ignore (tests isolate one feature) */
+const V1821D={ CAP:[0.75,1.6], FORM:0.02, mods:[], focus:[], match:[], tabs:[], off:false, skip:null, only:null, bookAll:false }; /* only: a Set of mod keys allowed (a feature's own test isolates it from the others) */ /* skip: a Set of mod keys to ignore (tests isolate one feature) */
 Object.assign(FOCUS_SHARE,{ f_sho:{sho:2.4,spd:1.1}, f_pas:{pas:2.4,sta:1.05}, f_def:{def:2.4}, f_spd:{spd:2.4,sta:1.1}, f_sta:{sta:2.4,spd:1.05}, f_gk:{gk:2.6} });
 const V1821D_FOC={ f_sho:'Finishing', f_pas:'Passing', f_def:'Defending', f_spd:'Pace', f_sta:'Stamina', f_gk:'Goalkeeping' };
 function v1821dMod(k,label,fn){ V1821D.mods=V1821D.mods.filter(m=>m.k!==k); V1821D.mods.push({k,label,fn}); }
@@ -28469,7 +28469,7 @@ function v1821dMatch(fn){ V1821D.match.push(fn); }
 function v1821dTab(t){ V1821D.tabs=V1821D.tabs.filter(x=>x.id!==t.id); V1821D.tabs.push(t); V1821D.tabs.sort((a,b)=>(a.order||0)-(b.order||0)); }
 /* the multiplier for one player now, with its parts */
 function v1821dMult(C,p,ctx){ const parts=[]; let m=1;
-  if(!V1821D.off) for(const M of V1821D.mods){ if(V1821D.skip&&V1821D.skip.has(M.k)) continue; let v=null; try{ v=M.fn(C,p,ctx); }catch(e){ console.warn('dev mod '+M.k,e); } if(v!=null&&isFinite(v)&&Math.abs(v-1)>1e-9){ parts.push({k:M.k,label:M.label,m:v}); m*=v; } }
+  if(!V1821D.off) for(const M of V1821D.mods){ if(V1821D.skip&&V1821D.skip.has(M.k)) continue; if(V1821D.only&&!V1821D.only.has(M.k)) continue; let v=null; try{ v=M.fn(C,p,ctx); }catch(e){ console.warn('dev mod '+M.k,e); } if(v!=null&&isFinite(v)&&Math.abs(v-1)>1e-9){ parts.push({k:M.k,label:M.label,m:v}); m*=v; } }
   const cm=clamp(m,V1821D.CAP[0],V1821D.CAP[1]); return {m:cm,raw:m,parts}; }
 function v1821dFocus(C,p,base){ if(!V1821D.off) for(const fn of V1821D.focus){ try{ const k=fn(C,p,base); if(k&&FOCUS_SHARE[k]) return k; }catch(e){} } return base; }
 /* a seeded random stream for a feature (career seed + keys), so choices for other schools are deterministic */

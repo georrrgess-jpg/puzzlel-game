@@ -5,10 +5,12 @@
 // recentred on 60 (parity). Checks: budget, hiring, multipliers by role and level, GK coach only on GKs, the S&C focus, rollover,
 // CPU parity, the balance table (baseline vs staffed sensibly), old-save migration, determinism, the UI on desktop and phone.
 const { chromium, DIST } = require('./_pw');
+/* v18.21 merge: the other development features are switched off so this test measures this feature alone (test/devbalance.js covers them together) */
+const ISO="V1821D.only=new Set(['staff']); V1821P.off=V1821M.off=V1821T.off=true;";
 const fs=require('fs'); const SHOTS=__dirname+'/shots/v1821'; fs.mkdirSync(SHOTS,{recursive:true});
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{ const b=await chromium.launch(); const errs=[];
-  const mk=async(seed,vw)=>{ const page=await b.newPage({viewport:vw||{width:1440,height:900}}); page.on('pageerror',e=>errs.push(e.message)); await page.goto(DIST); await page.waitForTimeout(400);
+  const mk=async(seed,vw)=>{ const page=await b.newPage({viewport:vw||{width:1440,height:900}}); page.on('pageerror',e=>errs.push(e.message)); await page.goto(DIST); await page.evaluate(ISO); await page.waitForTimeout(400);
     await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Staff Coach'); await page.fill('#nc-seed',seed);
     await page.click('[data-a="ncNext"]'); await page.waitForTimeout(150); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(800); return page; };
   const page=await mk('staff-1');

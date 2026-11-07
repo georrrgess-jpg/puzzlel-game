@@ -5,12 +5,14 @@
 // saves, CPU parity, the balance table (growth and results per policy) with the win% trade-off, Light before big games,
 // determinism, and the UI (tab, badge, Overview chip and This week item, match preview control) on desktop and phone.
 const { chromium, DIST } = require('./_pw');
+/* v18.21 merge: the other development features are switched off so this test measures this feature alone (test/devbalance.js covers them together) */
+const ISO="V1821D.only=new Set(['prac']); V1821C.off=V1821P.off=V1821M.off=true;";
 const fs=require('fs'); const OUT=__dirname+'/shots/v1821'; fs.mkdirSync(OUT,{recursive:true});
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 const LVLS=['V','JV','MOD']; const SEEDS=Array.from({length:20},(_,i)=>String(31+i));
 (async()=>{ const b=await chromium.launch(); const errs=[]; const ctx=await b.newContext({viewport:{width:1440,height:900}});
   const page=await ctx.newPage(); page.on('pageerror',e=>errs.push(e.message));
-  await page.goto(DIST); await page.waitForTimeout(500);
+  await page.goto(DIST); await page.evaluate(ISO); await page.waitForTimeout(500);
   await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Practice Coach'); await page.fill('#nc-seed','prac-t1');
   await page.click('[data-a="ncNext"]'); await page.waitForTimeout(200); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(900);
 
@@ -126,7 +128,7 @@ const LVLS=['V','JV','MOD']; const SEEDS=Array.from({length:20},(_,i)=>String(31
 
   /* ---------- phone + gold theme ---------- */
   const ph=await ctx.newPage(); await ph.setViewportSize({width:390,height:844}); ph.on('pageerror',e=>errs.push('phone: '+e.message));
-  await ph.goto(DIST); await ph.waitForTimeout(1000); await ph.evaluate(async(slot)=>{ await openSlot(slot); App.route='dev'; App.params={dtab:'practice'}; render(); },SV.slot); await ph.waitForTimeout(400);
+  await ph.goto(DIST); await ph.evaluate(ISO); await ph.waitForTimeout(1000); await ph.evaluate(async(slot)=>{ await openSlot(slot); App.route='dev'; App.params={dtab:'practice'}; render(); },SV.slot); await ph.waitForTimeout(400);
   const sw=await ph.evaluate(()=>[document.documentElement.scrollWidth,innerWidth,document.querySelectorAll('.v1821t-pl').length]);
   await ph.screenshot({path:OUT+'/practice_phone.png',fullPage:true});
   await ph.evaluate(()=>{ const x=v1821tComing(App.C,'V'); App.modal={type:'fixture',id:x.f.id}; renderModal(); }); await ph.waitForTimeout(300);

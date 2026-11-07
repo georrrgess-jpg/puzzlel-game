@@ -4,10 +4,12 @@
 // Suggest for me stays in budget, CPU parity and the balance table (same seed, season + rollover: V1821D.off vs the feature),
 // migration of old / broken saves, determinism, the UI on desktop and phone (no sideways scroll), no page errors.
 const { chromium, DIST } = require('./_pw');
+/* v18.21 merge: the other development features are switched off so this test measures this feature alone (test/devbalance.js covers them together) */
+const ISO="V1821D.only=new Set(['summer']); V1821C.off=V1821P.off=V1821M.off=V1821T.off=true;";
 const fs=require('fs'); const SHOTS=__dirname+'/shots/v1821'; fs.mkdirSync(SHOTS,{recursive:true});
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{ const b=await chromium.launch(); const errs=[];
-  const mk=async(seed,vw)=>{ const page=await b.newPage({viewport:vw||{width:1440,height:900}}); page.on('pageerror',e=>errs.push(e.message)); await page.goto(DIST); await page.waitForTimeout(500);
+  const mk=async(seed,vw)=>{ const page=await b.newPage({viewport:vw||{width:1440,height:900}}); page.on('pageerror',e=>errs.push(e.message)); await page.goto(DIST); await page.evaluate(ISO); await page.waitForTimeout(500);
     await page.click('[data-a="newCareerForm"][data-slot="1"]'); await page.fill('#nc-name','Summer Coach'); await page.fill('#nc-seed',seed);
     await page.click('[data-a="ncNext"]'); await page.waitForTimeout(200); await page.click('[data-a="createCareer"]'); await page.waitForTimeout(900); return page; };
   /* sim to the offseason; returns the season-start snapshot for the balance table */
