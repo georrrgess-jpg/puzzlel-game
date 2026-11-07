@@ -4657,6 +4657,34 @@ button.v1819k-li{cursor:pointer}button.v1819k-li:hover{background:var(--surface2
 @media (prefers-reduced-motion:reduce){ .v1819s-med.v1819s-on::after,.v1819s-rays,.v1819s-bigmed,.v1819s-detail,.v1819s-endm h2,.v1819s-newbest,.v1819s-endrows li,.v1819s-bar i,.v1819s-codebox,.v1819s-skel .v1819s-pl,.v1819s-chip.live i{animation:none!important} }
 body.rm .v1819s-med.v1819s-on::after,body.rm .v1819s-rays,body.rm .v1819s-bigmed,body.rm .v1819s-detail,body.rm .v1819s-endm h2,body.rm .v1819s-newbest,body.rm .v1819s-endrows li,body.rm .v1819s-bar i{animation:none!important}
 
+/* v18.21 Player Development hub */
+.v1821d-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:4px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--surface) 80%,transparent);width:max-content;max-width:100%}
+.v1821d-tabs button{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;font-size:.9rem;padding:8px 14px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:background .15s,color .15s}
+.v1821d-tabs button:hover{color:var(--text);background:color-mix(in srgb,var(--surface2) 70%,transparent)}
+.v1821d-tabs button.on{color:var(--text);background:var(--surface2);box-shadow:inset 0 -2px 0 var(--accent)}
+.v1821d-bd{font-style:normal;font-size:.68rem;font-weight:800;min-width:18px;padding:1px 6px;border-radius:999px;background:var(--accent);color:#16110a;text-align:center}
+.v1821d-body{display:flex;flex-direction:column;gap:16px}
+.v1821d-gls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px}
+.v1821d-gl{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--surface2) 40%,transparent);min-width:0}
+.v1821d-glh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.v1821d-glh b{font-family:var(--f-display);font-size:1.15rem;text-transform:uppercase}
+.v1821d-pct{font-size:.74rem;font-weight:800;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--surface2) 90%,transparent);color:var(--muted)}
+.v1821d-pct.up{color:#5fd38d;background:color-mix(in srgb,#3fbf73 16%,transparent)}.v1821d-pct.dn{color:#ff8a7a;background:color-mix(in srgb,#e2574c 16%,transparent)}
+.v1821d-big{display:flex;align-items:baseline;gap:8px;margin:8px 0 6px;flex-wrap:wrap}.v1821d-big span{font-family:var(--f-display);font-size:2rem;line-height:1}.v1821d-big small{color:var(--muted);font-size:.78rem}
+.v1821d-parts{list-style:none;margin:0;padding:0;display:grid;gap:3px;font-size:.84rem}
+.v1821d-parts li{display:flex;justify-content:space-between;gap:8px}.v1821d-parts li.tot{border-top:1px solid var(--line);padding-top:4px;margin-top:2px;color:var(--muted)}
+.v1821d-sums{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}
+.v1821d-sum{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,transform .15s}
+.v1821d-sum:hover{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));transform:translateY(-1px)}
+.v1821d-sum>span:first-child{font-size:1.2rem;line-height:1.2}.v1821d-sum b{display:block;font-size:.9rem}.v1821d-sum small{display:block;color:var(--muted);font-size:.78rem;margin-top:1px}
+.v1821d-sum.warn{border-color:color-mix(in srgb,#e8b84a 55%,var(--line))}
+.v1821d-pstrip{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 45%,transparent)}
+.v1821d-pk{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:4px}
+.v1821d-fc{appearance:none;font:inherit;font-size:.78rem;color:var(--text);padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.v1821d-fc.up b{color:#5fd38d}.v1821d-fc.dn b{color:#ff8a7a}.v1821d-fc.foc b{color:var(--accent)}.v1821d-fc.more{cursor:pointer;margin-left:auto}
+@media (max-width:900px){ .v1821d-gls{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:640px){ .v1821d-tabs{width:100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none} .v1821d-tabs button{flex:none;padding:8px 11px} }
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -28155,6 +28183,106 @@ MODALS.v1819sEnd=()=>{ const C=App.C; const S=C&&C.scn; if(!S||!S.end) return ''
     ${v1819sCodeBox(S.rcode,'Share your result: anyone with this code plays your exact world')}
     <div class="v1819s-endact"><button class="btn v1819s-ghost" data-a="v1819sReplay">Try this world again</button><button class="btn v1819s-ghost" data-a="v1819sHub">Scenario hub</button><button class="btn pri" data-a="closeModal" data-autofocus>Keep playing this career</button></div>
     <p class="tiny muted">The rules are lifted. ${esc(Sx(C.userSid).town)} carry on as a normal career.</p></div></div>`; };
+
+/* ===================== v18.21 PLAYER DEVELOPMENT CORE =====================
+   One place where every development feature plugs in, so their effects stack predictably and stay balanced.
+   - Growth multipliers: V1821D.mods holds {k,label,fn(C,p,ctx)} where fn returns a multiplier (1 = no effect) or null.
+     ctx = 'tick' (a regular-season matchday) or 'off' (the offseason growth inside rollover). The product of all of them is
+     clamped to V1821D.CAP, then applied to that player's normal growth (it never raises potential, so nobody passes POT).
+   - Per-player skill focus: V1821D.focus holds fn(C,p,base) returning a FOCUS_SHARE key or null (the first answer wins).
+     New single-skill keys are added to FOCUS_SHARE: f_sho f_pas f_def f_spd f_sta f_gk.
+   - Match form: V1821D.match holds fn(C,f,sid,side) returning a small strength delta for that side of a fixture (practice
+     sharpness, for example). The sum is clamped to +-V1821D.FORM and added to the side's S.home, which scales attack and
+     defence; it applies to fast odds runs too, so odds and results agree.
+   - A ledger (C.dvx) records, for your school, how much growth each level got this season and how much of it came from
+     each feature, for the Development hub.
+   - Hub tabs: V1821D.tabs holds {id,label,order,render(C),summary(C)}; the core draws the tab bar on VIEWS.dev.
+   With no feature registered every number is identical to before (devTick is a copy with the hook added).
+   Identifiers v1821d / V1821D. */
+const V1821D={ CAP:[0.75,1.6], FORM:0.02, mods:[], focus:[], match:[], tabs:[], off:false };
+Object.assign(FOCUS_SHARE,{ f_sho:{sho:2.4,spd:1.1}, f_pas:{pas:2.4,sta:1.05}, f_def:{def:2.4}, f_spd:{spd:2.4,sta:1.1}, f_sta:{sta:2.4,spd:1.05}, f_gk:{gk:2.6} });
+const V1821D_FOC={ f_sho:'Finishing', f_pas:'Passing', f_def:'Defending', f_spd:'Pace', f_sta:'Stamina', f_gk:'Goalkeeping' };
+function v1821dMod(k,label,fn){ V1821D.mods=V1821D.mods.filter(m=>m.k!==k); V1821D.mods.push({k,label,fn}); }
+function v1821dFocusFn(fn){ V1821D.focus.push(fn); }
+function v1821dMatch(fn){ V1821D.match.push(fn); }
+function v1821dTab(t){ V1821D.tabs=V1821D.tabs.filter(x=>x.id!==t.id); V1821D.tabs.push(t); V1821D.tabs.sort((a,b)=>(a.order||0)-(b.order||0)); }
+/* the multiplier for one player now, with its parts */
+function v1821dMult(C,p,ctx){ const parts=[]; let m=1;
+  if(!V1821D.off) for(const M of V1821D.mods){ let v=null; try{ v=M.fn(C,p,ctx); }catch(e){ console.warn('dev mod '+M.k,e); } if(v!=null&&isFinite(v)&&Math.abs(v-1)>1e-9){ parts.push({k:M.k,label:M.label,m:v}); m*=v; } }
+  const cm=clamp(m,V1821D.CAP[0],V1821D.CAP[1]); return {m:cm,raw:m,parts}; }
+function v1821dFocus(C,p,base){ if(!V1821D.off) for(const fn of V1821D.focus){ try{ const k=fn(C,p,base); if(k&&FOCUS_SHARE[k]) return k; }catch(e){} } return base; }
+/* a seeded random stream for a feature (career seed + keys), so choices for other schools are deterministic */
+const v1821dR=(C,...k)=>rngFrom(hashStr([C.seed,'v1821d',...k].join('|')));
+/* ---------- the ledger ---------- */
+function v1821dLed(C,yr){ const X=C.dvx||(C.dvx={v:1,yr:{}}); const Y=X.yr[yr]||(X.yr[yr]={}); for(const l of LVLS) if(!Y[l]) Y[l]={base:0,tot:0,n:0,parts:{}}; return Y; }
+function v1821dBook(C,p,lvl,base,amt,M,yr){ if(p.sid!==C.userSid) return; const L=v1821dLed(C,yr)[lvl]; if(!L) return; L.base+=base; L.tot+=amt; const extra=amt-base;
+  if(Math.abs(extra)>1e-9&&M.parts.length){ const lt=M.parts.reduce((a,x)=>a+Math.log(x.m),0); for(const x of M.parts){ const sh=Math.abs(lt)>1e-9?Math.log(x.m)/lt:1/M.parts.length; L.parts[x.k]=(L.parts[x.k]||0)+extra*sh; } } }
+function v1821dTrim(C){ const X=C.dvx; if(!X) return; for(const y of Object.keys(X.yr)) if(+y<C.year-2) delete X.yr[y]; }
+/* ---------- devTick with the hook (otherwise identical to engine.js) ---------- */
+devTick=function(C, frac, starters){
+  const focus=C.training;
+  for(const id in C.players){ const p=C.players[id]; if(!p.plan) continue; const sch=C.schools[p.sid]; if(!sch||sch.ext) continue;
+    const user=p.sid===C.userSid;
+    let f = user? (focus==='youth'?(p.lvl==='V'?0.85:1.3):1) : 1;
+    if(user){ const vlu=getLu(C,p.sid,p.lvl); if(vlu&&vlu.strat==='youth'&&p.grade<=10&&starters&&starters.has(p.id)) f*=STRATS.youth.m.dev; }
+    if(starters&&starters.has(p.id)) f*=1.1;
+    const cur=ovr(p); const gap=p.pot-cur; if(gap<=0) continue;
+    const base=Math.min(p.plan.gain*frac*f*clamp(gap/12,0.15,1),gap);
+    const M=v1821dMult(C,p,'tick');
+    const amt=Math.min(p.plan.gain*frac*f*clamp(gap/12,0.15,1)*M.m,gap);
+    const fk=user?(focus==='youth'?'balanced':focus):sch.devFocus;
+    shiftOvr(p, amt, M.parts.length||V1821D.focus.length?v1821dFocus(C,p,fk):fk);
+    v1821dBook(C,p,p.lvl,base,amt,M,C.year);
+  }
+};
+/* ---------- the offseason growth: scale each plan for the duration of rollover's growth step ---------- */
+{ const _ro=rollover; rollover=function(C){ const scaled=[];
+    try{ if(C&&C.phase==='offseason'&&!(C.rolled&&C.rolled[C.year])){ const yr=C.year;
+        for(const id in C.players){ const p=C.players[id]; const sch=C.schools[p.sid]; if(!p.plan||!sch||sch.ext) continue; const gap=p.pot-ovr(p); if(gap<=0) continue;
+          const M=v1821dMult(C,p,'off'); if(M.m===1&&p.sid!==C.userSid) continue;
+          const base=Math.min(gap,p.plan.gain*0.52*clamp(gap/12,0.2,1)); const amt=Math.min(gap,p.plan.gain*M.m*0.52*clamp(gap/12,0.2,1));
+          v1821dBook(C,p,p.lvl,base,amt,M,yr); if(M.m!==1){ scaled.push([p.plan,p.plan.gain]); p.plan.gain*=M.m; } } } }catch(e){ console.warn('dev offseason',e); }
+    let r; try{ r=_ro.apply(this,arguments); } finally{ for(const [pl,g] of scaled) if(pl.gain!==g) pl.gain=g; }
+    try{ v1821dTrim(C); }catch(e){} return r; }; }
+/* ---------- match form ---------- */
+{ const _sm=startMatch; startMatch=function(C,fid,opts){ const M=_sm.apply(this,arguments);
+    try{ if(!V1821D.off&&V1821D.match.length&&M&&M.sides){ const f=C.fixtures[fid]; if(f) for(let i=0;i<2;i++){ const S=M.sides[i]; if(!S) continue; let d=0; for(const fn of V1821D.match){ try{ const v=fn(C,f,S.sid,i); if(v&&isFinite(v)) d+=v; }catch(e){} }
+          d=clamp(d,-V1821D.FORM,V1821D.FORM); if(d){ S.home=(S.home||0)+d; S.v1821dForm=d; } } } }catch(e){ console.warn('dev form',e); }
+    return M; }; }
+/* the multiplier a level gets on average (for summaries), user school */
+function v1821dLvlAvg(C,lvl,ctx){ const ps=squad(C,C.userSid,lvl).filter(p=>p.plan&&p.pot>ovr(p)); if(!ps.length) return {m:1,parts:{}}; let s=0; const parts={};
+  for(const p of ps){ const M=v1821dMult(C,p,ctx||'tick'); s+=M.m; for(const x of M.parts){ const o=parts[x.k]||(parts[x.k]={label:x.label,sum:0,n:0}); o.sum+=x.m; o.n++; } }
+  return {m:s/ps.length,parts}; }
+
+/* v18.21 Player Development hub: tabs on Squads -> Development (the existing page is the Overview tab), a growth card with
+   where this season's growth came from, a boosts strip fed by each feature's summary(), and a growth-factors strip in the
+   player card. Identifiers v1821d. */
+const V1821D_UI={};
+function v1821dTabNow(){ const k=App.params&&App.params.dtab; return k&&V1821D.tabs.some(t=>t.id===k)?k:'overview'; }
+function v1821dTabBar(C,cur){ const T=[{id:'overview',label:'Overview'},...V1821D.tabs];
+  return `<nav class="v1821d-tabs" role="tablist" aria-label="Player development">${T.map(t=>{ let badge=''; try{ const b=t.badge&&t.badge(C); if(b) badge=`<i class="v1821d-bd">${esc(String(b))}</i>`; }catch(e){}
+    return `<button role="tab" aria-selected="${t.id===cur}" class="${t.id===cur?'on':''}" data-a="v1821dTab" data-k="${t.id}">${t.ico?`<span aria-hidden="true">${t.ico}</span>`:''}${esc(t.label)}${badge}</button>`; }).join('')}</nav>`; }
+A.v1821dTab=el=>{ App.params={...(App.params||{}),dtab:el.dataset.k}; App.keepScroll=true; render(); };
+function v1821dLabel(k){ const m=V1821D.mods.find(x=>x.k===k); return m?m.label:k; }
+function v1821dGrowthCard(C){ const u=C.userSid; const Y=(C.dvx&&C.dvx.yr[C.year])||null;
+  const cols=LVLS.map(l=>{ const ps=squad(C,u,l); const g=ps.length?ps.reduce((a,p)=>a+(ovr(p)-(p.ovr0[C.year]??ovr(p))),0)/ps.length:0; const L=Y&&Y[l];
+    const parts=L?Object.entries(L.parts).filter(([,v])=>Math.abs(v)>0.005).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])):[]; const n=Math.max(1,ps.length);
+    const avg=v1821dLvlAvg(C,l,'tick'); const pct=Math.round((avg.m-1)*100);
+    return `<div class="v1821d-gl"><div class="v1821d-glh"><b>${LVL_NAME[l]}</b><span class="v1821d-pct ${pct>0?'up':pct<0?'dn':''}">${pct>0?'+':''}${pct}% growth rate</span></div>
+      <div class="v1821d-big"><span class="${g>0?'good':''}">${g>0?'+':''}${fmt1(g)}</span><small>average OVR this season · ${ps.length} players</small></div>
+      <ul class="v1821d-parts">${parts.length?parts.map(([k,v])=>`<li><span>${esc(v1821dLabel(k))}</span><b class="${v>0?'good':'bad'}">${v>0?'+':''}${fmt1(v)}</b></li>`).join('')+`<li class="tot"><span>Extra OVR in the squad from boosts</span><b>${fmt1(parts.reduce((a,[,v])=>a+v,0))}</b></li>`:`<li class="muted">No boosts have paid out yet this season.</li>`}</ul></div>`; }).join('');
+  const sums=[]; for(const t of V1821D.tabs){ try{ const s=t.summary&&t.summary(C); if(s) sums.push(`<button class="v1821d-sum ${s.warn?'warn':''}" data-a="v1821dTab" data-k="${t.id}"><span aria-hidden="true">${t.ico||'•'}</span><span><b>${esc(s.t)}</b><small>${esc(s.s||'')}</small></span></button>`); }catch(e){} }
+  return `<section class="card v1821d-gc"><div class="hd"><h3>Growth this season</h3><span class="small muted">Boosts multiply each player's normal growth; nobody passes his potential</span></div>
+    <div class="v1821d-gls">${cols}</div>${sums.length?`<div class="v1821d-sums">${sums.join('')}</div>`:''}</section>`; }
+{ const _dv=VIEWS.dev; VIEWS.dev=function(){ const C=App.C; const cur=v1821dTabNow(); let body;
+    try{ if(cur==='overview') body=v1821dGrowthCard(C)+_dv.apply(this,arguments); else { const t=V1821D.tabs.find(x=>x.id===cur); body=t.render(C); } }catch(e){ console.warn('dev hub',e); body=_dv.apply(this,arguments); }
+    return v1821dTabBar(C,cur)+`<div class="v1821d-body">${body}</div>`; }; }
+/* player card: what moves this player's growth now */
+{ const _mp=MODALS.player; MODALS.player=function(m){ let h=_mp.apply(this,arguments); try{ const C=App.C; const p=C&&C.players[m.id]; if(!p||p.sid!==C.userSid||(m.tab||'overview')!=='overview'||!p.plan) return h;
+    const M=v1821dMult(C,p,'tick'); const fk=v1821dFocus(C,p,null); if(!M.parts.length&&!fk) return h;
+    const chips=M.parts.map(x=>`<span class="v1821d-fc ${x.m>=1?'up':'dn'}">${esc(x.label)} <b>${x.m>=1?'+':'−'}${Math.round(Math.abs(x.m-1)*100)}%</b></span>`).join('')+(fk?`<span class="v1821d-fc foc">Focus <b>${esc(V1821D_FOC[fk]||fk)}</b></span>`:'');
+    const strip=`<div class="v1821d-pstrip"><span class="v1821d-pk">Growth ${M.m>=1?'+':'−'}${Math.round(Math.abs(M.m-1)*100)}%</span>${chips}<button class="v1821d-fc more" data-a="go" data-r="dev">Development</button></div>`;
+    const i=h.indexOf('<div class="mbody">'); if(i>=0){ const j=i+'<div class="mbody">'.length; h=h.slice(0,j)+strip+h.slice(j); } }catch(e){ console.warn('v1821d player',e); } return h; }; }
 
 </script>
 </body></html>
