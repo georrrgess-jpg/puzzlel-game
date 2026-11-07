@@ -4789,6 +4789,63 @@ body.rm .v1819s-med.v1819s-on::after,body.rm .v1819s-rays,body.rm .v1819s-bigmed
   .v1821m-sr .v1821m-pc{justify-self:start}
   .v1821m-duo{grid-template-columns:minmax(0,1fr)} }
 
+/* v18.21 Practice Planner */
+.v1821t{display:flex;flex-direction:column;gap:16px;min-width:0}
+.v1821t-h{font-family:var(--f-display);text-transform:uppercase;margin:0 0 2px;font-size:1.6rem;letter-spacing:.01em}
+.v1821t-top p{margin:0;max-width:72ch}
+.v1821t-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.v1821t-pl{min-width:0;display:flex;flex-direction:column;gap:6px}
+.v1821t-pl.warn{border-color:color-mix(in srgb,#e8b84a 55%,var(--line))}
+.v1821t-pl .hd{flex-wrap:wrap;gap:6px}
+.v1821t-ov{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 60%,var(--line))}
+.v1821t-opp{display:flex;align-items:center;gap:10px;min-width:0}
+.v1821t-opp>div{min-width:0;flex:1}.v1821t-opp b{display:block;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v1821t-opp small{display:block;color:var(--muted);font-size:.76rem}
+.v1821t-opp svg{flex:none}
+.v1821t-big{flex:none;font-size:.7rem}
+.v1821t-hint{margin:0;font-size:.8rem;color:var(--muted);padding:6px 9px;border-radius:9px;background:color-mix(in srgb,var(--surface2) 55%,transparent)}
+.v1821t-hint.big{color:var(--text);background:color-mix(in srgb,#e8b84a 14%,transparent)}
+.v1821t-lab{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:4px}
+.v1821t-ints{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:3px;border:1px solid var(--line);border-radius:11px;background:color-mix(in srgb,var(--bg) 55%,var(--surface))}
+.v1821t-int{appearance:none;font:inherit;color:var(--muted);background:none;border:0;border-radius:8px;padding:7px 6px;cursor:pointer;text-align:center;display:flex;flex-direction:column;gap:1px;min-width:0;transition:background .15s,color .15s}
+.v1821t-int:hover:not([disabled]){color:var(--text);background:color-mix(in srgb,var(--surface2) 70%,transparent)}
+.v1821t-ih{font-weight:800;font-size:.86rem;display:flex;gap:4px;justify-content:center;align-items:center}
+.v1821t-int small{font-size:.68rem;line-height:1.25}
+.v1821t-int.on{color:var(--text);background:var(--surface2);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--team-hi,var(--accent)) 70%,transparent)}
+.v1821t-int.on.i-int{box-shadow:inset 0 0 0 1px #e2574c}.v1821t-int.on.i-light{box-shadow:inset 0 0 0 1px #4fb3d9}
+.v1821t-int[disabled],.v1821t-ses[disabled]{cursor:default;opacity:.55}
+.v1821t-int.on[disabled],.v1821t-ses.on[disabled]{opacity:1}
+.v1821t-ints.sm .v1821t-int{padding:6px 4px}
+.v1821t-sess{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.v1821t-ses{appearance:none;font:inherit;color:var(--text);text-align:left;cursor:pointer;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:2px;min-width:0;transition:border-color .15s}
+.v1821t-ses:hover:not([disabled]){border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 50%,var(--line))}
+.v1821t-ses b{font-size:.84rem}.v1821t-ses small{font-size:.72rem;color:var(--muted);line-height:1.3}
+.v1821t-ses.on{border-color:var(--team-hi,var(--accent));background:color-mix(in srgb,var(--team,var(--accent)) 14%,var(--surface))}
+.v1821t-eff{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:6px;font-size:.8rem;color:var(--muted)}
+.v1821t-eff b{color:var(--text)}
+.v1821t-btns{display:flex;gap:6px;flex-wrap:wrap}
+.v1821t-ahead .v1821t-pl{border-style:dashed}
+.v1821t-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;margin-top:8px}
+.v1821t-tile{appearance:none;font:inherit;color:var(--text);text-align:left;padding:6px 7px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:1px;min-width:0;font-size:.74rem;position:relative}
+button.v1821t-tile{cursor:pointer}button.v1821t-tile:hover{border-color:color-mix(in srgb,var(--team-hi,var(--accent)) 50%,var(--line))}
+.v1821t-tile.done{background:color-mix(in srgb,var(--surface2) 55%,var(--surface))}
+.v1821t-tile.sel{border-color:var(--team-hi,var(--accent));box-shadow:0 0 0 1px var(--team-hi,var(--accent))}
+.v1821t-tile.ov::after{content:'';position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--team-hi,var(--accent))}
+.v1821t-tile.i-int{border-left:3px solid #e2574c}.v1821t-tile.i-light{border-left:3px solid #4fb3d9}
+.v1821t-tw{font-weight:800;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v1821t-star{font-style:normal;color:#e8b84a;margin-left:3px}
+.v1821t-ti{font-weight:800;display:flex;gap:3px;align-items:center}.v1821t-ts{color:var(--muted)}
+.v1821t-r{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v1821t-r.rW{color:#5fd38d}.v1821t-r.rL{color:#ff8a7a}.v1821t-r.rD{color:var(--muted)}
+.v1821t-tal{margin:10px 0 0}
+.v1821t-two{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px}
+.v1821t-dr{display:grid;grid-template-columns:90px minmax(0,auto) minmax(0,1fr);gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.v1821t-dr:first-of-type{border-top:0}.v1821t-dr b{font-family:var(--f-display);text-transform:uppercase}
+.v1821t-dr .seg{justify-self:start}
+.v1821t-how ul{margin:6px 0 0;padding-left:18px;display:grid;gap:6px;font-size:.84rem}
+.v1821t-pv{margin-top:12px}.v1821t-pv p{margin:6px 0 0}
+@media (max-width:1180px){ .v1821t-cards{grid-template-columns:minmax(0,1fr)} .v1821t-two{grid-template-columns:minmax(0,1fr)} .v1821t-sess{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:820px){ .v1821t-sess{grid-template-columns:repeat(2,minmax(0,1fr))} .v1821t-dr{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:640px){ .v1821t-strip{grid-template-columns:repeat(auto-fill,minmax(68px,1fr))} .v1821t-h{font-size:1.35rem} }
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -28675,6 +28732,219 @@ v1821dTab({id:'mentors',label:'Mentors',ico:'🤝',order:30,render:v1821mRender,
     const b=document.createElement('button'); b.className='dec v1821p-dec'; b.dataset.a='go'; b.dataset.r='dev'; b.dataset.p=JSON.stringify({dtab:'plans'});
     b.innerHTML=`<span class="dec-ico">🎯</span><span class="grow"><b>Set development plans</b><small>Player Plans · up to 3 per level · +15% growth for each plan player</small></span><span class="dec-go">${icon('chev',16)}</span>`;
     box.appendChild(b); return t.innerHTML; }catch(e){ console.warn('v1821p overview',e); return h; } }; }
+
+/* ===================== v18.21 PRACTICE PLANNER =====================
+   Each level (V, JV, MOD) gets a practice plan for every game week: an intensity and one session type.
+   - Intensity: Light x0.85 growth and fresh legs (+0.006 match form), Standard nothing, Intense x1.2 growth but tired legs
+     (-0.008, or -0.012 when the level's previous game week was Intense too; the Calendar's open week resets the legs).
+   - Session: Technical (growth leans to passing / finishing), Tactical (+0.003 form, no growth change), Conditioning
+     (leans to stamina / pace), Scrimmage (Varsity and JV together: +5% growth for the non-starters of both levels).
+   - Growth effects are regular-season only (the core's 'tick'); preseason and postseason weeks keep only the form effects.
+     The practice multiplier of one week is capped at V1821T.CAP (Intense + Scrimmage do not stack past +20%).
+   - Weeks are keyed by fixture: P0-2 preseason, R0-13 league matchdays, S0-2 Sectionals, G Regional, T0-2 State.
+   - State (lazy, on the career): C.prac = {v:1, def:{V:{i,s},JV,MOD}, yr:{[yr]:{ov:{[wk]:{[lvl]:{i,s}}}, log:{[wk]:{[lvl]:{i,s,b2b,fm,fid}}}}}}
+     ov = per-week overrides; log = the plan frozen when that level's game kicked off (later edits never rewrite history).
+   - Other schools: a seeded plan per (school, level, week) like an average coach: mostly Standard, about 12% Intense and 16%
+     Light in the league (the growth and form averages cancel), and a taper (Light 45%) in knockout games.
+   Identifiers v1821t / V1821T. */
+const V1821T={ CAP:1.2, B2B:-0.012, SCRIM:1.05, off:false,
+  INT:{ light:{l:'Light',g:0.85,f:0.006}, std:{l:'Standard',g:1,f:0}, int:{l:'Intense',g:1.2,f:-0.008} },
+  SES:{ tech:{l:'Technical'}, tac:{l:'Tactical',f:0.003}, cond:{l:'Conditioning'}, scrim:{l:'Scrimmage'} },
+  CPU:{ int:0.12, light:0.16, scrim:0.06, tac:0.10, cond:0.22 }, POST:{ light:0.45, tac:0.40 } };
+const V1821T_IK=['light','std','int'], V1821T_SK=['tech','tac','cond','scrim'];
+/* ---------- weeks ---------- */
+function v1821tWk(f){ if(!f) return null; if(f.comp==='pre') return 'P'+f.rd; if(f.comp==='reg') return 'R'+f.rd; if(f.comp==='sec') return 'S'+f.rd; if(f.comp==='rgn') return f.lpo?null:'G'; if(f.comp==='st') return 'T'+f.rd; return null; }
+function v1821tOrd(wk){ const n=+wk.slice(1)||0; return ({P:0,R:10,S:30,G:40,T:50}[wk[0]]||0)+n; }
+const v1821tReg=wk=>!!wk&&wk[0]==='R';
+const V1821T_POST=['S0','S1','S2','G','T0','T1','T2'];
+function v1821tWkName(wk,short){ if(!wk) return ''; const n=+wk.slice(1)||0; const t=wk[0];
+  if(t==='R') return short?`MD${n+1}`:`Matchday ${n+1}`; if(t==='P') return short?`Pre ${n+1}`:`Preseason Cup ${n+1}`;
+  if(t==='S') return short?['Sec QF','Sec SF','Sec F'][n]:['Sectional quarterfinal','Sectional semifinal','Section final'][n];
+  if(t==='G') return short?'Regional':'Regional final'; return short?['State QF','State SF','State F'][n]:['State quarterfinal','State semifinal','State final'][n]; }
+/* the Calendar's open week (no league games between two matchdays) gives fresh legs: no back-to-back penalty after it */
+const v1821tAfterRest=wk=>typeof V1819K!=='undefined'&&V1819K&&wk==='R'+V1819K.OPEN_AFTER;
+/* ---------- state ---------- */
+function v1821tS(C){ let P=C.prac; if(!P||typeof P!=='object'){ P=C.prac={v:1,def:{},yr:{}}; }
+  if(!P.def) P.def={}; if(!P.yr) P.yr={}; for(const l of LVLS){ const d=P.def[l]; if(!d||!V1821T.INT[d.i]||!V1821T.SES[d.s]||(d.s==='scrim'&&l==='MOD')) P.def[l]={i:'std',s:'tech'}; }
+  if(P.def.V.s==='scrim'&&P.def.JV.s!=='scrim') P.def.JV.s='scrim'; if(P.def.JV.s==='scrim'&&P.def.V.s!=='scrim') P.def.V.s='scrim';
+  for(const y of Object.keys(P.yr)) if(+y<C.year-2) delete P.yr[y]; return P; }
+function v1821tY(C,yr){ const P=v1821tS(C); const y=yr==null?C.year:yr; return P.yr[y]||(P.yr[y]={ov:{},log:{}}); }
+/* ---------- the user's weeks (fixtures of one level this year, plus the postseason still ahead for Varsity) ---------- */
+const V1821T_C={wk:new Map(),cpu:new Map(),key:''};
+function v1821tCacheKey(C){ return [C.seed,C.year,C.phase,C.md,C.pre&&C.pre.rd,C.pre&&C.pre.skipped,C.post&&(C.post.cur||[]).join(',')].join('|'); }
+function v1821tAlive(C,yr){ const u=C.userSid; for(const id in C.fixtures){ const f=C.fixtures[id]; if(f.yr===yr&&isKO(f.comp)&&!f.lpo&&f.st==='d'&&(f.h===u||f.a===u)&&f.w&&f.w!==u) return false; } return true; }
+function v1821tWeeks(C,lvl,yr){ yr=yr==null?C.year:yr; const k=v1821tCacheKey(C); if(V1821T_C.key!==k){ V1821T_C.key=k; V1821T_C.wk.clear(); }
+  const ck=lvl+'|'+yr; if(V1821T_C.wk.has(ck)) return V1821T_C.wk.get(ck);
+  const u=C.userSid; const out=[];
+  for(const id in C.fixtures){ const f=C.fixtures[id]; if(f.yr!==yr||f.lvl!==lvl||f.st==='x'||(f.h!==u&&f.a!==u)) continue; const wk=v1821tWk(f); if(wk) out.push({wk,f}); }
+  out.sort((a,b)=>v1821tOrd(a.wk)-v1821tOrd(b.wk));
+  if(lvl==='V'&&yr===C.year&&C.phase!=='offseason'&&C.phase!=='awards'&&v1821tAlive(C,yr)){ const last=out.length?v1821tOrd(out[out.length-1].wk):-1;
+    for(const wk of V1821T_POST) if(v1821tOrd(wk)>last) out.push({wk,f:null,hyp:true}); }
+  V1821T_C.wk.set(ck,out); return out; }
+/* ---------- plans ---------- */
+function v1821tUserPlan(C,lvl,wk,yr){ const Y=v1821tY(C,yr); const lg=Y.log[wk]&&Y.log[wk][lvl]; if(lg) return {i:lg.i,s:lg.s,src:'played'};
+  const o=Y.ov[wk]&&Y.ov[wk][lvl]; const d=v1821tS(C).def[lvl]; let p=o?{i:o.i||d.i,s:o.s||d.s,src:'week'}:{i:d.i,s:d.s,src:'default'};
+  if(p.s==='scrim'&&(lvl==='MOD'||!v1821tReg(wk))) p={...p,s:'tech'}; return p; }
+function v1821tCpuPlan(C,sid,lvl,wk,yr){ const k=[C.seed,sid,lvl,wk,yr].join('|'); const c=V1821T_C.cpu.get(k); if(c) return c;
+  const r=v1821dR(C,'prac',sid,lvl,yr,wk); const u=r(), v=r(); const T=V1821T.CPU, Q=V1821T.POST; let i='std', s='tech';
+  if(wk[0]==='S'||wk[0]==='G'||wk[0]==='T'){ i=u<Q.light?'light':'std'; s=v<Q.tac?'tac':'tech'; }
+  else { i=u<T.int?'int':u<T.int+T.light?'light':'std';
+    const sc=v1821tReg(wk)&&lvl!=='MOD'&&v1821dR(C,'pracS',sid,yr,wk)()<T.scrim;
+    s=sc?'scrim':v<T.tac?'tac':v<T.tac+T.cond?'cond':'tech'; }
+  const p={i,s,src:'cpu'}; if(V1821T_C.cpu.size>6000) V1821T_C.cpu.clear(); V1821T_C.cpu.set(k,p); return p; }
+function v1821tPlan(C,sid,lvl,wk,yr){ yr=yr==null?C.year:yr; return sid===C.userSid?v1821tUserPlan(C,lvl,wk,yr):v1821tCpuPlan(C,sid,lvl,wk,yr); }
+/* the level's previous game week (for the back-to-back Intense rule) */
+function v1821tPrev(C,sid,lvl,wk,yr){ yr=yr==null?C.year:yr;
+  if(sid!==C.userSid){ if(!v1821tReg(wk)) return null; const n=+wk.slice(1); return n>0?'R'+(n-1):null; }
+  const W=v1821tWeeks(C,lvl,yr); const o=v1821tOrd(wk); let best=null; for(const x of W){ if(v1821tOrd(x.wk)<o) best=x.wk; else break; } return best; }
+function v1821tB2B(C,sid,lvl,wk,yr){ const p=v1821tPlan(C,sid,lvl,wk,yr); if(p.i!=='int'||v1821tAfterRest(wk)) return false; const pw=v1821tPrev(C,sid,lvl,wk,yr); return !!pw&&v1821tPlan(C,sid,lvl,pw,yr).i==='int'; }
+/* the plan's match-form delta and growth multiplier (numbers the UI shows come from here) */
+function v1821tFormOf(C,sid,lvl,wk,yr){ const p=v1821tPlan(C,sid,lvl,wk,yr); let d=V1821T.INT[p.i].f; if(p.i==='int'&&v1821tB2B(C,sid,lvl,wk,yr)) d=V1821T.B2B; if(p.s==='tac') d+=V1821T.SES.tac.f; return d; }
+function v1821tScrimOn(C,sid,wk,yr){ return v1821tReg(wk)&&v1821tPlan(C,sid,'V',wk,yr).s==='scrim'&&v1821tPlan(C,sid,'JV',wk,yr).s==='scrim'; }
+function v1821tStarter(C,p){ const lu=getLu(C,p.sid,p.lvl); return !!(lu&&lu.slots&&lu.slots.some(s=>s.pid===p.id)); }
+function v1821tGrowOf(C,sid,lvl,wk,yr,starter){ if(!v1821tReg(wk)) return 1; const p=v1821tPlan(C,sid,lvl,wk,yr); let g=V1821T.INT[p.i].g;
+  if(lvl!=='MOD'&&!starter&&v1821tScrimOn(C,sid,wk,yr)) g*=V1821T.SCRIM; return Math.min(g,V1821T.CAP); }
+/* ---------- hooks into the development core ---------- */
+v1821dMod('prac','Practice plan',(C,p,ctx)=>{ if(V1821T.off||ctx!=='tick'||C.phase!=='regular') return null; const sch=C.schools[p.sid]; if(!sch||sch.ext) return null;
+  const g=v1821tGrowOf(C,p.sid,p.lvl,'R'+C.md,C.year,v1821tStarter(C,p)); return g===1?null:g; });
+function v1821tFocusKey(C,p,base){ if(V1821T.off||!p||!C||C.phase!=='regular') return null; const sch=C.schools[p.sid]; if(!sch||sch.ext||p.pos==='GK') return null;
+  const s=v1821tPlan(C,p.sid,p.lvl,'R'+C.md,C.year).s; if(s!=='tech'&&s!=='cond') return null;
+  const b=base==null?(p.sid===C.userSid?C.training:sch.devFocus):base; if(b&&b!=='balanced'&&b!=='youth') return null;
+  for(const fn of V1821D.focus){ if(fn===v1821tFocusFn) continue; try{ if(fn(C,p,base)) return null; }catch(e){} }
+  return s==='tech'?(p.pos==='FWD'?'f_sho':'f_pas'):(p.pos==='FWD'?'f_spd':'f_sta'); }
+function v1821tFocusFn(C,p,base){ return v1821tFocusKey(C,p,base); }
+v1821dFocusFn(v1821tFocusFn);
+v1821dMatch((C,f,sid,side)=>{ if(V1821T.off) return 0; const wk=v1821tWk(f); if(!wk||!C.schools[sid]) return 0; return v1821tFormOf(C,sid,f.lvl,wk,f.yr); });
+/* ---------- freeze the user's plan when a real game kicks off ---------- */
+function v1821tFreeze(C,f){ const u=C.userSid; if(!f||(f.h!==u&&f.a!==u)) return null; const wk=v1821tWk(f); if(!wk) return null; const Y=v1821tY(C,f.yr); const L=Y.log[wk]||(Y.log[wk]={});
+  if(L[f.lvl]) return L[f.lvl]; const p=v1821tUserPlan(C,f.lvl,wk,f.yr); const b2b=v1821tB2B(C,u,f.lvl,wk,f.yr);
+  L[f.lvl]={i:p.i,s:p.s,b2b:b2b?1:0,fid:f.id};
+  L[f.lvl].fm=Math.round(v1821tFormOf(C,u,f.lvl,wk,f.yr)*10000)/10000; return L[f.lvl]; }
+{ const _sm=startMatch; startMatch=function(C,fid,opts){ try{ if(!V1821T.off&&!(opts&&opts.fast)){ const f=C.fixtures[fid]; if(f&&f.st==='s') v1821tFreeze(C,f); } }catch(e){ console.warn('practice freeze',e); }
+    return _sm.apply(this,arguments); }; }
+/* ---------- season-end practice report (one news item) ---------- */
+function v1821tTally(C,lvl,yr){ yr=yr==null?C.year:yr; const Y=v1821tY(C,yr); const t={light:0,std:0,int:0,b2b:0,n:0,rec:{light:[0,0,0],std:[0,0,0],int:[0,0,0]}};
+  for(const wk in Y.log){ const x=Y.log[wk][lvl]; if(!x) continue; t[x.i]++; t.n++; if(x.b2b) t.b2b++; const f=C.fixtures[x.fid]; if(f&&f.st==='d'){ const u=C.userSid; const k=f.w===u?0:f.w?2:1; t.rec[x.i][k]++; } } return t; }
+{ const _ad=advance; advance=function(C){ const ph=C&&C.phase; const r=_ad.apply(this,arguments);
+    try{ if(!V1821T.off&&ph==='regular'&&C.phase==='sectionals'&&C.prac){ const Y=v1821tY(C); if(!Y.news){ Y.news=1; const t=v1821tTally(C,'V'); const L=C.dvx&&C.dvx.yr[C.year];
+          const ex=L?LVLS.reduce((a,l)=>a+((L[l]&&L[l].parts.prac)||0),0):0;
+          if(t.int+t.light>=3) addNews(C,'program',`Practice report: ${C.schools[C.userSid].town} Varsity went Intense ${t.int} time${t.int===1?'':'s'} and Light ${t.light} time${t.light===1?'':'s'} in league play; practice plans added ${ex>=0?'+':''}${fmt1(ex)} OVR across the program`,C.userSid); } } }catch(e){ console.warn('practice news',e); }
+    return r; }; }
+
+/* v18.21 Practice Planner UI: the "Practice" tab on Squads -> Development (coming week per level, plan ahead, the season
+   strip, saved defaults), the Overview chip and badge, a "This week" item before rivalry / knockout games, and a small
+   Varsity intensity control in the match preview. Identifiers v1821t. */
+const V1821T_ICO={light:'🌤️',std:'⚖️',int:'🔥'}, V1821T_SICO={tech:'🎯',tac:'🧠',cond:'🫀',scrim:'🤝'};
+const V1821T_SS={tech:'Technical',tac:'Tactical',cond:'Fitness',scrim:'Scrimmage'};
+const v1821tPts=d=>{ const v=Math.round(d*1000); return (v>0?'+':v<0?'−':'±')+Math.abs(v); };
+function v1821tIntTxt(k,wk,b2b){ const I=V1821T.INT[k]; const reg=v1821tReg(wk); const gr=k==='std'?'normal growth':reg?`×${I.g.toFixed(2).replace(/0$/,'')} growth`:'no growth outside the league season';
+  const fm=k==='int'?`${v1821tPts(b2b?V1821T.B2B:I.f)} form${b2b?' (2nd Intense in a row)':' (tired legs)'}`:k==='light'?`${v1821tPts(I.f)} form (fresh legs)`:'no form change'; return [gr,fm]; }
+function v1821tSesTxt(C,k,lvl,wk){ const reg=v1821tReg(wk); const fo=C.training||'balanced'; const lean=fo==='balanced'||fo==='youth';
+  if(k==='tac') return `${v1821tPts(V1821T.SES.tac.f)} form next game · no growth change`;
+  if(k==='scrim') return lvl==='MOD'?'Varsity and JV only':!reg?'League season only':`+${Math.round((V1821T.SCRIM-1)*100)}% growth for non-starters on Varsity and JV (sets both levels)`;
+  const what=k==='tech'?'passing (DEF/MID) and finishing (FWD)':'stamina (DEF/MID) and pace (FWD)';
+  if(!reg) return `Growth leans to ${what} in league weeks · no growth this week`;
+  return lean?`Growth leans to ${what} · same amount`:`Your training focus (${TRAINING[fo]}) sets the direction; no extra effect`; }
+function v1821tOpp(C,f){ return f?C.schools[f.h===C.userSid?f.a:f.h]:null; }
+function v1821tBig(C,f){ if(!f) return null; if(isKO(f.comp)&&!f.lpo) return f.comp==='sec'&&f.rd===2?'Section final':f.comp==='st'&&f.rd===2?'State final':'Knockout game'; const r=isRivalry(C,f.h,f.a); return r?(r==='heated'?'Rivalry game':'Rival game'):null; }
+function v1821tComing(C,lvl){ return v1821tWeeks(C,lvl).find(x=>x.f?x.f.st==='s':false)||null; }
+function v1821tHint(C,lvl,x){ const f=x.f; const big=v1821tBig(C,f); const opp=v1821tOpp(C,f); let d=0; try{ d=xiRating(C,opp.id,lvl)-xiRating(C,C.userSid,lvl); }catch(e){}
+  const p=v1821tUserPlan(C,lvl,x.wk);
+  if(big) return {t:p.i==='light'?`${big}: fresh legs are set.`:`${big}: Light gives fresh legs (${v1821tPts(V1821T.INT.light.f)} form).`,big:1};
+  if(d<=-2.5) return {t:`You are stronger on paper (XI ${fmt1(-d)} better). A good week to push: Intense grows more.`};
+  if(d>=2.5) return {t:`They are stronger on paper (XI ${fmt1(d)} better). Light or Tactical keeps you sharp.`};
+  return {t:'An even matchup on paper.'}; }
+function v1821tDate(C,f){ try{ if(f&&typeof seasonDate==='function'){ const s=seasonDate(C,f); return s&&s.label?s.label:''; } }catch(e){} return ''; }
+function v1821tEffect(C,lvl,wk){ const u=C.userSid; const fm=v1821tFormOf(C,u,lvl,wk); const reg=v1821tReg(wk);
+  const gS=reg?v1821tGrowOf(C,u,lvl,wk,C.year,true):1, gB=reg?v1821tGrowOf(C,u,lvl,wk,C.year,false):1;
+  const g=!reg?'no growth this week (form only)':gS===gB?`growth ×${gS.toFixed(2)}`:`growth ×${gS.toFixed(2)} starters · ×${gB.toFixed(2)} bench`;
+  return `${g} · form ${v1821tPts(fm)}`; }
+/* the planner for one level and week */
+function v1821tPlanner(C,lvl,x,opts){ opts=opts||{}; const wk=x.wk; const f=x.f; const p=v1821tUserPlan(C,lvl,wk); const lock=p.src==='played';
+  const b2b=v1821tPrev(C,C.userSid,lvl,wk)&&!v1821tAfterRest(wk)&&v1821tPlan(C,C.userSid,lvl,v1821tPrev(C,C.userSid,lvl,wk)).i==='int';
+  const opp=v1821tOpp(C,f); const hint=f?v1821tHint(C,lvl,x):null; const big=v1821tBig(C,f);
+  const tag=p.src==='played'?'Locked: game started':p.src==='week'?'This week only':'On your default';
+  const oppL=f?`<div class="v1821t-opp">${crest(opp,30)}<div><b>${f.h===C.userSid?'vs':'@'} ${esc(opp.town)} <span class="muted">${esc(opp.mascot||'')}</span></b><small>${esc(fixtureLabel(f))}${v1821tDate(C,f)?' · '+esc(v1821tDate(C,f)):''}</small></div>${big?`<span class="chip riv v1821t-big">${esc(big)}</span>`:''}</div><p class="v1821t-hint ${hint&&hint.big?'big':''}">${esc(hint.t)}</p>`
+    :`<div class="v1821t-opp"><div><b>${esc(v1821tWkName(wk))}</b><small>If Varsity gets there · opponent not set yet</small></div></div>`;
+  const dis=lock?' disabled':''; const D=` data-l="${lvl}" data-w="${wk}"`;
+  const ints=V1821T_IK.map(k=>{ const [a,b]=v1821tIntTxt(k,wk,k==='int'&&b2b); return `<button class="v1821t-int ${p.i===k?'on':''} i-${k}" role="radio" aria-checked="${p.i===k}" data-a="v1821tSet"${D} data-k="i" data-v="${k}"${dis}><span class="v1821t-ih"><span aria-hidden="true">${V1821T_ICO[k]}</span>${V1821T.INT[k].l}</span><small>${esc(a)}</small><small>${esc(b)}</small></button>`; }).join('');
+  const ses=V1821T_SK.map(k=>{ const off=k==='scrim'&&(lvl==='MOD'||!v1821tReg(wk)); return `<button class="v1821t-ses ${p.s===k?'on':''}" role="radio" aria-checked="${p.s===k}" data-a="v1821tSet"${D} data-k="s" data-v="${k}"${dis||(off?' disabled':'')}><b><span aria-hidden="true">${V1821T_SICO[k]}</span> ${V1821T.SES[k].l}</b><small>${esc(v1821tSesTxt(C,k,lvl,wk))}</small></button>`; }).join('');
+  const d=v1821tS(C).def[lvl]; const same=p.i===d.i&&p.s===d.s;
+  return `<section class="card v1821t-pl ${big&&p.src==='default'&&p.i!=='light'?'warn':''}"><div class="hd"><h3>${opts.title||LVL_NAME[lvl]}</h3><span class="chip ${p.src==='week'?'v1821t-ov':''}">${tag}</span></div>${oppL}
+    <div class="v1821t-lab" id="v1821t-il-${lvl}-${wk}">Intensity</div><div class="v1821t-ints" role="radiogroup" aria-labelledby="v1821t-il-${lvl}-${wk}">${ints}</div>
+    <div class="v1821t-lab" id="v1821t-sl-${lvl}-${wk}">Session</div><div class="v1821t-sess" role="radiogroup" aria-labelledby="v1821t-sl-${lvl}-${wk}">${ses}</div>
+    <div class="v1821t-eff"><span>This week: <b>${esc(v1821tEffect(C,lvl,wk))}</b></span>${lock?'':`<span class="v1821t-btns">${p.src==='week'?`<button class="btn sm ghost" data-a="v1821tReset"${D}>Back to default</button>`:''}${same?'':`<button class="btn sm" data-a="v1821tSaveDef"${D}>Save as default</button>`}</span>`}</div></section>`; }
+/* the season strip for one level */
+function v1821tStrip(C,lvl){ const W=v1821tWeeks(C,lvl); const u=C.userSid; const sel=App.params&&App.params.pwk;
+  if(!W.length) return `<div class="empty">No ${LVL_NAME[lvl]} games on the schedule this season.</div>`;
+  const tiles=W.map(x=>{ const f=x.f; const p=v1821tUserPlan(C,lvl,x.wk); const opp=v1821tOpp(C,f); const big=v1821tBig(C,f)||(x.hyp&&x.wk==='S2'?'Section final':null);
+    let res=''; if(f&&f.st==='d'){ const us=f.h===u?f.hg:f.ag, th=f.h===u?f.ag:f.hg; const r=f.w===u?'W':f.w?'L':'D'; res=`<span class="v1821t-r r${r}">${r} ${us}-${th}</span>`; } else res=`<span class="v1821t-r">${f?(f.h===u?'vs ':'@ ')+esc(boardName(opp)):'TBD'}</span>`;
+    const played=p.src==='played'; const fut=!played; const on=sel===x.wk&&(App.params.plv||'V')===lvl;
+    const lab=`${v1821tWkName(x.wk)}: ${V1821T.INT[p.i].l} + ${V1821T.SES[p.s].l}${f&&f.st==='d'?', '+res.replace(/<[^>]+>/g,''):''}${big?' · '+big:''}`;
+    return `<${fut?'button':'div'} class="v1821t-tile i-${p.i} ${on?'sel':''} ${played?'done':''} ${p.src==='week'?'ov':''}" ${fut?`data-a="v1821tPick" data-l="${lvl}" data-w="${x.wk}" aria-pressed="${on}"`:''} title="${esc(lab)}" aria-label="${esc(lab)}">
+      <span class="v1821t-tw">${esc(v1821tWkName(x.wk,1))}${big?'<i class="v1821t-star" aria-hidden="true">★</i>':''}</span><span class="v1821t-ti"><span aria-hidden="true">${V1821T_ICO[p.i]}</span>${V1821T.INT[p.i].l}</span><span class="v1821t-ts">${V1821T_SS[p.s]}</span>${res}</${fut?'button':'div'}>`; }).join('');
+  const t=v1821tTally(C,lvl); const rec=k=>t.rec[k].join('-');
+  return `<div class="v1821t-strip">${tiles}</div><p class="small muted v1821t-tal">${t.n?`So far: ${t.int} Intense (${rec('int')} W-D-L)${t.b2b?`, ${t.b2b} back to back`:''} · ${t.std} Standard (${rec('std')}) · ${t.light} Light (${rec('light')})`:'Nothing played yet this season.'} Pick an upcoming week to plan it ahead; ★ marks big games.</p>`; }
+function v1821tDefCard(C){ const P=v1821tS(C);
+  const rows=LVLS.map(l=>{ const d=P.def[l]; return `<div class="v1821t-dr"><b>${LVL_NAME[l]}</b><div class="seg sm" role="group" aria-label="${LVL_NAME[l]} default intensity">${V1821T_IK.map(k=>`<button class="${d.i===k?'on':''}" aria-pressed="${d.i===k}" data-a="v1821tDef" data-l="${l}" data-k="i" data-v="${k}">${V1821T.INT[k].l}</button>`).join('')}</div>
+    <div class="seg sm" role="group" aria-label="${LVL_NAME[l]} default session">${V1821T_SK.filter(k=>k!=='scrim'||l!=='MOD').map(k=>`<button class="${d.s===k?'on':''}" aria-pressed="${d.s===k}" data-a="v1821tDef" data-l="${l}" data-k="s" data-v="${k}">${V1821T.SES[k].l}</button>`).join('')}</div></div>`; }).join('');
+  return `<section class="card v1821t-def"><div class="hd"><h3>Every week</h3><span class="small muted">Your saved default, used for every week you don't change</span></div>${rows}</section>`; }
+function v1821tHow(){ const I=V1821T.INT;
+  return `<section class="card v1821t-how"><div class="hd"><h3>How practice works</h3></div><ul>
+    <li><b>Intense</b> ×${I.int.g} growth that matchday, but the game is played on tired legs: ${v1821tPts(I.int.f)} form, ${v1821tPts(V1821T.B2B)} if the week before was Intense too (the open week resets legs).</li>
+    <li><b>Light</b> ×${I.light.g} growth, fresh legs: ${v1821tPts(I.light.f)} form. <b>Standard</b> changes nothing.</li>
+    <li><b>Form</b> is match sharpness for that one game: home field is worth about 30 form points. Measured over league games: Light ≈ +1 point of win chance, Intense ≈ −2, back-to-back Intense ≈ −3.</li>
+    <li>Practice changes growth only in league weeks; preseason and postseason weeks keep the form effects. One week's practice boost is capped at +${Math.round((V1821T.CAP-1)*100)}%.</li>
+    <li>Other coaches plan too: mostly Standard, some Intense and Light weeks, and many taper before knockout games.</li></ul></section>`; }
+function v1821tRender(C){ const u=C.userSid; const lv=(App.params&&App.params.plv)||'V'; const sel=App.params&&App.params.pwk;
+  const cards=LVLS.map(l=>{ const x=v1821tComing(C,l); return x?v1821tPlanner(C,l,x,{title:`${LVL_NAME[l]} · next game`}):`<section class="card v1821t-pl"><div class="hd"><h3>${LVL_NAME[l]}</h3></div><div class="empty">${C.phase==='offseason'?'The season is over. Your defaults carry into next season.':`No more ${LVL_NAME[l]} games this season.`}</div></section>`; }).join('');
+  let ahead=''; if(sel){ const x=v1821tWeeks(C,lv).find(y=>y.wk===sel); const c=v1821tComing(C,lv); if(x&&(!c||c.wk!==sel)&&v1821tUserPlan(C,lv,sel).src!=='played') ahead=`<div class="v1821t-ahead">${v1821tPlanner(C,lv,x,{title:`Plan ahead · ${LVL_NAME[lv]} · ${v1821tWkName(sel)}`})}</div>`; }
+  return `<div class="v1821t"><div class="v1821t-top"><div><h2 class="v1821t-h">Practice Planner</h2><p class="small muted">Set each level's practice before its next game. Intense grows players faster but costs sharpness; Light keeps legs fresh for big games.</p></div></div>
+    <div class="v1821t-cards">${cards}</div>${ahead}
+    <section class="card"><div class="hd"><h3>The season</h3><div class="seg sm" role="group" aria-label="Level">${LVLS.map(l=>`<button class="${lv===l?'on':''}" aria-pressed="${lv===l}" data-a="v1821tLvl" data-l="${l}">${LVL_NAME[l]}</button>`).join('')}</div></div>${v1821tStrip(C,lv)}</section>
+    <div class="v1821t-two">${v1821tDefCard(C)}${v1821tHow()}</div></div>`; }
+/* ---------- summary chip and badge ---------- */
+function v1821tPending(C){ const out=[]; for(const l of LVLS){ const x=v1821tComing(C,l); if(!x) continue; const big=v1821tBig(C,x.f); const p=v1821tUserPlan(C,l,x.wk); if(big&&p.src==='default'&&p.i!=='light') out.push({l,x,big}); } return out; }
+function v1821tSummary(C){ const parts=[]; for(const l of LVLS){ const x=v1821tComing(C,l); if(!x) continue; const p=v1821tUserPlan(C,l,x.wk); parts.push(`${l} ${V1821T.INT[p.i].l} + ${V1821T.SES[p.s].l}`); }
+  if(!parts.length) return {t:'Practice: season over',s:'Your defaults carry into next season'}; const pend=v1821tPending(C);
+  return {t:'This week: '+parts[0],s:pend.length?`${pend[0].big} ahead for ${LVL_NAME[pend[0].l]}: still on defaults`:parts.slice(1).join(' · '),warn:pend.length>0}; }
+v1821dTab({id:'practice',label:'Practice',ico:'📋',order:40,render:C=>v1821tRender(C),summary:C=>v1821tSummary(C),badge:C=>{ const n=v1821tPending(C).length; return n||''; }});
+/* ---------- actions ---------- */
+function v1821tAfter(){ App.odds.clear(); queueSave(); App.keepScroll=true; if(App.modal) renderModal(); render(); }
+function v1821tLink(C,Y,wk,lvl,s){ /* Scrimmage is one session for Varsity and JV together */
+  if(lvl==='MOD') return; const o=lvl==='V'?'JV':'V'; const cur=v1821tUserPlan(C,o,wk); if(cur.src==='played') return; const d=v1821tS(C).def[o];
+  if(s==='scrim'&&cur.s!=='scrim'){ const w=Y.ov[wk]||(Y.ov[wk]={}); w[o]={i:cur.i,s:'scrim'}; }
+  else if(s!=='scrim'&&cur.s==='scrim'){ const w=Y.ov[wk]||(Y.ov[wk]={}); w[o]={i:cur.i,s:d.s==='scrim'?'tech':d.s}; } }
+function v1821tClean(C,Y,wk){ const w=Y.ov[wk]; if(!w) return; const D=v1821tS(C).def; for(const l of Object.keys(w)){ if(w[l].i===D[l].i&&w[l].s===D[l].s) delete w[l]; } if(!Object.keys(w).length) delete Y.ov[wk]; }
+A.v1821tSet=el=>{ const C=App.C; const l=el.dataset.l, wk=el.dataset.w, k=el.dataset.k, v=el.dataset.v; if(!C||!LVLS.includes(l)||!wk) return; const Y=v1821tY(C);
+  const cur=v1821tUserPlan(C,l,wk); if(cur.src==='played'){ toast('That game has started; its practice is locked.'); return; }
+  if(k==='s'&&v==='scrim'&&(l==='MOD'||!v1821tReg(wk))) return;
+  const np={i:cur.i,s:cur.s,[k]:v}; (Y.ov[wk]||(Y.ov[wk]={}))[l]=np; if(k==='s') v1821tLink(C,Y,wk,l,v); v1821tClean(C,Y,wk); v1821tAfter(); };
+A.v1821tReset=el=>{ const C=App.C; const l=el.dataset.l, wk=el.dataset.w; const Y=v1821tY(C); const w=Y.ov[wk]; const was=v1821tUserPlan(C,l,wk);
+  if(w) delete w[l]; const now=v1821tUserPlan(C,l,wk); if(was.s!==now.s) v1821tLink(C,Y,wk,l,now.s); v1821tClean(C,Y,wk); v1821tAfter(); };
+A.v1821tSaveDef=el=>{ const C=App.C; const l=el.dataset.l, wk=el.dataset.w; const p=v1821tUserPlan(C,l,wk); const P=v1821tS(C); const s=p.s==='scrim'&&l==='MOD'?'tech':p.s;
+  P.def[l]={i:p.i,s}; if(l!=='MOD'){ const o=l==='V'?'JV':'V'; if(s==='scrim') P.def[o].s='scrim'; else if(P.def[o].s==='scrim') P.def[o].s='tech'; }
+  for(const y of Object.values(P.yr)) for(const w of Object.keys(y.ov)) v1821tClean(C,y,w); toast(`${LVL_NAME[l]} default: ${V1821T.INT[p.i].l} + ${V1821T.SES[s].l} every week.`); v1821tAfter(); };
+A.v1821tDef=el=>{ const C=App.C; const l=el.dataset.l, k=el.dataset.k, v=el.dataset.v; const P=v1821tS(C); if(k==='s'&&v==='scrim'&&l==='MOD') return;
+  P.def[l]={...P.def[l],[k]:v}; if(k==='s'&&l!=='MOD'){ const o=l==='V'?'JV':'V'; if(v==='scrim') P.def[o].s='scrim'; else if(P.def[o].s==='scrim') P.def[o].s='tech'; }
+  const Y=v1821tY(C); for(const w of Object.keys(Y.ov)) v1821tClean(C,Y,w); v1821tAfter(); };
+A.v1821tPick=el=>{ const l=el.dataset.l, wk=el.dataset.w; const cur=App.params||{}; const same=cur.pwk===wk&&(cur.plv||'V')===l; App.params={...cur,plv:l,pwk:same?undefined:wk}; if(same) delete App.params.pwk; App.keepScroll=true; render(); };
+A.v1821tLvl=el=>{ App.params={...(App.params||{}),plv:el.dataset.l}; delete App.params.pwk; App.keepScroll=true; render(); };
+/* ---------- Overview: a "This week" item before a rivalry or knockout game ---------- */
+{ const _of=VIEWS.office; VIEWS.office=function(){ const h=_of.apply(this,arguments); try{ const C=App.C; if(!C||V1821T.off) return h; const pend=v1821tPending(C); if(!pend.length) return h;
+    const t=document.createElement('template'); t.innerHTML=h; const box=t.content.querySelector('.v1817o-items'); if(!box) return h; const cl=box.querySelector('.v1817o-clear'); if(cl) cl.remove();
+    const x=pend[0]; const opp=v1821tOpp(C,x.x.f); const p=v1821tUserPlan(C,x.l,x.x.wk);
+    const b=document.createElement('button'); b.className='dec v1821t-dec'; b.dataset.a='go'; b.dataset.r='dev'; b.dataset.p=JSON.stringify({dtab:'practice'});
+    b.innerHTML=`<span class="dec-ico" aria-hidden="true">🌤️</span><span class="grow"><b>${esc(x.big)} next: go Light in practice?</b><small>${esc(LVL_NAME[x.l])} vs ${esc(opp?opp.town:'')} · fresh legs ${v1821tPts(V1821T.INT.light.f)} form · now ${esc(V1821T.INT[p.i].l)} + ${esc(V1821T.SES[p.s].l)}${pend.length>1?` · ${pend.length-1} more level${pend.length>2?'s':''}`:''}</small></span><span class="dec-go">${icon('chev',16)}</span>`;
+    box.appendChild(b); return t.innerHTML; }catch(e){ console.warn('practice overview',e); return h; } }; }
+/* ---------- match preview: the Varsity intensity for this game ---------- */
+{ const _fm=MODALS.fixture; MODALS.fixture=function(m){ let h=_fm.apply(this,arguments); try{ const C=App.C; const f=C&&C.fixtures[m.id]; if(!f||f.st!=='s'||V1821T.off||f.lvl!=='V'||(f.h!==C.userSid&&f.a!==C.userSid)) return h;
+    const wk=v1821tWk(f); if(!wk) return h; const c=v1821tComing(C,'V'); if(!c||c.wk!==wk) return h; const p=v1821tUserPlan(C,'V',wk); if(p.src==='played') return h;
+    const b2b=v1821tPrev(C,C.userSid,'V',wk)&&!v1821tAfterRest(wk)&&v1821tPlan(C,C.userSid,'V',v1821tPrev(C,C.userSid,'V',wk)).i==='int';
+    const card=`<div class="card v1821t-pv"><div class="hd"><h3>Practice this week</h3><button class="btn sm ghost" data-a="go" data-r="dev" data-p="${esc(JSON.stringify({dtab:'practice'}))}">Practice Planner</button></div>
+      <div class="v1821t-ints sm" role="radiogroup" aria-label="Varsity practice intensity">${V1821T_IK.map(k=>{ const [a,b]=v1821tIntTxt(k,wk,k==='int'&&b2b); return `<button class="v1821t-int ${p.i===k?'on':''} i-${k}" role="radio" aria-checked="${p.i===k}" data-a="v1821tSet" data-l="V" data-w="${wk}" data-k="i" data-v="${k}"><span class="v1821t-ih"><span aria-hidden="true">${V1821T_ICO[k]}</span>${V1821T.INT[k].l}</span><small>${esc(a)} · ${esc(b)}</small></button>`; }).join('')}</div>
+      <p class="tiny muted">Session: ${esc(V1821T.SES[p.s].l)} · this game: ${esc(v1821tEffect(C,'V',wk))}</p></div>`;
+    const i=h.lastIndexOf('</div><div class="mfoot">'); if(i>=0) h=h.slice(0,i)+card+h.slice(i); }catch(e){ console.warn('practice preview',e); } return h; }; }
 
 </script>
 </body></html>
