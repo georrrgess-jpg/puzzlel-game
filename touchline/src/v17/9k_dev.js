@@ -13,7 +13,7 @@
    - Hub tabs: V1821D.tabs holds {id,label,order,render(C),summary(C)}; the core draws the tab bar on VIEWS.dev.
    With no feature registered every number is identical to before (devTick is a copy with the hook added).
    Identifiers v1821d / V1821D. */
-const V1821D={ CAP:[0.75,1.6], FORM:0.02, mods:[], focus:[], match:[], tabs:[], off:false };
+const V1821D={ CAP:[0.75,1.6], FORM:0.02, mods:[], focus:[], match:[], tabs:[], off:false, skip:null, bookAll:false }; /* skip: a Set of mod keys to ignore (tests isolate one feature) */
 Object.assign(FOCUS_SHARE,{ f_sho:{sho:2.4,spd:1.1}, f_pas:{pas:2.4,sta:1.05}, f_def:{def:2.4}, f_spd:{spd:2.4,sta:1.1}, f_sta:{sta:2.4,spd:1.05}, f_gk:{gk:2.6} });
 const V1821D_FOC={ f_sho:'Finishing', f_pas:'Passing', f_def:'Defending', f_spd:'Pace', f_sta:'Stamina', f_gk:'Goalkeeping' };
 function v1821dMod(k,label,fn){ V1821D.mods=V1821D.mods.filter(m=>m.k!==k); V1821D.mods.push({k,label,fn}); }
@@ -22,14 +22,14 @@ function v1821dMatch(fn){ V1821D.match.push(fn); }
 function v1821dTab(t){ V1821D.tabs=V1821D.tabs.filter(x=>x.id!==t.id); V1821D.tabs.push(t); V1821D.tabs.sort((a,b)=>(a.order||0)-(b.order||0)); }
 /* the multiplier for one player now, with its parts */
 function v1821dMult(C,p,ctx){ const parts=[]; let m=1;
-  if(!V1821D.off) for(const M of V1821D.mods){ let v=null; try{ v=M.fn(C,p,ctx); }catch(e){ console.warn('dev mod '+M.k,e); } if(v!=null&&isFinite(v)&&Math.abs(v-1)>1e-9){ parts.push({k:M.k,label:M.label,m:v}); m*=v; } }
+  if(!V1821D.off) for(const M of V1821D.mods){ if(V1821D.skip&&V1821D.skip.has(M.k)) continue; let v=null; try{ v=M.fn(C,p,ctx); }catch(e){ console.warn('dev mod '+M.k,e); } if(v!=null&&isFinite(v)&&Math.abs(v-1)>1e-9){ parts.push({k:M.k,label:M.label,m:v}); m*=v; } }
   const cm=clamp(m,V1821D.CAP[0],V1821D.CAP[1]); return {m:cm,raw:m,parts}; }
 function v1821dFocus(C,p,base){ if(!V1821D.off) for(const fn of V1821D.focus){ try{ const k=fn(C,p,base); if(k&&FOCUS_SHARE[k]) return k; }catch(e){} } return base; }
 /* a seeded random stream for a feature (career seed + keys), so choices for other schools are deterministic */
 const v1821dR=(C,...k)=>rngFrom(hashStr([C.seed,'v1821d',...k].join('|')));
 /* ---------- the ledger ---------- */
 function v1821dLed(C,yr){ const X=C.dvx||(C.dvx={v:1,yr:{}}); const Y=X.yr[yr]||(X.yr[yr]={}); for(const l of LVLS) if(!Y[l]) Y[l]={base:0,tot:0,n:0,parts:{}}; return Y; }
-function v1821dBook(C,p,lvl,base,amt,M,yr){ if(p.sid!==C.userSid) return; const L=v1821dLed(C,yr)[lvl]; if(!L) return; L.base+=base; L.tot+=amt; const extra=amt-base;
+function v1821dBook(C,p,lvl,base,amt,M,yr){ let key=lvl; if(p.sid!==C.userSid){ if(!V1821D.bookAll||!C.league.includes(p.sid)) return; key='c'+lvl; } const Y=v1821dLed(C,yr); const L=Y[key]||(Y[key]={base:0,tot:0,n:0,parts:{}}); /* bookAll (tests): CPU league schools are booked under cV/cJV/cMOD */ L.base+=base; L.tot+=amt; const extra=amt-base;
   if(Math.abs(extra)>1e-9&&M.parts.length){ const lt=M.parts.reduce((a,x)=>a+Math.log(x.m),0); for(const x of M.parts){ const sh=Math.abs(lt)>1e-9?Math.log(x.m)/lt:1/M.parts.length; L.parts[x.k]=(L.parts[x.k]||0)+extra*sh; } } }
 function v1821dTrim(C){ const X=C.dvx; if(!X) return; for(const y of Object.keys(X.yr)) if(+y<C.year-2) delete X.yr[y]; }
 /* ---------- devTick with the hook (otherwise identical to engine.js) ---------- */
@@ -53,7 +53,7 @@ devTick=function(C, frac, starters){
 { const _ro=rollover; rollover=function(C){ const scaled=[];
     try{ if(C&&C.phase==='offseason'&&!(C.rolled&&C.rolled[C.year])){ const yr=C.year;
         for(const id in C.players){ const p=C.players[id]; const sch=C.schools[p.sid]; if(!p.plan||!sch||sch.ext) continue; const gap=p.pot-ovr(p); if(gap<=0) continue;
-          const M=v1821dMult(C,p,'off'); if(M.m===1&&p.sid!==C.userSid) continue;
+          const M=v1821dMult(C,p,'off'); if(M.m===1&&p.sid!==C.userSid&&!V1821D.bookAll) continue;
           const base=Math.min(gap,p.plan.gain*0.52*clamp(gap/12,0.2,1)); const amt=Math.min(gap,p.plan.gain*M.m*0.52*clamp(gap/12,0.2,1));
           v1821dBook(C,p,p.lvl,base,amt,M,yr); if(M.m!==1){ scaled.push([p.plan,p.plan.gain]); p.plan.gain*=M.m; } } } }catch(e){ console.warn('dev offseason',e); }
     let r; try{ r=_ro.apply(this,arguments); } finally{ for(const [pl,g] of scaled) if(pl.gain!==g) pl.gain=g; }

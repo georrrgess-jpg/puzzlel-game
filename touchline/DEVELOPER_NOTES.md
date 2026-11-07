@@ -2,6 +2,51 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.21 (Player Development: Coaching Staff, Player Plans, Mentors, Practice Planner, Summer Development)
+
+Five tools that improve players at every level (Varsity, JV, Modified), built on one shared core so they stack predictably. Tests: `test/staff.js`, `plans.js`, `practice.js`, `summer.js`, and the combined `devbalance.js` (all in `run_all.sh`).
+
+### Core (`src/v17/9k_dev.js`, `9k_dev_ui.js`, `9k_dev.css`; v1821d / V1821D)
+- `v1821dMod(k,label,fn(C,p,ctx))`: growth multipliers, ctx 'tick' (each league matchday, inside `devTick`, which the core replaces with an identical copy plus the hook) or 'off' (the offseason step in `rollover`: each plan's gain is scaled for the duration of the inner rollover, then restored). The product per player is clamped to [0.75, 1.6]. Growth never passes potential.
+- `v1821dFocusFn(fn)`: per-player skill focus (new single-skill keys `f_sho f_pas f_def f_spd f_sta f_gk` in `FOCUS_SHARE`); first answer wins. Coaching Staff wraps `v1821dFocus` so its S&C lean runs last.
+- `v1821dMatch(fn(C,f,sid,side))`: match form, summed and clamped to ±0.02, added to the side's `S.home` (scales attack and defence; fast odds runs included).
+- Ledger `C.dvx.yr[yr][lvl] = {base, tot, parts}`: your school's growth with and without boosts, and the extra per feature (attributed by log share). `V1821D.bookAll` also books CPU league schools under `cV/cJV/cMOD` (tests only). Trimmed to 3 years.
+- Switches: `V1821D.off` (whole system), `V1821D.skip` (a Set of mod keys, to isolate one feature in tests).
+- UI: tabs on `VIEWS.dev` (`v1821dTab({id,label,ico,order,render,summary,badge})`; the old page is the Overview tab), a Growth this season card (per level: OVR gained, growth rate, extra from each boost, feature summary chips), and a growth strip on the player card.
+- With no feature registered every number is identical to v18.20 (checked on a full season + rollover).
+
+### Coaching Staff (`9l_staff*`; v1821c / V1821C)
+- `C.stf = {v, u:{JV,MOD,GK,SC}, mkt, cpu, lost}`. Roles: JV Coach (JV), Modified Coach (MOD), Goalkeeper Coach (GKs at every level), Strength & Conditioning (Varsity; leans growth to pace/stamina under Balanced/Youth). Multiplier 1+(rating−60)/250 per role (+0.02 when the specialty matches `C.training`), product capped 1.12; a vacant role is a volunteer at 45 (−6%).
+- Budget 100 + prestige ($k); salary rises steeply with rating (45: $9k, 60: $26k, 75: $54k, 90: $94k). Hiring windows: preseason and offseason, seeded market of 3–4 per role; contracts 1–3 seasons, renewals (+8% ask, 80% willing), experience +1..+3 a season, poaching of 75+ coaches after a strong season (12%, at most one a year).
+- CPU: seeded staffs recentred to an average of 60 per role every season (average multiplier ≈1.0).
+
+### Player Plans and Mentors (`9m_plans*`; v1821p / V1821P, v1821m / V1821M)
+- Plans: 3 per level, focus + target OVR; ×1.15 on league matchdays along the focus; ×0.99 for the rest of a level with all 3 slots used; target locks after the first matchday, new plans close after matchday 11; +0.3 once per player per season on hitting the target; plans end with the regular season (summary + news); promotions move or end a plan.
+- Mentors: up to 3 pairs, mentor Varsity grade 11–12, mentee JV/MOD at least 8 OVR below; mentee ×1.08 + position match + mentor quality, cap 1.18 (matchdays and offseason; offseason share scales with time paired); mentee leans to the mentor's best skill; mentor ×0.97 on matchdays; graduation farewell +0.4. A mentee on a plan gets only the plan's boost on matchdays (no compounding).
+- CPU: 2 plans per level and 1–2 pairs per school, seeded at `seasonStart`.
+
+### Practice Planner (`9n_practice*`; v1821t / V1821T)
+- Plan per level per week `{i: light|std|int, s: tech|tac|cond|scrim}`; weeks P0-2, R0-13, S0-2, G, T0-2. `C.prac = {v, def, yr:{ov, log}}`; a played week is frozen at kick-off.
+- Growth (league weeks only): Light ×0.85, Intense ×1.2, Scrimmage ×1.05 for V/JV non-starters (needs both levels), weekly cap ×1.2. Form: Intense −0.008 (−0.012 back to back; the open week resets), Light +0.006, Tactical +0.003, every week. Technical / Conditioning lean growth, only when no training focus or other focus applies.
+- CPU: seeded per school, level and week; league average multiplier 0.999; knockout games taper (Light/Tactical) so a user tapering every playoff game gets no free edge.
+
+### Summer Development (`9o_summer*`; v1821u / V1821U)
+- Offseason only. Budget `min(14, 10 + floor(max(0,prestige−50)/25))`. Programs: Elite ID Camp (V, 4 pts, ×1.45, 15% chance of +1 potential within 3 of it, once per player), Club Season (JV/MOD, 2, ×1.35), Speed & Strength (any, 2, ×1.2, pace/stamina), Goalkeeper Academy (GK, 2, ×1.35), Futsal (JV/MOD, 1, ×1.15, passing), Rest. No seniors; one program per player.
+- The rollover wrapper prunes invalid picks, builds seeded CPU plans (3–4 players per school), rolls bumps and records each player's at-home baseline; afterwards it writes the Summer report (`C.smr.hist`, 10 summers) and a news item. The `archiveSeason`/`standings` wrappers bracket the engine's offseason growth so the report shows exactly what was gained there; a `shiftOvr` wrapper applies the program leans only inside that step.
+- Play reminder once per summer if no points were spent.
+
+### Balance (test/devbalance.js, 3 seeds, one season + rollover, growth from boosts read from the ledger)
+- Everything used hard (best staff for the budget, 3 plans per level, 3 mentor pairs, Intense + Scrimmage every week, Suggest for me): your Varsity +6% to +14%, JV +26% to +28%, Modified +25% to +29%.
+- No decisions: your school −4% to +3%. CPU schools (their own staffs, plans, practice, summers): +1.4% to +4.7%, so a coach who ignores the tools falls slightly behind.
+- Per feature (each feature's own test, alone): Staff ≤ +10.6%, Plans + Mentors ≤ +6.3%, Practice all-Intense ≤ +9.9% with 63.6% vs 66.8% league wins (20 seeds), Summer ≤ +7.9%.
+- Realized growth between separate runs is too noisy to compare (results, lineups and promotions diverge once ratings differ), so the gates use the ledger.
+
+### Not verified
+- Real phones, Safari and touch; themes other than dark and gold.
+- More than one or two rollovers with every feature in use; a full human-played season through the live Play button with all five tools.
+- A save from a published older build (old saves are simulated by deleting each feature's state from a current career).
+- The tools inside a live Scenario run.
+
 ## Version 18.20 (Scenario medals: The Streak)
 
 Bug report: a Streak run finished unbeaten and won the Section title but only got bronze. Cause: medals were bronze `unbeaten`, silver `perfect`, gold `perfect AND sec`, so one league draw made silver and gold both dead at once; with every medal settled, `v1819sCheck` ended the run (`why:'settled'`) at the end of the league, and the Section title won afterwards was never graded. Every 14-0 run in a sweep (UI live play, quick sim, Sim ahead, save/reload) was graded correctly; the draw path reproduces the report exactly.

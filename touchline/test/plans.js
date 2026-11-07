@@ -182,7 +182,7 @@ const LVLS=['V','JV','MOD']; let fails=0; const ok=(c,m)=>{ console.log((c?'PASS
   ok(MG.errs.length===0&&MG.cpu, 'an old save without plan or mentor state renders both tabs and plays on (state created lazily)');
 
   /* ---------- balance: same seed, a season plus rollover, feature off vs on ---------- */
-  const season=async(seed,use)=>{ const pg=await mk(seed); const r=await pg.evaluate(use=>{ const C=App.C; V1821D.off=!use; const u=C.userSid;
+  const season=async(seed,use)=>{ const pg=await mk(seed); const r=await pg.evaluate(use=>{ const C=App.C; V1821D.skip=use?null:new Set(['v1821p','v1821ps','v1821m','v1821mc']); /* the other v18.21 features stay on: this isolates plans and mentors */ const u=C.userSid;
       if(use){ for(const l of LVLS) for(const c of v1821pCands(C,l).slice(0,3)) v1821pAdd(C,c.p.id); for(const s of v1821mSuggest(C,3)) v1821mPair(C,s.m.id,s.e.id); }
       const s0={}; for(const id in C.players){ const p=C.players[id]; const sc=C.schools[p.sid]; if(sc&&!sc.ext&&C.league.includes(p.sid)) s0[id]=ovr(p); }
       let g=0; while(C.phase!=='offseason'&&g++<80){ simRound(C); advance(C); }
@@ -192,7 +192,7 @@ const LVLS=['V','JV','MOD']; let fails=0; const ok=(c,m)=>{ console.log((c?'PASS
       const agg={}; for(const id in lv){ if(end[id]==null) continue; const k=lv[id].join(':'); const a=agg[k]||(agg[k]={s:0,n:0}); a.s+=end[id]-s0[id]; a.n++; }
       const out={}; for(const k in agg) out[k]=agg[k].s/agg[k].n;
       const h=Object.keys(C.players).sort().map(id=>id+Object.values(C.players[id].sk).map(v=>v.toFixed(4)).join(',')).join('|')+JSON.stringify(C.v1821p&&C.v1821p.yr)+JSON.stringify(C.v1821m&&C.v1821m.pairs);
-      V1821D.off=false; return {g:out,h:h.length+':'+[...h].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7)}; },use); await pg.context().close(); return r; };
+      V1821D.skip=null; return {g:out,h:h.length+':'+[...h].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7)}; },use); await pg.context().close(); return r; };
   const rows=[]; let worstU=0, worstC=0;
   for(const seed of ['plans-bal-1','plans-bal-2']){ const A=await season(seed,false), B=await season(seed,true);
     for(const l of LVLS){ const ua=A.g['u:'+l], ub=B.g['u:'+l], ca=A.g['c:'+l], cb=B.g['c:'+l]; rows.push(`${seed} ${l.padEnd(3)} | you ${ua.toFixed(2)} → ${ub.toFixed(2)} (${((ub/ua-1)*100).toFixed(1)}%) | CPU ${ca.toFixed(2)} → ${cb.toFixed(2)} (${((cb/ca-1)*100).toFixed(1)}%)`);
