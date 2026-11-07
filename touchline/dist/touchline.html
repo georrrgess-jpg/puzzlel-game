@@ -28527,7 +28527,7 @@ A.v1821dTab=el=>{ App.params={...(App.params||{}),dtab:el.dataset.k}; App.keepSc
 function v1821dLabel(k){ const m=V1821D.mods.find(x=>x.k===k); return m?m.label:k; }
 function v1821dGrowthCard(C){ const u=C.userSid; const Y=(C.dvx&&C.dvx.yr[C.year])||null;
   const cols=LVLS.map(l=>{ const ps=squad(C,u,l); const g=ps.length?ps.reduce((a,p)=>a+(ovr(p)-(p.ovr0[C.year]??ovr(p))),0)/ps.length:0; const L=Y&&Y[l];
-    const parts=L?Object.entries(L.parts).filter(([,v])=>Math.abs(v)>0.005).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])):[]; const n=Math.max(1,ps.length);
+    const parts=L?Object.entries(L.parts).filter(([,v])=>Math.abs(v)>=0.05).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])):[]; const n=Math.max(1,ps.length);
     const avg=v1821dLvlAvg(C,l,'tick'); const pct=Math.round((avg.m-1)*100);
     return `<div class="v1821d-gl"><div class="v1821d-glh"><b>${LVL_NAME[l]}</b><span class="v1821d-pct ${pct>0?'up':pct<0?'dn':''}">${pct>0?'+':''}${pct}% growth rate</span></div>
       <div class="v1821d-big"><span class="${g>0?'good':''}">${g>0?'+':''}${fmt1(g)}</span><small>average OVR gained this season · ${ps.length} players</small></div>
@@ -28540,9 +28540,9 @@ function v1821dGrowthCard(C){ const u=C.userSid; const Y=(C.dvx&&C.dvx.yr[C.year
     return v1821dTabBar(C,cur)+`<div class="v1821d-body">${body}</div>`; }; }
 /* player card: what moves this player's growth now */
 { const _mp=MODALS.player; MODALS.player=function(m){ let h=_mp.apply(this,arguments); try{ const C=App.C; const p=C&&C.players[m.id]; if(!p||p.sid!==C.userSid||(m.tab||'overview')!=='overview'||!p.plan) return h;
-    const M=v1821dMult(C,p,'tick'); const fk=v1821dFocus(C,p,null); if(!M.parts.length&&!fk) return h;
+    const M=v1821dMult(C,p,C.phase==='offseason'?'off':'tick'); M.parts=M.parts.filter(x=>Math.round(Math.abs(x.m-1)*100)>=1); const fk=C.phase==='regular'?v1821dFocus(C,p,null):null; if(!M.parts.length&&!fk) return h;
     const chips=M.parts.map(x=>`<span class="v1821d-fc ${x.m>=1?'up':'dn'}">${esc(x.label)} <b>${x.m>=1?'+':'−'}${Math.round(Math.abs(x.m-1)*100)}%</b></span>`).join('')+(fk?`<span class="v1821d-fc foc">Focus <b>${esc(V1821D_FOC[fk]||fk)}</b></span>`:'');
-    const strip=`<div class="v1821d-pstrip"><span class="v1821d-pk">Growth ${M.m>=1?'+':'−'}${Math.round(Math.abs(M.m-1)*100)}%</span>${chips}<button class="v1821d-fc more" data-a="go" data-r="dev">Development</button></div>`;
+    const strip=`<div class="v1821d-pstrip"><span class="v1821d-pk">${C.phase==='offseason'?'Offseason growth':'Growth'} ${M.m>=1?'+':'−'}${Math.round(Math.abs(M.m-1)*100)}%</span>${chips}<button class="v1821d-fc more" data-a="go" data-r="dev">Development</button></div>`;
     const i=h.indexOf('<div class="mbody">'); if(i>=0){ const j=i+'<div class="mbody">'.length; h=h.slice(0,j)+strip+h.slice(j); } }catch(e){ console.warn('v1821d player',e); } return h; }; }
 
 /* ===================== v18.21 COACHING STAFF =====================
