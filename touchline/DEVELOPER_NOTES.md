@@ -2,6 +2,17 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.22 (Booster Fund: facilities and private coaching)
+
+`src/v17/9p_fund.js`, `9p_fund_ui.js`, `9p_fund.css`; v1821f / V1821F; Development hub tab `fund` ("Facilities", order 60). Built on the 9k development core; test `test/fund.js` (in `run_all.sh`).
+
+- State `C.fnd = {v:1, funds, lv:{wr,fr,tp,ya}, pc:{yr,ids[]}, hist[], inc}`, created lazily and repaired by `v1821fS`. Funds: 10 to start, then `6 + floor(prestige/20) + 2 for a Section title` added by a `rollover` wrapper after each season (once per year, `S.inc`), 24 banked at most.
+- Facilities (group, permanent): levels 1-3, upgrade cost 6 (to 2) and 10 (to 3). +2.5% or +3% per level above 1 on the levels each covers (weight room V/JV/MOD, film room V/JV, training pitch V/JV/MOD, youth academy JV/MOD); product capped at +10% (`V1821F.CAP`). Core mod key `fund` ('tick' and 'off').
+- Private coaching (specific players): x1.25 in-season growth ('tick' only), 3 funds, 3 slots, booked in the preseason or through matchday 11, expires with the season. Not allowed for a player on a Player Plan (the plan's boost applies instead), or at his potential. Core mod key `fundpc`.
+- Parity: league schools get seeded facility levels (level 2 with chance prestige/500 per facility); their average multiplier is ~+1% (0% to 2.2% on the two test seeds).
+- Balance (test/fund.js, ledger): spending all of the first year's funds on four level-2 facilities gives +8.2% (V/MOD) to +10% (JV); with no spending growth is unchanged. Over two or three years a program can reach the +10% cap, which is the budget for this feature.
+- Not verified: real phones and Safari, themes other than dark and gold, and more than one rollover with every development tool in use.
+
 ## Version 18.21 (Player Development: Coaching Staff, Player Plans, Mentors, Practice Planner, Summer Development)
 
 Five tools that improve players at every level (Varsity, JV, Modified), built on one shared core so they stack predictably. Tests: `test/staff.js`, `plans.js`, `practice.js`, `summer.js`, and the combined `devbalance.js` (all in `run_all.sh`).

@@ -4941,6 +4941,25 @@ button.v1821t-tile{cursor:pointer}button.v1821t-tile:hover{border-color:color-mi
 .v1821u-week{margin-top:16px}.v1821u-week .hd{margin-bottom:2px}
 .v1821u-wh{font-weight:700}
 
+/* v18.22 Booster Fund */
+.v1821f-bal{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.v1821f-big{display:block;font-family:var(--f-display);font-size:3rem;line-height:1}
+.v1821f-bal>div:first-child small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.v1821f-lead{flex:1;min-width:260px;margin:0}
+.v1821f-fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}
+.v1821f-fc{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:color-mix(in srgb,var(--surface2) 35%,transparent);min-width:0}
+.v1821f-fc.up{border-color:color-mix(in srgb,#3fbf73 45%,var(--line))}
+.v1821f-fh{display:flex;gap:10px;align-items:flex-start}.v1821f-fh>div{flex:1;min-width:0}.v1821f-fh b{display:block;font-family:var(--f-display);text-transform:uppercase;font-size:1.1rem}.v1821f-fh small{display:block;color:var(--muted);font-size:.78rem}
+.v1821f-ic{font-size:1.5rem;line-height:1}
+.v1821f-pips{display:inline-flex;gap:4px;margin-top:4px}.v1821f-pips i{width:14px;height:14px;border-radius:4px;background:var(--surface2);border:1px solid var(--line)}.v1821f-pips i.on{background:#3fbf73;border-color:#3fbf73}
+.v1821f-fx{display:flex;flex-direction:column;gap:1px}.v1821f-fx>span{font-weight:800}.v1821f-fx small{color:var(--muted);font-size:.78rem}
+.v1821f-seg{margin:10px 0}
+.v1821f-list{display:grid;gap:4px}
+.v1821f-row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-top:1px solid var(--line)}
+.v1821f-pl{display:flex;align-items:center;gap:8px;flex:1;min-width:0}.v1821f-n{display:flex;align-items:center;gap:6px;flex:none}
+.v1821f-hist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:.86rem}.v1821f-hist li{display:flex;justify-content:space-between;gap:8px}
+@media (max-width:760px){ .v1821f-fg{grid-template-columns:minmax(0,1fr)} .v1821f-big{font-size:2.4rem} .v1821f-row{flex-wrap:wrap} .v1821f-pl{flex-basis:100%} }
+
 </style>
 <div id="app"></div>
 <script>
@@ -14545,6 +14564,7 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['🏗️','Booster Fund & Facilities','Squads → Development → Facilities. The booster club raises funds every season (10 to start, then 6 plus prestige, more for a Section title; 24 banked at most). Spend them on facilities that make a whole level grow faster for good: Weight room, Film room, Training pitch and Youth academy, three levels each, a few percent per level and +10% at most in total, for Varsity, JV and Modified as each facility covers. Or book private coaching: +25% in-season growth for up to three players a season. A player on a Player Plan can’t be booked too. Rival schools have facilities as well.'],
   ['🧑‍🏫','Coaching Staff','Squads → Development → Staff. Hire a JV Coach, a Modified Coach, a Goalkeeper Coach (keepers at every level) and a Strength & Conditioning Coach (Varsity). Each one speeds up the growth of the players he coaches by his rating, from −8% at 40 to +12% at 90, plus 2% when his specialty matches your training focus. Your staff budget grows with prestige and better coaches cost more, so you choose where to spend. Hire from a fresh market each preseason and offseason, give 1–3 season contracts, decide on renewals; coaches improve every season they stay, and after a strong year a rival may hire one away. Rival schools have staffs too.'],
   ['🎯','Player Plans & Mentors','Squads → Development. Put up to three players per level on a plan: pick the skill to work on and a target OVR, and he grows 15% faster on every league matchday, with a progress bar, a trend and an on track / behind status. Hit the target for a +0.3 bonus; fill all three slots and the rest of that squad grows 1% slower. In Mentors, pair a Varsity junior or senior with a JV or Modified player at least 8 OVR below him: the mentee grows 8–18% faster all year and leans toward his mentor’s best skill, the mentor gives up 3% of his own growth, and a graduating mentor leaves a +0.4 farewell boost.'],
   ['🏃','Practice Planner','Squads → Development → Practice. Every level gets a weekly practice plan. Intense grows players 20% faster that week but sends them out on tired legs (two in a row hurt more); Light keeps legs fresh for the rivalry game or the Section final at the cost of some growth. Pick a session too: Technical, Tactical (better form), Conditioning, or a Varsity-vs-JV Scrimmage that gives bench players +5% growth. Save a default, override the big weeks, and see the season as a strip of plans and results.'],
@@ -29422,5 +29442,86 @@ A.v1821uSugGo=()=>{ const C=App.C; v1821uSuggest(C); queueSave(); A.v1821uGoOn()
 { const _pn=A.playNext; A.playNext=function(){ const C=App.C;
     try{ if(C&&v1821uOpen(C)&&!V1821D.off&&!(typeof v1819lPending==='function'&&C.lad&&v1819lPending(C))){ const P=v1821uPlan(C); if(!P.rem&&v1821uUsed(C)===0&&v1821uBudget(C)>0){ P.rem=1; queueSave(); App.modal={type:'v1821uRemind'}; renderModal(); return; } } }catch(e){ console.warn('summer remind',e); }
     return _pn.apply(this,arguments); }; }
+
+/* ===================== v18.22 BOOSTER FUND =====================
+   The booster club raises money every year. You spend it two ways, for Varsity, JV and Modified alike:
+   - Facilities (a whole program, permanent): Weight room, Film room, Training pitch, Youth academy. Each has levels 1-3; every level above 1
+     adds growth to the levels it covers (V1821F.FAC). The facility multiplier is capped at V1821F.CAP.
+   - Private coaching (specific players, one season): up to 3 players a season get x1.25 in-season growth. Not combined with a Player Plan.
+   Funds: 10 to start, then 6 + prestige/20 (+2 for a Section title) after every season, at most 24 banked.
+   Parity: league schools have seeded facilities (level 2 with a chance of prestige/500 each), so their average multiplier stays near 1.
+   Uses the development core (9k_dev.js): v1821dMod, v1821dTab, the ledger. State: C.fnd = {v:1, funds, lv:{wr,fr,tp,ya}, pc:{yr,ids[]}, hist[]}.
+   Identifiers v1821f / V1821F. */
+const V1821F={ START:10, MAX:24, CAP:1.10, COACH:{cost:3, slots:3, m:1.25, lastMd:10}, UP:[0,0,6,10], off:false,
+  FAC:[ {k:'wr',n:'Weight room',ico:'🏋️',lv:['V','JV','MOD'],pc:2.5,d:'Strength and speed work for every squad'},
+        {k:'fr',n:'Film room',ico:'🎬',lv:['V','JV'],pc:3,d:'Video study for Varsity and JV'},
+        {k:'tp',n:'Training pitch',ico:'🏟️',lv:['V','JV','MOD'],pc:2.5,d:'A better surface and more field time for every squad'},
+        {k:'ya',n:'Youth academy',ico:'🌱',lv:['JV','MOD'],pc:3,d:'Age-group programs for JV and Modified'} ], cache:new Map() };
+const V1821F_BY=Object.fromEntries(V1821F.FAC.map(f=>[f.k,f]));
+function v1821fS(C){ let S=C.fnd; if(!S||typeof S!=='object'){ S=C.fnd={v:1,funds:V1821F.START,lv:{},pc:{yr:0,ids:[]},hist:[]}; }
+  if(typeof S.funds!=='number'||!isFinite(S.funds)) S.funds=V1821F.START; if(!S.lv) S.lv={}; for(const f of V1821F.FAC) if(!(S.lv[f.k]>=1&&S.lv[f.k]<=3)) S.lv[f.k]=1;
+  if(!S.pc||typeof S.pc!=='object') S.pc={yr:0,ids:[]}; if(!Array.isArray(S.pc.ids)) S.pc.ids=[]; if(!Array.isArray(S.hist)) S.hist=[]; return S; }
+/* a league school's level in one facility: seeded, mostly 1 */
+function v1821fCpuLv(C,sid,k){ const key=C.seed+'|'+sid+'|'+k; let v=V1821F.cache.get(key); if(v!=null) return v; const s=C.schools[sid]; const r=v1821dR(C,'fac',sid,k);
+  v=r()<(s?s.prestige:50)/500?2:1; if(V1821F.cache.size>600) V1821F.cache.clear(); V1821F.cache.set(key,v); return v; }
+function v1821fLv(C,sid,k){ return sid===C.userSid?v1821fS(C).lv[k]:v1821fCpuLv(C,sid,k); }
+/* the multiplier from facilities for one player, with its parts */
+function v1821fFacOf(C,p){ let m=1; const parts=[]; for(const f of V1821F.FAC){ if(!f.lv.includes(p.lvl)) continue; const l=v1821fLv(C,p.sid,f.k); if(l>1){ const x=1+(l-1)*f.pc/100; m*=x; parts.push({k:f.k,m:x}); } } return {m:Math.min(m,V1821F.CAP),parts}; }
+v1821dMod('fund','Facilities',(C,p,ctx)=>{ if(V1821F.off) return null; const sch=C.schools[p.sid]; if(!sch||sch.ext||!C.league.includes(p.sid)) return null; const m=v1821fFacOf(C,p).m; return m>1?m:null; });
+function v1821fCoached(C,p){ const S=C.fnd; return !!(S&&S.pc&&S.pc.yr===C.year&&S.pc.ids.includes(p.id)); }
+v1821dMod('fundpc','Private coaching',(C,p,ctx)=>{ if(V1821F.off||ctx!=='tick'||p.sid!==C.userSid||!v1821fCoached(C,p)) return null; if(typeof v1821pOf==='function'&&v1821pOf(C,p)) return null; return V1821F.COACH.m; });
+/* ---------- money ---------- */
+function v1821fIncome(C){ const s=C.schools[C.userSid]; const T=C.tourneys&&C.tourneys[C.year-1]; return 6+Math.floor((s?s.prestige:50)/20)+(T&&T.secChamp===C.userSid?2:0); }
+function v1821fCost(C,k){ const l=v1821fS(C).lv[k]; return l>=3?null:V1821F.UP[l+1]; }
+function v1821fUp(C,k){ const S=v1821fS(C); const f=V1821F_BY[k]; if(!f) return {ok:false,msg:'Unknown facility.'}; const c=v1821fCost(C,k); if(c==null) return {ok:false,msg:f.n+' is already at level 3.'};
+  if(S.funds<c) return {ok:false,msg:`You need ${c} funds for level ${S.lv[k]+1}; you have ${S.funds}.`}; S.funds-=c; S.lv[k]++; S.hist.unshift({yr:C.year,t:'up',k,l:S.lv[k],c}); if(S.hist.length>20) S.hist.length=20;
+  addNews(C,'program',`The booster club funds ${S.lv[k]===2?'an upgraded':'a top-level'} ${f.n.toLowerCase()} at ${C.schools[C.userSid].town}`,C.userSid); return {ok:true,msg:`${f.n} is now level ${S.lv[k]}.`}; }
+function v1821fCoachOpen(C){ return C.phase==='preseason'||(C.phase==='regular'&&C.md<=V1821F.COACH.lastMd); }
+function v1821fCoachList(C){ const S=v1821fS(C); return S.pc.yr===C.year?S.pc.ids.filter(id=>C.players[id]&&C.players[id].sid===C.userSid):[]; }
+function v1821fCanCoach(C,p){ const S=v1821fS(C); if(!p||p.sid!==C.userSid) return {ok:false,msg:'Not on your program.'}; if(!v1821fCoachOpen(C)) return {ok:false,msg:`Private coaching can be booked in the preseason and through matchday ${V1821F.COACH.lastMd+1}.`};
+  if(v1821fCoachList(C).includes(p.id)) return {ok:false,msg:'Already booked this season.'}; if(v1821fCoachList(C).length>=V1821F.COACH.slots) return {ok:false,msg:`All ${V1821F.COACH.slots} private coaching slots are booked this season.`};
+  if(S.funds<V1821F.COACH.cost) return {ok:false,msg:`Private coaching costs ${V1821F.COACH.cost} funds; you have ${S.funds}.`}; if(p.pot<=ovr(p)) return {ok:false,msg:'He has reached his potential.'};
+  if(typeof v1821pOf==='function'&&v1821pOf(C,p)) return {ok:false,msg:'He is on a Player Plan, which already gives him a focused boost.'}; return {ok:true}; }
+function v1821fCoach(C,pid){ const p=C.players[pid]; const c=v1821fCanCoach(C,p); if(!c.ok) return c; const S=v1821fS(C); if(S.pc.yr!==C.year) S.pc={yr:C.year,ids:[]}; S.pc.ids.push(pid); S.funds-=V1821F.COACH.cost;
+  S.hist.unshift({yr:C.year,t:'pc',pid,c:V1821F.COACH.cost}); if(S.hist.length>20) S.hist.length=20; return {ok:true,msg:`${p.fn} ${p.ln} has a private coach for the season.`}; }
+/* income after each season (rollover wrapper) */
+{ const _ro=rollover; rollover=function(C){ const y0=C&&C.year; const r=_ro.apply(this,arguments);
+    try{ if(C&&C.year===y0+1&&!V1821F.off&&!V1821D.off){ const S=v1821fS(C); if(!S.inc||S.inc<C.year){ const g=v1821fIncome(C); S.funds=Math.min(V1821F.MAX,S.funds+g); S.inc=C.year; S.hist.unshift({yr:C.year,t:'inc',c:g}); if(S.hist.length>20) S.hist.length=20; } } }catch(e){ console.warn('fund income',e); }
+    return r; }; }
+
+/* v18.22 Booster Fund: the Facilities tab on Squads -> Development, summary chip, badge, actions. Identifiers v1821f. */
+const V1821F_UI={ lvl:'V' };
+function v1821fPips(l){ return `<span class="v1821f-pips" aria-label="Level ${l} of 3">${[1,2,3].map(i=>`<i class="${i<=l?'on':''}"></i>`).join('')}</span>`; }
+function v1821fCovers(f){ return f.lv.map(l=>LVL_NAME[l]).join(', '); }
+function v1821fFacCard(C,f){ const S=v1821fS(C); const l=S.lv[f.k]; const c=v1821fCost(C,f.k); const have=S.funds>=(c||0); const cur=l>1?`+${((l-1)*f.pc).toFixed(l>2?0:1).replace('.0','')}% growth`:'No bonus yet';
+  return `<div class="v1821f-fc ${l>1?'up':''}"><div class="v1821f-fh"><span class="v1821f-ic" aria-hidden="true">${f.ico}</span><div><b>${esc(f.n)}</b><small>${esc(f.d)}</small></div>${v1821fPips(l)}</div>
+    <div class="v1821f-fx"><span class="${l>1?'good':'muted'}">${cur}</span><small>+${f.pc}% per level above 1 · ${esc(v1821fCovers(f))}</small></div>
+    ${c==null?`<button class="btn" disabled>Top level</button>`:`<button class="btn ${have?'pri':''}" data-a="v1821fUp" data-k="${f.k}"${have?'':' disabled'}>Upgrade to level ${l+1} · ${c} funds</button>`}</div>`; }
+function v1821fRow(C,p){ const c=v1821fCanCoach(C,p); const on=v1821fCoachList(C).includes(p.id); const gap=p.pot-ovr(p);
+  return `<div class="v1821f-row"><div class="v1821f-pl">${posTag(p.pos)}<span class="grow trunc">${pLink(p.id)} <small class="muted">Gr ${p.grade}</small></span></div><span class="v1821f-n">${ovrBadge(ovr(p))}<small class="muted">POT ${p.pot}</small></span>
+    ${on?`<span class="chip acc">Booked ×${V1821F.COACH.m}</span>`:`<button class="btn sm" data-a="v1821fCoach" data-id="${p.id}"${c.ok?'':' disabled'} title="${esc(c.ok?'':c.msg)}">Book · ${V1821F.COACH.cost}</button>`}</div>`; }
+function v1821fRender(C){ const S=v1821fS(C); const lvl=V1821F_UI.lvl; const booked=v1821fCoachList(C); const open=v1821fCoachOpen(C);
+  const pool=squad(C,C.userSid,lvl).filter(p=>p.pot>ovr(p)||booked.includes(p.id)).sort((a,b)=>(booked.includes(b.id)?1:0)-(booked.includes(a.id)?1:0)||(b.pot-ovr(b))-(a.pot-ovr(a))).slice(0,14);
+  const ph=C.phase==='offseason'?`+${v1821fIncome({...C,year:C.year+1,tourneys:C.tourneys,schools:C.schools,userSid:C.userSid})} funds when the next season starts`:`+${v1821fIncome(C)} funds a season (more with prestige and Section titles)`;
+  const top=`<section class="card v1821f-top"><div class="hd"><h3>Booster Fund</h3><span class="chip">Max ${V1821F.MAX} banked</span></div>
+    <div class="v1821f-bal"><div><b class="v1821f-big">${S.funds}</b><small>funds to spend · ${esc(ph)}</small></div>
+    <p class="small muted v1821f-lead">The booster club raises money every season. Put it into <b>facilities</b> that make every player at a level grow a little faster for good, or into <b>private coaching</b> for up to ${V1821F.COACH.slots} players this season. Each facility adds a few percent, all facilities together are capped at +${Math.round((V1821F.CAP-1)*100)}%, and nobody passes his potential. Rival schools have facilities too.</p></div></section>`;
+  const facs=`<section class="card"><div class="hd"><h3>Facilities</h3><span class="small muted">Permanent · Varsity, JV and Modified</span></div><div class="v1821f-fg">${V1821F.FAC.map(f=>v1821fFacCard(C,f)).join('')}</div>
+    <p class="tiny muted">Level 2 costs ${V1821F.UP[2]} funds, level 3 costs ${V1821F.UP[3]} more. Spending is final.</p></section>`;
+  const coach=`<section class="card"><div class="hd"><h3>Private coaching</h3><span class="chip ${booked.length>=V1821F.COACH.slots?'':'acc'}">${booked.length} of ${V1821F.COACH.slots} booked</span></div>
+    <p class="small muted" style="margin-top:0">A private coach gives one player <b class="good">+${Math.round((V1821F.COACH.m-1)*100)}% in-season growth</b> for ${V1821F.COACH.cost} funds, until the season ends. Book in the preseason or through matchday ${V1821F.COACH.lastMd+1}. A player on a Player Plan already has a focused boost, so he can't be booked as well.${open?'':' <b>Booking is closed right now.</b>'}</p>
+    <div class="seg v1821f-seg" role="group">${LVLS.map(l=>`<button class="${l===lvl?'on':''}" aria-pressed="${l===lvl}" data-a="v1821fLvl" data-k="${l}">${LVL_NAME[l]}</button>`).join('')}</div>
+    <div class="v1821f-list">${pool.length?pool.map(p=>v1821fRow(C,p)).join(''):'<p class="muted small">Nobody at this level has room to grow.</p>'}</div>
+    <p class="tiny muted">Players with the most room to grow are listed first.</p></section>`;
+  const hist=S.hist.slice(0,6).map(h=>h.t==='inc'?`<li><span>${h.yr}: booster club raised</span><b class="good">+${h.c}</b></li>`:h.t==='up'?`<li><span>${h.yr}: ${esc(V1821F_BY[h.k].n)} to level ${h.l}</span><b>−${h.c}</b></li>`:`<li><span>${h.yr}: private coaching, ${esc(C.players[h.pid]?pname(C.players[h.pid]):'a player')}</span><b>−${h.c}</b></li>`).join('');
+  return top+facs+coach+(hist?`<section class="card"><h3>Fund history</h3><ul class="v1821f-hist">${hist}</ul></section>`:''); }
+function v1821fNote(r){ if(r&&r.msg) toast(r.msg); }
+A.v1821fUp=el=>{ const r=v1821fUp(App.C,el.dataset.k); v1821fNote(r); queueSave(); App.keepScroll=true; render(); };
+A.v1821fCoach=el=>{ const r=v1821fCoach(App.C,el.dataset.id); v1821fNote(r); queueSave(); App.keepScroll=true; render(); };
+A.v1821fLvl=el=>{ V1821F_UI.lvl=el.dataset.k; App.keepScroll=true; render(); };
+v1821dTab({id:'fund',label:'Facilities',ico:'🏗️',order:60,render:C=>v1821fRender(C),
+  summary:C=>{ const S=v1821fS(C); const lv=V1821F.FAC.reduce((a,f)=>a+S.lv[f.k]-1,0); const left=V1821F.COACH.slots-v1821fCoachList(C).length; const cheap=Math.min(...V1821F.FAC.map(f=>v1821fCost(C,f.k)||99),v1821fCoachOpen(C)&&left>0?V1821F.COACH.cost:99);
+    return {t:`Booster Fund: ${S.funds} to spend`,s:`${lv} facility upgrade${lv===1?'':'s'} · ${v1821fCoachList(C).length} private coach${v1821fCoachList(C).length===1?'':'es'}`,warn:S.funds>=cheap&&S.funds>=V1821F.MAX-4}; },
+  badge:C=>{ if(C.phase!=='preseason'&&C.phase!=='offseason') return ''; const S=v1821fS(C); return S.funds>=V1821F.UP[2]?S.funds:''; }});
 
 </script>
