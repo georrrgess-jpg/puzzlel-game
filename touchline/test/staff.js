@@ -6,7 +6,7 @@
 // CPU parity, the balance table (baseline vs staffed sensibly), old-save migration, determinism, the UI on desktop and phone.
 const { chromium, DIST } = require('./_pw');
 /* v18.21 merge: the other development features are switched off so this test measures this feature alone (test/devbalance.js covers them together) */
-const ISO="V1821D.only=new Set(['staff']); V1821P.off=V1821M.off=V1821T.off=true;";
+const ISO="V1821D.only=new Set(['staff']); V1821P.off=V1821M.off=V1821T.off=true; V1822.off=true; V1821F.off=true;";
 const fs=require('fs'); const SHOTS=__dirname+'/shots/v1821'; fs.mkdirSync(SHOTS,{recursive:true});
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{ const b=await chromium.launch(); const errs=[];

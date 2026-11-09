@@ -1,7 +1,7 @@
 /* ===================== v18.23 LOCKER ROOM & PERSONALITIES =====================
    Every player has a personality (seeded from career seed + player id, so it never changes and needs no save data):
    Captain, Gym Rat, Joker, Quiet Pro, Natural, Student, Hothead, Showman. A personality does three things:
-   - Growth: a small multiplier on the development core (Gym Rat x1.06, Student x1.03, Joker x0.98, Natural x0.96, others x1).
+   - Growth: a small multiplier on the development core (Gym Rat x1.05, Student x1.03, Joker x0.98, Natural x0.95, others x1).
    - Chemistry: each level's starters add up (Captain +2, Joker +1, Hothead -2, Showman -1); with your locker-room mood it gives that
      squad a small match-form edge (x0.0012 per point, at most +-6 points = +-0.0072; a home edge is about 0.03).
    - Voice: postgame quotes in the News, and weekly locker-room situations (about 40% of league matchdays) where you choose how to
@@ -11,10 +11,10 @@
 const V1822={ FORM:0.0012, CHEM:6, P:0.4, off:false, cache:new Map() };
 const V1822_P=[
   {k:'cap',n:'Captain',ico:'👑',w:8,g:1,c:2,d:'Leads by example and keeps the room together.',q:{W:['We did it for each other tonight.','Proud of every guy in that room.'],L:['That one is on us. We will be better Tuesday.','Heads up. We learn from it.'],D:['A point is a point. We go again.']}},
-  {k:'grind',n:'Gym Rat',ico:'💪',w:14,g:1.06,c:0,d:'First in, last out. Grows faster than most.',q:{W:['Back in the weight room tomorrow morning.','The extra work showed tonight.'],L:['I need to get stronger. Simple as that.'],D:['Not good enough. Extra reps this week.']}},
+  {k:'grind',n:'Gym Rat',ico:'💪',w:14,g:1.05,c:0,d:'First in, last out. Grows faster than most.',q:{W:['Back in the weight room tomorrow morning.','The extra work showed tonight.'],L:['I need to get stronger. Simple as that.'],D:['Not good enough. Extra reps this week.']}},
   {k:'joker',n:'Joker',ico:'😄',w:12,g:0.98,c:1,d:'Keeps everyone loose. Not always focused in drills.',q:{W:['Somebody tell the bus driver we want music.','Coach almost smiled. Almost.'],L:['Hey, at least our uniforms looked good.'],D:['A tie? Like kissing your sister. Ask my sister.']}},
   {k:'quiet',n:'Quiet Pro',ico:'🤫',w:20,g:1,c:0,d:'Says little, does his job every week.',q:{W:['Good win. Next game.'],L:['We move on.'],D:['Fine. We keep working.']}},
-  {k:'natural',n:'Natural',ico:'✨',w:12,g:0.96,c:0,d:'Gifted, makes it look easy, and sometimes coasts.',q:{W:['Felt easy out there honestly.','I just saw the gap and went.'],L:['Off night. Happens.'],D:['We should have won that one easy.']}},
+  {k:'natural',n:'Natural',ico:'✨',w:12,g:0.95,c:0,d:'Gifted, makes it look easy, and sometimes coasts.',q:{W:['Felt easy out there honestly.','I just saw the gap and went.'],L:['Off night. Happens.'],D:['We should have won that one easy.']}},
   {k:'student',n:'Student',ico:'📚',w:14,g:1.03,c:0,d:'Studies film like homework. Learns quickly.',q:{W:['We watched their film all week. It paid off.','Their left back cheated inside. We noticed.'],L:['I already know what I would change. Film tomorrow.'],D:['Tactically even. We need a better plan for the second half.']}},
   {k:'hot',n:'Hothead',ico:'🔥',w:10,g:1,c:-2,d:'Plays with fire. Sometimes burns the room.',q:{W:['Tell them to come back next year. Same result.','I told you all week.'],L:['The ref decided that game, not us.','I am not talking about it.'],D:['We got robbed. Write that down.']}},
   {k:'show',n:'Showman',ico:'🎤',w:10,g:1,c:-1,d:'Loves the cameras and the big moment.',q:{W:['Did you get my celebration on video?','Big stage, big player.'],L:['Just wait until the playoffs.'],D:['Even my highlight reel needs a cliffhanger.']}}];

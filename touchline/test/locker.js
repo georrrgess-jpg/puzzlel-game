@@ -17,7 +17,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   ok(A.kinds===8&&A.stable, 'every player has one of eight personalities, stable for the career');
   ok(Math.abs(A.gm-1)<0.01, `personalities are growth-neutral on average (x${A.gm.toFixed(4)})`);
   ok(A.capOld>A.capYoung, `captains are mostly upperclassmen (${(A.capOld*100).toFixed(0)}% of 11th-12th graders vs ${(A.capYoung*100).toFixed(0)}% of 9th and younger)`);
-  ok(A.grMult===1.06, 'a Gym Rat grows 6% faster');
+  ok(A.grMult===1.05, 'a Gym Rat grows 5% faster');
   ok(Math.abs(A.cpuMean)<1.5&&A.cpuChem.every(c=>c>=-6&&c<=6), `league chemistry is near neutral on average (${A.cpuMean.toFixed(2)}) and capped at ±6`);
   ok(Math.abs(A.form[1]-A.form[0]*0.0012)<1e-9||(A.form[0]===0&&A.form[1]===0), `chemistry reaches the match (chem ${A.form[0]} → form ${A.form[1]})`);
   /* a season: situations, choices, quotes */

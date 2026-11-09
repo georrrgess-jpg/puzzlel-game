@@ -6,7 +6,7 @@
 // determinism, and the UI (tab, badge, Overview chip and This week item, match preview control) on desktop and phone.
 const { chromium, DIST } = require('./_pw');
 /* v18.21 merge: the other development features are switched off so this test measures this feature alone (test/devbalance.js covers them together) */
-const ISO="V1821D.only=new Set(['prac']); V1821C.off=V1821P.off=V1821M.off=true;";
+const ISO="V1821D.only=new Set(['prac']); V1821C.off=V1821P.off=V1821M.off=true; V1822.off=true; V1821F.off=true;";
 const fs=require('fs'); const OUT=__dirname+'/shots/v1821'; fs.mkdirSync(OUT,{recursive:true});
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 const LVLS=['V','JV','MOD']; const SEEDS=Array.from({length:20},(_,i)=>String(31+i));
@@ -120,7 +120,7 @@ const LVLS=['V','JV','MOD']; const SEEDS=Array.from({length:20},(_,i)=>String(31
 
   /* ---------- save / reload ---------- */
   const SV=await page.evaluate(async()=>{ const C=App.C; queueSave(); await saveNow(); return {slot:App.slot,P:JSON.stringify(C.prac)}; });
-  await page.reload(); await page.waitForTimeout(1000);
+  await page.reload(); await page.evaluate(ISO); await page.waitForTimeout(1000);
   const RL=await page.evaluate(async(slot)=>{ await openSlot(slot); const C=App.C; return {P:JSON.stringify(C.prac)}; },SV.slot);
   ok(RL.P===SV.P&&/"MOD":\{"i":"int","s":"cond"\}/.test(RL.P), 'defaults, per-week overrides and the played-week log survive save and reload');
   const OLD=await page.evaluate(()=>{ const C=App.C; delete C.prac; App.route='dev'; App.params={dtab:'practice'}; render(); const ok1=!!document.querySelector('.v1821t-pl'); simRound(C); advance(C); return ok1&&!!C.prac&&C.prac.def.V.i==='std'; });

@@ -6,7 +6,7 @@ Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-s
 
 `src/v17/9q_locker.js`, `9q_locker_ui.js`, `9q_locker.css`; v1822 / V1822; route `locker` (Squads → People) and a `locker` tab on the Development hub. Test `test/locker.js` (in `run_all.sh`).
 
-- Personality (`v1822Pers`): seeded from career seed + player id (cached, no save data), weights in `V1822_P` (Captain weighted ×1.6 for grades 11-12, ×0.5 otherwise). Growth (core mod `pers`, every league school): Gym Rat ×1.06, Student ×1.03, Joker ×0.98, Natural ×0.96; average ×1.004.
+- Personality (`v1822Pers`): seeded from career seed + player id (cached, no save data), weights in `V1822_P` (Captain weighted ×1.6 for grades 11-12, ×0.5 otherwise). Growth (core mod `pers`, every league school): Gym Rat ×1.05, Student ×1.03, Joker ×0.98, Natural ×0.95; average ×1.003.
 - Chemistry (`v1822Chem`): sum over a level's lineup (Captain +2, Joker +1, Hothead −2, Showman −1) plus your mood, clamped ±6; match form `chem × 0.0012` through `v1821dMatch` (fast odds runs included). League average ≈ 0.
 - Situations: after each league matchday (advance wrapper), 40% chance (seeded per year and matchday) of one for a random player in your program, by his personality (`V1822_EV`, two choices each). A choice adds mood to his level for 2-3 games (`C.lr.mood[lvl]`) and/or a ×0.8-×1.25 growth modifier for him for 3 weeks (core mod `lr`). Unanswered situations lapse after the next game. Overview This week item, nav badge, News line and a season log.
 - Quotes: after your real Varsity games (not preseason, not fast runs), 40% chance (seeded per fixture) of a quote from a starter matching his personality and the result.
@@ -59,7 +59,7 @@ Five tools that improve players at every level (Varsity, JV, Modified), built on
 
 ### Balance (test/devbalance.js, 3 seeds, one season + rollover, growth from boosts read from the ledger)
 - Everything used hard (best staff for the budget, 3 plans per level, 3 mentor pairs, Intense + Scrimmage every week, Suggest for me): your Varsity +6% to +14%, JV +26% to +28%, Modified +25% to +29%.
-- No decisions: your school −4% to +3%. CPU schools (their own staffs, plans, practice, summers): +1.4% to +4.7%, so a coach who ignores the tools falls slightly behind.
+- No decisions: your school −4% to +3%. CPU schools (their own staffs, plans, practice, summers): +1.4% to +4.7%, so a coach who ignores the tools falls slightly behind. With v18.22 facilities added: +2.4% to +6.3% (gate +7%); personalities are excluded here (they apply to every school alike; test/locker.js covers them).
 - Per feature (each feature's own test, alone): Staff ≤ +10.6%, Plans + Mentors ≤ +6.3%, Practice all-Intense ≤ +9.9% with 63.6% vs 66.8% league wins (20 seeds), Summer ≤ +7.9%.
 - Realized growth between separate runs is too noisy to compare (results, lineups and promotions diverge once ratings differ), so the gates use the ledger.
 

@@ -5,13 +5,13 @@
 //   idle = everything on, you make no decisions (CPU schools use their staffs, plans, practice and summers)
 //   max  = everything on and used hard: best staff for the budget, 3 plans per level, 3 mentor pairs, Intense + Scrimmage every
 //          week, Suggest for me in the summer
-// Gates: max adds at most +35% to your growth at any level; idle stays within -5%..+8%; CPU schools within -3%..+5%
+// Gates: max adds at most +35% to your growth at any level; idle stays within -5%..+8%; CPU schools within -3%..+7% (with v18.22 facilities)
 // in every run. Growth is read from the core's ledger (each player's growth with and without the boosts, same game state).
 const { chromium, DIST } = require('./_pw'); const LVLS=['V','JV','MOD'];
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{ const b=await chromium.launch(); const errs=[];
   const run=async(seed,mode)=>{ const pg=await b.newPage(); pg.on('pageerror',e=>errs.push(e.message)); await pg.goto(DIST); await pg.waitForTimeout(400);
-    const r=await pg.evaluate(([seed,mode])=>{ V1821D.off=mode==='off'; V1821D.bookAll=true; const C=newCareer({slot:1,coachName:'Bal',seed,now:0}); App.C=C; const u=C.userSid;
+    const r=await pg.evaluate(([seed,mode])=>{ V1821D.off=mode==='off'; V1821D.bookAll=true; V1821D.skip=new Set(['pers','lr']); V1822.off=true; /* personalities apply to every school alike: test/locker.js covers them */ const C=newCareer({slot:1,coachName:'Bal',seed,now:0}); App.C=C; const u=C.userSid;
       if(mode==='max'){
         const best=()=>{ const M=v1821cMkt(C); const S=v1821cS(C); const W=v1821cWeights(C); const bud=v1821cBudget(C);
           const opts=V1821C.ROLES.map(k=>[{k,q:S.u[k],keep:true},{k,q:null},...M.c.filter(q=>q.role===k&&!q.hired).map(q=>({k,q}))]);
@@ -30,7 +30,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
       const end={}; const _g=gradOutcome, _h=hofInduct; gradOutcome=function(r,p){ end[p.id]=ovr(p); return _g.apply(this,arguments); }; hofInduct=function(C2){ for(const id in s0) if(C2.players[id]&&end[id]==null) end[id]=ovr(C2.players[id]); return _h.apply(this,arguments); };
       try{ rollover(C); }finally{ gradOutcome=_g; hofInduct=_h; }
       const agg={}; for(const id in lv){ if(end[id]==null) continue; const k=lv[id].join(':'); const a=agg[k]||(agg[k]={s:0,n:0}); a.s+=end[id]-s0[id]; a.n++; }
-      const out={}; for(const k in agg) out[k]=agg[k].s/agg[k].n; V1821D.off=false; V1821D.bookAll=false;
+      const out={}; for(const k in agg) out[k]=agg[k].s/agg[k].n; V1821D.off=false; V1821D.bookAll=false; V1821D.skip=null; V1822.off=false;
       const Y=(C.dvx&&C.dvx.yr[yr0])||{}; const led={}; for(const k of ['V','JV','MOD','cV','cJV','cMOD']){ const L=Y[k]; led[k]=L&&L.base>0?L.tot/L.base:1; }
       let maxM=0; for(const id in C.players){ const p=C.players[id]; if(p.plan) maxM=Math.max(maxM,v1821dMult(C,p,'tick').raw); }
       return {g:out,led,W,L,n:reg.length,maxM}; },[seed,mode]); await pg.close(); return r; };
@@ -45,7 +45,7 @@ let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails+
   console.log('(Realized growth differs between runs because results, lineups and promotions diverge once ratings differ; the ledger compares each player with and without the boosts in the same game state.)');
   ok(worstMax<=0.35, `everything used hard adds at most +35% to your growth at any level (worst ${pc(1+worstMax)})`);
   ok(idleLo>=0.95&&idleHi<=1.08, `with no decisions your growth stays close to the old game (${pc(idleLo)} to ${pc(idleHi)})`);
-  ok(cpuLo>=0.97&&cpuHi<=1.05, `CPU schools' growth from their own staffs, plans, practice and summers stays small (${pc(cpuLo)} to ${pc(cpuHi)})`);
+  ok(cpuLo>=0.97&&cpuHi<=1.07, `CPU schools' growth from their own staffs, plans, practice, summers and facilities stays small (${pc(cpuLo)} to ${pc(cpuHi)})`);
   console.log(`info: Varsity league win margin over three seasons: max ${wMax}, idle ${wIdle} (too few games to judge; test/practice.js measures the cost of Intense practice over 20 seeds)`);
   ok(!errs.length, 'no page errors'+(errs.length?': '+errs.slice(0,3).join(' | '):''));
   console.log(fails?`${fails} FAILED`:'ALL PASS'); await b.close(); process.exit(fails?1:0); })();

@@ -2,7 +2,7 @@
 // (3 slots, window, plan exclusion, GK ok, expires), CPU parity, balance (the feature alone vs the system off, read from the ledger),
 // old saves, determinism, the Facilities tab on desktop and phone.
 const { chromium, DIST } = require('./_pw');
-const ISO="V1821D.only=new Set(['fund','fundpc']); V1821C.off=V1821P.off=V1821M.off=V1821T.off=V1821U.off=true;";
+const ISO="V1821D.only=new Set(['fund','fundpc']); V1821C.off=V1821P.off=V1821M.off=V1821T.off=V1821U.off=true; V1822.off=true;";
 let fails=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fails++; };
 (async()=>{ const b=await chromium.launch(); const errs=[];
   const mk=async(seed,vw)=>{ const page=await b.newPage({viewport:vw||{width:1440,height:900}}); page.on('pageerror',e=>errs.push(e.message)); await page.goto(DIST); await page.evaluate(ISO); await page.waitForTimeout(400);
