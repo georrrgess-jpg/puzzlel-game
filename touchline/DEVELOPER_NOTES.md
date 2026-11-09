@@ -2,6 +2,17 @@
 
 Single-file HTML game (`dist/touchline.html` for the artifact, `dist/touchline-standalone.html` to open locally). Source in `src/`, built by `python3 build.py`. No framework or bundler: the build concatenates plain JS so the engine can also run headless in Node (`test/`).
 
+## Version 18.23 (Locker Room & Personalities)
+
+`src/v17/9q_locker.js`, `9q_locker_ui.js`, `9q_locker.css`; v1822 / V1822; route `locker` (Squads → People) and a `locker` tab on the Development hub. Test `test/locker.js` (in `run_all.sh`).
+
+- Personality (`v1822Pers`): seeded from career seed + player id (cached, no save data), weights in `V1822_P` (Captain weighted ×1.6 for grades 11-12, ×0.5 otherwise). Growth (core mod `pers`, every league school): Gym Rat ×1.06, Student ×1.03, Joker ×0.98, Natural ×0.96; average ×1.004.
+- Chemistry (`v1822Chem`): sum over a level's lineup (Captain +2, Joker +1, Hothead −2, Showman −1) plus your mood, clamped ±6; match form `chem × 0.0012` through `v1821dMatch` (fast odds runs included). League average ≈ 0.
+- Situations: after each league matchday (advance wrapper), 40% chance (seeded per year and matchday) of one for a random player in your program, by his personality (`V1822_EV`, two choices each). A choice adds mood to his level for 2-3 games (`C.lr.mood[lvl]`) and/or a ×0.8-×1.25 growth modifier for him for 3 weeks (core mod `lr`). Unanswered situations lapse after the next game. Overview This week item, nav badge, News line and a season log.
+- Quotes: after your real Varsity games (not preseason, not fast runs), 40% chance (seeded per fixture) of a quote from a starter matching his personality and the result.
+- State `C.lr = {v:1, ev, mood, pg, log, yr}`, lazy and repaired by `v1822S`; reset each year.
+- Not verified: real phones and Safari, themes other than dark and crimson, more than one season of situations.
+
 ## Version 18.22 (Booster Fund: facilities and private coaching)
 
 `src/v17/9p_fund.js`, `9p_fund_ui.js`, `9p_fund.css`; v1821f / V1821F; Development hub tab `fund` ("Facilities", order 60). Built on the 9k development core; test `test/fund.js` (in `run_all.sh`).

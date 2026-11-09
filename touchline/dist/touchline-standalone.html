@@ -4960,6 +4960,32 @@ button.v1821t-tile{cursor:pointer}button.v1821t-tile:hover{border-color:color-mi
 .v1821f-hist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:.86rem}.v1821f-hist li{display:flex;justify-content:space-between;gap:8px}
 @media (max-width:760px){ .v1821f-fg{grid-template-columns:minmax(0,1fr)} .v1821f-big{font-size:2.4rem} .v1821f-row{flex-wrap:wrap} .v1821f-pl{flex-basis:100%} }
 
+/* v18.23 Locker Room */
+.v1822-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 7px;border-radius:999px;font-size:.8rem;font-weight:800;border:1px solid var(--line);background:var(--surface2);white-space:nowrap}
+.v1822-chip.sm{font-size:.72rem;padding:1px 8px 1px 5px}.v1822-chip i{font-style:normal}
+.v1822-chip.k-cap{border-color:#e8c35a;color:#f2d47a}.v1822-chip.k-grind{border-color:#5fd38d;color:#7fe0a5}.v1822-chip.k-joker{border-color:#7cc7ff;color:#9ad4ff}
+.v1822-chip.k-natural{border-color:#c39bff;color:#d2b4ff}.v1822-chip.k-student{border-color:#6fd6c9;color:#8ee3d8}.v1822-chip.k-hot{border-color:#ff8a7a;color:#ff9f92}.v1822-chip.k-show{border-color:#ffb35c;color:#ffc27e}
+.v1822-lead p{margin:0 0 4px;max-width:760px;color:color-mix(in srgb,var(--text) 82%,var(--bg))}
+.v1822-ev{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.v1822-evp{display:flex;gap:12px;align-items:flex-start;margin:4px 0 12px}.v1822-evt{margin:0 0 6px;font-size:1.05rem;font-weight:600}.v1822-evm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.v1822-chs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v1822-cho{appearance:none;font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,transform .15s}
+.v1822-cho:hover,.v1822-cho:focus-visible{border-color:var(--accent);transform:translateY(-1px)}.v1822-cho b{font-size:.98rem}.v1822-cho span{font-size:.82rem;color:var(--muted)}
+.v1822-chems{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
+.v1822-chem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--surface2) 40%,transparent);min-width:0}
+.v1822-ch{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.v1822-ch b{font-family:var(--f-display);font-size:1.15rem;text-transform:uppercase}
+.v1822-lab{font-size:.74rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--surface2);color:var(--muted)}.v1822-lab.up{color:#5fd38d}.v1822-lab.dn{color:#ff8a7a}
+.v1822-bar{position:relative;height:8px;border-radius:999px;margin:10px 0 6px;background:linear-gradient(90deg,#e2574c,#3a4150 45%,#3a4150 55%,#3fbf73)}
+.v1822-bar i{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:var(--text);border:2px solid var(--bg);transform:translate(-50%,-50%)}
+.v1822-parts{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px;font-size:.84rem}.v1822-parts li{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.v1822-grps{display:grid;gap:12px;margin-top:6px}.v1822-gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.v1822-gh small{color:var(--muted);font-size:.8rem}
+.v1822-pl{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.v1822-p{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:.86rem}
+.v1822-log{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:.86rem}.v1822-log li{display:flex;justify-content:space-between;gap:8px}
+.v1822-pstrip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface2) 45%,transparent)}
+.v1822-pd{font-size:.84rem;color:var(--muted);flex:1;min-width:200px}.v1822-pd b{color:var(--text)}
+@media (max-width:900px){ .v1822-chems{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:640px){ .v1822-chs{grid-template-columns:minmax(0,1fr)} }
+
 </style>
 </head><body><div id="app"></div>
 <script>
@@ -14564,6 +14590,7 @@ MODALS.howTo = ()=> modalShell('<h2>How to play</h2>', `<div class="howto">${[
   ['6','The stories','Read The Courier and TouchlineTV in the Newsroom, honor your seniors on Senior Night, unlock signature celebrations, and enshrine legends in the Hall of Fame.']].map(([n,t,d])=>`<div class="ht-step"><span class="ht-n">${n}</span><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div>
   <div class="howto-keys"><span><kbd>Space</kbd> Pause / resume a live match</span><span><kbd>Esc</kbd> Close a window</span><span><kbd>Enter</kbd> Continue your latest career from the menu</span></div>`, `<button class="btn pri" data-a="closeModal">Got it</button>`);
 MODALS.whatsNew = ()=> modalShell('<h2>What\'s new in Touchline</h2>', `<div class="wn">${[
+  ['🧠','Locker Room & Personalities','Squads → Locker Room. Every player now has a personality: Captain, Gym Rat, Joker, Quiet Pro, Natural, Student, Hothead or Showman. Gym Rats (+6%) and Students (+3%) grow faster, Naturals coast (−4%), and Captains and Jokers lift a starting XI’s chemistry while Hotheads and Showmen strain it. Chemistry gives each squad a small match-day edge (at most ±0.7% on attack and defence). About four times a season a locker-room situation needs your call: a Hothead blows up at practice, a Gym Rat wants the gym keys, a Student has an exam. Your choice moves the squad’s mood or one player’s growth for a few weeks. Players speak after games too: look for their quotes in the News, and each player card shows who he is.'],
   ['🏗️','Booster Fund & Facilities','Squads → Development → Facilities. The booster club raises funds every season (10 to start, then 6 plus prestige, more for a Section title; 24 banked at most). Spend them on facilities that make a whole level grow faster for good: Weight room, Film room, Training pitch and Youth academy, three levels each, a few percent per level and +10% at most in total, for Varsity, JV and Modified as each facility covers. Or book private coaching: +25% in-season growth for up to three players a season. A player on a Player Plan can’t be booked too. Rival schools have facilities as well.'],
   ['🧑‍🏫','Coaching Staff','Squads → Development → Staff. Hire a JV Coach, a Modified Coach, a Goalkeeper Coach (keepers at every level) and a Strength & Conditioning Coach (Varsity). Each one speeds up the growth of the players he coaches by his rating, from −8% at 40 to +12% at 90, plus 2% when his specialty matches your training focus. Your staff budget grows with prestige and better coaches cost more, so you choose where to spend. Hire from a fresh market each preseason and offseason, give 1–3 season contracts, decide on renewals; coaches improve every season they stay, and after a strong year a rival may hire one away. Rival schools have staffs too.'],
   ['🎯','Player Plans & Mentors','Squads → Development. Put up to three players per level on a plan: pick the skill to work on and a target OVR, and he grows 15% faster on every league matchday, with a progress bar, a trend and an on track / behind status. Hit the target for a +0.3 bonus; fill all three slots and the rest of that squad grows 1% slower. In Mentors, pair a Varsity junior or senior with a JV or Modified player at least 8 OVR below him: the mentee grows 8–18% faster all year and leans toward his mentor’s best skill, the mentor gives up 3% of his own growth, and a graduating mentor leaves a +0.4 farewell boost.'],
@@ -29523,6 +29550,111 @@ v1821dTab({id:'fund',label:'Facilities',ico:'🏗️',order:60,render:C=>v1821fR
   summary:C=>{ const S=v1821fS(C); const lv=V1821F.FAC.reduce((a,f)=>a+S.lv[f.k]-1,0); const left=V1821F.COACH.slots-v1821fCoachList(C).length; const cheap=Math.min(...V1821F.FAC.map(f=>v1821fCost(C,f.k)||99),v1821fCoachOpen(C)&&left>0?V1821F.COACH.cost:99);
     return {t:`Booster Fund: ${S.funds} to spend`,s:`${lv} facility upgrade${lv===1?'':'s'} · ${v1821fCoachList(C).length} private coach${v1821fCoachList(C).length===1?'':'es'}`,warn:S.funds>=cheap&&S.funds>=V1821F.MAX-4}; },
   badge:C=>{ if(C.phase!=='preseason'&&C.phase!=='offseason') return ''; const S=v1821fS(C); return S.funds>=V1821F.UP[2]?S.funds:''; }});
+
+/* ===================== v18.23 LOCKER ROOM & PERSONALITIES =====================
+   Every player has a personality (seeded from career seed + player id, so it never changes and needs no save data):
+   Captain, Gym Rat, Joker, Quiet Pro, Natural, Student, Hothead, Showman. A personality does three things:
+   - Growth: a small multiplier on the development core (Gym Rat x1.06, Student x1.03, Joker x0.98, Natural x0.96, others x1).
+   - Chemistry: each level's starters add up (Captain +2, Joker +1, Hothead -2, Showman -1); with your locker-room mood it gives that
+     squad a small match-form edge (x0.0012 per point, at most +-6 points = +-0.0072; a home edge is about 0.03).
+   - Voice: postgame quotes in the News, and weekly locker-room situations (about 40% of league matchdays) where you choose how to
+     handle a player. Choices change mood (chemistry for a few games) or one player's growth for a few weeks.
+   Parity: other schools have personalities and chemistry from the same tables (no situations), so the averages stay neutral.
+   State (your school only): C.lr = {v:1, ev, mood:{V,JV,MOD:[{d,until}]}, pg:{pid:{m,until}}, log[], yr}. Identifiers v1822 / V1822. */
+const V1822={ FORM:0.0012, CHEM:6, P:0.4, off:false, cache:new Map() };
+const V1822_P=[
+  {k:'cap',n:'Captain',ico:'👑',w:8,g:1,c:2,d:'Leads by example and keeps the room together.',q:{W:['We did it for each other tonight.','Proud of every guy in that room.'],L:['That one is on us. We will be better Tuesday.','Heads up. We learn from it.'],D:['A point is a point. We go again.']}},
+  {k:'grind',n:'Gym Rat',ico:'💪',w:14,g:1.06,c:0,d:'First in, last out. Grows faster than most.',q:{W:['Back in the weight room tomorrow morning.','The extra work showed tonight.'],L:['I need to get stronger. Simple as that.'],D:['Not good enough. Extra reps this week.']}},
+  {k:'joker',n:'Joker',ico:'😄',w:12,g:0.98,c:1,d:'Keeps everyone loose. Not always focused in drills.',q:{W:['Somebody tell the bus driver we want music.','Coach almost smiled. Almost.'],L:['Hey, at least our uniforms looked good.'],D:['A tie? Like kissing your sister. Ask my sister.']}},
+  {k:'quiet',n:'Quiet Pro',ico:'🤫',w:20,g:1,c:0,d:'Says little, does his job every week.',q:{W:['Good win. Next game.'],L:['We move on.'],D:['Fine. We keep working.']}},
+  {k:'natural',n:'Natural',ico:'✨',w:12,g:0.96,c:0,d:'Gifted, makes it look easy, and sometimes coasts.',q:{W:['Felt easy out there honestly.','I just saw the gap and went.'],L:['Off night. Happens.'],D:['We should have won that one easy.']}},
+  {k:'student',n:'Student',ico:'📚',w:14,g:1.03,c:0,d:'Studies film like homework. Learns quickly.',q:{W:['We watched their film all week. It paid off.','Their left back cheated inside. We noticed.'],L:['I already know what I would change. Film tomorrow.'],D:['Tactically even. We need a better plan for the second half.']}},
+  {k:'hot',n:'Hothead',ico:'🔥',w:10,g:1,c:-2,d:'Plays with fire. Sometimes burns the room.',q:{W:['Tell them to come back next year. Same result.','I told you all week.'],L:['The ref decided that game, not us.','I am not talking about it.'],D:['We got robbed. Write that down.']}},
+  {k:'show',n:'Showman',ico:'🎤',w:10,g:1,c:-1,d:'Loves the cameras and the big moment.',q:{W:['Did you get my celebration on video?','Big stage, big player.'],L:['Just wait until the playoffs.'],D:['Even my highlight reel needs a cliffhanger.']}}];
+const V1822_BY=Object.fromEntries(V1822_P.map(x=>[x.k,x]));
+/* the personality of a player (stable for a career) */
+function v1822Pers(C,p){ if(!p) return V1822_BY.quiet; const key=C.seed+'|'+p.id; let k=V1822.cache.get(key); if(!k){ const r=rngFrom(hashStr(C.seed+'|prs|'+p.id));
+    const ws=V1822_P.map(x=>x.w*(x.k==='cap'?(p.grade>=11?1.6:0.5):1)); const t=ws.reduce((a,b)=>a+b,0); let v=r()*t; k='quiet'; for(let i=0;i<ws.length;i++){ v-=ws[i]; if(v<=0){ k=V1822_P[i].k; break; } }
+    if(V1822.cache.size>5000) V1822.cache.clear(); V1822.cache.set(key,k); } return V1822_BY[k]; }
+function v1822S(C){ let S=C.lr; if(!S||typeof S!=='object') S=C.lr={v:1,ev:null,mood:{},pg:{},log:[],yr:C.year}; if(!S.mood||typeof S.mood!=='object') S.mood={}; for(const l of LVLS) if(!Array.isArray(S.mood[l])) S.mood[l]=[];
+  if(!S.pg||typeof S.pg!=='object') S.pg={}; if(!Array.isArray(S.log)) S.log=[]; if(S.yr!==C.year){ S.yr=C.year; for(const l of LVLS) S.mood[l]=[]; S.pg={}; if(S.ev&&!S.ev.done) S.ev=null; } return S; }
+/* starters of a level (lineup), falling back to the best 11 */
+function v1822Starters(C,sid,lvl){ const lu=getLu(C,sid,lvl); const ids=lu&&lu.slots?lu.slots.map(s=>s.pid).filter(id=>C.players[id]):[]; if(ids.length) return ids.map(id=>C.players[id]); return squad(C,sid,lvl).sort((a,b)=>ovr(b)-ovr(a)).slice(0,11); }
+function v1822Mood(C,lvl){ const S=C.lr; if(!S||!S.mood||S.yr!==C.year) return 0; return (S.mood[lvl]||[]).filter(m=>m.until>=C.md).reduce((a,m)=>a+m.d,0); }
+function v1822Chem(C,sid,lvl){ let c=0; for(const p of v1822Starters(C,sid,lvl)) c+=v1822Pers(C,p).c; if(sid===C.userSid) c+=v1822Mood(C,lvl); return clamp(c,-V1822.CHEM,V1822.CHEM); }
+function v1822ChemParts(C,lvl){ const o={}; for(const p of v1822Starters(C,C.userSid,lvl)){ const P=v1822Pers(C,p); if(P.c){ const e=o[P.k]||(o[P.k]={P,n:0,sum:0}); e.n++; e.sum+=P.c; } } return Object.values(o); }
+/* development core hooks */
+v1821dMod('pers','Personality',(C,p)=>{ if(V1822.off) return null; const sch=C.schools[p.sid]; if(!sch||sch.ext) return null; const g=v1822Pers(C,p).g; return g===1?null:g; });
+v1821dMod('lr','Locker room',(C,p,ctx)=>{ if(V1822.off||ctx!=='tick'||p.sid!==C.userSid) return null; const S=C.lr; const x=S&&S.yr===C.year&&S.pg&&S.pg[p.id]; return x&&x.until>=C.md?x.m:null; });
+v1821dMatch((C,f,sid)=>{ if(V1822.off) return 0; const sch=C.schools[sid]; if(!sch||sch.ext) return 0; return v1822Chem(C,sid,f.lvl)*V1822.FORM; });
+/* ---------- weekly situations ---------- */
+const V1822_EV={
+  hot:{t:'{A} got into a shouting match with a teammate at practice.',ch:[{l:'Talk it out',d:'Both sides say their piece. Squad mood +1 for 3 games.',mood:1,g:3},{l:'Make an example of him',d:'Extra laps for him: mood +2 for 3 games, but he grows 10% slower for 3 weeks.',mood:2,g:3,pm:0.9}]},
+  grind:{t:'{A} asks for the gym keys so he can lift before school.',ch:[{l:'Open the gym',d:'He grows 25% faster for 3 weeks.',pm:1.25,g:3},{l:'Tell him to rest',d:'Rest days are part of the plan: squad mood +1 for 2 games.',mood:1,g:2}]},
+  joker:{t:'{A} swapped every cone in practice for traffic cones from the parking lot.',ch:[{l:'Laugh it off',d:'The room loosens up: mood +2 for 2 games.',mood:2,g:2},{l:'Crack down',d:'Mood −1 for 2 games, but he grows 10% faster for 3 weeks.',mood:-1,g:2,pm:1.1}]},
+  show:{t:'{A} posted a video calling out this week’s opponent.',ch:[{l:'Back him publicly',d:'He grows 15% faster for 3 weeks; the room is annoyed: mood −1 for 2 games.',pm:1.15,mood:-1,g:2},{l:'Make him take it down',d:'Team first: mood +1 for 2 games.',mood:1,g:2}]},
+  student:{t:'{A} has a chemistry exam and asks to skip Wednesday practice.',ch:[{l:'Let him study',d:'The room respects it: mood +1 for 2 games. He grows 20% slower for 2 weeks.',mood:1,g:2,pm:0.8},{l:'Practice comes first',d:'He practices. Mood −1 for 2 games.',mood:-1,g:2}]},
+  cap:{t:'{A} wants to run a players-only meeting before the next game.',ch:[{l:'Let him lead it',d:'Mood +2 for 3 games.',mood:2,g:3},{l:'Run it yourself',d:'Mood +1 for 2 games, and he grows 10% faster for 3 weeks.',mood:1,g:2,pm:1.1}]},
+  natural:{t:'{A} is coasting through drills again.',ch:[{l:'Challenge him',d:'He grows 25% faster for 3 weeks; he sulks: mood −1 for 2 games.',pm:1.25,mood:-1,g:2},{l:'Leave him be',d:'Nothing changes.'}]},
+  quiet:{t:'{A} stayed late to help the younger players with their touch.',ch:[{l:'Praise him in front of the team',d:'Mood +1 for 3 games.',mood:1,g:3},{l:'Ask him to keep doing it',d:'He grows 10% faster for 3 weeks.',pm:1.1,g:3}]}};
+function v1822Spawn(C){ if(V1822.off||C.phase!=='regular'||C.md>=14) return null; const S=v1822S(C); if(S.ev&&!S.ev.done&&S.ev.md===C.md) return S.ev; const r=v1821dR(C,'v1822ev',C.year,C.md); if(r()>=V1822.P) return null;
+  const pool=[]; for(const l of ['V','JV','MOD']) for(const p of squad(C,C.userSid,l)) pool.push(p); if(!pool.length) return null; const p=pool[Math.floor(r()*pool.length)]; const P=v1822Pers(C,p);
+  S.ev={yr:C.year,md:C.md,k:P.k,pid:p.id,lvl:p.lvl,done:false}; return S.ev; }
+function v1822Pending(C){ const S=C.lr; const e=S&&S.ev; return e&&!e.done&&e.yr===C.year&&e.md===C.md&&C.phase==='regular'&&C.players[e.pid]?e:null; }
+function v1822Choose(C,i){ const e=v1822Pending(C); if(!e) return {ok:false,msg:'Nothing to decide right now.'}; const E=V1822_EV[e.k]; const c=E&&E.ch[i]; if(!c) return {ok:false,msg:'Unknown choice.'}; const S=v1822S(C); const p=C.players[e.pid];
+  if(c.mood) S.mood[e.lvl].push({d:c.mood,until:C.md+(c.g||2)-1}); if(c.pm) S.pg[p.id]={m:c.pm,until:C.md+2};
+  e.done=true; e.ch=i; S.log.unshift({yr:C.year,md:C.md,k:e.k,pid:p.id,nm:pname(p),lvl:e.lvl,c:c.l}); if(S.log.length>12) S.log.length=12;
+  addNews(C,'program',`Locker room: ${pname(p)} (${v1822Pers(C,p).n}). ${c.l}.`,C.userSid); return {ok:true,msg:c.d}; }
+/* ---------- hooks: situations after each league matchday, quotes after your Varsity games ---------- */
+{ const _ad=advance; advance=function(C){ const ph=C.phase, md=C.md; const r=_ad.apply(this,arguments); try{ if(!V1822.off&&r&&C.phase==='regular'&&(ph!=='regular'||C.md!==md)) v1822Spawn(C); }catch(e){ console.warn('locker',e); } return r; }; }
+{ const _fm=finishMatch; finishMatch=function(C,M){ const f=C&&M&&C.fixtures[M.fid]; const was=f&&f.st; const r=_fm.apply(this,arguments);
+    try{ if(!V1822.off&&f&&was!=='d'&&f.st==='d'&&!M.fast&&f.lvl==='V'&&(f.h===C.userSid||f.a===C.userSid)&&f.comp!=='pre'){ const rr=v1821dR(C,'v1822q',f.id); if(rr()<0.4){ const xi=v1822Starters(C,C.userSid,'V'); if(xi.length){ const p=xi[Math.floor(rr()*xi.length)]; const P=v1822Pers(C,p); const res=f.w===C.userSid?'W':f.w?'L':'D'; const qs=P.q[res]||P.q.W; addNews(C,'program',`“${qs[Math.floor(rr()*qs.length)]}” ${pname(p)} (${P.n}) after the ${f.hg}-${f.ag} ${res==='W'?'win':res==='L'?'loss':'draw'}`,C.userSid); } } } }catch(e){ console.warn('locker quote',e); }
+    return r; }; }
+
+/* v18.23 Locker Room page (Squads -> People), personality strip on the player card, This week item, menus. Identifiers v1822. */
+const V1822_UI={ lvl:'V' };
+function v1822Chip(P,sm){ return `<span class="v1822-chip k-${P.k}${sm?' sm':''}" title="${esc(P.d)}"><i aria-hidden="true">${P.ico}</i>${esc(P.n)}</span>`; }
+function v1822Meter(C,lvl){ const c=v1822Chem(C,C.userSid,lvl); const mood=v1822Mood(C,lvl); const pct=(c+V1822.CHEM)/(2*V1822.CHEM)*100; const lab=c>=3?'Tight-knit':c>=1?'Good':c<=-3?'Fractured':c<=-1?'Tense':'Neutral';
+  const parts=v1822ChemParts(C,lvl).map(x=>`<li>${v1822Chip(x.P,true)} ×${x.n}<b class="${x.sum>0?'good':'bad'}">${x.sum>0?'+':''}${x.sum}</b></li>`).join('')+(mood?`<li><span>Locker-room mood</span><b class="${mood>0?'good':'bad'}">${mood>0?'+':''}${mood}</b></li>`:'');
+  return `<div class="v1822-chem"><div class="v1822-ch"><b>${LVL_NAME[lvl]}</b><span class="v1822-lab ${c>0?'up':c<0?'dn':''}">${lab} · ${c>0?'+':''}${c}</span></div>
+    <div class="v1822-bar" role="img" aria-label="Chemistry ${c} of ${V1822.CHEM}"><i style="left:${pct}%"></i></div>
+    <small class="muted">Match form ${c>0?'+':c<0?'−':'±'}${Math.abs(c*V1822.FORM*100).toFixed(2)}% on attack and defence</small>
+    <ul class="v1822-parts">${parts||'<li class="muted">No strong personalities in the starting XI.</li>'}</ul></div>`; }
+function v1822EventCard(C){ const e=v1822Pending(C); if(!e) return ''; const p=C.players[e.pid]; const P=v1822Pers(C,p); const E=V1822_EV[e.k];
+  return `<section class="card v1822-ev"><div class="hd"><h3>Locker room situation</h3><span class="chip acc">Before matchday ${C.md+1}</span></div>
+    <div class="v1822-evp">${crest(Sx(C.userSid),34)}<div><p class="v1822-evt">${esc(E.t).replace('{A}',pLink(p.id))}</p><div class="v1822-evm">${v1822Chip(P)} <span class="muted small">${LVL_NAME[p.lvl]} · ${posTag(p.pos)} ${ovrBadge(ovr(p))}</span></div></div></div>
+    <div class="v1822-chs">${E.ch.map((c,i)=>`<button class="v1822-cho" data-a="v1822Choose" data-i="${i}"><b>${esc(c.l)}</b><span>${esc(c.d)}</span></button>`).join('')}</div>
+    <p class="tiny muted">If you play the next game without deciding, the moment passes and nothing changes.</p></section>`; }
+VIEWS.locker=()=>{ const C=App.C; const u=C.userSid; const lvl=V1822_UI.lvl; const S=v1822S(C);
+  const sq=squad(C,u,lvl); const by={}; for(const p of sq){ const P=v1822Pers(C,p); (by[P.k]=by[P.k]||[]).push(p); }
+  const groups=V1822_P.filter(P=>by[P.k]).map(P=>`<div class="v1822-grp"><div class="v1822-gh">${v1822Chip(P)}<small>${esc(P.d)}${P.g!==1?` <b class="${P.g>1?'good':'bad'}">${P.g>1?'+':'−'}${Math.round(Math.abs(P.g-1)*100)}% growth</b>`:''}${P.c?` <b class="${P.c>0?'good':'bad'}">${P.c>0?'+':''}${P.c} chemistry</b>`:''}</small></div>
+    <div class="v1822-pl">${by[P.k].sort((a,b)=>ovr(b)-ovr(a)).map(p=>`<span class="v1822-p">${posTag(p.pos)}${pLink(p.id)}${ovrBadge(ovr(p))}</span>`).join('')}</div></div>`).join('');
+  const log=S.log.filter(x=>x.yr===C.year).slice(0,8).map(x=>`<li><span>MD ${x.md+1} · ${V1822_BY[x.k].ico} ${esc(x.nm)}</span><b>${esc(x.c)}</b></li>`).join('');
+  return `<div class="v1822-lead"><p>Every player has a personality. It shapes how fast he grows, how the starting XI gets along, and what he says after games. Chemistry gives a squad a small edge on match day; your calls in locker-room situations move the mood.</p></div>
+    ${v1822EventCard(C)}
+    <section class="card"><div class="hd"><h3>Team chemistry</h3><span class="small muted">From each level's starting XI and your locker-room calls</span></div><div class="v1822-chems">${LVLS.map(l=>v1822Meter(C,l)).join('')}</div></section>
+    <section class="card"><div class="hd"><h3>Personalities</h3><div class="seg" role="group">${LVLS.map(l=>`<button class="${l===lvl?'on':''}" aria-pressed="${l===lvl}" data-a="v1822Lvl" data-k="${l}">${LVL_NAME[l]}</button>`).join('')}</div></div><div class="v1822-grps">${groups||'<div class="empty">No players at this level.</div>'}</div></section>
+    ${log?`<section class="card"><h3>This season's calls</h3><ul class="v1822-log">${log}</ul></section>`:''}`; };
+A.v1822Choose=el=>{ const r=v1822Choose(App.C,+el.dataset.i); if(r.msg) toast(r.msg); try{ Sound.ui('pop'); }catch(e){} queueSave(); App.keepScroll=true; render(); };
+A.v1822Lvl=el=>{ V1822_UI.lvl=el.dataset.k; App.keepScroll=true; render(); };
+TITLES.locker='Locker Room'; NAV_ICON.locker='users'; if(typeof NAV_DESC!=='undefined') NAV_DESC.locker='Personalities, chemistry and locker-room calls';
+{ const i=NAV.findIndex(n=>n[0]==='families'); if(!NAV.some(n=>n[0]==='locker')) NAV.splice(i>=0?i+1:NAV.length,0,['locker','Locker Room']); }
+{ const g=TOPNAV.find(t=>t[0]==='squads'); if(g&&!g[3].includes('locker')){ const j=g[3].indexOf('families'); g[3].splice(j>=0?j+1:g[3].length,0,'locker'); } }
+try{ if(typeof V1817O_MENU!=='undefined'&&V1817O_MENU.squads){ const pe=V1817O_MENU.squads.find(x=>x[0]==='People'); if(pe&&!pe[1].includes('locker')) pe[1].splice(1,0,'locker'); } }catch(e){}
+if(typeof V17_LITE_VIEWS!=='undefined') V17_LITE_VIEWS.add('locker');
+{ const _nb=navBadges; navBadges=function(C){ const b=_nb.apply(this,arguments); try{ if(C&&v1822Pending(C)) b.locker='1'; }catch(e){} return b; }; }
+/* player card: personality strip */
+{ const _mp=MODALS.player; MODALS.player=function(m){ let h=_mp.apply(this,arguments); try{ const C=App.C; const p=C&&C.players[m.id]; if(!p||(m.tab||'overview')!=='overview') return h; const sch=C.schools[p.sid]; if(!sch||sch.ext) return h; const P=v1822Pers(C,p);
+    const fx=[P.g!==1?`${P.g>1?'+':'−'}${Math.round(Math.abs(P.g-1)*100)}% growth`:'',P.c?`${P.c>0?'+':''}${P.c} chemistry when he starts`:''].filter(Boolean).join(' · ');
+    const strip=`<div class="v1822-pstrip">${v1822Chip(P)}<span class="v1822-pd">${esc(P.d)}${fx?` <b>${esc(fx)}</b>`:''}</span>${p.sid===C.userSid?'<button class="v1821d-fc more" data-a="go" data-r="locker">Locker Room</button>':''}</div>`;
+    const i=h.indexOf('<div class="mbody">'); if(i>=0){ const j=i+'<div class="mbody">'.length; h=h.slice(0,j)+strip+h.slice(j); } }catch(e){ console.warn('v1822 player',e); } return h; }; }
+/* Overview: This week item when a situation is waiting */
+{ const _of=VIEWS.office; VIEWS.office=function(){ const h=_of.apply(this,arguments); try{ const C=App.C; const e=v1822Pending(C); if(!e) return h; const t=document.createElement('template'); t.innerHTML=h; const box=t.content.querySelector('.v1817o-items'); if(!box) return h;
+    const clr=box.querySelector('.v1817o-clear'); if(clr) clr.remove(); const p=C.players[e.pid]; const P=v1822Pers(C,p); const b=document.createElement('button'); b.className='dec v1822-dec'; b.dataset.a='go'; b.dataset.r='locker';
+    b.innerHTML=`<span class="dec-ico">${P.ico}</span><span class="grow"><b>Locker room: ${esc(pname(p))}</b><small>${esc(P.n)} · a call to make before matchday ${C.md+1}</small></span><span class="dec-go">${icon('chev',16)}</span>`; box.appendChild(b); return t.innerHTML; }catch(e){ console.warn('locker overview',e); return h; } }; }
+/* the Development hub: chemistry chip on the Overview growth card */
+v1821dTab({id:'locker',label:'Personality',ico:'🧠',order:70,render:C=>VIEWS.locker(),
+  summary:C=>{ const n=squad(C,C.userSid,'V').filter(p=>v1822Pers(C,p).g>1).length; const c=v1822Chem(C,C.userSid,'V'); return {t:`Personalities: ${n} hard workers on Varsity`,s:`Varsity chemistry ${c>0?'+':''}${c}${v1822Pending(C)?' · a locker-room call is waiting':''}`,warn:!!v1822Pending(C)}; }});
 
 </script>
 </body></html>
