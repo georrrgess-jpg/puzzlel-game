@@ -7,6 +7,9 @@
   g.putImageData(d,0,0);document.documentElement.style.setProperty('--sand',`url(${c.toDataURL()})`);
 })();
 /* ---------- Sort Tubes ---------- */
+/* the sand's own palette: ten hues far apart (one green only, no teal or mint beside it), so no two layers can be
+   mistaken for each other, even through the grain */
+const TCOL=['#f0303f','#ff8a12','#ffd60a','#30c23c','#22b8f0','#2a4dff','#9140ff','#ff52c4','#8f4f22','#f2eee6'];
 registerMode('tubes',{name:'Sand Tubes',icon:'⏳',col:'#22b8c9',tip:'Tap a tube to scoop up its top sand, then tap another tube to pour it. Make every tube hold one colour.'},{goal:'Make every tube hold a single colour of sand.',steps:['Tap a tube to scoop up its top sand.','Tap another tube to pour. It must be empty, or already have the same colour on top. Tubes you can pour into glow.','Fill each tube with 4 of one colour. The empty tubes are spare space.'],
     demo:()=>htStage(`<div class="mtrow">${tube([0,6],'tap',HT_F)+tube([6],'tap2',HT_F2)+tube([])}</div>`,`<div class="mtrow">${tube([0])+tube([6,6],'grow')+tube([])}</div>`,
       'Tap the tube with blue on top, then the blue tube','The blue pours across')});
@@ -91,9 +94,9 @@ MAKERS.tubes=function({R,tier,board,api}){
     const isNew=j=>lastNew&&lastNew.i===i&&j>=lastNew.from,ghost=lastGhost&&lastGhost.i===i?lastGhost.segs:[];
     t.forEach((c,j)=>{
       const s=el('div','seg'+(isNew(j)?' new':'')+(j===t.length-1&&!ghost.length?' top':'')+(j&&t[j-1]===c?' same':''),S.symbols?SYMS[c]:'');
-      s.style.setProperty('--c',COLORS[c]);if(isNew(j))s.style.animationDelay=(FL_RM?0:230)+(j-lastNew.from)*90+'ms';e.appendChild(s)});
+      s.style.setProperty('--c',TCOL[c]);if(isNew(j))s.style.animationDelay=(FL_RM?0:230)+(j-lastNew.from)*90+'ms';e.appendChild(s)});
     /* sand that just left this tube drains away from the top */
-    ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',COLORS[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
+    ghost.forEach((c,k)=>{const s=el('div','seg gone'+(k===ghost.length-1?' top':''));s.style.setProperty('--c',TCOL[c]);s.style.animationDelay=(FL_RM?0:200)+(ghost.length-1-k)*90+'ms';e.appendChild(s)});
   }
   /* once the pour animations have played, turn the tube back into plain resting layers */
   function settle(e){
@@ -149,9 +152,9 @@ MAKERS.tubes=function({R,tier,board,api}){
     sel=-1;moves++;sfx.sand(cnt);buzz(10);
     const geo=pourGeo(from,i,oldLen);   // measured before the board changes, so measuring costs no extra layout
     render();api.commit();lastFrom=-1;lastNew=null;lastGhost=null;
-    pourAnim(from,i,COLORS[col],cnt,geo);
+    pourAnim(from,i,TCOL[col],cnt,geo);
     const finished=tubes[i].length===cap&&uniform(tubes[i]);
-    if(finished){const T=tEls[i],cc=COLORS[tubes[i][0]];setTimeout(()=>{if(!T.isConnected)return;sfx.done();const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
+    if(finished){const T=tEls[i],cc=TCOL[tubes[i][0]];setTimeout(()=>{if(!T.isConnected)return;sfx.done();const[x,y]=centerOf(T);flBurst(x,y-T.offsetHeight*.45,cc,26,1.1);flBurst(x,y,'#ffffff',8,.6);flRing(x,y,cc,180);
       if(!FL_RM)T.animate([{filter:'brightness(1)'},{filter:'brightness(1.7)',offset:.25},{filter:'brightness(1)'}],{duration:700})},FL_RM?0:520)}
     if(stacking||finished)api.good(tEls[i],{silent:true});
     if(solved(tubes))api.win(starsFor(moves,s3,s2));
