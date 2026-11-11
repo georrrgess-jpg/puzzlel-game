@@ -29,6 +29,7 @@
 <link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="css/redesign.css">
 <link rel="stylesheet" href="css/jigsaw.css">
+<link rel="stylesheet" href="css/crossword.css">
 <link rel="stylesheet" href="css/desktop.css">
 </head>
 <body>
@@ -128,6 +129,33 @@
   </div>
 </section>
 
+<section id="cw" class="screen">
+  <div class="topbar">
+    <button class="iconbtn" data-go="home" aria-label="Back">←</button>
+    <h2><i class="h2i">🔤</i>Word Search</h2>
+    <button class="chip coinbtn" aria-label="Coins: open the shop"><i class="coin"></i><b class="coinval">0</b><i class="cplus" aria-hidden="true">+</i></button>
+  </div>
+  <div class="cwscroll">
+    <div class="cwnext" id="cwNext">
+      <button class="cwnmini" aria-label="Play the next word search"><div class="cwmini" id="cwMini"></div><i class="cwnic" id="cwIcon">🦸</i></button>
+      <div class="cwntx">
+        <small id="cwNum">PUZZLE 1</small>
+        <b id="cwName">Caped Crusaders</b>
+        <span class="cwtag" id="cwTag"></span>
+        <div class="cwdots" id="cwDots"></div>
+        <button class="btn playbtn cwplay" id="cwPlay"><span class="shine"></span><b>PLAY</b></button>
+      </div>
+    </div>
+    <div class="cwbook">
+      <div class="jgahead"><button class="jgarr" id="cwPrev" aria-label="Previous book">‹</button><div class="jgpt"><small>📚 THEMES</small><b id="cwBk">Book 1</b></div><span class="jgpn" id="cwBkN">0/24</span><button class="jgarr" id="cwNextB" aria-label="Next book">›</button></div>
+      <div class="jgpbar"><i id="cwBkBar"></i></div>
+      <div class="cwgridb" id="cwGrid"></div>
+      <div class="jgreward" id="cwReward"></div>
+      <div class="jgcount" id="cwCount"></div>
+    </div>
+  </div>
+</section>
+
 <section id="play" class="screen">
   <div class="topbar">
     <button class="iconbtn" id="backBtn" aria-label="Back" title="Back (Esc)" data-k="ESC">←</button>
@@ -151,6 +179,7 @@
   <button class="bn" data-nav="home"><i>🏠</i><span>Home</span></button>
   <button class="bn" data-nav="map"><i>🗺️</i><span>Levels</span></button>
   <button class="bn" data-nav="jig"><i>🧩</i><span>Jigsaw</span><em class="bnew">NEW</em><em class="block">🔒</em></button>
+  <button class="bn" data-nav="cw"><i>🔤</i><span>Words</span><em class="bnew">NEW</em><em class="block">🔒</em></button>
   <button class="bn" data-nav="shop"><i>🛍️</i><span>Shop</span></button>
 </nav>
 <div id="modal"></div>
@@ -178,10 +207,13 @@
 <script src="js/jig/subjects-b.js"></script>
 <script src="js/jig/compose.js"></script>
 <script src="js/jig/jigsaw.js"></script>
+<script src="js/cw/themes.js"></script>
+<script src="js/cw/crossword.js"></script>
 <script src="js/scenes.js"></script>
 <script src="js/screens.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/jig/hub.js"></script>
+<script src="js/cw/hub.js"></script>
 <script>
 // installable + offline when served over http(s) (e.g. GitHub Pages); silently skipped elsewhere
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){

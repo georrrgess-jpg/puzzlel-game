@@ -11,9 +11,9 @@ const api={
   setInfo(h){$('#hudInfo').innerHTML=h;meterKey=''},
   setStars(n){$$('#hudStars svg').forEach((s,i)=>{const on=i<n;if(!on&&s.classList.contains('on')){gfx.pulse(s,'lose');sfx.pop(.5)}s.classList.toggle('on',on)})},
   /* star meter: green ★★★ zone, yellow ★★ zone, red ★ zone and a marker for moves used */
-  moves(m,s3,s2,limit){
-    const max=limit||s2+Math.max(2,Math.ceil(s2*.4)),pct=v=>clamp(v/max*100,0,100),n=m<=s3?3:m<=s2?2:1,info=$('#hudInfo'),key=[s3,s2,limit].join();
-    if(meterKey!==key){meterKey=key;info.innerHTML=`<div class="meter"><div class="mtx"><span>Moves <b class="mv"></b>${limit?` / ${limit}`:''}</span><span class="nx"></span></div><div class="mbar"><i class="z3" style="width:${pct(s3)}%"></i><i class="z2" style="width:${pct(s2)-pct(s3)}%"></i><i class="z1" style="width:${100-pct(s2)}%"></i><div class="mkt"><div class="mk"></div></div></div></div>`}
+  moves(m,s3,s2,limit,label='Moves'){
+    const max=limit||s2+Math.max(2,Math.ceil(s2*.4)),pct=v=>clamp(v/max*100,0,100),n=m<=s3?3:m<=s2?2:1,info=$('#hudInfo'),key=[s3,s2,limit,label].join();
+    if(meterKey!==key){meterKey=key;info.innerHTML=`<div class="meter"><div class="mtx"><span>${label} <b class="mv"></b>${limit?` / ${limit}`:''}</span><span class="nx"></span></div><div class="mbar"><i class="z3" style="width:${pct(s3)}%"></i><i class="z2" style="width:${pct(s2)-pct(s3)}%"></i><i class="z1" style="width:${100-pct(s2)}%"></i><div class="mkt"><div class="mk"></div></div></div></div>`}
     $('.mv',info).textContent=m;
     /* "within" is dropped on narrow phones (css): ★★★ ≤14 fits where ★★★ within 14 does not */
     $('.nx',info).innerHTML=n===3?`★★★ <span class="w">within </span><span class="le">≤</span>${s3}`:n===2?`★★ <span class="w">within </span><span class="le">≤</span>${s2}`:limit?`${limit-m} left`:'★ finish it!';
@@ -45,34 +45,38 @@ const api={
 function startLevel(n,opts={}){
   if(opts.daily&&dailyDone()){toast(`✅ Done for today! New challenge in ${fmtTime(untilMidnight())}`);sfx.bad();return}
   if(cur&&cur.puz&&cur.puz.destroy)cur.puz.destroy();
-  const daily=!!opts.daily,jig=!!opts.jig&&!daily;let type,tier,seed;
+  const daily=!!opts.daily,jig=!!opts.jig&&!daily,cw=!!opts.cw&&!daily&&!jig;let type,tier,seed;
   if(daily){const c=dailyCfg();type=c.type;tier=c.tier;seed=c.seed}
   else if(jig){type='jigsaw';tier=jigSize(n);seed=hashSeed(n,7177)}
+  else if(cw){type='crossword';tier=0;seed=hashSeed(n,9091)}
   else{type=typeFor(n);tier=tierFor(n);seed=hashSeed(n,TYPES.indexOf(type)+1)}
-  const bonus=!daily&&!jig&&isBonus(n),chal=!daily&&!jig&&isChallenge(n);
+  const bonus=!daily&&!jig&&!cw&&isBonus(n),chal=!daily&&!jig&&!cw&&isChallenge(n);
   board.innerHTML='';closeModal();pendingUnlock=null;
   $('#hudStars').innerHTML=STAR+STAR+STAR;meterKey='';$('#hudInfo').innerHTML='';
-  $('#ptitle').textContent=daily?'📅 Daily Challenge':jig?`🧩 Puzzle ${n}`:bonus?`👑 Level ${n}`:chal?`🔥 Level ${n}`:'Level '+n;
+  $('#ptitle').textContent=daily?'📅 Daily Challenge':jig?`🧩 Puzzle ${n}`:cw?`🔤 Puzzle ${n}`:bonus?`👑 Level ${n}`:chal?`🔥 Level ${n}`:'Level '+n;
   $('.ptitle').classList.toggle('bonus',bonus||daily);$('.ptitle').classList.toggle('chal',chal&&!bonus);
-  $('#psub').innerHTML=`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(jig?`<span class="sx"> · ${JIG_SIZES[tier][0]*JIG_SIZES[tier][1]} pieces</span>`:bonus?'<span class="sx"> · BONUS 2× coins</span>':chal?'<span class="sx"> · Finale</span>':daily?'<span class="sx"> · big reward!</span>':'');
+  $('#psub').innerHTML=cw?`<span class="si">${cwPuzzle(n).theme.icon} </span>${cwPuzzle(n).theme.name}`:`<span class="si">${INFO[type].icon} </span>`+INFO[type].name+(false?'':jig?`<span class="sx"> · ${JIG_SIZES[tier][0]*JIG_SIZES[tier][1]} pieces</span>`:bonus?'<span class="sx"> · BONUS 2× coins</span>':chal?'<span class="sx"> · Finale</span>':daily?'<span class="sx"> · big reward!</span>':'');
   /* the written instruction is for the first 3 levels of each mode; after that the coach pill is the only guidance (? still opens the how-to) */
-  const again=!!cur&&cur.level===n&&cur.daily===daily&&!!cur.jig===jig;   // a restart is not a new level
+  const again=!!cur&&cur.level===n&&cur.daily===daily&&!!cur.jig===jig&&!!cur.cw===cw;   // a restart is not a new level
   S.seenN=S.seenN||{};const seenN=S.seenN[type]||0;if(!again&&seenN<3){S.seenN[type]=seenN+1;save()}
   $('#instr').textContent=INFO[type].tip;$('#instr').classList.toggle('off',seenN>=3);api.coach('');
-  const replay=again||(jig?(S.jig.stars[n]||0)>0:!daily&&(S.stars[n]||0)>0);
-  cur={replay,level:n,type,daily,jig,bonus,chal,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
+  const replay=again||(jig?(S.jig.stars[n]||0)>0:cw?(S.cw.stars[n]||0)>0:!daily&&(S.stars[n]||0)>0);
+  cur={replay,level:n,type,daily,jig,cw,bonus,chal,over:false,locked:false,history:[],puz:null,combo:0,hinted:false,last:null,dday:daily?today():0,t0:performance.now()};
   cur.puz=MAKERS[type]({R:rngOf(seed),tier,level:n,board,api});
   cur.history=[cur.puz.snap()];
   /* pick an unfinished level up where it was left (a restart starts it fresh) */
-  const kept=jig?S.jig.res:S.resume;
+  /* a crossword in progress is kept as one snapshot */
+  if(cw&&S.cw.res&&S.cw.res.n===n){if(!again){try{cur.puz.restore(S.cw.res.s);const me=cur;setTimeout(()=>{if(cur===me)toast('↩️ Picked up where you left off')},900)}catch(e){}}S.cw.res=null;save()}
+  const kept=jig?S.jig.res:cw?null:S.resume;
   if(kept&&kept.n===n&&kept.t===type&&!daily){
     if(again){if(jig)S.jig.res=null;else S.resume=null}
     else{try{const h=kept.h;cur.puz.restore(h[h.length-1]);cur.history=h.slice();refreshUndo();const me=cur;setTimeout(()=>{if(cur===me)toast('↩️ Picked up where you left off')},900)}catch(e){cur.history=[cur.puz.snap()]}}
     if(jig)S.jig.res=null;else S.resume=null;save();
   }
   /* in a jigsaw the Skip button is Peek (hold it, or tap it, to see the finished picture) */
-  $('#play').classList.toggle('jigm',jig);$('#skipBtn').classList.toggle('peekb',jig);$('#skipBtn').firstElementChild.textContent=jig?'👁️':'⏭️';$('#skipBtn').childNodes[1].textContent=jig?'Peek':'Skip';
-  $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;refreshUndo();
+  /* in a crossword it is Clues (every clue at once) */
+  $('#play').classList.toggle('jigm',jig);$('#play').classList.toggle('cwm',cw);$('#skipBtn').classList.toggle('peekb',jig);$('#skipBtn').firstElementChild.textContent=jig?'👁️':cw?'📋':'⏭️';$('#skipBtn').childNodes[1].textContent=jig?'Peek':cw?'Clues':'Skip';
+  $('#undoBtn').disabled=!!cur.puz.noUndo;$('#skipBtn').disabled=daily;$('#undoBtn').hidden=cw;refreshUndo();
   refreshHUD();show('play');sfx.whoosh();
   const me=cur,go=()=>{if(cur===me&&cur.puz.begin)cur.puz.begin();resetNudge(true)};
   if(!S.seen[type])showHowTo(type,go);else{go();if(!jig)showIntro()}   // a jigsaw opens with its own reveal
@@ -87,7 +91,7 @@ function showIntro(){
   }
   const goal=c.puz.goal||(L?`★★★ in ${L.s3} moves or fewer`:'');
   const b=el('div','lvintro',`<div class="lvi-card" style="--tc:${i.col}"><div class="lvi-ic">${i.icon}</div>
-    <small>${c.daily?'DAILY CHALLENGE':c.jig?`🧩 JIGSAW · PUZZLE ${c.level}`:c.bonus?'👑 BONUS LEVEL · 2× COINS':c.chal?`🔥 WORLD FINALE · LEVEL ${c.level}`:'LEVEL '+c.level}</small><b>${i.name}</b>
+    <small>${c.daily?'DAILY CHALLENGE':c.jig?`🧩 JIGSAW · PUZZLE ${c.level}`:c.cw?`${cwPuzzle(c.level).theme.icon} WORD SEARCH · ${cwPuzzle(c.level).theme.name.toUpperCase()}`:c.bonus?'👑 BONUS LEVEL · 2× COINS':c.chal?`🔥 WORLD FINALE · LEVEL ${c.level}`:'LEVEL '+c.level}</small><b>${i.name}</b>
     ${goal?`<em>${goal}</em>`:''}${best?`<span class="lvi-best">Your best: ${'★'.repeat(best)}${'☆'.repeat(3-best)}</span>`:''}</div>`);
   $('#play').appendChild(b);
   setTimeout(()=>b.classList.add('out'),1500);setTimeout(()=>b.remove(),2100);
@@ -118,6 +122,7 @@ function showHowTo(type,done){
 }
 /* an unfinished (non-daily) level is kept, so leaving it, or closing the app, never loses progress */
 function keepResume(){
+  if(cur&&cur.cw&&!cur.over){if(cur.puz.dirty()){S.cw.res={n:cur.level,s:cur.puz.snap()};save()}else if(S.cw.res&&S.cw.res.n===cur.level){S.cw.res=null;save()}return}
   if(!cur||cur.over||cur.daily||cur.puz.noUndo)return;
   if(cur.jig){if(cur.history.length>1){S.jig.res={n:cur.level,t:cur.type,h:cur.history.slice(-40)};save()}else if(S.jig.res&&S.jig.res.n===cur.level){S.jig.res=null;save()}return}
   if(cur.history.length>1){S.resume={n:cur.level,t:cur.type,h:cur.history.slice(-40)};save()}
@@ -143,6 +148,7 @@ function useHint(){
 }
 function skipLevel(){
   if(cur&&cur.jig){if(!cur.over&&cur.puz.peek){sfx.click();cur.puz.peek()}return}
+  if(cur&&cur.cw){if(!cur.over){sfx.click();cur.puz.clues()}return}
   if(!cur||cur.over||cur.locked||cur.daily)return;
   const n=cur.level,hasToken=S.skips>0;
   openModal(`<h2>Skip level?</h2><p>Move on to the next level. This level stays unstarred so you can come back for stars later.</p>
@@ -156,6 +162,7 @@ function skipLevel(){
 function onWin(stars){
   if(cur.over)return;cur.over=true;clearTimeout(nudgeT);clearTimeout(pulseT);$('#hintBtn').classList.remove('pulse');refreshUndo();
   if(cur.jig)return onJigWin(stars);
+  if(cur.cw)return onCwWin(stars);
   const me=cur,n=cur.level,daily=cur.daily;
   let coins,prev=0,streakBonus=0,chest=0,dstreak=0,chalBonus=0,world=null;
   /* a daily is booked to the day it was STARTED (a win after midnight still counts for that day) and only once; a
@@ -305,7 +312,7 @@ addEventListener('popstate',()=>{
   if(m.classList.contains('on')){const f=m._back;if(f&&!Trans.busy)f();syncGuard();return}
   if(Trans.busy){syncGuard();return}
   if($('#play').classList.contains('active')){$('#backBtn').click();syncGuard();return}
-  if($('#map').classList.contains('active')||$('#shop').classList.contains('active')||$('#jig').classList.contains('active')){show('home');return}
+  if($('#map').classList.contains('active')||$('#shop').classList.contains('active')||$('#jig').classList.contains('active')||$('#cw').classList.contains('active')){show('home');return}
   history.back();   // the home screen: let the Back button really leave
 });
 /* closing is instant for the game (state flips now); the card just plays a short exit while it fades */
@@ -323,7 +330,8 @@ function show(id,o={}){
     $$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
     Scene.show(id);document.body.dataset.scr=id;$$('#nav .bn').forEach(b=>b.classList.toggle('on',b.dataset.nav===id));
     if(id==='home')renderHome();if(id==='map')renderMap();if(id==='shop')renderShop();if(id==='jig'){renderJig();if(!S.jig.intro){S.jig.intro=true;save()}}
-    refreshJigTab();
+    if(id==='cw'){renderCw();if(!S.cw.intro){S.cw.intro=true;save()}}
+    refreshJigTab();refreshCwTab();
     Music.setMode(id==='play'?'play':'menu');BG.setCalm(id==='play'?1:0);
     refreshHUD();syncGuard();
     if(id==='home'){setTimeout(drainModalQ,700);setTimeout(wiggleTiles,520)}
@@ -361,6 +369,7 @@ $('.nextcard').onclick=()=>$('#playBtn').click();   // the Next up card plays th
 /* the bottom bar, the coin chips (+ opens the shop's boosts) and the garden's Edit button */
 $$('#nav .bn').forEach(b=>b.onclick=()=>{if(b.classList.contains('on'))return;
   if(b.dataset.nav==='jig'&&!jigOpen()){sfx.bad();toast(`🔒 Clear level ${ECON.jig.unlock-1} to unlock the Jigsaw`);wa(b,[{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'none'}],{duration:280});return}
+  if(b.dataset.nav==='cw'&&!cwOpen()){sfx.bad();toast(`🔒 Clear level ${ECON.cw.unlock-1} to unlock Word Search`);wa(b,[{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'none'}],{duration:280});return}
   sfx.click();show(b.dataset.nav)});
 $$('.coinbtn').forEach(b=>b.onclick=()=>{sfx.click();setShopTab('boosts');if(!$('#shop').classList.contains('active'))show('shop')});
 $('#gardenEdit').onclick=()=>{sfx.click();setShopTab('garden');show('shop')};
@@ -371,12 +380,12 @@ $('#tSpin').onclick=()=>{sfx.click();showSpin()};
 $('#tQuests').onclick=()=>{sfx.click();showQuests()};
 $('#tTrophy').onclick=()=>{sfx.click();showTrophies()};
 $$('[data-go]').forEach(b=>b.onclick=()=>{sfx.click();show(b.dataset.go)});
-$('#backBtn').onclick=()=>{if(Trans.busy||(cur&&cur.locked&&!cur.over))return;sfx.click();playExit(cur&&cur.jig?'jig':cur&&cur.daily?'home':'map')};
+$('#backBtn').onclick=()=>{if(Trans.busy||(cur&&cur.locked&&!cur.over))return;sfx.click();playExit(cur&&cur.jig?'jig':cur&&cur.cw?'cw':cur&&cur.daily?'home':'map')};
 $('#undoBtn').onclick=undo;
 $('#hintBtn').onclick=useHint;
 $('#helpBtn').onclick=()=>{if(cur){sfx.click();showHowTo(cur.type)}};
 /* Restart asks first when 3 or more moves would be lost; holding the button restarts at once */
-const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:cur.daily,jig:cur.jig})};
+const doRestart=()=>{if(cur&&!cur.over&&!cur.locked)startLevel(cur.level,{daily:cur.daily,jig:cur.jig,cw:cur.cw})};
 (()=>{
   const rb=$('#restartBtn');let t=0,long=false;
   rb.addEventListener('pointerdown',()=>{long=false;clearTimeout(t);t=setTimeout(()=>{long=true;if(cur&&!cur.over&&!cur.locked){sfx.click();buzz(15);doRestart()}},650)});
@@ -402,6 +411,8 @@ $('#modal').addEventListener('pointerdown',e=>{if(e.target===e.currentTarget&&e.
 addEventListener('keydown',e=>{
   if(e.target.closest&&e.target.closest('input'))return;
   const m=$('#modal.on'),k=e.key.toLowerCase();
+  /* the word search may take keys for itself (it takes none today: it is played by dragging) */
+  if(!m&&cur&&cur.cw&&!cur.over&&$('#play').classList.contains('active')&&cur.puz.key(e)){e.preventDefault();return}
   if(m&&k==='escape'){if(m._back)m._back();return}
   if(m&&(k==='enter'||k===' ')){
     const ae=document.activeElement;
@@ -433,4 +444,4 @@ addEventListener('storage',e=>{
   applyTheme();refreshHUD();const a=$('.screen.active');if(a&&a.id!=='play')show(a.id);
   toast('Progress updated from another tab');
 });
-window.__game={S,TYPES,typeFor,tierFor,startJig:n=>startLevel(n,{jig:true}),jigSize,levelFor:(t,tier)=>{for(let n=1;n<5000;n++)if(typeFor(n)===t&&tierFor(n)>=tier)return n},startLevel,get cur(){return cur},show,api,closeModal};
+window.__game={S,TYPES,typeFor,tierFor,startJig:n=>startLevel(n,{jig:true}),startCw:n=>startLevel(n,{cw:true}),jigSize,levelFor:(t,tier)=>{for(let n=1;n<5000;n++)if(typeFor(n)===t&&tierFor(n)>=tier)return n},startLevel,get cur(){return cur},show,api,closeModal};

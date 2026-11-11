@@ -63,6 +63,35 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Also at home on a computer**: in any landscape window from about 860x480, a desktop layout with a navigation rail, a two-column home and
   large boards (see v8 below). Keyboard: Z or U undo, H hint, R restart, M music, Esc back, Enter for a popup's main button.
 
+## What's new in v9 (Word Search)
+A new endless track beside the levels and the Jigsaw. It opens when level 4 is cleared and has its own tab (🔤 Words).
+
+- **The board:** an 11x11 board of letters with 9 words of one theme hidden in it. The word bank sits under the board,
+  three by three.
+- **Finding words:** drag from a word's first letter to its last. A band follows your finger and snaps to straight
+  lines. Let go on a bank word and it is found: it keeps its band in a colour of its own, its letters pop, sparkles
+  rise, a chime climbs (higher with every word), and the coach shows its clue.
+- **Difficulty:** the first puzzles hide words only across and down. Diagonals come next, and later words that run
+  backwards.
+- **Stars:** swiping across 3 or more letters that are no word is a slip. Letting go a letter short, or partway along a
+  word you have not found yet, is not. A hint counts as two slips. ★★★ with 2 slips or fewer.
+- **Buttons:** 💡 lights up where a word starts. 📋 lists every word with its clue.
+- **24 themes:** Caped Crusaders, Pirate's Cove, Haunted Manor, Space Station, Wizard Academy, Dino Dig, Ninja Dojo,
+  Candy Factory, Wild West, Deep Sea, Dragon's Keep, Robot Lab, Retro Arcade, Pharaoh's Tomb, Detective Noir,
+  Rock Concert, Arctic Expedition, Mount Olympus, Jungle Safari, Spy Agency, Circus Big Top, Fairy Forest,
+  Volcano Island and Bake Off. Each has about 18 words and their clues (`js/cw/themes.js`).
+- **The Book:** each theme holds three puzzles, and finishing all three pays a bonus (45 coins and a hint). After the
+  last theme, Book 2 starts again with new word mixes and boards.
+- **Never ambiguous:** every board is built so each bank word can be read exactly once, never inside another word (no
+  STAGE inside BACKSTAGE), and the filler letters are weighted like English so words hide well.
+- **Rewards and progress:** win card with the solved board in miniature, theme progress and bonus, quests, 4 new
+  trophies, and an unfinished puzzle is picked up where it was left.
+- **Smooth:** with the CPU 6x slower, dragging all nine words holds 54 fps. The band is one element moved with
+  transform, and the board is measured once per drag.
+- **Tests:** `tools/regress.cjs` C1-C5 cover the unlock, 150 boards checked for ambiguity, real mouse drags (slips and
+  finds), rewards with the theme bonus, and resume. `tools/matrix.cjs` visits the book, a puzzle, the clue list and the
+  win card on every size.
+
 ## What's new in v8.2 (PC home after the concept art)
 The PC home screen follows the concept art. The logo is centred on top, with the garden island floating beside it on
 wide windows. The world card with PLAY sits in the middle, with the star chest under it. Daily and Quests are on the
@@ -375,6 +404,7 @@ The game is a mobile-first web app. Once it is hosted it can be installed to the
 - `js/perf.js`: quality tiers. `js/audio.js`: the audio engine and the sound effects. `js/music.js`: the songs and the band
   that plays them. `js/fx.js`: particles, animated background.
 - `css/desktop.css`: the layout for computers and landscape tablets (loaded last).
+- `js/cw/`: Word Search: `themes.js` (the themes, words and clues), `crossword.js` (boards and play; the mode's internal name is still `crossword`), `hub.js` (the book, rewards). Styles in `css/crossword.css`.
 - `js/meta.js`: XP, quests, trophies, daily, spin, settings. `js/howto.js`: how-to demo helpers.
 - `js/modes/`: `common.js` (shared helpers + the drag controller) and one file per mode: `arrows`, `tubes`, `threads`, `merge`, `blocks`, `pics` (its art is in `pics-art.js`).
 - `js/screens.js`: home, map, shop. `js/ui.js`: game flow, popups, HUD.

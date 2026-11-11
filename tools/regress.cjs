@@ -517,7 +517,7 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
   });
 
   /* ---------- Jigsaw ---------- */
-  const jprep = (p, unlocked = 10) => p.evaluate(u => { const g = __game; g.closeModal(); for (const t of [...g.TYPES, 'jigsaw']) g.S.seen[t] = true; g.S.login.last = today(); g.S.welcome3 = false; g.S.unlocked = u; g.S.jig.intro = true }, unlocked);
+  const jprep = (p, unlocked = 10) => p.evaluate(u => { const g = __game; g.closeModal(); for (const t of [...g.TYPES, 'jigsaw']) g.S.seen[t] = true; g.S.login.last = today(); g.S.welcome3 = false; g.S.unlocked = u; g.S.jig.intro = true; g.S.cw.intro = true }, unlocked);
   await test('J1 the Jigsaw opens after level 6', async p => {
     await jprep(p, 3); await p.evaluate(() => { __game.show('home'); renderHome() }); await sleep(600);
     await p.evaluate(() => document.querySelector('#nav .bn[data-nav="jig"]').click()); await sleep(700);
@@ -581,6 +581,54 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     ck('J7 a tap skips straight to play at 0%', !b.intro && b.pct === '0%', JSON.stringify(b));
     await p.evaluate(() => { const q = __game.cur.puz; for (let k = 0; k < 60 && !__game.cur.locked; k++) q._bot() }); await sleep(300);
     ck('J7 a finished picture reads 100%', await p.evaluate(() => document.querySelector('.jpt').textContent === '100%'));
+  });
+  /* ---------- Crosswords ---------- */
+  const cprep = (p, unlocked = 10) => p.evaluate(u => { const g = __game; g.closeModal(); for (const t of [...g.TYPES, 'jigsaw', 'crossword']) g.S.seen[t] = true; g.S.login.last = today(); g.S.welcome3 = false; g.S.unlocked = u; g.S.jig.intro = true; g.S.cw.intro = true }, unlocked);
+  await test('C1 the Crosswords open after level 4', async p => {
+    await cprep(p, 3); await p.evaluate(() => { __game.show('home'); renderHome() }); await sleep(600);
+    await p.evaluate(() => document.querySelector('#nav .bn[data-nav="cw"]').click()); await sleep(700);
+    ck('C1 locked before level 4 is cleared', await p.evaluate(() => !document.querySelector('#cw').classList.contains('active')));
+    await cprep(p, 5); await p.evaluate(() => document.querySelector('#nav .bn[data-nav="cw"]').click()); await sleep(900);
+    ck('C1 open after level 4, the book shows 24 themes', await p.evaluate(() => document.querySelector('#cw').classList.contains('active') && document.querySelectorAll('#cwGrid .cwtc').length === 24));
+  });
+  await test('C2 every board hides each bank word exactly once', async p => {
+    const r = await p.evaluate(() => { let bad = 0, few = 0, early = 0; for (let n = 1; n <= 150; n++) { const L = cwLayout(n); if (L.words.length < 8) few++;
+      if (!L.g.every(ch => /^[A-Z]$/.test(ch))) bad++;
+      for (const w of L.words) { if (w.cells.map(i => L.g[i]).join('') !== w.w) bad++; if (cwCount(L.g, w.w) !== 1) bad++; if (n <= 6 && w.d > 1) early++ } }
+      return { bad, few, early } });
+    ck('C2 150 boards: full of letters, every word where it says, readable exactly once, at least 8 words', r.bad === 0 && r.few === 0, JSON.stringify(r));
+    ck('C2 the first puzzles hide words only across and down', r.early === 0, JSON.stringify(r));
+  });
+  await test('C3 dragging: a wrong swipe is a slip, a dragged word is found', async p => {
+    await cprep(p); await p.evaluate(() => __game.startCw(4)); await sleep(1600);
+    const pt = i => p.evaluate(i => { const r = document.querySelector(`#board .cwc[data-i="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] }, i);
+    const drag = async (a, b) => { const A = await pt(a), B = await pt(b); await p.mouse.move(...A); await p.mouse.down(); for (let k = 1; k <= 8; k++) { await p.mouse.move(A[0] + (B[0] - A[0]) * k / 8, A[1] + (B[1] - A[1]) * k / 8); await sleep(20) } await sleep(40); await p.mouse.up(); await sleep(350) };
+    /* a swipe of 4 letters that is no word: a row where no word starts at that cell going right */
+    const miss = await p.evaluate(() => { const L = __game.cur.puz.layout; for (let i = 0; i < 121; i++) { if (i % 11 > 7) continue; const cells = [i, i + 1, i + 2, i + 3]; if (!L.words.some(w => w.cells.length === 4 && (w.cells.join() === cells.join() || w.cells.slice().reverse().join() === cells.join()))) return i } });
+    await drag(miss, miss + 3);
+    const r1 = await p.evaluate(() => ({ slips: +document.querySelector('#hudInfo .mv').textContent, found: document.querySelector('.cwpn').textContent }));
+    const w = await p.evaluate(() => { const w = __game.cur.puz.layout.words[0]; return [w.cells[0], w.cells[w.cells.length - 1]] });
+    await drag(w[0], w[1]);
+    const r2 = await p.evaluate(() => ({ found: document.querySelector('.cwpn').textContent, band: document.querySelectorAll('.cwband.got').length, bank: document.querySelectorAll('.cwbw.ok').length, slips: +document.querySelector('#hudInfo .mv').textContent }));
+    ck('C3 a swipe over no word costs one slip and finds nothing', r1.slips === 1 && r1.found === '0', JSON.stringify(r1));
+    ck('C3 dragging a word finds it: a band, a ticked bank word, no slip', r2.found === '1' && r2.band === 1 && r2.bank === 1 && r2.slips === 1, JSON.stringify(r2));
+  });
+  await test('C4 a finished crossword pays, advances the book, and a full theme pays its bonus', async p => {
+    await cprep(p); await p.evaluate(() => { const S = __game.S; S.cw.next = 3; S.cw.stars = { 1: 3, 2: 2 }; S.cw.themes = {}; __game.startCw(3) }); await sleep(1500);
+    const c0 = await p.evaluate(() => __game.S.coins);
+    await p.evaluate(() => { for (let k = 0; k < 20 && !__game.cur.over; k++) __game.cur.puz._bot() }); await sleep(2600);
+    const r = await p.evaluate(() => ({ next: __game.S.cw.next, stars: __game.S.cw.stars[3], theme: !!__game.S.cw.themes['0-0'], card: !!document.querySelector('#modal.on .cwwincard') }));
+    const c1 = await p.evaluate(() => __game.S.coins);
+    ck('C4 the win card shows and the next puzzle opens', r.card && r.next === 4 && r.stars === 3, JSON.stringify(r));
+    ck('C4 the theme bonus is paid once all three are solved', r.theme && c1 - c0 >= 45 + 12, `coins +${c1 - c0}`);
+  });
+  await test('C5 an unfinished crossword is picked up where it was left', async p => {
+    await cprep(p); await p.evaluate(() => __game.startCw(6)); await sleep(1300);
+    await p.evaluate(() => __game.cur.puz._bot()); await sleep(400);
+    const k0 = await p.evaluate(() => document.querySelector('.cwpn').textContent);
+    await p.evaluate(() => document.querySelector('#backBtn').click()); await sleep(900);
+    await p.evaluate(() => __game.startCw(6)); await sleep(1300);
+    ck('C5 the found word is still found', await p.evaluate(() => document.querySelector('.cwpn').textContent) === k0 && k0 === '1', 'words ' + k0);
   });
   await test('J6 pictures do not repeat', async p => {
     const r = await p.evaluate(() => { const seen = new Map(); let dup = 0, same = 0, prev = null; for (let n = 1; n <= 400; n++) { const c = JIGART.compose(n), k = c.biome + '|' + c.main + '|' + c.side + '|' + c.time; if (seen.has(k)) dup++; seen.set(k, n); if (prev && prev.biome === c.biome) same++; prev = c } return { dup, same, variety: JIGART.variety() } });

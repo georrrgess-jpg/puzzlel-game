@@ -42,7 +42,7 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
           if (!vis(e) || e.disabled && !e.matches('.node')) return;
           const r = e.getBoundingClientRect(), id = (e.id || e.className || e.tagName).toString().split(' ').slice(0, 2).join('.') + ' "' + (e.textContent || '').trim().slice(0, 14) + '"';
           const activeScreen = e.closest('.screen.active,#modal.on,#banners'); if (!activeScreen) return;
-          if (e.matches('.node,.sw,.seg3 button,.bgs,.mg')) return;
+          if (e.matches('.node,.sw,.seg3 button,.bgs,.mg,.k')) return;   // .k: crossword keyboard keys, phone-keyboard sized by design (10 to a row)
           if (!inScroller(e) || e.closest('.mbtns,.toolbar')) {
             if (!e.closest('.wtabs') && (r.right > vw + 1 || r.left < -1 || r.bottom > vh + 1 || r.top < -1)) bad.push('outside viewport: ' + id + ' [' + Math.round(r.left) + ',' + Math.round(r.top) + ',' + Math.round(r.right) + ',' + Math.round(r.bottom) + ']');
           }
@@ -116,6 +116,12 @@ const UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 5) AppleWebKit/537.36 (KHTML, 
     await page.evaluate(() => { __game.S.jig.next = 18; __game.startJig(18) }); await sleep(2600); await page.evaluate(() => __game.cur.puz._bot()); await sleep(600); await check('play-jigsaw'); await shot('play-jigsaw');
     await page.evaluate(() => { const q = __game.cur.puz; for (let k = 0; k < 60 && !__game.cur.locked; k++) q._bot() }); await sleep(3200); await check('jig-win'); await shot('jig-win');
     await closeM(); await page.evaluate(() => { __game.S.jig.next = 1; __game.S.jig.stars = {} });
+    // crosswords: the book, a puzzle, the clue list, the win card
+    await closeM(); await page.evaluate(() => { const S = __game.S; S.cw.intro = true; S.seen.crossword = true; S.cw.stars = { 1: 3, 2: 2, 3: 1 }; S.cw.next = 4; __game.show('cw') }); await sleep(1100); await check('cw'); await shot('cw');
+    await page.evaluate(() => __game.startCw(4)); await sleep(1800); await page.evaluate(() => __game.cur.puz._bot()); await sleep(600); await check('play-crossword'); await shot('play-crossword');
+    await openAndCheck('cw-clues', () => page.evaluate(() => document.querySelector('#skipBtn').click()));
+    await closeM(); await page.evaluate(() => { for (let k = 0; k < 20 && !__game.cur.over; k++) __game.cur.puz._bot() }); await sleep(3000); await check('cw-win'); await shot('cw-win');
+    await closeM(); await page.evaluate(() => { __game.S.cw.next = 1; __game.S.cw.stars = {} });
     // popups
     await openAndCheck('settings', () => page.evaluate(() => { __game.show('home'); document.querySelector('#settingsBtn').click() }));
     await openAndCheck('quests', () => page.evaluate(() => document.querySelector('#tQuests').click()));

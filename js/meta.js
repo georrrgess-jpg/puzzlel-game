@@ -20,6 +20,7 @@ function emit(ev,d){
   if(ev==='coins')st.coinsEarned+=d;
   if(ev==='hint')st.hints++;
   if(ev==='jig'){st.jig=(st.jig||0)+1;if(d.stars===3)st.jigPerfect=(st.jigPerfect||0)+1}
+  if(ev==='cw'){st.cw=(st.cw||0)+1;if(d.stars===3)st.cwPerfect=(st.cwPerfect||0)+1}
   questEvent(ev,d);checkAch();save();
 }
 
@@ -33,11 +34,12 @@ const QT={
   coins:{ic:'🪙',txt:n=>`Collect ${n} coins`,ns:[80,120,150],ev:'coins',add:true},
   daily:{ic:'📅',txt:()=>'Beat the Daily Challenge',ns:[1],ev:'daily'},
   spin:{ic:'🎡',txt:()=>'Spin the Lucky Wheel',ns:[1],ev:'spin'},
-  jig:{ic:'🧩',txt:n=>`Finish ${n} jigsaw puzzle${n>1?'s':''}`,ns:[1,2],ev:'jig'}
+  jig:{ic:'🧩',txt:n=>`Finish ${n} jigsaw puzzle${n>1?'s':''}`,ns:[1,2],ev:'jig'},
+  cw:{ic:'🔤',txt:n=>`Finish ${n} word search${n>1?'es':''}`,ns:[1,2],ev:'cw'}
 };
 function ensureQuests(){
   const d=today();if(S.quests.day===d&&S.quests.list.length)return;
-  const R=rngOf(hashSeed(d,4242)),keys=shuffle(Object.keys(QT).filter(k=>k!=='jig'||jigOpen()),R).slice(0,3);
+  const R=rngOf(hashSeed(d,4242)),keys=shuffle(Object.keys(QT).filter(k=>(k!=='jig'||jigOpen())&&(k!=='cw'||cwOpen())),R).slice(0,3);
   S.quests={day:d,bonus:false,list:keys.map((k,i)=>{const q=QT[k];return{k,n:R.pick(q.ns),p:q.param?R.pick(TYPES):null,v:0,claimed:false,r:ECON.quest.rewards[i]}})};
   save();
 }
@@ -103,7 +105,11 @@ const ACH=[
   {id:'j1',ic:'🧩',name:'Piece by Piece',desc:'Finish your first jigsaw',t:()=>(st().jig||0)>=1,r:15},
   {id:'jpg',ic:'📖',name:'Page Turner',desc:'Fill a jigsaw album page',t:()=>Object.keys(S.jig.pages).length>=1,r:40},
   {id:'jp10',ic:'💠',name:'Picture Perfect',desc:'Get 3 stars on 10 jigsaws',t:()=>(st().jigPerfect||0)>=10,r:50},
-  {id:'j50',ic:'🏛️',name:'Gallery Owner',desc:'Finish 50 jigsaws',t:()=>(st().jig||0)>=50,r:120}
+  {id:'j50',ic:'🏛️',name:'Gallery Owner',desc:'Finish 50 jigsaws',t:()=>(st().jig||0)>=50,r:120},
+  {id:'cw1',ic:'🔤',name:'Word Hunter',desc:'Finish your first word search',t:()=>(st().cw||0)>=1,r:15},
+  {id:'cwt',ic:'📚',name:'Theme Master',desc:'Finish every puzzle of a word search theme',t:()=>Object.keys(S.cw.themes).length>=1,r:40},
+  {id:'cw10',ic:'✒️',name:'Clean Sheet',desc:'Get 3 stars on 10 word searches',t:()=>(st().cwPerfect||0)>=10,r:50},
+  {id:'cw50',ic:'🎓',name:'Lexicon Legend',desc:'Finish 50 word searches',t:()=>(st().cw||0)>=50,r:120}
 ];
 /* [current, target] for every trophy, shown as a progress bar while it is locked */
 const ACH_PROG={
@@ -113,7 +119,8 @@ const ACH_PROG={
   all:()=>[TYPES.filter(x=>st().types[x]).length,TYPES.length],spec:()=>[Math.max(0,...Object.values(st().types)),15],
   c6:()=>[st().maxCombo,6],c12:()=>[st().maxCombo,12],d1:()=>[st().daily,1],d7:()=>[st().daily,7],l7:()=>[st().bestLogin,7],
   sp5:()=>[st().spins,5],nh20:()=>[st().nohint,20],q10:()=>[st().quests,10],th:()=>[S.owned.length-1,1],th4:()=>[S.owned.length,4],pl10:()=>[S.plv,10],
-  j1:()=>[st().jig||0,1],jpg:()=>[Object.keys(S.jig.pages).length,1],jp10:()=>[st().jigPerfect||0,10],j50:()=>[st().jig||0,50]
+  j1:()=>[st().jig||0,1],jpg:()=>[Object.keys(S.jig.pages).length,1],jp10:()=>[st().jigPerfect||0,10],j50:()=>[st().jig||0,50],
+  cw1:()=>[st().cw||0,1],cwt:()=>[Object.keys(S.cw.themes).length,1],cw10:()=>[st().cwPerfect||0,10],cw50:()=>[st().cw||0,50]
 };
 function checkAch(){
   let n=0,sum=0;

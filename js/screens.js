@@ -6,6 +6,7 @@ function buildLogo(){
 }
 function renderHome(){
   /* the Jigsaw tab (hub.js loads after this file, so it may not be there yet on the very first render) */
+  if(typeof refreshCwTab==="function"){refreshCwTab();if(cwOpen()&&!S.cw.intro&&!renderHome._cq){renderHome._cq=1;queueModal(()=>{renderHome._cq=0;showCwIntro()},1200)}}
   if(typeof refreshJigTab==="function"){refreshJigTab();if(jigOpen()&&!S.jig.intro&&!renderHome._jq){renderHome._jq=1;queueModal(()=>{renderHome._jq=0;showJigIntro()},900)}}
   const stars=totalStars(),m=S.milestone,prevT=m?msThreshold(m-1):0,t=msThreshold(m),pct=clamp((stars-prevT)/(t-prevT)*100,4,100);
   /* the garden: your decorations on a bed of soil (tall phones show the bed even when it is empty, as a nudge towards the shop) */
