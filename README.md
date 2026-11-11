@@ -71,8 +71,7 @@ A new endless track beside the levels and the Jigsaw. It opens when level 4 is c
 - **Finding words:** drag from a word's first letter to its last. A band follows your finger and snaps to straight
   lines. Let go on a bank word and it is found: it keeps its band in a colour of its own, its letters pop, sparkles
   rise, a chime climbs (higher with every word), and the coach shows its clue.
-- **Difficulty:** the first puzzles hide words only across and down. Diagonals come next, and later words that run
-  backwards.
+- **Directions:** every board mixes all eight: across, down and both diagonals, each forwards or backwards.
 - **Stars:** swiping across 3 or more letters that are no word is a slip. Letting go a letter short, or partway along a
   word you have not found yet, is not. A hint counts as two slips. ★★★ with 2 slips or fewer.
 - **Buttons:** 💡 lights up where a word starts. 📋 lists every word with its clue.

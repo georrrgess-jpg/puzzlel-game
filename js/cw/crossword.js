@@ -3,30 +3,33 @@
    An 11x11 board of letters with nine words of one theme (js/cw/themes.js) hidden among them, in straight lines.
    The word bank sits under the board, three by three. Drag across the letters to circle a word: a band follows the
    finger and snaps to the eight directions; let go on a bank word and it is found (it keeps its band, in a colour of
-   its own). The first puzzles hide words left-to-right and top-to-bottom only; diagonals come next, then words that
-   run backwards. Puzzles 1, 2, 3... go through the themes three at a time; after the last theme the book starts again
+   its own). Every board mixes all eight directions: across, down and both diagonals, each either way round. Puzzles 1, 2, 3... go through the themes three at a time; after the last theme the book starts again
    with new word mixes and new boards. (Internally the mode keeps its first name, 'crossword' / 'cw'.) */
 const CW_N=11,CW_PER=3;
 /* which theme puzzle n belongs to, and which of its word mixes */
 function cwPuzzle(n){const i=n-1,T=CW_THEMES.length,t=Math.floor(i/CW_PER)%T,round=Math.floor(i/(CW_PER*T)),v=i%CW_PER;return{t,theme:CW_THEMES[t],round,v,book:round+1}}
-/* the directions words may run in: → ↓ ↘ ↗, then the backwards ones ← ↑ ↖ ↙ */
+/* the directions words may run in: → ↓ ↘ ↗, then the same lines read backwards ← ↑ ↖ ↙ */
 const CW_D=[[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0],[-1,-1],[1,-1]];
-const cwDirs=n=>n<=6?2:n<=18?3:4;          // forward directions open so far
-const cwBack=n=>n<=36?0:n<=72?2:4;         // how many words at most may run backwards
+const CW_GEN=2;   // bump when boards change, so a saved half-done puzzle does not tick the wrong words
 /* random filler letters, weighted like English (the board reads like words, so the real ones hide well) */
 const CW_FILL='EEEEEEEEEEEETTTTTTTTTAAAAAAAAOOOOOOOOIIIIIIINNNNNNNSSSSSSRRRRRRHHHHHLLLLDDDDCCCUUUMMMFFPPGGWWYYBBVKXJQZ';
 
 function cwBuild(pool,R,n,target=9){
-  const N=CW_N,nd=cwDirs(n),nb=cwBack(n);let best=null;
+  const N=CW_N;let best=null;
   for(let att=0;att<40;att++){
-    const g=Array(N*N).fill(''),words=[];let back=0;
+    const g=Array(N*N).fill(''),words=[];
+    /* every word gets a line of its own kind in turn (across, down, the two diagonals, in a shuffled order) so a
+       board always mixes them, and a coin toss for which way round it reads */
+    const axes=shuffle([0,1,2,3],R);
     const ws=shuffle(pool.slice(),R).sort((a,b)=>b[0].length-a[0].length+(R()-.5)*3);
     for(const e of ws){
       if(words.length>=target)break;const w=e[0];let placed=null;
       /* never a word inside another one (STAGE in BACKSTAGE): finding one would find the other */
       if(words.some(o=>o.w.includes(w)||w.includes(o.w)||o.w.includes([...w].reverse().join(''))))continue;
+      const ax=axes[words.length%4];
       for(let tr=0;tr<300&&!placed;tr++){
-        const wantBack=back<nb&&R()<.35,di=wantBack?4+Math.floor(R()*nd):Math.floor(R()*nd),[dr,dc]=CW_D[di];
+        /* the first tries keep to this word's kind of line; after that any line that fits */
+        const di=(tr<180?ax:Math.floor(R()*4))+(R()<.5?4:0),[dr,dc]=CW_D[di];
         const r0=Math.floor(R()*N),c0=Math.floor(R()*N),r1=r0+dr*(w.length-1),c1=c0+dc*(w.length-1);
         if(r1<0||c1<0||r1>=N||c1>=N)continue;
         const cells=[];let ok=true,shared=0;
@@ -34,12 +37,15 @@ function cwBuild(pool,R,n,target=9){
         if(!ok||shared===w.length)continue;
         /* never along the same line as a word already there (one would hide inside the other) */
         if(words.some(o=>Math.abs(o.dr)===Math.abs(dr)&&Math.abs(o.dc)===Math.abs(dc)&&o.dr*dc===o.dc*dr&&o.cells.some(i=>cells.includes(i))))continue;
-        placed={w,clue:e[1],cells,dr,dc,back:wantBack};
+        placed={w,clue:e[1],cells,dr,dc,b:di>=4};
       }
-      if(placed){placed.cells.forEach((i,k)=>g[i]=w[k]);words.push(placed);if(placed.back)back++}
+      if(placed){placed.cells.forEach((i,k)=>g[i]=w[k]);words.push(placed)}
     }
-    if(!best||words.length>best.words.length)best={g,words};
-    if(words.length>=target)break;
+    /* the best board has the most words, then all four kinds of line, then some read backwards and some not */
+    const nb=words.filter(o=>o.b).length,
+      score=words.length*10+new Set(words.map(o=>o.dr*3+o.dc).map(k=>Math.abs(k))).size+(nb&&nb<words.length?1:0);
+    if(!best||score>best.score)best={g,words,score};
+    if(score>=target*10+5)break;
   }
   /* fill the rest; fill again if a bank word turns up a second time by chance */
   const fill=()=>{const g=best.g.slice();for(let i=0;i<N*N;i++)if(!g[i])g[i]=CW_FILL[Math.floor(R()*CW_FILL.length)];return g};
@@ -66,7 +72,7 @@ function cwLayout(n){
 INFO.crossword={name:'Word Search',icon:'🔤',col:'#4dd4ff',tip:'Drag across the letters to circle a word from the bank below. Words run in straight lines.'};
 HOWTO.crossword={
   goal:'Find every word of the theme in the letters.',
-  steps:['Press on the first letter of a word and drag to its last letter. A band follows your finger in a straight line.','Let go on a word from the bank and it is found: it keeps its colour and the bank ticks it off.','Words run across and down at first; later on a slant, and even backwards. Stuck? 💡 lights up where a word starts.'],
+  steps:['Press on the first letter of a word and drag to its last letter. A band follows your finger in a straight line.','Let go on a word from the bank and it is found: it keeps its colour and the bank ticks it off.','Words run across, down and on a slant, and either way round. Stuck? 💡 lights up where a word starts.'],
   demo:()=>{const t=(ch,c='')=>`<span class="cwdc ${c}">${ch}</span>`;
     return htStage(`<div class="cwdm">${t('Q')}${t('C')}${t('A')}${t('P')}${t('E')}${t('X')}${HT_F}</div>`,`<div class="cwdm done"><i class="cwdb"></i>${t('Q')}${t('C','ok')}${t('A','ok')}${t('P','ok')}${t('E','ok')}${t('X')}</div>`,'Drag from C to E','CAPE is found')}
 };
@@ -167,10 +173,10 @@ MAKERS.crossword=function({level,board,api}){
   setTimeout(()=>cells.forEach(c=>{c.classList.remove('cin');c.style.animationDelay=''}),1200);
   return{
     noUndo:true,noNudge:true,goal:`★★★ with ${s3} slips or fewer`,goalShort:`★★★ ≤${s3} slips`,
-    snap:()=>JSON.stringify({f:found.map(Number).join(''),s:slips,h:hints}),
+    snap:()=>JSON.stringify({f:found.map(Number).join(''),s:slips,h:hints,g:CW_GEN}),
     restore(s){const o=JSON.parse(s);gen++;done=false;wrap.classList.remove('won');slips=o.s||0;hints=o.h||0;
       bands.querySelectorAll('.got').forEach(e=>e.remove());bank.querySelectorAll('.ok').forEach(e=>e.classList.remove('ok'));found=new Array(NW).fill(false);
-      [...(o.f||'')].forEach((x,wi)=>{if(x==='1'&&wi<NW)find(wi,false)});progress(true)},
+      [...(o.g===CW_GEN&&o.f||'')].forEach((x,wi)=>{if(x==='1'&&wi<NW)find(wi,false)});progress(true)},
     dirty:()=>found.some(Boolean),
     /* 💡: the first letter of a word still hidden glows, and its bank word too */
     hint(){

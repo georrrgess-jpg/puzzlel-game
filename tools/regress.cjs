@@ -594,17 +594,17 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
   await test('C2 every board hides each bank word exactly once', async p => {
     const r = await p.evaluate(() => { let bad = 0, few = 0, early = 0; for (let n = 1; n <= 150; n++) { const L = cwLayout(n); if (L.words.length < 8) few++;
       if (!L.g.every(ch => /^[A-Z]$/.test(ch))) bad++;
-      for (const w of L.words) { if (w.cells.map(i => L.g[i]).join('') !== w.w) bad++; if (cwCount(L.g, w.w) !== 1) bad++; if (n <= 6 && w.d > 1) early++ } }
+      for (const w of L.words) { if (w.cells.map(i => L.g[i]).join('') !== w.w) bad++; if (cwCount(L.g, w.w) !== 1) bad++; } const ax = new Set(L.words.map(w => w.d % 4)), bk = L.words.filter(w => w.d >= 4).length; if (ax.size < 4 || bk === 0 || bk === L.words.length) early++ }
       return { bad, few, early } });
     ck('C2 150 boards: full of letters, every word where it says, readable exactly once, at least 8 words', r.bad === 0 && r.few === 0, JSON.stringify(r));
-    ck('C2 the first puzzles hide words only across and down', r.early === 0, JSON.stringify(r));
+    ck('C2 every board mixes across, down, both diagonals, forwards and backwards', r.early === 0, JSON.stringify(r));
   });
   await test('C3 dragging: a wrong swipe is a slip, a dragged word is found', async p => {
     await cprep(p); await p.evaluate(() => __game.startCw(4)); await sleep(1600);
     const pt = i => p.evaluate(i => { const r = document.querySelector(`#board .cwc[data-i="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] }, i);
     const drag = async (a, b) => { const A = await pt(a), B = await pt(b); await p.mouse.move(...A); await p.mouse.down(); for (let k = 1; k <= 8; k++) { await p.mouse.move(A[0] + (B[0] - A[0]) * k / 8, A[1] + (B[1] - A[1]) * k / 8); await sleep(20) } await sleep(40); await p.mouse.up(); await sleep(350) };
     /* a swipe of 4 letters that is no word: a row where no word starts at that cell going right */
-    const miss = await p.evaluate(() => { const L = __game.cur.puz.layout; for (let i = 0; i < 121; i++) { if (i % 11 > 7) continue; const cells = [i, i + 1, i + 2, i + 3]; if (!L.words.some(w => w.cells.length === 4 && (w.cells.join() === cells.join() || w.cells.slice().reverse().join() === cells.join()))) return i } });
+    const miss = await p.evaluate(() => { const L = __game.cur.puz.layout; for (let i = 0; i < 121; i++) { if (i % 11 > 7) continue; const cells = [i, i + 1, i + 2, i + 3]; const k = ',' + cells.join() + ','; if (!L.words.some(w => (',' + w.cells.join() + ',').includes(k) || (',' + w.cells.slice().reverse().join() + ',').includes(k))) return i } });
     await drag(miss, miss + 3);
     const r1 = await p.evaluate(() => ({ slips: +document.querySelector('#hudInfo .mv').textContent, found: document.querySelector('.cwpn').textContent }));
     const w = await p.evaluate(() => { const w = __game.cur.puz.layout.words[0]; return [w.cells[0], w.cells[w.cells.length - 1]] });
