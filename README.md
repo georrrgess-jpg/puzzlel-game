@@ -63,6 +63,21 @@ a how-to card, and a built-in solver that guarantees each level can be finished.
 - **Also at home on a computer**: in any landscape window from about 860x480, a desktop layout with a navigation rail, a two-column home and
   large boards (see v8 below). Keyboard: Z or U undo, H hint, R restart, M music, Esc back, Enter for a popup's main button.
 
+## What's new in v9.1 (Word Search polish)
+- **A steadier band:** the band follows where your finger really is, not the letter under it. It keeps its direction
+  until the finger clearly heads another way, so a wobble along a row never tips it onto a diagonal. It only adds a
+  letter once the finger is well into it, so brushing the edge of the next letter does not add that letter.
+- **Forgiving ends:** a band that runs one letter past either end of a word, or stops one short of a word of five
+  letters or more, still finds it. A drag one letter too far used to count as a slip.
+- **New effects:** the letters under the band lift as it passes. A found word's band locks in with a streak of light,
+  its letters hop one after another, and a chip with the word flies to its place in the bank, which ticks with a chime
+  as it lands. A progress line fills under the header. At the end, the bands light up one by one, a sweep of light
+  crosses the paper, and the letters that were never part of a word fade back.
+- **Smoother:** a new board deals its rows onto the paper (11 animations instead of 121), each letter is one plain
+  element, sparkles are a few small elements instead of the full-screen particle canvas, and the band is placed
+  without forcing a layout. Measured on a phone slowed down 6x: opening a board 45 to 55 fps (its longest frame about
+  400 to 200 ms), finding words 45 to 56 fps, the finish 39 to 56 fps, dragging 60 fps.
+
 ## What's new in v9 (Word Search)
 A new endless track beside the levels and the Jigsaw. It opens when level 4 is cleared and has its own tab (🔤 Words).
 

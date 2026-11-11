@@ -602,9 +602,9 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
   await test('C3 dragging: a wrong swipe is a slip, a dragged word is found', async p => {
     await cprep(p); await p.evaluate(() => __game.startCw(4)); await sleep(1600);
     const pt = i => p.evaluate(i => { const r = document.querySelector(`#board .cwc[data-i="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] }, i);
-    const drag = async (a, b) => { const A = await pt(a), B = await pt(b); await p.mouse.move(...A); await p.mouse.down(); for (let k = 1; k <= 8; k++) { await p.mouse.move(A[0] + (B[0] - A[0]) * k / 8, A[1] + (B[1] - A[1]) * k / 8); await sleep(20) } await sleep(40); await p.mouse.up(); await sleep(350) };
+    const drag = async (a, b) => { const A = await pt(a), B = await pt(b); await p.mouse.move(...A); await p.mouse.down(); for (let k = 1; k <= 8; k++) { await p.mouse.move(A[0] + (B[0] - A[0]) * k / 8, A[1] + (B[1] - A[1]) * k / 8); await sleep(20) } await sleep(40); await p.mouse.up(); await sleep(800) };
     /* a swipe of 4 letters that is no word: a row where no word starts at that cell going right */
-    const miss = await p.evaluate(() => { const L = __game.cur.puz.layout; for (let i = 0; i < 121; i++) { if (i % 11 > 7) continue; const cells = [i, i + 1, i + 2, i + 3]; const k = ',' + cells.join() + ','; if (!L.words.some(w => (',' + w.cells.join() + ',').includes(k) || (',' + w.cells.slice().reverse().join() + ',').includes(k))) return i } });
+    const miss = await p.evaluate(() => { const L = __game.cur.puz.layout; for (let i = 0; i < 121; i++) { if (i % 11 > 7) continue; const cells = [i, i + 1, i + 2, i + 3]; if (!L.words.some(w => w.cells.some(c => cells.includes(c)))) return i } });
     await drag(miss, miss + 3);
     const r1 = await p.evaluate(() => ({ slips: +document.querySelector('#hudInfo .mv').textContent, found: document.querySelector('.cwpn').textContent }));
     const w = await p.evaluate(() => { const w = __game.cur.puz.layout.words[0]; return [w.cells[0], w.cells[w.cells.length - 1]] });
@@ -629,6 +629,43 @@ const typeLevel = (p, t) => p.evaluate(t => { let n = 1; while (__game.typeFor(n
     await p.evaluate(() => document.querySelector('#backBtn').click()); await sleep(900);
     await p.evaluate(() => __game.startCw(6)); await sleep(1300);
     ck('C5 the found word is still found', await p.evaluate(() => document.querySelector('.cwpn').textContent) === k0 && k0 === '1', 'words ' + k0);
+  });
+  await test('C6 the band forgives a wobble and an overshoot', async p => {
+    await cprep(p); await p.evaluate(() => { __game.S.cw.res = null; __game.startCw(7) }); await sleep(1600);
+    /* cell centres and the pitch, in page px */
+    const G = await p.evaluate(() => { const c = i => { const r = document.querySelector(`#board .cwc[data-i="${i}"]`).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2] }; const a = c(0), b = c(12); return { x0: a[0], y0: a[1], px: b[0] - a[0], py: b[1] - a[1] } });
+    const at = (r, c) => [G.x0 + c * G.px, G.y0 + r * G.py];
+    const path = async pts => { await p.mouse.move(...pts[0]); await p.mouse.down(); for (const q of pts.slice(1)) { await p.mouse.move(...q); await sleep(24) } await sleep(40); await p.mouse.up(); await sleep(800) };
+    const W = await p.evaluate(() => __game.cur.puz.layout.words.map(w => ({ w: w.w, cells: w.cells, d: w.d })));
+    const state = () => p.evaluate(() => ({ found: __game.cur.puz._found().filter(Boolean).length, slips: +document.querySelector('#hudInfo .mv').textContent }));
+    const rc = i => [Math.floor(i / 11), i % 11];
+    /* 1. a word dragged one letter too far (where the board allows) is still found, with no slip */
+    const ov = W.find(w => { const [r0, c0] = rc(w.cells[0]), [r1, c1] = rc(w.cells[w.cells.length - 1]), dr = Math.sign(r1 - r0), dc = Math.sign(c1 - c0), r2 = r1 + dr, c2 = c1 + dc; return r2 >= 0 && c2 >= 0 && r2 < 11 && c2 < 11 });
+    const s0 = await state();
+    { const [r0, c0] = rc(ov.cells[0]), [r1, c1] = rc(ov.cells[ov.cells.length - 1]), dr = Math.sign(r1 - r0), dc = Math.sign(c1 - c0), n = ov.cells.length;
+      const pts = []; for (let k = 0; k <= n * 3; k++) { const f = k / 3; pts.push(at(r0 + dr * f, c0 + dc * f)) } await path(pts) }
+    const s1 = await state();
+    ck('C6 dragging one letter past the end of a word still finds it, no slip', s1.found === s0.found + 1 && s1.slips === s0.slips, `${ov.w} ${JSON.stringify([s0, s1])}`);
+    /* 2. a straight word dragged with the finger wobbling 40% of a letter off the line stays on its line */
+    const wb = W.find(w => w !== ov && w.d % 2 === 0) || W.find(w => w !== ov);
+    { const [r0, c0] = rc(wb.cells[0]), [r1, c1] = rc(wb.cells[wb.cells.length - 1]), n = wb.cells.length - 1, dr = (r1 - r0) / n, dc = (c1 - c0) / n;
+      const nr = dc, nc = -dr, pts = []; for (let k = 0; k <= n * 4; k++) { const f = k / 4, wob = Math.sin(k * 1.7) * .4; pts.push(at(r0 + dr * f + nr * wob, c0 + dc * f + nc * wob)) } await path(pts) }
+    const s2 = await state();
+    ck('C6 a wobbly drag along a word stays on its line and finds it', s2.found === s1.found + 1 && s2.slips === s1.slips, `${wb.w} ${JSON.stringify([s1, s2])}`);
+    /* 3. letting go just inside the next letter (40% of the way) does not add it: the band still shows the word */
+    const rest = W.filter(w => w !== ov && w !== wb);
+    const nx = rest.find(w => { const [r0, c0] = rc(w.cells[0]), [r1, c1] = rc(w.cells[w.cells.length - 1]), dr = Math.sign(r1 - r0), dc = Math.sign(c1 - c0), r2 = r1 + dr * 2, c2 = c1 + dc * 2; return r2 >= 0 && c2 >= 0 && r2 < 11 && c2 < 11 });
+    { const [r0, c0] = rc(nx.cells[0]), [r1, c1] = rc(nx.cells[nx.cells.length - 1]), n = nx.cells.length - 1, dr = (r1 - r0) / n, dc = (c1 - c0) / n;
+      const pts = []; for (let k = 0; k <= n * 3; k++) { const f = k / 3; pts.push(at(r0 + dr * f, c0 + dc * f)) } pts.push(at(r0 + dr * (n + .4), c0 + dc * (n + .4))); await path(pts) }
+    const s3 = await state();
+    ck('C6 letting go 40% into the next letter still finds the word', s3.found === s2.found + 1 && s3.slips === s2.slips, `${nx.w} ${JSON.stringify([s2, s3])}`);
+    /* 4. the matching rules themselves: exact, one past either end, one short of a long word; two past is not */
+    const m = await p.evaluate(() => { const P = __game.cur.puz, L = P.layout, f = P._found(); const wi = f.findIndex(x => !x), w = L.words[wi], c = w.cells, N = 11;
+      const d = c[1] - c[0], ext = i => i, past = c.concat([c[c.length - 1] + d]), past2 = past.concat([c[c.length - 1] + 2 * d]);
+      const inBoard = l => l.every(i => i >= 0 && i < 121);
+      return { exact: P._match(c) === wi, rev: P._match(c.slice().reverse()) === wi, short: c.length >= 5 ? P._match(c.slice(0, -1)) === wi : true, past: !inBoard(past) || Math.abs((past[past.length - 1] % N) - (c[c.length - 1] % N)) > 1 || P._match(past) === wi,
+        past2: !inBoard(past2) || P._match(past2) !== wi } });
+    ck('C6 matching: exact, reversed, one short of a long word and one past all find it; two past does not', Object.values(m).every(Boolean), JSON.stringify(m));
   });
   await test('J6 pictures do not repeat', async p => {
     const r = await p.evaluate(() => { const seen = new Map(); let dup = 0, same = 0, prev = null; for (let n = 1; n <= 400; n++) { const c = JIGART.compose(n), k = c.biome + '|' + c.main + '|' + c.side + '|' + c.time; if (seen.has(k)) dup++; seen.set(k, n); if (prev && prev.biome === c.biome) same++; prev = c } return { dup, same, variety: JIGART.variety() } });
